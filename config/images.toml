@@ -1,0 +1,52 @@
+# MANUALLY MANAGED - the retail disc and the linked programs it carries.
+#
+# `name` is the tool's image identity (`--image` takes its lowercase stem);
+# `disc_file` is the root ISO9660 file it is read from. The PS-X EXE header
+# fields are checked by `kf init`, so a wrong dump fails before any query.
+# Images are listed in the order reports and inventories sort them.
+
+[disc]
+serial = "SLUS-00255"
+# Sold in North America as "King's Field II"; the Japanese King's Field III
+# (SLPS-00377) is its original.
+title = "King's Field III (USA)"
+# Single-track MODE2/2352 image.
+sha256 = "3ca3c3e03e16abd2a224eb430d6e848d3dc685d8adb4988353bb120b73635518"
+
+# Boot loader named by SYSTEM.CNF (`BOOT = cdrom:\SLUS_002.55;1`).
+[[image]]
+name = "PSX.EXE"
+disc_file = "SLUS_002.55"
+sha256 = "c8e696c312c6ba0ad9c24b0977a993b517cddf649e3a20586a4f394b1224ae70"
+file_size = 0x1000
+entry = 0x80010120
+load_address = 0x80010000
+load_size = 0x800
+
+# GAME, OPEN and END share one overlay load window at 0x80011000.
+[[image]]
+name = "GAME.EXE"
+disc_file = "GAME.EXE"
+sha256 = "7556ec7fa3324f39df483f5383bb8f6fcef5ba3b88a6dd4e895e366edf6b83d9"
+file_size = 0x8C000
+entry = 0x800144F8
+load_address = 0x80011000
+load_size = 0x8B800
+
+[[image]]
+name = "OPEN.EXE"
+disc_file = "OPEN.EXE"
+sha256 = "bf5b2c820007157c2bf3bd380b0e5b280843f579c2e7fbc84605c22c5eb13edb"
+file_size = 0x30000
+entry = 0x800136C8
+load_address = 0x80011000
+load_size = 0x2F800
+
+[[image]]
+name = "END.EXE"
+disc_file = "END.EXE"
+sha256 = "57feb4f5cb2031469516a88d485334cc3ba6162a8f47ce73ab934164a7b7f999"
+file_size = 0x27000
+entry = 0x80011D04
+load_address = 0x80011000
+load_size = 0x26800

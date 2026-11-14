@@ -1,0 +1,4 @@
+interface:
+  display_name: "King's Field III Matcher"
+  short_description: "Reconstruct and byte-match King's Field III PS1 C"
+  default_prompt: "Use $matcher to reconstruct and verify a King's Field III function against one selected retail executable."

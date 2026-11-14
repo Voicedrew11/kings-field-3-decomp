@@ -1,0 +1,5 @@
+# MANUALLY MANAGED - semantic WIP identities for all carveable non-vendored functions.
+# Address-only func_ names are unresolved; candidate signatures require caller/callee review.
+# Methods use name=owner_action with the owner and action columns populated.
+# Future analysis writes build/function-inventory proposals and never overwrites this file.
+image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
