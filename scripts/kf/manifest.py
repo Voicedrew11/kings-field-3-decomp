@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import tomllib
+from collections import Counter
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -417,6 +418,8 @@ def load(
     if not isinstance(raw_units, list):
         raise ValueError(f"{path}: [[unit]] entries must be an array of tables")
 
+    source_users = Counter(str(row.get("source", "")) for row in raw_units
+                           if isinstance(row, dict))
     catalog = load_catalog(config_dir)
     identities = identity_names(config_dir)
     vendored_names = {
@@ -524,8 +527,10 @@ def load(
             # A shared source carries the claims of its primary image; another
             # image reuses it by resolving every claimed definition through
             # that image's own identity tables, so the addresses stay
-            # image-qualified while the C text is written once.
-            if rodata_claims or sdata_claims:
+            # image-qualified while the C text is written once. A source only
+            # this unit lists (one that includes shared .inc fragments) still
+            # claims its own image's read-only ranges.
+            if (rodata_claims or sdata_claims) and source_users[str(row["source"])] > 1:
                 raise ValueError(
                     f"{source}: RODATA()/SDATA() ranges are image-specific; unit {name!r} "
                     "cannot bind them by name"

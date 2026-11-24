@@ -66,7 +66,13 @@ s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
  * yaw.
  */
 ADDRESS(0x80045c7c, 0x398)
-s16 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, s16 angle, s16 range)
+s32 func_80045c7c(start, pos, height, reach_up, angle, range)
+    s32 start;
+    VECTOR *pos;
+    s32 height;
+    s32 reach_up;
+    s16 angle;
+    s16 range;
 {
     SVECTOR offset;
     VECTOR at;
@@ -312,7 +318,7 @@ void func_800463bc(u8 id)
             }
             break;
         case 0x51:
-            if (obj->arg.b.unk3d == id) {
+            if (obj->arg.b.unk3d[0] == id) {
                 obj->arg.b.unk38 = obj->arg.b.unk38 == 0 ? 0xff : 0;
             }
             break;
@@ -329,7 +335,7 @@ void func_800463bc(u8 id)
             }
             break;
         case 0x56:
-            if (obj->arg.b.unk3a == id) {
+            if (obj->arg.b.unk3a.bytes[0] == id) {
                 obj->arg.b.unk39 = obj->arg.b.unk39 == 0 ? 0xff : 0;
             }
             break;

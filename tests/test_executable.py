@@ -180,6 +180,70 @@ class PartialImageTests(unittest.TestCase):
         self.assertIn('partial reconstruction (3 game functions unclaimed)', output.getvalue())
 
 
+class OverlayHostSymbolTests(unittest.TestCase):
+    @staticmethod
+    def resolve(*symbols):
+        from scripts.kf.lnk import Object
+
+        native = Object({}, dict(enumerate(symbols)), [])
+        with mock.patch('scripts.kf.lnk.read', return_value=native):
+            return executable.host_symbols('FDAT_002.BIN', [Path(__file__)])
+
+    def test_references_resolve_through_the_host_address_book(self):
+        from scripts.kf.lnk import Symbol
+
+        self.assertEqual(self.resolve(Symbol('func_80041eec', None), Symbol('handler', 1, 0x10),
+                                      Symbol('DAT_801ba984', None), Symbol('DAT_8009c21c', None)),
+                         {'func_80041eec': 0x80041EEC, 'DAT_801ba984': 0x801BA984,
+                          'DAT_8009c21c': 0x8009C21C})
+
+    def test_module_addresses_and_unknown_names_are_not_host_symbols(self):
+        from scripts.kf.lnk import Symbol
+
+        for name in ('func_801e83a8', 'no_such_symbol'):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                self.resolve(Symbol(name, None))
+
+
+class ArchiveEntryTests(unittest.TestCase):
+    def test_archive_entry_frame_matches_the_retail_checksum_rule(self):
+        from scripts.psxbuild.link import equ_lines, overlay_reserved_size, pack_archive_entry
+
+        payload = struct.pack('<3I', 0x15, 0x801E8398, 0x03E00008)
+        entry = pack_archive_entry(payload)
+        self.assertEqual(len(entry), 0x800)
+        self.assertEqual(entry[:12], payload)
+        self.assertEqual(entry[12:-4], bytes(0x800 - 16))
+        self.assertEqual(struct.unpack_from('<I', entry, 0x7FC)[0],
+                         (0x15 + 0x801E8398 + 0x03E00008 + 0x12345678) & 0xFFFFFFFF)
+        # A payload that fills the sector up to the checksum word still fits
+        # (FDAT_053.BIN's 0xff0 linked bytes end one word short of it); one
+        # more word starts the next sector.
+        self.assertEqual(len(pack_archive_entry(bytes(0x7FC))), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x800))), 0x1000)
+        self.assertEqual(len(pack_archive_entry(bytes(0xFF0))), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(b'\0\0')
+        # Uninitialized storage past the linked bytes counts toward the entry.
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0xC)), 0x800)
+        self.assertEqual(len(pack_archive_entry(bytes(0x7F0), 0x10)), 0x1000)
+        with self.assertRaises(ValueError):
+            pack_archive_entry(bytes(8), 2)
+        map_text = (
+            '    Start     Stop   Length      Obj Group            Section name\n'
+            ' 801E8308 801E838F 00000088 801E8308 text             .rdata\n'
+            ' 801E8390 801E8667 000002D8 801E8390 text             .text\n'
+            ' 801E8668 801E8668 00000000 801E8668 bss              .sbss\n'
+            ' 801E8668 801E8A87 00000420 801E8668 bss              .bss\n')
+        self.assertEqual(overlay_reserved_size(map_text, 0x801E8308, 0x360), 0x420)
+        self.assertEqual(overlay_reserved_size(map_text, 0x801E8308, 0x800), 0)
+        self.assertEqual(overlay_reserved_size('', 0x801E8308, 0x360), 0)
+        self.assertEqual(equ_lines({'func_80041eec': 0x80041EEC}),
+                         ['func_80041eec\tequ\t$80041eec'])
+        with self.assertRaises(ValueError):
+            equ_lines({'bad name': 1})
+
+
 @unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-260', 'cc1psx-260', 'dosbox-x'))
                      and all(os.environ.get(key) for key in (
                          'PSYQ_CC1PSX', 'PSYQ_ASPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',

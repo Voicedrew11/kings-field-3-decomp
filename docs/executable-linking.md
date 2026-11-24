@@ -80,6 +80,48 @@ SDK's own COMMON, and the 3.3 archives supply a different SDK set; that
 placement is a recorded `common-placement` exemption in
 `config/check_exemptions.tsv` (see the delinking document's Validation).
 
+## FDAT modules
+
+The 28 `FDAT_nnn.BIN` images are raw code entries of `CD\COM\FDAT.T`, not
+PS-X EXEs. `GAME.EXE` loads one whole at `0x801E8308` and calls into it
+through the handler table at its +4; the module calls `GAME.EXE`'s functions
+and reads `GAME.EXE`'s data in place, and links no SDK code of its own.
+`kf build` links a fully claimed module with `OVERLAY_LINK`
+(`scripts/psxbuild/link.py`, ported from the Shadow Tower decomp):
+
+- the same command file and section order at origin `0x801E8308`, with no
+  startup object, allocator, library or `regs` line;
+- every symbol the module's objects reference without defining becomes a
+  command-file `name equ $address` line. `executable.host_symbols` takes the
+  addresses from `GAME.EXE`'s identities (the target relink's address book,
+  `roundtrip.address_book`, with an unresolved `DAT_xxxxxxxx` spelling its
+  literal address) and refuses a name that is not a unique `GAME.EXE`
+  identity outside the module's window;
+- PSYLINK 2.27's pure binary output (`/p`, written as `<NAME>.RAW`) replaces
+  the CPE and CPE2X; and
+- `pack_archive_entry` frames those bytes as the archive does: zeros up to
+  the sector multiple that leaves room for one trailing word (counting any
+  `bss` group past the linked bytes, from PSYLINK's map), and that word,
+  `0x12345678` plus the 32-bit sum of every preceding word. All 28 retail code
+  entries satisfy that rule; the packing step only appends the frame and
+  never rewrites linked bytes.
+
+The handler table is the module source's `const FdatHeader` and the first
+bytes of its `RODATA()` claim: `.rdata` leads the text group, so it lands at
+the origin, and any switch tables follow it in cc1 order. A module's code
+reads `GAME.EXE`'s small data with `lui`/low pairs (no module uses `$gp`), so
+its units compile `-G0`. A partially claimed module is reported `partial` like
+a partial program. `kf link --compare-only` compares a module's file bytes
+strictly (header size 0) and keeps it out of the island report.
+
+Twenty modules are claimed whole (`src/fdat/fdat_nnn.c`). Fifteen of them
+(`FDAT_011`, `017`, `023`, `035`, `041`, `044`, `047`, `050`, `056`, `059`,
+`062`, `065`, `068`, `071`, `074`) relink byte-identically, checksum frame
+included, which proves the module link model: one compilation unit per
+module, `.rdata` (the handler table) first, then `.text`, then `.data`
+(`FDAT_023.BIN`'s two `SVECTOR` offsets), no padding between units. The
+other five link with one or two non-exact functions each.
+
 ## PSX.EXE
 
 `src/psx/main.c` (one unit, `psx.main`, profile `gcc260-o2-g8`) links with

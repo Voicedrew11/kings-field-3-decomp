@@ -15,10 +15,8 @@ void func_80017c78(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, 
                    s8 shift2);
 void func_80018358(void);
 s32 func_8001fa60(void);
-void func_80030a6c(SVECTOR *knockback);
-void func_80030e14(void);
 void func_80030fcc(void);
-void func_800324f0(s32 x, s32 y, s32 z);
+s32 func_800324f0(s32 x, s32 y, s32 z);
 void func_80047010(void);
 void func_8005eb20(void);
 void func_8005f7bc(u8 *data);

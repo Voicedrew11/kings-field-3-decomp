@@ -16,6 +16,26 @@
 #include <psyq/sdk.h>
 #include <kf/decenv.h>
 
+/* Data801b24e4.unk188 in modes 3, 0x10, 0x11 and 0x12 (func_80030908). */
+typedef struct Record10 {
+    SVECTOR dir;    /* +0x0 */
+    SVECTOR push;   /* +0x8: added to unk134..unk138 (func_8003047c) */
+} Record10;
+
+/* Data801b24e4.unk188 in modes 7, 8 and 9 (func_80030810). */
+typedef struct Record0a {
+    u8 id;          /* +0x0 */
+    u8 unk1;
+    SVECTOR angle;  /* +0x2: copy of Data801b24e4.unk12c */
+} Record0a;
+
+/* Data801b24e4.unk188: one view per unk101 mode (mode 5 counts in count). */
+typedef union Data801b24e4Mode {
+    Record10 knock;
+    Record0a turn;
+    s16 count;
+} Data801b24e4Mode;
+
 typedef struct Data801b24e4 {
     s32 experience; /* +0x00: the save title shows it as six digits */
     s32 unk4;
@@ -74,11 +94,11 @@ typedef struct Data801b24e4 {
     s16 unk92;
     s16 unk94;
     u8 unk96[0x6];
-    s32 unk9c;
+    u32 unk9c;      /* +0x9c: frame counter (func_80030cbc periods) */
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
-    s32 unka8;
-    s32 unkac;
+    u16 *unka8;     /* +0xa8: next pad bit of the DAT_8009c3cc sequence (func_8002fe1c) */
+    struct Record18 *unkac; /* +0xac: &DAT_801b77ec.unk0[id] (func_8002d130) */
     struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
@@ -164,19 +184,13 @@ typedef struct Data801b24e4 {
     s16 unk172;
     s16 unk174;
     s16 unk176;
-    s16 unk178;
-    s16 unk17a;
+    u16 unk178;     /* +0x178: pad bits held (DAT_80081868) */
+    u16 unk17a;     /* +0x17a: pad bits held the frame before */
     u8 unk17c[0x4];
     s32 unk180;
     s32 unk184;
-    s16 unk188;
-    s16 unk18a;
-    s16 unk18c;
-    s16 unk18e;
-    s16 unk190;
-    s16 unk192;
-    s16 unk194;
-    u8 unk196[0x6];
+    Data801b24e4Mode unk188; /* +0x188: parameters of the unk101 mode */
+    u8 unk198[0x4];
 } Data801b24e4;
 
 typedef struct Data801ba984 {
@@ -212,7 +226,11 @@ typedef struct Record20 {
     u16 unke;
     u16 unk10;
     u16 unk12;
-    u8 unk14[0xc];
+    u16 unk14;      /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
+    u16 unk16;
+    u16 unk18;
+    u16 unk1a;
+    u8 unk1c[0x4];
 } Record20;
 
 /*
@@ -279,23 +297,35 @@ typedef struct Data801e7edc {
  * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
  * records it also moves are the placed effects (Effect, game/render.h).
  */
-/* Per-kind state of an Object44 at +0x38 (WIP views, by Object44.unk4). */
+/* Object44 +0x3a as the FDAT module handlers read it (WIP). */
+typedef union Object44Link {
+    u16 index;      /* slot 0: a linked object, 0xffff for none; kind 7 (func_80044c34) */
+    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value; func_80044900 reads
+                     * bytes[0] and bytes[1] as angles */
+} Object44Link;
+
+/*
+ * Per-kind state of an Object44 from +0x34 (WIP views, by Object44.unk4): the
+ * GAME and FDAT code read it as bytes or halfwords by kind; func_8004485c
+ * clears the first three words.
+ */
 typedef struct Object44Bytes {
+    u8 unk34[4];
     u8 unk38;       /* +0x38: radius scale, 0x80 = 1 (flag 0x10) */
     u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
-    u8 unk3a;
-    u8 unk3b;
-    u8 unk3c;
-    u8 unk3d;
-    u8 unk3e;
-    u8 unk3f;
-    u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (func_80046914) */
+    Object44Link unk3a; /* +0x3a */
+    u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
+    u8 unk3d[2];
+    u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
+    u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (func_80046914); FDAT slot 0
+                     * copies it to the linked object's unk0 */
     u8 unk41[3];
 } Object44Bytes;
 
 typedef struct Object44Halves {
+    u16 unk34[2];
     u16 unk38;
-    u16 unk3a;      /* +0x3a: kind 7: index of the Object44 it drives */
+    u16 unk3a;
     u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
     s16 unk3e;
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914) */
@@ -303,6 +333,7 @@ typedef struct Object44Halves {
 } Object44Halves;
 
 typedef struct Object44Words {
+    s32 unk34;
     s32 unk38;
     s32 unk3c;
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
@@ -322,17 +353,16 @@ typedef struct Object44 {
     u8 unk4;        /* +0x04: kind, 0xff when free */
     u8 unk5;
     u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
-    u16 unk8;
-    u16 unka;
+    u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
+    u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
     u16 unkc;       /* +0x0c: reach below its position (collision tests) */
     s16 unke;
-    u16 unk10;
+    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (func_8005bee0) */
-    SVECTOR scale;  /* +0x2c: 0x1000 = 1 */
-    s32 unk34;
-    Object44Arg arg; /* +0x38 */
+    SVECTOR scale;  /* +0x2c: 0x1000 = 1; FDAT_017 clears vx, vy and vz */
+    Object44Arg arg; /* +0x34 */
 } Object44;
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
@@ -404,7 +434,7 @@ typedef struct Object88 {
     u8 unk13;
     u8 unk14;
     u8 unk15;
-    u16 unk16;
+    s16 unk16;      /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
     u16 unk18;      /* +0x18: animation time */
     u16 unk1a;
     u16 unk1c;
@@ -426,14 +456,16 @@ typedef struct Object88 {
     u8 unk5a[2];
     u32 unk5c;
     u8 *unk60;      /* +0x60: running script record */
-    u8 unk64[2];
+    s16 unk64;      /* +0x64: FDAT slot 17 stores the angle to the player */
     s16 unk66;
     s16 unk68;
     s16 unk6a;
     s16 unk6c;
     u8 unk6e[2];
-    s16 unk70;
-    u8 unk72[0x16];
+    s16 unk70;      /* +0x70: FDAT slot 17 phase 0..2 */
+    u8 unk72[2];
+    s16 unk74;      /* +0x74: FDAT slot 17 toggles it when the turn completes */
+    u8 unk76[0x12];
 } Object88;
 
 /*
@@ -499,7 +531,7 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u16 unk16;      /* +0x16: the value func_8001c6c0 lists with it */
+    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130); func_8001c6c0 lists it */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -521,17 +553,27 @@ typedef struct Record0c {
 
 /* 0x44-byte records func_80029500 adds to the player's unk54[]/unk62 (WIP). */
 typedef struct Record44 {
-    u8 unk0[5];
+    u8 unk0[4];
+    u8 unk4;
     u8 unk5;
     u16 unk6[8];
     u8 unk16[8];
     u16 unk1e;
-    u8 unk20[6];
+    u8 unk20[4];
+    u16 unk24;
     u16 unk26;
     u8 unk28[4];
     u16 unk2c;
     u16 unk2e;
-    u8 unk30[0x14];
+    u8 unk30[4];
+    u16 unk34;      /* +0x34..+0x42: model offsets of the weapon tip (func_8002cea8) */
+    u16 unk36;
+    u16 unk38;
+    s16 unk3a;
+    u16 unk3c;
+    u16 unk3e;
+    u16 unk40;
+    s16 unk42;
 } Record44;
 
 /* One entry of a loaded FDAT module's handler table. */
@@ -570,7 +612,8 @@ typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[8];
-    Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test */
+    Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test; the object
+                             * FDAT slot 9 handlers test */
     u8 unk885c[2];
     u16 unk885e;
     u16 unk8860;

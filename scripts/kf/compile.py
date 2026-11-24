@@ -131,6 +131,11 @@ def _source_data_sizes(preprocessed: Path, names: tuple[str, ...],
     source, assembly = scratch / 'SIZES.I', scratch / 'SIZES.S'
     source.write_bytes(content + declaration.encode())
     _run([*compiler_arguments, str(source), '-o', str(assembly)])
+    # The native cc1psx port numbers the `.file`/`.loc` of each source it
+    # enters (an included `.inc` fragment is file 2); ASPSX accepts only the
+    # DOS CC1PSX's single file number. Debug directives do not affect the table.
+    assembly.write_bytes(re.sub(rb'(?m)^(\s*\.(?:file|loc)\s+)\d+', rb'\g<1>1',
+                                assembly.read_bytes()))
     obj = read(assemble_many(scratch, ('UNIT', 'SIZES'), small_data)['SIZES'])
     symbols = [symbol for symbol in obj.symbols.values() if symbol.name == marker]
     if len(symbols) != 1 or symbols[0].section is None or symbols[0].common:

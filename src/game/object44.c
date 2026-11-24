@@ -30,7 +30,7 @@ void func_8004485c(void)
     i = 396;
     while (i--) {
         obj->unk4 = obj->unk6 = 0xff;
-        obj->unk34 = obj->arg.w.unk38 = obj->arg.w.unk3c = 0;
+        obj->arg.w.unk34 = obj->arg.w.unk38 = obj->arg.w.unk3c = 0;
         obj++;
     }
     DAT_8018fb3c.unk885e = DAT_8018fb3c.unk8860 = DAT_8018fb3c.unk8862 = 0;
@@ -78,7 +78,7 @@ void func_80044900(s32 id, s32 mode, ...)
             obj->unk0 = 0;
             /* fall through */
         case 0x14:
-            obj->arg.b.unk3e = 0;
+            obj->arg.b.unk3d[1] = 0;
             break;
         case 9:
         case 0x15:
@@ -89,11 +89,11 @@ void func_80044900(s32 id, s32 mode, ...)
             obj->unk0 = 0;
             obj->arg.b.unk38 = 0;
             if (obj->unk6 != 0x95) {
-                if (obj->arg.b.unk3a != 0xff) {
-                    obj->angle.vx = obj->arg.b.unk3a << 6;
+                if (obj->arg.b.unk3a.bytes[0] != 0xff) {
+                    obj->angle.vx = obj->arg.b.unk3a.bytes[0] << 6;
                 }
-                if (obj->arg.b.unk3b != 0xff) {
-                    obj->angle.vy = obj->arg.b.unk3b << 6;
+                if (obj->arg.b.unk3a.bytes[1] != 0xff) {
+                    obj->angle.vy = obj->arg.b.unk3a.bytes[1] << 6;
                 }
                 if (obj->arg.b.unk3c != 0xff) {
                     obj->angle.vz = obj->arg.b.unk3c << 6;
@@ -125,7 +125,7 @@ void func_80044900(s32 id, s32 mode, ...)
         case 0xd:
         case 0x14:
         case 0x53:
-            obj->arg.b.unk3e = 0xff;
+            obj->arg.b.unk3d[1] = 0xff;
             break;
         case 9:
         case 0x15:
@@ -184,13 +184,13 @@ void func_80044c34(s32 mode)
     for (i = 396; i != 0; i--) {
         switch (obj->unk4) {
         case 0x51:
-            if (obj->arg.b.unk3b != 0xff) {
+            if (obj->arg.b.unk3a.bytes[1] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
                 func_80044b40(obj, mode, def->unk17);
             }
             break;
         case 0x52:
-            if (obj->arg.b.unk3d != 0xff) {
+            if (obj->arg.b.unk3d[0] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
                 func_80044b40(obj, mode, def->unk17);
             }

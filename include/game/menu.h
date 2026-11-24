@@ -158,7 +158,6 @@ void func_80027310(s32 a0);
 void func_8002792c(s32 se);
 s32 func_800279a4(void);
 void func_80027a40(void);
-void func_8002deec(s32 a0);
 void func_80023300(void);
 void func_80024a78(u8 *levels);
 void func_800246bc(u8 *options);

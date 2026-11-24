@@ -257,13 +257,14 @@ void func_8004e928(Object88 *obj, s16 target, s32 max, s32 accel)
 }
 
 ADDRESS(0x8004ea7c, 0x74)
-void func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode)
+/* Returns func_8004e824's result (FDAT module slot 17 handlers test it). */
+s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode)
 {
     Object88 *obj;
 
     obj = DAT_80185da8.current;
     func_8004e928(obj, target, max, accel);
-    func_8004e824(obj->angle.vy, scale_x, scale_z, mode);
+    return func_8004e824(obj->angle.vy, scale_x, scale_z, mode);
 }
 
 /* Walks the current record toward (x, z); -1 when face is set, it is close and not facing. */

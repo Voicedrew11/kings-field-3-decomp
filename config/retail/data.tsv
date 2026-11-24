@@ -86,11 +86,14 @@ GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	DAT_80081868	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
 GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	DAT_80081884	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
 GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	DAT_800818c0	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
-GAME.EXE	0x800818e3	0x710e3	0x45	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x800818e3	0x710e3	0x29	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	DAT_8008190c	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record func_800324f0 selects outside the map
+GAME.EXE	0x80081916	0x71116	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
-GAME.EXE	0x80081c8c	0x7148c	0x1a5a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	DAT_80081c8c	Record30[64]	asm;band C/H relocs;FDAT_080 func_801e86c4	light records (render.h); func_80017664 copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
+GAME.EXE	0x8008288c	0x7208c	0x199a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
 GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
 GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	DAT_8009c22e	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
@@ -135,7 +138,8 @@ GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	DAT_8009c3bc	long	asm;src/game/car
 GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
 GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
 GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
-GAME.EXE	0x8009c3cc	0x8bbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	DAT_8009c3cc	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by func_8002fe1c, followed through Data801b24e4.unka8
+GAME.EXE	0x8009c3d4	0x8bbd4	0x42c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -255,7 +259,9 @@ FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-compleme
 FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_020.BIN	0x801e8ce8	0x9e0	0x620	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_023.BIN	0x801e8908	0x600	0x200	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	DAT_801e8908	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
+FDAT_023.BIN	0x801e8910	0x608	0x8	defined	supported	DAT_801e8910	SVECTOR	asm;src/fdat/fdat_023.c	.data; second slot 9 offset
+FDAT_023.BIN	0x801e8918	0x610	0x1f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e89c8	0x6c0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_029.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -293,6 +299,8 @@ FDAT_074.BIN	0x801e8670	0x368	0x498	unclassified	coverage-gap			payload-compleme
 FDAT_077.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_077.BIN	0x801e8b14	0x80c	0x7f4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_080.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_080.BIN	0x801e8bb8	0x8b0	0x750	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_080.BIN	0x801e8bb8	0x8b0	0x30	defined	supported	DAT_801e8bb8	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends from
+FDAT_080.BIN	0x801e8be8	0x8e0	0x30	defined	supported	DAT_801e8be8	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends to
+FDAT_080.BIN	0x801e8c18	0x910	0x6f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8a80	0x778	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

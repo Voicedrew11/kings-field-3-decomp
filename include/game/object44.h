@@ -16,7 +16,8 @@ void func_80044900(s32 id, s32 mode, ...);
 void func_80044b40(Object44 *obj, s32 mode, u8 value);
 void func_80044c34(s32 mode);
 s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape);
-s16 func_80045c7c(s16 start, VECTOR *pos, s32 height, s32 reach_up, s16 angle, s16 range);
+/* K&R definition: angle and range are s16 in the callee, int at the call (FDAT callers). */
+s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle, int range);
 void func_80046014(Object44 *obj, u8 kind);
 Object44 *func_80046034(s32 first, s32 count, s32 stamp);
 void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy);

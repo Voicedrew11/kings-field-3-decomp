@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 
 from .sdk import dmpsx_verified, dos_run, stage_dmpsx, tool_succeeded
@@ -69,6 +70,19 @@ IMAGE_LINKS = {
                          evidence='signature census: game | NONE2 | game | MALLOC | API PRESS GPU '
                                   'GTE CD ETC SND SPU'),
 }
+# A headerless FDAT module is linked on its own at the address GAME.EXE loads
+# it to: no startup object, allocator or library (the modules call GAME.EXE's
+# code in place), its references into GAME.EXE defined as absolute symbols,
+# PSYLINK's pure binary output (`/p`) instead of a CPE, framed as an FDAT.T
+# entry.
+OVERLAY_LINK = ImageLink((), startup='',
+                         evidence='FDAT modules: own code only, jal into GAME.EXE text')
+# FDAT.T frames each entry: the linked bytes, zeros through the module's
+# uninitialized storage and up to the sector multiple that leaves room for one
+# trailing word, and that word, 0x12345678 plus the 32-bit sum of every
+# preceding word (all 28 retail code entries agree).
+ARCHIVE_SECTOR = 0x800
+ARCHIVE_CHECKSUM_SEED = 0x12345678
 ENTRY = '__SN_ENTRY_POINT'
 # Runtime Library 3.3 CD PSX/LIB objects.
 STARTUP_SHA256 = {
@@ -102,6 +116,41 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def pack_archive_entry(payload: bytes, reserved: int = 0) -> bytes:
+    """Frame one linked module as its FDAT.T entry (see ARCHIVE_CHECKSUM_SEED).
+
+    `reserved` is the extent of the module's uninitialized storage past the
+    linked bytes: the entry covers it with zeros before the checksum word.
+    """
+    if len(payload) % 4 or reserved % 4 or reserved < 0:
+        raise ValueError('an archive entry payload must be whole words')
+    size = -(-(len(payload) + reserved + 4) // ARCHIVE_SECTOR) * ARCHIVE_SECTOR
+    body = payload + bytes(size - 4 - len(payload))
+    total = sum(struct.unpack(f'<{len(body) // 4}I', body)) + ARCHIVE_CHECKSUM_SEED
+    return body + struct.pack('<I', total & 0xFFFFFFFF)
+
+
+def overlay_reserved_size(map_text: str, load_address: int, linked_size: int) -> int:
+    """Bytes of the `bss` group that lie past a module's linked bytes, from
+    PSYLINK's map (`Start Stop Length Obj Group Section` rows), rounded up to
+    whole words."""
+    end = load_address + linked_size
+    for line in map_text.splitlines():
+        fields = line.split()
+        if len(fields) == 6 and fields[4] == 'bss' and int(fields[2], 16):
+            end = max(end, int(fields[1], 16) + 1)
+    return -(-(end - load_address - linked_size) // 4) * 4
+
+
+def equ_lines(symbols: dict[str, int]) -> list[str]:
+    """PSYLINK command-file definitions of absolute host symbols."""
+    for name in symbols:
+        if not name or not (name[0].isalpha() or name[0] in '_$') or not all(
+                c.isalnum() or c in '_$' for c in name):
+            raise ValueError(f'invalid absolute symbol name {name!r}')
+    return [f'{name}\tequ\t${address:08x}' for name, address in sorted(symbols.items())]
+
+
 def _pinned_object(source: Path, expected: str, root: Path, name: str, provenance: str) -> dict:
     if file_hash(source) != expected:
         raise ValueError(f'{source}: expected the pinned {name} (sha256 {expected[:12]}...)')
@@ -109,16 +158,23 @@ def _pinned_object(source: Path, expected: str, root: Path, name: str, provenanc
     return {'file': name, 'path': str(source), 'sha256': expected, 'provenance': provenance}
 
 
-def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
-    """Compile and link a program using its source units and SDK libraries."""
+def build_image(name, root, units, compile_one, *, repo, load_address,
+                host_symbols=None) -> dict:
+    """Compile and link a program using its source units and SDK libraries.
+
+    `host_symbols` selects the headerless module link (OVERLAY_LINK): it is
+    called with the native objects and returns the absolute addresses of the
+    host-program symbols they reference but do not define.
+    """
     root = root.resolve()
     if root.exists():
         shutil.rmtree(root)
     root.mkdir(parents=True)
     report = {'image': name, 'linked': False, 'phase': 'compile', 'units': [],
               'libraries': [], 'startup': None, 'allocator': None, 'tools': {}}
+    overlay = host_symbols is not None
     try:
-        layout = image_link(name)
+        layout = OVERLAY_LINK if overlay else image_link(name)
         report['layout'] = {'proven': layout.proven, 'evidence': layout.evidence}
         tools = {'ASPSX.EXE': Path(os.environ['PSYQ_ASPSX']),
                  'PSYLINK.EXE': Path(os.environ['PSYQ_PSYLINK']),
@@ -135,10 +191,12 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
         for index, unit in enumerate(units):
             report['units'].append(compile_one(unit, root, index))
         library_dir = Path(os.environ['PSYQ_LIB'])
-        report['startup'] = _pinned_object(
-            library_dir / layout.startup, STARTUP_SHA256[layout.startup], root, layout.startup,
-            'Runtime Library 3.3 CD PSX/LIB object')
-        startup = [layout.startup]
+        startup = []
+        if layout.startup:
+            report['startup'] = _pinned_object(
+                library_dir / layout.startup, STARTUP_SHA256[layout.startup], root,
+                layout.startup, 'Runtime Library 3.3 CD PSX/LIB object')
+            startup.append(layout.startup)
         if layout.allocator:
             report['allocator'] = _pinned_object(
                 Path(os.environ['PSYQ_MALLOC_OBJ']), MALLOC_OBJECT_SHA256, root, 'MALLOC.OBJ',
@@ -172,7 +230,7 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'corrections': corrections,
             })
         report['phase'] = 'link'
-        stem = name.removesuffix('.EXE')
+        stem = name.rsplit('.', 1)[0]
         objects = [u['object'] for u in report['units']]
         names = [u['unit'] for u in report['units']]
         position = (0 if layout.startup_before == FIRST else
@@ -186,12 +244,37 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
         if allocator_unit:
             after = objects.index(allocator_unit) + 1
             objects[after:after] = ['MALLOC.OBJ']
-        report['startup']['after_source_units'] = position
+        if report['startup'] is not None:
+            report['startup']['after_source_units'] = position
+        if overlay:
+            absolute = host_symbols([root / u['object'] for u in report['units']])
+            report['host_symbols'] = {key: f'{value:#010x}'
+                                      for key, value in sorted(absolute.items())}
+            tail = equ_lines(absolute)
+        else:
+            tail = [f'\tregs\tpc={ENTRY}']
         commands = [f'\torg\t${load_address:08x}', *SECTIONS,
                     *(f'\tinclude\t"{obj}"' for obj in objects),
                     *(f'\tinclib\t"{library["file"]}"' for library in report['libraries']),
-                    f'\tregs\tpc={ENTRY}']
+                    *tail]
         (root / 'LINK.LNK').write_bytes(('\r\n'.join(commands) + '\r\n').encode('ascii'))
+        if overlay:
+            report['linker_command'] = (
+                f'psylink /c /m /p @LINK.LNK,{stem}.RAW,{stem}.SYM,{stem}.MAP > LINK.TXT')
+            dos_run(root, [report['linker_command']], 'link')
+            tool_succeeded(root, 'LINK.TXT', stem + '.RAW', b'')
+            report['phase'] = 'pack'
+            raw = (root / (stem + '.RAW')).read_bytes()
+            map_path = root / (stem + '.MAP')
+            reserved = overlay_reserved_size(
+                map_path.read_text(errors='replace') if map_path.is_file() else '',
+                load_address, len(raw))
+            (root / name).write_bytes(pack_archive_entry(raw, reserved))
+            report.update(linked=True, phase='complete', executable=str(root / name),
+                          raw=str(root / (stem + '.RAW')), raw_size=len(raw),
+                          reserved_size=reserved)
+            (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+            return report
         report['linker_command'] = (
             f'psylink /c /m @LINK.LNK,{stem}.CPE,{stem}.SYM,{stem}.MAP > LINK.TXT')
         dos_run(root, [report['linker_command']], 'link')

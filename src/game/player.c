@@ -490,18 +490,18 @@ void func_8002a074(void)
 }
 
 ADDRESS(0x8002a10c, 0x104)
-void func_8002a10c(u8 *spell)
+void func_8002a10c(Record18 *spell)
 {
     s32 mask = 0x10;
     s32 elements = 0;
     s32 i;
 
     if (spell != NULL) {
-        elements = spell[5];
+        elements = spell->unk5;
     }
     for (i = 4; i != -1; mask >>= 1, i--) {
         if (elements & mask) {
-            DAT_801b24e4.unk26[i] += spell[3];
+            DAT_801b24e4.unk26[i] += spell->unk3;
             if (DAT_801b24e4.unk26[i] >= 400) {
                 DAT_801b24e4.unk26[i] = 0;
                 DAT_801b24e4.unk34[i]++;
@@ -1149,26 +1149,39 @@ s32 func_8002b8d8(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
     return func_80016ec8(&DAT_801b24e4.pos, x, y, z, radius, 1700, reach_up);
 }
 
+/*
+ * Unresolved (func_8002b928, func_8002ba38): retail reads r->unk2 again after
+ * each 0xff test, so both bodies compile 4 bytes short.
+ */
 ADDRESS(0x8002b928, 0x110)
 void func_8002b928(u8 id)
 {
     SoundBank *bank = NULL;
     Record18 *r;
     s16 n;
+    s32 se;
+    SoundEffect *effect;
 
     DAT_801b09fc.bank_select = 0;
     DAT_801b24e4.unkc7 = id;
     if (DAT_801b24e4.unkc7 != 0xff) {
         r = &DAT_801b77ec.unk0[DAT_801b24e4.unkc7];
-        if (r->unk2 != 0xff && (n = DAT_801b09fc.effects[r->unk2 + 144].bank) != -1) {
-            bank = &DAT_801b09fc.banks[n];
+        if (r->unk2 != 0xff) {
+            se = r->unk2 + 144;
+            effect = &DAT_801b09fc.effects[se];
+            if ((n = effect->bank) != -1) {
+                bank = &DAT_801b09fc.banks[n];
+            }
         }
     }
     if (id != 0xff) {
         r = &DAT_801b77ec.unk0[id];
-        if (r->unk2 != 0xff && bank != NULL && bank->slot == NULL) {
-            n = DAT_801b09fc.effects[r->unk2 + 144].bank;
-            func_80015ce0(2, n + 94, n);
+        if (r->unk2 != 0xff) {
+            se = r->unk2 + 144;
+            if (bank != NULL && bank->slot == NULL) {
+                n = DAT_801b09fc.effects[se].bank;
+                func_80015ce0(2, n + 94, n);
+            }
         }
     }
 }
@@ -1179,20 +1192,27 @@ void func_8002ba38(u8 id)
     SoundBank *bank = NULL;
     Record18 *r;
     s16 n;
+    s32 se;
+    SoundEffect *effect;
 
     DAT_801b09fc.bank_select = 1;
     DAT_801b24e4.unkc8 = id;
     if (DAT_801b24e4.unkc8 != 0xff) {
         r = &DAT_801b77ec.unk0[DAT_801b24e4.unkc8];
-        if (r->unk2 != 0xff && (n = DAT_801b09fc.effects[r->unk2 + 144].bank) != -1) {
-            bank = &DAT_801b09fc.banks[n];
+        if (r->unk2 != 0xff) {
+            se = r->unk2 + 144;
+            effect = &DAT_801b09fc.effects[se];
+            if ((n = effect->bank) != -1) {
+                bank = &DAT_801b09fc.banks[n];
+            }
         }
     }
     if (id != 0xff) {
         r = &DAT_801b77ec.unk0[id];
         if (r->unk2 != 0xff) {
+            se = r->unk2 + 144;
             if (bank != NULL && bank->slot == NULL) {
-                n = DAT_801b09fc.effects[r->unk2 + 144].bank;
+                n = DAT_801b09fc.effects[se].bank;
                 func_80015ce0(2, n + 94, n);
             }
         }

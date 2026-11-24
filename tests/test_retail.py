@@ -91,6 +91,17 @@ class RetailTests(unittest.TestCase):
                 self.assertEqual(layout.load_address, 0x801E8308)
                 self.assertEqual(layout.file_offset(0x801E830C), 4)
 
+    def test_overlay_references_outside_its_window_belong_to_its_host(self) -> None:
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x801E83A8), "FDAT_002.BIN")
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x80041EEC), "GAME.EXE")
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x801CA984), "GAME.EXE")
+        # One past the overlay's load window is no longer the overlay's.
+        layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", layout.load_end), "GAME.EXE")
+        # A root program owns every address its code names.
+        self.assertEqual(retail.referent_image("GAME.EXE", 0x801E83A8), "GAME.EXE")
+        self.assertEqual(retail.referent_image("OPEN.EXE", 0x80041EEC), "OPEN.EXE")
+
     def test_archive_entry_slices_sector_offsets(self) -> None:
         archive = bytearray(0x1800)
         struct.pack_into("<4H", archive, 0, 2, 1, 2, 3)

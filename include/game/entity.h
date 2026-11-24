@@ -82,7 +82,7 @@ s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode);
 s32 func_8004e8ec(s32 angle, s32 target);
 s32 func_8004e914(s32 angle, s32 target);
 void func_8004e928(Object88 *obj, s16 target, s32 max, s32 accel);
-void func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode);
+s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode);
 s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel, s32 mode);
 s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode);
 void func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, s32 mode);
