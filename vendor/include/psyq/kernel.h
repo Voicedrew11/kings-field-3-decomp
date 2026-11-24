@@ -24,6 +24,8 @@ extern long DisableEvent(long event);
 extern long TestEvent(long event);
 extern long UnDeliverEvent(long event);
 extern long CloseEvent(long event);
+extern long SetRCnt(unsigned long spec, unsigned short target, long mode);
+extern long StartRCnt(unsigned long spec);
 
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
