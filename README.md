@@ -24,7 +24,7 @@ returns it loads the index that program left in the byte at `0x800102F0`.
 | `GAME.EXE` | `GAME.EXE` | `0x80011000` | `0x8b800` | 593 |
 | `OPEN.EXE` | `OPEN.EXE` | `0x80011000` | `0x2f800` | 34 |
 | `END.EXE` | `END.EXE` | `0x80011000` | `0x26800` | 13 |
-| `FDAT_nnn.BIN` (28) | `CD\COM\FDAT.T` entry *nnn* | `0x801E8308` | `0x800`–`0x1000` | 436 |
+| `FDAT_nnn.BIN` (28) | `CD\COM\FDAT.T` entry *nnn* | `0x801E8308` | `0x800`–`0x1000` | 437 |
 
 `GAME.EXE` loads one headerless code module at a time from `CD\COM\FDAT.T`
 (entries 2, 5, ..., 83: the third member of each area's triplet; the other
@@ -32,8 +32,9 @@ entries are data) at `0x801E8308`. The modules share `GAME.EXE`'s address
 space and call straight into its code; each starts with an id word and 32
 handler pointers that `GAME.EXE` calls through. They are named by archive
 entry (`--image fdat_005`) because the area each one belongs to is not yet
-proven. The game function counts exclude the Psy-Q library code, whose
-starts and ownership wait for the Library 3.4/3.3 re-seed (see
+proven. The game function counts exclude the 1,383 Psy-Q library functions
+(plus the four startup entries), which `functions_vendored.tsv` identifies
+against the Runtime Library 3.3 archives where it can (see
 [the inventory](docs/function-and-data-inventory.md#current-census)).
 
 ## Getting started
@@ -55,10 +56,11 @@ The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)
 project. The toolchain is this game's own: Sony's GNU C 2.60 `CC1PSX` with
 ASPSX 2.21, PSYLINK 2.27 and CPE2X 1.5 from the Runtime Library 3.3 CD
-rebuilds `PSX.EXE` byte-identically. GAME and OPEN were linked against
-Library 3.4 and END against a slightly newer 3.3, which no public archive
-preserves, so their link layouts and libraries remain hypotheses. See
-[AGENTS.md](AGENTS.md) for the reconstruction rules.
+rebuilds `PSX.EXE` byte-identically, and its one game function (`main`) is
+matched and banked. GAME and OPEN were linked against Library 3.4 and END
+against a slightly newer 3.3, which no public archive preserves, so their
+link layouts and libraries remain hypotheses. See [AGENTS.md](AGENTS.md)
+for the reconstruction rules.
 
 <!-- match-score:start -->
 ## Match status

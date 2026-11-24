@@ -100,7 +100,8 @@ refreshes the second generated README block, `executable-score`:
 kf link --compare-only
 ```
 
-The command accepts `--image psx|game|open|end`. The README keeps one row per image
+The command accepts `--image` with any image key; without it, images that
+have no linked EXE yet are skipped. The README keeps one row per image
 and a byte-weighted total for the available images. It reads saved reports
 only when their candidate hashes match EXEs still on disk and their retail
 hashes match the configured retail identities. Missing, changed or failed
@@ -174,6 +175,11 @@ model's startup and `inclib` order, exclusion of an 8192-byte BSS buffer, and
 rejection of unresolved references or stale output.
 `tests/test_dmpsx.py` checks the DMPSX rewrite of INLINE.H GTE macros.
 
-`kf analyze` scores `psx.main` at 98.89%: its data (the path table,
-`program_index`, `next_program` and the EXEC header) is not yet claimed in
-the data inventories, so `kf check` reports that data as unowned.
+`psx.main` is exact and banked: `src/psx/main.c` claims its data (the path
+table, `program_index`, `next_program` and the EXEC header) and
+`relocs.tsv` holds its reviewed relocations, so objdiff scores it 100%,
+`kf verify data` and the target relink pass, and `kf check` passes for
+`PSX.EXE`. Without the data claims objdiff scored it 98.89% even though the
+EXE was byte-identical: the delinked retail object then had no owners for
+those references, so its relocation referents differed from the native
+object's symbols.

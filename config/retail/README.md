@@ -21,6 +21,9 @@ Each image is a separate linked program or overlay, so every row carries an
 region, and the 28 `FDAT_nnn.BIN` modules all load at 0x801E8308 inside
 `GAME.EXE`'s address space: never merge rows on address alone. Overlay rows use file offsets
 relative to the overlay image (it has no PS-X EXE header).
-All files start empty, with their headers only. Seed them with
-`kf inventory propose` and admit rows by review; see
+`functions.tsv`/`data.tsv` hold the reviewed `kf-function-audit` /
+`kf-function-propose` census, `functions_vendored.tsv` the reviewed
+`kf-vendored-seed` output (its SDK evidence is in `../evidence/`), and the
+identity tables the reviewed `kf inventory` seeds; generators write below
+`build/` and rows are admitted by review. See
 `docs/function-and-data-inventory.md`.

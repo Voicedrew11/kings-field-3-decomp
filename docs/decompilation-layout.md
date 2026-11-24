@@ -79,8 +79,9 @@ units. That ownership is not inferable from the linked image alone, so the
 initial pipeline deliberately carves one object per contiguous function. It is
 a calibration topology, not a claim that the original source had one-function
 files. Provider-identified Sony/Psy-Q functions never become reconstruction
-or objdiff units; until the Library 3.4/3.3 re-seed, the Psy-Q text is not
-carved at all (see [the inventory](function-and-data-inventory.md#current-census)).
+or objdiff units; every function in the Psy-Q text bands has a
+`functions_vendored.tsv` row (see
+[the inventory](function-and-data-inventory.md#psy-q-library-text)).
 Functions with multiple fragments and no fragment-range manifest are withheld
 rather than guessed.
 

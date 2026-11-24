@@ -91,7 +91,10 @@ collections searched (Archive.org `psyq-sdk`, psx.arthus.net, the
 archaic-toolchains, FoxdieTeam, cdlewis and mkst/esa repositories) start at
 3.3 or later and none is 3.4. The 3.3 archives are therefore the closest
 proven set and stay a labelled probe for GAME, OPEN and END: those programs
-cannot link byte-identically from them.
+cannot link byte-identically from them. `kf-vendored-seed` and
+`kf-fid-census` read the same archives; the per-function result (3.3
+object, 3.3 function ID, signature only, unmatched version) is in
+[the inventory](function-and-data-inventory.md#psy-q-library-text).
 
 ## Build commands
 

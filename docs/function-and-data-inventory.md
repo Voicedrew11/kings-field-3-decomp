@@ -23,27 +23,31 @@ symbols or pretending that WIP names are original symbols:
 | Image | Game functions | `proven` | `candidate` | Bytes |
 | :---- | -------------: | -------: | ----------: | ----: |
 | `PSX.EXE` | 1 | 1 | 0 | `0xe0` |
-| `GAME.EXE` | 593 | 521 | 72 | `0x42638` |
+| `GAME.EXE` | 593 | 537 | 56 | `0x4d09c` |
 | `OPEN.EXE` | 34 | 33 | 1 | `0x26c8` |
 | `END.EXE` | 13 | 12 | 1 | `0xa3c` |
-| 28 `FDAT_nnn.BIN` | 436 (14–22 each) | 10 | 426 | `0xb124` |
-| **Total** | **1,077** | **577** | **500** | |
+| 28 `FDAT_nnn.BIN` | 437 (14–22 each) | 10 | 427 | `0xb208` |
+| **Total** | **1,078** | **593** | **485** | |
 
-`functions.tsv` also keeps the four PS-X EXE entry rows (Psy-Q startup,
-already in `functions_vendored.tsv`). All game identities are address-only
-with candidate signatures from the static MIPS live-in heuristic
-(`kf inventory seed`); no data identities are admitted yet.
+These are the denominator. `functions.tsv` also holds the four PS-X EXE
+entry rows (Psy-Q startup objects) and the 1,383 Psy-Q library functions
+(below); all of those have `functions_vendored.tsv` rows. All game
+identities are address-only with candidate signatures from the static MIPS
+live-in heuristic (`kf inventory seed`). The only data identities are
+`PSX.EXE` `main`'s four (`program_paths`, `program_index`, `next_program`,
+`program_header`).
 
 ### Evidence tiers
 
-Each row's note starts with its AGENTS.md tier. `tier=proven` is decoded
-direct control flow: the PS-X EXE entry, or the target of a `jal` or a
-cross-function `j` decoded from carved code, including the 52 `GAME.EXE`
-functions that FDAT modules call directly. `tier=candidate` is everything
-else: 412 FDAT rows are named by their module's dispatch table (stored
-pointers that `GAME.EXE` calls indirectly), and the rest are carved from
-frame or return shape alone. No function is `validated` yet: that tier needs
-reviewed relocation rows, and `relocs.tsv` is still empty.
+Each row's note starts with its AGENTS.md tier (library-band rows with
+`Psy-Q library band; ` first). `tier=proven` is decoded direct control
+flow: the PS-X EXE entry, or the target of a `jal` or a cross-function `j`
+decoded from carved code, including the 52 `GAME.EXE` functions that FDAT
+modules call directly. `tier=candidate` is everything else: 412 FDAT rows
+are named by their module's dispatch table (stored pointers that
+`GAME.EXE` calls indirectly), and the rest are carved from frame or return
+shape alone. No game function is `validated` yet: that tier needs reviewed
+relocation rows, and `relocs.tsv` holds only `PSX.EXE` `main`'s.
 
 ### Function starts
 
@@ -53,67 +57,103 @@ row's `confidence` names the rule that admitted it:
 
 - `entry`: the PS-X EXE header pc0;
 - `mips-frame-carve`: a stack frame with `ra` saved and a matching stack
-  restore at the return. The game code's GCC 2.6/2.7 restores the stack
-  before the return (`lw ra; addiu sp; jr ra; nop`); the library band has
-  the older delay-slot form (`jr ra; addiu sp`). Loads scheduled above the
-  frame allocation start at the previous function's return;
-- `mips-return-carve`: valid code between one return and the next;
+  restore at the return. The game code's GCC 2.6 always restores the stack
+  before the return (`lw ra; addiu sp; jr ra; nop`); the library text has
+  that form and the delay-slot one (`jr ra; addiu sp`), so only the
+  converse marks library code. Loads scheduled above the frame allocation
+  start at the previous function's return;
+- `mips-return-carve`: valid code between one return (or the end of an
+  overlay's 0x88-byte handler header) and the next return;
 - `mips-call-carve`: a `jal` target decoded from admitted code that lies in
-  unowned bytes, carved to its first unconditional transfer;
+  unowned bytes, carved to the first unconditional transfer at or past the
+  furthest forward branch it has seen (a tail call to the next start still
+  ends it);
 - `mips-call-split`: a `jal` target inside an admitted extent whose preceding
   code cannot fall through into it; and
 - `mips-handler-carve`: an FDAT dispatch-table pointer, carved the same way
   (the shared `jr ra; nop` default handler directly after each header).
 
+An admitted extent that ends at a `jr reg` the CFG's switch prover proves a
+table dispatch, with every case in the unowned bytes up to the next start,
+grows over its cases (`switch-extend`): `GAME.EXE` `0x8003260c`,
+`0x80047010` and `0x800568bc` own their case bodies (0x1504, 0x4514 and
+0x5338 bytes, tables at `0x80011b0c`, `0x8001209c` and `0x80012ebc`).
+
 A `jal` target up to 0x40 bytes of straight-line code above an admitted
 start moves that start back (the row's note records it). ASPSX expands
 every `div` with `break 7`/`break 6` traps whose branches only skip the
-trap; such a run counts as straight-line, and each trap widens the window
-by one expansion (`GAME.EXE` `0x80067c10` and `0x80077ad8`, `OPEN.EXE`
+trap; such a run counts as straight-line, and each expansion widens the
+window once (`GAME.EXE` `0x80067c10` and `0x80077ad8`, `OPEN.EXE`
 `0x80020294` start 0x7c bytes above their frames). ASPSX also spells `li`
 as `ori`, which the carves accept as ordinary code.
 
-Over the full structural census (library text included), every decoded
-`jal` target lands on a start except eight interior entries in the Psy-Q
-text (GTE assembly with fall-through entries at `GAME.EXE` `0x80074d88`,
+Over the full census (library text included), every decoded `jal` target
+lands on a start except eight interior entries in the Psy-Q text (GTE
+assembly with fall-through entries at `GAME.EXE` `0x80074d88`,
 `0x80074d90`, `0x80075190`, `0x800756b0`, `0x80075b50`, `0x800776c8`, and
 `EnterCriticalSection` behind exception code at `OPEN.EXE` `0x8001ad2c` and
 `END.EXE` `0x800172f8`), which stay unsplit. All 62 distinct FDAT-to-`GAME.EXE`
 call targets and all 32 handler slots of every module land on starts. The
 short code-pointer tables some modules keep between `0x88` and the default
-handler point at labels inside one function (switch cases), not at starts.
+handler point at labels inside one function (switch cases), not at starts;
+the one function there (`FDAT_029` `0x801e8390`, byte-identical to admitted
+functions of `FDAT_014`, `FDAT_020` and `FDAT_080`) is carved from the
+header end. The audit's three lone 8-byte "returns" in data tables
+(`GAME.EXE` `0x80094c34`, `OPEN.EXE` `0x8003d640`, `END.EXE` `0x80034714`)
+are not code and are not admitted.
 
-### Psy-Q library text: pending
+### Psy-Q library text
 
-The library text is not admitted yet: its bytes stay `unclassified` gaps
-whose note says so. The bands are
+`config/evidence/sdk_text_bands.tsv` lists the reviewed library bands:
 
-| Image | Library text |
-| :---- | :----------- |
-| `PSX.EXE` | `0x80010118..0x80010248` |
-| `GAME.EXE` | `0x800144f0..0x80014b48`, `0x80061be4..0x8007e4c4` |
-| `OPEN.EXE` | `0x800136c0..0x800136d8`, `0x800144f4..0x8002c1b8` |
-| `END.EXE` | `0x80011cfc..0x80011d14`, `0x8001240c..0x800232a0` |
+| Image | Library text | Starts |
+| :---- | :----------- | -----: |
+| `PSX.EXE` | `0x80010118..0x80010248` | 8 + entry |
+| `GAME.EXE` | `0x800144f0..0x80014b48`, `0x80061be4..0x8007e4c4` | 578 + entry |
+| `OPEN.EXE` | `0x800136c0..0x800136d8`, `0x800144f4..0x8002c1b8` | 447 + entry |
+| `END.EXE` | `0x80011cfc..0x80011d14`, `0x8001240c..0x800232a0` | 350 + entry |
 
-The game bands end where `ghidra_psx_ldr` signature sets 340/330 begin to
-match (`NONE2`, `MALLOC.OBJ`, LIBCARD's BIOS stubs, LIBCD, ...), and no
-game-band function has the library's delay-slot epilogue; the game's
-`0x80014b14` (CARD.OBJ `_card_clear`, calling `_new_card`/`_card_write`) and
-`0x80061bc4` were placed by their epilogue and callees. `GAME.EXE` and
-`OPEN.EXE` link Library 3.4 members (intr.c 1.73, sys.c 1.116), `END.EXE`
-Library 3.3 ones.
+The band edges are where `ghidra_psx_ldr` signature sets 340/330 and the
+Runtime Library 3.3 object matches stop and start (`NONE2`, `MALLOC.OBJ`,
+LIBCARD's BIOS stubs, LIBCD, ...); nothing in a band calls or jumps into
+game code, and no game-band function has the delay-slot epilogue. The
+game's `0x80061bc4` was placed by its epilogue and callees.
 
-TODO(sdk): once the toolchain pins the Library 3.4 and 3.3 archives:
+`kf-vendored-seed --exe-dir retail` identifies every band function, in
+this order of precedence:
 
-1. run `kf-function-audit --exe-dir retail` and `kf-function-propose` to a
-   fixed point and admit the library-band starts the game-band filter held
-   back (about 1,390; the three lone 8-byte "returns" the audit carves in
-   data tables at `GAME.EXE` `0x80094c34`, `OPEN.EXE` `0x8003d640` and
-   `END.EXE` `0x80034714` are not code);
-2. run `kf-vendored-seed --exe-dir retail --sdk-lib-dir <3.4 LIB>` (and the
-   3.3 archives for `END.EXE`) so FID and exact rows carry the right release,
-   with signature sets 340 then 330 as fallback; and
-3. seed identities only for the starts left non-vendored.
+1. exact objects: `config/evidence/psyq_33_text_sections.tsv` and
+   `psyq_33_complete_objects.tsv`, produced by
+   `python -m scripts.kf.sdk_object_census --exe-dir retail` against the
+   pinned Runtime Library 3.3 archives and re-verified by the seed (a
+   function lying inside a relocation-masked exact `.text` match, or a
+   small object whose bytes equal the image outright);
+2. project-built function IDs from the same archives (`fid-sdk33`): the
+   function's masked bytes equal one 3.3 function, even where its object as
+   a whole is a newer revision (END's LIBGPU `SYS`, sys.c 1.109 against the
+   CD's 1.107);
+3. `ghidra_psx_ldr` signature set 340, then 330 (`psyq340-signature`):
+   signature-only, no preserved archive behind it; and
+4. the band list (`sdk-unmatched-version`, library and module
+   `unmatched`): band code none of the above matches, recorded as vendored
+   because it is library code of a release no archive preserves, with the
+   identified neighbours in its note.
+
+| Image | 3.3 exact object | 3.3 function ID | signature only | unmatched version | Total |
+| :---- | ---------------: | --------------: | -------------: | ----------------: | ----: |
+| `PSX.EXE` | 9 | 0 | 0 | 0 | 9 |
+| `GAME.EXE` | 285 | 109 | 102 | 83 | 579 |
+| `OPEN.EXE` | 179 | 109 | 80 | 80 | 448 |
+| `END.EXE` | 233 | 51 | 8 | 59 | 351 |
+| **Total** | **706** | **269** | **190** | **222** | **1,387** |
+
+The totals include the four entry rows (`2MBYTE.OBJ` and `NONE2.OBJ`, all
+exact). The unmatched-version rows are GAME/OPEN/END's LIBSND voice
+manager, SEQREAD and VS_VH code, two END LIBGPU `SYS` functions, the CARD
+`_card_clear` object at `GAME.EXE` `0x80014b14` and the exception code in
+front of OPEN's and END's `EnterCriticalSection`. Library 3.5 (not pinned)
+matches less than 3.3 in every image. Identities are seeded only for the
+starts left non-vendored, which are exactly the game functions.
 
 ## Ownership board
 
@@ -138,6 +178,7 @@ or changes to the inventory.
 ```sh
 kf-function-audit --exe-dir retail      # build/function-audit/candidates.tsv
 kf-function-propose                     # build/function-audit/proposed-retail/
+python -m scripts.kf.sdk_object_census --exe-dir retail  # build/sdk-objects/ (config/evidence inputs)
 kf-vendored-seed --exe-dir retail       # build/vendored-seed/functions_vendored.tsv
 kf inventory check
 kf inventory propose

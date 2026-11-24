@@ -37,18 +37,20 @@ derivation, then add its output to the list passed to `ghidra.withExtensions`.
 This keeps plugin versions coupled to the Ghidra version and makes
 `nix flake check` catch API or build incompatibilities.
 
-The bundled signature sets cover Psy-Q 2.60 through 4.70, including the 3.00
-set that corresponds to the SLPS-00069 runtime. Our hash-pinned Psy-Q 3.0
-libraries remain the primary evidence for those bodies.
+The bundled signature sets cover Psy-Q 2.60 through 4.70. No Library 3.4
+archive is preserved, so the 3.40 set (then 3.30) is the closest signature
+evidence for GAME and OPEN; the hash-pinned Runtime Library 3.3 archives
+remain the primary evidence for every body they match.
 
-`kf-vendored-seed` uses the 3.00 JSON corpus as a secondary byte-signature
-lane. It requires a unique executable occurrence and a meaningful signature
-label aligned to an admitted function start. Resulting rows retain
-`psyq300-signature*` confidence and never override a Psy-Q 3.0 object claim.
-These are plugin wildcard signatures, not a Ghidra FID database; the TSV keeps
-the evidence type explicit. `kf-fid-census` separately builds and compares a
-project-owned function-ID corpus directly from the pinned Psy-Q 3.0 OBJ/LIB
-files. That primary path is independent of Ghidra and its `.fidb` format.
+`kf-vendored-seed` uses the 340 and 330 JSON corpora as a secondary
+byte-signature lane. It requires a unique executable occurrence and a
+meaningful signature label aligned to an admitted function start. Resulting
+rows retain `psyq340-signature*` confidence and never override a 3.3 object
+or function-ID claim. These are plugin wildcard signatures, not a Ghidra FID
+database; the TSV keeps the evidence type explicit. `kf-fid-census`
+separately builds and compares a project-owned function-ID corpus directly
+from the pinned Runtime Library 3.3 OBJ/LIB files. That primary path is
+independent of Ghidra and its `.fidb` format.
 
 For game-code identity work, `kf inventory ghidra --image psx|game|open|end`
 creates persistent ignored projects below `build/ghidra-inventory` and exports
