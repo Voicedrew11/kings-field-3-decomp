@@ -1366,36 +1366,30 @@ u8 func_80040694(VECTOR *pos)
 ADDRESS(0x80040708, 0xc4)
 u8 func_80040708(VECTOR *pos, s32 radius)
 {
-    u8 cells;
-    s32 row;
-    s32 col0;
+    u8 cells = 0;
+    s32 row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
+    s32 col0 = (pos->vx >> 11) + DAT_80199154.grid_x - radius;
     s32 col;
     s32 i;
     s32 j;
-    u8 *line;
-    u8 *cell;
 
-    cells = 0;
-    i = radius * 2;
-    row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
-    col0 = (pos->vx >> 11) + DAT_80199154.grid_x - radius;
-    line = DAT_80199154.grid[row];
+    radius *= 2;
+    i = radius;
     do {
         if (row >= 0 && (u32)row < 25) {
-                j = radius * 2;
-                col = col0;
-                cell = &line[col];
-                do {
-                    if (col >= 0 && (u32)col < 25) {
-                        cells |= *cell;
-                    }
-                    cell++;
-                    col++;
-                } while (--j != -1);
+            col = col0;
+            j = radius;
+            do {
+                if (col >= 0 && (u32)col < 25) {
+                    cells |= DAT_80199154.grid[row][col];
+                }
+                col++;
+                j--;
+            } while (j != -1);
         }
-        line += 25;
         row++;
-    } while (--i != -1);
+        i--;
+    } while (i != -1);
     return cells;
 }
 
@@ -1432,17 +1426,17 @@ void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
 {
     u8 *wanted;
     s32 end;
-    SoundSlot *slot;
+    s32 i;
 
     wanted = SCRATCH->u.load.sound_wanted;
-    for (end = count + entry; entry < end; entry++, bank++) {
-        slot = DAT_801b09fc.banks[bank].slot;
+    for (i = entry, end = count + entry; i < end; i++, bank++) {
+        SoundBank *record = &DAT_801b09fc.banks[bank];
+        SoundSlot *slot = record->slot;
+
         if (*wanted++ != 0) {
             if (slot == NULL) {
-                func_80015ce0(file, entry, bank);
-                continue;
-            }
-            if (slot->state == 2) {
+                func_80015ce0(file, i, bank);
+            } else if (slot->state == 2) {
                 slot->state = 1;
             }
         } else if (slot != NULL && slot->state == 1) {
