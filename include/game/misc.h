@@ -24,7 +24,7 @@ void func_8005c0d4(Object88 *obj, u8 anim, u16 time, s32 target, u16 step);
 u8 func_8005c18c(u8 *script, u8 id);
 void func_8005c308(Object88 *obj);
 u8 *func_8005c1e8(Object88 *obj);
-void func_8005c7e8(Object44 *obj, s16 id);
+void func_8005c7e8(Object44 *obj, s32 id);
 
 /* A start position of func_8005c864's table: areas, map cell and height, yaw. */
 typedef struct Record08 {

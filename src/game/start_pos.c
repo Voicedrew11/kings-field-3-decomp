@@ -1,9 +1,10 @@
 /*
  * GAME.EXE: an Object88's talk script (func_8005c308), an Object44 spawn
- * helper and the player's move to one of 14 start positions (areas loaded
- * through func_80017c78) (WIP module). The .rdata is func_8005c864's local
- * table initializer, then func_8005c308's jump table: GCC 2.6 emits the
- * initializers of a TU ahead of its jump tables, so the two share a TU.
+ * helper, the player's move to one of 14 start positions (areas loaded
+ * through func_80017c78) and the item use dispatcher (func_8005cbe0) (WIP
+ * module). The .rdata is func_8005c864's local table initializer, then the
+ * jump tables of func_8005c308 and func_8005cbe0: GCC 2.6 emits the
+ * initializers of a TU ahead of its jump tables, so the three share a TU.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -21,7 +22,7 @@
 #include <game/object44.h>
 #include <game/scene.h>
 
-RODATA(0x800130f0, 0xb0)
+RODATA(0x800130f0, 0x1a4)
 
 /* Runs obj's talk script record (id 0x70) from its entry point up to the 0xff end, then its end action. */
 ADDRESS(0x8005c308, 0x4e0)
@@ -166,7 +167,7 @@ end:
 
 /* Spawns Object44 0x17c and links obj to it (its index - 124). */
 ADDRESS(0x8005c7e8, 0x7c)
-void func_8005c7e8(Object44 *obj, s16 id)
+void func_8005c7e8(Object44 *obj, s32 id)
 {
     Object44 *made;
     s32 i;
@@ -251,4 +252,390 @@ void func_8005c864(s32 n)
         func_80029500();
     }
     DAT_801b24e4.unk134 = DAT_801b24e4.unk136 = DAT_801b24e4.unk138 = 0;
+}
+
+/* Uses item id at pos/angle (stat raises, objects near the player, start-position moves),
+ * then passes it to the loaded FDAT module's handler 2; message 10 when nothing took it. */
+ADDRESS(0x8005cbe0, 0xbdc)
+void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
+{
+    VECTOR unused[2]; /* the frame keeps 32 unused bytes here */
+    Object88 *o88;
+    Object44 *obj;
+    Object44 *obj2;
+    Object88 *o88b;
+    Object44 *obj2b;
+    Object88 *target;
+    Object44 *made;
+    s32 dist;
+    s32 i;
+    s32 element;
+    s32 flag;
+    s32 n;
+    s32 k;
+    s32 j;
+
+    DAT_801ba984.unk0 = 0;
+    switch (id) {
+    case 113:
+        element = 0;
+        goto raise;
+    case 114:
+        element = 1;
+        goto raise;
+    case 115:
+        element = 2;
+        goto raise;
+    case 116:
+        element = 3;
+        goto raise;
+    case 117:
+        element = 4;
+    raise:
+        func_8005d7f8(id);
+        for (j = 2; j != -1; j--) {
+            DAT_801b24e4.unk34[element]++;
+            if (DAT_801b24e4.unk34[element] >= 1000) {
+                DAT_801b24e4.unk34[element] = 999;
+            } else {
+                func_80029f1c(element);
+                func_80029500();
+                if (DAT_801ba984.unk0 == 0) {
+                    DAT_801ba984.unk0 = 1;
+                    func_80041eec(element + 18);
+                }
+            }
+        }
+        break;
+    case 110:
+        func_8005d7f8(id);
+        for (i = 4; i != -1; i--) {
+            DAT_801b24e4.unk34[i]++;
+            if (DAT_801b24e4.unk34[i] >= 1000) {
+                DAT_801b24e4.unk34[i] = 999;
+            } else {
+                func_80029f1c(i);
+                func_80029500();
+                if (DAT_801ba984.unk0 == 0) {
+                    DAT_801ba984.unk0 = 1;
+                    func_80041eec(13);
+                }
+            }
+        }
+        break;
+    case 111:
+        for (j = 2; j != -1; j--) {
+            DAT_801b24e4.unk32++;
+            if (DAT_801b24e4.unk32 >= 1000) {
+                DAT_801b24e4.unk32 = 999;
+            } else {
+                func_80029500();
+                if (DAT_801ba984.unk0 == 0) {
+                    DAT_801ba984.unk0 = 1;
+                    func_80041eec(1);
+                }
+            }
+        }
+        break;
+    case 112:
+        DAT_801b24e4.unk4c++;
+        if (DAT_801b24e4.unk4c >= 5) {
+            DAT_801b24e4.unk4c = 4;
+            break;
+        }
+        func_80029500();
+        if (DAT_801ba984.unk0 == 0) {
+            DAT_801ba984.unk0 = 1;
+            func_80041eec(2);
+        }
+        break;
+    case 128:
+        if (DAT_8018fad4.area[0] == 6) {
+            k = 0;
+            for (;;) {
+                k = func_80045c7c(k, pos, 800, 1700, angle->vy, 512);
+                if (k == -1) {
+                    break;
+                }
+                if (k == 0x5b) {
+                    DAT_801ba984.unk0 = 1;
+                    func_8005d7f8(0x80);
+                    obj2 = &DAT_8018fb3c.objects[0x5b];
+                    i = 16;
+                    o88 = &DAT_80185da8.objects[3];
+                    o88->unk9 = 0;
+                    o88->unk0 = 2;
+                    while (o88->unk9 == 0) {
+                        func_80052e5c();
+                        func_80015a48();
+                        func_80018cd0();
+                        func_800422b8(NULL, NULL);
+                    }
+                    func_80019ab4();
+                    o88->unk15 = -1;
+                    obj2->unk10 = 0x400;
+                    obj2->unk2 = 5;
+                    o88->unk16 = 0x1000;
+                    o88->unk13 = 5;
+                    while (--i != -1) {
+                        if (o88->unk15 > 100) {
+                            o88->unk15 -= 8;
+                            obj2->scale.vx += 8;
+                            obj2->scale.vz += 8;
+                            obj2->unk10 += 256;
+                            o88->unk16 -= 256;
+                        } else {
+                            o88->unk15 = 100;
+                        }
+                        func_80015a48();
+                        func_80018cd0();
+                        func_800422b8(NULL, NULL);
+                    }
+                    o88->unk16 = 0x800;
+                    o88->unk13 = 0;
+                    o88->unk0 = 1;
+                    obj2->unk6 = 0xff;
+                    DAT_801ba984.unke[0x19] = 1;
+                    break;
+                }
+                if (k == 0x53) {
+                    DAT_801ba984.unk0 = 1;
+                    func_8005d7f8(0x80);
+                    o88b = &DAT_80185da8.objects[58];
+                    o88b->unk9 = 0;
+                    o88b->unk0 = 2;
+                    func_8004c0b0(o88b, 0x15);
+                    obj2b = &DAT_8018fb3c.objects[0x53];
+                    i = 16;
+                    while (o88b->unk9 == 0) {
+                        func_80052e5c();
+                        o88b->unk18 = 0;
+                        func_80015a48();
+                        func_80018cd0();
+                        func_800422b8(NULL, NULL);
+                    }
+                    func_80019ab4();
+                    o88b->unk15 = -1;
+                    obj2b->unk10 = 0x400;
+                    obj2b->unk2 = 5;
+                    o88b->unk16 = 0x1000;
+                    o88b->unk13 = 5;
+                    while (--i != -1) {
+                        if (o88b->unk15 > 0) {
+                            o88b->unk15 -= 8;
+                            obj2b->scale.vx += 8;
+                            obj2b->scale.vz += 8;
+                            obj2b->unk10 += 256;
+                            o88b->unk16 -= 256;
+                        } else {
+                            o88b->unk15 = 0;
+                        }
+                        func_80015a48();
+                        func_80018cd0();
+                        func_800422b8(NULL, NULL);
+                    }
+                    o88b->unk16 = 0x800;
+                    o88b->unk13 = 0;
+                    o88b->unk0 = 1;
+                    obj2b->unk6 = 0xff;
+                    DAT_801ba984.unk2c[0] = 1;
+                    break;
+                }
+                k++;
+            }
+        }
+        if (DAT_801ba984.unk0 == 0) {
+            func_8005d7f8(id);
+            DAT_801b24e4.unk94 = 900;
+            DAT_801ba984.unk0 = 1;
+            func_80029500();
+        }
+        break;
+    case 135:
+    case 137:
+    case 138:
+    case 139:
+    case 140:
+    case 142:
+    case 144:
+        i = 0;
+        for (;;) {
+            i = func_80045c7c(i, pos, 800, 1700, angle->vy, 512);
+            if (i == -1) {
+                goto done;
+            }
+            switch (func_80046608(&DAT_8018fb3c.objects[i], id)) {
+            case 0:
+                break;
+            case 1:
+                func_8005bd34();
+                DAT_801ba984.unk0 = 1;
+                goto done;
+            case 3:
+                func_80041eec(7);
+                DAT_801ba984.unk0 = 1;
+                goto done;
+            case 4:
+                func_80041eec(7);
+                DAT_801ba984.unk0 = 1;
+                goto done;
+            }
+            i++;
+        }
+    case 141:
+        i = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+        if (i == -1) {
+            break;
+        }
+        made = &DAT_8018fb3c.objects[i];
+        if (made->unk6 == 0x101) {
+            if (made->arg.b.unk38 == 0xff) {
+                made->arg.b.unk38 = id;
+                made->unk8 = 0;
+                DAT_801ba984.unk0 = 1;
+                func_8005d7f8(id);
+                func_8005c7e8(made, id);
+            }
+        } else if (func_80046608(made, id) == 3) {
+            func_80041eec(7);
+            DAT_801ba984.unk0 = 1;
+        }
+        break;
+    case 136:
+        i = 0;
+        for (;;) {
+            i = func_80045c7c(i, pos, 800, 1700, angle->vy, 512);
+            if (i == -1) {
+                break;
+            }
+            obj = &DAT_8018fb3c.objects[i];
+            if (obj->unk6 == 0xa2) {
+                if (obj->arg.b.unk38 == 0x88) {
+                    obj->arg.b.unk38 = 0xfe;
+                    DAT_801ba984.unk0 = 1;
+                    func_8005d7f8(id);
+                }
+            } else if (obj->unk6 == 0x102) {
+                if (obj->arg.b.unk38 == 0xff) {
+                    Object44 *made;
+
+                    obj->arg.b.unk38 = id;
+                    obj->unk8 = 0;
+                    DAT_801ba984.unk0 = 1;
+                    func_8005d7f8(id);
+                    made = func_80046034(350, 10, DAT_8018fb3c.unk885e);
+                    func_800448b8(made);
+                    made->arg.h.unk3c = DAT_8018fb3c.unk885e++;
+                    made->unk6 = id;
+                    made->arg.b.unk38 = 0;
+                    obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 94;
+                }
+            } else if (func_80046608(obj, id) == 3) {
+                func_80041eec(7);
+                DAT_801ba984.unk0 = 1;
+            }
+            i++;
+        }
+        break;
+    case 118:
+        i = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+        if (i == -1) {
+            break;
+        }
+        if (DAT_8018fb3c.objects[i].unk6 == 0xfe) {
+            if (func_8005d898(0x77) == 0) {
+                func_80041eec(12);
+                func_8005d7f8(id);
+            }
+            DAT_801ba984.unk0 = 1;
+        } else if (DAT_8018fb3c.objects[i].unk6 == 0xfb) {
+            if (func_8005d898(0x78) == 0) {
+                func_80041eec(12);
+                func_8005d7f8(id);
+            }
+            DAT_801ba984.unk0 = 1;
+        }
+        break;
+    case 130:
+        k = 1;
+        goto start;
+    case 131:
+        k = 6;
+        goto start;
+    case 132:
+        k = 9;
+        goto start;
+    case 150:
+    case 151:
+    case 152:
+    case 153:
+    case 154:
+    case 155:
+    case 156:
+    case 157:
+    case 158:
+    case 159:
+    case 160:
+    case 161:
+        k = id - 150;
+        if ((u32)k >= 12) {
+            break;
+        }
+    start:
+        if (DAT_8018fad4.area[0] == 25 || DAT_8018fad4.area[0] == 27) {
+            k = 0;
+            break;
+        }
+        if ((s16)DAT_8018fad4.loading == 1
+            && (DAT_8018fad4.previous[0] == 25 || DAT_8018fad4.previous[0] == 27)) {
+            break;
+        }
+        func_8005c864(k);
+        break;
+    case 104:
+    case 105:
+    case 106:
+    case 107:
+    case 108:
+    case 109:
+    case 119:
+    case 120:
+        DAT_801ba984.unk0 = 1;
+        break;
+    case 101:
+        flag = 2;
+        if (DAT_801b24e4.unk160 == 0) {
+            flag = 1;
+        }
+        target = func_8004d3c4(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
+        if (target != NULL && target->unk3 == flag) {
+            func_800441d4(6, target->unk1 + 270);
+            DAT_801ba984.unk0 = 1;
+        } else {
+            n = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+            if (n != -1 && DAT_8018fb3c.objects[n].unk0 != 0 && n == 11 && DAT_8018fad4.area[0] == 17) {
+                func_800441d4(6, 305);
+                DAT_801ba984.unk0 = 1;
+            }
+        }
+        if (DAT_801ba984.unk0 == 0) {
+            obj = DAT_8018fb3c.objects;
+            for (i = 395; i != -1; i--, obj++) {
+                if (DAT_8018fb3c.defs[obj->unk6].unk0 == 0xe2 && obj->arg.b.unk40 == flag
+                    && func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
+                                     0x8000) != 0) {
+                    func_800441d4(6, obj->arg.h.unk3a + 810);
+                    DAT_801ba984.unk0 = 1;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+done:
+    DAT_8018fad4.handlers[2](pos, angle, id);
+    if (DAT_801ba984.unk0 == 0) {
+        func_80041eec(10);
+    }
+    func_8002b6f0();
 }
