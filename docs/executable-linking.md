@@ -41,6 +41,16 @@ the SLPS-00017 setup; the kit's ASPSX 2.08 is not yet wired in. The build report
 a reproducible source-to-EXE chain, while exact historical compiler and
 assembler attribution remains open.
 
+A partial image, one whose source units claim some but not all of its
+admitted game functions, is not linked: its code still calls and reads game
+code no source provides, which PSYLINK cannot resolve. `kf build` reports it
+as `partial` with the number of unclaimed game functions and does not fail;
+its units are verified by the target relink and data gates of `kf check`.
+Sources that claim no retail function, such as the synthetic link controls,
+are always linked.
+
+## Link model
+
 GAME startup passes `BSS_END` to `InitHeap`. Retail loads it with a
 relocated `lui`/`addiu` pair and subtracts it at run time, so the original
 referenced a link-time symbol rather than a folded number (KF1's startup, by

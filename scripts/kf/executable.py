@@ -9,15 +9,16 @@ import os
 from pathlib import Path
 import struct
 
+from scripts.kf.delink import load_catalog
 from scripts.kf.sdk import compile_c
 from scripts.psxbuild.link import build_image as link_image
 from scripts.psxbuild.link import OVERLAY_STARTUP as OVERLAY_STARTUP
 from scripts.kf.executable_diff import compare_executables, render_html
 from scripts.kf.graph import IncludeScanner
 from scripts.kf.manifest import Manifest, Profile, Unit, load as load_manifest
-from scripts.kf.paths import BUILD, REPO
+from scripts.kf.paths import BUILD, REPO, RETAIL_CONFIG
 from scripts.kf.readme import refresh_executable
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
 from scripts.kf.sema.image import RetailImage
 
 
@@ -75,12 +76,38 @@ def cpe_loads(data: bytes) -> tuple[int | None, list[tuple[int, bytes]]]:
     raise ValueError('missing native CPE end record')
 
 
+def unclaimed_game_functions(name: str, units: list[Unit]) -> list[int]:
+    """Admitted game functions of the image that no unit's claimed run covers.
+
+    Sources that claim no retail function (free-form controls) are not a
+    partial reconstruction of the census, so they report nothing.
+    """
+    if not any(unit.functions for unit in units):
+        return []
+    claimed = {function.va for unit in units for function in unit.functions}
+    return [function.va for function in load_catalog(RETAIL_CONFIG).functions[name]
+            if not function.provider and function.va not in claimed]
+
+
 def build_image(name: str, manifest: Manifest, root: Path) -> dict:
     units = [u for u in manifest.units if u.image == name and u.scope != 'vendored']
     if not units:
         # An image no source claims yet has nothing to link; that is not a failure.
         root.mkdir(parents=True, exist_ok=True)
         report = {'image': name, 'linked': False, 'phase': 'not-started', 'units': []}
+        (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+        return report
+    if name in OVERLAY_SOURCES:
+        raise ValueError(f'{name}: linking a headerless archive overlay is not modeled yet')
+    unclaimed = unclaimed_game_functions(name, units)
+    if unclaimed:
+        # A partial reconstruction still calls and reads game code no source
+        # provides, so PSYLINK cannot resolve it. Its units are verified by the
+        # target relink and data gates instead; that is not a link failure.
+        root.mkdir(parents=True, exist_ok=True)
+        report = {'image': name, 'linked': False, 'phase': 'partial',
+                  'units': [unit.unit for unit in units],
+                  'unclaimed_game_functions': len(unclaimed)}
         (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
         return report
     report = link_image(
@@ -124,14 +151,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--compare-only', action='store_true',
                         help='compare existing native EXEs without rebuilding or changing them')
     args = parser.parse_args(argv)
-    names = [key.upper() + '.EXE' for key in args.image] if args.image else list(IMAGE_LAYOUTS)
+    names = [IMAGE_NAMES[key] for key in args.image] if args.image else list(IMAGE_LAYOUTS)
     try:
         manifest = None if args.compare_only else load_manifest()
         verified = {name: RetailImage.load(name) for name in names} if args.compare_only else {}
         reports = []
         filename = 'fuzzy-comparison.json' if args.compare_only else 'build.json'
         for name in names:
-            root = BUILD / 'link' / name[:-4].lower()
+            root = BUILD / 'link' / image_key(name)
             report = ({'image': name, 'mode': 'compare-existing', 'executable': str(root / name)}
                       if args.compare_only else build_image(name, manifest, root))
             if args.compare_only:
@@ -152,6 +179,9 @@ def main(argv: list[str] | None = None) -> int:
                 print(f'{name}: built {report["executable"]}')
             elif report['phase'] == 'not-started':
                 print(f'{name}: no source units yet; link skipped')
+            elif report['phase'] == 'partial':
+                print(f'{name}: partial reconstruction ({report["unclaimed_game_functions"]} '
+                      'game functions unclaimed); native link skipped')
             else:
                 print(f'{name}: {report["phase"]} failed; see {root}: {report["error"]}')
             (root / filename).write_text(json.dumps(report, indent=2) + '\n')
@@ -161,7 +191,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.compare_only:
             refresh_executable(BUILD / 'link')
         return int(any(not report.get('linked', args.compare_only)
-                       and report.get('phase') != 'not-started' for report in reports))
+                       and report.get('phase') not in {'not-started', 'partial'}
+                       for report in reports))
     except (OSError, ValueError) as error:
         parser.error(str(error))
 

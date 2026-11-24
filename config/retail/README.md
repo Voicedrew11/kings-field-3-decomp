@@ -16,8 +16,11 @@ King's Field III `SLUS-00255` executables listed in `../images.toml`:
 - `structures.tsv` and `structure_fields.tsv`: target structure layouts with
   their evidence.
 
-Each image is a separate linked program, so every row carries an `image`.
-Overlays reuse the same virtual addresses: never merge rows on address alone.
+Each image is a separate linked program or overlay, so every row carries an
+`image`. `GAME.EXE`, `OPEN.EXE` and `END.EXE` reuse the 0x80011000 load
+region, and the 28 `FDAT_nnn.BIN` modules all load at 0x801E8308 inside
+`GAME.EXE`'s address space: never merge rows on address alone. Overlay rows use file offsets
+relative to the overlay image (it has no PS-X EXE header).
 All files start empty, with their headers only. Seed them with
 `kf inventory propose` and admit rows by review; see
 `docs/function-and-data-inventory.md`.

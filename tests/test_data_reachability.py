@@ -33,7 +33,110 @@ def ref(site, target, *, tier="validated", kind="address", image=IMAGE, origins=
     return Reference(image, site, target, kind, None, tier=tier, origins=origins)
 
 
+def words(*values):
+    import struct
+
+    return struct.pack(f"<{len(values)}I", *values)
+
+
 class ReachabilityTest(unittest.TestCase):
+    def test_bios_vector_stub_is_a_proven_vendored_dispatch(self):
+        # li $t2,0xb0; jr $t2; li $t1,0x32
+        code = words(0x240A00B0, 0x01400008, 0x24090032)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1004, None, tier="proven", kind="jump")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1004,
+            "pattern": "bios-vector-stub", "target": 0xB0,
+        }])
+
+    def test_empty_link_time_table_loop_is_proven_dead(self):
+        # lui $s1,0; addiu $s1,$s1,0; beqz $s1,+3; nop; jalr $t0
+        code = words(0x3C110000, 0x26310000, 0x12200003, 0, 0x0100F809)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1010, None, tier="proven", kind="indirect-call")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"][0]["pattern"], "empty-link-time-table")
+
+    def test_other_vendored_indirect_control_stays_unresolved(self):
+        # jr $v0 through an unproven value
+        code = words(0x00400008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1000, None, tier="proven", kind="indirect-jump")), img)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["vendored_dispatch"], [])
+
+    def switch_code(self, table_words):
+        # andi v1,v0,0xff; sltiu v0,v1,3; beqz v0,+7; lui v0,0; addiu v0,v0,0x40;
+        # sll v1,v1,2; addu v1,v1,v0; lw v0,0(v1); nop; jr v0; nop
+        code = words(0x304300FF, 0x2C620003, 0x10400007, 0x3C020000, 0x24420040,
+                     0x00031880, 0x00621821, 0x8C620000, 0, 0x00400008, 0)
+        return code + b"\0" * (0x40 - len(code)) + words(*table_words)
+
+    def test_bounded_game_switch_table_is_a_proven_dispatch(self):
+        img = RetailImage.synthetic(IMAGE, 0x0, self.switch_code((0x2C, 0x2C, 0x28)) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x40, body_size=0x40)
+        report = audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00000000", "site": 0x24, "pattern": "switch-table",
+            "table": 0x40, "entries": 3,
+        }])
+
+    def test_game_switch_table_leaving_the_function_stays_unresolved(self):
+        img = RetailImage.synthetic(IMAGE, 0x0, self.switch_code((0x2C, 0x80, 0x28)) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x40, body_size=0x40)
+        report = audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def switch_table(self, last_entry, *, vendor=False, unresolved=True):
+        # sltiu $v0,$v1,2; beqz $v0,+7; lui $v0,0; addiu $v0,$v0,0x1100;
+        # sll $v1,$v1,2; addu $v1,$v1,$v0; lw $v0,0($v1); nop; jr $v0; nop
+        code = words(0x2C620002, 0x10400007, 0x3C020000, 0x24421100, 0x00031880,
+                     0x00621821, 0x8C620000, 0, 0x00400008, 0)
+        table = words(0x1028, last_entry)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * (0x100 - len(code)) + table
+                                    + b"\0" * 0x100)
+        switch = replace(function(0x1000, vendor=vendor), size=0x30, body_size=0x30)
+        functions = (switch, function(0x1400)) if vendor else (switch,)
+        refs = (ref(0x1400, 0x1000, tier="proven", kind="call"),) if vendor else ()
+        if unresolved:
+            refs += (ref(0x1020, None, tier="proven", kind="indirect-jump"),)
+        return audit(IMAGE, functions, (), refs, img)
+
+    def test_bounded_switch_table_inside_the_function_is_proven(self):
+        report = self.switch_table(0x102C)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1020,
+            "pattern": "switch-table", "table": 0x1100, "entries": 2,
+        }])
+
+    def test_switch_table_leaving_the_function_stays_unresolved(self):
+        report = self.switch_table(0x1200)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def test_switch_witness_needs_no_unresolved_reference(self):
+        # The semantic evidence folds a proven game switch into the CFG, so
+        # the audit sees no reference at the `jr`; the witness row remains.
+        report = self.switch_table(0x102C, unresolved=False)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual([row["site"] for row in report["switch_dispatch"]], [0x1020])
+
+    def test_vendored_switch_table_is_not_exempt(self):
+        report = self.switch_table(0x102C, vendor=True)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
     def audit(self, functions, data=(), refs=(), img=None):
         img = img or RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
         return audit(IMAGE, tuple(functions), tuple(data), tuple(refs), img)

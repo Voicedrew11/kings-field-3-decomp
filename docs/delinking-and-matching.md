@@ -26,14 +26,20 @@ reference shown as `validated` uses the same proof boundary as safe delinking.
 
 ## First-pass topology
 
-The four programs are processed independently:
+The 32 images (four programs and 28 FDAT modules) are processed
+independently, each under its `--image` key:
 
 ```text
-PSX.EXE  + config/retail/*.tsv -> build/delink/psx  -> build/objdiff/psx
-GAME.EXE + config/retail/*.tsv -> build/delink/game -> build/objdiff/game
-OPEN.EXE + config/retail/*.tsv -> build/delink/open -> build/objdiff/open
-END.EXE  + config/retail/*.tsv -> build/delink/end  -> build/objdiff/end
+PSX.EXE      + config/retail/*.tsv -> build/delink/psx      -> build/objdiff/psx
+GAME.EXE     + config/retail/*.tsv -> build/delink/game     -> build/objdiff/game
+OPEN.EXE     + config/retail/*.tsv -> build/delink/open     -> build/objdiff/open
+END.EXE      + config/retail/*.tsv -> build/delink/end      -> build/objdiff/end
+FDAT_005.BIN + config/retail/*.tsv -> build/delink/fdat_005 -> build/objdiff/fdat_005
+...
 ```
+
+A module's calls into `GAME.EXE` are cross-image references: they stay
+unmodeled targets until `GAME.EXE`'s owner is linked against the module.
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a
@@ -62,6 +68,9 @@ independently validate the TSV claim:
 - an external J/JAL target must be an admitted function start;
 - a HI/LO pair must remain inside one function extent, consume the LUI register,
   decode to the recorded address, and use a sign-extending low instruction;
+  rows may share a site only as one HI/LO family (same target: one `lui`
+  feeding several lows, or `lui`s on converging paths feeding one low), which
+  is emitted once per site in ELF REL order;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;
@@ -301,11 +310,29 @@ The default build also checks target-object roundtrips through the independent
 GNU MIPS linker. A packed section must admit one retail base for all its owned
 symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
-checked as uninitialized storage. Synthetic tails imitating the probe assembler
+checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
+is the only one in its section is placed at that claim: in `.bss`, or in
+`.sbss` for a small request of a `-G8` unit. A unit whose `.sdata` holds
+only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. See the [placement evidence](../config/evidence/target_roundtrip_layout.md)
 for known conflicts. This is not yet a linked reconstruction or a check of all
 config-only reachable storage.
+
+`kf check` applies the target-relink and known-reference closure gates only to
+images that at least one source unit claims; an image without units has
+nothing to relink, and its census-wide closure is the curation worklist
+(`kf verify reachability --image KEY`). The OK line says how many images were
+gated. Inside reached Sony functions, only indirect transfers proved from the
+member's own instructions (BIOS `li $t2, 0xA0/0xB0/0xC0; jr $t2` stubs and
+startup table loops with a link-time zero count) are exempt; they are listed
+as `vendored_dispatch` witness rows in the reachability report. In a game
+function, a compiled `switch` jump is proved from its own bounded value
+chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
+`jr`) when every table word is an instruction start inside that function;
+the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
+and each such jump is a `switch_dispatch` witness row. A Sony member's
+switch jump gets no exemption from it.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

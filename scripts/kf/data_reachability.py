@@ -20,8 +20,9 @@ from pathlib import Path
 
 from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema import Context
+from scripts.kf.sema.cfg import switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -48,7 +49,7 @@ class DataExtent:
 
     @property
     def claimed(self) -> bool:
-        return self.source in {"DATA", "RODATA"}
+        return self.source in {"DATA", "RODATA", "SDATA"}
 
     @property
     def key(self) -> str:
@@ -94,6 +95,76 @@ def data_extents(
 
 def _function_key(function: Binding) -> str:
     return f"function:{function.va:08x}"
+
+
+BIOS_VECTORS = {0xA0, 0xB0, 0xC0}
+JR_T2 = 0x01400008
+
+
+def proven_vendored_dispatch(
+    img: RetailImage, function: Binding, site: int
+) -> tuple[str, int | None] | None:
+    """Prove an SDK member's indirect transfer from its own instruction values.
+
+    Two value chains are accepted, both ending inside the same function:
+
+    * a BIOS table stub, `li $t2, 0xA0|0xB0|0xC0` then `jr $t2` (the target is
+      the fixed BIOS vector); and
+    * an SN startup table loop whose count register is the link-time constant
+      zero (`lui r,0; addiu r,r,0` then `beqz r` before the `jalr`), so the
+      call cannot execute.
+
+    Anything else stays unresolved, as AGENTS.md requires for `jr`/`jalr`.
+    """
+    word = img.u32(site)
+    if word is None:
+        return None
+    if word == JR_T2:
+        for back in (4, 8):
+            prior = img.u32(site - back) if site - back >= function.va else None
+            if prior is not None and prior >> 16 == 0x240A and prior & 0xFFFF in BIOS_VECTORS:
+                return "bios-vector-stub", prior & 0xFFFF
+        return None
+    if word & 0xFC1FFFFF != 0x0000F809:  # jalr $ra, rs
+        return None
+    zero_registers: set[int] = set()
+    for address in range(function.va, site, 4):
+        current = img.u32(address)
+        following = img.u32(address + 4)
+        if current is None or following is None:
+            return None
+        register = (current >> 16) & 0x1F
+        if (
+            current & 0xFFE0FFFF == 0x3C000000  # lui r, 0
+            and following == (0x24000000 | register << 21 | register << 16)  # addiu r, r, 0
+        ):
+            zero_registers.add(register)
+        if current >> 26 == 0x04 and (current >> 16) & 0x1F == 0:  # beqz rs
+            if (current >> 21) & 0x1F in zero_registers:
+                return "empty-link-time-table", None
+    return None
+
+
+def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dict]:
+    """Switch `jr` sites of a game function, proved by the shared CFG rule.
+
+    `scripts.kf.sema.cfg.switch_table` is the only switch-table prover: a
+    bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
+    sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
+    the scanned run, the index unchanged, and every table word an instruction
+    start inside this function. Vendored members get no exemption from it.
+    Returns the witness detail per `jr` site.
+    """
+    if function.vendored or function.fragments != 1:
+        return {}
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return {}
+    return {
+        site: {"site": site, "pattern": "switch-table", "table": proven.table,
+               "entries": len(proven.targets)}
+        for site, proven in switch_tables(function, payload, img.u32).items()
+    }
 
 
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
@@ -159,6 +230,9 @@ def audit(
     outgoing: dict[str, list[int]] = {}
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
+    dispatch_witnesses: dict[int, dict] = {}
+    switch_witnesses: dict[int, dict] = {}
+    switches: dict[str, dict[int, dict]] = {}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -186,7 +260,9 @@ def audit(
 
     for root in roots:
         visit(root, TIER_RANK["proven"], None, None)
-    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(img.layout.entry))
+    entry = img.layout.entry
+    include_entry = include_entry and entry is not None
+    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(entry))
     for root in entry_roots:
         visit(root, TIER_RANK["proven" if len(entry_roots) == 1 else "candidate"], None, None)
     if include_entry and len(entry_roots) != 1:
@@ -204,6 +280,12 @@ def audit(
         if key not in outgoing:
             lo, hi = bisect.bisect_left(sites, node.va), bisect.bisect_left(sites, end)
             outgoing[key] = list(range(lo, hi))
+            if isinstance(node, Binding):
+                # The semantic evidence already folds these into the CFG; the
+                # audit re-proves them so each reached switch keeps a witness.
+                switches[key] = proven_switch_dispatch(img, node)
+                for site, witness in switches[key].items():
+                    switch_witnesses[site] = {"owner": key, **witness}
         for number in outgoing[key]:
             reference = references[number]
             if reference.site + 4 > end:
@@ -219,6 +301,22 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
+                pattern = (
+                    proven_vendored_dispatch(img, node, reference.site)
+                    if isinstance(node, Binding) and node.vendored else None
+                )
+                if pattern is not None:
+                    # Proven by the member's own instruction values, not by
+                    # vendored ownership alone; kept as a witness row.
+                    dispatch_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": pattern[0],
+                        "target": pattern[1],
+                    }
+                    continue
+                if reference.site in switches.get(key, {}):
+                    # A game switch whose every case lands in this function's
+                    # body: the transfer adds no edge; its witness row is kept.
+                    continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
@@ -327,9 +425,13 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
+            "proven_vendored_dispatch": len(dispatch_witnesses),
+            "proven_switch_dispatch": len(switch_witnesses),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
+        "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
+        "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
@@ -370,7 +472,7 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="kf verify reachability", description=__doc__)
-    aliases = {image.removesuffix(".EXE").lower(): image for image in IMAGE_LAYOUTS}
+    aliases = dict(IMAGE_NAMES)
     parser.add_argument("--image", action="append", choices=tuple(aliases))
     parser.add_argument("--output", type=Path,
                         help="write full witness/evidence JSON under build/")

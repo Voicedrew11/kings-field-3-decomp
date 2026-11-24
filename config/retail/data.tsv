@@ -1,13 +1,81 @@
 # MANUALLY MANAGED - admitted WIP retail data census, including unclassified gaps.
 # Seed/audit tooling writes build/retail-seed only; review and edit this file by hand.
-# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside GAME.EXE's address space.
 # Defined rows plus unclassified gaps account for every byte of every loaded payload.
 image	va	file_offset	size	kind	confidence	name	datatype	provenance	note
-PSX.EXE	0x80010000	0x800	0x120	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-PSX.EXE	0x80010144	0x944	0x6bc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80011000	0x800	0x34f8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80014508	0x3d08	0x882f8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-OPEN.EXE	0x80011000	0x800	0x26c8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-OPEN.EXE	0x800136d8	0x2ed8	0x2d128	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-END.EXE	0x80011000	0x800	0xd04	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-END.EXE	0x80011d14	0x1514	0x25aec	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010000	0x800	0x38	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+PSX.EXE	0x80010118	0x918	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+PSX.EXE	0x800101cc	0x9cc	0x7c	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+PSX.EXE	0x80010248	0xa48	0x5b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80011000	0x800	0x34f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x800144f0	0x3cf0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x80014508	0x3d08	0x640	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x800327f0	0x21ff0	0x1320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x800470c4	0x368c4	0x4460	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80056910	0x46110	0x52e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80061be4	0x513e4	0x1c8e0	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x8007e4c4	0x6dcc4	0x1e33c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x800136c0	0x2ec0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+OPEN.EXE	0x800144f4	0x3cf4	0x17cc4	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+OPEN.EXE	0x8002c1b8	0x1b9b8	0x14648	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80011000	0x800	0x9b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80011cfc	0x14fc	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+END.EXE	0x8001240c	0x1c0c	0x10e94	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+END.EXE	0x800232a0	0x12aa0	0x14560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_002.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_005.BIN	0x801e8b78	0x870	0x790	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_008.BIN	0x801e8308	0x0	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_008.BIN	0x801e8f80	0xc78	0x388	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_011.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_011.BIN	0x801e87e0	0x4d8	0x328	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_014.BIN	0x801e8308	0x0	0x9c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_014.BIN	0x801e8e74	0xb6c	0x494	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_017.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_020.BIN	0x801e8ce8	0x9e0	0x620	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_023.BIN	0x801e8908	0x600	0x200	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_026.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_026.BIN	0x801e89c8	0x6c0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_029.BIN	0x801e8308	0x0	0x16c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_029.BIN	0x801e8c0c	0x904	0x6fc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_032.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_032.BIN	0x801e8a64	0x75c	0xa4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_035.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_035.BIN	0x801e8824	0x51c	0x2e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_038.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_038.BIN	0x801e883c	0x534	0x2cc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_041.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_041.BIN	0x801e8958	0x650	0x1b0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_044.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_044.BIN	0x801e87fc	0x4f4	0x30c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_047.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_047.BIN	0x801e8890	0x588	0x278	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_050.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_050.BIN	0x801e8668	0x360	0x4a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_053.BIN	0x801e8308	0x0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_053.BIN	0x801e92f8	0xff0	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_056.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_056.BIN	0x801e860c	0x304	0x4fc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_059.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_059.BIN	0x801e86c4	0x3bc	0x444	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_062.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_062.BIN	0x801e88d8	0x5d0	0x230	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_065.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_065.BIN	0x801e860c	0x304	0x4fc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_068.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_068.BIN	0x801e86fc	0x3f4	0x40c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_071.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_071.BIN	0x801e8740	0x438	0x3c8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_074.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_074.BIN	0x801e8670	0x368	0x498	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_077.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_077.BIN	0x801e8b14	0x80c	0x7f4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_080.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_080.BIN	0x801e8bb8	0x8b0	0x750	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_083.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_083.BIN	0x801e8a80	0x778	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

@@ -27,7 +27,7 @@ from scripts.kf.allocation_notes import read_requests
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_GP, IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
 from scripts.kf.sema.image import RetailImage
 
 
@@ -35,6 +35,8 @@ SECTIONS = {".text": "SHT_PROGBITS", ".rodata": "SHT_PROGBITS",
             ".data": "SHT_PROGBITS", ".sdata": "SHT_PROGBITS", ".bss": "SHT_NOBITS",
             ".sbss": "SHT_NOBITS"}
 LINKER = "mipsel-linux-gnu-ld"
+# Sections a claimed COMMON request may be placed in (see named_common_bss_claim).
+COMMON_SECTIONS = (".bss", ".sbss")
 SYMBOL_NAME = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*\Z")
 ADDRESS_NAME = re.compile(r"DAT_([0-9a-fA-F]{8})\Z")
 
@@ -101,18 +103,27 @@ def named_common_bss_claim(elf: ELFFile, unit: Unit):
     COMMON carries no input section. Only a single, exact, globally named
     reservation is admissible here; the claimed address supplies its placement
     and must satisfy the request's alignment. Other COMMON remains unresolved.
+    The claim's section is `.bss`, or `.sbss` for a small request a -G8 unit
+    leaves to the linker; it must be the only claim there, and the object's
+    section of that name must be empty.
     """
     symtab = elf.get_section_by_name(".symtab")
     if symtab is None:
         return None
     common = [symbol for symbol in symtab.iter_symbols()
               if symbol['st_shndx'] == 'SHN_COMMON']
-    claims = [datum for datum in unit.data if datum.section_name == '.bss']
-    bss = elf.get_section_by_name('.bss')
-    if (len(common) != 1 or len(claims) != 1
-            or (bss is not None and bss['sh_size'])):
+    if len(common) != 1:
         return None
-    symbol, claim = common[0], claims[0]
+    symbol = common[0]
+    named = [datum for datum in unit.data
+             if datum.symbol == symbol.name and datum.section_name in COMMON_SECTIONS]
+    if len(named) != 1:
+        return None
+    claim = named[0]
+    claims = [datum for datum in unit.data if datum.section_name == claim.section_name]
+    section = elf.get_section_by_name(claim.section_name)
+    if len(claims) != 1 or (section is not None and section['sh_size']):
+        return None
     alignment = symbol['st_value']
     if (not symbol.name or symbol.name != claim.symbol
             or symbol['st_info']['bind'] != 'STB_GLOBAL'
@@ -183,7 +194,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
         index = symbol['st_shndx']
         is_claimed_common = (common_claim is not None and name == common_claim.symbol
                              and index == 'SHN_COMMON')
-        actual_section = ('.bss' if is_claimed_common else
+        actual_section = (common_claim.section_name if is_claimed_common else
                           elf.get_section(index).name if isinstance(index, int) else index)
         if actual_section != section_name or symbol['st_size'] != size:
             result.issue("owned-symbol-layout", symbol=name, expected_section=section_name,
@@ -209,6 +220,11 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     if unit.rodata:
         bases[".rodata"].add(unit.rodata[0])
         sizes[".rodata"] = unit.rodata[1]
+    if unit.sdata and not witnesses[".sdata"]:
+        # A unit whose .sdata holds only its SDATA() literals: the target
+        # module packs that range alone, so it starts the section.
+        bases[".sdata"].add(unit.sdata[0])
+        sizes[".sdata"] = unit.sdata[1]
     placed = {}
     seen = set()
     for section in elf.iter_sections():
@@ -227,7 +243,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             result.issue("unsupported-allocated-section", section=name, size=size)
             continue
         if not size:
-            if name == '.bss' and common_claim is not None:
+            if common_claim is not None and name == common_claim.section_name:
                 continue
             if sizes[name]:
                 result.issue("owned-section-extent", section=name, size=0, claimed=sizes[name])
@@ -256,7 +272,7 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
             name, base, size, sizes[name], "bss" if name in {".bss", ".sbss"} else "load",
         ))
     if common_claim is not None:
-        name, size, base = '.bss', common_claim.size, common_claim.va
+        name, size, base = common_claim.section_name, common_claim.size, common_claim.va
         if (name in seen and elf.get_section_by_name(name)['sh_size']
                 or sizes[name] != size or bases[name] != {base}):
             result.issue('owned-section-extent', section=name, size=size,
@@ -285,7 +301,7 @@ def externals(elf: ELFFile, book: dict[str, set[int]], result: UnitResult) -> di
         symtab = elf.get_section(section['sh_link'])
         for row in section.iter_relocations():
             result.relocation_rows += 1
-            if row['r_info_type'] not in {2, 4, 5, 6}:
+            if row['r_info_type'] not in {2, 4, 5, 6, 7}:
                 result.issue("unsupported-relocation", section=target_section.name,
                              offset=row['r_offset'], type=row['r_info_type'])
             if row['r_offset'] & 3 or row['r_offset'] + 4 > target_section['sh_size']:
@@ -341,6 +357,18 @@ def compare_linked(elf: ELFFile, image: RetailImage, result: UnitResult) -> None
                          differing_bytes=sum(a != b for a, b in zip(expected, actual)))
 
 
+def link_command(linker: str, image: str, entry: int, script: Path, linked: Path,
+                 object_path: Path, symbols: dict[str, int]) -> list[str]:
+    """GNU ld arguments that place one target object at its retail addresses."""
+    command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
+               "-o", str(linked), str(object_path.resolve())]
+    command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+    if image in IMAGE_GP:
+        # R_MIPS_GPREL16 resolves against the program's startup $gp.
+        command.append(f"--defsym=_gp={IMAGE_GP[image]:#x}")
+    return command
+
+
 def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
                 object_path: Path, scratch: Path, *, linker: str = LINKER) -> UnitResult:
     result = UnitResult(unit.image, unit.unit, str(object_path))
@@ -359,18 +387,19 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
         with tempfile.TemporaryDirectory(prefix="link-", dir=scratch) as temporary:
             root = Path(temporary)
             script = root / "retail.ld"
+            common = named_common_bss_claim(elf, unit)
+            common_section = common.section_name if common is not None else '.bss'
             script.write_text("SECTIONS {\n" + "\n".join(
                 f"  {name} {address:#x} : {{ *({name})"
-                + (" *(COMMON)" if name == '.bss' else "") + " }"
+                + (" *(COMMON)" if name == common_section else "") + " }"
                 for name, address in sorted(placed.items(), key=lambda item: item[1])
             ) + "\n  /DISCARD/ : { *(*) }\n}\n")
             linked = root / "linked.elf"
             entry = unit.functions[0].va if unit.functions else min(placed.values())
             # GNU MIPS ld otherwise moves SHN_COMMON requests of up to 8 bytes
             # into .scommon, which this script discards; only claimed BSS is placed.
-            command = [linker, "-EL", "-G", "0", "--entry", hex(entry), "-T", str(script),
-                       "-o", str(linked), str(object_path.resolve())]
-            command += [f"--defsym={name}={address:#x}" for name, address in sorted(symbols.items())]
+            command = link_command(linker, unit.image, entry, script, linked,
+                                   object_path, symbols)
             process = subprocess.run(command, capture_output=True, text=True, timeout=30)
             result.linker_ran = True
             result.linker_diagnostics = process.stderr.strip()
@@ -459,7 +488,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--unit")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    images = tuple(name.upper() + ".EXE" for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
+    images = tuple(IMAGE_NAMES[name] for name in args.image) if args.image else tuple(IMAGE_LAYOUTS)
     try:
         return run(images, output=args.output, unit=args.unit)
     except (OSError, ValueError) as error:

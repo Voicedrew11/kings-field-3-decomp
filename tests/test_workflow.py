@@ -23,6 +23,12 @@ from scripts.kf.progress import (
     classifications,
 )
 from scripts.kf.readme import END, START, render_block, write_block
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+
+from types import SimpleNamespace
+
+# A manifest whose only unit belongs to GAME.EXE: the closure/relink gates apply.
+STARTED_GAME = SimpleNamespace(units=(SimpleNamespace(image="GAME.EXE"),))
 
 
 def sample_current(percent: float | None) -> Current:
@@ -130,7 +136,7 @@ class ProgressTests(unittest.TestCase):
 
     def test_default_check_always_gates_data(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -143,9 +149,26 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(progress.check(("GAME.EXE",)), 1)
         data_gate.assert_called_once()
 
+    def test_check_does_not_gate_closure_or_relink_of_an_unstarted_image(self) -> None:
+        unstarted = SimpleNamespace(units=())
+        with (
+            mock.patch.object(progress, "current_state", return_value=(unstarted, {}, [], [])),
+            mock.patch.object(progress, "load_baseline", return_value={}),
+            mock.patch.object(progress, "print_status", return_value=0),
+            mock.patch.object(progress, "_report_cleanliness"),
+            mock.patch("scripts.kf.data_match.run", return_value=0),
+            mock.patch("scripts.kf.data_reachability.run", return_value=1) as reachability,
+            mock.patch("scripts.kf.roundtrip.run", return_value=1) as roundtrip,
+            mock.patch("scripts.kf.readme.refresh", return_value=False),
+            mock.patch("builtins.print"),
+        ):
+            self.assertEqual(progress.check(("GAME.EXE",)), 0)
+        reachability.assert_not_called()
+        roundtrip.assert_not_called()
+
     def test_default_check_rejects_unowned_data_even_when_objects_match(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -160,7 +183,7 @@ class ProgressTests(unittest.TestCase):
 
     def test_default_check_rejects_unfaithful_target_even_when_objects_match(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -301,7 +324,7 @@ class GraphTests(unittest.TestCase):
         ):
             graph.emit()
         lines = write.call_args.args[1].splitlines()
-        for rule, count in (("report", 1), ("check", 4)):
+        for rule, count in (("report", 1), ("check", len(IMAGE_LAYOUTS))):
             edges = [line for line in lines if f": {rule} " in line]
             self.assertEqual(len(edges), count)
             for edge in edges:
@@ -413,7 +436,7 @@ class ReadmeTests(unittest.TestCase):
             "fuzzy_overall_percent": 0.0,
         }
         document = {
-            "images": {key: dict(summary) for key in ("psx", "game", "open", "end")},
+            "images": {key: dict(summary) for key in IMAGE_KEYS},
             "total": dict(summary),
         }
         block = render_block(document)

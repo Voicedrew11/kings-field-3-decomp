@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass, replace
 from functools import lru_cache
 
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.relocations import (
+    ambiguous_sites,
     DataReferent,
+    decode_gprel16_target,
     decode_hi_lo_target,
     decode_mips26_target,
     named_data_referent,
@@ -140,6 +141,12 @@ class Evidence:
                 if decode_mips26_target(site, word) == target
                 else "decoded-target-mismatch"
             )
+        if row["kind"] == "mips_gprel16":
+            try:
+                decoded = decode_gprel16_target(self.img.image, word)
+            except ValueError as error:
+                return str(error)
+            return None if decoded == target else "decoded-target-mismatch"
         if row["kind"] != "mips_hi16_lo16":
             return "unsupported-relocation-kind"
         if not row["paired_site_va"]:
@@ -151,24 +158,15 @@ class Evidence:
         if owner is not None and not owner.contains(paired, 4):
             return "pair-crosses-function-extent"
         try:
-            decoded = decode_hi_lo_target(word, paired_word)
+            decoded = decode_hi_lo_target(word, paired_word, self.img.u32(site + 4))
         except ValueError as error:
             return f"instruction-pair-mismatch:{error}"
         return None if decoded == target else "decoded-target-mismatch"
 
     def _relocation_references(self) -> list[Reference]:
-        occupied = Counter()
-        reviewed = Counter()
-        for row in self.rows:
-            if row["status"] == "rejected":
-                continue
-            sites = [parse_int(row["site_va"])]
-            if row["paired_site_va"]:
-                sites.append(parse_int(row["paired_site_va"]))
-            for site in sites:
-                occupied[site] += 1
-                if row["status"] == "reviewed":
-                    reviewed[site] += 1
+        live = [row for row in self.rows if row["status"] != "rejected"]
+        occupied = ambiguous_sites(live)
+        reviewed = ambiguous_sites(row for row in live if row["status"] == "reviewed")
 
         out: list[Reference] = []
         for row in self.rows:
@@ -181,10 +179,7 @@ class Evidence:
             tier = "candidate"
             byte_reason = self._byte_reason(row, owner)
             overlap_counts = reviewed if row["status"] == "reviewed" else occupied
-            overlaps = (
-                overlap_counts[site] > 1
-                or paired is not None and overlap_counts[paired] > 1
-            )
+            overlaps = site in overlap_counts or paired is not None and paired in overlap_counts
             if row["status"] == "rejected":
                 tier, reason = "rejected", "candidate-rejected"
             elif byte_reason:
@@ -262,7 +257,12 @@ class Evidence:
             payload = self.img.read(function.va, function.body_size)
             if payload is None:
                 continue
-            graph = build_graph(function, payload, self.idx)
+            # A proven switch table resolves a game function's `jr` into
+            # in-function cases. A Sony member's `jr` stays unresolved: only
+            # its own member patterns (data_reachability) may exempt it.
+            graph = build_graph(
+                function, payload, self.idx, None if function.vendored else self.img.u32
+            )
             for edge in graph.edges:
                 if edge.kind not in {
                     "call",
