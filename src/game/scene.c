@@ -441,11 +441,11 @@ void func_80018358(void)
                 }
                 switch (obj44->unk4) {
                 case 0x20:
-                    func_80019518((void *)obj44->arg.w.unk40);
+                    func_80019518((u8 *)obj44->arg.w.unk40);
                     obj44->unk4 = 0xff;
                     break;
                 case 0x22:
-                    func_80019518((void *)obj44->arg.w.unk40);
+                    func_80019518((u8 *)obj44->arg.w.unk40);
                     obj44->unk4 = 0xff;
                     break;
                 }
