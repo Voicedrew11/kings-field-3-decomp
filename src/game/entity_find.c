@@ -83,24 +83,30 @@ void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 
 ADDRESS(0x8004d254, 0x170)
 s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
 {
-    Object88 *obj;
+    s32 offset = height << 5;
+    Object88 *obj = DAT_80185da8.current;
+    VECTOR *target;
     VECTOR pos;
     s32 dist;
+    s32 angle;
 
-    obj = DAT_80185da8.current;
+    near <<= 6;
+    range <<= 6;
+    cone <<= 4;
     pos.vx = obj->pos.vx;
-    pos.vy = obj->pos.vy - (height << 5);
+    pos.vy = obj->pos.vy - offset;
     pos.vz = obj->pos.vz;
-    dist = func_80016ec8(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, range << 6, 0, 0x6a4);
-    if (dist == -1) {
+    dist = func_80016ec8(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, range, 0, 0x6a4);
+    if (dist == -1 || dist < near) {
         return 0;
     }
-    if (dist < near << 6) {
+
+    target = &DAT_801b24e4.pos;
+    angle = func_80016ab8(target->vx - pos.vx, target->vz - pos.vz);
+    if (!func_80016a2c(obj->angle.vy, angle, cone)) {
         return 0;
     }
-    if (!func_80016a2c(obj->angle.vy, func_80016ab8(DAT_801b24e4.pos.vx - pos.vx, DAT_801b24e4.pos.vz - pos.vz), cone << 4)) {
-        return 0;
-    }
+
     func_8002ab18(a4, a5, a6, a7, 0, 0, 0, 0, 0, 0x1000, 10, &pos);
     return 1;
 }
