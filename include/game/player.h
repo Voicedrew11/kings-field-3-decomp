@@ -55,15 +55,15 @@ extern u16 DAT_80081868[14];
 
 /*
  * The same WIP module after func_8002c30c: src/game/player_cast.c,
- * player_spell.c and player_action.c (func_8002c30c, func_8002d2a0 and
- * func_8002e3f8 are not reconstructed yet).
+ * player_spell.c and player_action.c (func_8002c30c and func_8002d2a0 are
+ * not reconstructed yet).
  */
 void func_8002c30c(); /* spell id; spills all four argument registers */
 void func_8002cea8(s32 vertex, VECTOR *out);
 s32 func_8002cfe0(s32 hand);
 void func_8002d130(s32 id, s32 pay, s32 dir);
 void func_8002deec(s32 id);
-void func_8002e3f8(s32 angle, s32 speed);
+s32 func_8002e3f8(s32 angle, s32 speed);
 void func_8002ecbc(void);
 void func_8002ed1c(s32 speed);
 void func_8002ed60(void);

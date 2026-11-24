@@ -268,13 +268,17 @@ typedef struct Data801d4464 {
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
     s32 unk1200c;   /* +0x1200c: height given to Object88 records with flag 0x400 */
     s32 unk12010;   /* +0x12010: floor height of the last collision test */
-    u8 unk12014[4];
+    s32 unk12014;   /* +0x12014: second height of the last collision test (func_8003260c);
+                     * func_8002e3f8 lets the player through when it is 1700 above unk12010 */
     s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against; [0] the
                       * floor the Object4c spawns of func_80056268 must reach */
     u32 unk12024;   /* +0x12024: hit bits of the last func_80033f38 test */
     s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (func_800533e8 reads it) */
     s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
-    u8 unk12030[0xc];
+    u8 unk12030[4];
+    s32 unk12034;   /* +0x12034: push of the last collision test (func_8003260c); from 64
+                     * up func_8002e3f8 moves the player by it */
+    s32 unk12038;   /* +0x12038: angle of that push */
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
     u16 unk1204c;   /* +0x1204c: radius of what was hit (func_80033d84) */
     u16 unk1204e;   /* +0x1204e: height of what was hit */
