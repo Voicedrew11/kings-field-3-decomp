@@ -27,8 +27,9 @@ extern long CloseEvent(long event);
 
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
-extern void ResetCallback(void);
-extern void StopCallback(void);
+/* As Runtime Library 3.3 LIBETC.H declares them, so both headers can meet. */
+extern int ResetCallback(void);
+extern int StopCallback(void);
 
 extern void InitHeap(void *head, long size);
 extern void InitCARD(long pad_enable);
