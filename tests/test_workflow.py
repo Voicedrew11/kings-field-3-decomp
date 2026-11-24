@@ -23,6 +23,7 @@ from scripts.kf.progress import (
     classifications,
 )
 from scripts.kf.readme import END, START, render_block, write_block
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
 
 
 def sample_current(percent: float | None) -> Current:
@@ -301,7 +302,7 @@ class GraphTests(unittest.TestCase):
         ):
             graph.emit()
         lines = write.call_args.args[1].splitlines()
-        for rule, count in (("report", 1), ("check", 4)):
+        for rule, count in (("report", 1), ("check", len(IMAGE_LAYOUTS))):
             edges = [line for line in lines if f": {rule} " in line]
             self.assertEqual(len(edges), count)
             for edge in edges:
@@ -413,7 +414,7 @@ class ReadmeTests(unittest.TestCase):
             "fuzzy_overall_percent": 0.0,
         }
         document = {
-            "images": {key: dict(summary) for key in ("psx", "game", "open", "end")},
+            "images": {key: dict(summary) for key in IMAGE_KEYS},
             "total": dict(summary),
         }
         block = render_block(document)

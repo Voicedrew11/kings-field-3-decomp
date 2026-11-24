@@ -1,6 +1,6 @@
 # MANUALLY MANAGED - admitted WIP retail function census; one row per current start.
 # Seed/audit tooling writes build/retail-seed only; review and edit this file by hand.
-# Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
+# Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside GAME.EXE's address space.
 # Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.
 image	va	file_offset	size	body_size	fragments	kind	confidence	name	labels	provenance	note
 PSX.EXE	0x80010120	0x920	0x24	0x24	1	function	entry	start		PS-X EXE header pc0	WIP boundary: same instruction shape as the KF2 Psy-Q startup stub

@@ -14,6 +14,7 @@ from scripts.kf import readme
 from scripts.kf.data_match import ArtifactFailure, SectionDiff, UnitDataDiff
 from scripts.kf.executable import compare
 from scripts.kf.executable_diff import compare_executables
+from scripts.kf.retail import IMAGE_KEYS
 from scripts.kf.sema.image import RetailImage
 
 
@@ -110,10 +111,11 @@ class ExecutableReadmeTests(unittest.TestCase):
         artifact = ArtifactFailure('OPEN.EXE', 'open.missing', 'missing object')
         with (mock.patch('scripts.kf.manifest.load'),
               mock.patch.object(readme, '_data_inputs_current', return_value=True),
-              mock.patch('scripts.kf.data_match.diff_image', side_effect=[
-                  ([], []), ([good, bad], []), ([good], [artifact]), ([], [])])):
-            self.assertEqual(readme.data_snapshot(),
-                             {'psx': (0, 0), 'game': (1, 2), 'end': (0, 0)})
+              mock.patch('scripts.kf.data_match.diff_image', side_effect=lambda image, *_: {
+                  'GAME.EXE': ([good, bad], []), 'OPEN.EXE': ([good], [artifact])}.get(image, ([], [])))):
+            expected = {key: (0, 0) for key in IMAGE_KEYS if key != 'open'}
+            expected['game'] = (1, 2)
+            self.assertEqual(readme.data_snapshot(), expected)
         with (mock.patch('scripts.kf.manifest.load'),
               mock.patch.object(readme, '_data_inputs_current', return_value=False),
               mock.patch('scripts.kf.data_match.diff_image') as compare):
