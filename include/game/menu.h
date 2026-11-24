@@ -16,6 +16,23 @@
 #define MENU_NONE (-99)
 #define MENU_CANCEL (-1)
 
+/*
+ * The menu's glyph sets and window frame (12-byte records from 0x8007e564):
+ * [0] digits, [1] text, [5] the frame func_80025f38 draws.
+ */
+typedef struct MenuFont {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unka;
+} MenuFont;
+
+#define MENU_FONT_NUMBER 0
+#define MENU_FONT_TEXT 1
+#define MENU_FONT_FRAME 5
+
 /* A line of menu text: screen position and glyphs (0xff ends the line). */
 typedef struct MenuText {
     s16 x;
@@ -93,11 +110,46 @@ void func_8001dd94(void);
 void func_8001dee4(void);
 void func_8001e1b4(void);
 s32 func_8001e484(void);
+s32 func_8001e710(void);
+s32 func_8001ea34(char *dir, u8 *text, u32 *experience, u8 *levels, s32 *numbers);
+void func_8001eb3c(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
+void func_8001ec84(void);
+void func_8001f004(void);
+void func_8001f274(void);
+void func_8001f31c(void);
+void func_8001f4c0(void);
+s32 func_8001fc5c(char *dir);
+void func_8001fe9c(MenuText *lines);
+void func_8001ff94(MenuText *lines);
+s32 func_8001f8b4(void);
+void func_8002090c(MenuText *line);
+void func_8002098c(MenuText *lines);
+void func_80020a84(MenuText *lines);
+void func_80020b7c(MenuText *lines);
+void func_80020c74(MenuText *lines);
+void func_80020d6c(MenuText *line);
+void func_80020dec(MenuText *line);
+void func_80020e6c(MenuText *lines, s32 error);
+void func_8002008c(void);
+void func_800203c8(s32 number);
+s32 func_80020560(void);
+void func_80020fe8(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
+void func_800285dc(void);
+s32 func_80028750(s32 number);
+/* memory card helpers past the menu (game/card.h on band D) */
+void func_80028034(void);
+void func_80028090(void);
+s32 func_800280d4(void);
+s32 func_800281c4(char *dir, s32 *status);
+s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number);
+s32 func_8002860c(s32 number);
 s32 func_800221e8(s32 selected, s32 last, s32 *chosen, s32 *confirmed, s32 *result);
 void func_800227ec(void);
 void func_800252f4(s32 page, s32 count, s32 selected, s32 flags);
-void func_80025f38(s16 *frame, MenuText *text);
-void func_8002636c(s16 *font, MenuText *text);
+void func_80025f38(MenuFont *frame, MenuText *text);
+void func_800261dc(MenuFont *font, MenuText *text);
+void func_8002636c(MenuFont *font, MenuText *text);
+void func_80026acc(s32 x, s32 y, s32 w, s32 h);
 void func_80026570(s32 x, s32 y, char *text, s32 a3, s32 a4);
 void func_80026fe4(void);
 void func_800270f8(void);
@@ -114,6 +166,10 @@ void func_8002b928(u8 spell);
 void func_8002ba38(u8 spell);
 void func_8002bb5c(u8 item);
 void func_80023300(void);
+void func_80024a78(u8 *levels);
+void func_800246bc(u8 *options);
+void func_80023fd4(u8 style, u8 layout, s32 row);
+void func_80025b24(MenuText *yes, MenuText *no, s32 choice);
 void func_80023ce8(s32 page);
 /* book table helpers past the menu (call-site signatures) */
 u16 func_80060a10(u8 book, u8 page);
@@ -142,8 +198,10 @@ void func_80027d88(s32 file, u16 entry);
 /* the TIM upload of the model/animation module (game/render.h on band B) */
 void func_80043b38(u8 *file);
 
-extern s16 DAT_8007e564[];
-extern s16 DAT_8007e5a0[];
+extern MenuFont DAT_8007e564[];
+/* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
+ * yes/no positions [10] and [11], message titles from [28]. */
+extern MenuText DAT_8007e660[];
 extern u16 DAT_80081868[];
 extern MenuEntry DAT_8007f620[];
 extern MenuEntry DAT_8007f230[10];
@@ -159,6 +217,13 @@ extern s32 DAT_8009c234;
 extern s32 DAT_8009c24c;
 extern s32 DAT_8009c250;
 extern s32 DAT_8009c254;
+extern s32 DAT_8009c248;
+extern s32 DAT_8009c268;
+extern s32 DAT_8009c26c;
+extern s32 DAT_8009c270;
+extern s32 DAT_8009c274;
+extern s32 DAT_8009c278;
+extern s32 DAT_8009c27c;
 extern s32 DAT_8009c258;
 extern s32 DAT_8009c25c;
 extern s32 DAT_8009c260;
@@ -167,5 +232,6 @@ extern s32 DAT_8009c260;
 extern POLY_FT4 *DAT_8009c374;
 extern u8 *DAT_8009c37c;
 extern u8 *DAT_8009c380;
+extern u8 DAT_8009c384;
 
 #endif

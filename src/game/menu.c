@@ -81,6 +81,8 @@ DATA(0x8009c37c, 0x4, ".sbss")
 u8 *DAT_8009c37c;
 DATA(0x8009c380, 0x4, ".sbss")
 u8 *DAT_8009c380;
+DATA(0x8009c384, 0x1, ".sbss")
+u8 DAT_8009c384;
 
 ADDRESS(0x8001a634, 0x140)
 void func_8001a634(void)
@@ -100,7 +102,7 @@ void func_8001a634(void)
     do {
         for (i = 0; i < 2; i++) {
             func_80026fe4();
-            func_80025f38(DAT_8007e5a0, &text);
+            func_80025f38(&DAT_8007e564[MENU_FONT_FRAME], &text);
             func_80026570(0x8c, 0x74, "pause", 1, 0);
             func_800270f8();
         }
@@ -206,7 +208,7 @@ void func_8001a9dc(void)
     text.y = 0xd2;
     func_800277c0(DAT_8018fad4.unk9 * 10000 + x * 100 + z,
                   6, 1, 0, text.text);
-    func_8002636c(DAT_8007e564, &text);
+    func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &text);
 }
 
 ADDRESS(0x8001aa84, 0x420)

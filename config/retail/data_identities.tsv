@@ -35,6 +35,7 @@ GAME.EXE	0x8009c27c	0x4	DAT_8009c27c	global	load	s32	func_8001f274	address-only	
 GAME.EXE	0x8009c374	0x4	DAT_8009c374	global	bss	POLY_FT4 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x160); the menu's current textured primitive (func_80027414 sets it)
 GAME.EXE	0x8009c37c	0x4	DAT_8009c37c	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x168); buffer of the picture being read from ITEM.T
 GAME.EXE	0x8009c380	0x4	DAT_8009c380	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x16c); read pointer into that buffer (the ready callback advances it)
+GAME.EXE	0x8009c384	0x1	DAT_8009c384	global	bss	u8	func_8001e710	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x170); nonzero while the menu sequence plays (save, options and menu entry pause/replay it)
 GAME.EXE	0x8009c3f8	0x4	DAT_8009c3f8	global	bss	s32	func_80014bd4	address-only	asm;src/game/main.c game.main	.sbss word ($gp+0x1e4); the game loop runs while it is 0; 2 returns to OPEN.EXE, 3 and 4 go to END.EXE with mailbox 2 or 3
 GAME.EXE	0x8009c3fc	0x4	DAT_8009c3fc	global	bss	u32	func_80017664	address-only	asm;src/game/scene.c game.scene	.sbss word ($gp+0x1e8): FDAT window base + 4, the loaded module's handler table; func_80018358 copies it to DAT_8018fad4.handlers
 GAME.EXE	0x8009f114	0x4	DAT_8009f114	global	bss	u32[]	func_80017664	address-only	asm;band C relocs	table func_80017664 copies out of the first FDAT.T entry; WIP extent
