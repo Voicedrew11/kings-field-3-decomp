@@ -54,7 +54,12 @@ s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
     return 0;
 }
 
-/* Hit by the current record: the player (kind 0x80) or the Object88 record of unk12028 (0x10). */
+/*
+ * Hit by the current record: the player (kind 0x80) or the Object88 record
+ * of unk12028 (0x10). K&R definition: func_800536f8 passes a3 unmasked, so
+ * the narrow parameters arrive as int. Not exact: retail spills a3 with sw
+ * and reads it back with lhu; this source spills it with sh.
+ */
 ADDRESS(0x800533e8, 0x23c)
 void func_800533e8(flags, kind, rec, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, target)
 s32 flags;
