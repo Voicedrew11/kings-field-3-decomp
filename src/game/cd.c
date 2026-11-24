@@ -39,7 +39,6 @@ CdState DAT_801c12e4;
 
 void func_80019570(void);
 void func_800196e8(void);
-void func_80019848(void);
 void func_800198d0(void);
 s32 func_800198d8(u8 bcd);
 s32 func_800198f8(u8 value);

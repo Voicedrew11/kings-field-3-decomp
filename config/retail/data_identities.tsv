@@ -45,11 +45,16 @@ GAME.EXE	0x8009c2d0	0x8	DAT_8009c2d0	global	load	RECT	func_8003daec	address-only
 GAME.EXE	0x8009c2e0	0x4	DAT_8009c2e0	global	load	CVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8	DAT_8009c2e4	global	load	SVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x4	DAT_8009c2ec	global	load	s32	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
-GAME.EXE	0x8009c374	0x4	DAT_8009c374	global	bss	POLY_FT4 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x160); the menu's current textured primitive (func_80027414 sets it)
-GAME.EXE	0x8009c378	0x4	DAT_8009c378	global	bss	POLY_FT4 *	func_800261dc	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x164); the menu text primitive (func_80027560 sets it)
-GAME.EXE	0x8009c37c	0x4	DAT_8009c37c	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x168); buffer of the picture being read from ITEM.T
-GAME.EXE	0x8009c380	0x4	DAT_8009c380	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x16c); read pointer into that buffer (the ready callback advances it)
-GAME.EXE	0x8009c384	0x1	DAT_8009c384	global	bss	u8	func_8001e710	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x170); nonzero while the menu sequence plays (save, options and menu entry pause/replay it)
+GAME.EXE	0x8009c374	0x4	DAT_8009c374	static	bss	POLY_FT4 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x160); the menu's current textured primitive (func_80027414 sets it)
+GAME.EXE	0x8009c378	0x4	DAT_8009c378	static	bss	SPRT *	func_800261dc	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x164); the menu text primitive (func_80027560 sets it)
+GAME.EXE	0x8009c37c	0x4	DAT_8009c37c	static	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x168); buffer of the picture being read from ITEM.T
+GAME.EXE	0x8009c380	0x4	DAT_8009c380	static	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x16c); read pointer into that buffer (the ready callback advances it)
+GAME.EXE	0x8009c384	0x1	DAT_8009c384	static	bss	u8	func_8001e710	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x170); nonzero while the menu sequence plays (save, options and menu entry pause/replay it)
+GAME.EXE	0x8009c388	0x4	DAT_8009c388	static	bss	u8 *	func_800270f8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x174); the screen copy the menu draws over: func_80027198 stores the screen there, the present loads it back each frame
+GAME.EXE	0x8009c38c	0x8	DAT_8009c38c	static	bss	RECT	func_800270f8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x178); where that copy goes in VRAM: the half being drawn, 320x240
+GAME.EXE	0x8009c394	0x8	DAT_8009c394	static	bss	SVECTOR	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x180); item preview translation (vz the distance, 1000 at load)
+GAME.EXE	0x8009c39c	0x8	DAT_8009c39c	static	bss	SVECTOR	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x188); item preview rotation, vy advanced by DAT_8009c3a4 each frame
+GAME.EXE	0x8009c3a4	0x4	DAT_8009c3a4	static	bss	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x190); item preview spin per frame (4 at load)
 GAME.EXE	0x8009c3a8	0x4	DAT_8009c3a8	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x194; card I/O end event
 GAME.EXE	0x8009c3ac	0x4	DAT_8009c3ac	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x198; card timeout event
 GAME.EXE	0x8009c3b0	0x4	DAT_8009c3b0	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x19c; new card event

@@ -106,6 +106,8 @@ void func_80019614(void);
 void func_8001967c(CdRequest *request);
 void func_80019a74(CdlLOC *pos, s32 offset, CdlLOC *out);
 void func_80019ab4(void);
+/* The CdReadyCallback that runs the request queue (the menu puts it back, func_80027c8c). */
+void func_80019848(void);
 void func_80019b1c(CdRequest *request);
 /* Word checksum of a sector read: nonzero when the last word disagrees. */
 s32 func_80019b68(u8 *buffer, s32 sectors);

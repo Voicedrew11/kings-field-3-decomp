@@ -126,7 +126,8 @@ typedef struct Data80199154 {
     u8 unk10024[0x44];
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
-    u8 unk10148[0x10];
+    u8 unk10148[0xc];
+    void *unk10154;                 /* +0x10154: a buffer the menu frees (func_80027b5c) */
     u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
     u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
                                      * resident, area banks from 256 + area * 32

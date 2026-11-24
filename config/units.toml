@@ -117,18 +117,6 @@ source = "src/game/menu.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
-unit = "game.menu_warp"
-image = "GAME.EXE"
-source = "src/game/menu_warp.c"
-profile = "gcc260-o2-g8"
-
-[[unit]]
-unit = "game.menu_pages"
-image = "GAME.EXE"
-source = "src/game/menu_pages.c"
-profile = "gcc260-o2-g8"
-
-[[unit]]
 unit = "game.card"
 image = "GAME.EXE"
 source = "src/game/card.c"

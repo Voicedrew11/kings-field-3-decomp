@@ -42,7 +42,7 @@ typedef struct Data801b24e4 {
     s16 unk3e;
     u16 unk40;      /* +0x40: 0..999 */
     u16 unk42[5];   /* +0x42: 0..999 each */
-    s16 unk4c;
+    u16 unk4c;      /* +0x4c: the menu shows it plus one (func_800227ec, lhu) */
     u8 unk4e[0x2];
     s32 unk50;
     u16 unk54[7];   /* +0x54: func_80029500 rebuilds them; never above 0x7fff */

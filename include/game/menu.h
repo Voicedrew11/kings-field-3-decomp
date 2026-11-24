@@ -134,6 +134,15 @@ void func_8002008c(void);
 void func_800203c8(s32 number);
 s32 func_80020560(void);
 void func_80020fe8(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
+void func_80021114(s32 shop);
+void func_80021298(s32 shop);
+void func_800216a4(u8 *bag, u8 *counts, u32 *prices, u8 *ids, s32 first, s32 end, s32 shop);
+void func_80021724(s32 shop);
+void func_80021a4c(u32 *prices, u8 *ids, s32 first, s32 end, s32 shop);
+s32 func_80021aac(void);
+s32 func_80021d94(void);
+s32 func_8002200c(s32 mode);
+void func_80025e80(void);
 s32 func_800221e8(s32 selected, s32 last, s32 *chosen, s32 *confirmed, s32 *result);
 void func_800227ec(void);
 void func_800252f4(s32 page, s32 count, s32 selected, s32 flags);
@@ -177,9 +186,21 @@ void func_80027494(s16 x, s16 y, s16 w, s16 h, s16 u, s16 v, s16 uw, s16 vh);
 void func_80027530(s32 depth);
 void func_800269c0(s32 x, s32 y, s32 value);
 void func_80026e4c(s32 x, s32 y, s32 w, s32 h);
+void func_80025db8(s32 big);
+void func_80026794(MenuText *text, s32 shadow);
 void func_80027a70(void);
 void func_800279d8(void);
-void func_80027d88(s32 file, u16 entry);
+s32 func_80027d88(u16 file, u16 entry);
+void func_80027ea8(u8 status, u8 *data);
+void func_80027560(void);
+void func_800275e0(s32 depth);
+void func_80027610(s32 depth, s16 tpage);
+void func_80027ac0(void);
+/* model code past the menu (call-site signatures) */
+void func_80035c44(s32 kind, u8 *data);
+void func_8004290c(void);
+void func_80026020(MenuFont *font, MenuText *text, s32 shade);
+void func_80026158(MenuFont *font, MenuText *text);
 
 extern MenuFont DAT_8007e564[];
 /* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
@@ -192,7 +213,20 @@ extern MenuEntry DAT_80080430[];
 /* The bag: counts by item id, then the storage counts at [150 + id]. */
 extern u8 DAT_800c85e8[300];
 extern u8 DAT_80081780[];
+/* Shop stock counts per shop and item id, buy prices and sell prices. */
+extern u8 DAT_80080718[6][150];
+extern u16 DAT_80080a9c[6][150];
+extern u16 DAT_800811a4[5][150];
 extern MapRect DAT_801ba6fc[160];
+
+/*
+ * The two per-frame packet pools at DAT_80199154 + 4 (render.h names their words
+ * heap, pool0 and image; func_80026fe4 picks pools[frame]). The menu saves both
+ * while it is open and restores them when it closes.
+ */
+#define FRAME_POOLS ((PrimPool *)&DAT_80199154.heap)
+extern PrimPool DAT_8009c404;
+extern PrimPool DAT_8009c410;
 
 /* menu .sdata */
 extern u8 DAT_8009c22c;
@@ -211,11 +245,14 @@ extern s32 DAT_8009c27c;
 extern s32 DAT_8009c258;
 extern s32 DAT_8009c25c;
 extern s32 DAT_8009c260;
+extern s32 DAT_8009c238;
+extern s32 DAT_8009c23c;
+extern s32 DAT_8009c240;
+extern s32 DAT_8009c244;
+extern s32 DAT_8009c264;
+extern s32 DAT_8009c274;
+extern s32 DAT_8009c278;
 
-/* menu .sbss */
-extern POLY_FT4 *DAT_8009c374;
-extern u8 *DAT_8009c37c;
-extern u8 *DAT_8009c380;
-extern u8 DAT_8009c384;
+/* The menu .sbss words (0x8009c374..0x8009c3a7) are statics of menu.c. */
 
 #endif
