@@ -49,7 +49,8 @@ void func_8002bdc0(u8 id);
 void func_8002c040(s32 hand);
 struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
-/* Pad bit per action (WIP), defined in player.c. */
+/* Pad bit per action (WIP), defined in player.c; [7] toggles a setting in
+ * Data801b24e4.unk178 (func_80043bb8). */
 extern u16 DAT_80081868[14];
 
 /*
@@ -95,9 +96,5 @@ void func_80030e14(void);
 /* Callees outside the module (no definition reconstructed yet). */
 void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id);
 void func_8005e2d0(VECTOR *pos, SVECTOR *angle);
-
-/* Pad button bits by action (owned by the player module); [7] toggles a
- * setting in Data801b24e4.unk178 (func_80043bb8). */
-extern u16 DAT_80081868[];
 
 #endif

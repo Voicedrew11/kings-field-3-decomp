@@ -191,8 +191,6 @@ void func_80027560(void);
 void func_800275e0(s32 depth);
 void func_80027610(s32 depth, s16 tpage);
 void func_80027ac0(void);
-/* model code past the menu (call-site signatures) */
-void func_8004290c(void);
 void func_80026020(MenuFont *font, MenuText *text, s32 shade);
 void func_80026158(MenuFont *font, MenuText *text);
 
@@ -237,8 +235,6 @@ extern s32 DAT_8009c23c;
 extern s32 DAT_8009c240;
 extern s32 DAT_8009c244;
 extern s32 DAT_8009c264;
-extern s32 DAT_8009c274;
-extern s32 DAT_8009c278;
 
 /* The menu .sbss words (0x8009c374..0x8009c3a7) are statics of menu.c. */
 

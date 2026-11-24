@@ -9,6 +9,7 @@
 #include <psyq/sdk.h>
 #include <game/data.h>
 #include <game/render.h>
+#include <INLINE.H>
 
 /* Brightness the 3D overlays share with the status sprites (.sdata). */
 DATA(0x8009c2e0, 0x4, ".sdata")
@@ -215,15 +216,15 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
                         DAT_800819b4[29].visible = (DAT_801b24e4.unkf9 & 2) >> 1;
     i = DAT_801b24e4.unkfa - 1;
     if (i >= 0) {
-        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].unk1a, DAT_80199154.unk15b08.vy);
+        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].angle.vy, DAT_80199154.unk15b08.vy);
         if (DAT_8009c2ec > 0) {
             DAT_8009c2ec -= (DAT_8009c2ec + 7) >> 3;
         } else if (DAT_8009c2ec < 0) {
             DAT_8009c2ec -= (DAT_8009c2ec - 7) >> 3;
         }
-        DAT_80081c20[i == 0].unk1a = DAT_80081c20[i].unk1a =
-            DAT_80081c20[i].unk1a + (DAT_8009c2ec >> 6);
-        DAT_80081c20[i == 0].unk18 = DAT_80081c20[i].unk18 = DAT_80199154.unk15b08.vx;
+        DAT_80081c20[i == 0].angle.vy = DAT_80081c20[i].angle.vy =
+            DAT_80081c20[i].angle.vy + (DAT_8009c2ec >> 6);
+        DAT_80081c20[i == 0].angle.vx = DAT_80081c20[i].angle.vx = DAT_80199154.unk15b08.vx;
     }
     if (DAT_801b24e4.unkf9 == 1) {
         DAT_800819b4[4].unka = DAT_800819b4[4].w = DAT_801b24e4.hp * 48 / DAT_801b24e4.hp_max;
@@ -262,4 +263,68 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
     func_80035700();
     func_80019614();
     func_80043940();
+}
+
+/*
+ * Draws model 3 (the menu's item model) with the matrices the caller set:
+ * projects its vertices into Data80199154.screen with a depth-cue value from
+ * the fog range, then draws part 0 at depth offset 100.
+ * Not exact: retail stores the CLUT offset between SCRATCH->screen and
+ * SCRATCH->end; every statement order tried schedules it earlier.
+ */
+ADDRESS(0x8004290c, 0x264)
+void func_8004290c(void)
+{
+    ScratchPad *scratch;
+    u8 *model;
+    u8 *vertex;
+    ScreenVertex *screen;
+    s32 i;
+    s32 offset;
+
+    scratch = SCRATCH;
+    gte_SetBackColor(60, 60, 60);
+    SetGeomScreen(200);
+    model = DAT_80199154.unk10148[3];
+    SCRATCH->model = model;
+    SCRATCH->part = ((ModelData *)model)->parts;
+    offset = SCRATCH->part->vertices + 12;
+    SCRATCH->vertices = (u8 *)(offset + (s32)model);
+    func_80035358(20000, 24000);
+    SCRATCH->ot = DAT_80199154.ot;
+    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
+    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
+    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
+    SCRATCH->next = DAT_80199154.pool->next;
+    SCRATCH->draw.count.clut = 0;
+    SCRATCH->end = DAT_80199154.pool->end;
+    *(u32 *)&SCRATCH->rgb = *(u32 *)&DAT_8009c2e0;
+    SCRATCH->screen = DAT_80199154.screen;
+    i = ((ModelData *)SCRATCH->model)->parts[0].unk4;
+    vertex = SCRATCH->vertices;
+    screen = DAT_80199154.screen;
+    while (--i != -1) {
+        gte_ldv0(vertex);
+        gte_rtps();
+        gte_stsxy(&screen->sxy);
+        gte_stszotz(&screen->z);
+        if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
+            screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
+                          (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+        } else {
+            screen->fog = 0;
+        }
+        if (screen->fog >= 7952) {
+            screen->z = screen->fog = 0x1f0f;
+        }
+        if (screen->fog < 0) {
+            screen->fog = 0;
+        }
+        screen++;
+        vertex += 8;
+    }
+    func_80035ca4(0, 100);
+    DAT_80199154.pool->next = scratch->next;
+    DAT_80199154.unk159bc = scratch->draw.count.unk4;
+    DAT_80199154.ot_count = scratch->draw.count.ot_count;
 }

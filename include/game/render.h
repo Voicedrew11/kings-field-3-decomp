@@ -57,8 +57,9 @@ typedef struct ModelFile {
 /* A vertex set of a model's data block. */
 typedef struct ModelPart {
     s32 vertices;   /* offset from the block start, less 12 */
-    s32 unk4;
-    u8 unk8[8];
+    s32 unk4;       /* +0x04: vertex count */
+    s32 normals;    /* +0x08: offset of the normals from the block start, less 12 */
+    u8 unkc[4];
     s32 prims;      /* +0x10: offset of the primitives from the block start, less 12 */
     s32 prim_count; /* +0x14 */
     u8 unk18[4];
@@ -165,6 +166,13 @@ typedef struct ScrollRec {
     RECT unk10;         /* source */
 } ScrollRec;
 
+/* A vertex after gte_rtps: screen position, depth and depth-cue value. */
+typedef struct ScreenVertex {
+    DVECTOR sxy;        /* GTE SXY */
+    s16 z;              /* SZ / 4 (gte_stszotz writes z and fog as one word) */
+    s16 fog;            /* depth-cue interpolation, 0..0x1f0f */
+} ScreenVertex;
+
 typedef struct Data80199154 {
     u8 *buffer;                     /* +0x00000: 2D quads per frame; CD load buffer */
     PrimPool pools[2];              /* +0x00004: one per frame, carved from the heap
@@ -185,7 +193,9 @@ typedef struct Data80199154 {
                                      * from 556 + part * 32 (func_800290d8); WIP extent,
                                      * up to slots */
     AnimSlot slots[12];             /* +0x11a10 */
-    u8 unk11b00[0x1f44];
+    ScreenVertex screen[1000];      /* +0x11b00: projected vertices of the part being
+                                     * drawn (WIP extent) */
+    u8 unk13a40[4];
     SVECTOR pose[1000];             /* +0x13a44: the blended pose being drawn */
     u16 message_arg[8];             /* +0x15984: number shown with message 25 */
     u8 frame;                       /* +0x15994: index of draw[]/disp[] in use */
@@ -248,21 +258,59 @@ typedef union ScratchPhase {
     ScratchView view;
 } ScratchPhase;
 
+/* The head word of a model primitive record: len words follow it, code is the
+ * GPU primitive code (bit 1, semi-transparency, ignored when picking the kind). */
+typedef struct PrimTag {
+    u8 unk0;
+    u8 len;
+    u8 unk2;
+    u8 code;
+} PrimTag;
+
+/* Scratchpad words from +0x74 while a model is drawn: the frame counters,
+ * copied in and back by the model front ends (func_8004290c). */
+typedef struct ScratchCount {
+    s16 unk0;           /* +0x74 */
+    s16 unk2;           /* +0x76: func_8003e34c sets 100 */
+    s32 unk4;           /* +0x78: Data80199154.unk159bc; the renderers add each part's
+                         * primitive count */
+    s32 ot_count;       /* +0x7c */
+    s32 prim_count;     /* +0x80 */
+    u16 clut;           /* +0x84: added to each primitive's CLUT */
+    u8 unk12[0xe];
+} ScratchCount;
+
+typedef union ScratchDraw {
+    MATRIX transform;   /* map layer transform (func_8003bb04) */
+    ScratchCount count;
+} ScratchDraw;
+
 /*
  * The R3000 data cache used as scratchpad RAM at 0x1f800000 (a fixed
  * hardware address). The game keeps per-frame working pointers there.
  */
 typedef struct ScratchPad {
-    u8 unk0[0x10];
+    u8 unk0[8];
+    u32 *ot;            /* +0x08: Data80199154.ot while a model is drawn */
+    u8 unkc[4];
     u8 *model;          /* +0x10: data of the model being drawn */
-    u32 unk14;          /* +0x14: func_8003bb04 drops flag 4 within 10240 of unk18 */
-    u32 unk18;
-    u8 unk1c[8];
-    u8 *unk24;          /* +0x24: model data + 12 */
-    u8 unk28[0x24];
+    u8 *next;           /* +0x14: Data80199154.pool->next while a model is drawn;
+                         * func_8003bb04 drops flag 4 within 10240 of end */
+    u8 *end;            /* +0x18: pool->end */
+    PrimTag tag;        /* +0x1c: head word of the primitive record being drawn */
+    u32 *prim;          /* +0x20: the primitive record after its head word */
+    ModelPart *part;    /* +0x24: the part being drawn */
+    u8 *normals;        /* +0x28: the part's normals (records index them by byte offset) */
+    u8 unk2c[0x18];
+    ScreenVertex *screen; /* +0x44: the part's projected vertices */
+    ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too */
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
-    u8 unk50[0x24];
-    MATRIX unk74;       /* +0x74: map layer transform (func_8003bb04) */
+    u8 unk50[4];
+    VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
+    CVECTOR rgb;        /* +0x64: colour the models are lit with */
+    u8 unk68[8];
+    s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
+    ScratchDraw draw;   /* +0x74 */
     u8 unk94[0x6c];
     SVECTOR unk100;     /* +0x100: map layer position func_8003be34 hands func_8003bb04 */
     VECTOR unk108;      /* +0x108: origin of the map layer positions */
@@ -294,11 +342,16 @@ extern SpriteRec DAT_800819b4[31];
 
 /* A 3D overlay record (compass needles); the list ends with visible == 0xff. */
 typedef struct Data80081c20 {
-    u8 visible;
-    u8 unk1[0x17];
-    u16 unk18;
-    s16 unk1a;      /* angle, eased toward the viewer's heading */
-    u8 unk1c[8];
+    u8 visible;     /* 1 drawn (func_8003c35c) */
+    u8 anim;        /* +0x01 */
+    u8 light;       /* +0x02: light record (Data80199154.unk15da8) */
+    u8 unk3;
+    u16 model;      /* +0x04: model file id */
+    u16 time;       /* +0x06: animation time */
+    SVECTOR scale;  /* +0x08: ScaleMatrix factors */
+    SVECTOR pos;    /* +0x10: translation */
+    SVECTOR angle;  /* +0x18: vx follows the view pitch; vy eased toward the viewer's heading */
+    AnimSlot *slot; /* +0x20 */
 } Data80081c20;
 
 extern Data80081c20 DAT_80081c20[3];
@@ -341,6 +394,8 @@ void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which);
 void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which);
 void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step);
 
+void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
+                   s32 light_id, u16 depth);
 u16 func_80040568(u16 id);
 void func_800405e8(u16 id, u8 **out);
 void func_80040658(u8 *file);
@@ -358,6 +413,7 @@ void func_80041eec(s32 message, ...);
 void func_80041f8c(SpriteRec *sprite, u8 digit);
 void func_80041f9c(void);
 void func_800422b8(VECTOR *pos, SVECTOR *angle);
+void func_8004290c(void);
 
 void func_80042b70(u16 id);
 void func_80042ba8(u16 id, u8 *file);
@@ -401,17 +457,28 @@ void func_800357e8(VECTOR *pos, SVECTOR *angle);
 void func_8003591c(u8 *data);
 void func_80035c44(u16 id, u8 *data);
 void func_80035c84(u16 id, u8 *data);
+void func_80035ca4(u16 part, s32 depth);
 
 void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags);
 void func_8003be34(s32 x, s32 z, s32 flags);
 
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
+void func_800366a8(u16 part);
+void func_80037bec(u16 part, s32 depth, s32 mode);
+void func_80038844(u16 part, s32 depth, s32 shift, s32 dist);
+void func_80039428(u16 part, s16 depth, s32 shade);
 void func_80039d50(void);
 void func_8003ab04(void);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
+void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   s32 flags, s32 depth);
+void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   u8 flags, s32 depth);
 void func_80040ae4(void);
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80043b38(u8 *file);

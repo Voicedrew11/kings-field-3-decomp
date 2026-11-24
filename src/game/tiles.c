@@ -29,7 +29,7 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
     MATRIX *transform;
     ScratchPad *scratch;
 
-    transform = &SCRATCH->unk74;
+    transform = &SCRATCH->draw.transform;
     scratch = SCRATCH;
     turn = layer->unk2 & 3;
     light = &DAT_80199154.unk15da8[layer->unk4 & 0x3f];
@@ -41,7 +41,7 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
     gte_SetTransMatrix(&DAT_80199154.unk159f8);
     gte_ldv0(pos);
     gte_rt();
-    gte_stlvnl(SCRATCH->unk74.t);
+    gte_stlvnl(SCRATCH->draw.transform.t);
     gte_stflg(&flag);
     gte_SetRotMatrix(&DAT_80199154.unk15a38[turn]);
     gte_SetTransMatrix(transform);
@@ -50,16 +50,16 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
         part >= ((ModelData *)SCRATCH->model)->unk4 >> 1) {
         return;
     }
-    if (scratch->unk18 - 10240 < scratch->unk14) {
+    if (scratch->end - 10240 < scratch->next) {
         flags &= ~4;
     }
     if (flags & 4) {
-        scratch->unk24 = (u8 *)&((ModelData *)scratch->model)->parts[part];
-        scratch->vertices = *(s32 *)scratch->unk24 + 12 + scratch->model;
+        scratch->part = &((ModelData *)scratch->model)->parts[part];
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
         func_8003ab04();
     } else {
-        scratch->unk24 = (u8 *)&((ModelData *)scratch->model)->parts[part];
-        scratch->vertices = *(s32 *)scratch->unk24 + 12 + scratch->model;
+        scratch->part = &((ModelData *)scratch->model)->parts[part];
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
         func_80039d50();
     }
 }

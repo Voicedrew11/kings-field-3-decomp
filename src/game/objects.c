@@ -11,6 +11,93 @@
 #include <game/data.h>
 #include <game/render.h>
 #include <game/sound.h>
+#include <INLINE.H>
+#include <GTEMAC.H>
+
+/*
+ * Draws model file id (an object's model) turned by rotation and placed 100
+ * units down in view space: lit by light record light_id, posed by
+ * func_800431e8 (the base pose when no slot is free) and drawn by
+ * func_80039428 at depth offset depth.
+ * Not exact only in the read of DAT_8009c2e0: retail reads it $gp-relative,
+ * which ASPSX emits only for .sdata defined in the same file (hud.c).
+ */
+ADDRESS(0x800400ac, 0x4bc)
+void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
+                   s32 light_id, u16 depth)
+{
+    MATRIX m;
+    ScratchPad *scratch;
+    Record6c *light;
+    u8 *file;
+    u8 *model;
+    s32 i;
+    s32 offset;
+
+    m.t[0] = 0;
+    m.t[1] = 100;
+    m.t[2] = 0;
+    func_800166f4(rotation, &m);
+    scratch = SCRATCH;
+    gte_MulMatrix0(&DAT_80199154.unk159f8, &m, &m);
+    gte_SetRotMatrix(&m);
+    gte_SetTransMatrix(&m);
+    light = &DAT_80199154.unk15da8[light_id & 0x7f];
+    gte_SetColorMatrix(&light->unk50);
+    gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+    gte_SetLightMatrix(&light->unk0[0]);
+    file = DAT_80199154.models[id];
+    model = file + ((ModelFile *)file)->vertices;
+    SCRATCH->ot = DAT_80199154.ot;
+    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
+    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
+    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
+    SCRATCH->model = model;
+    SCRATCH->next = DAT_80199154.pool->next;
+    SCRATCH->end = DAT_80199154.pool->end;
+    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->draw.count.clut = 0;
+    *(u32 *)&SCRATCH->rgb = *(u32 *)&DAT_8009c2e0;
+    if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) == 0) {
+        u8 *vertex;
+        ScreenVertex *screen;
+
+        SCRATCH->part = ((ModelData *)SCRATCH->model)->parts;
+        offset = SCRATCH->part->vertices + 12;
+        vertex = SCRATCH->vertices = (u8 *)(offset + (u32)SCRATCH->model);
+        screen = SCRATCH->screen;
+        i = ((ModelData *)model)->parts[0].unk4;
+        while (--i != -1) {
+            gte_ldv0(vertex);
+            gte_rtps();
+            gte_stsxy(&screen->sxy);
+            gte_stszotz(&screen->z);
+            screen->fog = 0;
+            screen++;
+            vertex += 8;
+        }
+    } else {
+        u8 *vertex;
+        ScreenVertex *screen;
+
+        i = ((ModelData *)model)->parts[0].unk4;
+        screen = SCRATCH->screen;
+        vertex = SCRATCH->vertices;
+        while (--i != -1) {
+            gte_ldv0(vertex);
+            gte_rtps();
+            gte_stsxy(&screen->sxy);
+            gte_stszotz(&screen->z);
+            screen->fog = 0;
+            screen++;
+            vertex += 8;
+        }
+    }
+    func_80039428(0, depth, shade);
+    DAT_80199154.pool->next = scratch->next;
+    DAT_80199154.unk159bc = scratch->draw.count.unk4;
+    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+}
 
 ADDRESS(0x80040568, 0x80)
 u16 func_80040568(u16 id)
