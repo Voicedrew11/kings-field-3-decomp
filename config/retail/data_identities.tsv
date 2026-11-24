@@ -7,8 +7,40 @@ PSX.EXE	0x8001024c	0xc	program_paths	static	load	char *[3]	main	supported	asm;sr
 PSX.EXE	0x80010260	0x4	program_index	global	load	int	main	supported	asm;src/psx/main.c psx.main exact	$gp+0; the program to load next, read back from the next-program byte
 PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800102f0
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
-END.EXE	0x80037498	0x4	movie_unused_0	static	bss	int		supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+0; never referenced (could equally be end.main .sbss)
-END.EXE	0x8003749c	0x4	movie_unused_1	static	bss	int		supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+4; never referenced (could equally be end.main .sbss)
+OPEN.EXE	0x8002c1bc	0xd	save_prefix	static	load	char[13]	card_list_saves	supported	asm;src/open/card.c open.card	.data; first .data of the image; BASLUS-00255
+OPEN.EXE	0x800403f4	0x4	next_program	global	load	u8 *	main	supported	asm;src/open/main.c open.main	.sdata; $gp+0; points at PSX.EXE next-program byte 0x800102f0
+OPEN.EXE	0x800403f8	0x4	logo_level	global	load	int	draw_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+4; logo brightness
+OPEN.EXE	0x800403fc	0x4	logo_state	global	load	int	draw_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+8; 0 fading in, else holding
+OPEN.EXE	0x80040400	0x4	press_level	global	load	int	draw_press_start	supported	asm;src/open/main.c open.main	.sdata; $gp+12
+OPEN.EXE	0x80040404	0x4	press_state	global	load	int	draw_press_start	supported	asm;src/open/main.c open.main	.sdata; $gp+16
+OPEN.EXE	0x80040408	0x4	menu_level	global	load	int	draw_menu	supported	asm;src/open/main.c open.main	.sdata; $gp+20
+OPEN.EXE	0x8004040c	0x4	menu_state	global	load	int	draw_menu	supported	asm;src/open/main.c open.main	.sdata; $gp+24
+OPEN.EXE	0x80040410	0x4	old_pad	global	load	u_long	read_menu_pad	supported	asm;src/open/main.c open.main	.sdata; $gp+28; last PadRead(1) for edge detection
+OPEN.EXE	0x80040420	0x4	movie_unused_0	global	load	int		supported	asm;src/open/movie.c open.movie	.sdata; $gp+44; never referenced
+OPEN.EXE	0x80040424	0x4	movie_unused_1	global	load	int		supported	asm;src/open/movie.c open.movie	.sdata; $gp+48; never referenced
+OPEN.EXE	0x80040434	0x4	frame_no	static	bss	int	strNext	supported	asm;src/open/movie.c open.movie	.sbss fixed; $gp+64; frameCount of the last frame header
+OPEN.EXE	0x80040438	0x4	ev0	static	bss	long	card_init	supported	asm;src/open/card.c open.card	.sbss fixed; $gp+68; card I/O end event
+OPEN.EXE	0x8004043c	0x4	ev1	static	bss	long	card_init	supported	asm;src/open/card.c open.card	.sbss fixed; $gp+72; card timeout event
+OPEN.EXE	0x80040440	0x4	ev2	static	bss	long	card_init	supported	asm;src/open/card.c open.card	.sbss fixed; $gp+76; new card event
+OPEN.EXE	0x80040444	0x4	ev3	static	bss	long	card_init	supported	asm;src/open/card.c open.card	.sbss fixed; $gp+80; card error event
+OPEN.EXE	0x80040448	0x4	ev10	static	bss	long		supported	asm;src/open/card.c open.card	.sbss fixed; $gp+84; Sony card sample hardware-event handle, never referenced
+OPEN.EXE	0x8004044c	0x4	ev11	static	bss	long		supported	asm;src/open/card.c open.card	.sbss fixed; $gp+88; never referenced
+OPEN.EXE	0x80040450	0x4	ev12	static	bss	long		supported	asm;src/open/card.c open.card	.sbss fixed; $gp+92; never referenced
+OPEN.EXE	0x80040454	0x4	ev13	static	bss	long		supported	asm;src/open/card.c open.card	.sbss fixed; $gp+96; never referenced; MALLOC.OBJ .sbss follows
+OPEN.EXE	0x80040488	0x2	vab_id	global	bss	short	load_title_assets	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+148; WIP spelling inside the retail bucket order
+OPEN.EXE	0x8004048c	0x4	vh_addr	global	bss	u_char *	load_title_assets	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+152; OP.D sound bank header; WIP spelling inside the retail bucket order
+OPEN.EXE	0x80040490	0x4	cdb	global	bss	DB *	swap_buffers	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+156; the display buffer being drawn
+OPEN.EXE	0x80040494	0x4	data_buf	global	bss	u_long *	load_title_data	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+160; malloc'd OP.D; WIP spelling inside the retail bucket order
+OPEN.EXE	0x80040498	0x1	fade	global	bss	u_char	add_sprite	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+164; amount add_sprite darkens each sprite; WIP spelling inside the retail bucket order
+OPEN.EXE	0x8004049c	0x4	prim_next	global	bss	POLY_FT4 *	add_sprite	supported	asm;src/open/main.c open.main	.sbss COMMON; $gp+168; next free sprite, reset per frame
+OPEN.EXE	0x800404a0	0x50000	vlc_buffer	static	bss	u_long[2][0xa000]	strSetDefDecEnv	supported	asm;src/open/movie.c open.movie	.bss fixed, first; the two VLC buffers
+OPEN.EXE	0x800904a0	0x3c00	image_buffer	static	bss	u_long[2][0x780]	strSetDefDecEnv	supported	asm;src/open/movie.c open.movie	.bss fixed; DecDCTout slice buffer
+OPEN.EXE	0x800940a0	0x10000	ring_buffer	static	bss	u_long[0x4000]	strInit	supported	asm;src/open/movie.c open.movie	.bss fixed; StSetRing buffer (32 sectors)
+OPEN.EXE	0x800a40a0	0x30	dec	static	bss	DECENV	strCallback	supported	asm;src/open/movie.c open.movie	.bss fixed; movie decode environment; LIBGPU statics follow
+OPEN.EXE	0x800a6f00	0x8e8	db	global	bss	DB[2]	init_graphics	supported	asm;src/open/main.c open.main	.bss COMMON; the two display buffers
+OPEN.EXE	0x800a7804	0x2000	prim_buffer	global	bss	u_long[2][0x400]	init_graphics	supported	asm;src/open/main.c open.main	.bss COMMON; primitive area of each display buffer
+END.EXE	0x80037498	0x4	movie_unused_0	global	load	int		supported	asm;src/end/movie.c end.movie	.sdata; $gp+0; never referenced (OPEN's player has the same pair)
+END.EXE	0x8003749c	0x4	movie_unused_1	global	load	int		supported	asm;src/end/movie.c end.movie	.sdata; $gp+4; never referenced
 END.EXE	0x800374a0	0x4	frame_no	static	bss	int	strNext	supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+8; frameCount of the last frame header
 END.EXE	0x800374d4	0x4	cdb	global	bss	DB *	swap_buffers	supported	asm;src/end/main.c end.main	.sbss COMMON; $gp+60; the display buffer being drawn
 END.EXE	0x800374d8	0x4	prim_next	global	bss	u_long *	swap_buffers	supported	asm;src/end/main.c end.main	.sbss COMMON; $gp+64; next free primitive word, reset per frame

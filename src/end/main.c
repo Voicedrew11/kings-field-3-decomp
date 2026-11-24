@@ -9,6 +9,7 @@
 #include <psyq/sdk.h>
 #include <psyq/audio.h>
 #include <psyq/kernel.h>
+#include <psyq/libc.h>
 #include "end.h"
 
 /*

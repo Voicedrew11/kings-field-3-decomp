@@ -49,3 +49,21 @@ unit = "end.movie"
 image = "END.EXE"
 source = "src/end/movie.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "open.main"
+image = "OPEN.EXE"
+source = "src/open/main.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "open.movie"
+image = "OPEN.EXE"
+source = "src/open/movie.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "open.card"
+image = "OPEN.EXE"
+source = "src/open/card.c"
+profile = "gcc260-o2-g8"

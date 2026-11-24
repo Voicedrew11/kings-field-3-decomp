@@ -28,14 +28,19 @@ static void strKickCD(CdlLOC *loc);
 RODATA(0x80011000, 0x48)
 
 /*
- * Fixed small and large statics: they start .sbss and .bss, ahead of the
- * MALLOC.OBJ and SDK statics and of every COMMON request. Nothing reads
- * or writes the first two words.
+ * Nothing reads or writes these two words. They are the image's whole
+ * .sdata ($gp+0): OPEN.EXE's copy of this player has the same pair in its
+ * .sdata, between the main unit's data and the card unit's literals.
  */
-DATA(0x80037498, 0x4, ".sbss")
-static int movie_unused_0;
-DATA(0x8003749c, 0x4, ".sbss")
-static int movie_unused_1;
+DATA(0x80037498, 0x4, ".sdata")
+int movie_unused_0 = 0;
+DATA(0x8003749c, 0x4, ".sdata")
+int movie_unused_1 = 0;
+
+/*
+ * Fixed statics: they start .sbss and .bss, ahead of the MALLOC.OBJ and SDK
+ * statics and of every COMMON request.
+ */
 DATA(0x800374a0, 0x4, ".sbss")
 static int frame_no;
 

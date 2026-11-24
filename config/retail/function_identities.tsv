@@ -597,40 +597,40 @@ GAME.EXE	0x80061894	func_80061894			unknown		address-only	candidate	mips-live-in
 GAME.EXE	0x80061918	func_80061918			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 GAME.EXE	0x80061940	func_80061940			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 GAME.EXE	0x80061bc4	func_80061bc4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80011e14	func_80011e14			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800123cc	func_800123cc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80012494	func_80012494			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80012500	func_80012500			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80012644	func_80012644			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800126ac	func_800126ac			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x8001273c	func_8001273c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x8001279c	func_8001279c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80012b0c	func_80012b0c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80012ea0	func_80012ea0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800131ac	func_800131ac			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800132f4	func_800132f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x8001333c	func_8001333c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800133c8	func_800133c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013418	func_80013418			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013464	func_80013464			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800135bc	func_800135bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x8001362c	func_8001362c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800136d8	func_800136d8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013b6c	func_80013b6c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013c94	func_80013c94			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013d04	func_80013d04			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013e28	func_80013e28			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013ebc	func_80013ebc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013f50	func_80013f50			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80013fc8	func_80013fc8			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80014014	func_80014014			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800140d4	func_800140d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80014124	func_80014124			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x8001414c	func_8001414c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80014174	func_80014174			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80014264	func_80014264			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x80014438	func_80014438			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-OPEN.EXE	0x800144ac	func_800144ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80011e14	main			int		supported	proven	asm;called by NONE2.OBJ __SN_ENTRY_POINT	logo and attract movies, title screen, NEW GAME/CONTINUE choice to 0x800102fa, PSX next-program 1
+OPEN.EXE	0x800123cc	fade_out_title			void	int selection	supported	proven	asm;called by main	fades the title and its music out over 48 frames, pauses the CD
+OPEN.EXE	0x80012494	load_title_data			void		supported	proven	asm;called once by main	mallocs 0x32000 bytes and reads \OP\OP.D into them, retrying until it succeeds
+OPEN.EXE	0x80012500	init_graphics			void		supported	proven	asm;called once by main	ResetGraph, geometry and the two 640x240 display buffers
+OPEN.EXE	0x80012644	init_sound			void		supported	proven	asm;called once by main	SsInit, no tick, hall reverb, SsStart2, serial A on
+OPEN.EXE	0x800126ac	load_title_assets			void		supported	proven	asm;called once by main	loads OP.D's TIMs and transfers its sound bank
+OPEN.EXE	0x8001273c	start_title_music			void		supported	proven	asm;called by main	streams \OP\M2.S as XA audio
+OPEN.EXE	0x8001279c	draw_logo			int	int mode	supported	proven	asm;title sprite family	title picture and logo halves; mode 0 fades in, 1 holds, 2 resets; 1 when faded in
+OPEN.EXE	0x80012b0c	draw_press_start			int	int mode	supported	proven	asm;title sprite family	PRESS START BUTTON sprites; same modes as draw_logo
+OPEN.EXE	0x80012ea0	draw_menu			int	int mode	supported	proven	asm;title sprite family	NEW GAME / CONTINUE sprites; mode 0/1 selects, 2 both, 3 resets, 4 dims
+OPEN.EXE	0x800131ac	read_menu_pad			int	int *selection;int saves	supported	proven	asm;called by main	1 on a new circle/cross/START press; up/down toggle the choice when a save exists
+OPEN.EXE	0x800132f4	begin_sprite			void		supported	proven	asm;title sprite family	SetPolyFT4 on prim_next, grey 96
+OPEN.EXE	0x8001333c	add_sprite			void	int depth	supported	proven	asm;title sprite family	applies the fade, AddPrim into cdb's table, prim_next++
+OPEN.EXE	0x800133c8	swap_buffers			void		supported	proven	asm;called per frame	toggles cdb, ClearOTagR, clears the fade, resets prim_next
+OPEN.EXE	0x80013418	flip_buffers			void		supported	proven	asm;called per frame	DrawSync, VSync(2), puts cdb's environments, DrawOTag from the table end
+OPEN.EXE	0x80013464	load_file			int	u_long *addr;char *name	supported	proven	asm;called by load_title_data	reads \OP\<name>;1 sector by sector with CdReady/CdGetSector; 0 read, 1 absent, 3 error
+OPEN.EXE	0x800135bc	load_tims			void	u_long *addr	supported	proven	asm;called by load_title_assets	OpenTIM/ReadTIM loop loading each CLUT and image
+OPEN.EXE	0x8001362c	play_sound			void	short vab;short prog;short tone;short note;short voll;short volr	supported	proven	asm;called by read_menu_pad	SsUtKeyOn then SsSeqCalledTbyT when any of prog/tone/note is set
+OPEN.EXE	0x800136d8	play_movie			int	int movie	supported	proven	asm;called by main with 0..4	plays an opening movie; 0 ran out, 1 START, 2 another button
+OPEN.EXE	0x80013b6c	strSetDefDecEnv			void	int movie	supported	proven	asm;Sony movie sample shape (as END)	sets the global DECENV's buffers and areas; movie 0 is letterboxed
+OPEN.EXE	0x80013c94	strInit			void	CdlLOC *loc	supported	proven	asm;Sony movie sample shape (as END)	DecDCTReset, output callback, ring buffer, StSetStream, strKickCD
+OPEN.EXE	0x80013d04	strCallback			void		supported	proven	asm;DecDCToutCallback target set by strInit	loads one decoded slice, starts the next or flips the frame area
+OPEN.EXE	0x80013e28	strNextVlc			int		supported	proven	asm;Sony movie sample shape (as END)	waits for the next frame and VLC-decodes it; -1 on timeout
+OPEN.EXE	0x80013ebc	strNext			u_long *	DECENV *dec	supported	proven	asm;Sony movie sample shape (as END)	next ring frame whose header matches its sector; records frame_no
+OPEN.EXE	0x80013f50	strSync			void	DECENV *dec	supported	proven	asm;Sony movie sample shape (as END)	waits until the decoded frame is fully loaded (timeout flips anyway)
+OPEN.EXE	0x80013fc8	strKickCD			void	CdlLOC *loc	supported	proven	asm;Sony movie sample shape (as END)	CdlSeekL then CdRead2 in stream mode, each retried until accepted
+OPEN.EXE	0x80014014	card_init			void		supported	proven	asm;called once by main	InitCARD and four enabled BIOS card events
+OPEN.EXE	0x800140d4	card_close			void		supported	proven	asm;called once by main	closes the card events, StopCARD
+OPEN.EXE	0x80014124	card_start			void		supported	proven	asm;called by main	StartCARD, _bu_init
+OPEN.EXE	0x8001414c	card_stop			void		supported	proven	asm;called by main	StopCARD, PadInit(0)
+OPEN.EXE	0x80014174	card_check			int		supported	proven	asm;called by main	creates and deletes a TEMP file on bu00; 0 usable, 2 not, 1/3 timeout/error
+OPEN.EXE	0x80014264	card_list_saves			int	struct DIRENTRY *dir;int *count	supported	proven	asm;called by main	counts BASLUS-00255 saves on bu00 and sorts them by number
+OPEN.EXE	0x80014438	card_wait_event			int		supported	proven	asm;called by card_check	polls the four card events; returns which fired
+OPEN.EXE	0x800144ac	card_clear_events			void		supported	proven	asm;called by card_check	TestEvent on each card event to clear it
 END.EXE	0x800119b8	main			int		supported	proven	asm;called by NONE2.OBJ __SN_ENTRY_POINT	sets up display and sound, plays the closing movies, sets PSX next-program 0 and stops
 END.EXE	0x80011ae0	init_graphics			void		supported	proven	asm;called once by main	ResetGraph, geometry and the two display buffers
 END.EXE	0x80011c24	init_sound			void		supported	proven	asm;called once by main	SsInit, master volume 0, serial A mix on
