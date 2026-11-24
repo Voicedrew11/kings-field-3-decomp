@@ -583,11 +583,6 @@ void func_800171b0(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
     }
 }
 
-/*
- * Not exact: control flow, calls and constants agree; distance and height
- * trade callee-saved registers ($s2/$s3) and the root/b temporaries trade
- * $a0/$v0/$v1 (unattributed allocation residue).
- */
 ADDRESS(0x80017210, 0x28c)
 s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s32 *time,
                   s32 *angle)
@@ -595,40 +590,42 @@ s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s3
     s32 speed2 = speed * speed;
     s32 gravity2 = gravity * gravity;
     s32 v = speed2 >> 6;
-    s32 discriminant = v * v - (gravity2 * distance >> 10) * (distance >> 2)
-                     - (gravity * v >> 3) * (height >> 2);
-    s32 root;
+    s32 discriminant = v * v - ((gravity2 * distance >> 10) * (distance >> 2))
+                     - ((gravity * v >> 3) * (height >> 2));
     s32 b;
     s32 t1;
     s32 t2;
     s32 t;
     s32 sqrt_t;
+    s32 across;
+    s32 up;
 
     if (discriminant < 0) {
         return -1;
     }
-    root = SquareRoot0(discriminant << 4) << 2;
+    discriminant = SquareRoot0(discriminant << 4) << 2;
     b = (speed2 >> 2) - (height * gravity >> 2);
-    t1 = ((b + root) << 1) / gravity2;
-    t2 = ((b - root) << 1) / gravity2;
+    t1 = ((b + discriminant) << 1) / gravity2;
+    t2 = ((b - discriminant) << 1) / gravity2;
     if (t1 <= 0 && t2 <= 0) {
         return -1;
     }
     if (high == 0) {
         t = t2;
-        if (t1 > 0 && t2 >= t1) {
+        if (t1 > 0 && t1 <= t2) {
             t = t1;
         }
     } else {
         t = t2;
-        if (t1 >= t2) {
+        if (t2 <= t1) {
             t = t1;
         }
     }
     sqrt_t = SquareRoot0(t << 14);
+    across = ((distance << 14) / speed) / sqrt_t;
+    up = (((height + ((gravity * t) << 1)) << 12) / (speed >> 1)) / (sqrt_t >> 1);
     *time = sqrt_t;
-    *angle = func_80016ab8(((height + (gravity * t << 1)) << 12) / (speed >> 1) / (sqrt_t >> 1),
-                           (distance << 14) / speed / sqrt_t);
+    *angle = func_80016ab8(up, across);
     return 0;
 }
 
