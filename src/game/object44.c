@@ -161,7 +161,11 @@ void func_80044b40(Object44 *obj, s32 mode, u8 value)
     MapLayer *layer;
 
     if (mode == 0 && DAT_801b24e4.unk90 == 0) {
-        cell = &DAT_801d4464.cells[obj->pos.vz >> 11][obj->pos.vx >> 11];
+        {
+            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+
+            cell = &row[obj->pos.vx >> 11];
+        }
         layer = cell->layer;
         if (obj->unk0 != 1) {
             layer++;
@@ -169,7 +173,11 @@ void func_80044b40(Object44 *obj, s32 mode, u8 value)
         layer->unk0 = value;
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
     } else {
-        cell = &DAT_801d4464.cells[obj->pos.vz >> 11][obj->pos.vx >> 11];
+        {
+            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+
+            cell = &row[obj->pos.vx >> 11];
+        }
         layer = cell->layer;
         if (obj->unk0 != 1) {
             layer++;
@@ -230,7 +238,6 @@ void func_80044d9c(Object44Place *place)
 {
     Object44 *obj;
     Object44Def *def;
-    MapLayer *layer;
     u32 radius;
     s32 i;
     u32 frames;
@@ -272,11 +279,15 @@ void func_80044d9c(Object44Place *place)
         }
         obj->pos.vx = (place->unk2 << 11) + place->unka;
         obj->pos.vz = (place->unk1 << 11) + place->unk8;
-        layer = DAT_801d4464.cells[place->unk1][place->unk2].layer;
-        if (obj->unk0 != 1) {
-            layer++;
+        {
+            MapCell *row = DAT_801d4464.cells[place->unk1];
+            MapLayer *layer = row[place->unk2].layer;
+
+            if (obj->unk0 != 1) {
+                layer++;
+            }
+            obj->pos.vy = place->unkc - (layer->unk1 << 7);
         }
-        obj->pos.vy = place->unkc - (layer->unk1 << 7);
         func_80018f5c((u32 *)&obj->arg.b.unk38, (u32 *)place->unk10, 2);
         func_80018fbc((u32 *)&obj->arg.w.unk40, 0xff, 1);
         radius = def->unk4;
@@ -570,11 +581,15 @@ void func_80044d9c(Object44Place *place)
             obj->unk10 = 0x1000;
             obj->unk2 = (obj->unk2 & 0xf8) | 5;
             obj->pos.vy += 256;
-            layer = DAT_801d4464.cells[obj->pos.vz >> 11][obj->pos.vx >> 11].layer;
-            if (obj->unk0 != 1) {
-                layer++;
+            {
+                MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+                MapLayer *layer = row[obj->pos.vx >> 11].layer;
+
+                if (obj->unk0 != 1) {
+                    layer++;
+                }
+                layer->unk3 = 0x75;
             }
-            layer->unk3 = 0x75;
             obj->arg.b.unk41[1] = obj->unk0;
             goto clear_area;
         case 15:
