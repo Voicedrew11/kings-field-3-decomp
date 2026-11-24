@@ -749,7 +749,7 @@ s32 func_8001c030(void)
             setRGB0(DAT_8009c374, n - 96, n - 96, n / 2 - 96);
             DAT_8009c374->tpage = 0x1e;
             DAT_8009c374->clut = 0x7d85;
-            func_80027494(selected % 4 * 56 + (xs[selected] * 4 / 5 + 40),
+            func_80027494(selected % 4 * 56 + 40 + xs[selected] * 4 / 5,
                           0xbc - selected / 4 * 56 - ys[selected] * 4 / 5, 16, 16, 0xa0, 0x80, 16, 16);
             func_80027530(0x1c);
             func_800269c0(0x5f, 0xd6, DAT_8009c254);
