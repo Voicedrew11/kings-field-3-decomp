@@ -339,10 +339,48 @@ typedef struct Object44Words {
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
 } Object44Words;
 
+/* Kinds func_80040ae4 draws with a model (0xf2 and the default kinds): pose slot first. */
+typedef struct Object44Model {
+    struct AnimSlot *unk34; /* +0x34: pose slot (func_800431e8) */
+    u8 unk38;       /* +0x38: kind 0xf2: x range in map cells it is drawn from */
+    u8 unk39;       /* +0x39: z range */
+    s16 unk3a;      /* +0x3a: kind 0xf2: x offset of the drawn position in map cells */
+    s16 unk3c;      /* +0x3c: z offset */
+    u8 unk3e;       /* +0x3e: height of the drawn position in map cells */
+    u8 unk3f[5];
+} Object44Model;
+
+/* Kind 0xf0, drawn in view space by func_800400ac. */
+typedef struct Object44View {
+    struct AnimSlot *unk34; /* +0x34: pose slot */
+    u8 unk38;       /* +0x38: x range in map cells it is drawn from */
+    u8 unk39;       /* +0x39: z range */
+    u8 unk3a;       /* +0x3a: depth below 0x1fff */
+    u8 unk3b;       /* +0x3b: light record */
+    u8 unk3c;       /* +0x3c: shade */
+    u8 unk3d[7];
+} Object44View;
+
+/* Kind 0x1f: a sound played by distance from the player. */
+typedef struct Object44Sound {
+    u8 unk34[4];
+    u8 unk38;       /* +0x38: half width (1024 units) */
+    u8 unk39;       /* +0x39: half depth */
+    u8 unk3a;       /* +0x3a: sound effect - 496 */
+    u8 unk3b;       /* +0x3b: volume */
+    u8 unk3c;       /* +0x3c: fade-in distance (2048 units) */
+    u8 unk3d;       /* +0x3d: bit 0 fades by height too */
+    u16 unk3e;      /* +0x3e: interval in 6-frame units */
+    s32 unk40;      /* +0x40: frame of the next play */
+} Object44Sound;
+
 typedef union Object44Arg {
     Object44Bytes b;
     Object44Halves h;
     Object44Words w;
+    Object44Model m;
+    Object44View v;
+    Object44Sound s;
 } Object44Arg;
 
 typedef struct Object44 {
@@ -357,7 +395,8 @@ typedef struct Object44 {
     u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
     u16 unkc;       /* +0x0c: reach below its position (collision tests) */
     s16 unke;
-    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
+    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; light
+                     * blend toward light2 (func_8003e34c) */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (func_8005bee0) */
@@ -401,14 +440,15 @@ typedef struct Object4c {
     u8 unkd;
     u16 unke;
     s16 unk10;
-    u16 unk12;
+    u16 unk12;      /* +0x12: light blend toward light2 (func_8003e34c) */
     u16 unk14;      /* +0x14: animation time */
     u8 unk16[2];
     VECTOR pos;     /* +0x18 */
     SVECTOR angle;  /* +0x28 */
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
-    u8 unk40[0xc];
+    struct AnimSlot *unk40; /* +0x40: pose slot (func_800431e8) */
+    u8 unk44[8];
 } Object4c;
 
 typedef struct Object88 {
@@ -432,8 +472,8 @@ typedef struct Object88 {
     u8 unk11;
     u8 unk12;
     u8 unk13;
-    u8 unk14;
-    u8 unk15;
+    u8 unk14;       /* +0x14: second light record (func_8003e34c light2) */
+    s8 unk15;       /* +0x15: depth offset (func_8003e34c) */
     s16 unk16;      /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
     u16 unk18;      /* +0x18: animation time */
     u16 unk1a;
@@ -447,14 +487,11 @@ typedef struct Object88 {
     VECTOR pos;     /* +0x2c */
     s32 unk3c;
     SVECTOR angle;  /* +0x40 */
-    s16 unk48;      /* +0x48: scale, 0x1000 = 1 */
-    s16 unk4a;
-    s16 unk4c;
-    u16 unk4e;
+    SVECTOR scale;  /* +0x48: 0x1000 = 1 */
     SVECTOR vel;    /* +0x50 */
     s16 unk58;
     u8 unk5a[2];
-    u32 unk5c;
+    struct AnimSlot *unk5c; /* +0x5c: pose slot (func_800431e8) */
     u8 *unk60;      /* +0x60: running script record */
     s16 unk64;      /* +0x64: FDAT slot 17 stores the angle to the player */
     s16 unk66;
@@ -581,11 +618,12 @@ typedef s32 (*FdatHandler)();
 
 /*
  * Area state func_80017664 and func_8001796c set up (WIP). Only the scene
- * module sees the step the CD callbacks set as volatile: the menu module's
- * accesses to the same object show none of that (a volatile member changes
- * how GCC 2.6 reaches every member of the aggregate; see game/cd.h).
+ * module and the render module (func_80040ae4 reads step lhu + sll) see the
+ * step the CD callbacks set as volatile: the menu module's accesses to the
+ * same object show none of that (a volatile member changes how GCC 2.6
+ * reaches every member of the aggregate; see game/cd.h).
  */
-#ifdef GAME_SCENE_MODULE
+#if defined(GAME_SCENE_MODULE) || defined(GAME_RENDER_MODULE)
 #define SCENE_STEP_SHARED volatile
 #else
 #define SCENE_STEP_SHARED
@@ -605,7 +643,10 @@ typedef struct Data8018fad4 {
     u8 unk17;       /* +0x17 */
     u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
-    u8 unk1c[0x4c];
+    u8 unk1c[4];
+    Object44 *unk20; /* +0x20: unk24 once a kind 0xf0 record was drawn, NULL when
+                      * the view hides them; drawn while an area loads */
+    Object44 unk24; /* +0x24: copy of the last kind 0xf0 record drawn */
 } Data8018fad4;
 
 typedef struct Data8018fb3c {

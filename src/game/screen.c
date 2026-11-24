@@ -651,7 +651,7 @@ void func_8003df50(void)
  */
 ADDRESS(0x8003e34c, 0xfb8)
 void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    s32 flags, s32 depth)
 {
     SVECTOR rel;
@@ -733,15 +733,15 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(func_80017158(light->unk68, other->unk68, (s16)t),
-                          func_80017158(light->unk6a, other->unk6a, (s16)t));
+            func_80035358(func_80017158(light->unk68, other->unk68, t),
+                          func_80017158(light->unk6a, other->unk6a, t));
         } else {
             func_80035358(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
-            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, (s16)t),
-                             func_80017158(light->unk64.g, other->unk64.g, (s16)t),
-                             func_80017158(light->unk64.b, other->unk64.b, (s16)t));
+            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, t),
+                             func_80017158(light->unk64.g, other->unk64.g, t),
+                             func_80017158(light->unk64.b, other->unk64.b, t));
         } else {
             gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         }
@@ -909,7 +909,7 @@ done:
  */
 ADDRESS(0x8003f304, 0xda8)
 void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    u8 flags, s32 depth)
 {
     SVECTOR rel;
@@ -999,15 +999,15 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(func_80017158(light->unk68, other->unk68, (s16)t),
-                          func_80017158(light->unk6a, other->unk6a, (s16)t));
+            func_80035358(func_80017158(light->unk68, other->unk68, t),
+                          func_80017158(light->unk6a, other->unk6a, t));
         } else {
             func_80035358(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
-            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, (s16)t),
-                             func_80017158(light->unk64.g, other->unk64.g, (s16)t),
-                             func_80017158(light->unk64.b, other->unk64.b, (s16)t));
+            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, t),
+                             func_80017158(light->unk64.g, other->unk64.g, t),
+                             func_80017158(light->unk64.b, other->unk64.b, t));
         } else {
             gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         }

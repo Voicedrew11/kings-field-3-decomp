@@ -60,7 +60,7 @@ void func_8004b624(Object88 *obj)
     obj->unk1c = def->unk12;
     obj->unk1e = def->unk14;
     obj->unk28 = def->unk34;
-    obj->unk48 = obj->unk4a = obj->unk4c = def->unk32;
+    obj->scale.vx = obj->scale.vy = obj->scale.vz = def->unk32;
 }
 
 ADDRESS(0x8004b698, 0xd8)

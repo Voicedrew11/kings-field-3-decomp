@@ -347,9 +347,9 @@ s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out)
         v.vy = -obj->unk1e >> 1;
         v.vz = -obj->unk1c;
     } else {
-        v.vx = v.vx * obj->unk48 >> 12;
-        v.vy = v.vy * obj->unk4a >> 12;
-        v.vz = v.vz * obj->unk4c >> 12;
+        v.vx = v.vx * obj->scale.vx >> 12;
+        v.vy = v.vy * obj->scale.vy >> 12;
+        v.vz = v.vz * obj->scale.vz >> 12;
     }
     rotation.vx = obj->angle.vx;
     rotation.vy = obj->angle.vy + 2048;
