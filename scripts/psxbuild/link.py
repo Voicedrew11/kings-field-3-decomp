@@ -8,7 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from .sdk import dos_run, tool_succeeded
+from .sdk import dmpsx_verified, dos_run, stage_dmpsx, tool_succeeded
 from .sdk_compat import library_input
 
 
@@ -140,13 +140,19 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
                 'Runtime Library 3.3 CD PSX/LIB/MALLOC.OBJ (= Release 2.5 object)')
             startup.append('MALLOC.OBJ')
         report['phase'] = 'assemble'
-        assembler_commands = [u['assembler_command'] for u in report['units']
-                              if 'assembler_command' in u]
+        assembler_commands = [command for u in report['units'] if 'assembler_command' in u
+                              for command in (u['assembler_command'], *u.get('gte_commands', ()))]
+        if any('gte_commands' in u for u in report['units']):
+            tool = Path(os.environ['PSYQ_DMPSX'])
+            stage_dmpsx(root)
+            report['tools']['DMPSX.EXE'] = {'path': str(tool), 'sha256': file_hash(tool)}
         if assembler_commands:
             dos_run(root, assembler_commands, 'asm')
         for unit in report['units']:
             if 'assembler_command' in unit:
                 tool_succeeded(root, unit['log'], unit['object'], b'LNK\x02')
+            if 'gte_commands' in unit:
+                dmpsx_verified(root, unit['object'].removesuffix('.OBJ'))
             elif not (root / unit['object']).read_bytes().startswith(b'LNK\x02'):
                 raise ValueError('compiler produced no native object')
             unit['object_sha256'] = file_hash(root / unit['object'])

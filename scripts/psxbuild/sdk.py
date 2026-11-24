@@ -36,6 +36,52 @@ def aspsx_command(stem: str, small_data: int) -> str:
     return f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
+# Runtime Library 3.3 INLINE.H writes each GTE operation as placeholder words
+# (`.word 0x0000007f`: below 0x2000 with SPECIAL funct 0x3e or 0x3f, which no
+# R3000 instruction uses) that Sony's DMPSX 2.03 rewrites in the assembled
+# object, from INLINE.TBL, into the COP2 transfers and commands. Objects
+# without such words are never given to DMPSX.
+GTE_WORD = re.compile(rb'(?m)^\s*\.word\s+0x([0-9a-fA-F]+)\s*$')
+
+
+def gte_placeholder(value: int) -> bool:
+    return value < 0x2000 and value & 0x3e == 0x3e
+
+
+def uses_gte_inline(assembly: bytes) -> bool:
+    return any(gte_placeholder(int(match.group(1), 16)) for match in GTE_WORD.finditer(assembly))
+
+
+def dmpsx_commands(stem: str) -> list[str]:
+    # The copy keeps ASPSX's object for dmpsx_verified.
+    return [f'copy {stem}.OBJ {stem}.ASP > NUL', f'dmpsx {stem}.OBJ -b > {stem}.DMP']
+
+
+def stage_dmpsx(root: Path) -> None:
+    tool = Path(os.environ['PSYQ_DMPSX'])
+    shutil.copyfile(tool, root / 'DMPSX.EXE')
+    shutil.copyfile(tool.with_name('INLINE.TBL'), root / 'INLINE.TBL')
+
+
+def dmpsx_verified(root: Path, stem: str) -> None:
+    """Require DMPSX to have changed only GTE placeholder words of the object."""
+    log = (root / (stem + '.DMP')).read_text(errors='replace')
+    before, after = (root / (stem + '.ASP')).read_bytes(), (root / (stem + '.OBJ')).read_bytes()
+    if 'DMPSX version' not in log or len(before) != len(after) or before == after:
+        raise RuntimeError(f'{stem}: DMPSX rewrote no GTE placeholder: {log.strip()}')
+    covered = set()
+    for index in range(len(before)):
+        if before[index] == after[index] or index in covered:
+            continue
+        for start in range(max(index - 3, 0), index + 1):
+            word = before[start:start + 4]
+            if len(word) == 4 and gte_placeholder(int.from_bytes(word, 'little')):
+                covered.update(range(start, start + 4))
+                break
+        else:
+            raise RuntimeError(f'{stem}: DMPSX changed object byte {index:#x} outside a GTE word')
+
+
 def run_command(arguments, *, environment=None):
     result = subprocess.run(arguments, capture_output=True, env=environment, check=False)
     if result.returncode:
@@ -122,9 +168,11 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     else:
         run(cc1_command, environment=environment)
     dos_text(assembly)
+    gte = uses_gte_inline(assembly.read_bytes())
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
             'assembler_command': aspsx_command(stem, small_data),
+            **({'gte_commands': dmpsx_commands(stem)} if gte else {}),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -168,10 +216,19 @@ def assemble(root: Path, stem: str, small_data: int) -> bytes:
 
 def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[str, bytes]:
     shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
+    commands, gte = [], []
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
+        commands.append(aspsx_command(stem, small_data))
+        if uses_gte_inline((root / (stem + '.S')).read_bytes()):
+            commands.extend(dmpsx_commands(stem))
+            gte.append(stem)
+    if gte:
+        stage_dmpsx(root)
+    dos_run(root, commands, 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
+        if stem in gte:
+            dmpsx_verified(root, stem)
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}
