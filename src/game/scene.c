@@ -153,9 +153,9 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     k = 200;
     while (k--) {
         if (c->unk0 != 0xff) {
-            c->x += dx;
-            c->z += dz;
-            c->y += dy;
+            c->pos.vx += dx;
+            c->pos.vz += dz;
+            c->pos.vy += dy;
         }
         c++;
     }

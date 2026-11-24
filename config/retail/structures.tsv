@@ -12,7 +12,7 @@ CdSoundRequest	0xc	supported	asm;band A sound accesses at CdRequest+0x4..0xf	WIP
 CdState	0x4c0	supported	asm;src/game/cd.c game.cd (func_8001a438 base+0x20 requests, func_80019bbc write == &requests[24])	WIP (game-c)
 ColorSum	0x8	supported	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	WIP field names; untouched ranges opaque
 Data80081c20	0x24	supported	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	WIP field names; untouched ranges opaque
-Data80185da8	0x9d2c	supported	asm;game loop word-count clear;func_80017aa4 records at +0	WIP (game-c)
+Data80185da8	0x9d2c	supported	asm;game loop word-count clear;func_80017aa4 records at +0;band F globals at +0x9d00 (func_8004da2c derives &defs from &current)	WIP (game-c)
 Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
 Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	WIP: render work area; only the fields band B touches are named
@@ -29,7 +29,9 @@ ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header 
 ModelPart	0x1c	supported	asm;func_8004352c/func_800437c8 28-byte stride	WIP field names; untouched ranges opaque
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records	WIP (game-c)
-Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records	WIP (game-c)
+Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (func_8004b624, func_80053084)	WIP (game-f)
+Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records;band F src/game/entity*.c field accesses	WIP (game-c)
+Object88Place	0x10	supported	asm;func_800530f8 16-byte placement records	WIP (game-f)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
 ScratchPad	0x124	supported	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	R3000 scratchpad at the fixed address 0x1f800000; WIP
 ScreenTint	0x4	supported	asm;func_8003d4ac/func_8003d624	WIP field names; untouched ranges opaque
