@@ -78,7 +78,32 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x1e33c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4c4	0x6dcc4	0x1dd68	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
+GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
+GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	DAT_8009c22e	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
+GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	DAT_8009c22f	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
+GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	DAT_8009c230	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	DAT_8009c234	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	DAT_8009c238	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	DAT_8009c23c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
+GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	DAT_8009c240	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	DAT_8009c244	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	DAT_8009c248	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	DAT_8009c24c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
+GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	DAT_8009c250	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
+GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	DAT_8009c254	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	DAT_8009c258	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
+GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	DAT_8009c25c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	DAT_8009c260	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	DAT_8009c264	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	DAT_8009c268	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	DAT_8009c26c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
+GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	DAT_8009c270	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	DAT_8009c274	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	DAT_8009c278	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	DAT_8009c27c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
+GAME.EXE	0x8009c280	0x8ba80	0x580	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
