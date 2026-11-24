@@ -78,9 +78,10 @@ let
       # as preserved in Archive.org `ps1_sdks`. CC1PSX.EXE is "GNU C 2.6.0
       # [AL 1.1, MM 40] Sony Playstation", a go32 (DJGPP v1) DOS program run
       # under DOSBox-X. It is byte-identical to the CC1PSX.EXE of the mkst/esa
-      # psyq3.3 and psyq3.5 bundles, and is not the Psy-Q 3.0 kit's
-      # COMPILER/CC1PSX.EXE (a different 2.6.0 build). With -O2 -G8 it emits
-      # PSX.EXE's main exactly, its __main call included.
+      # psyq3.3 and psyq3.5 bundles. The Psy-Q 3.0 kit's COMPILER/CC1PSX.EXE
+      # is a different file with the same version string and, on every sample
+      # tried, identical output. With -O2 -G8 it emits PSX.EXE's main
+      # exactly, its __main call included.
       sonyGcc260Floppy = pkgs.fetchurl {
         name = "sony-gnu-c-2.60-disk1.img";
         url = "https://archive.org/download/ps1_sdks/GNU%20C%20Compiler%20Version%202.60%20%28World%29%20%28Disk%201%29.img";
