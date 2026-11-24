@@ -43,17 +43,15 @@ ADDRESS(0x8005c18c, 0x5c)
 u8 func_8005c18c(u8 *script, u8 id)
 {
     u8 *p;
-    u8 *base;
 
     p = script + 20;
-    base = p - 1;
     for (;;) {
         switch (*p++) {
         case 0xff:
             return script[16];
         case 0xf2:
             if (*p == id) {
-                return p - base;
+                return p - 19 - script;
             }
             p++;
             break;
