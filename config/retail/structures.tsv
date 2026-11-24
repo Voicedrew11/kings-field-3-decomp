@@ -15,6 +15,7 @@ Data80081c20	0x24	supported	asm;func_800422b8 36-byte stride over the .data list
 Data80185da8	0x9d2c	supported	asm;game loop word-count clear;func_80017aa4 records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, func_8002c164);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);func_8002c164 word +0x9d28	WIP (game-c, game-d, game-f)
 Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;func_80029188 field accesses	WIP field names (game-c, game-b, game-d)
 Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
+Data801983a8	0xda0	supported	asm;func_80060800 relates the three parts to one base (+0xc0, +0x1e0); WIP extent up to DAT_80199148	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);func_800290d8 pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
 Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;func_80029f1c/func_8002b468 24-byte records at +0;func_80017aa4 records at +0x900	WIP (game-c, game-d)
@@ -33,6 +34,8 @@ Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (fun
 Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records;band F src/game/entity*.c field accesses;func_8002c164 reads +0x2 and +0x28 of func_8004d3c4's result	WIP (game-c)
 Object88Place	0x10	supported	asm;func_800530f8 16-byte placement records	WIP (game-f)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
+Record04	0x4	supported	asm;func_80060800 4-byte stride at DAT_801983a8	WIP (game-i)
+Record06	0x6	supported	asm;func_80060800/func_800608ec 6-byte stride at DAT_801983a8+0xc0	WIP (game-i)
 Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
 Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
 Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec	WIP (game-d)

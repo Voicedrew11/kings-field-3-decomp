@@ -241,3 +241,21 @@ unit = "game.arena_ptr"
 image = "GAME.EXE"
 source = "src/game/arena_ptr.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.slot_table"
+image = "GAME.EXE"
+source = "src/game/slot_table.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.movie"
+image = "GAME.EXE"
+source = "src/game/movie.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.movie_start"
+image = "GAME.EXE"
+source = "src/game/movie_start.c"
+profile = "gcc260-o2-g8"

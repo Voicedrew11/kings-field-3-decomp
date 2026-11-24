@@ -8,6 +8,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
+#include <psyq/cd.h>
 #include <game/data.h>
 
 void func_8005bd34(void);
@@ -46,6 +47,26 @@ void func_8005ee58(u8 **out);
 void func_8005eea8(s32 delta);
 void func_8005ef18(u8 **in);
 void func_8005ef64(s32 delta);
+
+void func_80060800(void);
+void func_800608ec(u8 id, u8 slot);
+u16 func_80060a10(u8 n, u8 slot);
+u8 func_80060b0c(void);
+u8 func_80060ba8(u8 n);
+u8 func_80060c54(u8 n);
+u8 func_80060cd0(u8 id);
+void func_80060d20(void);
+void func_80061364(void);
+void func_800614d4(CdlLOC *loc);
+void func_80061550(void);
+s32 func_80061650(void);
+u_long *func_800616dc(DECENV *dec);
+void func_8006179c(DECENV *dec);
+void func_8006182c(CdlLOC *loc);
+void func_80061878(void);
+void func_80061894(void);
+void func_80061918(void);
+void func_80061bc4(void);
 
 /* Game loop exit word (defined in src/game/main.c). */
 extern s32 DAT_8009c3f8;

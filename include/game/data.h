@@ -14,6 +14,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
+#include <kf/decenv.h>
 
 typedef struct Data801b24e4 {
     s32 experience; /* +0x00: the save title shows it as six digits */
@@ -236,13 +237,16 @@ typedef struct Data801d4464 {
 
 typedef struct Data801e7edc {
     u8 unk0[0x9c];
-    u8 unk9c[0x2d4];
+    u8 unk9c[0x2a4]; /* +0x9c: the in-game movie records (unk380 points into them) */
+    DECENV dec;     /* +0x340: the in-game movie player's decode environment */
     s16 unk370;
-    s16 unk372;
-    u8 unk374[0xc];
-    u8 *unk380;
-    u8 unk384;
-    u8 unk385[7];
+    s16 unk372;     /* +0x372: 99 once the stream passed the movie's last frame */
+    u_long *unk374[2]; /* +0x374: VLC buffers func_80061364 hands to dec */
+    u_long *unk37c; /* +0x37c: slice buffer */
+    u8 *unk380;     /* +0x380: the movie's record; u16 [1] its last frame */
+    u8 unk384;      /* +0x384: movie id, 0xff for none */
+    u8 unk385[3];
+    s32 unk388;     /* +0x388: frame number of the last sector (func_800616dc) */
 } Data801e7edc;
 
 /*
@@ -490,6 +494,33 @@ extern Data801b24e4 DAT_801b24e4;
 extern u32 DAT_801b56cc[0xa0];
 extern u32 DAT_801b594c[0xc8];
 extern Data801b77ec DAT_801b77ec;
+
+/* A record of the table func_80017664 copies in (DAT_801983a8.unk0). */
+typedef struct Record04 {
+    u8 id;          /* 0xff ends the table */
+    u8 count;       /* slots in its run of DAT_801983a8.unk1e0 */
+    u16 unk2;
+} Record04;
+
+/* A record func_80060800 builds from a Record04 (DAT_801983a8.unkc0). */
+typedef struct Record06 {
+    u8 id;          /* 0xff ends the table */
+    u8 unk1;
+    u16 unk2;       /* Record04.unk2 */
+    u16 offset;     /* start of its run in DAT_801983a8.unk1e0, 0xffff for none */
+} Record06;
+
+/*
+ * Slot tables (WIP extent, up to DAT_80199148): the copied records, the
+ * records func_80060800 builds from them and their runs of slot bytes
+ * (bits 0-1 set: in use; 0xff: free or the end of a run).
+ */
+typedef struct Data801983a8 {
+    Record04 unk0[48];
+    Record06 unkc0[48];  /* +0xc0 */
+    u8 unk1e0[0xbc0];    /* +0x1e0 */
+} Data801983a8;
+extern Data801983a8 DAT_801983a8;
 extern Data801ba984 DAT_801ba984;
 /* Two counts per item id (0..149; func_8005d898 caps each at 99), cleared by func_8005ea64. */
 extern u8 DAT_800c85e8[2][150];
@@ -506,7 +537,6 @@ extern Record44 DAT_801d37a4[48];
 extern u32 DAT_80081c8c[];
 extern u32 DAT_800aedc4[];
 extern u32 DAT_80116154[];
-extern u32 DAT_801983a8[];
 extern u32 DAT_801e64b8[];
 extern u8 DAT_8014f164[];
 
