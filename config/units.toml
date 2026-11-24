@@ -201,6 +201,24 @@ source = "src/game/anim.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.map_patch"
+image = "GAME.EXE"
+source = "src/game/map_patch.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44"
+image = "GAME.EXE"
+source = "src/game/object44.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44_find"
+image = "GAME.EXE"
+source = "src/game/object44_find.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.entity"
 image = "GAME.EXE"
 source = "src/game/entity.c"
@@ -313,3 +331,154 @@ unit = "game.movie_start"
 image = "GAME.EXE"
 source = "src/game/movie_start.c"
 profile = "gcc260-o2-g8"
+
+# FDAT.T area modules: one source per module, -G0 (no module uses $gp; the
+# modules reach GAME.EXE's small data with lui/low pairs). A module source
+# includes the shared fragments under src/fdat/shared/, so its unit binds
+# its claims by name.
+[[unit]]
+unit = "fdat_050.main"
+image = "FDAT_050.BIN"
+source = "src/fdat/fdat_050.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_011.main"
+image = "FDAT_011.BIN"
+source = "src/fdat/fdat_011.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_017.main"
+image = "FDAT_017.BIN"
+source = "src/fdat/fdat_017.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_023.main"
+image = "FDAT_023.BIN"
+source = "src/fdat/fdat_023.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_026.main"
+image = "FDAT_026.BIN"
+source = "src/fdat/fdat_026.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_032.main"
+image = "FDAT_032.BIN"
+source = "src/fdat/fdat_032.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_035.main"
+image = "FDAT_035.BIN"
+source = "src/fdat/fdat_035.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_038.main"
+image = "FDAT_038.BIN"
+source = "src/fdat/fdat_038.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_041.main"
+image = "FDAT_041.BIN"
+source = "src/fdat/fdat_041.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_044.main"
+image = "FDAT_044.BIN"
+source = "src/fdat/fdat_044.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_047.main"
+image = "FDAT_047.BIN"
+source = "src/fdat/fdat_047.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_056.main"
+image = "FDAT_056.BIN"
+source = "src/fdat/fdat_056.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_059.main"
+image = "FDAT_059.BIN"
+source = "src/fdat/fdat_059.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_062.main"
+image = "FDAT_062.BIN"
+source = "src/fdat/fdat_062.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_065.main"
+image = "FDAT_065.BIN"
+source = "src/fdat/fdat_065.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_068.main"
+image = "FDAT_068.BIN"
+source = "src/fdat/fdat_068.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_071.main"
+image = "FDAT_071.BIN"
+source = "src/fdat/fdat_071.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_074.main"
+image = "FDAT_074.BIN"
+source = "src/fdat/fdat_074.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_077.main"
+image = "FDAT_077.BIN"
+source = "src/fdat/fdat_077.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_083.main"
+image = "FDAT_083.BIN"
+source = "src/fdat/fdat_083.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_080.main"
+image = "FDAT_080.BIN"
+source = "src/fdat/fdat_080.c"
+profile = "gcc260-o2-g0"
+bind = "name"

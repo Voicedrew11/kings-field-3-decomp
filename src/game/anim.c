@@ -1,6 +1,7 @@
 /*
  * GAME.EXE: model animation (WIP module): key frame lookup, delta-coded
- * vertex poses blended by the sub-frame, and the twelve cached pose slots.
+ * vertex poses blended by the sub-frame, the twelve cached pose slots, and
+ * the full-screen picture shown between two fades.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -10,7 +11,12 @@
 #include <MALLOC.H>
 #include <RAND.H>
 #include <game/data.h>
+#include <game/cd.h>
+#include <game/player.h>
 #include <game/render.h>
+
+DATA(0x8009c2d8, 0x8, ".sdata")
+RECT DAT_8009c2d8 = { 960, 256, 64, 240 };
 
 /* A delta run marker: the next word is a count instead of a vertex. */
 #define DELTA_RUN (-32768)
@@ -533,4 +539,150 @@ void func_80043b38(u8 *file)
             DrawSync(0);
         }
     }
+}
+
+/* Fades a full-screen picture by step per frame from level (0..120) over the
+ * saved screen. Returns the level when a button was pressed after all were
+ * released, -1 when one was held throughout, -2 when the fade ended first. */
+ADDRESS(0x80043bb8, 0x61c)
+s32 func_80043bb8(s32 level, s32 step)
+{
+    POLY_FT4 *p;
+    s32 result;
+    u32 pad;
+    s32 dim;
+
+    result = -1;
+    for (;;) {
+        func_80035630();
+        p = (POLY_FT4 *)DAT_80199154.pool->next;
+        DAT_80199154.pool->next += sizeof(POLY_FT4);
+        dim = 128 - (level >> 1);
+        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+            return KF_VALUELESS;
+        }
+        DAT_80199154.prim_count++;
+        setPolyFT4(p);
+        setSemiTrans(p, 1);
+        setXYWH(p, 32, 32, 256, 208);
+        setUVWH(p, 0, 0, 255, 208);
+        p->clut = GetClut(96, 480);
+        p->tpage = GetTPage(0, 1, 960, 256);
+        setRGB0(p, level, level, level);
+        addPrim(DAT_80199154.ot, p);
+        p = (POLY_FT4 *)DAT_80199154.pool->next;
+        DAT_80199154.pool->next += sizeof(POLY_FT4);
+        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+            return KF_VALUELESS;
+        }
+        DAT_80199154.prim_count++;
+        setPolyFT4(p);
+        setSemiTrans(p, 1);
+        setXYWH(p, 33, 33, 256, 208);
+        setUVWH(p, 0, 0, 255, 208);
+        p->clut = GetClut(96, 480);
+        p->tpage = GetTPage(0, 2, 960, 256);
+        setRGB0(p, level, level, level);
+        addPrim(DAT_80199154.ot, p);
+        p = (POLY_FT4 *)DAT_80199154.pool->next;
+        DAT_80199154.pool->next += sizeof(POLY_FT4);
+        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+            return KF_VALUELESS;
+        }
+        DAT_80199154.prim_count++;
+        setPolyFT4(p);
+        setXYWH(p, 0, 0, 192, 240);
+        setUVWH(p, 0, 0, 192, 240);
+        p->clut = 0;
+        p->tpage = GetTPage(2, 0, 320, 0);
+        setRGB0(p, dim, dim, dim);
+        addPrim(DAT_80199154.ot, p);
+        p = (POLY_FT4 *)DAT_80199154.pool->next;
+        DAT_80199154.pool->next += sizeof(POLY_FT4);
+        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+            return KF_VALUELESS;
+        }
+        DAT_80199154.prim_count++;
+        setPolyFT4(p);
+        setXYWH(p, 192, 0, 128, 240);
+        setUVWH(p, 0, 0, 128, 240);
+        p->clut = 0;
+        p->tpage = GetTPage(2, 0, 512, 0);
+        setRGB0(p, dim, dim, dim);
+        addPrim(DAT_80199154.ot, p);
+        level += step;
+        DrawSync(0);
+        func_80035700();
+        if (level <= 0 || level >= 120) {
+            break;
+        }
+        pad = PadRead(1);
+        if (result == -1) {
+            if (pad == 0) {
+                result = -2;
+            }
+        } else if (pad != 0) {
+            DrawSync(0);
+            if (pad & DAT_80081868[7]) {
+                DAT_801b24e4.unk178 |= DAT_80081868[7];
+            } else if (pad != 0) {
+                DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+            }
+            return level;
+        }
+    }
+    DrawSync(0);
+    if (pad & DAT_80081868[7]) {
+        DAT_801b24e4.unk178 |= DAT_80081868[7];
+    } else if (pad != 0) {
+        DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+    }
+    return result;
+}
+
+/* Shows TIM entry `entry` of file `file` between a fade in and a fade out over
+ * the saved screen; a button press cuts the wait short. */
+ADDRESS(0x800441d4, 0x1f4)
+void func_800441d4(u16 file, u16 entry)
+{
+    s32 level;
+    u32 pad;
+
+    DrawSync(0);
+    func_8001a154(file, entry, DAT_80199154.buffer);
+    ClearImage(&DAT_8009c2d8, 0, 0, 0);
+    DrawSync(0);
+    func_80043b38(DAT_80199154.buffer);
+    DrawSync(0);
+    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
+    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
+    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x7400;
+    StoreImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
+    DrawSync(0);
+    MoveImage(&DAT_80199154.draw[DAT_80199154.frame].clip, DAT_8009c2d0.x, DAT_8009c2d0.y);
+    DrawSync(0);
+    level = func_80043bb8(0, 12);
+    if (level < 0) {
+        for (;;) {
+            pad = PadRead(1);
+            if (level == -1) {
+                if (pad == 0) {
+                    level = -2;
+                }
+            } else if (pad != 0) {
+                break;
+            }
+        }
+        if (pad & DAT_80081868[7]) {
+            DAT_801b24e4.unk178 |= DAT_80081868[7];
+        } else if (pad != 0) {
+            DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+        }
+        level = 80;
+    }
+    func_80043bb8(level, -12);
+    LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
+    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
+    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
+    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x1a000;
 }

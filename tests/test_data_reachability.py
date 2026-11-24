@@ -288,6 +288,29 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(len(report["references"]), 1)
         self.assertEqual(report["summary"]["issues"], {"unmodeled-target": 1})
 
+    def test_overlay_reference_into_its_host_is_owned_there_not_traversed(self):
+        overlay, host = "FDAT_002.BIN", "GAME.EXE"
+        img = RetailImage.synthetic(overlay, 0x801E8308, b"\0" * 0x1000)
+        root = replace(function(0x801E83A8, image=overlay))
+        callee = function(0x80041EEC, image=host)
+        table = datum(0x801CA984, 4, source="data_identities.tsv", image=host, storage="bss")
+        refs = (ref(0x801E83A8, 0x80041EEC, tier="proven", kind="call", image=overlay),
+                ref(0x801E83AC, 0x801CA984, image=overlay),
+                ref(0x801E83B0, 0x80070000, image=overlay))
+        report = audit(overlay, (root,), (), refs, img,
+                       host_functions=(callee,), host_extents=(table,))
+        self.assertEqual(report["summary"]["host_references"], 3)
+        self.assertEqual(report["summary"]["reached_vendor_functions"], 0)
+        self.assertEqual(report["summary"]["issues"], {"unmodeled-target": 1})
+        self.assertEqual(report["issues"][0]["image"], host)
+        owners = {row["id"]: row["target_owners"] for row in report["references"]}
+        self.assertEqual(owners[0], ["GAME.EXE:function:80041eec"])
+        self.assertEqual(owners[1], [f"GAME.EXE:{table.key}"])
+        self.assertEqual(owners[2], [])
+        # Without the host inventories the same edges stay unmodeled.
+        bare = audit(overlay, (root,), (), refs, img)
+        self.assertEqual(bare["summary"]["issues"], {"unmodeled-target": 3})
+
     def test_link_label_target_is_a_boundary_not_an_unmodeled_owner(self):
         img = RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
         refs = (ref(0x1000, 0x1300),)

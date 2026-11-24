@@ -16,6 +16,7 @@
 #include <game/menu.h>
 #include <game/object4c.h>
 #include <game/misc.h>
+#include <game/object44.h>
 #include <game/funcs.h>
 #include <game/player.h>
 #include <game/entity.h>

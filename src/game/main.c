@@ -23,6 +23,7 @@
 #include <game/entity.h>
 #include <game/object4c.h>
 #include <game/misc.h>
+#include <game/object44.h>
 #include <game/funcs.h>
 #include <game/card.h>
 #include <game/player.h>

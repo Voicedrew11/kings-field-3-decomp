@@ -15,6 +15,7 @@
 #include <game/entity.h>
 #include <game/player.h>
 #include <game/misc.h>
+#include <game/object44.h>
 
 RODATA(0x800130f0, 0x70)
 
@@ -26,9 +27,9 @@ void func_8005c7e8(Object44 *obj, s16 id)
     s32 i;
 
     made = func_80046034(0x17c, 0x10, -1);
-    obj->unk39 = made - DAT_8018fb3c.objects - 124;
+    obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 124;
     made->unk6 = id;
-    made->unk38 = 0;
+    made->arg.b.unk38 = 0;
 }
 
 /* Loads start position n's areas and puts the player there (12: none). */

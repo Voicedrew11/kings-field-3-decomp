@@ -255,7 +255,16 @@ defines = ["KF_OPEN"]
   the definition name, so addresses stay image-qualified. The claimed size
   must still equal that image's body size; a size mismatch means the images
   do not share the body and the difference has to be expressed in source.
-  `RODATA()` ranges are image-specific and cannot be name-bound.
+  `RODATA()` ranges are image-specific and cannot be name-bound in a source
+  that several units list.
+- A source only one unit lists may still bind by name and claim its image's
+  `RODATA()`/`SDATA()` ranges: the ranges belong to that image, while the
+  functions of the `.inc` fragments it includes resolve through the image's
+  identities. The FDAT modules use this (one `src/fdat/fdat_nnn.c` per
+  module, `bind = "name"`): a body several modules repeat is one fragment in
+  `src/fdat/shared/`, its claim spelled with the address of the first module
+  that has it, and its function carries that one shared identity name
+  (`fdat_<address>`) in every module's `function_identities.tsv` rows.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images (in SLPS-00017 the mode-1 arena limit was `0xfefff` in `GAME.EXE`
