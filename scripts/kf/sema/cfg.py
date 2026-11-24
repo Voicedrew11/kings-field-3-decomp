@@ -235,7 +235,7 @@ def switch_tables(
 def build_graph(
     function: Binding,
     payload: bytes,
-    idx: Index,
+    idx: Index | None,
     read_word: Callable[[int], int | None] | None = None,
 ) -> Graph:
     if function.space != "text":
@@ -388,7 +388,7 @@ def build_graph(
                     fallthrough.start,
                 ))
         elif control.kind == "jump":
-            external = idx.function(control.target or 0)
+            external = idx.function(control.target or 0) if idx is not None else None
             kind = "jump" if target_block else "tail" if external else "jump-external"
             edges.append(Edge(
                 block.start,
