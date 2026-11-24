@@ -11,6 +11,14 @@
 #include <game/data.h>
 #include <game/render.h>
 
+/* Brightness the 3D overlays share with the status sprites (.sdata). */
+DATA(0x8009c2e0, 0x4, ".sdata")
+CVECTOR DAT_8009c2e0 = { 0x80, 0x80, 0x80, 0 };
+DATA(0x8009c2e4, 0x8, ".sdata")
+SVECTOR DAT_8009c2e4 = { 0x1000, 0x1000, 0x1000, 0 };
+DATA(0x8009c2ec, 0x4, ".sdata")
+s32 DAT_8009c2ec = 0;
+
 ADDRESS(0x80041ad4, 0x2c8)
 void func_80041ad4(SpriteRec *sprite, u16 mode, u8 *rgb)
 {
@@ -177,4 +185,82 @@ void func_80041f9c(void)
         }
         break;
     }
+}
+
+ADDRESS(0x800422b8, 0x654)
+void func_800422b8(void)
+{
+    s32 i;
+
+    DAT_8009c2e0.b = DAT_8009c2e0.g = DAT_8009c2e0.r = DAT_801b24e4.unkfd;
+    func_800357e8();
+    func_800351fc();
+    func_80041f9c();
+    func_80034bf4();
+    func_80035630();
+    func_80043858();
+    func_8003df50();
+    DAT_800819b4[13].visible = DAT_800819b4[14].visible = 0;
+    DAT_80081c20[0].visible = DAT_801b24e4.unkfa & 1;
+    DAT_80081c20[1].visible = (DAT_801b24e4.unkfa & 2) >> 1;
+    DAT_800819b4[0].visible = DAT_800819b4[1].visible = DAT_800819b4[2].visible =
+        DAT_800819b4[3].visible = DAT_800819b4[4].visible = DAT_800819b4[5].visible =
+            DAT_800819b4[6].visible = DAT_800819b4[7].visible = DAT_800819b4[8].visible =
+                DAT_800819b4[9].visible = DAT_800819b4[10].visible = DAT_800819b4[11].visible =
+                    DAT_800819b4[12].visible = DAT_801b24e4.unkf9 & 1;
+    DAT_800819b4[15].visible = DAT_800819b4[16].visible = DAT_800819b4[17].visible =
+        DAT_800819b4[18].visible = DAT_800819b4[19].visible = DAT_800819b4[20].visible =
+            DAT_800819b4[21].visible = DAT_800819b4[22].visible = DAT_800819b4[23].visible =
+                DAT_800819b4[24].visible = DAT_800819b4[25].visible = DAT_800819b4[26].visible =
+                    DAT_800819b4[27].visible = DAT_800819b4[28].visible =
+                        DAT_800819b4[29].visible = (DAT_801b24e4.unkf9 & 2) >> 1;
+    i = DAT_801b24e4.unkfa - 1;
+    if (i >= 0) {
+        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].unk1a, DAT_80199154.unk15b0a);
+        if (DAT_8009c2ec > 0) {
+            DAT_8009c2ec -= (DAT_8009c2ec + 7) >> 3;
+        } else if (DAT_8009c2ec < 0) {
+            DAT_8009c2ec -= (DAT_8009c2ec - 7) >> 3;
+        }
+        DAT_80081c20[i == 0].unk1a = DAT_80081c20[i].unk1a =
+            DAT_80081c20[i].unk1a + (DAT_8009c2ec >> 6);
+        DAT_80081c20[i == 0].unk18 = DAT_80081c20[i].unk18 = DAT_80199154.unk15b08;
+    }
+    if (DAT_801b24e4.unkf9 == 1) {
+        DAT_800819b4[4].unka = DAT_800819b4[4].w = DAT_801b24e4.hp * 48 / DAT_801b24e4.hp_max;
+        DAT_800819b4[5].unka = DAT_800819b4[5].w = DAT_801b24e4.unk1e * 48 / 5000;
+        DAT_800819b4[6].unka = DAT_800819b4[6].w = DAT_801b24e4.unk1c * 48 / DAT_801b24e4.unk1a;
+        DAT_800819b4[7].unka = DAT_800819b4[7].w = DAT_801b24e4.unk22 * 48 / 5000;
+    } else if (DAT_801b24e4.unkf9 == 2) {
+        u16 hp;
+        u16 mp;
+        s32 n;
+
+        hp = DAT_801b24e4.hp % 1000;
+        n = hp;
+        DAT_800819b4[17].u = n / 100 * 12 + 0x80;
+        DAT_800819b4[18].u = n % 100 / 10 * 12 + 0x80;
+        DAT_800819b4[19].u = n % 10 * 12 + 0x80;
+        mp = DAT_801b24e4.unk1c % 1000;
+        n = mp;
+        DAT_800819b4[22].u = n / 100 * 12 + 0x80;
+        DAT_800819b4[23].u = n % 100 / 10 * 12 + 0x80;
+        DAT_800819b4[24].u = n % 10 * 12 + 0x80;
+        DAT_800819b4[25].unka = DAT_800819b4[25].w = DAT_801b24e4.unk1e * 64 / 5000;
+        DAT_800819b4[26].unka = DAT_800819b4[26].w = DAT_801b24e4.unk22 * 64 / 5000;
+    }
+    func_8003c35c();
+    func_80041e68();
+    func_80041d9c();
+    func_8003bfd0();
+    func_80040ae4();
+    func_8003d280();
+    func_8003d38c();
+    func_8003d41c();
+    func_8003d568();
+    func_8003d64c();
+    func_8003d79c();
+    func_80035700();
+    func_80019614();
+    func_80043940();
 }

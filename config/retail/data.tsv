@@ -79,9 +79,14 @@ GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x8007e4c4	0x6dcc4	0x3464	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; kf_Render rewrites their positions and texture cells every frame; visible 0xff ends the list
-GAME.EXE	0x80081c20	0x71420	0x1a6b0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); kf_Render shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x80081c8c	0x7148c	0x1a644	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	DAT_8009c2d0	RECT	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
-GAME.EXE	0x8009c2d8	0x8bad8	0x528	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2d8	0x8bad8	0x8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; kf_Render copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
+GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
+GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
+GAME.EXE	0x8009c2f0	0x8baf0	0x510	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

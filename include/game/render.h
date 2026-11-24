@@ -148,7 +148,10 @@ typedef struct Data80199154 {
     s32 unk159bc;
     s32 ot_count;                   /* +0x159c0: primitives linked this frame */
     s32 prim_count;                 /* +0x159c4: packets allocated this frame */
-    u8 unk159c8[0x148];
+    u8 unk159c8[0x140];
+    u16 unk15b08;                   /* +0x15b08 */
+    s16 unk15b0a;                   /* +0x15b0a: viewer yaw */
+    u8 unk15b0c[4];
     s32 unk15b10;                   /* +0x15b10: map cell x of the viewer */
     s32 unk15b14;                   /* +0x15b14: map cell z of the viewer */
     s32 grid_x;                     /* +0x15b18: map cell x of grid column 0, negated */
@@ -199,6 +202,21 @@ typedef struct SpriteRec {
 extern SpriteRec DAT_80081928[7];
 extern SpriteRec DAT_800819b4[31];
 
+/* A 3D overlay record (compass needles); the list ends with visible == 0xff. */
+typedef struct Data80081c20 {
+    u8 visible;
+    u8 unk1[0x17];
+    u16 unk18;
+    s16 unk1a;      /* angle, eased toward the viewer's heading */
+    u8 unk1c[8];
+} Data80081c20;
+
+extern Data80081c20 DAT_80081c20[3];
+
+extern CVECTOR DAT_8009c2e0;
+extern SVECTOR DAT_8009c2e4;
+extern s32 DAT_8009c2ec;
+
 /* Links p at depth z when z is inside the ordering table. */
 #define LINK_PRIM(z, p)                                         \
     {                                                           \
@@ -248,6 +266,7 @@ void func_80041e68(void);
 void func_80041eec(s32 message, ...);
 void func_80041f8c(SpriteRec *sprite, u8 digit);
 void func_80041f9c(void);
+void func_800422b8(void);
 
 void func_80042b70(u16 id);
 void func_80042ba8(u16 id, u8 *file);
@@ -269,6 +288,15 @@ void func_800439b0(AnimSlot **out);
 void func_80043a08(EffectSpawn *spawn);
 
 /* Callees outside the render modules; signatures from these call sites. */
+s32 func_80016a98(s32 angle, s32 target);
+void func_80019614(void);
+void func_80034bf4(void);
+void func_800351fc(void);
+void func_800357e8(void);
+void func_8003bfd0(void);
+void func_8003c35c(void);
+void func_8003df50(void);
+void func_80040ae4(void);
 s32 func_80033b8c(u8 area, s32 x, s32 z, s32 arg3, s32 arg4);
 u8 *func_8001939c(u8 *arena, s32 size, u8 **owner);
 SVECTOR *func_800194b0(s32 size);

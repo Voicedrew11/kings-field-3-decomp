@@ -25,10 +25,20 @@ typedef struct Data8018fad4 {
 typedef struct Data801b24e4 {
     u8 unk0[0xe];
     u8 unke;        /* +0x0e: cleared every frame by the game loop */
-    u8 unkf[0xe8];
+    u8 unkf[7];
+    u16 hp_max;     /* +0x16 */
+    u16 hp;         /* +0x18 */
+    u16 unk1a;      /* +0x1a: maximum of unk1c */
+    u16 unk1c;
+    u16 unk1e;      /* +0x1e: out of 5000 */
+    u16 unk20;
+    u16 unk22;      /* +0x22: out of 5000 */
+    u8 unk24[0xd3];
     u8 se_volume;   /* +0xf7: 0 mutes sound effects; scales them by n/128 */
     u8 bgm_volume;  /* +0xf8: 0 keeps the sequence off */
-    u8 unkf9[4];
+    u8 unkf9;       /* +0xf9: status overlay layout, bits 0-1 show its two halves */
+    u8 unkfa;       /* +0xfa: compass, bits 0-1 show its needles */
+    u8 unkfb[2];
     u8 unkfd;       /* +0xfd: brightness of the status overlay */
     u8 unkfe[0x56];
     s32 unk154;     /* +0x154: top edge of the full-screen overlay pair; >= 240 hides it */

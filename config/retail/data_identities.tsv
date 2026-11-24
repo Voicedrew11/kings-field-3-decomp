@@ -9,7 +9,11 @@ PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 GAME.EXE	0x80081928	0x8c	DAT_80081928	global	load	SpriteRec[7]	func_80041f9c	address-only	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x26c	DAT_800819b4	global	load	SpriteRec[31]	func_80041e68	address-only	asm;game-b hud relocs	status overlay sprites; kf_Render rewrites their positions and texture cells every frame; visible 0xff ends the list
+GAME.EXE	0x80081c20	0x6c	DAT_80081c20	global	load	Data80081c20[3]	func_800422b8	address-only	asm;game-b hud relocs	compass needle records (0x24 bytes); kf_Render shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
 GAME.EXE	0x8009c2d0	0x8	DAT_8009c2d0	global	load	RECT	func_8003daec	address-only	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
+GAME.EXE	0x8009c2e0	0x4	DAT_8009c2e0	global	load	CVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; kf_Render copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
+GAME.EXE	0x8009c2e4	0x8	DAT_8009c2e4	global	load	SVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
+GAME.EXE	0x8009c2ec	0x4	DAT_8009c2ec	global	load	s32	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
 GAME.EXE	0x800c8954	0x4d800	DAT_800c8954	global	bss	u8[0x4d800]	func_80014bd4	address-only	asm;band A relocs	arena func_8001937c formats with a 0x4d800-byte free block
 GAME.EXE	0x80182964	0x4	DAT_80182964	global	bss	s32	func_80040ae4	address-only	asm;game-b relocs	effect frame counter; the 128 effect records follow
 GAME.EXE	0x80182968	0xc00	DAT_80182968	global	bss	Effect[128]	func_80043a08	address-only	asm;game-b relocs	placed effects (24-byte records); func_80043a08 fills all 128 from a map spawn list; ends at band A's DAT_80183568
