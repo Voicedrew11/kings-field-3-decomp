@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/data.h>
+#include <game/player.h>
 
 /* A script record's fields past the id and chances depend on the id (WIP view). */
 #define SCRIPT_U16(script, offset) (*(u16 *)((script) + (offset)))
@@ -96,13 +97,12 @@ void func_80052e5c(void);
 void func_80053084(void);
 void func_800530f8(Object88Place *place);
 
-/* Callees outside the module; signatures from these call sites. */
-void func_8002ab18(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8, s32 a9,
-                   s32 a10, VECTOR *pos);
+/* Callees outside the module; signatures from these call sites (game/player.h
+ * declares func_8002ab18). */
 void func_80033b10(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 void func_80033d08(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 void func_80033d84(void);
-void func_80033c4c(s32 x, s32 z, s32 a2, s32 a3);
+void func_80033c4c(s32 x, s32 z, s32 radius, s32 mode);
 s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, s32 mask);
 
 #endif

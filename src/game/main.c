@@ -21,6 +21,8 @@
 #include <game/scene.h>
 #include <game/render.h>
 #include <game/funcs.h>
+#include <game/card.h>
+#include <game/player.h>
 
 /*
  * PSX.EXE's next-program byte (0 OPEN, 1 GAME, 2 END) and the mailbox byte

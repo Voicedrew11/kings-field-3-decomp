@@ -172,4 +172,3 @@ void func_8004b94c(Object88 *obj, u8 *script)
         obj->unkf = 0xff;
     }
 }
-

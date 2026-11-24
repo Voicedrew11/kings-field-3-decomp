@@ -42,7 +42,7 @@ void func_80052e5c(void)
                 obj->pos.vy = carrier->y - 500;
                 obj->pos.vz = carrier->z;
                 if (obj->unk9 == 1) {
-                    obj->angle.vy = func_80016ab8(DAT_801b24e4.x - obj->pos.vx, DAT_801b24e4.z - obj->pos.vz);
+                    obj->angle.vy = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
                 }
             }
             if (obj->unk1 == 0x6e) {

@@ -57,8 +57,8 @@ void func_8004bf1c(s32 dist)
 ADDRESS(0x8004c01c, 0x4c)
 void func_8004c01c(void)
 {
-    func_8004bf1c(func_80016c08(DAT_80185da8.current->pos.vx - DAT_801b24e4.x,
-                                DAT_80185da8.current->pos.vz - DAT_801b24e4.z));
+    func_8004bf1c(func_80016c08(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
+                                DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
 }
 
 /* The script record of the given id, or 0. */
@@ -146,7 +146,7 @@ void func_8004c1f0(void)
     kind = obj->unk0;
     switch (obj->unk9) {
     case 0:
-        dist = func_80016ec8(&obj->pos, DAT_801b24e4.x, 0xffff, DAT_801b24e4.z, (def->unka + 1) << 11, 0, 0);
+        dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, (def->unka + 1) << 11, 0, 0);
         if (dist == -1) {
             break;
         }
@@ -190,7 +190,7 @@ void func_8004c1f0(void)
         }
         break;
     case 1:
-        if (func_80016ec8(&obj->pos, DAT_801b24e4.x, 0xffff, DAT_801b24e4.z, def->unkb << 11, 0, 0) != -1) {
+        if (func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0) != -1) {
             break;
         }
         func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
@@ -206,7 +206,7 @@ void func_8004c1f0(void)
             func_8004b560(obj);
             break;
         }
-        if (func_80016ec8(&obj->pos, DAT_801b24e4.x, 0xffff, DAT_801b24e4.z, def->unkb << 11, 0, 0) != -1) {
+        if (func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0) != -1) {
             break;
         }
         obj->unk9 = 0;

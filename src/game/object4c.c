@@ -170,7 +170,11 @@ void func_800537e8(s32 flags)
     func_800536f8(flags, 5000, &pos);
 }
 
-/* Area hit of the current record: the player (unk0 bit 0) and the Object88 records (bit 1). */
+/*
+ * Area hit of the current record: the player (unk0 bit 0) and the Object88
+ * records (bit 1). Both callees read flags as a word, but retail passes it
+ * masked to 16 bits (andi) to both.
+ */
 ADDRESS(0x80053850, 0x1bc)
 void func_80053850(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s32 flags)
 {
@@ -181,12 +185,13 @@ void func_80053850(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s3
     rec = DAT_801b77ec.unk2f00;
     if (obj->unk0 & 1) {
         func_8002b114(pos, reach, radius, mode, falloff, rec->unk6, rec->unk8, rec->unka, rec->unk4,
-                      rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14, flags, obj->unk6);
+                      rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14, (u16)flags,
+                      obj->unk6);
     }
     if (obj->unk0 & 2) {
         func_8004ceac(pos, reach, radius, mode, falloff, func_80053624(obj), rec->unk6, rec->unk8,
-                      rec->unka, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14, flags,
-                      (obj->unk0 & 0xc0) | 0x20, rec);
+                      rec->unka, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
+                      (u16)flags, (obj->unk0 & 0xc0) | 0x20, rec);
     }
 }
 

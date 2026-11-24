@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/data.h>
+#include <game/player.h>
 
 /* Object4c.unk0 of a free record. */
 #define OBJECT4C_FREE 0xff
@@ -51,13 +52,9 @@ void func_80056840(void);
 extern SVECTOR DAT_8009c33c;
 
 /* Callees outside the module; signatures from these call sites. */
-void func_8002b114(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u16 slash, u16 blow,
-                   u16 stab, u16 type, u16 element0, u16 element1, u16 element2, u16 element3,
-                   u16 element4, u16 flags, u16 knockback);
 void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
                    u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target);
-s32 func_8002b80c(VECTOR *pos, s32 angle, s32 radius, s32 range);
 void func_8004ceac(VECTOR *pos, s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
-                   u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 a14, u16 a15, Record18 *rec);
+                   u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, s32 a14, u16 a15, Record18 *rec);
 
 #endif

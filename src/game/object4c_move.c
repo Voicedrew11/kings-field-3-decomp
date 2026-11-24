@@ -94,9 +94,9 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
     } else {
         dist = func_8002b80c(&obj->pos, obj->angle.vy, 24000, 0x1000);
         if (dist != -1) {
-            target.vx = DAT_801b24e4.x;
-            target.vy = DAT_801b24e4.y - 1600;
-            target.vz = DAT_801b24e4.z;
+            target.vx = DAT_801b24e4.pos.vx;
+            target.vy = DAT_801b24e4.pos.vy - 1600;
+            target.vz = DAT_801b24e4.pos.vz;
             goto aim;
         }
     }
