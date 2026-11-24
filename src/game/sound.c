@@ -123,9 +123,10 @@ void func_80015354(void)
 }
 
 /*
- * Not exact: retail leaves `note` in its stack slot (loaded at the call) and
- * saves no $s5; GCC here gives it $s5, which shifts se/near between $s3/$s4
- * and the near-volume and turn temporaries (unattributed allocation residue).
+ * `angle = angle < 0 ? ... : angle` assigns the conditional to its own
+ * operand, so GCC builds it in a temporary and copies it back (retail's
+ * `move v0,a0 ... move a0,v0`); `base` is the near arm's separate
+ * `volume + 32` temporary.
  */
 ADDRESS(0x80015410, 0x244)
 s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note)
@@ -138,7 +139,6 @@ s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 n
     s32 volume;
     s32 left;
     s32 right;
-    s32 turn;
     s32 angle;
 
     se &= 0xfff;
@@ -156,15 +156,16 @@ s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 n
     if (!near) {
         left = volume + (127 - volume) / 4;
     } else {
-        left = volume + 32;
-        left += (127 - volume) / 2;
+        s32 base = volume + 32;
+
+        left = base + (127 - volume) / 2;
         if (left >= 128) {
             left = 127;
         }
     }
-    turn = func_80016ab8(pos->vx - DAT_801b09fc.listener.vx, pos->vz - DAT_801b09fc.listener.vz)
+    angle = func_80016ab8(pos->vx - DAT_801b09fc.listener.vx, pos->vz - DAT_801b09fc.listener.vz)
          - DAT_801b09fc.listener_angle.vy;
-    angle = turn < 0 ? turn + 0x1000 : turn;
+    angle = angle < 0 ? angle + 0x1000 : angle;
     right = left;
     if (angle < 2048) {
         left -= (left * rsin(angle) >> 12) * (127 - volume) / 128;
