@@ -463,15 +463,15 @@ void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
-        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].count++;
+        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].r = (r * scale) >> 12;
         DAT_80199154.sum[0].g = (g * scale) >> 12;
         DAT_80199154.sum[0].b = (b * scale) >> 12;
         break;
     case 2:
-        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].count++;
+        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].r = (r * scale) >> 12;
         DAT_80199154.sum[1].g = (g * scale) >> 12;
         DAT_80199154.sum[1].b = (b * scale) >> 12;
@@ -705,6 +705,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     u8 *file;
     u8 *model;
     s32 n;
+    s32 mode;
 
     mat = &m;
     scratch = SCRATCH;
@@ -717,8 +718,9 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     SCRATCH->next = DAT_80199154.pool->next;
     SCRATCH->end = DAT_80199154.pool->end;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
+    mode = flags;
     if (SCRATCH->end - 30720 < SCRATCH->next) {
-        flags &= 0xbf;
+        mode &= 0xbf;
     }
     gte_SetRotMatrix(&DAT_80199154.unk159f8);
     gte_SetTransMatrix(&DAT_80199154.unk159f8);
@@ -751,8 +753,8 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
                                                       [DAT_80199154.unk15af8.vx >> 11] +
                            DAT_801b24e4.unk160))->unk4 & 0x3f];
     }
-    if (flags & 0x80) {
-        flags &= 0x7f;
+    if (mode & 0x80) {
+        mode &= 0x7f;
     } else if (rel.vy <= 0) {
         depth += 240;
     }
@@ -819,7 +821,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     }
 draw:
-    if (flags & 0x40) {
+    if (mode & 0x40) {
         if (view != NULL) {
             func_800366a8(n);
             goto done;
@@ -842,7 +844,7 @@ draw:
             }
         }
         func_80035ca4(n, depth);
-    } else if (flags & 4) {
+    } else if (mode & 4) {
         if (view != NULL) {
             u8 *vertex = scratch->vertices;
             ScreenVertex *screen = scratch->screen;
@@ -885,7 +887,7 @@ draw:
                 vertex += 8;
             }
         }
-        func_80037bec(n, depth, flags & 3);
+        func_80037bec(n, depth, mode & 3);
     } else {
         if (view != NULL) {
             u8 *vertex = scratch->vertices;
