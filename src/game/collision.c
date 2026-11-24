@@ -129,13 +129,11 @@ void func_80033d84(void)
 /*
  * Tests a shape at (x, y, z) against what mask selects: bit 0 the map, bit 1
  * the map's pits, bit 4 or 6 the Object88 records, bit 5 the Object44 records,
- * bit 7 the player. Returns the bits that hit.
- * Not exact: control flow, calls and constants agree; retail keeps mask in
- * two callee-saved registers ($s0 for bits 0-1, a copy in $s7 for the rest)
- * and a 64-byte frame (unattributed allocation residue).
+ * bit 7 the player. Returns the bits that hit. mask is a u16: callers pass
+ * DAT_80185da8.unk9d04 (a word) with lhu.
  */
 ADDRESS(0x80033f38, 0x248)
-s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, s32 mask)
+s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
 {
     s32 hits;
 
