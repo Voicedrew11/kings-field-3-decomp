@@ -20,7 +20,6 @@ void func_80030a6c(SVECTOR *knockback);
 void func_80030e14(void);
 void func_80030fcc(void);
 void func_800324f0(s32 x, s32 y, s32 z);
-void func_80033c4c(s32 x, s32 z, s32 radius, s32 mode);
 void func_80034180(void);
 void func_800341e8(void);
 void func_80034300(void);
@@ -31,9 +30,6 @@ void func_8004485c(void);
 void func_80046c00(s32 a0, s32 a1, s32 a2, s32 a3);
 void func_80047010(void);
 void func_8004b8fc(void);
-void func_8004b94c(void *object, s32 found);
-s32 func_8004c068(void *record, s32 kind);
-void *func_8004d3c4(VECTOR *pos, s32 yaw, s32 pitch, s32 a3, s32 a4, s32 a5, s32 kind, s32 a7);
 void func_80052e5c(void);
 /* Called with five or six arguments (no prototype). */
 void func_80053c84();

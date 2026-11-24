@@ -47,7 +47,7 @@ void func_8002bb5c(u8 id);
 void func_8002bb84(s32 id, u8 slot);
 void func_8002bdc0(u8 id);
 void func_8002c040(s32 hand);
-struct Object2c *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 kind);
+struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
 /* Later in the module (not reconstructed yet). */
 void func_80030908(SVECTOR *dir, SVECTOR *push, s16 lift);

@@ -15,6 +15,7 @@
 #include <game/data.h>
 #include <game/funcs.h>
 #include <game/player.h>
+#include <game/entity.h>
 #include <kf/lib/null.h>
 
 RODATA(0x80011760, 0x84)
@@ -1351,11 +1352,11 @@ void func_8002c040(s32 hand)
 }
 
 ADDRESS(0x8002c164, 0x1a8)
-Object2c *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 kind)
+Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
 {
     SVECTOR rot;
-    Object2c *object;
-    s32 found;
+    Object88 *object;
+    u8 *found;
     s32 y;
 
     if (offset != NULL) {
@@ -1368,10 +1369,10 @@ Object2c *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 kind)
         offset->vy = y + DAT_801b24e4.pos.vy;
         offset->vz += DAT_801b24e4.pos.vz;
     }
-    object = (Object2c *)func_8004d3c4(&DAT_801b24e4.pos, DAT_801b24e4.unk124.vy, DAT_801b24e4.unk124.vx, 0x55f0,
-                           0x200, 0x200, kind, 0);
+    object = func_8004d3c4(&DAT_801b24e4.pos, DAT_801b24e4.unk124.vy, DAT_801b24e4.unk124.vx, 0x55f0,
+                           0x200, 0x200, dist, 0);
     DAT_80185da8.unk9d28 = object;
-    if (object != NULL && (found = func_8004c068(&DAT_80185da8.unk6a40[object->unk2], 0x82)) != 0
+    if (object != NULL && (found = func_8004c068(&DAT_80185da8.defs[object->unk2], 0x82)) != NULL
         && !(object->unk28 & 0x100)) {
         func_8004b94c(object, found);
     }

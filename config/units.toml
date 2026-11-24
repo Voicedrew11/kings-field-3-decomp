@@ -145,3 +145,39 @@ unit = "game.anim"
 image = "GAME.EXE"
 source = "src/game/anim.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity"
+image = "GAME.EXE"
+source = "src/game/entity.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity_script"
+image = "GAME.EXE"
+source = "src/game/entity_script.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity_find"
+image = "GAME.EXE"
+source = "src/game/entity_find.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity_move"
+image = "GAME.EXE"
+source = "src/game/entity_move.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity_sound"
+image = "GAME.EXE"
+source = "src/game/entity_sound.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.entity_load"
+image = "GAME.EXE"
+source = "src/game/entity_load.c"
+profile = "gcc260-o2-g8"
