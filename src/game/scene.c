@@ -197,16 +197,16 @@ ADDRESS(0x80017c78, 0x668)
 void func_80017c78(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, s8 shift1,
                    s8 shift2)
 {
-    u8 next0;
-    u8 next1;
-    u8 next2;
-    u8 next3;
-    u8 next4;
     u8 want0;
     u8 want1;
     u8 want2;
     u8 want3;
     u8 want4;
+    u8 next0;
+    u8 next1;
+    u8 next2;
+    u8 next3;
+    u8 next4;
 
     if (area4 == 200) {
         if (DAT_801b09fc.seq_playing == 0) {
