@@ -215,11 +215,14 @@ VENDORED_FUNCTION_FIELDS = (
 
 # Confidence names carry the SDK release they were proven against: `sdk34`
 # for the supplied archives, `psyq340` for a ghidra_psx_ldr signature set.
+# `sdk-unmatched-version` is SDK text-band code that no supplied archive or
+# signature set matches (a library release that is not preserved).
 VENDORED_CONFIDENCE = re.compile(
     r"fid-sdk\d+(?:-ambiguous)?"
     r"|exact-sdk\d+(?:-short|-ambiguous|-complete)?"
     r"|psyq\d{3,4}-signature(?:-ambiguous)?"
     r"|sdk-lineage-supported"
+    r"|sdk-unmatched-version"
 )
 
 

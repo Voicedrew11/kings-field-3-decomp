@@ -94,13 +94,12 @@ AUTOMATIC_LABEL_RE = re.compile(
     r"^(?:loc|text|lab|fun|sub|byte|word|dword|unk)_[0-9a-f]+$", re.IGNORECASE
 )
 SDK_DIRECTORY_RE = re.compile(r"psyq-(\d+(?:\.\d+)+)", re.IGNORECASE)
-# GAME.EXE and OPEN.EXE carry Psy-Q Library 3.4 members (intr.c 1.73, sys.c
-# 1.116; most GAME signature hits are 3.4-consistent and 40+ are 3.4-only),
-# END.EXE Library 3.3 ones. The 3.4 set is preferred; the 3.3 set only fills
-# starts 3.4 leaves open and stays visible as `psyq330-signature`.
-# TODO(sdk): re-seed with --sdk-lib-dir once the toolchain pins the 3.4/3.3
-# archives; the flake still passes the 3.0 kit, so FID/exact rows would carry
-# the wrong release (see docs/function-and-data-inventory.md).
+# The flake supplies the Runtime Library 3.3 CD archives (exact and FID rows
+# carry `sdk33`); no Library 3.4 archive is preserved. GAME.EXE and OPEN.EXE
+# also carry newer members (intr.c 1.73, sys.c 1.116; most GAME signature hits
+# are 3.4-consistent), END.EXE a newer LIBGPU SYS and LIBSND members. The 3.4
+# signature set fills starts the archives leave open; the 3.3 set only fills
+# what 3.4 leaves open and stays visible as `psyq330-signature`.
 DEFAULT_SIGNATURE_SETS = ("340", "330")
 GHIDRA_PSX_LOADER_RELEASE = "ghidra_psx_ldr-2026.07.08"
 
@@ -926,6 +925,86 @@ def apply_fid_rows(
         }
 
 
+SDK_BAND_FIELDS = ("image", "start", "end", "note")
+
+
+def load_sdk_bands(path: Path) -> list[tuple[str, int, int]]:
+    fields, rows = read_tsv(path)
+    if fields != SDK_BAND_FIELDS:
+        raise ValueError(f"{path}: fields {fields!r}, expected {SDK_BAND_FIELDS!r}")
+    bands = []
+    for row in rows:
+        if row["image"] not in IMAGE_LAYOUTS:
+            raise ValueError(f"{path}: unknown image {row['image']!r}")
+        start, end = parse_int(row["start"]), parse_int(row["end"])
+        if not start < end:
+            raise ValueError(f"{path}: empty band {row!r}")
+        bands.append((row["image"], start, end))
+    return bands
+
+
+def apply_band_rows(
+    functions: Sequence[Function],
+    bands: Sequence[tuple[str, int, int]],
+    rows: dict[tuple[str, int], dict[str, object]],
+    band_path: Path,
+) -> None:
+    """Mark SDK text-band functions that no stronger channel identified.
+
+    The band file is the reviewed extent of each image's library text. A
+    function inside it with no exact, FID or signature row belongs to a
+    library release that no supplied archive or signature set preserves; it
+    stays vendored (it is not game code) under `sdk-unmatched-version`, with
+    the identified neighbours recorded for review.
+    """
+    by_image: dict[str, list[tuple[int, dict[str, object]]]] = {}
+    for (image, va), row in rows.items():
+        by_image.setdefault(image, []).append((va, row))
+    for entries in by_image.values():
+        entries.sort(key=lambda item: item[0])
+
+    def neighbour(image: str, va: int, step: int) -> str:
+        entries = by_image.get(image, [])
+        candidates = [row for address, row in entries if (address - va) * step > 0]
+        if not candidates:
+            return "none"
+        row = candidates[0] if step > 0 else candidates[-1]
+        return f"{row['library']}/{row['module']} {row['name'] or row['va']}"
+
+    for function in functions:
+        key = (function.image, function.va)
+        if key in rows:
+            continue
+        band = next(
+            (band for band in bands
+             if band[0] == function.image and band[1] <= function.va
+             and function.end <= band[2]),
+            None,
+        )
+        if band is None:
+            continue
+        rows[key] = {
+            "image": function.image,
+            "va": f"0x{function.va:08x}",
+            "size": f"0x{function.size:x}",
+            "name": "",
+            "aliases": "",
+            "provider": "Sony Computer Entertainment",
+            "library": "unmatched",
+            "module": "unmatched",
+            "member_offset": "0x0",
+            "source_version": "Psy-Q library release not preserved",
+            "evidence": "sdk-text-band",
+            "confidence": "sdk-unmatched-version",
+            "provenance": band_path.name,
+            "note": (
+                f"inside SDK text band 0x{band[1]:08x}..0x{band[2]:08x}; no exact, FID or "
+                f"signature match; follows {neighbour(function.image, function.va, -1)}, "
+                f"precedes {neighbour(function.image, function.va, 1)}"
+            ),
+        }
+
+
 def signature_root_from_environment() -> Path | None:
     """The ghidra_psx_ldr `data/psyq` directory holding one subdirectory per set."""
     if root := os.environ.get("GHIDRA_PSX_LOADER"):
@@ -982,6 +1061,11 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--signature-dir", type=Path,
         help="one explicit signature set directory, used instead of --signature-set",
+    )
+    parser.add_argument(
+        "--sdk-bands", type=Path,
+        help="reviewed SDK text bands; unidentified functions inside them become "
+        "sdk-unmatched-version rows (optional)",
     )
     parser.add_argument("--no-fids", action="store_true")
     parser.add_argument("--no-signatures", action="store_true")
@@ -1075,6 +1159,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 raise SystemExit(f"{directory}: missing signature set {name}")
             patterns = load_signatures(directory)
             apply_signature_rows(functions, signature_hits(patterns, images), rows, name)
+
+    if args.sdk_bands:
+        apply_band_rows(functions, load_sdk_bands(args.sdk_bands), rows, args.sdk_bands)
 
     ordered = sorted(
         rows.values(),
