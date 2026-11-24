@@ -22,10 +22,10 @@ extern int strncmp(const char *left, const char *right, unsigned long count);
 extern int abs(int value);
 
 #if defined(__cplusplus)
+/* The 3.3 MEMORY.H declares memcpy without parameters, which C++ reads as
+ * (void). Its memset and MALLOC.H's malloc/free are prototyped, so they are
+ * not redeclared: a second C++ prototype would make every call ambiguous. */
 extern void *memcpy(void *destination, const void *source, unsigned long size);
-extern void *memset(void *destination, int value, unsigned long size);
-extern void *malloc(unsigned long size);
-extern void free(void *allocation);
 #endif
 
 #endif
