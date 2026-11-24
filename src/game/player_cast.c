@@ -239,7 +239,7 @@ void func_8002d2a0(void)
                 func_800167cc(&arrow->angle, &arrow->vel);
                 func_80016928(DAT_801b24e4.unk1e * 900 / 5000, &arrow->vel);
                 arrow->unk10 = 50;
-                arrow->unk44 = arrow->pos.vy;
+                arrow->arg.h.unk44 = arrow->pos.vy;
             }
             DAT_801b24e4.unkca = 1;
             DAT_801b24e4.unkc0 = 0;

@@ -274,7 +274,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         sv.vz = 0;
         shot = func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
         if (shot != NULL) {
-            shot->unk44 = pos.vy;
+            shot->arg.h.unk44 = pos.vy;
             shot->unk10 = 0x32;
             shot->unk7 = 0;
         }

@@ -461,6 +461,40 @@ typedef struct Object44Def {
     u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set */
 } Object44Def;
 
+/* One of the 24 positions kinds 5 and 16 record behind them (func_80053c84). */
+typedef struct Object4cTrail {
+    VECTOR pos;
+    SVECTOR angle;
+} Object4cTrail;
+
+/* Object4c+0x44..+0x4b: func_80053c84 stores bytes, halfwords or words there by id (WIP views). */
+typedef struct Object4cBytes {
+    u8 unk44;
+    u8 unk45;
+    u8 unk46[2];
+    u8 unk48;
+    u8 unk49;
+    u8 unk4a[2];
+} Object4cBytes;
+
+typedef struct Object4cHalves {
+    u16 unk44;      /* +0x44: a shot arrow keeps its starting height here (func_8002d2a0) */
+    u16 unk46;
+    u16 unk48;
+    u16 unk4a;
+} Object4cHalves;
+
+typedef struct Object4cWords {
+    Object4cTrail *unk44; /* +0x44: ids 5 and 16: their 24 trail records */
+    s32 unk48;      /* +0x48: id 95: the height it was made at */
+} Object4cWords;
+
+typedef union Object4cArg {
+    Object4cBytes b;
+    Object4cHalves h;
+    Object4cWords w;
+} Object4cArg;
+
 typedef struct Object4c {
     u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
                      * 0x40 averages the Record18.unk5 stats (func_80053624) */
@@ -487,8 +521,7 @@ typedef struct Object4c {
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
     struct AnimSlot *unk40; /* +0x40: pose slot (func_800431e8) */
-    u16 unk44;      /* +0x44: a shot arrow keeps its starting height here (func_8002d2a0) */
-    u8 unk46[6];
+    Object4cArg arg; /* +0x44: per-id payload (func_80053c84) */
 } Object4c;
 
 typedef struct Object88 {
