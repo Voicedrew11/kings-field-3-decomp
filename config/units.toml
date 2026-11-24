@@ -37,3 +37,21 @@ unit = "psx.main"
 image = "PSX.EXE"
 source = "src/psx/main.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.screen"
+image = "GAME.EXE"
+source = "src/game/screen.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.objects"
+image = "GAME.EXE"
+source = "src/game/objects.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.hud"
+image = "GAME.EXE"
+source = "src/game/hud.c"
+profile = "gcc260-o2-g8"
