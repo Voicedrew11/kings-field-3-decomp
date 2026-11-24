@@ -41,6 +41,36 @@ typedef struct ColorSum {
     s16 b;
 } ColorSum;
 
+/* A model file as loaded: offsets are from the start of the file. */
+typedef struct ModelFile {
+    u32 unk0;
+    s32 unk4;       /* 0: static model, no animation */
+    s32 vertices;   /* offset of the vertex data */
+    s32 deltas;     /* offset of the delta-run offset table */
+    s32 anims;      /* offset of the animation offset table */
+} ModelFile;
+
+/* One key frame of an animation. */
+typedef struct AnimKey {
+    u16 reverse;    /* nonzero: the sub-frame runs from 0x1000 down */
+    u16 length;     /* time units */
+    u16 base;       /* delta table entry blended by the sub-frame */
+    u16 count;      /* delta runs applied to the vertices: first, then ids */
+    u16 first;
+    u16 ids[1];
+} AnimKey;
+
+/* A cached animated pose; owner points back at the model's slot pointer. */
+typedef struct AnimSlot {
+    u16 state;
+    u16 model;
+    u16 anim;
+    u16 key;
+    s32 base;
+    SVECTOR *pose;
+    struct AnimSlot **owner;
+} AnimSlot;
+
 typedef struct Data80199154 {
     u8 *buffer;                     /* +0x00000: 2D quads per frame; CD load buffer */
     u8 *heap;                       /* +0x00004: base the packet pool is carved from */
@@ -53,9 +83,13 @@ typedef struct Data80199154 {
     u8 unk10024[0x44];
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
-    u8 unk10148[0x14];
+    u8 unk10148[0x10];
+    u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
     u8 *models[0x100];              /* +0x1015c: loaded model files by id; 0..103 stay resident */
-    u8 unk1055c[0x5428];
+    u8 unk1055c[0x14b4];
+    AnimSlot slots[12];             /* +0x11a10 */
+    u8 unk11b00[0x1f44];
+    SVECTOR pose[1000];             /* +0x13a44: the blended pose being drawn */
     u16 message_arg[8];             /* +0x15984: number shown with message 25 */
     u8 frame;                       /* +0x15994: index of draw[]/disp[] in use */
     u8 unk15995[2];
@@ -90,7 +124,13 @@ extern Data80199154 DAT_80199154;
  * hardware address). The game keeps per-frame working pointers there.
  */
 typedef struct ScratchPad {
-    u8 unk0[0x11c];
+    u8 unk0[0x10];
+    u8 *model;          /* +0x10: data of the model being drawn */
+    u8 unk14[0x10];
+    u8 *unk24;          /* +0x24: model data + 12 */
+    u8 unk28[0x24];
+    u8 *vertices;       /* +0x4c: vertices of the model being drawn */
+    u8 unk50[0xcc];
     u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
     u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
 } ScratchPad;
@@ -168,8 +208,22 @@ void func_80041eec(s32 message, ...);
 void func_80041f8c(SpriteRec *sprite, u8 digit);
 void func_80041f9c(void);
 
+void func_80042b70(u16 id);
+void func_80042ba8(u16 id, u8 *file);
+void func_80042c64(u16 id, u8 *file);
+AnimKey *func_80042cac(ModelFile *model, s32 anim, s32 time, s32 *index, s32 *frac);
+void func_80042d70(SVECTOR *pose, SVECTOR *base, s16 *deltas);
+void func_80042e34(SVECTOR *pose, s16 *deltas);
+void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t);
+s16 *func_8004316c(s16 *deltas, s32 index);
+s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count);
+void func_80043894(AnimSlot *slot);
+void func_800438e0(void);
+void func_800439b0(AnimSlot **slot);
+
 /* Callees outside the render modules; signatures from these call sites. */
 u8 *func_8001939c(u8 *arena, s32 size, u8 **owner);
+SVECTOR *func_800194b0(s32 size);
 void func_80019474(u8 *block, u8 state);
 u8 func_8001947c(u8 *block);
 void func_8001949c(u8 *block, u16 id);
