@@ -1377,13 +1377,14 @@ void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
     u8 *wanted;
     s32 end;
     u8 *model;
+    s32 i;
 
     wanted = SCRATCH->u.load.model_wanted;
-    for (end = count + entry; entry < end; entry++, id++) {
+    for (i = entry, end = count + entry; i < end; i++, id++) {
         if (*wanted++ != 0) {
             model = DAT_80199154.models[id];
             if (model == NULL) {
-                func_80040830(file, entry, id);
+                func_80040830(file, i, id);
                 continue;
             }
             if (func_8001947c(model) == 1) {
