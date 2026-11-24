@@ -5116,6 +5116,8 @@ void func_800270f8(void)
 ADDRESS(0x80027198, 0x178)
 void func_80027198(void)
 {
+    RECT rect;
+
     func_800438e0();
     DAT_80199154.draw[0].isbg = 0;
     DAT_80199154.draw[0].dfe = 0;
