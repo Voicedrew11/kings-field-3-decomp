@@ -27,10 +27,10 @@ extern long CloseEvent(long event);
 
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
-extern void ResetCallback(void);
-extern void StopCallback(void);
+extern int ResetCallback(void); /* LIBETC.H 3.3 spelling */
+extern int StopCallback(void);
 
-extern void InitHeap(void *head, long size);
+extern void InitHeap(unsigned long *head, unsigned long size); /* MALLOC.H 3.3 spelling */
 extern void InitCARD(long pad_enable);
 extern long StartCARD(void);
 extern long StopCARD(void);
