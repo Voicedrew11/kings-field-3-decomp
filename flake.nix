@@ -263,7 +263,11 @@
           cd "$repo"
           exec python3 -m scripts.kf.seed_vendored_functions \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
+            --sdk-lib-dir "${psyq33Sdk}/lib" \
+            --sdk-version 3.3 \
+            --object-evidence config/evidence/psyq_33_text_sections.tsv \
+            --complete-object-evidence config/evidence/psyq_33_complete_objects.tsv \
+            --sdk-bands config/evidence/sdk_text_bands.tsv \
             --signature-root ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq \
             "$@"
         '';
@@ -277,7 +281,7 @@
           cd "$repo"
           exec python3 -m scripts.kf.fid_census \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
+            --sdk-lib-dir "${psyq33Sdk}/lib" \
             "$@"
         '';
       };

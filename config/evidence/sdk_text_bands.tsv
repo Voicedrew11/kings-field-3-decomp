@@ -1,0 +1,11 @@
+# Reviewed Psy-Q library text bands: every admitted start inside one is SDK code, not game code.
+# Bounds: ghidra_psx_ldr 340/330 signature hits and Runtime Library 3.3 object matches stop and start here, nothing in a
+# band calls or jumps into game code, and no game-band function uses the delay-slot epilogue (jr ra; addiu sp).
+image	start	end	note
+PSX.EXE	0x80010118	0x80010248	2MBYTE.OBJ (__main, __SN_ENTRY_POINT and four words its .text keeps at 0x800101cc), then LIBAPI stubs
+GAME.EXE	0x800144f0	0x80014b48	NONE2.OBJ, MALLOC.OBJ, LIBCARD BIOS stubs and the CARD object's _card_clear ahead of the game code
+GAME.EXE	0x80061be4	0x8007e4c4	library text after the game code
+OPEN.EXE	0x800136c0	0x800136d8	NONE2.OBJ after the first game unit
+OPEN.EXE	0x800144f4	0x8002c1b8	library text after the game code
+END.EXE	0x80011cfc	0x80011d14	NONE2.OBJ after the first game unit
+END.EXE	0x8001240c	0x800232a0	library text after the game code
