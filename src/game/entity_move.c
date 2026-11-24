@@ -189,17 +189,17 @@ ADDRESS(0x8004e824, 0xc8)
 s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
 {
     Object88 *obj;
-    s32 target[2];
-    s32 step[2];
+    struct {
+        s32 v[2];
+    } target, step;
 
     obj = DAT_80185da8.current;
-    func_80016240(angle, target);
-    step[0] = target[0];
-    step[1] = target[1];
-    func_800168f0(scale_x, target);
-    func_800168f0(scale_z, step);
-    obj->vel.vx = func_80015fdc(obj->vel.vx, target[0], step[0]);
-    obj->vel.vz = func_80015fdc(obj->vel.vz, target[1], step[1]);
+    func_80016240(angle, target.v);
+    step = target;
+    func_800168f0(scale_x, target.v);
+    func_800168f0(scale_z, step.v);
+    obj->vel.vx = func_80015fdc(obj->vel.vx, target.v[0], step.v[0]);
+    obj->vel.vz = func_80015fdc(obj->vel.vz, target.v[1], step.v[1]);
     return func_8004dbc8(&obj->vel, mode);
 }
 
