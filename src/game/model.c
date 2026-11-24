@@ -31,14 +31,11 @@ void func_80035c84(u16 id, u8 *data)
  * SCRATCH->screen: back faces (gte_nclip) dropped, each face lit from its
  * normals (normal colour depth-cued by the vertex fog values) and linked at
  * its average depth plus depth. Returns early when the packet pool is full.
- * Not exact: retail does not cross-jump the depth tests of the two triangle
- * cases and keeps the quad cases' depth + offset in $a0.
  */
 ADDRESS(0x80035ca4, 0xa04)
 void func_80035ca4(u16 id, s32 depth)
 {
     s32 n;
-    s32 z;
     ScreenVertex *v0;
     ScreenVertex *v1;
     ScreenVertex *v2;
@@ -91,11 +88,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_strgb(&((POLY_FT3 *)p)->r0);
             setlen(p, 7);
             setcode(p, scratch->tag.code);
-            z = (v0->z + v1->z + v2->z) / 3;
-            if (z > 0 && (u32)(z + depth) < OT_LENGTH) {
-                addPrim((u32 *)scratch->ot + (z + depth), p);
-                scratch->draw.count.ot_count++;
-            }
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
             break;
         }
         case 0x2c: {
@@ -132,11 +125,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_strgb(&((POLY_FT4 *)p)->r0);
             setlen(p, 9);
             setcode(p, scratch->tag.code);
-            z = (v0->z + v1->z + v2->z + v3->z) >> 2;
-            if (z > 0 && (u32)(z + depth) < OT_LENGTH) {
-                addPrim((u32 *)scratch->ot + (z + depth), p);
-                scratch->draw.count.ot_count++;
-            }
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
             break;
         }
         case 0x34: {
@@ -172,11 +161,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_strgb3(&((POLY_GT3 *)p)->r0, &((POLY_GT3 *)p)->r1, &((POLY_GT3 *)p)->r2);
             setlen(p, 9);
             setcode(p, scratch->tag.code);
-            z = (v0->z + v1->z + v2->z) / 3;
-            if (z > 0 && (u32)(z + depth) < OT_LENGTH) {
-                addPrim((u32 *)scratch->ot + (z + depth), p);
-                scratch->draw.count.ot_count++;
-            }
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
             break;
         }
         case 0x3c: {
@@ -220,11 +205,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_strgb(&((POLY_GT4 *)p)->r3);
             setlen(p, 12);
             setcode(p, scratch->tag.code);
-            z = (v0->z + v1->z + v2->z + v3->z) >> 2;
-            if (z > 0 && (u32)(z + depth) < OT_LENGTH) {
-                addPrim((u32 *)scratch->ot + (z + depth), p);
-                scratch->draw.count.ot_count++;
-            }
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
             break;
         }
         }

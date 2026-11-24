@@ -316,7 +316,9 @@ typedef struct ScratchPad {
     u32 *prim;          /* +0x20: the primitive record after its head word */
     ModelPart *part;    /* +0x24: the part being drawn */
     u8 *normals;        /* +0x28: the part's normals (records index them by byte offset) */
-    u8 unk2c[0x18];
+    u8 *poly;           /* +0x2c: the packet being filled (func_80037bec) */
+    ScreenVertex *vert[4]; /* +0x30: its projected vertices (func_80037bec) */
+    u8 unk40[4];
     ScreenVertex *screen; /* +0x44: the part's projected vertices */
     ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too */
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
@@ -388,6 +390,30 @@ extern s32 DAT_8009c2ec;
             addPrim(DAT_80199154.ot + depth, (p));              \
             DAT_80199154.ot_count++;                            \
         }                                                       \
+    }
+
+/*
+ * Links packet p of a model part into scratch->ot at z + depth, z being the
+ * face's depth: faces at z <= 0 or past the table are dropped. The part
+ * renderers expand it once per face kind, each with its own z.
+ */
+#define LINK_PART_PRIM(scratch, zexpr, depth, p)                    \
+    {                                                               \
+        s32 z = (zexpr);                                            \
+        if (z > 0 && (u32)(z + (depth)) < OT_LENGTH) {              \
+            addPrim((scratch)->ot + (z + (depth)), (p));            \
+            (scratch)->draw.count.ot_count++;                       \
+        }                                                           \
+    }
+
+/* As LINK_PART_PRIM into the eight scratch->ot2 entries, at (z + depth) & 7. */
+#define LINK_PART_BIN(scratch, zexpr, depth, p)                     \
+    {                                                               \
+        s32 z = (zexpr);                                            \
+        if (z > 0 && (u32)((z + (depth)) & 7) < 8) {                \
+            addPrim((scratch)->ot2 + ((z + (depth)) & 7), (p));     \
+            (scratch)->draw.count.ot_count++;                       \
+        }                                                           \
     }
 
 void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,

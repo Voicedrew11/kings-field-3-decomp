@@ -171,6 +171,12 @@ source = "src/game/model.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.parts"
+image = "GAME.EXE"
+source = "src/game/parts.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.tiles"
 image = "GAME.EXE"
 source = "src/game/tiles.c"
