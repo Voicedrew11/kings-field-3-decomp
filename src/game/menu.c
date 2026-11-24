@@ -4589,6 +4589,7 @@ ADDRESS(0x80025be8, 0x1d0)
 void func_80025be8(u8 item)
 {
     MATRIX m;
+    MATRIX unused[2];
     MATRIX light;
     MATRIX lights;
     MATRIX color;
