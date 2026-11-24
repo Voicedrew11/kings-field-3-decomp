@@ -33,6 +33,7 @@ Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (fun
 Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records;band F src/game/entity*.c field accesses;func_8002c164 reads +0x2 and +0x28 of func_8004d3c4's result	WIP (game-c)
 Object88Place	0x10	supported	asm;func_800530f8 16-byte placement records	WIP (game-f)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
+Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
 Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
 Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec	WIP (game-d)
 Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)

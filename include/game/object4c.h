@@ -48,6 +48,10 @@ s32 func_80056580(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
 s32 func_800566d4(s32 radius, s32 height, s32 spin);
 void func_80056800(void);
 void func_80056840(void);
+void func_800568bc(void);
+void func_8005bbf4(void);
+void func_8005bc24(u32 *src);
+void func_8005bc50(void);
 
 extern SVECTOR DAT_8009c33c;
 

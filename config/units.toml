@@ -193,3 +193,51 @@ unit = "game.object4c_move"
 image = "GAME.EXE"
 source = "src/game/object4c_move.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c_list"
+image = "GAME.EXE"
+source = "src/game/object4c_list.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.misc_5bd34"
+image = "GAME.EXE"
+source = "src/game/misc_5bd34.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44_move"
+image = "GAME.EXE"
+source = "src/game/object44_move.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.script_scan"
+image = "GAME.EXE"
+source = "src/game/script_scan.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.start_pos"
+image = "GAME.EXE"
+source = "src/game/start_pos.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.item_count"
+image = "GAME.EXE"
+source = "src/game/item_count.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.new_game"
+image = "GAME.EXE"
+source = "src/game/new_game.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.arena_ptr"
+image = "GAME.EXE"
+source = "src/game/arena_ptr.c"
+profile = "gcc260-o2-g8"

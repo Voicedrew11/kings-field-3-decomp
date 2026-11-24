@@ -192,7 +192,11 @@ typedef struct Data801ba984 {
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[9];
     u8 unk7f[5];    /* +0x7f: per magic element */
-    u8 unk84[0x50c0];
+    u8 unk84[0x26];
+    u8 unkaa;       /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
+    u8 unkab[0x59];
+    u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by func_8005ea64 */
+    u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (func_8005ef18) */
 } Data801ba984;
 
 /* 0x20-byte records func_800293e4 adds to the player's halfwords +0x66..+0x76. */
@@ -255,7 +259,12 @@ typedef struct Object44 {
     s32 x;          /* +0x14 */
     s32 y;
     s32 z;
-    u8 unk20[0x24];
+    u8 unk20[4];
+    SVECTOR angle;  /* +0x24 (func_8005bee0) */
+    u8 unk2c[0xc];
+    u8 unk38;
+    u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
+    u8 unk3a[0xa];
 } Object44;
 
 typedef struct Object4c {
@@ -412,7 +421,7 @@ typedef struct Data801b77ec {
     Object4c objects[128];  /* +0x900 */
     Record18 *unk2f00;      /* +0x2f00: record of unk2f04 */
     Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
-    u8 unk2f08[4];
+    s32 unk2f08;            /* +0x2f08: index of unk2f04 (func_8005bc50) */
 } Data801b77ec;
 
 /* 12-byte level records (DAT_8009f114, one per level). */
@@ -482,6 +491,8 @@ extern u32 DAT_801b56cc[0xa0];
 extern u32 DAT_801b594c[0xc8];
 extern Data801b77ec DAT_801b77ec;
 extern Data801ba984 DAT_801ba984;
+/* Two counts per item id (0..149; func_8005d898 caps each at 99), cleared by func_8005ea64. */
+extern u8 DAT_800c85e8[2][150];
 extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;
 
