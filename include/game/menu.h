@@ -206,7 +206,8 @@ extern u16 DAT_80081868[];
 extern MenuEntry DAT_8007f620[];
 extern MenuEntry DAT_8007f230[10];
 extern MenuEntry DAT_80080430[];
-extern u8 DAT_800c85e8[];
+/* The bag: counts by item id, then the storage counts at [150 + id]. */
+extern u8 DAT_800c85e8[300];
 extern u8 DAT_80081780[];
 extern MapRect DAT_801ba6fc[160];
 

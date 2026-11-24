@@ -41,6 +41,7 @@ GAME.EXE	0x8009c3f8	0x4	DAT_8009c3f8	global	bss	s32	func_80014bd4	address-only	a
 GAME.EXE	0x8009c3fc	0x4	DAT_8009c3fc	global	bss	u32	func_80017664	address-only	asm;src/game/scene.c game.scene	.sbss word ($gp+0x1e8): FDAT window base + 4, the loaded module's handler table; func_80018358 copies it to DAT_8018fad4.handlers
 GAME.EXE	0x8009f114	0x4	DAT_8009f114	global	bss	u32[]	func_80017664	address-only	asm;band C relocs	table func_80017664 copies out of the first FDAT.T entry; WIP extent
 GAME.EXE	0x800aedc4	0x4	DAT_800aedc4	global	bss	u32[]	func_80017664	address-only	asm;band C relocs	table func_80017664 copies out of the first FDAT.T entry and passes to func_80042ba8(0x28, ...); WIP extent
+GAME.EXE	0x800c85e8	0x12c	DAT_800c85e8	global	bss	u8[300]	func_8001aa84	address-only	asm;game-e item pages	the bag: item counts by id [0..0x95], storage counts [150 + id] (func_8001dee4/func_8001e1b4); WIP extent
 GAME.EXE	0x800c8768	0x158	DAT_800c8768	global	bss	char[SS_SEQ_TABSIZ * 2]	func_8001509c	address-only	asm;band A relocs	libsnd sequence attribute table for SsSetTableSize(table, 2, 1); extent is SS_SEQ_TABSIZ (172) * 2 * 1
 GAME.EXE	0x800c8954	0x4d800	DAT_800c8954	global	bss	u8[0x4d800]	func_80014bd4	address-only	asm;band A relocs	arena func_8001937c formats with a 0x4d800-byte free block
 GAME.EXE	0x80116154	0x4	DAT_80116154	global	bss	u32[]	func_80017664	address-only	asm;band C relocs	table func_80017664 copies out of the first FDAT.T entry and passes to func_80042ba8(0, ...); starts where the arena DAT_800c8954 ends; WIP extent
