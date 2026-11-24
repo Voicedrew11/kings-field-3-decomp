@@ -3259,18 +3259,19 @@ s32 func_8002200c(s32 mode)
             func_80027a40();
         }
         if (chosen == 0) {
-            if (mode != 0) {
+            if (mode == 0) {
+                if ((u32)DAT_801b24e4.unk50 >= 150) {
+                    DAT_801b24e4.unk50 -= 150;
+                    paid = 0;
+                    break;
+                }
+                func_8002792c(0xe);
+                chosen = -1;
+                result = MENU_NONE;
+            } else {
                 paid = 0;
                 break;
             }
-            if ((u32)DAT_801b24e4.unk50 >= 150) {
-                DAT_801b24e4.unk50 -= 150;
-                paid = 0;
-                break;
-            }
-            func_8002792c(0xe);
-            chosen = -1;
-            result = MENU_NONE;
         }
         if (chosen == 1 || result != MENU_NONE) {
             break;
