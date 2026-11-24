@@ -1238,7 +1238,7 @@ void func_8002bb5c(u8 id)
 }
 
 ADDRESS(0x8002bb84, 0x23c)
-void func_8002bb84(s32 id, u8 slot)
+void func_8002bb84(u8 id, u8 slot)
 {
     switch (slot) {
     case 0:

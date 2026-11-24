@@ -1057,10 +1057,9 @@ void func_8001cbb8(s32 slot)
     n++;
     func_80027688(&list, 0, 2);
     list.count = n;
-    n--;
     list.entries = entries;
     list.counts = counts;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n - 1; i++) {
         if (ids[i] == equipped) {
             cursor = i;
             i = 40;
