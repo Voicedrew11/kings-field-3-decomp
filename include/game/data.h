@@ -13,7 +13,9 @@
 typedef struct Data801b24e4 {
     u8 unk0[0xe];
     u8 unke;        /* +0x0e: cleared every frame by the game loop */
-    u8 unkf[0xe8];
+    u8 unkf[0x95];
+    u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
+    u8 unka8[0x4f];
     u8 se_volume;   /* +0xf7: 0 mutes sound effects; scales them by n/128 */
     u8 bgm_volume;  /* +0xf8: 0 keeps the sequence off */
     u8 unkf9[0xa3];
