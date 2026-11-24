@@ -472,10 +472,22 @@ typedef struct Object4cBytes {
     u8 unk44;
     u8 unk45;
     u8 unk46[2];
-    u8 unk48;
-    u8 unk49;
-    u8 unk4a[2];
+    u8 unk48;       /* +0x48: ids 5 and 16: cursor into their 24 trail records */
+    u8 unk49;       /* +0x49: ids 5 and 16: step counter of the current phase */
+    u8 unk4a;       /* +0x4a: ids 5 and 16: index of the Object88 record they hold */
+    u8 unk4b;
 } Object4cBytes;
+
+/* Signed views of the payload: func_800568bc reads some ids' bytes with lb, halfwords with lh. */
+
+typedef struct Object4cChars {
+    s8 unk44;
+    s8 unk45;
+    s8 unk46[2];
+    s8 unk48;
+    s8 unk49;
+    s8 unk4a[2];
+} Object4cChars;
 
 typedef struct Object4cHalves {
     u16 unk44;      /* +0x44: a shot arrow keeps its starting height here (func_8002d2a0) */
@@ -484,6 +496,14 @@ typedef struct Object4cHalves {
     u16 unk4a;
 } Object4cHalves;
 
+/* Signed halfword view (func_800568bc). */
+typedef struct Object4cShorts {
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4a;
+} Object4cShorts;
+
 typedef struct Object4cWords {
     Object4cTrail *unk44; /* +0x44: ids 5 and 16: their 24 trail records */
     s32 unk48;      /* +0x48: id 95: the height it was made at */
@@ -491,7 +511,9 @@ typedef struct Object4cWords {
 
 typedef union Object4cArg {
     Object4cBytes b;
+    Object4cChars c;
     Object4cHalves h;
+    Object4cShorts s;
     Object4cWords w;
 } Object4cArg;
 
@@ -513,7 +535,7 @@ typedef struct Object4c {
     u8 unkd;
     u16 unke;
     s16 unk10;
-    u16 unk12;      /* +0x12: light blend toward light2 (func_8003e34c) */
+    s16 unk12;      /* +0x12: light blend toward light2 (func_8003e34c); id 6 compares it signed */
     u16 unk14;      /* +0x14: animation time */
     u8 unk16[2];
     VECTOR pos;     /* +0x18 */
