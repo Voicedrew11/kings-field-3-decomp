@@ -375,25 +375,25 @@ void func_80029500(void)
             DAT_801b24e4.unk42[i] = 999;
         }
     }
-    if (DAT_801b24e4.unk54[0] & 0x8000) {
+    if (DAT_801b24e4.unk54[0] >= 0x8000) {
         DAT_801b24e4.unk54[0] = 0;
     }
-    if (DAT_801b24e4.unk54[1] & 0x8000) {
+    if (DAT_801b24e4.unk54[1] >= 0x8000) {
         DAT_801b24e4.unk54[1] = 0;
     }
-    if (DAT_801b24e4.unk54[2] & 0x8000) {
+    if (DAT_801b24e4.unk54[2] >= 0x8000) {
         DAT_801b24e4.unk54[2] = 0;
     }
-    if (DAT_801b24e4.unk54[3] & 0x8000) {
+    if (DAT_801b24e4.unk54[3] >= 0x8000) {
         DAT_801b24e4.unk54[3] = 0;
     }
-    if (DAT_801b24e4.unk54[4] & 0x8000) {
+    if (DAT_801b24e4.unk54[4] >= 0x8000) {
         DAT_801b24e4.unk54[4] = 0;
     }
-    if (DAT_801b24e4.unk54[5] & 0x8000) {
+    if (DAT_801b24e4.unk54[5] >= 0x8000) {
         DAT_801b24e4.unk54[5] = 0;
     }
-    if (DAT_801b24e4.unk54[6] & 0x8000) {
+    if (DAT_801b24e4.unk54[6] >= 0x8000) {
         DAT_801b24e4.unk54[6] = 0;
     }
     if (DAT_801b24e4.unk62 > 0x7fff) {
