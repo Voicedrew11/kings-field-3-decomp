@@ -46,8 +46,9 @@ void func_80052e5c(void)
                 }
             }
             if (obj->unk1 == 0x6e) {
-                if ((DAT_801b24e4.unkf5 == 0x5c || DAT_801b24e4.unkf6 == 0x5c) && DAT_801b24e4.unk1c != 0) {
-                } else {
+                if (DAT_801b24e4.unkf5 != 0x5c && DAT_801b24e4.unkf6 != 0x5c) {
+                    obj->unk3 = 0;
+                } else if (DAT_801b24e4.unk1c == 0) {
                     obj->unk3 = 0;
                 }
             }
