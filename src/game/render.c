@@ -133,8 +133,6 @@ void func_8003bfd0(void)
  * posed by func_800431e8 (the base pose is rebuilt when it returns nonzero,
  * unlike func_800400ac), and projected flat (screen x/y = view x/y, depth =
  * view z / 4) before func_80035ca4.
- * Not exact: retail sets the &SCRATCH->w.model.unk54 base after the empty-list test,
- * not in the prologue.
  */
 
 ADDRESS(0x8003c35c, 0x50c)
@@ -150,10 +148,8 @@ void func_8003c35c(void)
     u8 *model;
     s32 i;
     s32 offset;
-    VECTOR *view;
 
     scratch = SCRATCH;
-    view = &SCRATCH->w.model.unk54;
     for (rec = DAT_80081c20; rec->visible != 0xff; rec++) {
         if (rec->visible != 1) {
             continue;
@@ -199,7 +195,7 @@ void func_8003c35c(void)
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(view);
+                gte_stlvnl(&scratch->w.model.unk54);
                 screen->sxy.vx = scratch->w.model.unk54.vx;
                 screen->sxy.vy = scratch->w.model.unk54.vy;
                 screen->fog = scratch->w.model.unk54.vz;
@@ -217,7 +213,7 @@ void func_8003c35c(void)
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(view);
+                gte_stlvnl(&scratch->w.model.unk54);
                 screen->sxy.vx = scratch->w.model.unk54.vx;
                 screen->sxy.vy = scratch->w.model.unk54.vy;
                 screen->fog = scratch->w.model.unk54.vz;
