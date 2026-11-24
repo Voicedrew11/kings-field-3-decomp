@@ -604,6 +604,7 @@ void func_8001babc(void)
     s32 n;
     s32 i;
     s32 bytes;
+    s32 size = 15;
 
     n = DAT_8018fad4.unk9 + 721;
     bytes = func_80019cc4(6, n, 0);
@@ -639,10 +640,10 @@ void func_8001babc(void)
                 n = 0;
             }
             if (DAT_8018fad4.unk9 == 0x19 || DAT_8018fad4.unk9 == 0x1b) {
-                func_80027494(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, 15, 15);
+                func_80027494(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, size, size);
             } else {
                 func_80027494(DAT_801b24e4.pos.vx / 1024 + 72, 0xbc - DAT_801b24e4.pos.vz / 1024, 15, 15,
-                              n * 16 + 128, 0x90, 15, 15);
+                              n * 16 + 128, 0x90, size, size);
             }
             func_80027530(0x1d);
             func_80026e4c(0x32, 0x1a, 0xdc, 0xb4);
