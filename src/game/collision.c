@@ -13,6 +13,7 @@
 #include <game/player.h>
 #include <game/entity.h>
 #include <game/collision.h>
+#include <game/object44.h>
 
 /* Tests a shape at (x, y, z) after locating the point 1280 above it; returns the floor. */
 ADDRESS(0x80033b10, 0x7c)
@@ -114,7 +115,7 @@ void func_80033d84(void)
         def = &DAT_8018fb3c.defs[carrier->unk6];
         DAT_801d4464.unk1203c = carrier->pos;
         if (carrier->unk3 & 0x10) {
-            DAT_801d4464.unk1204c = def->unk4 * carrier->unk38 >> 7;
+            DAT_801d4464.unk1204c = def->unk4 * carrier->arg.b.unk38 >> 7;
         } else if (carrier->unk3 & 0x4) {
             DAT_801d4464.unk12050 = def->unke;
             DAT_801d4464.unk1204c = def->unk10;

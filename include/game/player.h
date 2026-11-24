@@ -53,4 +53,8 @@ struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dis
 void func_80030908(SVECTOR *dir, SVECTOR *push, s16 lift);
 void func_800309c8(SVECTOR *dir, SVECTOR *push, s16 lift);
 
+/* Pad button bits by action (owned by the player module); [7] toggles a
+ * setting in Data801b24e4.unk178 (func_80043bb8). */
+extern u16 DAT_80081868[];
+
 #endif

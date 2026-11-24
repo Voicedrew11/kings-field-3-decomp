@@ -71,7 +71,4 @@ void func_80061bc4(void);
 /* Game loop exit word (defined in src/game/main.c). */
 extern s32 DAT_8009c3f8;
 
-/* Callees outside the band; signatures from these call sites. */
-Object44 *func_80046034(s32 a0, s32 a1, s32 a2);
-
 #endif

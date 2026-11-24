@@ -303,6 +303,7 @@ typedef struct Data80081c20 {
 
 extern Data80081c20 DAT_80081c20[3];
 
+extern RECT DAT_8009c2d0;
 extern CVECTOR DAT_8009c2e0;
 extern SVECTOR DAT_8009c2e4;
 extern s32 DAT_8009c2ec;
@@ -376,6 +377,8 @@ void func_800438e0(void);
 void func_80043940(void);
 void func_800439b0(AnimSlot **out);
 void func_80043a08(EffectSpawn *spawn);
+s32 func_80043bb8(s32 level, s32 step);
+void func_800441d4(u16 file, u16 entry);
 
 void func_80034180(void);
 void func_800341e8(void);

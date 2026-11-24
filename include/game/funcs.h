@@ -19,8 +19,6 @@ void func_80030a6c(SVECTOR *knockback);
 void func_80030e14(void);
 void func_80030fcc(void);
 void func_800324f0(s32 x, s32 y, s32 z);
-void func_8004485c(void);
-void func_80046c00(s32 a0, s32 a1, s32 a2, s32 a3);
 void func_80047010(void);
 void func_8005eb20(void);
 void func_8005f7bc(u8 *data);
