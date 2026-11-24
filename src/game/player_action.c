@@ -338,11 +338,11 @@ void func_8002f5c0(void)
 ADDRESS(0x8002f9bc, 0x420)
 void func_8002f9bc(void)
 {
+    s16 side;
+    s16 ahead;
     s32 sx;
     s32 sz;
     s16 len;
-    s16 side;
-    s16 ahead;
 
     if (DAT_801b24e4.unk178 & DAT_80081868[0]) {
         ahead = DAT_801b24e4.unk164 + (DAT_801b24e4.unk180 >> 2);
@@ -394,8 +394,10 @@ void func_8002f9bc(void)
             DAT_801b24e4.unk162 = 0;
         }
     }
-    sx = DAT_801b24e4.unk162 * DAT_801b24e4.unk162;
-    sz = DAT_801b24e4.unk164 * DAT_801b24e4.unk164;
+    sx = DAT_801b24e4.unk162;
+    sx *= sx;
+    sz = DAT_801b24e4.unk164;
+    sz *= sz;
     len = SquareRoot0(sx + sz);
     if (len == 0) {
         ahead = 0;

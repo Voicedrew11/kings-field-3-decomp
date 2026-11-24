@@ -12,6 +12,9 @@
  * shared identity, fdat_<address in the first module that has it>, in every
  * module, and the module units bind their claims by name.
  */
+
+/* Marks the declarations whose FDAT view differs from GAME.EXE's (game/entity.h). */
+#define FDAT_MODULE
 #include <kf/lib/null.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>

@@ -9,11 +9,8 @@ s32 fdat_801e875c(u8 *script, s32 dist)
     if (script[0] != 0x85) {
         return 1;
     }
-    if (dist >= ((u16 *)script)[8]) {
+    if (dist >= ((u16 *)script)[8] || ((u16 *)script)[9] >= dist) {
         return 0;
     }
-    if (((u16 *)script)[9] < dist) {
-        return 1;
-    }
-    return 0;
+    return 1;
 }

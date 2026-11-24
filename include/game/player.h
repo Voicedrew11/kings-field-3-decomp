@@ -44,7 +44,7 @@ s32 func_8002b8d8(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
 void func_8002b928(u8 id);
 void func_8002ba38(u8 id);
 void func_8002bb5c(u8 id);
-void func_8002bb84(s32 id, u8 slot);
+void func_8002bb84(u8 id, u8 slot);
 void func_8002bdc0(u8 id);
 void func_8002c040(s32 hand);
 struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);

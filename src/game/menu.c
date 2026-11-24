@@ -329,10 +329,13 @@ s32 func_8001aa84(void)
     }
     func_80027c8c();
     if (result >= 104 && result <= 120) {
-        if (!(DAT_8018fad4.unk9 == 2
-              && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
-              && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42
-              && (result == 104 || result == 107 || result == 108 || result == 109))) {
+        if (DAT_8018fad4.unk9 == 2
+            && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
+            && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42) {
+            if (!(result == 104 || result == 107 || result == 108 || result == 109)) {
+                func_8001b254(result);
+            }
+        } else {
             func_8001b254(result);
         }
     }
@@ -604,6 +607,7 @@ void func_8001babc(void)
     s32 n;
     s32 i;
     s32 bytes;
+    s32 size = 15;
 
     n = DAT_8018fad4.unk9 + 721;
     bytes = func_80019cc4(6, n, 0);
@@ -639,10 +643,10 @@ void func_8001babc(void)
                 n = 0;
             }
             if (DAT_8018fad4.unk9 == 0x19 || DAT_8018fad4.unk9 == 0x1b) {
-                func_80027494(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, 15, 15);
+                func_80027494(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, size, size);
             } else {
                 func_80027494(DAT_801b24e4.pos.vx / 1024 + 72, 0xbc - DAT_801b24e4.pos.vz / 1024, 15, 15,
-                              n * 16 + 128, 0x90, 15, 15);
+                              n * 16 + 128, 0x90, size, size);
             }
             func_80027530(0x1d);
             func_80026e4c(0x32, 0x1a, 0xdc, 0xb4);
@@ -701,6 +705,8 @@ void func_8001bea8(void)
                 for (y = y0; y < y1; y++) {
                     if (DAT_801b594c[x][y / 8] & (bit = 1 << (7 - y % 8))) {
                         DAT_801b56cc[DAT_8018fad4.unk9][i / 8] |= 1 << (7 - i % 8);
+                        x = x1;
+                        y = y1;
                     }
                 }
             }
@@ -748,7 +754,7 @@ s32 func_8001c030(void)
             setRGB0(DAT_8009c374, n - 96, n - 96, n / 2 - 96);
             DAT_8009c374->tpage = 0x1e;
             DAT_8009c374->clut = 0x7d85;
-            func_80027494(selected % 4 * 56 + (xs[selected] * 4 / 5 + 40),
+            func_80027494(selected % 4 * 56 + 40 + xs[selected] * 4 / 5,
                           0xbc - selected / 4 * 56 - ys[selected] * 4 / 5, 16, 16, 0xa0, 0x80, 16, 16);
             func_80027530(0x1c);
             func_800269c0(0x5f, 0xd6, DAT_8009c254);
@@ -1053,10 +1059,9 @@ void func_8001cbb8(s32 slot)
     n++;
     func_80027688(&list, 0, 2);
     list.count = n;
-    n--;
     list.entries = entries;
     list.counts = counts;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n - 1; i++) {
         if (ids[i] == equipped) {
             cursor = i;
             i = 40;
@@ -1157,11 +1162,10 @@ void func_8001d0c4(void)
     func_80027688(&list, 0, 2);
     list.rows = 4;
     list.count = n;
-    n--;
     list.entries = entries;
     list.values = values;
     list.y = 0x83;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n - 1; i++) {
         if (ids[i] == DAT_801b24e4.unkc7) {
             func_80027728(&list, i);
             i = 32;
@@ -1218,6 +1222,7 @@ void func_8001d3a0(void)
     s32 result;
     u8 saved;
     u8 item;
+    s32 n;
 
     confirmed = 0;
     result = MENU_NONE;
@@ -1229,13 +1234,13 @@ void func_8001d3a0(void)
     }
     saved = DAT_800c85e8[0][0x85];
     DAT_800c85e8[0][0x85] = 0;
-    i = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
+    n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
     DAT_800c85e8[0][0x85] = saved;
-    i += func_8001c6c0(DAT_801b77ec.unk0, &entries[i], &values[i], &spells[i], 0, 0x1e);
-    memcpy(&entries[i], &DAT_8007f230[11], 12);
-    i++;
+    n += func_8001c6c0(DAT_801b77ec.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
+    memcpy(&entries[n], &DAT_8007f230[11], 12);
+    n++;
     func_80027688(&list, 0, 2);
-    list.count = i;
+    list.count = n;
     list.entries = entries;
     list.counts = counts;
     list.values = values;
@@ -1875,16 +1880,15 @@ void func_8001eb3c(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w,
 {
     s32 i;
     s32 j;
-    MenuText *title = &DAT_8007e660[message + 28];
     MenuText *line;
 
     for (i = 0; i < 2; i++) {
         func_80026fe4();
-        line = lines;
         if (message < 8) {
-            func_80025f38(&DAT_8007e564[MENU_FONT_FRAME], title);
-            func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], title);
+            func_80025f38(&DAT_8007e564[MENU_FONT_FRAME], &DAT_8007e660[message + 28]);
+            func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &DAT_8007e660[message + 28]);
         }
+        line = lines;
         for (j = 0; j < count; j++) {
             func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], line);
             line++;
@@ -3178,8 +3182,8 @@ s32 func_80021d94(void)
         counts[i] = DAT_800c85e8[0][ids[i]] + DAT_800c85e8[1][ids[i]];
     }
     func_80027688(&list, 8, 1);
-    list.entries = entries;
     list.count = n;
+    list.entries = entries;
     list.counts = counts;
     for (i = 0; i < 2; i++) {
         func_80026fe4();
@@ -3255,18 +3259,19 @@ s32 func_8002200c(s32 mode)
             func_80027a40();
         }
         if (chosen == 0) {
-            if (mode != 0) {
+            if (mode == 0) {
+                if ((u32)DAT_801b24e4.unk50 >= 150) {
+                    DAT_801b24e4.unk50 -= 150;
+                    paid = 0;
+                    break;
+                }
+                func_8002792c(0xe);
+                chosen = -1;
+                result = MENU_NONE;
+            } else {
                 paid = 0;
                 break;
             }
-            if ((u32)DAT_801b24e4.unk50 >= 150) {
-                DAT_801b24e4.unk50 -= 150;
-                paid = 0;
-                break;
-            }
-            func_8002792c(0xe);
-            chosen = -1;
-            result = MENU_NONE;
         }
         if (chosen == 1 || result != MENU_NONE) {
             break;
@@ -3562,8 +3567,8 @@ void func_800227ec(void)
     func_800277c0(DAT_801b24e4.unk42[0], 6, 0, 0, number.text);
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
-    label.x += 35;
     label.y += 15;
+    label.x += 35;
     func_80027414();
     setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
     DAT_8009c374->tpage = 0x1d;
@@ -3586,8 +3591,8 @@ void func_800227ec(void)
     func_800277c0(DAT_801b24e4.unk42[3], 6, 0, 0, number.text);
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
-    label.x += 35;
     label.y += 15;
+    label.x += 35;
     func_80027414();
     setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
     DAT_8009c374->tpage = 0x1d;
@@ -5116,6 +5121,8 @@ void func_800270f8(void)
 ADDRESS(0x80027198, 0x178)
 void func_80027198(void)
 {
+    RECT rect;
+
     func_800438e0();
     DAT_80199154.draw[0].isbg = 0;
     DAT_80199154.draw[0].dfe = 0;

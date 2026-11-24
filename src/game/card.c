@@ -376,20 +376,24 @@ ADDRESS(0x80028b70, 0x104)
 void func_80028b70(SaveHeader *header, s32 number)
 {
     s32 i;
+    s32 d;
+    s32 e;
     s32 experience = DAT_801b24e4.experience;
     s32 level = DAT_801b24e4.level;
 
     header->title[30] = SJIS_DIGIT_LEAD;
     header->title[31] = number + SJIS_DIGIT_ZERO;
     for (i = 0; i < 6; i++) {
-        header->title[(25 - i) * 2 + 1] = experience % 10 + SJIS_DIGIT_ZERO;
+        d = experience % 10 + SJIS_DIGIT_ZERO;
+        header->title[(25 - i) * 2 + 1] = d;
         header->title[(25 - i) * 2] = SJIS_DIGIT_LEAD;
         experience /= 10;
         if (experience == 0)
             i = 6;
     }
     for (i = 0; i < 2; i++) {
-        header->title[(30 - i) * 2 + 1] = level % 10 + SJIS_DIGIT_ZERO;
+        e = level % 10 + SJIS_DIGIT_ZERO;
+        header->title[(30 - i) * 2 + 1] = e;
         header->title[(30 - i) * 2] = SJIS_DIGIT_LEAD;
         level /= 10;
         if (level == 0)

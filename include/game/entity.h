@@ -80,7 +80,15 @@ s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
 s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
 void func_8004da2c(Object88 *obj);
 void func_8004db08(Object88 *obj, s16 step);
+#ifdef FDAT_MODULE
+/*
+ * The FDAT modules call it without this prototype: FDAT_077/083 pass a u16
+ * script field zero-extended (lhu) where GAME.EXE's callers narrow to s16.
+ */
+void func_8004db3c();
+#else
 void func_8004db3c(Object88 *obj, s16 step);
+#endif
 s32 func_8004db98(Object88 *obj, u16 time);
 s32 func_8004dbc8(SVECTOR *vel, s32 mode);
 s32 func_8004e094(SVECTOR *vel);

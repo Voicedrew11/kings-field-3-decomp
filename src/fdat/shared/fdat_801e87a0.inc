@@ -18,6 +18,7 @@ void fdat_801e87a0(void)
     s32 turned;
     s32 dist;
     s32 range;
+    s32 mode;
 
     obj = DAT_80185da8.current;
     def = DAT_80185da8.def;
@@ -35,17 +36,18 @@ void fdat_801e87a0(void)
         obj->unk13 = 7;
         func_8004c130(script[1]);
     }
-    dz = DAT_801b24e4.pos.vz - obj->pos.vz;
     dx = DAT_801b24e4.pos.vx - obj->pos.vx;
+    dz = DAT_801b24e4.pos.vz - obj->pos.vz;
     angle = ratan2(dz, dx);
     step_x = ((u16 *)script)[6] * rcos(angle) >> 12;
     step_z = ((u16 *)script)[6] * rsin(angle) >> 12;
     obj->unk64 = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+    mode = 5;
     if (obj->unk72.vy == 0) {
         turned = func_8004ea7c(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7], def->unk1[2],
-                               def->unk1[3], 5);
+                               def->unk1[3], mode);
     } else {
-        turned = func_8004e824(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], 5);
+        turned = func_8004e824(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], mode);
     }
     if (turned != 0) {
         obj->unk72.vy = obj->unk72.vy == 0;
@@ -56,7 +58,7 @@ void fdat_801e87a0(void)
     case 0:
         obj->unk16 = obj->unk16 < 4095 ? obj->unk16 + FDAT_801E87A0_STEP : 0xfff;
         func_8004db3c(obj, ((u16 *)script)[4]);
-        if (dist > 0x1900000) {
+        if (dist > 0x19000000) {
             obj->unk70 = 1;
             obj->unk18 = 0;
         }
@@ -69,7 +71,7 @@ void fdat_801e87a0(void)
         func_8004db3c(obj, ((u16 *)script)[4]);
         obj->pos.vx += step_x;
         obj->pos.vz += step_z;
-        obj->unk16 = obj->unk16 - 256 + (rand() >> 6);
+        obj->unk16 += (rand() >> 6) - 256;
         if (dist < range) {
             obj->unk70 = 2;
             obj->unk18 = 0;
