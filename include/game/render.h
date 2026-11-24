@@ -109,7 +109,6 @@ typedef struct EffectSpawn {
     s16 dy;
 } EffectSpawn;
 
-extern s32 DAT_80182964;
 extern Effect DAT_80182968[128];
 
 typedef struct Data80199154 {
@@ -119,7 +118,7 @@ typedef struct Data80199154 {
     u8 *image;                      /* +0x00014: screen copy for the wipe effect */
     u8 unk18[4];
     PrimPool *pool;                 /* +0x0001c: the pool draw functions allocate from */
-    u32 ot_buffer[2][OT_LENGTH];    /* +0x00020 */
+    u32 ot_buffer[2][0x2000];       /* +0x00020: OT_LENGTH entries each */
     u32 *ot;                        /* +0x10020 */
     u8 unk10024[0x44];
     DRAWENV draw[2];                /* +0x10068 */
@@ -158,7 +157,7 @@ typedef struct Data80199154 {
     s32 grid_z;                     /* +0x15b1c: map cell z of grid row 0, negated */
     u8 unk15b20[0x10];
     u8 grid[25][25];                /* +0x15b30: map cells around the viewer */
-    u8 unk15da1[0x178a8 - 0x15da1];
+    u8 unk15da1[0x1b07];
 } Data80199154;
 
 extern Data80199154 DAT_80199154;

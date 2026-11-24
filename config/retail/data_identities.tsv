@@ -15,7 +15,6 @@ GAME.EXE	0x8009c2e0	0x4	DAT_8009c2e0	global	load	CVECTOR	func_800422b8	address-o
 GAME.EXE	0x8009c2e4	0x8	DAT_8009c2e4	global	load	SVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x4	DAT_8009c2ec	global	load	s32	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
 GAME.EXE	0x800c8954	0x4d800	DAT_800c8954	global	bss	u8[0x4d800]	func_80014bd4	address-only	asm;band A relocs	arena func_8001937c formats with a 0x4d800-byte free block
-GAME.EXE	0x80182964	0x4	DAT_80182964	global	bss	s32	func_80040ae4	address-only	asm;game-b relocs	effect frame counter; the 128 effect records follow
 GAME.EXE	0x80182968	0xc00	DAT_80182968	global	bss	Effect[128]	func_80043a08	address-only	asm;game-b relocs	placed effects (24-byte records); func_80043a08 fills all 128 from a map spawn list; ends at band A's DAT_80183568
 GAME.EXE	0x8018fad4	0x68	DAT_8018fad4	global	bss	Data8018fad4	func_80014bd4	address-only	asm;band A relocs;game-b field accesses	cleared by the game loop as 0x1a words; +0x4 area number and +0x10 alternative bank pick model id banks
 GAME.EXE	0x80199154	0x178a8	DAT_80199154	global	bss	Data80199154	func_80014bd4	address-only	asm;game loop clear;game-b field accesses	render work area: packet pools, ordering tables, draw/display environments, fades and tints; cleared by the game loop as 0x5e2a words; one object (GCC CSEs a base across members)
