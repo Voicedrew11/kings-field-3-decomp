@@ -11,11 +11,118 @@
 #include <psyq/libc.h>
 #include <game/data.h>
 #include <game/render.h>
+#include <INLINE.H>
+#include <GTEMAC.H>
 
 RODATA(0x80011bd0, 0xc)
 
 DATA(0x8009c2d0, 0x8, ".sdata")
 RECT DAT_8009c2d0 = { 320, 0, 320, 240 };
+
+/*
+ * Draws the 3D overlays (the compass needles of DAT_80081c20, visible == 1)
+ * in view space: each lit by its light record turned by its rotation, scaled,
+ * posed by func_800431e8 (the base pose is rebuilt when it returns nonzero,
+ * unlike func_800400ac), and projected flat (screen x/y = view x/y, depth =
+ * view z / 4) before func_80035ca4.
+ * Not exact: besides the $gp read of DAT_8009c2e0 (see func_8003df50), retail
+ * sets the &SCRATCH->unk54 base after the empty-list test, not in the prologue.
+ */
+ADDRESS(0x8003c35c, 0x50c)
+void func_8003c35c(void)
+{
+    MATRIX m;
+    VECTOR scale;
+    MATRIX lm;
+    Data80081c20 *rec;
+    ScratchPad *scratch;
+    Record6c *light;
+    u8 *file;
+    u8 *model;
+    s32 i;
+    s32 offset;
+    VECTOR *view;
+
+    scratch = SCRATCH;
+    view = &SCRATCH->unk54;
+    for (rec = DAT_80081c20; rec->visible != 0xff; rec++) {
+        if (rec->visible != 1) {
+            continue;
+        }
+        light = &DAT_80199154.unk15da8[rec->light];
+        m.t[0] = rec->pos.vx;
+        m.t[1] = rec->pos.vy;
+        m.t[2] = rec->pos.vz;
+        RotMatrix(&rec->angle, &m);
+        func_80035358(light->unk68, light->unk6a);
+        gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+        gte_SetColorMatrix(&light->unk50);
+        gte_MulMatrix0(&light->unk0[0], &m, &lm);
+        gte_SetLightMatrix(&lm);
+        scale.vx = rec->scale.vx;
+        scale.vy = rec->scale.vy;
+        scale.vz = rec->scale.vz;
+        ScaleMatrix(&m, &scale);
+        gte_SetRotMatrix(&m);
+        gte_SetTransMatrix(&m);
+        file = DAT_80199154.models[rec->model];
+        model = file + ((ModelFile *)file)->vertices;
+        scratch->ot = DAT_80199154.ot;
+        *(u32 *)&scratch->rgb = *(u32 *)&DAT_8009c2e0;
+        scratch->draw.count.unk4 = DAT_80199154.unk159bc;
+        scratch->draw.count.ot_count = DAT_80199154.ot_count;
+        scratch->draw.count.prim_count = DAT_80199154.prim_count;
+        scratch->model = model;
+        scratch->next = DAT_80199154.pool->next;
+        scratch->end = DAT_80199154.pool->end;
+        scratch->screen = DAT_80199154.screen;
+        scratch->draw.count.clut = 0;
+        if (func_800431e8(&rec->slot, rec->model, rec->anim, rec->time,
+                          ((ModelData *)model)->parts[0].unk4) != 0) {
+            u8 *vertex;
+            ScreenVertex *screen;
+
+            scratch->part = ((ModelData *)scratch->model)->parts;
+            offset = scratch->part->vertices + 12;
+            vertex = scratch->vertices = (u8 *)(offset + (u32)scratch->model);
+            screen = scratch->screen;
+            i = ((ModelData *)model)->parts[0].unk4;
+            while (--i != -1) {
+                gte_ldv0(vertex);
+                gte_rt();
+                gte_stlvnl(view);
+                screen->sxy.vx = scratch->unk54.vx;
+                screen->sxy.vy = scratch->unk54.vy;
+                screen->fog = scratch->unk54.vz;
+                screen->z = scratch->unk54.vz >> 2;
+                screen++;
+                vertex += 8;
+            }
+        } else {
+            u8 *vertex;
+            ScreenVertex *screen;
+
+            i = ((ModelData *)model)->parts[0].unk4;
+            screen = scratch->screen;
+            vertex = scratch->vertices;
+            while (--i != -1) {
+                gte_ldv0(vertex);
+                gte_rt();
+                gte_stlvnl(view);
+                screen->sxy.vx = scratch->unk54.vx;
+                screen->sxy.vy = scratch->unk54.vy;
+                screen->fog = scratch->unk54.vz;
+                screen->z = scratch->unk54.vz >> 2;
+                screen++;
+                vertex += 8;
+            }
+        }
+        func_80035ca4(0, 0);
+        DAT_80199154.pool->next = scratch->next;
+        DAT_80199154.unk159bc = scratch->draw.count.unk4;
+        DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    }
+}
 
 ADDRESS(0x8003c868, 0x100)
 void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
@@ -449,4 +556,86 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
     DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
     DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x1a000;
     DrawSync(0);
+}
+
+/*
+ * Draws the weapon model (resident model 32) while the player attacks
+ * (unkc0 is the attack time, -1 for none): lit by the light record of the map
+ * layer under the player, posed by func_800431e8 and placed by the weapon
+ * record's offset and angle; drawn at depth offset 24.
+ * Not exact only in the read of DAT_8009c2e0: retail reads it $gp-relative,
+ * which ASPSX emits only for .sdata defined in the same file (hud.c).
+ */
+ADDRESS(0x8003df50, 0x3fc)
+void func_8003df50(void)
+{
+    MATRIX m;
+    ScratchPad *scratch;
+    Record6c *light;
+    u8 *file;
+    u8 *model;
+    u8 *vertex;
+    ScreenVertex *screen;
+    s32 i;
+
+    if (DAT_801b24e4.unkc0 == -1) {
+        return;
+    }
+    scratch = SCRATCH;
+    light = &DAT_80199154.unk15da8[((MapLayer *)((u8 *)&DAT_801d4464.cells[DAT_801b24e4.pos.vz >> 11]
+                                                         [DAT_801b24e4.pos.vx >> 11] +
+                                                DAT_801b24e4.unk160))->unk4 & 0x3f];
+    gte_SetColorMatrix(&light->unk50);
+    gte_SetLightMatrix(&light->unk0[0]);
+    func_80035358(light->unk68, light->unk6a);
+    gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+    m.t[0] = (s16)DAT_801b24e4.unkb0->unk34;
+    m.t[1] = (s16)DAT_801b24e4.unkb0->unk36;
+    m.t[2] = (s16)DAT_801b24e4.unkb0->unk38;
+    RotMatrix((SVECTOR *)&DAT_801b24e4.unkb0->unk3c, &m);
+    gte_SetRotMatrix(&m);
+    gte_SetTransMatrix(&m);
+    file = DAT_80199154.models[32];
+    model = file + ((ModelFile *)file)->vertices;
+    SCRATCH->model = model;
+    if (func_800431e8((AnimSlot **)&DAT_801b24e4.unkb8, 32, DAT_801b24e4.unkca,
+                      DAT_801b24e4.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
+        return;
+    }
+    SCRATCH->ot = DAT_80199154.ot;
+    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
+    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
+    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
+    SCRATCH->next = DAT_80199154.pool->next;
+    SCRATCH->end = DAT_80199154.pool->end;
+    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->draw.count.clut = 0;
+    *(u32 *)&SCRATCH->rgb = *(u32 *)&DAT_8009c2e0;
+    vertex = SCRATCH->vertices;
+    screen = DAT_80199154.screen;
+    i = ((ModelData *)model)->parts[0].unk4;
+    while (--i != -1) {
+        gte_ldv0(vertex);
+        gte_rtps();
+        gte_stsxy(&screen->sxy);
+        gte_stszotz(&screen->z);
+        if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
+            screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
+                          (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+        } else {
+            screen->fog = 0;
+        }
+        if (screen->fog >= 7952) {
+            screen->z = screen->fog = 0x1f0f;
+        }
+        if (screen->fog < 0) {
+            screen->fog = 0;
+        }
+        screen++;
+        vertex += 8;
+    }
+    func_80035ca4(0, 24);
+    DAT_80199154.pool->next = scratch->next;
+    DAT_80199154.unk159bc = scratch->draw.count.unk4;
+    DAT_80199154.ot_count = scratch->draw.count.ot_count;
 }

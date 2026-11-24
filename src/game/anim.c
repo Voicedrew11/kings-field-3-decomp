@@ -266,7 +266,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         data = DAT_80199154.models[id];
         data += ((ModelFile *)data)->vertices;
         scratch->model = data;
-        scratch->unk24 = data + 12;
+        scratch->part = ((ModelData *)data)->parts;
         scratch->vertices = *(s32 *)(data + 12) + 12 + data;
         return 1;
     }
@@ -289,7 +289,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
     }
     key = func_80042cac(model, anim, time, &index, &frac);
     if (slot->anim != anim || slot->key != index) {
-        scratch->unk24 = scratch->model + 12;
+        scratch->part = ((ModelData *)scratch->model)->parts;
         scratch->vertices = *(s32 *)(scratch->model + 12) + 12 + scratch->model;
         deltas = (s32 *)((u8 *)model + model->deltas);
         n = key->count;
