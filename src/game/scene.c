@@ -6,6 +6,8 @@
  * is -G8: the handler-table pointer is a $gp-relative .sbss word, while the
  * FDAT window base is reached absolutely (declared without a size here).
  */
+/* The area step is volatile only here (see game/data.h). */
+#define GAME_SCENE_MODULE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
