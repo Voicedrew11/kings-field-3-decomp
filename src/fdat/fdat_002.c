@@ -128,39 +128,33 @@ ADDRESS(0x801e87e0, 0x180)
 void func_801e87e0(Object44 *obj)
 {
     Object44 *door;
-    s32 k;
 
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
         if (DAT_801ba984.unk4[6] == 1) {
             if (DAT_801ba984.unk4[7] == 0) {
-            DAT_80185da8.objects[0].unk0 = 8;
-            DAT_80185da8.objects[1].unk0 = 8;
-            DAT_80185da8.objects[2].unk0 = 8;
-            door = &DAT_8018fb3c.objects[214];
-            door->unk0 = 2;
-            k = 214;
-            DAT_8018fb3c.objects[k].arg.b.unk3c = 0xff;
-            k = 177;
-            DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0xff;
-            door = &DAT_8018fb3c.objects[111];
-            door->unk0 = 0;
-            k = 111;
-            DAT_8018fb3c.objects[k].arg.b.unk3c = 0;
-            k = 182;
-            DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0;
-            door = &DAT_8018fb3c.objects[62];
-            door->unk0 = 2;
-            k = 62;
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
-            door = &DAT_8018fb3c.objects[195];
-            door->unk0 = 2;
-            k = 195;
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
-            door = &DAT_8018fb3c.objects[172];
-            door->unk0 = 2;
-            k = 172;
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+                DAT_80185da8.objects[0].unk0 = 8;
+                DAT_80185da8.objects[1].unk0 = 8;
+                DAT_80185da8.objects[2].unk0 = 8;
+                door = &DAT_8018fb3c.objects[214];
+                door->unk0 = 2;
+                door->arg.b.unk3c = 0xff;
+                door = &DAT_8018fb3c.objects[177];
+                door->arg.b.unk3d[1] = 0xff;
+                door = &DAT_8018fb3c.objects[111];
+                door->unk0 = 0;
+                door->arg.b.unk3c = 0;
+                door = &DAT_8018fb3c.objects[182];
+                door->arg.b.unk3d[1] = 0;
+                door = &DAT_8018fb3c.objects[62];
+                door->unk0 = 2;
+                door->arg.b.unk38 = 0xff;
+                door = &DAT_8018fb3c.objects[195];
+                door->unk0 = 2;
+                door->arg.b.unk38 = 0xff;
+                door = &DAT_8018fb3c.objects[172];
+                door->unk0 = 2;
+                door->arg.b.unk38 = 0xff;
             }
         }
     case 10:
