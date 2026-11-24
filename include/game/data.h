@@ -331,7 +331,7 @@ typedef struct Object44Halves {
     u16 unk38;
     u16 unk3a;
     u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
-    s16 unk3e;
+    s16 unk3e;      /* +0x3e: kind 0x1f reads it unsigned: delay in units of 6 VSyncs */
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914) */
     u16 unk42;
 } Object44Halves;

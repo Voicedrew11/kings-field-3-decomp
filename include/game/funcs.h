@@ -14,7 +14,6 @@
 s32 func_8001fa60(void);
 void func_80030fcc(void);
 s32 func_800324f0(s32 x, s32 y, s32 z);
-void func_80044d9c(u8 *data);
 void func_80047010(void);
 void func_8005eb20(void);
 void func_8005efd4(s32 area);

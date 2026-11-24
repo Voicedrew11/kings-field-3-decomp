@@ -31,6 +31,7 @@
 #include <game/menu.h>
 #include <game/entity.h>
 #include <game/collision.h>
+#include <game/object44.h>
 
 /* archive file numbers (func_8001a34c table slots) */
 #define FILE_FDAT 4
@@ -467,7 +468,7 @@ void func_80018358(void)
             part = (u32 *)((u8 *)part + (*part + 4));
             func_80018f5c((u32 *)&DAT_8018fb3c.defs[300], part + 1, 0xc0);
             part = (u32 *)((u8 *)part + (*part + 4));
-            func_80044d9c((u8 *)(part + 1));
+            func_80044d9c((Object44Place *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             func_80043a08((EffectSpawn *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));

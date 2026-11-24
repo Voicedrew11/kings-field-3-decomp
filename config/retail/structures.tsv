@@ -45,6 +45,7 @@ Object44Bytes	0x10	supported	asm;func_80044900/func_800463bc/func_80046608 byte 
 Object44Def	0x18	supported	asm;func_80033d84 &DAT_8018fb3c + Object44.unk6 * 24 field reads	WIP (game-h)
 Object44Halves	0x10	supported	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40	WIP (game-k)
 Object44Link	0x2	supported	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules)	WIP (fdat)
+Object44Place	0x18	supported	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38	WIP (game-big)
 Object44Words	0x10	supported	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40	WIP (game-k)
 Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
 Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (func_8004b624, func_80053084);func_8002c164	WIP (game-f)
