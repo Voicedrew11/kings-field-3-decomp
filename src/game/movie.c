@@ -3,8 +3,9 @@
  * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
  * decode environment lives in DAT_801e7edc.dec, the ring buffer is
  * DAT_801c17a4, and the display swaps through DAT_80199154. The player
- * func_80060d20 and the decode set-up func_80061364 (not exact) precede them
- * and the switch func_80061940 follows.
+ * func_80060d20 and the decode set-up func_80061364 (not exact) precede them.
+ * func_80061940 steps the movie state; its jump table is this unit's .rdata
+ * (after func_80060d20's file names, so the TU starts at or before it).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -17,6 +18,9 @@
 #include <game/data.h>
 #include <game/render.h>
 #include <game/misc.h>
+#include <game/player.h>
+
+RODATA(0x800136a0, 0x44)
 
 /* Polling bound of the stream waits. */
 #define WAIT_TIME 0x800000
@@ -95,7 +99,7 @@ u_long *func_800616dc(DECENV *dec)
         return 0;
     }
     DAT_801e7edc.unk388 = sector->frameCount;
-    if (((u16 *)DAT_801e7edc.unk380)[1] < sector->frameCount) {
+    if (DAT_801e7edc.unk380->last < sector->frameCount) {
         DAT_801e7edc.unk372 = 99;
     }
     return addr;
@@ -153,4 +157,71 @@ void func_80061918(void)
     DAT_801e7edc.unk372 = -1;
     DAT_801e7edc.unk370 = 0;
     DAT_801e7edc.unk384 = 0xff;
+}
+
+/* Steps the in-game movie state (unk370) of movie unk384. */
+ADDRESS(0x80061940, 0x284)
+void func_80061940(void)
+{
+    u8 id;
+    u8 flag;
+
+    if (DAT_801e7edc.unk384 == 0xff) {
+        return;
+    }
+    id = DAT_801e7edc.unk384;
+    DAT_801e7edc.unk380 = &DAT_801e7edc.movies[id];
+    switch (DAT_801e7edc.unk370) {
+    case 0:
+        break;
+    case 1:
+        if (DAT_801e7edc.unk380->flag != 0xff) {
+            flag = DAT_801e7edc.unk380->flag;
+            if (flag & 0x80) {
+                if (DAT_801ba984.unk4[flag & 0x7f] == 0) {
+                    DAT_801e7edc.unk370 = 0x10;
+                    break;
+                }
+            } else if (DAT_801ba984.unk4[flag & 0x7f] != 0) {
+                DAT_801e7edc.unk370 = 0x10;
+                break;
+            }
+        }
+        DAT_801e7edc.unk370 = 2;
+        func_80030810(id);
+        break;
+    case 2:
+        if (DAT_801e7edc.unk372 == 1) {
+            DAT_801e7edc.unk370 = 4;
+        }
+        DAT_801e7edc.unk372 = 0;
+        break;
+    case 4:
+        DAT_8018fad4.handlers[10](id);
+        func_80060d20();
+        if (DAT_801ba984.unk61 == 1) {
+            DAT_801ba984.unk61 = 2;
+            DAT_801e7edc.unk372 = 1;
+            DAT_801e7edc.unk370 = 0;
+            DAT_801e7edc.unk384 = 0xff;
+            func_8003078c();
+            MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
+                      DAT_80199154.draw[DAT_80199154.frame].clip.y);
+            DrawSync(0);
+            func_8005c864(12);
+        }
+        DAT_801e7edc.unk370 = 8;
+        func_80030864(id);
+        break;
+    case 8:
+        if (DAT_801e7edc.unk372 == 1) {
+            DAT_801e7edc.unk370 = 0;
+            DAT_8018fad4.handlers[7](id);
+        }
+        DAT_801e7edc.unk372 = 0;
+        break;
+    case 16:
+        DAT_801e7edc.unk370 = 1;
+        break;
+    }
 }
