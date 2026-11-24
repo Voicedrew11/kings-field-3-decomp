@@ -47,7 +47,7 @@ s32 func_800198d8(u8 bcd);
 s32 func_800198f8(u8 value);
 s32 func_80019934(CdlLOC *pos);
 void func_800199b8(CdlLOC *pos, u32 sector);
-CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, void (*callback)());
+CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback);
 
 ADDRESS(0x80019538, 0x38)
 void func_80019538(void)
@@ -235,7 +235,7 @@ s32 func_80019b68(void *buffer, s32 sectors)
 }
 
 ADDRESS(0x80019bbc, 0x108)
-CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, void (*callback)())
+CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback)
 {
     CdRequest *request = DAT_801c12e4.write;
 
@@ -269,7 +269,7 @@ s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos)
 }
 
 ADDRESS(0x80019d48, 0x50)
-void func_80019d48(s32 file, s32 entry, u8 *buffer, void (*callback)())
+void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback)
 {
     CdlLOC pos;
 
@@ -281,7 +281,7 @@ void func_80019d98(file, entry, buffer, callback)
 u16 file;
 u16 entry;
 u8 *buffer;
-void (*callback)();
+CdCallback callback;
 {
     CdlLOC pos;
 
@@ -293,7 +293,7 @@ void func_80019df0(file, entry, buffer, callback)
 u16 file;
 u16 entry;
 u8 *buffer;
-void (*callback)();
+CdCallback callback;
 {
     CdlLOC pos;
 
@@ -305,7 +305,7 @@ void func_80019e48(file, entry, buffer, callback)
 u16 file;
 u16 entry;
 u8 *buffer;
-void (*callback)();
+CdCallback callback;
 {
     CdlLOC pos;
     CdRequest *request = DAT_801c12e4.write;

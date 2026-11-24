@@ -34,29 +34,41 @@ struct SoundSlot;
 #define CD_REQUEST_SOUND 0x30  /* sound bank read (src/game/sound.c) */
 #define CD_REQUEST_IMAGE 0x40  /* VRAM image read (func_80018cd0) */
 
+/* Called with the buffer (CD_REQUEST_READ) or with the request. */
+typedef void (*CdCallback)();
+
+/* CdRequest.u for a sound bank read. */
+typedef struct CdSoundRequest {
+    s16 bank;               /* SoundState.banks index */
+    s16 pad;
+    struct SoundSlot *slot;
+    s32 spu_addr;
+} CdSoundRequest;
+
+/* CdRequest.u for a VRAM image read. */
+typedef struct CdImageRequest {
+    RECT rect;              /* VRAM destination of the next part */
+    u16 sectors;            /* whole image */
+    s16 remaining;          /* sectors still to read after this part */
+} CdImageRequest;
+
+typedef union CdRequestUnion {
+    CdSoundRequest sound;
+    CdImageRequest image;
+} CdRequestUnion;
+
 typedef struct CdRequest {
     u8 kind;                /* +0x00: CD_REQUEST_* */
     u8 issued;              /* +0x01: 1 once CdRead/CdRead2 accepted the read */
     u8 unk2[2];
-    union {
-        struct {
-            s16 bank;               /* +0x04: SoundState.banks index */
-            struct SoundSlot *slot; /* +0x08 */
-            s32 spu_addr;           /* +0x0c */
-        } sound;
-        struct {
-            RECT rect;              /* +0x04: VRAM destination of the next part */
-            u16 sectors;            /* +0x0c: whole image */
-            s16 remaining;          /* +0x0e: sectors still to read after this part */
-        } image;
-    } u;
+    CdRequestUnion u;       /* +0x04 */
     u8 state;               /* +0x10 */
     u8 unk11[3];
     CdlLOC pos;             /* +0x14 */
     CdlLOC retry_pos;       /* +0x18 */
     u8 *buffer;             /* +0x1c */
     s32 count;              /* +0x20: sectors */
-    void (*callback)();     /* +0x24: called with the buffer (READ) or the request */
+    CdCallback callback;    /* +0x24 */
     u8 unk28[4];
 } CdRequest;
 
@@ -99,10 +111,10 @@ s32 func_80019b68(void *buffer, s32 sectors);
 s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos);
 /* These definitions are old-style with 16-bit file and entry numbers: the
  * callee truncates them and callers pass ints unconverted. */
-void func_80019d48(s32 file, s32 entry, u8 *buffer, void (*callback)());
-void func_80019d98(int file, int entry, u8 *buffer, void (*callback)());
-void func_80019df0(int file, int entry, u8 *buffer, void (*callback)());
-void func_80019e48(int file, int entry, u8 *buffer, void (*callback)());
+void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback);
+void func_80019d98(int file, int entry, u8 *buffer, CdCallback callback);
+void func_80019df0(int file, int entry, u8 *buffer, CdCallback callback);
+void func_80019e48(int file, int entry, u8 *buffer, CdCallback callback);
 s32 func_80019f14(int file, int entry);
 void func_80019f58(s32 fatal);
 void func_80019f60(CdlLOC *pos, u8 *buffer, s32 sectors);

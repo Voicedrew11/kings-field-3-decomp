@@ -9,6 +9,7 @@ PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 GAME.EXE	0x800136e8	0x18	DAT_800136e8	global	load	u32[6]	main	address-only	asm;band A relocs	FDAT window words (0x801e8308, 0x801e8308, 0x801e8308, 0x801e838c, 0x801e92f8, 0x801e92f8 in the image); main reads [2] and [4] and stores the heap base at [5]; WIP extent, owner unit unknown
 GAME.EXE	0x8009c3f8	0x4	DAT_8009c3f8	global	bss	s32	func_80014bd4	address-only	asm;src/game/main.c game.main	.sbss word ($gp+0x1e4); the game loop runs while it is 0; 2 returns to OPEN.EXE, 3 and 4 go to END.EXE with mailbox 2 or 3
+GAME.EXE	0x8009c3fc	0x4	DAT_8009c3fc	global	bss	u32	func_80017664	address-only	asm;src/game/scene.c game.scene	.sbss word ($gp+0x1e8): FDAT window base + 4, the loaded module's handler table; func_80018358 copies it to DAT_8018fad4.handlers
 GAME.EXE	0x800c8768	0x158	DAT_800c8768	global	bss	char[SS_SEQ_TABSIZ * 2]	func_8001509c	address-only	asm;band A relocs	libsnd sequence attribute table for SsSetTableSize(table, 2, 1); extent is SS_SEQ_TABSIZ (172) * 2 * 1
 GAME.EXE	0x800c8954	0x4d800	DAT_800c8954	global	bss	u8[0x4d800]	func_80014bd4	address-only	asm;band A relocs	arena func_8001937c formats with a 0x4d800-byte free block
 GAME.EXE	0x8014a958	0x2000	DAT_8014a958	global	bss	u8[2][0x1000]	func_8001509c	address-only	asm;band A relocs	VAB body buffers of sound slots 0 and 1
