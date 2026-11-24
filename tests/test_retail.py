@@ -135,6 +135,22 @@ class RetailTests(unittest.TestCase):
             self.assertIsNotNone(retail.VENDORED_CONFIDENCE.fullmatch(confidence))
         self.assertIsNone(retail.VENDORED_CONFIDENCE.fullmatch("psyq-signature"))
 
+    def test_gp_relative_relocation_decodes_against_the_startup_gp(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.relocations import validate_relocation
+
+        self.assertEqual(retail.IMAGE_GP["PSX.EXE"], 0x80010260)
+        self.assertEqual(retail.IMAGE_GP["FDAT_005.BIN"], retail.IMAGE_GP["GAME.EXE"])
+        function = SimpleNamespace(image="PSX.EXE", va=0x8001006C)
+        row = {"site_va": "0x8001006c", "target_va": "0x80010264", "kind": "mips_gprel16",
+               "status": "reviewed", "channel": "reachable-code"}
+        lw_v0_4_gp = struct.pack("<I", 0x8F820004)
+        validation = validate_relocation(lw_v0_4_gp, function, row, None, "safe")
+        self.assertEqual(validation.target, 0x80010264)
+        with self.assertRaises(ValueError):
+            validate_relocation(struct.pack("<I", 0x8C820004), function, row, None, "safe")
+
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(
             "\n".join((

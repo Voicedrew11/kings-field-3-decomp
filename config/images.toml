@@ -7,6 +7,17 @@
 # an archive entry (see the end of this file). Programs are listed first,
 # then the overlays by archive entry; reports and inventories sort them in
 # this order.
+#
+# Who loads what. PSX.EXE is a program sequencer: its table at 0x8001024C
+# names, by index, 0 OPEN.EXE, 1 GAME.EXE, 2 END.EXE. It clears the index
+# byte at 0x800102F0 (the pointer in its gp+4 word), then loops: BIOS
+# Load(table[index]), Exec, and on return reads the next index from that
+# byte. Which program stores which successor is not yet traced. GAME.EXE
+# alone names `COM\FDAT.T` and loads the FDAT area modules.
+#
+# `gp` is the $gp value each program's startup loads (lui/addiu gp before the
+# jump to main); gp-relative relocations decode against it. Overlays use
+# their host's.
 
 [disc]
 serial = "SLUS-00255"
@@ -23,6 +34,7 @@ disc_file = "SLUS_002.55"
 sha256 = "c8e696c312c6ba0ad9c24b0977a993b517cddf649e3a20586a4f394b1224ae70"
 file_size = 0x1000
 entry = 0x80010120
+gp = 0x80010260
 load_address = 0x80010000
 load_size = 0x800
 
@@ -33,6 +45,7 @@ disc_file = "GAME.EXE"
 sha256 = "7556ec7fa3324f39df483f5383bb8f6fcef5ba3b88a6dd4e895e366edf6b83d9"
 file_size = 0x8C000
 entry = 0x800144F8
+gp = 0x8009C214
 load_address = 0x80011000
 load_size = 0x8B800
 
@@ -42,6 +55,7 @@ disc_file = "OPEN.EXE"
 sha256 = "bf5b2c820007157c2bf3bd380b0e5b280843f579c2e7fbc84605c22c5eb13edb"
 file_size = 0x30000
 entry = 0x800136C8
+gp = 0x800403F4
 load_address = 0x80011000
 load_size = 0x2F800
 
@@ -51,6 +65,7 @@ disc_file = "END.EXE"
 sha256 = "57feb4f5cb2031469516a88d485334cc3ba6162a8f47ce73ab934164a7b7f999"
 file_size = 0x27000
 entry = 0x80011D04
+gp = 0x80037498
 load_address = 0x80011000
 load_size = 0x26800
 
