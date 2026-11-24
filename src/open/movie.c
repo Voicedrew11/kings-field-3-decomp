@@ -65,9 +65,9 @@ int play_movie(int movie)
     int vol;
     u_long pad;
 
-    /* Old-C valueless return: the caller sees CdSearchFile's NULL left in v0. */
+    /* Old-C valueless return: the caller sees the NULL CdSearchFile left in v0. */
     if (CdSearchFile(&file, names[movie]) == 0)
-        return;
+        return KF_VALUELESS;
     SsSetMVol(127, 127);
     for (vol = 0; vol < 127; vol++) {
         SsSetSerialVol(SS_SERIAL_A, vol, vol);
