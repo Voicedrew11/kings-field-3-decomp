@@ -18,6 +18,7 @@ GAME.EXE	0x80081928	0x8c	DAT_80081928	global	load	SpriteRec[7]	func_80041f9c	add
 GAME.EXE	0x800819b4	0x26c	DAT_800819b4	global	load	SpriteRec[31]	func_80041e68	address-only	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x6c	DAT_80081c20	global	load	Data80081c20[3]	func_800422b8	address-only	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
 GAME.EXE	0x80081c8c	0xc00	DAT_80081c8c	global	load	Record30[64]	func_800341e8	address-only	asm;band C/H relocs;FDAT_080 func_801e86c4	light records (render.h); func_80017664 copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
+GAME.EXE	0x8009c21c	0x4	DAT_8009c21c	global	load	s32	func_801e85b8	address-only	asm;src/fdat/fdat_002.c fdat_002.main	.sdata ($gp+0x8); 1; FDAT_002 negates it each swing of object 158 (owner unit unknown)
 GAME.EXE	0x8009c22c	0x1	DAT_8009c22c	global	load	u8	func_8001aa84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
 GAME.EXE	0x8009c22d	0x1	DAT_8009c22d	global	load	u8	func_8001c48c	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
 GAME.EXE	0x8009c22e	0x1	DAT_8009c22e	global	load	u8	func_8001dee4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
