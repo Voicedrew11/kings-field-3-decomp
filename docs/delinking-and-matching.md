@@ -345,6 +345,19 @@ the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
 and each such jump is a `switch_dispatch` witness row. A Sony member's
 switch jump is not proved by it; it is covered by the vendored exemption.
 
+A check that cannot run for a unit is skipped only through a recorded row in
+`config/check_exemptions.tsv` (image, unit, check, sections, reason; see
+`scripts/kf/check_exemptions.py`). The one kind, `common-placement`, covers a
+unit's global `.sbss`/`.bss` COMMON requests whose retail addresses depend on
+SDK objects that are not preserved (OPEN's Library 3.4, END's newer LIBGPU
+and LIBSND), so no link can place them. For those claims the data gate and
+the target relink skip storage placement and print `EXEMPT` with the reason;
+they still require every covered claim to be a COMMON request of its claimed
+size with no fixed allocation beside it, and the relink still links and
+compares the unit's code with each exempt symbol at its claimed address.
+`kf check` lists every exemption and says so in its OK line, and the README's
+exact data-module count leaves exempt units out.
+
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous
 bytes, padding, ordered relocation rows and BSS extents; report data totals

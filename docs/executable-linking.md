@@ -76,7 +76,9 @@ LIBPRESS (3.4's `DecDCTGetEnv` and DECVLC), and 3.4's LIBCD and LIBGPU `SYS`
 OPEN's LIBCARD stubs are its last text members, after LIBSPU. The units'
 COMMON requests (`cdb`, `db` and the primitive buffers) cannot be proven at
 their retail addresses: PSYLINK orders COMMON by symbol-hash bucket among the
-SDK's own COMMON, and the 3.3 archives supply a different SDK set.
+SDK's own COMMON, and the 3.3 archives supply a different SDK set; that
+placement is a recorded `common-placement` exemption in
+`config/check_exemptions.tsv` (see the delinking document's Validation).
 
 ## PSX.EXE
 
