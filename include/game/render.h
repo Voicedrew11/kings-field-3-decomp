@@ -286,7 +286,8 @@ typedef struct PrimTag {
 typedef struct ScratchModelWork {
     VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
     CVECTOR rgb;        /* +0x64: colour the models are lit with */
-    u8 unk68[8];
+    s32 near;           /* +0x68: Data80199154.unk15b28 (fog near, func_800366a8) */
+    s32 far;            /* +0x6c: Data80199154.unk15b2c (fog far) */
     s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
 } ScratchModelWork;
 
@@ -311,8 +312,9 @@ typedef union ScratchWork {
 /* Scratchpad words from +0x74 while a model is drawn: the frame counters,
  * copied in and back by the model front ends (func_8004290c). */
 typedef struct ScratchCount {
-    s16 unk0;           /* +0x74 */
-    s16 unk2;           /* +0x76: func_8003e34c sets 100 */
+    s16 z;              /* +0x74: ordering table depth of the face (func_800366a8) */
+    s16 clip;           /* +0x76: faces with every vertex nearer than this are dropped
+                         * (func_800366a8); func_8003e34c sets 100 */
     s32 unk4;           /* +0x78: Data80199154.unk159bc; the renderers add each part's
                          * primitive count */
     s32 ot_count;       /* +0x7c */

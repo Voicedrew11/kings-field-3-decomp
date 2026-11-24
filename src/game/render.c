@@ -708,7 +708,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
 
     mat = &m;
     scratch = SCRATCH;
-    SCRATCH->draw.count.unk2 = 100;
+    SCRATCH->draw.count.clip = 100;
     SCRATCH->screen = DAT_80199154.screen;
     SCRATCH->unk48 = DAT_80199154.screen;
     SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
@@ -970,7 +970,7 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
 
     mat = &m;
     scratch = SCRATCH;
-    SCRATCH->draw.count.unk2 = 100;
+    SCRATCH->draw.count.clip = 100;
     SCRATCH->screen = DAT_80199154.screen;
     SCRATCH->unk48 = DAT_80199154.screen;
     SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
