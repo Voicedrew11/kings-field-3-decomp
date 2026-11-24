@@ -212,20 +212,17 @@ ADDRESS(0x800460bc, 0x1d8)
 void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
 {
     Object44 *obj;
-    u16 *stamp;
-    s32 first;
     Object44Def *def;
 
     if (which == 0) {
-        stamp = &DAT_8018fb3c.unk8862;
-        first = 370;
+        obj = func_80046034(370, 10, DAT_8018fb3c.unk8862);
+        obj->arg.h.unk3c = DAT_8018fb3c.unk8862++;
+        obj->unk6 = def_id;
     } else {
-        first = 360;
-        stamp = &DAT_8018fb3c.unk8860;
+        obj = func_80046034(360, 10, DAT_8018fb3c.unk8860);
+        obj->arg.h.unk3c = DAT_8018fb3c.unk8860++;
+        obj->unk6 = def_id;
     }
-    obj = func_80046034(first, 10, *stamp);
-    obj->arg.h.unk3c = (*stamp)++;
-    obj->unk6 = def_id;
     func_800448b8(obj);
     def = &DAT_8018fb3c.defs[obj->unk6];
     if (def->unk3 & 0x10) {
