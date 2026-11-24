@@ -331,7 +331,7 @@ typedef union ScratchDraw {
  * hardware address). The game keeps per-frame working pointers there.
  */
 typedef struct ScratchPad {
-    u8 unk0[8];
+    s32 nclip[2];       /* +0x00: gte_nclip results of a quad's two halves (func_8003ab04) */
     u32 *ot;            /* +0x08: Data80199154.ot while a model is drawn */
     u32 *ot2;           /* +0x0c: Data80199154.ot2 (func_80040ae4) */
     u8 *model;          /* +0x10: data of the model being drawn */

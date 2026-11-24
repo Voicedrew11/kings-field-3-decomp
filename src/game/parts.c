@@ -837,3 +837,255 @@ void func_80039d50(u16 id)
         scratch->prim += scratch->tag.len;
     }
 }
+
+/*
+ * Draws part id of the map layer model in SCRATCH->model near the eye (the
+ * near ground renderer of func_8003bb04): projects the vertices like
+ * func_80039d50, then hands each front face to the LIBGTE subdivision
+ * (RCpolyFT3/FT4/GT3), more finely the nearer it is.
+ */
+ADDRESS(0x8003ab04, 0x1000)
+void func_8003ab04(u16 id)
+{
+    s32 n;
+    ScratchPad *scratch;
+    CVECTOR *rgb;
+    union {
+        DIVPOLYGON3 d3;
+        DIVPOLYGON4 d4;
+    } div;
+
+    scratch = SCRATCH;
+    SCRATCH->unk48 = SCRATCH->screen;
+    SCRATCH->vertex = SCRATCH->vertices;
+    SCRATCH->w.map.near = DAT_80199154.unk15b28;
+    SCRATCH->w.map.far = DAT_80199154.unk15b2c;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    n = SCRATCH->part->unk4;
+    while (n-- != 0) {
+        gte_ldv0(scratch->vertex);
+        gte_rtps();
+        gte_stsxy(&scratch->unk48->sxy);
+        gte_stszotz(&scratch->unk48->z);
+        if (scratch->w.map.near < 32000) {
+            scratch->unk48->fog = ((scratch->unk48->z - (scratch->w.map.near >> 2)) << 14) /
+                                  (scratch->w.map.far - scratch->w.map.near);
+        } else {
+            scratch->unk48->fog = 0;
+        }
+        if (scratch->unk48->fog >= 7952) {
+            scratch->unk48->fog = 0x1f0f;
+        }
+        if (scratch->unk48->fog < 0) {
+            scratch->unk48->fog = 0;
+        }
+        scratch->unk48++;
+        scratch->vertex += 8;
+    }
+    scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
+    n = scratch->part->prim_count;
+    scratch->w.map.count += n;
+    while (n-- != 0) {
+        rgb = &scratch->w.map.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d3.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1];
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog) / 3);
+            gte_ncds();
+            gte_strgb(&div.d3.rgbc);
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x24;
+            div.d3.ot = scratch->ot + scratch->w.map.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[8]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyFT3((POLY_FT3 *)scratch->next, &div.d3);
+            scratch->w.map.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x2c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[0]);
+            gte_ldsxy3(*(u32 *)&scratch->vert[3]->sxy, *(u32 *)&scratch->vert[2]->sxy,
+                       *(u32 *)&scratch->vert[1]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[1]);
+            if (scratch->nclip[0] > 0 || scratch->nclip[1] > 0) {
+                scratch->w.map.opz = 1;
+            } else {
+                scratch->w.map.opz = -1;
+            }
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip &&
+                scratch->vert[3]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z +
+                                scratch->vert[3]->z) >> 2;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d4.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d4.pih = 320;
+            div.d4.piv = 240;
+            div.d4.clut = ((u16 *)scratch->prim)[1];
+            div.d4.tpage = ((u16 *)scratch->prim)[3];
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog +
+                      scratch->vert[3]->fog) / 4);
+            gte_ncds();
+            gte_strgb(&div.d4.rgbc);
+            div.d4.cr[0].r0 = &div.d4.r0;
+            div.d4.cr[0].r1 = &div.d4.r1;
+            div.d4.cr[0].r2 = &div.d4.r2;
+            div.d4.cr[0].r3 = &div.d4.r3;
+            div.d4.rgbc.cd = scratch->tag.code | 0x2c;
+            div.d4.ot = scratch->ot + scratch->w.map.z;
+            div.d4.r0.sxy = scratch->vert[0]->sxy;
+            div.d4.r1.sxy = scratch->vert[1]->sxy;
+            div.d4.r2.sxy = scratch->vert[2]->sxy;
+            div.d4.r3.sxy = scratch->vert[3]->sxy;
+            div.d4.r0.sz = scratch->vert[0]->z;
+            div.d4.r1.sz = scratch->vert[1]->z;
+            div.d4.r2.sz = scratch->vert[2]->z;
+            div.d4.r3.sz = scratch->vert[3]->z;
+            div.d4.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            div.d4.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[10]);
+            div.d4.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[11]);
+            div.d4.r3.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[12]);
+            ((u32 *)&div.d4.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d4.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d4.r2)[2] = scratch->prim[2];
+            ((u32 *)&div.d4.r3)[2] = scratch->prim[3];
+            scratch->next = (u8 *)RCpolyFT4((POLY_FT4 *)scratch->next, &div.d4);
+            scratch->w.map.ot_count += div.d4.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x34:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d3.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1];
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r0.c);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r1.c);
+            gte_ldv0(((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r2.c);
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x34;
+            div.d3.ot = scratch->ot + scratch->w.map.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[8]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyGT3((POLY_GT3 *)scratch->next, &div.d3);
+            scratch->w.map.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}

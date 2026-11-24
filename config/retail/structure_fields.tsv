@@ -795,7 +795,7 @@ ScratchModelWork	0x0	0x10	unk54	VECTOR	opaque	asm;model part renderers: nclip re
 ScratchModelWork	0x10	0x4	rgb	CVECTOR	candidate	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
 ScratchModelWork	0x14	0x8	unk68	u8[8]	opaque	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
 ScratchModelWork	0x1c	0x4	opz	s32	candidate	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
-ScratchPad	0x0	0x8	unk0	u8[8]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
+ScratchPad	0x0	0x8	nclip	s32[2]	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte2	WIP (game-gte2)
 ScratchPad	0x8	0x4	ot	u32 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0xc	0x4	ot2	u32 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;render-tu	WIP (render-tu)
 ScratchPad	0x10	0x4	model	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
