@@ -143,11 +143,9 @@ s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in
                               reach_up) == -1) {
                 continue;
             }
-            if (obj->unk6 == 0x95) {
-                return i;
-            }
-            if (func_80016a2c(angle, func_80016ab8(obj->pos.vx - pos->vx, obj->pos.vz - pos->vz),
-                              range)) {
+            if (obj->unk6 == 0x95
+                || func_80016a2c(angle, func_80016ab8(obj->pos.vx - pos->vx, obj->pos.vz - pos->vz),
+                                 range)) {
                 return i;
             }
         }
