@@ -1,12 +1,14 @@
 /*
- * GAME.EXE: starting a spell (same WIP module as src/game/player.c, between
- * the unreconstructed func_8002d2a0 and func_8002e3f8).
+ * GAME.EXE: starting a spell and the wall-sliding mover (same WIP module as
+ * src/game/player.c, after the unreconstructed func_8002d2a0; contiguous
+ * with src/game/player_action.c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/render.h>
+#include <game/collision.h>
 #include <game/data.h>
 #include <game/player.h>
 
@@ -221,4 +223,217 @@ void func_8002deec(s32 id)
         break;
     }
     DAT_801b24e4.unkac = r;
+}
+
+/*
+ * Moves the player speed units along angle (4096ths of a turn), retrying
+ * around what func_80033f38 hit: the push of the last test, up to six turns
+ * along a pushing Object44 (unk3 bit 2), around a wall point, shorter steps,
+ * one axis at a time, and along the slope of the hit record. Returns 1 when
+ * the player moved freely; unk11c keeps the last step tried.
+ */
+ADDRESS(0x8002e3f8, 0x8c4)
+s32 func_8002e3f8(s32 angle, s32 speed)
+{
+    VECTOR p;
+    Object44 *obj;
+    s32 dx;
+    s32 dz;
+    s32 hit;
+    s32 blocked;
+    s32 tries;
+    s32 lz;
+    s32 step;
+    s32 a;
+    s32 r;
+    s32 dx0;
+    s32 dz0;
+    s32 pushed;
+    s32 cornered;
+    s32 stepped;
+    s32 walled;
+    s32 moved;
+    s16 rel;
+
+    dx = rcos(angle) * speed >> 12;
+    dz = rsin(angle) * speed >> 12;
+    tries = 0;
+    moved = 0;
+    walled = 0;
+    stepped = 0;
+    cornered = 0;
+    pushed = 0;
+    dx0 = dx;
+    dz0 = dz;
+retry:
+    p.vx = dx + DAT_801b24e4.pos.vx;
+    p.vz = dz + DAT_801b24e4.pos.vz;
+    hit = func_80033f38(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31);
+    if (hit == 0) {
+    free:
+        if (DAT_801d4464.unk12034 >= 64) {
+            s32 px;
+            s32 pz;
+
+            px = rcos(-DAT_801d4464.unk12038 - 1024) * DAT_801d4464.unk12034 >> 12;
+            pz = rsin(-DAT_801d4464.unk12038 - 1024) * DAT_801d4464.unk12034 >> 12;
+            if (!pushed) {
+                pushed = 1;
+                dx += px;
+                dz += pz;
+                goto retry;
+            }
+        }
+        moved = 1;
+        DAT_801b24e4.pos.vx = p.vx;
+        DAT_801b24e4.pos.vz = p.vz;
+        DAT_801b24e4.unk160 = DAT_801d4464.unk1200a;
+        goto done;
+    }
+    blocked = 0;
+    if (!(hit & ~0x207)) {
+        if (DAT_801d4464.unk12010 + 1280 >= DAT_801b24e4.pos.vy && DAT_801b24e4.unk101 == 0
+            && DAT_801d4464.unk12014 - DAT_801d4464.unk12010 < -1700) {
+            goto free;
+        }
+        if (!(hit & 2)) {
+            blocked = 1;
+        }
+    }
+    if (DAT_801d4464.unk1202c != -1) {
+        obj = &DAT_8018fb3c.objects[DAT_801d4464.unk1202c];
+        if (obj->unk3 & 4) {
+            tries++;
+            lz = speed;
+            if (lz < 0) {
+                lz = -lz;
+            }
+            if (tries == 1) {
+                s32 to;
+
+                to = ratan2(dz, dx) - 1024;
+                rel = to - obj->angle.vy;
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (lz != 0) {
+                    dz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1024) >> 12) - (lz * rsin(obj->angle.vy + 1024) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1024) >> 12) + (lz * rcos(obj->angle.vy + 1024) >> 12);
+                goto retry;
+            } else if (tries == 2) {
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (dz != 0) {
+                    lz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1024) >> 12) - (lz * rsin(obj->angle.vy + 1024) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1024) >> 12) + (lz * rcos(obj->angle.vy + 1024) >> 12);
+                goto retry;
+            } else if (tries == 3) {
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (lz != 0) {
+                    dz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1000) >> 12) - (lz * rsin(obj->angle.vy + 1000) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1000) >> 12) + (lz * rcos(obj->angle.vy + 1000) >> 12);
+                goto retry;
+            } else if (tries == 4) {
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (dz != 0) {
+                    lz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1000) >> 12) - (lz * rsin(obj->angle.vy + 1000) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1000) >> 12) + (lz * rcos(obj->angle.vy + 1000) >> 12);
+                goto retry;
+            } else if (tries == 5) {
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (lz != 0) {
+                    dz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1048) >> 12) - (lz * rsin(obj->angle.vy + 1048) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1048) >> 12) + (lz * rcos(obj->angle.vy + 1048) >> 12);
+                goto retry;
+            } else if (tries == 6) {
+                dz = lz * rcos(rel) >> 12;
+                lz = lz * rsin(rel) >> 12;
+                if (dz != 0) {
+                    lz = 0;
+                }
+                dx = (dz * rcos(obj->angle.vy + 1048) >> 12) - (lz * rsin(obj->angle.vy + 1048) >> 12);
+                dz = (dz * rsin(obj->angle.vy + 1048) >> 12) + (lz * rcos(obj->angle.vy + 1048) >> 12);
+                goto retry;
+            }
+        }
+    }
+    if (hit & 0x30) {
+        s32 wx;
+        s32 wz;
+
+        if (++walled == 2) {
+            goto done;
+        }
+        func_80033d84();
+        wx = DAT_801d4464.unk1203c.vx - DAT_801b24e4.pos.vx;
+        wz = DAT_801d4464.unk1203c.vz - DAT_801b24e4.pos.vz;
+        a = ratan2(dz - wz, dx - wx);
+        r = DAT_801d4464.unk1204c + 880;
+        dx = rcos(a) * r / 4096;
+        dz = rsin(a) * r / 4096;
+        p.vx = dx + DAT_801d4464.unk1203c.vx;
+        dx = p.vx - DAT_801b24e4.pos.vx;
+        p.vz = dz + DAT_801d4464.unk1203c.vz;
+        dz = p.vz - DAT_801b24e4.pos.vz;
+        goto retry;
+    }
+    if (!stepped) {
+        for (step = speed - 22; step >= 0; step -= 22) {
+            p.vx = DAT_801b24e4.pos.vx + rcos(angle) * step / 4096;
+            p.vz = DAT_801b24e4.pos.vz + rsin(angle) * step / 4096;
+            if (func_80033f38(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31) == 0) {
+                DAT_801b24e4.pos.vx = p.vx;
+                DAT_801b24e4.pos.vz = p.vz;
+                break;
+            }
+        }
+        stepped = 1;
+    }
+    if (blocked || (hit & 1)) {
+    slide:
+        if (dx != 0) {
+            dx = 0;
+            goto retry;
+        }
+        if (dz != 0) {
+            dx = dx0;
+            dz = 0;
+            goto retry;
+        }
+    }
+    if (hit & 2) {
+        s32 slope;
+
+        if (cornered) {
+            goto slide;
+        }
+        slope = DAT_801d4464.unk12004[2] & 3;
+        if (slope == 0 || slope == 2) {
+            dz = (dx0 + dz0) >> 1;
+            dx = dz;
+            cornered = 1;
+            goto retry;
+        }
+        dx = (dx0 - dz0) >> 1;
+        dz = -dx;
+        cornered = 1;
+        goto retry;
+    }
+    moved = 0;
+done:
+    DAT_801b24e4.unk11c.vx = dx;
+    DAT_801b24e4.unk11c.vz = dz;
+    return moved;
 }

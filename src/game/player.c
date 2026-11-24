@@ -8,6 +8,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
+#include <stdarg.h>
 #include <psyq/libc.h>
 #include <game/math.h>
 #include <game/sound.h>
@@ -23,7 +24,7 @@
 #include <game/scene.h>
 #include <kf/lib/null.h>
 
-RODATA(0x80011760, 0x84)
+RODATA(0x80011760, 0x1bc)
 
 /* Pad bit per action (WIP); func_8002b6f0 keeps four of them held. */
 DATA(0x80081868, 0x1c, ".data")
@@ -49,6 +50,12 @@ u8 DAT_800818c0[5][7] = {
     { 0x19, 0x1a, 0x0b, 0x0c, 0x1b, 0xff, 0x00 },
     { 0x0d, 0x1c, 0x0f, 0x10, 0x11, 0xff, 0x00 },
     { 0x1d, 0x1e, 0x13, 0x14, 0x15, 0xff, 0x00 },
+};
+
+/* Offsets (unk14c) of the five shots of spells 72..74 (func_8002c30c). */
+DATA(0x800818e4, 0x28, ".data")
+static SVECTOR DAT_800818e4[5] = {
+    { 0, 0, 100, 0 }, { -1500, 0, 0, 0 }, { -3000, 0, -2000, 0 }, { 1500, 0, 0, 0 }, { 3000, 0, -2000, 0 }
 };
 
 ADDRESS(0x80028d54, 0xf4)
@@ -375,25 +382,25 @@ void func_80029500(void)
             DAT_801b24e4.unk42[i] = 999;
         }
     }
-    if (DAT_801b24e4.unk54[0] & 0x8000) {
+    if (DAT_801b24e4.unk54[0] >= 0x8000) {
         DAT_801b24e4.unk54[0] = 0;
     }
-    if (DAT_801b24e4.unk54[1] & 0x8000) {
+    if (DAT_801b24e4.unk54[1] >= 0x8000) {
         DAT_801b24e4.unk54[1] = 0;
     }
-    if (DAT_801b24e4.unk54[2] & 0x8000) {
+    if (DAT_801b24e4.unk54[2] >= 0x8000) {
         DAT_801b24e4.unk54[2] = 0;
     }
-    if (DAT_801b24e4.unk54[3] & 0x8000) {
+    if (DAT_801b24e4.unk54[3] >= 0x8000) {
         DAT_801b24e4.unk54[3] = 0;
     }
-    if (DAT_801b24e4.unk54[4] & 0x8000) {
+    if (DAT_801b24e4.unk54[4] >= 0x8000) {
         DAT_801b24e4.unk54[4] = 0;
     }
-    if (DAT_801b24e4.unk54[5] & 0x8000) {
+    if (DAT_801b24e4.unk54[5] >= 0x8000) {
         DAT_801b24e4.unk54[5] = 0;
     }
-    if (DAT_801b24e4.unk54[6] & 0x8000) {
+    if (DAT_801b24e4.unk54[6] >= 0x8000) {
         DAT_801b24e4.unk54[6] = 0;
     }
     if (DAT_801b24e4.unk62 > 0x7fff) {
@@ -1409,4 +1416,262 @@ Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
         func_80016928(speed, dir);
     }
     return object;
+}
+
+/*
+ * Casts spell id (77 kinds, Record18 indices): aims along unk14c with
+ * func_8002c164 and spawns the spell's Object4c records with func_80053c84;
+ * spells 68, 69, 72 and 73/74 spawn under the ids 120..124. Declared with an
+ * ellipsis: the prologue spills all four argument registers and va_start
+ * keeps id in its stack slot (read back as a byte for the spawns).
+ */
+ADDRESS(0x8002c30c, 0xb9c)
+void func_8002c30c(s32 id, ...)
+{
+    VECTOR off;
+    SVECTOR dir;
+    SVECTOR unused;
+    s32 dist;
+    s32 range;
+    Object88 *obj;
+    Object4c *made;
+    SVECTOR *row;
+    s32 i;
+    s32 k;
+    s32 index;
+    s32 target;
+    s32 n;
+    s16 yaw;
+    va_list args;
+
+    va_start(args, id);
+    switch (id) {
+    case 0:
+        func_8002c164(900, &off, &dir, &dist);
+    spawn:
+        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        break;
+    case 6:
+        func_8002c164(500, &off, &dir, &dist);
+        goto spawn;
+    case 62:
+        func_8002c164(750, &off, &dir, &dist);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        break;
+    case 54:
+        for (i = 0; i < 4; i++) {
+            k = 3 - i;
+            DAT_801b24e4.unk14c.vz = k * 800;
+            func_8002c164(500, &off, &dir, &dist);
+            func_80053c84(10, 0x42, (u8)id, &off, &dir, k);
+        }
+        break;
+    case 55:
+        func_8002c164(500, &off, &dir, &dist);
+        goto spawn;
+    case 70:
+        func_8002c164(500, &off, &dir, &dist);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, 0);
+        break;
+    case 64:
+        func_8002c164(440, &off, &dir, &dist);
+        goto spawn;
+    case 76:
+        func_8002c164(450, &off, &dir, &dist);
+        goto spawn;
+    case 60:
+        func_8002c164(320, &off, &dir, &dist);
+        goto spawn;
+    case 58:
+        func_8002c164(550, &off, &dir, &dist);
+        goto spawn;
+    case 75:
+        func_8002c164(720, &off, &dir, &dist);
+        func_80053c84(10, 0x42, 75, &off, &dir);
+        break;
+    case 15:
+        func_8002c164(300, &off, &dir, &dist);
+        off.vy += 1344;
+        dir.vy = 0;
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 0);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 1);
+        break;
+    case 7:
+        func_80053c84(10, 0x43, (u8)id, &DAT_801b24e4.pos, 0, 0x1000, 0x100, 0x1000, 1);
+        break;
+    case 8:
+        obj = func_8002c164(7000, &off, &dir, &dist);
+        if (obj == NULL) {
+            off.vx += dir.vx;
+            off.vz += dir.vz;
+            off.vy = DAT_801b24e4.pos.vy;
+        } else {
+            off.vx = (obj->vel.vx << 14) / 650 + obj->pos.vx;
+            off.vy = (obj->vel.vy << 14) / 650 + obj->pos.vy;
+            off.vz = (obj->vel.vz << 14) / 650 + obj->pos.vz;
+            if (func_80033d08(off.vx, off.vy, off.vz, 10, 10)) {
+                off.vx = obj->pos.vx;
+                off.vy = obj->pos.vy;
+                off.vz = obj->pos.vz;
+            }
+        }
+        func_80053c84(10, 0x43, 0x5f, &off, 0);
+        break;
+    case 12:
+        obj = func_8002c164(7000, &off, &dir, &dist);
+        if (obj == NULL) {
+            off.vx += dir.vx;
+            off.vz += dir.vz;
+            off.vy = DAT_801b24e4.pos.vy;
+        } else {
+            off.vx = obj->pos.vx;
+            off.vy = obj->pos.vy;
+            off.vz = obj->pos.vz;
+        }
+        func_80053c84(10, 0x42, 12, &off, 0);
+        break;
+    case 56:
+    case 57:
+        func_8002c164(700, &off, &dir, &dist);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        break;
+    case 13:
+        func_8002c164(700, &off, &dir, &dist);
+    spawn2:
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        break;
+    case 11:
+        func_8002c164(260, &off, &dir, &dist);
+        dir.vx += (rand() >> 10) - 16;
+        dir.vy += (rand() >> 10) - 16;
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, 14 - DAT_801b24e4.unk106);
+        break;
+    case 21:
+        func_8002c164(260, &off, &dir, &dist);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        break;
+    case 19:
+        func_8002c164(600, &off, &dir, &range);
+        if (range != -1) {
+            range = range / 600 - 8;
+            if (range < 2) {
+                range = 2;
+            }
+        } else {
+            range = 10;
+        }
+        dir.vy = 0;
+        func_80053c84(10, 0x42, 0x71, &off, &dir, range);
+        break;
+    case 2:
+        obj = func_8002c164(500, &off, &dir, &dist);
+        if (obj == NULL) {
+            target = 0xff;
+        } else {
+            target = obj - DAT_80185da8.objects;
+        }
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, target, DAT_801b24e4.unk106);
+        break;
+    case 1:
+        func_8002c164(570, &off, &dir, &dist);
+        func_80053c84(10, 0x42, 1, &off, &dir, &DAT_801b24e4.unk124);
+        DAT_801b24e4.unk14c.vx += 1000;
+        break;
+    case 4:
+    case 9:
+    case 17:
+        func_8002c164(250, &off, &dir, &dist);
+        goto spawn2;
+    case 16:
+        func_8002c164(250, &off, &dir, &dist);
+        goto spawn2;
+    case 5:
+        func_8002c164(250, &off, &dir, &dist);
+        goto spawn2;
+    case 20:
+    case 71: {
+        SVECTOR unused2;
+
+        yaw = DAT_801b24e4.unk124.vy;
+        DAT_801b24e4.unk124.vy = yaw - (DAT_801b24e4.unk14c.vx << 1);
+        func_8002c164(170, &off, &dir, &dist);
+        DAT_801b24e4.unk14c.vx += 100;
+        DAT_801b24e4.unk124.vy = yaw;
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 600, 60, 128, 140, 160);
+        break;
+    }
+    case 73:
+    case 74:
+        id = 0x7a;
+        row = DAT_800818e4;
+        DAT_801b24e4.unk14c = *row;
+        func_8002c164(600, &off, &dir, &dist);
+        made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        if (made != NULL) {
+            index = made - DAT_801b77ec.objects;
+            row++;
+            for (n = 3; n != -1; n--) {
+                DAT_801b24e4.unk14c = *row;
+                func_8002c164(600, &off, &dir, &dist);
+                func_80053c84(10, 0x42, 0x5d, &off, &dir, index);
+                row++;
+            }
+        }
+        break;
+    case 72:
+        id = 0x78;
+        row = DAT_800818e4;
+        DAT_801b24e4.unk14c = *row;
+        func_8002c164(600, &off, &dir, &dist);
+        made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        if (made != NULL) {
+            index = made - DAT_801b77ec.objects;
+            row++;
+            for (n = 3; n != -1; n--) {
+                DAT_801b24e4.unk14c = *row;
+                func_8002c164(600, &off, &dir, &dist);
+                func_80053c84(10, 0x42, 0x5c, &off, &dir, index);
+                row++;
+            }
+        }
+        break;
+    case 68:
+        func_8002c164(1000, &off, &dir, &dist);
+        id = 0x7c;
+        goto spawn;
+    case 69:
+        func_8002c164(1000, &off, &dir, &dist);
+        id = 0x7b;
+        goto spawn2;
+    case 66:
+        func_8002c164(900, &off, &dir, &dist);
+        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        break;
+    case 26:
+        func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 0);
+        func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 1);
+        DAT_801b24e4.unk86 = 1800;
+        func_80029500();
+        break;
+    case 28:
+        func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 0);
+        func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 1);
+        DAT_801b24e4.unk8a = 1800;
+        func_80029500();
+        break;
+    case 27:
+        func_80053c84(10, 0x40, 0x1b, &DAT_801b24e4.pos, &dir);
+        DAT_801b24e4.unk88 = 200;
+        func_80029500();
+        break;
+    case 25:
+        func_80053c84(10, 0x40, 0x19, &DAT_801b24e4.pos, &dir);
+        break;
+    case 23:
+        func_80053c84(10, 0x40, 0x17, &DAT_801b24e4.pos, &dir);
+        break;
+    case 30:
+        func_80053c84(10, 0x40, 0x1e, &DAT_801b24e4.pos, &dir);
+        break;
+    }
 }
