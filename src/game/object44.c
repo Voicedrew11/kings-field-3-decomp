@@ -193,21 +193,21 @@ void func_80044c34(s32 mode)
         case 0x51:
             if (obj->arg.b.unk3a.bytes[1] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
-                func_80044b40(obj, mode, def->unk17);
+                func_80044b40(obj, mode, def->arg.b.unk17);
             }
             break;
         case 0x52:
             if (obj->arg.b.unk3d[0] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
-                func_80044b40(obj, mode, def->unk17);
+                func_80044b40(obj, mode, def->arg.b.unk17);
             }
             break;
         case 7:
             if (obj->arg.b.unk38 != 0xfe) {
                 func_80044900(obj->arg.h.unk3a, mode, obj->unk0);
                 def = &DAT_8018fb3c.defs[obj->unk6];
-                if (def->unkc != 0xff) {
-                    func_80044b40(obj, mode, def->unkc);
+                if (def->arg.b.unkc != 0xff) {
+                    func_80044b40(obj, mode, def->arg.b.unkc);
                 }
             }
             break;
@@ -223,7 +223,7 @@ void func_80044c34(s32 mode)
  * without a case go to FDAT handler 8.
  * Not exact: retail adds the cell row (base + z * 800) before the column
  * (+ x * 10) where GCC here forms z * 800 + (x * 10 + base) (as in
- * func_80044b40), and loads def->unke before def->unk10 for the larger radius.
+ * func_80044b40), and loads def->arg.h.unke before def->arg.h.unk10 for the larger radius.
  */
 ADDRESS(0x80044d9c, 0xd2c)
 void func_80044d9c(Object44Place *place)
@@ -287,16 +287,16 @@ void func_80044d9c(Object44Place *place)
                 func_80033c4c(obj->pos.vx, obj->pos.vz, radius, 1);
             }
         } else if (obj->unk3 & 4) {
-            radius = def->unk10;
-            if (def->unke > radius) {
-                radius = def->unke;
+            radius = def->arg.h.unk10;
+            if (def->arg.h.unke > radius) {
+                radius = def->arg.h.unke;
             }
             func_80033c4c(obj->pos.vx, obj->pos.vz, radius, 1);
         }
         switch (def->unk0) {
         case 1:
             func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 1, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->unkd, (u8)def->unke,
+                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                           obj->angle.vy, 45);
             obj->unk4 = 1;
             obj->unk8 = 2;
@@ -352,8 +352,8 @@ void func_80044d9c(Object44Place *place)
         case 2:
             obj->unk4 = 2;
             obj->unk1 = 0;
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->unkd * 2, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->unkd, (u8)def->unke,
+            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2, obj->arg.b.unk3c,
+                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                           obj->angle.vy, 45);
             func_80033c4c(obj->pos.vx, obj->pos.vz, 4400, 1);
             break;
@@ -366,8 +366,8 @@ void func_80044d9c(Object44Place *place)
         case 7:
             obj->unk4 = 7;
             obj->unk1 = 0;
-            if (def->unkc != 0xff) {
-                func_80044b40(obj, 0, def->unkc);
+            if (def->arg.b.unkc != 0xff) {
+                func_80044b40(obj, 0, def->arg.b.unkc);
             }
             break;
         case 8:
@@ -393,7 +393,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk0 = 2;
             obj->unk4 = 0x54;
             func_800443c8(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                          DAT_8008288c[(u8)def->unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
+                          DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 95:
@@ -406,7 +406,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk4 = 0x51;
             obj->arg.b.unk40 = 0;
             if (obj->arg.b.unk3a.bytes[1] != 0xff) {
-                func_80044b40(obj, 0, def->unk17);
+                func_80044b40(obj, 0, def->arg.b.unk17);
             }
             break;
         case 87:
@@ -431,7 +431,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk4 = 0x52;
             obj->arg.b.unk40 = 0;
             if (obj->arg.b.unk3d[0] != 0xff) {
-                func_80044b40(obj, 0, def->unk17);
+                func_80044b40(obj, 0, def->arg.b.unk17);
             }
             break;
         case 85:

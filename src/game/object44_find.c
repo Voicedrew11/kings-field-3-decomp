@@ -50,8 +50,8 @@ s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
                 return i;
             }
         } else if (obj->unk3 & 4) {
-            if (func_80016d3c(&obj->angle, &obj->pos, x, y, z, def->unke + radius,
-                              def->unk10 + radius, obj->unkc, shape) != -1) {
+            if (func_80016d3c(&obj->angle, &obj->pos, x, y, z, def->arg.h.unke + radius,
+                              def->arg.h.unk10 + radius, obj->unkc, shape) != -1) {
                 return i;
             }
         }
@@ -254,7 +254,7 @@ void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
         }
         break;
     }
-    obj->arg.h.unk3e = 0;
+    obj->arg.sh.unk3e = 0;
     obj->arg.b.unk38 = 0xff;
 }
 
@@ -280,7 +280,7 @@ void func_80046294(u16 target, VECTOR *pos, s32 dy)
     obj->angle.vy = rand() >> 3;
     obj->arg.b.unk38 = 0xff;
     func_80046014(obj, 0x62);
-    obj->arg.h.unk3e = -120;
+    obj->arg.sh.unk3e = -120;
 }
 
 /* Passes the switch event id to every record whose kind listens for it. */

@@ -366,10 +366,39 @@ typedef struct Object44Halves {
     u16 unk38;
     u16 unk3a;
     u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
-    s16 unk3e;      /* +0x3e: kind 0x1f reads it unsigned: delay in units of 6 VSyncs */
-    u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914) */
-    u16 unk42;
+    u16 unk3e;      /* +0x3e: kind 0x1f: delay in units of 6 VSyncs; kinds 0/0x1b: the
+                     * other wing's index, 0xffff for none */
+    u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914); kinds 0/1/0x1b:
+                     * frames since the door started opening */
+    u16 unk42;      /* +0x42: kinds 0/1/0x1b: yaw when shut */
 } Object44Halves;
+
+/* Signed views of the same bytes and halfwords (kinds 6, 0x60..0x62, 0xe0, 0xea). */
+typedef struct Object44SBytes {
+    s8 unk34[4];
+    s8 unk38;
+    s8 unk39;
+    s8 unk3a;
+    s8 unk3b;
+    s8 unk3c;       /* +0x3c: kind 0xea: x shift in map cells (func_80046cb0) */
+    s8 unk3d;       /* +0x3d: kind 0xea: z shift */
+    s8 unk3e;
+    s8 unk3f;
+    s8 unk40;       /* +0x40: kind 0xe0: shift passed to func_80017c78 (with unk41, unk42) */
+    s8 unk41;
+    s8 unk42;
+    s8 unk43;
+} Object44SBytes;
+
+typedef struct Object44SHalves {
+    s16 unk34[2];
+    s16 unk38;
+    s16 unk3a;
+    s16 unk3c;
+    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (func_800460bc, func_80046294) */
+    s16 unk40;      /* +0x40: kind 6: turn speed (func_80016168) */
+    s16 unk42;
+} Object44SHalves;
 
 typedef struct Object44Words {
     s32 unk34;
@@ -417,6 +446,8 @@ typedef union Object44Arg {
     Object44Bytes b;
     Object44Halves h;
     Object44Words w;
+    Object44SBytes sb;
+    Object44SHalves sh;
     Object44Model m;
     Object44View v;
     Object44Sound s;
@@ -443,6 +474,35 @@ typedef struct Object44 {
     Object44Arg arg; /* +0x34 */
 } Object44;
 
+/*
+ * Object44Def +0x0c..+0x17 by type (WIP views): most types read bytes; the
+ * moving types 0x51, 0x52 and 0x55 (func_80047010) and the collision tests read
+ * +0x0c..+0x11 as halfwords.
+ */
+typedef struct Object44DefBytes {
+    u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none; kind 0x51: first
+                     * vertex func_80046760 tests */
+    u8 unkd;        /* +0x0d: kind 0x51: second vertex */
+    u8 unke;
+    u8 unkf;        /* +0x0f: sound effect when it starts moving (func_8004482c) */
+    u8 unk10[2];
+    u8 unk12[4];    /* +0x12: kinds 0x51/0x52/0x55: passed to func_800533e8 on a hit */
+    u8 unk16;       /* +0x16: kinds 0x51/0x52/0x55: sound effect (- 496), 0xff for none */
+    u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set; kind 0x55: speed / 16 */
+} Object44DefBytes;
+
+typedef struct Object44DefHalves {
+    u16 unkc;       /* +0x0c: kinds 0x52/0x55: vertex func_80046760 tests */
+    u16 unke;       /* +0x0e: collision radius */
+    u16 unk10;      /* +0x10: collision height */
+    u8 unk12[6];
+} Object44DefHalves;
+
+typedef union Object44DefArg {
+    Object44DefBytes b;
+    Object44DefHalves h;
+} Object44DefArg;
+
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
 typedef struct Object44Def {
     u8 unk0;        /* +0x00: type (func_80044900) */
@@ -453,12 +513,7 @@ typedef struct Object44Def {
     u16 unk6;       /* +0x06: radius of the turned kinds (func_80045c7c) */
     u16 unk8;       /* +0x08: height */
     u16 unka;
-    u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none */
-    u8 unkd;
-    u16 unke;
-    u16 unk10;
-    u8 unk12[5];
-    u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set */
+    Object44DefArg arg; /* +0x0c */
 } Object44Def;
 
 /* One of the 24 positions kinds 5 and 16 record behind them (func_80053c84). */
@@ -739,7 +794,7 @@ typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[4];
-    u8 *unk8854;            /* +0x8854: FDAT_008 slot 9 passes its [15] to func_8004482c */
+    Object44Def *unk8854;   /* +0x8854: the def of unk8858 (func_80047010) */
     Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test; the object
                              * FDAT slot 9 handlers test */
     u8 unk885c[2];
