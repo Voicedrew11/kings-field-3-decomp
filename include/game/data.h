@@ -311,7 +311,8 @@ typedef struct Object44 {
     u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
     u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
     u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
-    u8 unkc[4];
+    u8 unkc[2];
+    s16 unke;       /* +0x0e: FDAT_053 sets -100 on the object it spawns */
     u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
@@ -570,7 +571,9 @@ typedef struct Data8018fb3c {
     Object44 objects[0x18c];
     u8 unk8850[8];
     Object44 *unk8858;      /* +0x8858: the object FDAT slot 9 handlers test */
-    u8 unk885c[0xc];
+    u8 unk885c[2];
+    u16 unk885e;            /* +0x885e: FDAT_053 numbers the objects it spawns with it */
+    u8 unk8860[8];
 } Data8018fb3c;
 
 /*

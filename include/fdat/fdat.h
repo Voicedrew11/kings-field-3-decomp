@@ -38,6 +38,7 @@ typedef struct FdatHeader {
 /* GAME.EXE functions the modules call (no GAME source or prototype yet). */
 void func_800445b8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
                    s32 arg7, s32 arg8);
+void func_800448b8(Object44 *obj);
 void func_800463bc(s32 arg0);
 void func_800466e8(s32 arg0);
 s32 func_80045c7c(s32 start, VECTOR *pos, s32 range, s32 height, s32 angle, s32 arc);
