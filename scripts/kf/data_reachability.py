@@ -20,7 +20,7 @@ from pathlib import Path
 
 from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv
 from scripts.kf.sema import Context
 from scripts.kf.sema.cfg import build_graph, switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
@@ -277,6 +277,8 @@ def audit(
     indirect_sites: tuple = (),
     pointer_targets: dict | None = None,
     pointer_problems: tuple[str, ...] = (),
+    host_functions: tuple[Binding, ...] = (),
+    host_extents: tuple[DataExtent, ...] = (),
 ) -> dict:
     """Lossless reference worklist with weakest-edge reachability witnesses.
 
@@ -295,6 +297,11 @@ def audit(
     edges; a target in another image (an FDAT module's handler) is recorded as
     a cross-image edge, owned and audited with that image. Each such site is a
     `pointer_dispatch` witness row.
+
+    An overlay's references outside its own load window reach its host
+    program (`retail.referent_image`). They are checked against the host's
+    owners (`host_functions`, `host_extents`) and recorded as cross-image
+    edges; the host's own closure is audited with the host image.
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -344,6 +351,21 @@ def audit(
             return [*code, *claimed]
         identities = [d for d in data if d.source == "data_identities.tsv"]
         return [*code, *(identities or data)]
+
+    host = OVERLAY_SOURCES.get(image)
+    window = IMAGE_LAYOUTS[image] if host is not None else None
+    host_name = host.host if host is not None else ""
+    host_functions = tuple(f for f in host_functions if f.image == host_name)
+    host_extents = tuple(d for d in host_extents if d.image == host_name)
+    cross_image: dict[int, list[str]] = {}
+
+    def host_owners(va: int) -> list[str]:
+        code = [_function_key(f) for f in host_functions if f.va <= va < f.body_end]
+        data = [d for d in host_extents if d.va <= va < d.end]
+        claimed = [d for d in data if d.claimed]
+        identities = [d for d in data if d.source == "data_identities.tsv"]
+        return [f"{host_name}:{key}"
+                for key in (*code, *(d.key for d in (claimed or identities or data)))]
 
     for root in roots:
         visit(root, TIER_RANK["proven"], None, None)
@@ -445,6 +467,15 @@ def audit(
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
+            if window is not None and not window.contains(reference.destination):
+                # A cross-image edge into the host: owned there, not traversed.
+                hosts = host_owners(reference.destination)
+                if not hosts:
+                    issue("unmodeled-target", key, number, target=reference.target,
+                          image=host_name)
+                destinations[number] = hosts
+                cross_image[number] = hosts
+                continue
             found = owners(reference.destination)
             if not found and reference.target in link_labels:
                 # A curated zero-size link-layout label (BSS_END) names a
@@ -571,6 +602,7 @@ def audit(
             ),
             "proven_switch_dispatch": len(switch_witnesses),
             "reviewed_pointer_dispatch": len(pointer_witnesses),
+            "host_references": len(cross_image),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
@@ -593,11 +625,14 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     for image in images:
         ctx = Context(image)
         pointer_targets, pointer_problems = resolve_pointers(image, ctx.refs.references)
+        host = OVERLAY_SOURCES.get(image)
+        host_functions = Context(host.host).idx.functions if host is not None else ()
         report = audit(image, ctx.idx.functions, extents, ctx.refs.references, ctx.img,
                        config_comparisons=comparisons,
                        link_labels=frozenset(link_labels(image).values()),
                        indirect_sites=load_sites(image), pointer_targets=pointer_targets,
-                       pointer_problems=tuple(pointer_problems))
+                       pointer_problems=tuple(pointer_problems),
+                       host_functions=host_functions, host_extents=extents)
         reports.append(report)
         summary = report["summary"]
         print(f"{image} known-reference closure: {summary['game_roots']} game roots, "
@@ -612,6 +647,9 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
         if summary["reviewed_pointer_dispatch"]:
             print(f"  game indirect sites through reviewed run-time pointers: "
                   f"{summary['reviewed_pointer_dispatch']}")
+        if summary["host_references"]:
+            print(f"  references into {OVERLAY_SOURCES[image].host} (owned there): "
+                  f"{summary['host_references']}")
         if summary['config_matched_data_ranges']:
             print(f"  independent provider/retail matches: {summary['config_matched_data_ranges']} config ranges")
         for code, count in summary["issues"].items():

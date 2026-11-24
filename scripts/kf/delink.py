@@ -49,6 +49,7 @@ from scripts.kf.retail import (
     format_size,
     parse_int,
     read_tsv,
+    referent_image,
     verify_retail_image,
     write_tsv,
 )
@@ -437,8 +438,11 @@ def _resolve_symbol(
     data_reference: bool = False,
     sdata: tuple[int, int] | None = None,
 ) -> tuple[str, int]:
+    # An overlay's references outside its own window name its host's
+    # functions and data (retail.referent_image).
+    owner_image = referent_image(function.image, target)
     named = named_data_referent(
-        catalog, function.image, sanitize_symbol(target_name, "")
+        catalog, owner_image, sanitize_symbol(target_name, "")
     ) if target_name else None
     if data_reference and named is not None:
         # A biased data base can coincide with unrelated code or RODATA. Use
@@ -459,7 +463,7 @@ def _resolve_symbol(
         # The owning module's small-data literals; module packing turns the
         # working symbol into a .sdata offset.
         return SDATA_LITERAL_SYMBOL, target - sdata[0]
-    target_function = catalog.function_starts[function.image].get(target)
+    target_function = catalog.function_starts[owner_image].get(target)
     if target_function is not None:
         return target_function.symbol, 0
     if target_name:
@@ -479,7 +483,7 @@ def _resolve_symbol(
         if named is not None:
             return symbol, target - named.va
         return symbol, 0
-    target_data = _containing_data(catalog, function.image, target)
+    target_data = _containing_data(catalog, owner_image, target)
     if target_data is not None:
         return target_data.symbol, target - target_data.va
     return f"DAT_{target:08x}", 0

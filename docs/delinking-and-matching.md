@@ -38,8 +38,14 @@ FDAT_005.BIN + config/retail/*.tsv -> build/delink/fdat_005 -> build/objdiff/fda
 ...
 ```
 
-A module's calls into `GAME.EXE` are cross-image references: they stay
-unmodeled targets until `GAME.EXE`'s owner is linked against the module.
+A module's calls and data references into `GAME.EXE` are cross-image
+references (`retail.referent_image`): an address outside the module's own
+load window belongs to its host. The delinker names such a referent with the
+host's identity (a call to `func_80041eec` stays `func_80041eec`), the
+relocation validator accepts a J/JAL whose target is a host function start,
+the target relink resolves the external from the host's address book, and the
+closure audit records the edge as a host reference owned there instead of an
+unmodeled target (the host's own closure is audited with the host).
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a
