@@ -329,10 +329,13 @@ s32 func_8001aa84(void)
     }
     func_80027c8c();
     if (result >= 104 && result <= 120) {
-        if (!(DAT_8018fad4.unk9 == 2
-              && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
-              && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42
-              && (result == 104 || result == 107 || result == 108 || result == 109))) {
+        if (DAT_8018fad4.unk9 == 2
+            && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
+            && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42) {
+            if (!(result == 104 || result == 107 || result == 108 || result == 109)) {
+                func_8001b254(result);
+            }
+        } else {
             func_8001b254(result);
         }
     }
