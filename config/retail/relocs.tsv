@@ -347,3 +347,32 @@ GAME.EXE	0x8004341c	0x32c1c		mips26	reachable-code	0x800433e8	load		j		manual-de
 GAME.EXE	0x8004347c	0x32c7c	0x80043480	mips_hi16_lo16	reachable-code	0x801acb98	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
 GAME.EXE	0x800434c8	0x32cc8	0x800434cc	mips_hi16_lo16	reachable-code	0x801acb98	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
 GAME.EXE	0x800434e0	0x32ce0		mips26	reachable-code	0x80042eb0	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043568	0x32d68		mips26	reachable-code	0x800405e8	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043588	0x32d88		mips26	reachable-code	0x80043798	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800435f0	0x32df0		mips26	reachable-code	0x80043794	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043608	0x32e08		mips26	reachable-code	0x800435a8	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x8004362c	0x32e2c		mips26	reachable-code	0x80042cac	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043698	0x32e98		mips26	reachable-code	0x8004316c	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800436f0	0x32ef0		mips26	reachable-code	0x8004316c	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800437cc	0x32fcc	0x800437d0	mips_hi16_lo16	reachable-code	0x801a92b0	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043804	0x33004		mips26	reachable-code	0x80043820	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043828	0x33028	0x8004382c	mips_hi16_lo16	reachable-code	0x801aab64	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043858	0x33058	0x8004385c	mips_hi16_lo16	reachable-code	0x801aab64	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800438c0	0x330c0		mips26	reachable-code	0x80014a18	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800438e8	0x330e8	0x800438ec	mips_hi16_lo16	reachable-code	0x801aab64	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x8004390c	0x3310c		mips26	reachable-code	0x80043894	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043948	0x33148	0x8004394c	mips_hi16_lo16	reachable-code	0x801aab64	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x8004397c	0x3317c		mips26	reachable-code	0x80043894	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800439b0	0x331b0	0x800439b4	mips_hi16_lo16	reachable-code	0x801aab64	bss	DAT_80199154	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x800439e0	0x331e0		mips26	reachable-code	0x80043a00	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043a18	0x33218	0x80043a1c	mips_hi16_lo16	reachable-code	0x80182968	bss	DAT_80182968	lui+addiu		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043ab8	0x332b8		mips26	reachable-code	0x80033b8c	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043acc	0x332cc		mips26	reachable-code	0x800796c0	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043ae8	0x332e8		mips26	reachable-code	0x80043af4	load		j		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b40	0x33340		mips26	reachable-code	0x8007c344	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b48	0x33348		mips26	reachable-code	0x8007c354	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b6c	0x3336c		mips26	reachable-code	0x80079dc8	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b74	0x33374		mips26	reachable-code	0x80079ba0	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b90	0x33390		mips26	reachable-code	0x80079dc8	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043b98	0x33398		mips26	reachable-code	0x80079ba0	load		jal		manual-decoded	reviewed	game-b asm review
+GAME.EXE	0x80043ba0	0x333a0		mips26	reachable-code	0x80043b48	load		j		manual-decoded	reviewed	game-b asm review

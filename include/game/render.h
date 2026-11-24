@@ -50,6 +50,19 @@ typedef struct ModelFile {
     s32 anims;      /* offset of the animation offset table */
 } ModelFile;
 
+/* A vertex set of a model's data block. */
+typedef struct ModelPart {
+    s32 vertices;   /* offset from the block start, less 12 */
+    s32 unk4;
+    u8 unk8[0x14];
+} ModelPart;
+
+/* The data block a ModelFile's vertices offset points at. */
+typedef struct ModelData {
+    u8 unk0[12];
+    ModelPart parts[1];
+} ModelData;
+
 /* One key frame of an animation. */
 typedef struct AnimKey {
     u16 reverse;    /* nonzero: the sub-frame runs from 0x1000 down */
@@ -62,7 +75,7 @@ typedef struct AnimKey {
 
 /* A cached animated pose; owner points back at the model's slot pointer. */
 typedef struct AnimSlot {
-    u16 state;
+    s16 state;      /* 0 free, 1 unused this frame, 2 drawn this frame */
     u16 model;
     u16 anim;
     u16 key;
@@ -70,6 +83,34 @@ typedef struct AnimSlot {
     SVECTOR *pose;
     struct AnimSlot **owner;
 } AnimSlot;
+
+/* A placed effect (128 of them follow a frame counter). */
+typedef struct Effect {
+    u16 id;         /* 0xffff: unused */
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;        /* random phase below unk3 */
+    u8 unk6[2];
+    VECTOR pos;
+} Effect;
+
+/* An effect placement record of a map file: map cell plus offsets. */
+typedef struct EffectSpawn {
+    u16 id;         /* 0xffff: none */
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 cell_z;
+    u8 cell_x;
+    u8 unk7[3];
+    s16 dz;
+    s16 dx;
+    s16 dy;
+} EffectSpawn;
+
+extern s32 DAT_80182964;
+extern Effect DAT_80182968[128];
 
 typedef struct Data80199154 {
     u8 *buffer;                     /* +0x00000: 2D quads per frame; CD load buffer */
@@ -217,11 +258,18 @@ void func_80042e34(SVECTOR *pose, s16 *deltas);
 void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t);
 s16 *func_8004316c(s16 *deltas, s32 index);
 s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count);
+s32 func_8004352c(u16 id, s32 anim, s32 time, s32 vertex, SVECTOR *out);
+s32 func_800437c8(s32 id, s32 part);
+void func_80043828(void);
+void func_80043858(void);
 void func_80043894(AnimSlot *slot);
 void func_800438e0(void);
-void func_800439b0(AnimSlot **slot);
+void func_80043940(void);
+void func_800439b0(AnimSlot **out);
+void func_80043a08(EffectSpawn *spawn);
 
 /* Callees outside the render modules; signatures from these call sites. */
+s32 func_80033b8c(u8 area, s32 x, s32 z, s32 arg3, s32 arg4);
 u8 *func_8001939c(u8 *arena, s32 size, u8 **owner);
 SVECTOR *func_800194b0(s32 size);
 void func_80019474(u8 *block, u8 state);
