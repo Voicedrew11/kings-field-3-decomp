@@ -11,6 +11,10 @@ import struct
 import subprocess
 
 C_COMPILERS = {
+    # Sony's GNU C 2.60 CC1PSX.EXE ("GNU C 2.6.0 [AL 1.1, MM 40]") runs under
+    # DOSBox; the Decompals 2.6.0 rebuild preprocesses and answers the
+    # source-size probe, both optimizer-independent.
+    "gcc260-sony": ("cpppsx-260", "cc1psx-260"),
     "gcc257-native": ("cpppsx-257", "cc1psx-257"),
     "gcc260-native": ("cpppsx-260", "cc1psx-260"),
     # The kit's extensionless CC1PSX (GCC 2.4.1) runs under DOSBox. Its
@@ -18,7 +22,18 @@ C_COMPILERS = {
     # are optimizer-independent and see the same headers and MIPS ABI.
     "gcc241-kit": ("cpppsx-257", "cc1psx-257"),
 }
-DOS_C_COMPILERS = frozenset({"gcc241-kit"})
+DOS_C_COMPILERS = frozenset({"gcc260-sony", "gcc241-kit"})
+# The Psy-Q CCPSX 1.17 driver's preprocessor definitions for C with -O.
+SONY_DRIVER_DEFINES = ('mips', '__mips__', '__mips', 'psx', '__psx__', '__psx',
+                       '__EXTENSIONS__', '_MIPSEL', '__CHAR_UNSIGNED__',
+                       '_LANGUAGE_C', 'LANGUAGE_C', '__OPTIMIZE__')
+# The Runtime Library 3.3 CD's assembler: it reproduces the retail div/rem
+# expansion and `li` -> `ori` with no hazard nop where 2.30 and 2.34 add one.
+ASPSX_VERSION = '2.21'
+
+
+def aspsx_command(stem: str, small_data: int) -> str:
+    return f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
 
 
 def run_command(arguments, *, environment=None):
@@ -77,10 +92,12 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     cpp, cc1 = C_COMPILERS[compiler]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
-    # The name becomes the assembly's `.file`; ASPSX 1.07 hangs on long ones,
-    # so a checkout-relative spelling keeps deep worktrees buildable.
+    # The name becomes the assembly's `.file`; older ASPSX builds hang on long
+    # ones, so a checkout-relative spelling keeps deep worktrees buildable.
+    driver = SONY_DRIVER_DEFINES if compiler == 'gcc260-sony' else ()
     cpp_command = [cpp, '-lang-c', '-undef', '-nostdinc', *includes,
-                   *(f'-D{value}' for value in defines), os.path.relpath(source.resolve())]
+                   *(f'-D{value}' for value in (*driver, *defines)),
+                   os.path.relpath(source.resolve())]
     preprocessed.write_bytes(run(cpp_command))
     cc1_command = [str(cc1_override) if cc1_override else cc1, '-quiet', '-g', f'-{optimization}',
                    f'-G{small_data}', *cc1_flags, str(preprocessed), '-o', str(assembly)]
@@ -88,7 +105,10 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     if compiler in DOS_C_COMPILERS:
         if cc1_override is not None:
             raise ValueError(f'{compiler} has no cc1 override')
-        stage_kit_gcc241(root / 'CC1.EXE')
+        if compiler == 'gcc260-sony':
+            shutil.copyfile(os.environ['PSYQ_CC1PSX'], root / 'CC1.EXE')
+        else:
+            stage_kit_gcc241(root / 'CC1.EXE')
         assembly.unlink(missing_ok=True)
         dos_command = ['CC1', '-quiet', '-g', f'-{optimization}', f'-G{small_data}', *cc1_flags,
                        preprocessed.name, '-o', assembly.name]
@@ -96,7 +116,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
         if not assembly.is_file() or not assembly.stat().st_size:
             log = root / (stem + '.CC1')
             detail = log.read_text(errors='replace').strip() if log.is_file() else ''
-            raise RuntimeError(f'kit CC1PSX produced no assembly: {detail or "no output"}')
+            raise RuntimeError(f'{compiler} CC1PSX produced no assembly: {detail or "no output"}')
         probe = {'size_probe_command': cc1_command}
         cc1_command = dos_command
     else:
@@ -104,7 +124,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     dos_text(assembly)
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
-            'assembler_command': f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT',
+            'assembler_command': aspsx_command(stem, small_data),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -151,8 +171,7 @@ def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[s
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
-                   for stem in stems], 'asm')
+    dos_run(root, [aspsx_command(stem, small_data) for stem in stems], 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

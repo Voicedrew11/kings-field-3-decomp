@@ -69,6 +69,8 @@ class Reader:
             return ('constant', self.integer(4))
         if tag in (2, 4):
             return ('symbol' if tag == 2 else 'section', self.integer(2))
+        if tag == 12:
+            return ('sectstart', self.integer(2))
         if tag in (44, 46):
             right, left = self.expression(depth + 1), self.expression(depth + 1)
             # Native PSYLINK evaluates the operand serialized second as the
@@ -173,6 +175,8 @@ def affine(expression: tuple) -> tuple[tuple[str, int] | None, int]:
         return None, value - 0x100000000 if value & 0x80000000 else value
     if kind in ('symbol', 'section'):
         return (kind, operands[0]), 0
+    if kind == 'sectstart':
+        raise ValueError('LNK section start is not an ELF referent')
     left, a = affine(operands[0])
     right, b = affine(operands[1])
     if kind == 'add' and not (left and right):
@@ -180,6 +184,20 @@ def affine(expression: tuple) -> tuple[tuple[str, int] | None, int]:
     if kind == 'subtract' and right is None:
         return left, a - b
     raise ValueError('LNK expression cannot be represented by one ELF relocation')
+
+
+def gp_relative(expression: tuple, names: dict[int, str]) -> tuple:
+    """Return the referent of an ASPSX 2.21 $gp-relative patch expression.
+
+    ASPSX 2.21 writes a 16-bit $gp offset (patch 30) as `X - sectstart(N)`,
+    where N is the object's .sdata or .sbss: the linker resolves it against
+    the start of that output section, which the startup loads into $gp. The
+    ELF view carries X as an R_MIPS_GPREL16 referent.
+    """
+    if (expression[0] != 'subtract' or expression[2][0] != 'sectstart'
+            or names.get(expression[2][1]) not in ('.sdata', '.sbss')):
+        raise ValueError('unsupported native $gp-relative expression')
+    return expression[1]
 
 
 def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
@@ -192,6 +210,11 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
     )
 
     obj = read(data)
+    # ASPSX 2.21 declares .ctors and .dtors in every object; C units leave
+    # them empty, and an empty section has nothing to compare.
+    for number, section in list(obj.sections.items()):
+        if section.name in ('.ctors', '.dtors') and not section.data and not section.patches:
+            del obj.sections[number]
     sizes = sizes or {}
     functions = set(functions) | set(obj.functions) | obj.declared_functions
     names = {number: '.rodata' if section.name == '.rdata' else section.name
@@ -217,7 +240,7 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
             symbols[section].append(DefinedSymbol(
                 symbol.name, symbol.value, sizes.get(symbol.name, 0), kind,
                 STB_LOCAL if symbol.local else STB_GLOBAL))
-    # ASPSX 1.07 can omit debug extents after the first function in a TU.
+    # Older ASPSX builds can omit debug extents after the first function in a TU.
     # Bound those definitions by the next native function start or text end.
     # No ADDRESS extent or disassembly heuristic enters this view.
     from dataclasses import replace
@@ -269,6 +292,8 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
         for offset, kind, expression in section.patches:
             if offset % 4 or not 0 <= offset <= len(payload) - 4:
                 raise ValueError('native relocation outside its code record')
+            if kind == 30:
+                expression = gp_relative(expression, names)
             referent, addend = affine(expression)
             if referent is None:
                 raise ValueError('absolute native patch is not an ELF relocation')
@@ -285,6 +310,8 @@ def elf_view(data: bytes, *, functions: tuple[str, ...] = (),
                 relocation, value = 'R_MIPS_HI16', (word & 0xffff0000) | (((addend + 0x8000) >> 16) & 0xffff)
             elif kind == 84:
                 relocation, value = 'R_MIPS_LO16', (word & 0xffff0000) | (addend & 0xffff)
+            elif kind == 30:
+                relocation, value = 'R_MIPS_GPREL16', (word & 0xffff0000) | (addend & 0xffff)
             else:
                 raise ValueError(f'unsupported native MIPS patch {kind}')
             struct.pack_into('<I', payload, offset, value)

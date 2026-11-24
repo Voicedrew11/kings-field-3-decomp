@@ -169,7 +169,8 @@ int witness(void) { return __kf_source_data_sizes[0]; }
         # Native control for SDATA(): GCC 2.5.7 -G8 sends a constant of at most
         # eight bytes to .sdata, but a string initializing a larger array takes
         # that array's type and stays in .rdata; ASPSX -G8 turns a small
-        # `.lcomm` into section-relative .sbss storage. Code size is unchanged.
+        # `.lcomm` into section-relative .sbss storage. ASPSX 2.21 reaches that
+        # small data $gp-relative, one instruction per access, so the text shrinks.
         source_text = '''
 static long event;
 int atoi(const char *);
@@ -215,4 +216,4 @@ int card(char *name)
                     else:
                         self.assertNotIn('.sdata', sections)
                         self.assertIn(b' \0', sections['.rodata'].data())
-            self.assertEqual(len(texts[0]), len(texts[8]))
+            self.assertLess(len(texts[8]), len(texts[0]))

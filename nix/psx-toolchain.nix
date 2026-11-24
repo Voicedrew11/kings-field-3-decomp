@@ -54,8 +54,9 @@ let
         mv "$out/include/gstdarg.h" "$out/include/stdarg.h"
       '';
 
-      # The one active historical SDK is the complete pinned Psy-Q 3.0 kit
-      # tree. Analysis programs below do not enter this derivation.
+      # The Psy-Q 3.0 kit tree (files dated 1995-04-08), inherited from King's
+      # Field II. KF3 links none of it: it stays only as the analysis corpus of
+      # the vendored-function seed and FID census and for the gcc241-kit probe.
       psyqSdk = pkgs.runCommand "kings-field-3-psyq-3.0-sdk" {
         nativeBuildInputs = with pkgs; [
           binutils
@@ -72,99 +73,92 @@ let
           --stage-dir "$out"
       '';
 
-      # This Release 2.5 standalone allocator is absent from the active 3.0
-      # kit. Its 0x60c text and all 1172 fixed bytes match the linked allocator
-      # in OPEN and END; the original distribution version remains unproved.
-      psyq25Floppies = pkgs.fetchurl {
-        name = "psyq-release-2.5-floppies.rar";
-        url = "https://archive.org/download/ps1_sdks/Floppies.rar";
-        hash = "sha256-SaLzzryjqEIclPHeQ7nSDnN1CwQrCDHdKxcy0o+Ud4M=";
+      # Sony's "GNU C Compiler Version 2.60 (World)" floppy (volume GNUCV260;
+      # CC1PSX.EXZ/CPPPSX.EXZ dated 1994-10-07, gzip-packed, README 1994-10-19)
+      # as preserved in Archive.org `ps1_sdks`. CC1PSX.EXE is "GNU C 2.6.0
+      # [AL 1.1, MM 40] Sony Playstation", a go32 (DJGPP v1) DOS program run
+      # under DOSBox-X. It is byte-identical to the CC1PSX.EXE of the mkst/esa
+      # psyq3.3 and psyq3.5 bundles, and is not the Psy-Q 3.0 kit's
+      # COMPILER/CC1PSX.EXE (a different 2.6.0 build). With -O2 -G8 it emits
+      # PSX.EXE's main exactly, its __main call included.
+      sonyGcc260Floppy = pkgs.fetchurl {
+        name = "sony-gnu-c-2.60-disk1.img";
+        url = "https://archive.org/download/ps1_sdks/GNU%20C%20Compiler%20Version%202.60%20%28World%29%20%28Disk%201%29.img";
+        hash = "sha256-B6+f7NFIzUI0Ec65En7T8+kUmhFRoaJU3z4rjwwzuuc=";
       };
-      psyqMallocObj = pkgs.runCommand "kings-field-3-psyq-release-2.5-malloc" {
-        nativeBuildInputs = with pkgs; [ coreutils findutils unar ];
-      } ''
-        mkdir -p "$TMPDIR/floppies" "$out"
-        unar -quiet -force-overwrite -output-directory "$TMPDIR/floppies" ${psyq25Floppies}
-        malloc_obj="$(find "$TMPDIR/floppies" -type f -path '*/isa board/PSXLIB/LIB/MALLOC.OBJ' -print -quit)"
-        test -n "$malloc_obj"
-        test "$(sha256sum "$malloc_obj" | cut -d' ' -f1)" = \
-          "628e405fd0e3acfff2ce9d4a15d481f0aa36398c14e9eae0a82b7ff0a86a74c9"
-        cp "$malloc_obj" "$out/MALLOC.OBJ"
-      '';
-
-      # Sony's Programmer Tool Runtime Library 3.0 CD (DTL-S2180, March 1995).
-      # Its PSXGRAPH CPE2X 1.3 is a later build than the kit's: it zeroes the
-      # EXEC save area and reserved words and sets s_addr to 801ffff0, as the
-      # retail PSX, OPEN and END headers record. Only this file is extracted.
-      psyqRuntime30Cd = pkgs.fetchurl {
-        name = "psx-runtime-library-3.0-dtl-s2180.zip";
-        url = "https://archive.org/download/ps1_sdks/Programmer%20Tool%20-%20Runtime%20Library%20Version%203.0%20%28Japan%29%20%28En%2CJa%29_DTL-S2180_redump.zip";
-        hash = "sha256-BxeoIBl9M35TaWy6uuShJS9eIDOWhtMMWSm+N/r07zc=";
-      };
-      psyqRuntime30Cpe2x = pkgs.runCommand "kings-field-3-runtime-3.0-cpe2x" {
-        nativeBuildInputs = with pkgs; [ coreutils python3 ];
+      sonyGcc260 = pkgs.runCommand "kings-field-3-sony-gnu-c-2.60" {
+        nativeBuildInputs = with pkgs; [ coreutils gzip mtools ];
       } ''
         mkdir -p "$out"
-        # Read PSXGRAPH/BIN/CPE2X.EXE from the MODE1/2352 track's ISO 9660 tree.
-        python3 - ${psyqRuntime30Cd} "$out/CPE2X.EXE" <<'PY'
-        import struct, sys, zipfile
-        with zipfile.ZipFile(sys.argv[1]) as archive:
-            name = next(n for n in archive.namelist() if n.endswith('.bin'))
-            raw = archive.read(name)
-        assert len(raw) % 2352 == 0
-        def sector(lba):
-            return raw[lba * 2352 + 16:lba * 2352 + 2064]
-        def read(lba, size):
-            return bytes().join(sector(lba + i) for i in range((size + 2047) // 2048))[:size]
-        def entries(lba, size):
-            data = read(lba, size)
-            position = 0
-            while position < len(data):
-                length = data[position]
-                if not length:
-                    position = (position // 2048 + 1) * 2048
-                    continue
-                record = data[position:position + length]
-                extent, extent_size = struct.unpack_from('<I', record, 2)[0], struct.unpack_from('<I', record, 10)[0]
-                identifier = record[33:33 + record[32]].decode('ascii').split(';')[0]
-                yield identifier, extent, extent_size
-                position += length
-        descriptor = sector(16)
-        assert descriptor[1:6] == b'CD001'
-        root = descriptor[156:156 + 34]
-        lba, size = struct.unpack_from('<I', root, 2)[0], struct.unpack_from('<I', root, 10)[0]
-        for part in ('PSXGRAPH', 'BIN', 'CPE2X.EXE'):
-            lba, size = next((e, n) for i, e, n in entries(lba, size) if i == part)
-        open(sys.argv[2], 'wb').write(read(lba, size))
-        PY
-        test "$(sha256sum "$out/CPE2X.EXE" | cut -d' ' -f1)" = \
-          "641d95ebe8131c3503407518cb6110ed311cb5f87943d866296660ab98938af2"
+        for tool in CC1PSX CPPPSX; do
+          mcopy -n -i ${sonyGcc260Floppy} "::$tool.EXZ" "$TMPDIR/$tool.EXZ"
+          gzip -dc < "$TMPDIR/$tool.EXZ" > "$out/$tool.EXE"
+        done
+        check() {
+          test "$(sha256sum "$out/$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
+        }
+        check CC1PSX.EXE 6587ed37f9f8795f8e47601d3a71167e93c832959f2f314e08d11c53be04661e
+        check CPPPSX.EXE 69e0b24ef219119200298ed450d5c8342529ee153f498a25c2166fea663c20d1
       '';
 
-      # Inherited from the King's Field (SLPS-00017) setup, where the Release
-      # 2.5 ASPSX was software-key protected. This hash-pinned ASPSX 1.07
-      # assembles all compiler output; its distinct provenance remains explicit
-      # in every build report. The 3.0 kit's own ASPSX 2.08 is not yet wired in.
-      aspsxArchive = pkgs.fetchurl {
-        name = "aspsx-binaries.tar.gz";
-        url = "https://github.com/mkst/maspsx/releases/download/aspsx/aspsx-binaries.tar.gz";
-        hash = "sha256-fHU4wq+SMzjdxaevXFfSgLGTBmDpj5xDDm6iq3XlLno=";
+      # Sony's Programmer Tool Runtime Library 3.3 CD (DTL-S2190, files dated
+      # 1995-10-20; redump in Archive.org `ps1_sdks`). Only data track 1 is
+      # read, and only these files are copied, unchanged:
+      #   lib/      PSX/LIB: the 3.3 archives, 2MBYTE.OBJ, NONE2.OBJ and
+      #             MALLOC.OBJ (byte-identical to the Release 2.5 allocator);
+      #   include/  PSX/INCLUDE, and include-lf/ the same with LF line endings;
+      #   bin/      PSYQ/ASPSX.EXE (ASPSX 2.21, 1995-06-22), PSYQ/PSYLINK.EXE
+      #             (PSYLINK 2.27, 1995-08-30), PSXGRAPH/BIN/CPE2X.EXE (CPE2X
+      #             1.5, 1995-07-07) and PSX/BIN/DMPSX.EXE with its INLINE.TBL.
+      # PSX.EXE rebuilds byte-identically from these tools and 2MBYTE.OBJ,
+      # LIBAPI and LIBSN. The archives carry LIBETC intr.c 1.71 (END's) and
+      # LIBGPU sys.c 1.107; GAME and OPEN link Library 3.4 (intr.c 1.73,
+      # sys.c 1.116) and END a LIBGPU sys.c 1.109, none of which we found
+      # preserved, so for those three programs these archives are a probe.
+      psyq33Cd = pkgs.fetchurl {
+        name = "psx-runtime-library-3.3-dtl-s2190-redump.zip";
+        url = "https://archive.org/download/ps1_sdks/Programmer%20Tool%20-%20Runtime%20Library%20Version%203.3%20%28Japan%29_DTL-S2190_redump.zip";
+        hash = "sha256-Vba1f7N6O6DCuNepSlUcp2RF+93DlIzz9SfFFfPP9W4=";
       };
-      aspsxNative = pkgs.runCommand "kings-field-aspsx-1.07" {
-        nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
+      psyq33Sdk = pkgs.runCommand "kings-field-3-psyq-runtime-3.3" {
+        nativeBuildInputs = with pkgs; [ coreutils findutils python3 unzip ];
       } ''
-        mkdir -p "$out"
-        tar -xzf ${aspsxArchive} -C "$out" ./1.07/ASPSX.EXE
+        cd "$TMPDIR"
+        track='PlayStation Programmer Tool - Runtime Library Version 3.3 (Japan) (Track 1).bin'
+        unzip -q ${psyq33Cd} "$track"
+        extract() { python3 ${./extract-iso9660.py} "$track" "$@"; }
+        extract "$out/lib" PSX/LIB/
+        extract "$out/include" PSX/INCLUDE/
+        extract "$out/include/SYS" PSX/INCLUDE/SYS/
+        extract "$out/bin" PSYQ/ASPSX.EXE PSYQ/PSYLINK.EXE PSXGRAPH/BIN/CPE2X.EXE \
+          PSX/BIN/DMPSX.EXE PSX/BIN/INLINE.TBL
+        check() {
+          test "$(sha256sum "$out/$1" | cut -d' ' -f1)" = "$2" || { echo "$1: unexpected hash" >&2; exit 1; }
+        }
+        check bin/ASPSX.EXE b52bf3d40a516333e679f18e9297883158e3015e8d97ac501e108b049617ce41
+        check bin/PSYLINK.EXE 39c9e16ba84ddfb366004dc36f9c0b5a30f9908e56f8fca4b06ddb6eb748243b
+        check bin/CPE2X.EXE 777caca88327cd18d4f92b43439575c1759381690d49f14177805a94b8ecbef6
+        check bin/DMPSX.EXE c548939dce634074dd4f8e686514d32b8d870e6e9f65808c46cf10d503602176
+        check bin/INLINE.TBL 2d869c07c00f718f34e63c57102a97ff45d7d305332f15aa7ad99963ea3ff913
+        check lib/2MBYTE.OBJ b4ed8b2e76bc841f7a81132906d846877aefa8f6233fb738600c8b1ebd032a46
+        check lib/NONE2.OBJ 38662381b57cdbebb8d083842fd23914bad1d4c66303beb871f2f5248c38774c
+        check lib/MALLOC.OBJ 628e405fd0e3acfff2ce9d4a15d481f0aa36398c14e9eae0a82b7ff0a86a74c9
+        check lib/LIBAPI.LIB c86ad75d077094ba51acbb04129a37d98682a79d241d1cf458a649df600eaa10
+        check lib/LIBC.LIB 35632724889f04dd81fa5a8460e5d373cbd90c9f00a4e3b8a85a4626dcbda432
+        check lib/LIBCARD.LIB 2a647d21c158d81422eb48917d513850549087e737188451343da43d2eba995d
+        check lib/LIBCD.LIB 122fe1696237fa2dd18bace4d12f0d49658c597fc25f57bc81295cb24aa69242
+        check lib/LIBETC.LIB 23435518b40906e1f0ff34219edb7873cb69c08bb6b75f0fd9b1713bc1b3dd19
+        check lib/LIBGPU.LIB 01e301fd645c47c800a4d13d44a40807f8e9e01bbe97ee91bd706f3a816f9f60
+        check lib/LIBGTE.LIB 0f8bd56b89d1ab71d7fb4352ab4d22eedf8a9bf8ab2315ea13479c2606b24203
+        check lib/LIBPRESS.LIB 7ed2866b5e2d3d855936f9fe5c3c330dd3a360c3ab9d49e2bff107a500b42d6c
+        check lib/LIBSN.LIB 1ef99108b065166613a4bf6c5b46a74bd0f584e8a570926e8e0c66497e64f547
+        check lib/LIBSND.LIB ecb60248990ae397a1f55acab1cf214ebc4f5acc9e7413c07d89fcf22b826648
+        check lib/LIBSPU.LIB 8c75abf4934f30a707b389c7e5ef7a45dec7e8b60a0a1ae6dad02918ff5a2185
+        (cd "$out/include" && find . -type f) | while read -r header; do
+          mkdir -p "$out/include-lf/$(dirname "$header")"
+          tr -d '\r' < "$out/include/$header" > "$out/include-lf/$header"
+        done
       '';
-
-      # The C assembler lacks named sections, while the kit's macro assembler
-      # is not yet validated under DOSBox. Use this preserved native ASMPSX
-      # solely for zero-byte linker boundary declarations, not game bodies.
-      asmpsxNative = pkgs.fetchurl {
-        name = "kings-field-asmpsx-2.34.exe";
-        url = "https://raw.githubusercontent.com/HighwayFrogs/frogger-psx/fa2d5185b19ae89aaceeb47b2828369e06566edf/sdk/bin/SDK4.0/DOS/ASMPSX.EXE";
-        sha256 = "c27e07db59f29282c837e06204a3a5efe69183dbfd2570c8b0d46f1cb5f760bb";
-      };
 
       cc1psx260 = pkgs.writeShellApplication {
         name = "cc1psx-260";
@@ -187,6 +181,6 @@ let
       };
 
 in {
-  inherit psyqSdk psyqMallocObj psyqRuntime30Cpe2x gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257 cc1psx260 cpppsx260
-    aspsxNative asmpsxNative;
+  inherit psyqSdk psyq33Sdk sonyGcc260 gcc257Native gcc257Headers gcc260Native
+    cc1psx257 cpppsx257 cc1psx260 cpppsx260;
 }

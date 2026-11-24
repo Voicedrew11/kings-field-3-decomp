@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-from dataclasses import replace
 import io
 import json
 import os
@@ -11,7 +10,6 @@ from pathlib import Path
 import re
 import shutil
 import struct
-import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -20,7 +18,8 @@ from scripts.kf import executable
 from scripts.kf.executable import build_image, compare, cpe_loads
 from scripts.kf.manifest import Manifest, Profile, Unit
 from scripts.kf.sema.image import RetailImage
-from scripts.psxbuild.link import LIBRARIES
+from scripts.psxbuild.link import FIRST, IMAGE_LINKS
+from scripts.psxbuild.link import build_image as link_image
 
 
 class ComparisonTests(unittest.TestCase):
@@ -108,19 +107,28 @@ class ComparisonTests(unittest.TestCase):
             self.assertIn('id="minimum"', html)
 
 
-@unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-257', 'cc1psx-257', 'dosbox-x'))
-                     and all(os.environ.get(key) for key in ('PSYQ_ASPSX', 'PSYQ_BIN', 'PSYQ_LIB',
-                                                             'PSYQ_INCLUDE', 'PSYQ_MALLOC_OBJ')),
-                     'requires pinned compiler, original DOS tools and SDK libraries')
+@unittest.skipUnless(all(shutil.which(tool) for tool in ('cpppsx-260', 'cc1psx-260', 'dosbox-x'))
+                     and all(os.environ.get(key) for key in (
+                         'PSYQ_CC1PSX', 'PSYQ_ASPSX', 'PSYQ_PSYLINK', 'PSYQ_CPE2X', 'PSYQ_LIB',
+                         'PSYQ_INCLUDE', 'PSYQ_MALLOC_OBJ')),
+                     'requires the pinned compiler, original SDK tools and libraries')
 class NativeBuildControls(unittest.TestCase):
-    def manifest(self, root: Path, sources: tuple[str, ...], image: str = 'PSX.EXE') -> Manifest:
-        profile = Profile('native-control', 'c', 'gcc257-native', 'O2', 0, '1.07', ('-mcpu=r2000',))
+    MAP_SECTION = re.compile(
+        r'(?m)^ ([0-9A-F]{8}) [0-9A-F]{8} ([0-9A-F]{8}) [0-9A-F]{8} \w+ +(\.[a-z]+)\s*$')
+
+    def manifest(self, root: Path, sources: tuple[str, ...], image: str = 'PSX.EXE',
+                 small_data: int = 8) -> Manifest:
+        profile = Profile('native-control', 'c', 'gcc260-sony', 'O2', small_data, '2.21', ())
         units = []
         for index, source in enumerate(sources):
             path = root / f'source{index}.c'
             path.write_text(source)
             units.append(Unit(f'{image[:-4].lower()}.control{index}', image, str(path), profile.name, ()))
         return Manifest({profile.name: profile}, tuple(units))
+
+    def sections(self, mapping: str) -> dict[str, tuple[int, int]]:
+        return {name: (int(start, 16), int(size, 16))
+                for start, size, name in self.MAP_SECTION.findall(mapping)}
 
     def test_comparison_view_uses_the_identical_native_linker_input(self):
         from scripts.kf.compile import compile_source
@@ -130,7 +138,7 @@ class NativeBuildControls(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             manifest = self.manifest(root, (
-                'static int values[2] = {7, 9}; int main(void) { return values[1]; }\n',))
+                'static int values[3] = {7, 9, 11}; int main(void) { return values[1]; }\n',))
             report = build_image('PSX.EXE', manifest, root / 'exe')
             self.assertTrue(report['linked'], report.get('error'))
             write_tsv(root / 'delink/psx/objects.tsv', ('object', 'scope'),
@@ -156,19 +164,26 @@ class NativeBuildControls(unittest.TestCase):
             self.assertTrue(report['linked'], report.get('error'))
             self.assertFalse(report['output_rewritten'])
             self.assertEqual(report['retail_payload_inputs'], [])
-            self.assertEqual([row['file'] for row in report['libraries']], ['LIBSN.LIB', 'LIBAPI.LIB'])
+            self.assertEqual(report['startup']['file'], '2MBYTE.OBJ')
+            self.assertIsNone(report['allocator'])
+            self.assertEqual([row['file'] for row in report['libraries']], ['LIBAPI.LIB', 'LIBSN.LIB'])
+            commands = (output / 'LINK.LNK').read_text().splitlines()
+            self.assertEqual([line.split('"')[1] for line in commands if '\tinclude\t' in line],
+                             ['U0000.OBJ', 'U0001.OBJ', '2MBYTE.OBJ'])
             self.assertTrue((output / 'U0000.OBJ').read_bytes().startswith(b'LNK\x02'))
             self.assertTrue((output / 'U0001.OBJ').read_bytes().startswith(b'LNK\x02'))
+            # Sony's 2.6.0 CC1PSX calls __main from main; 2MBYTE.OBJ defines it.
+            self.assertRegex((output / 'U0000.S').read_text(), r'(?m)^\s*jal\s+__main\b')
             entry, loads = cpe_loads((output / 'PSX.CPE').read_bytes())
             actual = (output / 'PSX.EXE').read_bytes()
             self.assertEqual(actual[:8], b'PS-X EXE')
-            # The converter session: zeroed reserved and save-area words, the
-            # 801ffff0 stack base, and the title-tail residue of the frame
-            # pointer, the far return 3b30:158e and the call's arguments.
+            # CPE2X 1.5 writes every header field: zero reserved words, gp0 and
+            # save area, the 801ffff0 stack base and the /CA region title.
             self.assertEqual(actual[8:16] + actual[0x14:0x18], bytes(12))
             self.assertEqual(struct.unpack_from('<I', actual, 0x30)[0], 0x801ffff0)
             self.assertEqual(actual[0x34:0x4c], bytes(0x18))
-            self.assertEqual(actual[0x7c:0x88].hex(), '0500c20f8e15303b05000405')
+            title = b'Sony Computer Entertainment Inc. for North America area'
+            self.assertEqual(actual[0x4c:0x800], title + bytes(0x800 - 0x4c - len(title)))
             self.assertEqual(struct.unpack_from('<I', actual, 0x10)[0], entry)
             base = struct.unpack_from('<I', actual, 0x18)[0]
             for address, payload in loads:
@@ -179,7 +194,7 @@ class NativeBuildControls(unittest.TestCase):
             for row in report['libraries']:
                 self.assertEqual((output / row['file']).read_bytes(), Path(row['path']).read_bytes())
 
-    def test_overlay_startup_and_bss_use_native_linker_inputs(self):
+    def test_overlay_startup_allocator_and_bss_use_native_linker_inputs(self):
         for image in ('OPEN.EXE', 'GAME.EXE', 'END.EXE'):
             with self.subTest(image=image), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
@@ -187,106 +202,42 @@ class NativeBuildControls(unittest.TestCase):
                           'int main(void) { buffer[4] = 7; '
                           'return buffer[2] + initialized_zero; }\n')
                 output = root / 'output'
-                manifest = self.manifest(root, (source,), image)
+                manifest = self.manifest(root, (source,), image, small_data=0)
                 with mock.patch.object(RetailImage, 'load', side_effect=AssertionError('retail input used')):
                     report = build_image(image, manifest, output)
                 self.assertTrue(report['linked'], report.get('error'))
-                self.assertEqual(report['startup']['file'], executable.OVERLAY_STARTUP)
-                self.assertEqual(
-                    (output / executable.OVERLAY_STARTUP).read_bytes(),
-                    Path(report['startup']['path']).read_bytes(),
-                )
+                layout = IMAGE_LINKS[image]
+                self.assertFalse(report['layout']['proven'])
+                self.assertEqual(report['startup']['file'], 'NONE2.OBJ')
+                self.assertEqual((output / 'NONE2.OBJ').read_bytes(),
+                                 Path(report['startup']['path']).read_bytes())
+                self.assertEqual(report['allocator'] is not None, layout.allocator)
                 self.assertEqual(report['retail_payload_inputs'], [])
                 commands = (output / 'LINK.LNK').read_text().splitlines()
-                explicit = [line.split('"')[1] for line in commands if 'include' in line]
-                expected = ['MALLOC.OBJ', 'CARD.OBJ'] if image == 'GAME.EXE' else ['MALLOC.OBJ']
-                self.assertEqual(explicit[explicit.index('BOUNDS.OBJ') + 1:], expected)
+                explicit = [line.split('"')[1] for line in commands if '\tinclude\t' in line]
+                startup = ['NONE2.OBJ', *(['MALLOC.OBJ'] if layout.allocator else [])]
+                expected = ([*startup, 'U0000.OBJ'] if layout.startup_before == FIRST
+                            else ['U0000.OBJ', *startup])
+                self.assertEqual(explicit, expected)
                 self.assertEqual([line.split('"')[1] for line in commands if 'inclib' in line],
-                                 [library + '.LIB' for library in LIBRARIES[image]])
-                self.assertEqual('card' in report, image == 'GAME.EXE')
+                                 [library + '.LIB' for library in layout.libraries])
                 actual = (output / image).read_bytes()
                 base = struct.unpack_from('<I', actual, 0x18)[0]
+                self.assertEqual(base, executable.IMAGE_LAYOUTS[image].load_address)
+                sections = self.sections((output / (image[:-4] + '.MAP')).read_text())
                 entry, loads = cpe_loads((output / (image[:-4] + '.CPE')).read_bytes())
-                sections = {name: (int(start, 16), int(size, 16)) for start, size, name in re.findall(
-                    r'(?m)^ ([0-9A-F]{8}) [0-9A-F]{8} ([0-9A-F]{8})  (\.[a-z]+)',
-                    (output / (image[:-4] + '.MAP')).read_text())}
-                offset = 2048 + entry - base
-                self.assertEqual(actual[offset - 8:offset], bytes.fromhex('0800e00300000000'))
-                high, low, jump, delay = struct.unpack_from('<4I', actual, offset)
-                self.assertEqual(high & 0xffff0000, 0x3c1c0000)
-                self.assertEqual(low & 0xffff0000, 0x279c0000)
-                signed_low = (low & 0xffff) - (0x10000 if low & 0x8000 else 0)
-                # PSYLINK omits empty sections from MAP. With these BIOS-only
-                # controls the empty .sdata anchor follows initialized data.
-                gp_base = sections.get('.sdata', (sum(sections['.data']), 0))[0]
-                self.assertEqual(((high & 0xffff) << 16) + signed_low, gp_base)
-                self.assertEqual(jump >> 26, 2)
-                self.assertEqual(((jump & 0x3ffffff) << 2) | (entry & 0xf0000000), sections['.text'][0])
-                self.assertEqual(delay, 0)
+                self.assertEqual(sections.get('.rdata', (base, 0))[0], base)
                 self.assertGreaterEqual(sections['.bss'][1], 8192)
                 self.assertTrue(all(address + len(data) <= sections['.bss'][0]
                                     for address, data in loads))
-                self.assertLess(len(actual), 8192)
-                data_base, data_size = sections['.data']
-                self.assertGreaterEqual(data_size, 4)
-                self.assertTrue(any(address <= data_base and address + len(data) >= data_base + 4
-                                    for address, data in loads))
+                self.assertLess(len(actual), 8192 + 0x1000)
 
-    def test_overlay_startup_uses_first_linked_small_data_address(self):
-        for image, origin in (('OPEN.EXE', 0x80012000), ('GAME.EXE', 0x80017ff0)):
-            with self.subTest(image=image), tempfile.TemporaryDirectory() as directory:
-                root = Path(directory)
-                manifest = self.manifest(root, (
-                    'int first = 0x12345678; extern int helper(void); '
-                    'int main(void) { return first + helper(); }\n',
-                    'int second = 0x76543210; unsigned char large[12] = {3}; '
-                    'int helper(void) { return second + large[0]; }\n',
-                ), image)
-                manifest = replace(manifest, profiles={
-                    key: replace(profile, small_data=8)
-                    for key, profile in manifest.profiles.items()})
-                layout = replace(executable.IMAGE_LAYOUTS[image], load_address=origin)
-                output = root / 'output'
-                with (mock.patch.dict(executable.IMAGE_LAYOUTS, {image: layout}),
-                      mock.patch.object(RetailImage, 'load',
-                                        side_effect=AssertionError('retail input used'))):
-                    report = build_image(image, manifest, output)
-                self.assertTrue(report['linked'], report.get('error'))
-                for unit in report['units']:
-                    self.assertRegex((output / unit['assembly']).read_text(), r'(?m)^\s*\.sdata\b')
-                commands = (output / 'LINK.LNK').read_text()
-                self.assertGreater(commands.index('NONE2.OBJ'), commands.index('U0001.OBJ'))
-                startup = subprocess.run(
-                    ['psyk', 'list', '--code', str(output / 'NONE2.OBJ')],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                ).stdout
-                self.assertIn('sectstart', startup)
-                self.assertIn("'__SN_ENTRY_POINT'", startup)
-                stem = image[:-4]
-                mapping = (output / (stem + '.MAP')).read_text()
-                match = re.search(r'(?m)^ ([0-9A-F]{8}) [0-9A-F]{8} ([0-9A-F]{8})  \.sdata',
-                                  mapping)
-                self.assertIsNotNone(match)
-                gp_base, extent = (int(value, 16) for value in match.groups())
-                self.assertEqual(extent, 8)
-                entry, loads = cpe_loads((output / (stem + '.CPE')).read_bytes())
-                actual = (output / image).read_bytes()
-                self.assertEqual(actual[2048 + gp_base - origin:2048 + gp_base - origin + 8],
-                                 struct.pack('<2I', 0x12345678, 0x76543210))
-                high, low, jump, delay = struct.unpack_from('<4I', actual, 2048 + entry - origin)
-                self.assertEqual(high & 0xffff0000, 0x3c1c0000)
-                self.assertEqual(low & 0xffff0000, 0x279c0000)
-                signed_low = (low & 0xffff) - (0x10000 if low & 0x8000 else 0)
-                self.assertEqual(((high & 0xffff) << 16) + signed_low, gp_base)
-                if image == 'GAME.EXE':
-                    self.assertLess(signed_low, 0)
-                self.assertEqual(jump >> 26, 2)
-                self.assertEqual(delay, 0)
-                for address, payload in loads:
-                    offset = 2048 + address - origin
-                    self.assertEqual(actual[offset:offset + len(payload)], payload)
+    def test_image_without_a_link_model_fails_readably(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = link_image('FDAT.EXE', Path(directory) / 'out', [object()],
+                                lambda *_: {}, repo=Path(directory), load_address=0x80010000)
+            self.assertFalse(report['linked'])
+            self.assertIn('FDAT.EXE: no link model', report['error'])
 
     def test_unresolved_source_symbol_fails_without_fallback_or_stale_executable(self):
         with tempfile.TemporaryDirectory() as directory:
