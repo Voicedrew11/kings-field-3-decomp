@@ -4845,21 +4845,26 @@ void func_8002636c(MenuFont *font, MenuText *text)
     } while (*c != 0xff);
 }
 
+/*
+ * `level = 0` comes before the font call, so level lives across it and is
+ * allocated a saved register (retail's $s0 for level and shade).
+ */
 ADDRESS(0x80026570, 0x224)
 void func_80026570(s32 x, s32 y, char *text, s32 shadow, s32 row)
 {
     MenuFont *font;
+    s32 level;
     s32 shade;
     s32 v;
 
     font = &DAT_8007e564[2];
     v = row != 0 ? 16 : 0;
+    level = 0;
     func_80027610(6, font->unk0);
-    shade = 0;
     if (DAT_801b24e4.unkfd > 128) {
-        shade = (DAT_801b24e4.unkfd - 128) / 2;
+        level = (DAT_801b24e4.unkfd - 128) / 2;
     }
-    shade += 112;
+    shade = level + 112;
     for (;;) {
         if (*text == 0) {
             return;
@@ -4898,25 +4903,32 @@ void func_80026570(s32 x, s32 y, char *text, s32 shadow, s32 row)
     }
 }
 
+/* As func_80026570: level is cleared before the font call ($s2, shared with dx). */
 ADDRESS(0x80026794, 0x22c)
 void func_80026794(MenuText *text, s32 shadow)
 {
     MenuFont *font;
     u8 *c;
-    s32 shade;
+    s32 level;
     s32 dx;
+    s32 shade;
 
     font = &DAT_8007e564[2];
+    level = 0;
     func_80027610(6, font->unk0);
-    shade = 0;
     if (DAT_801b24e4.unkfd > 128) {
-        shade = (DAT_801b24e4.unkfd - 128) / 2;
+        level = (DAT_801b24e4.unkfd - 128) / 2;
     }
     c = text->text;
-    for (dx = 0; *c != 0xff; dx += 7) {
+    if (*c == 0xff) {
+        return;
+    }
+    shade = level + 112;
+    dx = 0;
+    do {
         func_80027560();
         if (shadow == 0) {
-            setRGB0(DAT_8009c378, shade + 112, shade + 112, shade + 112);
+            setRGB0(DAT_8009c378, shade, shade, shade);
         }
         DAT_8009c378->clut = font->unk2;
         if (shadow == 0) {
@@ -4944,7 +4956,8 @@ void func_80026794(MenuText *text, s32 shadow)
             func_800275e0(6);
         }
         c++;
-    }
+        dx += 7;
+    } while (*c != 0xff);
 }
 
 ADDRESS(0x800269c0, 0x10c)
