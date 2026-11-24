@@ -16,6 +16,7 @@
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <LIBGTE.H>
 #include <LIBGPU.H>
 #include <LIBCD.H>
 
