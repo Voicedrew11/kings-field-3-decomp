@@ -87,6 +87,40 @@ class FunctionAuditTests(unittest.TestCase):
         self.assertEqual(starts, {f"0x{BASE:08x}": "strong",
                                   f"0x{BASE + 0x48:08x}": "strong-leaf"})
 
+    def test_called_division_hoisted_above_the_frame_extends_the_start(self) -> None:
+        # GAME.EXE 0x80067c10 shape: a jal target, then a signed division with
+        # its ASPSX traps scheduled above `addiu sp`, then the admitted frame.
+        division = (
+            0x00C2001A,  # div zero,a2,v0
+            0x14400002, NOP, 0x0007000D,  # bnez v0,+2; nop; break 7
+            0x2401FFFF,  # li at,-1
+            0x14410004,  # bne v0,at,+4
+            0x3C018000,  # lui at,0x8000
+            0x14C10002, NOP, 0x0006000D,  # bne a2,at,+2; nop; break 6
+            0x00003012,  # mflo a2
+        )
+        code = words(
+            0x27BDFFE8, 0xAFBF0010, jal(BASE + 0x20), NOP,  # caller
+            0x8FBF0010, 0x27BD0018, JR_RA, NOP,
+            0x00042400,  # sll a0,a0,16 (callee starts here)
+            *division,
+            0x3402007F,  # ori v0,zero,0x7f
+            0x27BDFFE8, 0xAFBF0010,  # admitted frame
+            0x8FBF0010, 0x27BD0018, JR_RA, NOP,
+        )
+        frame = BASE + 0x20 + 4 * 13
+        extents = [FunctionExtent(BASE, BASE + 0x20), FunctionExtent(frame, frame + 0x18)]
+        self.assertEqual(hoisted_start(code, frame), BASE + 0x20)
+        rows = audit_image("T.EXE", code, extents, {})
+        extend = [row for row in rows if row["confidence"] == "call-extend"]
+        self.assertEqual([(row["va"], row["owner_va"]) for row in extend],
+                         [(f"0x{BASE + 0x20:08x}", f"0x{frame:08x}")])
+
+    def test_branch_out_of_a_run_is_not_a_division_check(self) -> None:
+        code = words(JR_RA, NOP, 0x14400003, NOP, 0x0007000D, NOP, 0x27BDFFE8, 0xAFBF0010)
+        # bnez skips past the break (target is not right after it).
+        self.assertIsNone(hoisted_start(code, BASE + 0x18))
+
     def test_loads_hoisted_above_the_frame_belong_to_the_function(self) -> None:
         code = words(
             JR_RA, NOP,

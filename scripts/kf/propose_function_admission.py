@@ -7,11 +7,12 @@ The default output is below ``build``. This tool never overwrites the admitted
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from scripts.kf.audit_functions import CALL_EXTEND_LIMIT
+from scripts.kf.audit_functions import CALL_EXTEND_LIMIT, DIVISION_CHECK_SIZE
 from scripts.kf.retail import (
     DATA_FIELDS,
     FUNCTION_FIELDS,
@@ -95,7 +96,9 @@ def proposed_functions(
         owner = by_start.pop((candidate["image"], parse_int(candidate["owner_va"])))
         start = parse_int(candidate["va"])
         delta = parse_int(owner["va"]) - start
-        if not 0 < delta <= CALL_EXTEND_LIMIT:
+        traps = re.search(r"division-checks x(\d+)", candidate["note"])
+        limit = CALL_EXTEND_LIMIT + DIVISION_CHECK_SIZE * (int(traps.group(1)) if traps else 0)
+        if not 0 < delta <= limit:
             raise ValueError(f"invalid call extension of {candidate['image']} {owner['va']}")
         owner["va"] = format_hex(start)
         owner["file_offset"] = format_size(IMAGE_LAYOUTS[candidate["image"]].file_offset(start))

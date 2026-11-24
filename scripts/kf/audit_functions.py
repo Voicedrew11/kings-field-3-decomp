@@ -48,6 +48,13 @@ FIELDS = (
 # (GCC hoists constant-division setup and loads above the frame allocation).
 CALL_EXTEND_LIMIT = 0x40
 
+# ASPSX expands each `div`/`divu` with a divide-by-zero trap (`bnez rt; nop;
+# break 7`) and, when signed, an overflow trap (`li at,-1; bne rt,at; lui
+# at,0x8000; bne rs,at; nop; break 6`): ten words that GCC schedules along
+# with the division, also above a frame allocation.
+DIVISION_TRAPS = {0x0007000D, 0x0006000D}  # break 7, break 6
+DIVISION_CHECK_SIZE = 0x28
+
 # Candidate tiers that kf-function-propose admits.
 ADMISSIBLE = {"strong", "strong-leaf", "call-target", "call-split", "call-extend"}
 
@@ -285,6 +292,37 @@ def linear_return(
     return None
 
 
+def trap_skip(words: ImageWords, site: int, stop: int) -> bool:
+    """A conditional branch that only skips forward over an ASPSX division trap."""
+    word = words.word(site)
+    if opcode(word) not in {0x04, 0x05}:  # beq/bne (bnez is bne rs,zero)
+        return False
+    target = site + 4 + (signed16(word & 0xFFFF) << 2)
+    return (
+        site + 8 < target <= stop
+        and words.contains_word(target - 4)
+        and words.word(target - 4) in DIVISION_TRAPS
+    )
+
+
+def straight_line(words: ImageWords, start: int, stop: int) -> int | None:
+    """Count the division traps in [start, stop) if it is straight-line code.
+
+    Valid instructions only; the sole branches allowed are those that skip
+    forward over a division trap. Returns None for anything else.
+    """
+    traps = 0
+    for site in range(start, stop, 4):
+        word = words.word(site)
+        if not valid_instruction(word):
+            return None
+        if word in DIVISION_TRAPS:
+            traps += word == 0x0007000D
+        elif is_control_transfer(word) and not trap_skip(words, site, stop):
+            return None
+    return traps
+
+
 def valid_span(words: ImageWords, start: int, end: int) -> bool:
     return all(valid_instruction(words.word(site)) for site in range(start, end, 4))
 
@@ -297,12 +335,19 @@ def hoisted_start(words: ImageWords, address: int, limit: int = 8) -> int | None
     only a short run of valid, non-transfer instructions that reaches such a
     boundary.
     """
-    for back in range(1, limit + 1):
+    back = 0
+    while back < limit:
+        back += 1
         start = address - 4 * back
         if not words.contains_word(start):
             return None
         word = words.word(start)
-        if word == 0 or not valid_instruction(word) or is_control_transfer(word):
+        delay_slot = words.contains_word(start - 4) and trap_skip(words, start - 4, address)
+        if (word == 0 and not delay_slot) or not valid_instruction(word):
+            return None
+        if word in DIVISION_TRAPS:  # a division check: allow its words too
+            limit += DIVISION_CHECK_SIZE // 4
+        if is_control_transfer(word) and not trap_skip(words, start, address):
             return None
         if boundary_before(words, start):
             return start
@@ -590,9 +635,10 @@ def audit_image(
             evidence.append(f"handler-pointer x{handlers[target]}")
         if target not in splits:
             end = transfer_end(words, target, stop)
-            if end is None and stop in known_starts and stop - target <= CALL_EXTEND_LIMIT and all(
-                valid_instruction(words.word(site)) and not is_control_transfer(words.word(site))
-                for site in range(target, stop, 4)
+            traps = straight_line(words, target, stop) if end is None else None
+            if (
+                traps is not None and stop in known_starts
+                and stop - target <= CALL_EXTEND_LIMIT + DIVISION_CHECK_SIZE * traps
             ):
                 # Straight-line code scheduled above an admitted start: the
                 # call proves the function begins earlier.
@@ -600,6 +646,8 @@ def audit_image(
                 confidence, owner_va = "call-extend", f"0x{stop:08x}"
                 boundary = boundary_before(words, target)
                 evidence.append("hoisted-above-admitted-start")
+                if traps:
+                    evidence.append(f"division-checks x{traps}")
             elif end is None or not valid_span(words, target, end):
                 continue
             else:
