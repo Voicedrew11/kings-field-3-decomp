@@ -39,6 +39,7 @@ MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007
 ModelData	0x28	supported	asm;func_800431e8, func_8004352c, func_800437c8	WIP field names; untouched ranges opaque
 ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;func_80035ca4/func_80039428 28-byte parts at model data + 12: +0x04 vertex count (func_8004290c), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
+MovieRec	0x34	supported	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame	WIP (game-top)
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object44Arg	0x10	supported	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0)	WIP (game-k)
 Object44Bytes	0x10	supported	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind	WIP (game-k)

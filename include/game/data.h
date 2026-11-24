@@ -202,9 +202,14 @@ typedef struct Data801ba984 {
     u8 unk2b;
     u8 unk2c[5];
     u8 unk31;
-    u8 unk32[0x33];
+    u8 unk32[0x2f];
+    u8 unk61;       /* +0x61: 1: the movie ends at start position 12 (func_80061940) */
+    u8 unk62[3];
     u8 unk65;
-    u8 unk66[0xb];
+    u8 unk66[3];
+    u8 unk69;       /* +0x69: 1 when the ending is due (func_8005eb20 sets 2) */
+    u8 unk6a;       /* +0x6a: picks the ending (func_8005eb20) */
+    u8 unk6b[6];
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[9];
     u8 unk7f[5];    /* +0x7f: per magic element */
@@ -282,15 +287,23 @@ typedef struct Data801d4464 {
     u8 unk12052[2];
 } Data801d4464;
 
+/* An in-game movie record (WIP: 52 bytes; DAT_801e7edc holds 16, indexed by movie id). */
+typedef struct MovieRec {
+    u8 file;        /* +0x00: STR file number; 16 and up: a random DRM file */
+    u8 flag;        /* +0x01: script flag that skips the movie when set (0x80: when clear),
+                     * 0xff for none */
+    u16 last;       /* +0x02: last frame */
+    u8 unk4[0x30];
+} MovieRec;
+
 typedef struct Data801e7edc {
-    u8 unk0[0x9c];
-    u8 unk9c[0x2a4]; /* +0x9c: the in-game movie records (unk380 points into them) */
+    MovieRec movies[16]; /* +0x000: by movie id (unk380 points into them) */
     DECENV dec;     /* +0x340: the in-game movie player's decode environment */
     s16 unk370;
     s16 unk372;     /* +0x372: 99 once the stream passed the movie's last frame */
     u_long *unk374[2]; /* +0x374: VLC buffers func_80061364 hands to dec */
     u_long *unk37c; /* +0x37c: slice buffer */
-    u8 *unk380;     /* +0x380: the movie's record; u16 [1] its last frame */
+    MovieRec *unk380; /* +0x380: the record of movie unk384 */
     u8 unk384;      /* +0x384: movie id, 0xff for none */
     u8 unk385[3];
     s32 unk388;     /* +0x388: frame number of the last sector (func_800616dc) */

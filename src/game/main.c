@@ -123,7 +123,7 @@ void func_80014bd4(void)
     func_8001937c(DAT_800c8954, sizeof(DAT_800c8954));
     if (continued == 1) {
         DAT_801e7edc.unk384 = 3;
-        DAT_801e7edc.unk380 = DAT_801e7edc.unk9c;
+        DAT_801e7edc.unk380 = &DAT_801e7edc.movies[3];
         func_80061bc4();
         DAT_801e7edc.unk372 = -1;
         DAT_801e7edc.unk370 = 0;
