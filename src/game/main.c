@@ -9,13 +9,10 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
+#include <psyq/press.h>
 #include <psyq/kernel.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBETC.H>
-#include <LIBCD.H>
-#include <LIBSND.H>
-#include <LIBPRESS.H>
 #include <MALLOC.H>
 #include <game/sound.h>
 #include <game/data.h>

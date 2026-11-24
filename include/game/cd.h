@@ -9,7 +9,7 @@
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBCD.H>
+#include <psyq/cd.h>
 
 struct SoundSlot;
 
