@@ -898,3 +898,199 @@ done:
     DAT_80199154.unk159bc = scratch->draw.count.unk4;
     DAT_80199154.ot_count = scratch->draw.count.ot_count;
 }
+
+/*
+ * func_8003e34c's variant for large models (func_80038844): lit by light
+ * record 0 (blended by t toward light2). With a view matrix the model is
+ * skipped outside a 1536-unit wide angle around the player's heading, and the
+ * translation is kept below 0x8000 by halving it shift times (the view matrix
+ * rows are scaled down to match); func_80038844 gets shift and the distance.
+ * area is unused.
+ */
+ADDRESS(0x8003f304, 0xda8)
+void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   u8 flags, s32 depth)
+{
+    SVECTOR rel;
+    VECTOR delta;
+    VECTOR size;
+    MATRIX m;
+    MATRIX vm;
+    MATRIX lm;
+    MATRIX blend;
+    long flag;
+    MATRIX *mat;
+    ScratchPad *scratch;
+    Record6c *light;
+    Record6c *other;
+    ModelPart *part;
+    u8 *file;
+    u8 *model;
+    s32 n;
+    s32 shift;
+    s32 turn;
+    s32 angle;
+    s32 dist;
+
+    mat = &m;
+    scratch = SCRATCH;
+    SCRATCH->draw.count.unk2 = 100;
+    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->unk48 = DAT_80199154.screen;
+    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
+    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
+    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
+    SCRATCH->next = DAT_80199154.pool->next;
+    *(u32 *)&SCRATCH->rgb = *(u32 *)&DAT_8009c2e0;
+    SCRATCH->end = DAT_80199154.pool->end;
+    gte_SetRotMatrix(&DAT_80199154.unk159f8);
+    gte_SetTransMatrix(&DAT_80199154.unk159f8);
+    light = DAT_80199154.unk15da8;
+    if (view != NULL) {
+        delta.vx = pos->vx - DAT_80199154.unk15af8.vx;
+        delta.vy = pos->vy - DAT_80199154.unk15af8.vy;
+        delta.vz = pos->vz - DAT_80199154.unk15af8.vz;
+        turn = ratan2(delta.vz, delta.vx) - 1024;
+        angle = (DAT_801b24e4.unk124.vy - turn) & 0xfff;
+        if ((u32)(angle - 2048) < 1536 || (u32)(angle - 513) < 1536) {
+            return;
+        }
+        shift = 0;
+        delta.vx >>= 4;
+        delta.vy >>= 4;
+        rel.vz = delta.vz >>= 4;
+        rel.vx = delta.vx;
+        rel.vy = delta.vy;
+        gte_ldv0(&rel);
+        gte_rt();
+        gte_stlvnl(m.t);
+        gte_stflg(&flag);
+        m.t[0] <<= 4;
+        m.t[1] <<= 4;
+        m.t[2] <<= 4;
+        while (mat->t[0] > 0x7fff || mat->t[1] > 0x7fff || mat->t[2] > 0x7fff) {
+            shift++;
+            mat->t[0] >>= 1;
+            mat->t[1] >>= 1;
+            mat->t[2] >>= 1;
+        }
+        light = DAT_80199154.unk15da8;
+    } else {
+        m.t[0] = pos->vx;
+        m.t[1] = pos->vy;
+        m.t[2] = pos->vz;
+    }
+    if (!(flags & 0x80) && rel.vy <= 0) {
+        depth += 240;
+    }
+    func_800166f4(rotation, mat);
+    if (light2 != 0xff) {
+        other = &DAT_80199154.unk15da8[light2];
+        if (other->unk50.m[0][0] != -1) {
+            func_800171b0((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
+            gte_SetColorMatrix(&blend);
+        } else {
+            gte_SetColorMatrix(&light->unk50);
+        }
+        if (other->unk0[0].m[0][0] != -1) {
+            gte_MulMatrix0(&other->unk0[0], mat, &lm);
+        } else {
+            gte_MulMatrix0(&light->unk0[0], mat, &lm);
+        }
+        if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
+            func_80035358(func_80017158(light->unk68, other->unk68, (s16)t),
+                          func_80017158(light->unk6a, other->unk6a, (s16)t));
+        } else {
+            func_80035358(light->unk68, light->unk6a);
+        }
+        if (other->unk64.r != 0xff) {
+            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, (s16)t),
+                             func_80017158(light->unk64.g, other->unk64.g, (s16)t),
+                             func_80017158(light->unk64.b, other->unk64.b, (s16)t));
+        } else {
+            gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+        }
+    } else {
+        gte_SetColorMatrix(&light->unk50);
+        func_80035358(light->unk68, light->unk6a);
+        gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+        gte_MulMatrix0(&light->unk0[0], mat, &lm);
+    }
+    gte_SetLightMatrix(&lm);
+    if (scale != NULL) {
+        size.vx = scale->vx;
+        size.vy = scale->vy;
+        size.vz = scale->vz;
+        ScaleMatrix(mat, &size);
+    }
+    vm = *view;
+    vm.m[0][0] >>= shift;
+    vm.m[0][1] >>= shift;
+    vm.m[0][2] >>= shift;
+    vm.m[1][0] >>= shift;
+    vm.m[1][1] >>= shift;
+    vm.m[1][2] >>= shift;
+    vm.m[2][0] >>= shift;
+    vm.m[2][1] >>= shift;
+    vm.m[2][2] >>= shift;
+    if (view != NULL) {
+        gte_MulMatrix0(&vm, mat, mat);
+    }
+    gte_SetRotMatrix(mat);
+    gte_SetTransMatrix(mat);
+    file = DAT_80199154.models[id];
+    model = file + ((ModelFile *)file)->vertices;
+    scratch->model = model;
+    n = 0;
+    if (anim < 128) {
+        part = ((ModelData *)model)->parts;
+        if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) != 0) {
+            goto draw;
+        }
+        scratch->part = ((ModelData *)scratch->model)->parts;
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+    } else {
+        n = anim & 0x7f;
+        part = &((ModelData *)scratch->model)->parts[n];
+        scratch->part = &((ModelData *)model)->parts[n];
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+    }
+draw:
+    dist = SquareRoot0(mat->t[0] * mat->t[0] + mat->t[1] * mat->t[1] + mat->t[2] * mat->t[2]);
+    if (view != NULL) {
+        u8 *vertex = scratch->vertices;
+        ScreenVertex *screen = scratch->screen;
+        s32 i = part->unk4;
+
+        while (--i != -1) {
+            gte_ldv0(vertex);
+            gte_rtps();
+            gte_stsxy(&screen->sxy);
+            gte_stszotz(&screen->z);
+            screen->fog = 0;
+            screen++;
+            vertex += 8;
+        }
+    } else {
+        u8 *vertex = scratch->vertices;
+        ScreenVertex *screen = scratch->screen;
+        s32 i = part->unk4;
+
+        while (--i != -1) {
+            gte_ldv0(vertex);
+            gte_rt();
+            gte_stlvnl(&scratch->unk54);
+            screen->sxy.vx = scratch->unk54.vx;
+            screen->sxy.vy = scratch->unk54.vy;
+            screen->z = depth;
+            screen->fog = scratch->unk54.vz;
+            screen++;
+            vertex += 8;
+        }
+    }
+    func_80038844(n, depth, shift, dist);
+    DAT_80199154.pool->next = scratch->next;
+    DAT_80199154.unk159bc = scratch->draw.count.unk4;
+    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+}

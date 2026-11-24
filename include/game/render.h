@@ -466,6 +466,7 @@ void func_8003be34(s32 x, s32 z, s32 flags);
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
 void func_800366a8(u16 part);
 void func_80037bec(u16 part, s32 depth, s32 mode);
+void func_80038844(u16 part, s32 depth, s32 shift, s32 dist);
 void func_80039428(u16 part, s16 depth, s32 shade);
 void func_80039d50(void);
 void func_8003ab04(void);
@@ -475,6 +476,9 @@ void func_8003df50(void);
 void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
                    AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
                    s32 flags, s32 depth);
+void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   u8 flags, s32 depth);
 void func_80040ae4(void);
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80043b38(u8 *file);
