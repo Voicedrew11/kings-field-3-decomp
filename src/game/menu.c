@@ -3179,8 +3179,8 @@ s32 func_80021d94(void)
         counts[i] = DAT_800c85e8[0][ids[i]] + DAT_800c85e8[1][ids[i]];
     }
     func_80027688(&list, 8, 1);
-    list.entries = entries;
     list.count = n;
+    list.entries = entries;
     list.counts = counts;
     for (i = 0; i < 2; i++) {
         func_80026fe4();
