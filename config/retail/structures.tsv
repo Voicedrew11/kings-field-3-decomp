@@ -1,3 +1,13 @@
 # MANUALLY MANAGED - target C layouts used by semantic function/data identities.
 # A supported layout proves current size/offset modeling, not an original typedef spelling.
 name	size	layout_confidence	evidence	note
+CdRequest	0x2c	supported	asm;band A field accesses (func_80015908, func_80015a48, func_80015ce0);func_8001967c 0x2c stride	WIP: only the fields band A touches are named; owner is the CD module
+Data801b24e4	0x19c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Data801ba984	0x5144	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Data801d4464	0x12054	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+SoundBank	0x8	supported	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP extent; fields band A does not touch are opaque
+SoundEffect	0xa	supported	asm;func_80015790 indexes se*10	WIP extent; fields band A does not touch are opaque
+SoundSlot	0x8	supported	asm;sound init and func_80015b9c (8-byte stride, 11 entries)	WIP extent; fields band A does not touch are opaque
+SoundState	0x1ae8	supported	asm;band A field accesses;game loop clears 0x6ba words	WIP field names
+SoundUnk5c8	0x4	supported	asm;sound init loop (4-byte stride, 10 entries)	WIP extent; fields band A does not touch are opaque

@@ -107,7 +107,7 @@ GAME.EXE	0x80014ee0	0x46e0		mips26	reachable-code	0x80067acc	load		jal		manual-d
 GAME.EXE	0x80014ef4	0x46f4		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014efc	0x46fc		mips26	reachable-code	0x80019ab4	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014f10	0x4710		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-a asm review
-GAME.EXE	0x80014f18	0x4718		mips_gprel16	reachable-code	0x8009c3f8	load	DAT_8009c3f8	sw		manual-decoded	reviewed	game-a asm review
+GAME.EXE	0x80014f18	0x4718		mips_gprel16	reachable-code	0x8009c3f8	bss	DAT_8009c3f8	sw		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014f24	0x4724		mips26	reachable-code	0x800341e8	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014f2c	0x472c		mips26	reachable-code	0x80034180	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014f34	0x4734		mips26	reachable-code	0x80047010	load		jal		manual-decoded	reviewed	game-a asm review
@@ -124,7 +124,7 @@ GAME.EXE	0x80014f8c	0x478c		mips26	reachable-code	0x80034300	load		jal		manual-d
 GAME.EXE	0x80014f94	0x4794		mips26	reachable-code	0x80018cd0	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014f9c	0x479c		mips26	reachable-code	0x80015a48	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014fa8	0x47a8		mips26	reachable-code	0x800422b8	load		jal		manual-decoded	reviewed	game-a asm review
-GAME.EXE	0x80014fb0	0x47b0		mips_gprel16	reachable-code	0x8009c3f8	load	DAT_8009c3f8	lw		manual-decoded	reviewed	game-a asm review
+GAME.EXE	0x80014fb0	0x47b0		mips_gprel16	reachable-code	0x8009c3f8	bss	DAT_8009c3f8	lw		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014fd8	0x47d8		mips26	reachable-code	0x80014f24	load		j		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014fec	0x47ec		mips26	reachable-code	0x80014f24	load		j		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80014ff4	0x47f4		mips26	reachable-code	0x80015064	load		jal		manual-decoded	reviewed	game-a asm review
