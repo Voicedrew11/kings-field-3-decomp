@@ -898,6 +898,7 @@ def _module_data(
     data_symbols: list[DefinedSymbol] = []
     data_relocations: list[MipsRelocation] = []
     bss_size = 0
+    bss_base: int | None = None
     bss_symbols: list[DefinedSymbol] = []
     previous_load_end: int | None = None
     for datum in module.data:
@@ -931,7 +932,12 @@ def _module_data(
             data.extend(blob)
             previous_load_end = datum.end
         elif datum.section_name == (".bss" if section == ".data" else section):
-            offset = (bss_size + datum.alignment - 1) & -datum.alignment
+            # Align at the retail address, not the module offset: a module whose
+            # first object is not eight-byte aligned (the menu .sbss at
+            # 0x8009c374) must not gain a gap the retail packing does not have.
+            if bss_base is None:
+                bss_base = datum.va
+            offset = ((bss_base + bss_size + datum.alignment - 1) & -datum.alignment) - bss_base
             bss_symbols.append(
                 DefinedSymbol(datum.symbol, offset, datum.size, STT_OBJECT, datum.binding)
             )
