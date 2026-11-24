@@ -179,7 +179,7 @@ class SectionDiff:
     name: str
     retail_size: int
     recon_size: int
-    status: str  # match | missing | extra | size | bytes | referent | addend | storage | layout | placement
+    status: str  # match | exempt | missing | extra | size | bytes | referent | addend | storage | layout | placement
     detail: str = ""
 
 
@@ -191,11 +191,21 @@ class UnitDataDiff:
 
     @property
     def matches(self) -> bool:
+        """Strict: every section compared and equal (an exemption does not count)."""
         return all(d.status == "match" for d in self.diffs)
 
     @property
+    def passes(self) -> bool:
+        """Every section equal or covered by a recorded check exemption."""
+        return all(d.status in ("match", "exempt") for d in self.diffs)
+
+    @property
+    def exempt(self) -> list[SectionDiff]:
+        return [d for d in self.diffs if d.status == "exempt"]
+
+    @property
     def divergent(self) -> list[SectionDiff]:
-        return [d for d in self.diffs if d.status != "match"]
+        return [d for d in self.diffs if d.status not in ("match", "exempt")]
 
 
 @dataclass(frozen=True)
@@ -450,7 +460,43 @@ def diff_unit(unit: Unit, delink_dir: Path, objdiff_dir: Path,
                 diff.status = "placement"
             detail = f"{label}: {json.dumps(issue, sort_keys=True)}"
             diff.detail = f"{diff.detail}; {detail}" if diff.detail else detail
+    _apply_common_exemption(unit, retail, recon, result)
     return result if result.diffs else None
+
+
+def _apply_common_exemption(unit: Unit, retail: Elf, recon: Elf, result: UnitDataDiff) -> None:
+    """Mark sections a recorded common-placement exemption covers, after checking it.
+
+    The exemption holds only while every exempt claim is a COMMON request of
+    its claimed size in the reconstruction and the covered sections hold no
+    fixed allocation on either side other than those claims.
+    """
+    from scripts.kf.check_exemptions import common_symbols, for_unit
+
+    exemption = for_unit(unit.image, unit.unit)
+    exempt = common_symbols(unit)
+    if exemption is None:
+        return
+    requests = {request.name: request for request in recon.common_requests}
+    problems = [f"{name} is not a COMMON request of {datum.size} B in the reconstruction"
+                for name, datum in exempt.items()
+                if name not in requests or requests[name].size != datum.size]
+    for name in exemption.sections:
+        stray = sorted(
+            {a.name for a in retail.allocations.get(name, ()) if a.name not in exempt}
+            | {a.name for a in recon.allocations.get(name, ())}
+        )
+        if stray:
+            problems.append(f"{name} holds fixed allocations {stray}")
+    if problems:
+        result.diffs.append(SectionDiff(
+            ",".join(exemption.sections), 0, 0, "exemption-invalid", "; ".join(problems)))
+        return
+    for diff in result.diffs:
+        if diff.name in exemption.sections and diff.status != "match":
+            symbols = sorted(n for n, d in exempt.items() if d.section_name == diff.name)
+            diff.status = "exempt"
+            diff.detail = (f"COMMON {', '.join(symbols)} not placed: {exemption.reason}")
 
 
 def diff_image(
@@ -557,17 +603,26 @@ def coverage(
 def run(images: tuple[str, ...], *, show_detail: bool, show_coverage: bool,
         delink_dir: Path, objdiff_dir: Path) -> int:
     manifest = load_manifest()
-    total_units = total_match = total_diverge = total_artifact_failures = 0
+    total_units = total_match = total_diverge = total_artifact_failures = total_exempt = 0
     for image in images:
         # diff_image returns every data-owning unit: a matching one carries only
         # `match` SectionDiffs, a diverging one carries at least one other.
         results, artifact_failures = diff_image(
             image, manifest, delink_dir, objdiff_dir
         )
-        diverging = [r for r in results if not r.matches]
-        matched = len(results) - len(diverging)
+        diverging = [r for r in results if not r.passes]
+        exempted = [r for r in results if r.passes and not r.matches]
+        matched = len(results) - len(diverging) - len(exempted)
         print(f"\n{image}: {len(results)} unit(s) own data; "
-              f"{matched} match retail, {len(diverging)} diverge")
+              f"{matched} match retail, {len(exempted)} match with a recorded exemption, "
+              f"{len(diverging)} diverge")
+        for result in exempted:
+            summary = ", ".join(d.name for d in result.exempt)
+            print(f"  EXEMPT  {result.unit:<40} {summary} [common-placement]")
+            if show_detail:
+                for d in result.exempt:
+                    print(f"          {d.name:<9} {d.detail}")
+        total_exempt += len(exempted)
         total_units += len(results)
         total_match += matched
         total_diverge += len(diverging)
@@ -590,7 +645,7 @@ def run(images: tuple[str, ...], *, show_detail: bool, show_coverage: bool,
             for va, size, name in extents[:10]:
                 print(f"    {va:#010x}  {size:>6} B  {name}")
     print(f"\ndata-match: {total_match}/{total_units} data-owning unit(s) match retail"
-          f" ({total_diverge} diverge; "
+          f" ({total_exempt} with a recorded exemption; {total_diverge} diverge; "
           f"{total_artifact_failures} artifact failure(s))")
     from scripts.kf.config_data import run as check_config_data
 

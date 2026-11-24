@@ -54,16 +54,31 @@ chooses the explicit objects, their order and the `inclib` order
 | --- | --- | --- | --- |
 | `PSX.EXE` | units, then `2MBYTE.OBJ` | LIBAPI, LIBSN | proven: byte-identical |
 | `GAME.EXE` | `NONE2.OBJ`, `MALLOC.OBJ`, then units | LIBCARD, LIBCD, LIBSPU, LIBSND, LIBPRESS, LIBGTE, LIBETC, LIBAPI, LIBC, LIBGPU | unproven |
-| `OPEN.EXE` | units, `NONE2.OBJ` + `MALLOC.OBJ` before `open.movie` | LIBAPI, LIBC, LIBPRESS, LIBGPU, LIBGTE, LIBCD, LIBETC, LIBSND, LIBSPU | unproven |
-| `END.EXE` | units, `NONE2.OBJ` + `MALLOC.OBJ` before `end.movie` | LIBAPI, LIBC, LIBPRESS, LIBGPU, LIBGTE, LIBCD, LIBETC, LIBSND, LIBSPU | unproven |
+| `OPEN.EXE` | `open.main`, `NONE2.OBJ`, `open.movie`, `open.card`, `MALLOC.OBJ` | LIBAPI, LIBC, LIBPRESS, LIBGPU, LIBGTE, LIBCD, LIBETC, LIBSND, LIBSPU, LIBCARD | objects in retail order; libraries differ |
+| `END.EXE` | `end.main`, `NONE2.OBJ`, `end.movie`, `MALLOC.OBJ` | LIBAPI, LIBC, LIBPRESS, LIBGPU, LIBGTE, LIBCD, LIBETC, LIBSND, LIBSPU | objects in retail order; libraries differ |
 
-The overlay rows transcribe the Ghidra signature census of the scoping study
-(NONE2, MALLOC and a `_card_clear` CARD object ahead of GAME's game code; NONE2
-after the first OPEN and END units) and have not been linked against retail.
-GAME and OPEN were built with Library 3.4 and END with a LIBGPU `SYS` and
-several LIBSND members newer than the 3.3 CD; those objects are not preserved,
-so no overlay can rebuild byte-identically from the pinned archives. GAME's
-CARD object is not modelled.
+The GAME row transcribes the Ghidra signature census of the scoping study
+(NONE2, MALLOC and a `_card_clear` CARD object ahead of GAME's game code) and
+has not been linked against retail. GAME and OPEN were built with Library 3.4
+and END with a LIBGPU `SYS` and several LIBSND members newer than the 3.3 CD;
+those objects are not preserved, so no overlay can rebuild byte-identically
+from the pinned archives. GAME's CARD object is not modelled.
+
+OPEN and END are fully claimed and link. Their explicit objects land in the
+retail order and every game function is exact, so each linked image matches
+retail up to the first library member whose release differs. In END that is
+LIBSND: the text agrees in order and size through LIBGPU, LIBGTE, LIBCD and
+LIBETC, shifted only by 0x28c bytes of extra `.rdata` that the 3.3 LIBSND
+members bring (switch tables of members the newer LIBSND does not pull in),
+and from `SsInit` on the 3.3 members are larger. In OPEN the shift starts at
+LIBPRESS (3.4's `DecDCTGetEnv` and DECVLC), and 3.4's LIBCD and LIBGPU `SYS`
+1.116 follow. `kf link --compare-only` scores both near 78% island-aligned.
+OPEN's LIBCARD stubs are its last text members, after LIBSPU. The units'
+COMMON requests (`cdb`, `db` and the primitive buffers) cannot be proven at
+their retail addresses: PSYLINK orders COMMON by symbol-hash bucket among the
+SDK's own COMMON, and the 3.3 archives supply a different SDK set; that
+placement is a recorded `common-placement` exemption in
+`config/check_exemptions.tsv` (see the delinking document's Validation).
 
 ## PSX.EXE
 

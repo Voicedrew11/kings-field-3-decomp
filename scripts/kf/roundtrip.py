@@ -4,7 +4,10 @@ This checks the delinker's bytes and placements with the independent GNU MIPS
 linker, not the delinker's inverse encoding helpers. It is not reconstruction
 progress or proof that all reachable bytes have been modeled. Packed DATA/BSS
 claims must admit one base per ELF section; symbols are never scattered or
-overridden to make an unplaceable section appear linkable.
+overridden to make an unplaceable section appear linkable. The one recorded
+exception is a config/check_exemptions.tsv common-placement row: its COMMON
+storage is left unplaced (reported EXEMPT) and the code referring to it is
+linked against each claim's retail address.
 """
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ from elftools.common.exceptions import ELFError
 from elftools.elf.elffile import ELFFile
 
 from scripts.kf.allocation_notes import read_requests
+from scripts.kf.check_exemptions import common_symbols, for_unit
 from scripts.kf.delink import load_catalog, sanitize_symbol
 from scripts.kf.manifest import Unit, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
@@ -61,6 +65,8 @@ class UnitResult:
     relocation_rows: int = 0
     linker_ran: bool = False
     linker_diagnostics: str = ""
+    # Recorded config/check_exemptions.tsv rows this unit's plan applied.
+    exempt: list[str] = field(default_factory=list)
 
     def issue(self, kind: str, **details: object) -> None:
         self.issues.append({"kind": kind, **details})
@@ -157,8 +163,18 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     common_claim = named_common_bss_claim(elf, unit)
     named_bss = {datum.symbol: datum for datum in unit.data
                  if datum.section_name == '.bss' and datum.scope == 'global'}
+    # A recorded common-placement exemption takes these claims out of section
+    # placement; their sizes are still checked, and nothing is placed for them.
+    exemption = for_unit(unit.image, unit.unit)
+    exempt = common_symbols(unit)
     symbols: dict[str, list] = defaultdict(list)
     for symbol in symtab.iter_symbols():
+        if symbol.name in exempt and symbol['st_shndx'] == 'SHN_COMMON':
+            if symbol['st_size'] != exempt[symbol.name].size:
+                result.issue("exempt-common-size", symbol=symbol.name,
+                             size=symbol['st_size'], claimed=exempt[symbol.name].size)
+            symbols[symbol.name].append(symbol)
+            continue
         # COMMON has no input section: SHF_ALLOC enumeration cannot see it,
         # and the discard script below would silently drop an unreferenced
         # reservation. A shared allocation/placement contract is still needed;
@@ -180,7 +196,18 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
     # padding, but .text owns the entire contiguous run, including delay slots.
     claims = [(f.symbol, f.va, f.body_size, ".text") for f in unit.functions]
     claims += [(d.symbol, d.va, d.size, d.section_name)
-               for d in unit.data]
+               for d in unit.data if d.symbol not in exempt]
+    exempt_sections = {
+        elf.get_section(symbol['st_shndx']).name
+        for name in exempt for symbol in symbols.get(name, [])
+        if isinstance(symbol['st_shndx'], int)
+    }
+    for name, datum in exempt.items():
+        if len(symbols.get(name, [])) != 1:
+            result.issue("missing-or-ambiguous-owned-symbol", symbol=name,
+                         count=len(symbols.get(name, [])))
+    if exemption is not None:
+        result.exempt.append(exemption.describe())
     reservations = {d.symbol: d.reservation_size for d in unit.data if d.reservation_size}
     bases: dict[str, set[int]] = defaultdict(set)
     sizes: Counter = Counter()
@@ -247,6 +274,9 @@ def plan(elf: ELFFile, unit: Unit, result: UnitResult) -> dict[str, int]:
                 continue
             if sizes[name]:
                 result.issue("owned-section-extent", section=name, size=0, claimed=sizes[name])
+            continue
+        if name in exempt_sections and not witnesses[name]:
+            # Only exempt COMMON claims live here: not placed, not compared.
             continue
         candidates = bases.get(name, set())
         if len(candidates) != 1:
@@ -382,6 +412,9 @@ def verify_unit(unit: Unit, image: RetailImage, book: dict[str, set[int]],
         symbols = externals(elf, book, result)
         if result.issues:
             return result
+        # Exempt COMMON storage is not placed; the code's references to it are
+        # still linked, against each claim's retail address, and compared.
+        symbols.update({name: datum.va for name, datum in common_symbols(unit).items()})
         # Never scatter a packed section or override an internally defined
         # symbol to its desired VA. GNU ld must honor the entire input layout.
         with tempfile.TemporaryDirectory(prefix="link-", dir=scratch) as temporary:
@@ -473,7 +506,11 @@ def run(images=IMAGE_LAYOUTS, *, output: Path | None = None, unit: str | None = 
     for name in images:
         report = audit(RetailImage.load(name), units, address_book(name), BUILD / "delink", scratch)
         reports.append(report)
-        print(f"{name} target relink: {report['verified_units']}/{report['total_units']} units verified")
+        exempt = [line for unit_report in report['units'] for line in unit_report['exempt']]
+        print(f"{name} target relink: {report['verified_units']}/{report['total_units']} units verified"
+              + (f" ({len(exempt)} with a recorded exemption)" if exempt else ""))
+        for line in exempt:
+            print(f"  {line}")
         for kind, count in report['issues'].items():
             print(f"  {kind}: {count}")
     if output is not None:
