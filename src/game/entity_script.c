@@ -256,3 +256,189 @@ s32 func_8004c5ec(s32 a, s32 b, s32 c)
     }
     return d + (b * b) / (c * 2);
 }
+
+/*
+ * Hits record index: attack stats a2..a9 of power a1 against the record's
+ * resistances (func_8004c5ec each), strength a10 and flags a11 (bits 6-7
+ * the attacker kind, bits 4-5 the hit kind); FDAT slot 18 adjusts the
+ * damage. Starts the record's hurt or death script and pushes it away from
+ * target (NULL: no push).
+ */
+ADDRESS(0x8004c668, 0x844)
+void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
+                   u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target)
+{
+    Object88 *obj;
+    Object88 *link;
+    Object78 *def;
+    u8 **scripts;
+    u8 *script;
+    u8 *dodge;
+    SVECTOR dir;
+    s32 dmg;
+    s32 hp;
+    s32 mass;
+    s32 kind;
+    s32 mode;
+    s32 i;
+    u8 chance;
+
+    obj = &DAT_80185da8.objects[index];
+    if (obj->unk1 == 0x6e) {
+        return;
+    }
+    if (obj->unk1 == 1) {
+        return;
+    }
+    if (obj->unk1 == 2) {
+        return;
+    }
+    if (obj->unk1 == 0x1d) {
+        return;
+    }
+    if (obj->unk1 == 0x16) {
+        return;
+    }
+    if (obj->unk0 == 3) {
+        obj = &DAT_80185da8.objects[obj->unk22];
+    }
+    def = &DAT_80185da8.defs[obj->unk2];
+    if (obj->unke == 3 && obj->unk18 >= 1548) {
+        return;
+    }
+    if (obj->unke == 0x15) {
+        if (obj->unk70 == 0) {
+            obj->unk70 = 2;
+        }
+        return;
+    }
+    if (obj->unke == 6 && obj->unk70 == 0) {
+        obj->unk70 = 2;
+    }
+    if (obj->unke == 0x1a) {
+        return;
+    }
+    kind = a11 & 0xc0;
+    mode = a11 & 0x30;
+    if (kind == 0x80 && (obj->unk28 & 0x100000)) {
+        return;
+    }
+    dmg = func_8004c5ec(a1, a2, def->unk20[0]);
+    dmg += func_8004c5ec(a1, a3, def->unk20[1]);
+    dmg += func_8004c5ec(a1, a4, def->unk20[2]);
+    dmg += func_8004c5ec(a1, a5, def->unk20[3]);
+    dmg += func_8004c5ec(a1, a6, def->unk20[4]);
+    dmg += func_8004c5ec(a1, a7, def->unk20[5]);
+    dmg += func_8004c5ec(a1, a8, def->unk20[6]);
+    dmg += func_8004c5ec(a1, a9, def->unk20[7]);
+    if (dmg > 0x68db7) {
+        dmg = 0x68db7;
+    }
+    dmg = (dmg * a10 / 5000 + 128) >> 4;
+    DAT_8018fad4.handlers[18](obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
+    if (dmg == 0) {
+        return;
+    }
+    if (obj->unk1a != 0 && (kind & 0x40)) {
+        if (mode & 0x20) {
+            func_8002a10c(rec);
+        } else if ((mode & 0x10) && a10 >= 2500) {
+            func_8002a074();
+        }
+    }
+    if (mode & 0x10) {
+        if (obj->unke == 0x13 && obj->unk70 == 0x10) {
+            goto push;
+        }
+    } else if (mode & 0x20) {
+        if (obj->unk28 & 0x40000) {
+            goto push;
+        }
+        dodge = func_8004c068(def, 0x16);
+        if (dodge != NULL &&
+            func_80016a2c(obj->angle.vy, func_80016ab8(obj->pos.vx - target->vx, obj->pos.vz - target->vz), 0x200)) {
+            func_8004b94c(obj, dodge);
+            goto push;
+        }
+    }
+    if ((kind & 0x40) && (mode & 0x10)) {
+        switch (DAT_801b24e4.unkcb) {
+        case 0x1f:
+            func_80030c4c((rand() * 9 >> 15) + 1);
+            break;
+        case 0x20:
+            if (obj->unk1 == 59 || obj->unk1 == 60 || obj->unk1 == 61 || obj->unk1 == 63 || obj->unk1 == 66 ||
+                obj->unk1 == 67 || obj->unk1 == 79 || obj->unk1 == 88 || obj->unk1 == 89 || obj->unk1 == 91) {
+                if (obj->unk1a != 0) {
+                    dmg = obj->unk1a;
+                }
+            }
+            break;
+        }
+    }
+    hp = obj->unk1a - dmg;
+    scripts = def->scripts;
+    if (hp <= 0) {
+        if (obj->unk1a != 0 && kind == 0x40) {
+            func_8002a310(def->unk1e);
+        }
+        if (obj->unk1 < 43) {
+            if (DAT_801ba984.unk7d == 0) {
+                DAT_801ba984.unk7d = 1;
+            }
+            DAT_801ba984.unk7e++;
+        }
+        hp = 0;
+        func_8004c0b0(obj, 3);
+    } else {
+        for (i = 15; i != -1; i--) {
+            script = *scripts++;
+            if (script == NULL) {
+                break;
+            }
+            if (script[0] == 2) {
+                if (dmg >= SCRIPT_U16(script, 12)) {
+                    chance = script[2];
+                    if (chance == 0xff || rand() >> 7 < chance) {
+                        func_8004b94c(obj, script);
+                        break;
+                    }
+                } else {
+                    obj->unk28 |= 0x200000;
+                    obj->unk84 = 0;
+                }
+            }
+        }
+    }
+    obj->unk1a = hp;
+push:
+    if (obj->unk28 & 0x10) {
+        link = &DAT_80185da8.objects[obj->unk22];
+        mass = (DAT_80185da8.defs + link->unk2)->unk1[1];
+    } else {
+        mass = def->unk1[1];
+    }
+    if (target != NULL && mass < 240) {
+        func_80016c90(obj->pos.vx - target->vx, obj->pos.vy - (obj->unk1e >> 1) - target->vy,
+                      obj->pos.vz - target->vz, &dir);
+        func_800167cc(&dir, &obj->vel);
+        dmg = (SquareRoot0(SquareRoot0(dmg << 11)) << 10) / mass;
+        dmg = (dmg << 5) / mass;
+        if (dmg > 512) {
+            dmg = 512;
+        }
+        func_80016928(dmg, &obj->vel);
+        obj->vel.vx >>= 3;
+        obj->vel.vz >>= 3;
+        obj->vel.vy >>= 6;
+        if (obj->unk28 & 0x10) {
+            link->vel.vx = obj->vel.vx;
+            link->vel.vy = obj->vel.vy;
+            link->vel.vz = obj->vel.vz;
+            if (link->unke != 3) {
+                func_8004c0b0(link, 2);
+            }
+        }
+    }
+    obj->unkd = 0x10;
+}

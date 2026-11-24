@@ -211,7 +211,9 @@ typedef struct Data801ba984 {
     u8 unk6a;       /* +0x6a: picks the ending (func_8005eb20) */
     u8 unk6b[6];
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
-    u8 unk76[9];
+    u8 unk76[7];
+    u8 unk7d;       /* +0x7d: set to 1 by the first Object88 kill (func_8004c668) */
+    u8 unk7e;       /* +0x7e: Object88 kills (func_8004c668) */
     u8 unk7f[5];    /* +0x7f: per magic element */
     u8 unk84[6];
     u8 unk8a[0x20]; /* +0x8a: per area, 1 once func_80017c78 loaded it */
@@ -519,7 +521,9 @@ typedef struct Object88 {
     s16 unk70;      /* +0x70: FDAT slot 17 phase 0..2 */
     u8 unk72[2];
     s16 unk74;      /* +0x74: FDAT slot 17 toggles it when the turn completes */
-    u8 unk76[0x12];
+    u8 unk76[0xe];
+    u8 unk84;       /* +0x84: cleared by a hit below the hurt threshold (func_8004c668) */
+    u8 unk85[3];
 } Object88;
 
 /*
@@ -544,7 +548,9 @@ typedef struct Object78 {
     s16 unk18;      /* +0x18: yaw range (func_800533e8) */
     u16 unk1a;
     u16 unk1c;
-    u8 unk1e[0x14];
+    s16 unk1e;      /* +0x1e: passed to func_8002a310 when the record dies */
+    u16 unk20[8];   /* +0x20: resistances to the eight attack stats (func_8004c668) */
+    u8 unk30[2];
     u16 unk32;
     u32 unk34;      /* +0x34: flags copied to Object88.unk28 */
     u8 *scripts[16]; /* +0x38: script records, the first byte their id; 0 ends */
