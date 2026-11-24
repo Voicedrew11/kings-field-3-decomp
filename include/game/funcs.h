@@ -11,17 +11,13 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void func_80017664(void);
-void func_8001796c(void);
 void func_80018358(void);
-void func_80018cd0(void);
-u32 *func_80018fbc(u32 *dst, u32 value, s32 count);
-void func_8001937c(void *arena, s32 size);
 void func_80019ab4(void);
 void func_8001a438(void);
 void func_8001a5c0(void);
 s32 func_8001fa60(void);
 void func_80027f2c(void);
+void func_8002b64c(void);
 void func_80028f90(void);
 void func_8002b330(VECTOR *pos, SVECTOR *angle);
 void func_8002b760(void);
@@ -32,9 +28,11 @@ void func_80034180(void);
 void func_800341e8(void);
 void func_80034300(void);
 void func_800350fc(RECT *rect, s32 a1, s32 a2, s32 a3);
+void func_80035c84(s32 a0, u8 *a1);
 void func_80035394(void);
 void func_8003c9dc(void);
 void func_800422b8(VECTOR *pos, SVECTOR *angle);
+void func_80042ba8(s32 a0, u32 *table);
 void func_8004485c(void);
 void func_80046c00(s32 a0, s32 a1, s32 a2, s32 a3);
 void func_80047010(void);

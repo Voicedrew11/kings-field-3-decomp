@@ -350,7 +350,7 @@ an argument, a handler table an FDAT module brings) has no value chain inside
 the caller. Its evidence is curated in two tables, checked by
 `scripts/kf/indirect_pointers.py` (ported from the Shadow Tower decomp):
 `config/retail/indirect_pointers.tsv` lists every value source the review
-found for one typed member (`CdRequest.unk24`): a `table-word` (a code
+found for one typed member (`CdRequest.callback`): a `table-word` (a code
 pointer in a data word, which needs a reviewed `mips32_candidate` row matching
 the bytes; `source_image` `FDAT_*.BIN` means the same word in every FDAT
 module) or an `address` (a `lui`/low pair in the audited image's code taking

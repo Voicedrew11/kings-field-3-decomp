@@ -1,8 +1,9 @@
 /*
  * GAME.EXE: sound (WIP module): libsnd start-up and shutdown, the background
  * sequence, positional and plain sound effects, and VAB bank loading through
- * CD read requests. Its unit is -G0: the CD request pointers it reads are
- * scalars addressed with absolute lui pairs.
+ * CD read requests. It references no small data, so -G8 and -G0 compile it
+ * alike; the CD request pointers it reads are members of the CD state
+ * aggregate (game/cd.h), reached absolutely either way.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -255,9 +256,9 @@ void func_80015908(CdRequest *request)
 
     switch (request->state) {
     case 0:
-        bank = &DAT_801b09fc.banks[request->bank];
-        if (func_80019b68(request->slot->buffer, request->count)) {
-            request->unk1 = 0;
+        bank = &DAT_801b09fc.banks[request->u.sound.bank];
+        if (func_80019b68(request->u.sound.slot->buffer, request->count)) {
+            request->issued = 0;
             CdSeekL(&request->retry_pos);
             break;
         }
@@ -265,7 +266,7 @@ void func_80015908(CdRequest *request)
             SsVabClose(bank->vab_id);
             bank->vab_id = SOUND_VAB_NONE;
         }
-        bank->vab_id = func_80068f7c(request->slot->buffer, -1, request->spu_addr);
+        bank->vab_id = func_80068f7c(request->u.sound.slot->buffer, -1, request->u.sound.spu_addr);
         if (bank->vab_id == SOUND_VAB_NONE) {
             func_8001967c(request);
             break;
@@ -273,7 +274,7 @@ void func_80015908(CdRequest *request)
         func_80019a74(&request->pos, request->count, &request->pos);
         request->state = 1;
         request->buffer = DAT_801c17a4;
-        request->unk1 = 0;
+        request->issued = 0;
         request->count = 20;
         CdSeekL(&request->pos);
         break;
@@ -291,10 +292,10 @@ void func_80015a48(void)
     SoundBank *bank;
 
     EnterCriticalSection();
-    request = DAT_801c1728;
-    if (request->unk0 == 0x30 && request->state == 2) {
+    request = DAT_801c12e4.read;
+    if (request->kind == 0x30 && request->state == 2) {
         ExitCriticalSection();
-        bank = &DAT_801b09fc.banks[request->bank];
+        bank = &DAT_801b09fc.banks[request->u.sound.bank];
         for (;;) {
             id = SsVabTransBodyPartly(request->buffer, 0xa000, bank->vab_id);
             if (id == -1) {
@@ -302,7 +303,7 @@ void func_80015a48(void)
                 bank->vab_id = SOUND_VAB_NONE;
                 func_8001967c(request);
             } else if (id == -2) {
-                request->unk1 = 0;
+                request->issued = 0;
                 request->state = 1;
                 func_80019a74(&request->pos, request->count, &request->pos);
                 CdSeekL(&request->pos);
@@ -312,7 +313,7 @@ void func_80015a48(void)
                 if (id == bank->vab_id) {
                     func_8001967c(request);
                     SsVabTransCompleted(SS_WAIT_COMPLETED);
-                    request->slot->state = 1;
+                    request->u.sound.slot->state = 1;
                     request->count = 0;
                 }
                 return;
@@ -366,9 +367,8 @@ SoundSlot *func_80015b9c(s32 first_bank, s32 bank_count, s32 first_slot, s32 slo
 }
 
 /*
- * Not exact: retail stores bank->slot and slot->state before it loads
- * DAT_801c1724; GCC here schedules the load first. The callback's .text
- * offset also follows func_80015410's size.
+ * Not exact only through func_80015410: the callback's .text offset follows
+ * that function's size.
  */
 ADDRESS(0x80015ce0, 0x238)
 void func_80015ce0(s32 file, s32 sector, s32 index)
@@ -431,11 +431,11 @@ void func_80015ce0(s32 file, s32 sector, s32 index)
     }
     bank->slot = slot;
     slot->state = 3;
-    request = DAT_801c1724;
+    request = DAT_801c12e4.write;
     func_80019b1c(request);
     request->state = 0;
-    request->slot = slot;
-    request->bank = index;
-    request->spu_addr = spu_addr;
+    request->u.sound.slot = slot;
+    request->u.sound.bank = index;
+    request->u.sound.spu_addr = spu_addr;
     func_80019df0(file, sector * 2, slot->buffer, func_80015908);
 }

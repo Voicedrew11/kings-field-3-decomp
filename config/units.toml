@@ -78,10 +78,34 @@ profile = "gcc260-o2-g8"
 unit = "game.sound"
 image = "GAME.EXE"
 source = "src/game/sound.c"
-profile = "gcc260-o2-g0"
+profile = "gcc260-o2-g8"
 
 [[unit]]
 unit = "game.math"
 image = "GAME.EXE"
 source = "src/game/math.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.scene"
+image = "GAME.EXE"
+source = "src/game/scene.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.image"
+image = "GAME.EXE"
+source = "src/game/image.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.memory"
+image = "GAME.EXE"
+source = "src/game/memory.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.cd"
+image = "GAME.EXE"
+source = "src/game/cd.c"
 profile = "gcc260-o2-g8"
