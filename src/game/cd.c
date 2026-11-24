@@ -221,10 +221,10 @@ void func_80019b1c(CdRequest *request)
 }
 
 ADDRESS(0x80019b68, 0x54)
-s32 func_80019b68(void *buffer, s32 sectors)
+s32 func_80019b68(u8 *buffer, s32 sectors)
 {
     u32 sum = CD_CHECKSUM_SEED;
-    u32 *word = buffer;
+    u32 *word = (u32 *)buffer;
     s32 last = (sectors << 9) - 1;
     s32 i;
 

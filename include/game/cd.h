@@ -108,7 +108,8 @@ void func_8001967c(CdRequest *request);
 void func_80019a74(CdlLOC *pos, s32 offset, CdlLOC *out);
 void func_80019ab4(void);
 void func_80019b1c(CdRequest *request);
-s32 func_80019b68(void *buffer, s32 sectors);
+/* Word checksum of a sector read: nonzero when the last word disagrees. */
+s32 func_80019b68(u8 *buffer, s32 sectors);
 s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos);
 /* These definitions are old-style with 16-bit file and entry numbers: the
  * callee truncates them and callers pass ints unconverted. */
