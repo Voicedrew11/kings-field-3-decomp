@@ -474,9 +474,19 @@ def _header_structure_layouts() -> dict[str, HeaderStructureLayout]:
     definitions = {}
     constants: dict[str, int] = {}
     enum_domains: set[str] = set()
+    # `volatile` does not change a layout. A header may also spell it through
+    # a macro (`#define NAME volatile`) so that only its owning unit sees the
+    # qualifier; both spellings are dropped before fields are parsed.
+    qualifier_macros: set[str] = set()
     for path in checked_headers:
         text = re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.DOTALL)
         text = re.sub(r"//[^\n]*", "", text)
+        qualifier_macros.update(re.findall(
+            r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)[ \t]+volatile[ \t]*$", text, flags=re.M
+        ))
+        text = re.sub(
+            r"\b(?:" + "|".join(["volatile", *sorted(qualifier_macros)]) + r")\b", "", text
+        )
         for callback in callback_typedef_pattern.finditer(text):
             name = callback.group(1)
             if name in primitive_layouts or name in definitions:
