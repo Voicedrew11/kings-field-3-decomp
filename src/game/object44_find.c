@@ -557,7 +557,11 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
 
 /* Runs frames while the screen tint (mode) steps its level from level to end. */
 ADDRESS(0x80046c00, 0xb0)
-void func_80046c00(u8 mode, s32 level, s32 end, s32 step)
+void func_80046c00(mode, level, end, step)
+    u8 mode;
+    s32 level;
+    s32 end;
+    s32 step;
 {
     VECTOR pos;
     SVECTOR angle;

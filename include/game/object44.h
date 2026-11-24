@@ -44,7 +44,8 @@ void func_800466e8(u8 id);
 void func_80046760(Object44 *obj, s32 vertex, VECTOR *out);
 s32 func_80046884(s32 x, s32 z, s32 w, s32 h, s32 y);
 s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 fade, s32 steps);
-void func_80046c00(u8 mode, s32 level, s32 end, s32 step);
+/* K&R definition: mode is u8 in the callee, int at the call (func_80030fcc passes an s16). */
+void func_80046c00(int mode, s32 level, s32 end, s32 step);
 void func_80046cb0(s32 dx, s32 dy, s32 dz);
 s16 func_80046dcc(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *out, s16 pitch,
                   s16 rate, s32 count);

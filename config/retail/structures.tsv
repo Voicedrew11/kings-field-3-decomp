@@ -39,7 +39,7 @@ MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007
 ModelData	0x28	supported	asm;func_800431e8, func_8004352c, func_800437c8	WIP field names; untouched ranges opaque
 ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;func_80035ca4/func_80039428 28-byte parts at model data + 12: +0x04 vertex count (func_8004290c), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
-MovieRec	0x34	supported	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame	WIP (game-top)
+MovieRec	0x34	supported	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame;func_80030fcc modes 7/8/9 fields +0x4..+0x2c	WIP (game-top)
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object44Arg	0x10	supported	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0)	WIP (game-k)
 Object44Bytes	0x10	supported	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind	WIP (game-k)
@@ -66,7 +66,7 @@ Record10	0x10	supported	asm;func_80030908/func_8003047c 8-byte copies to +0x188/
 Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec;game-e func_8001c6c0 u16 at +0x16	WIP (game-d)
 Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
 Record30	0x30	supported	asm;func_800341e8 48-byte stride source records at DAT_80081c8c;func_8003456c builds one on the stack	WIP (game-h)
-Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4	WIP (game-d)
+Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4;func_80030fcc +0x16/+0x18 periods	WIP (game-d)
 Record6c	0x6c	supported	asm;func_800341e8/func_80034300/func_800344dc 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads	WIP (game-h)
 SaveHeader	0x280	supported	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 ScratchCount	0x20	supported	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084	WIP (game-gte)

@@ -299,7 +299,23 @@ typedef struct MovieRec {
     u8 flag;        /* +0x01: script flag that skips the movie when set (0x80: when clear),
                      * 0xff for none */
     u16 last;       /* +0x02: last frame */
-    u8 unk4[0x30];
+    s16 unk4;       /* +0x04..+0x08: view angles the player turns to before the movie
+                     * (func_80030fcc mode 7), -1 to keep one */
+    s16 unk6;
+    s16 unk8;
+    s16 unka;       /* +0x0a: nonzero fades tint unk22 back in after the movie */
+    s32 unkc;       /* +0x0c..+0x14: position the player moves to before it, -1 to keep */
+    s32 unk10;
+    s32 unk14;
+    u8 unk18[4];
+    s16 unk1c;      /* +0x1c..+0x20: view angles after the movie (mode 9), -1 to keep */
+    s16 unk1e;
+    s16 unk20;
+    s16 unk22;      /* +0x22: func_80046c00 tint mode around the movie */
+    s32 unk24;      /* +0x24..+0x2c: position after it, -1 to keep */
+    s32 unk28;
+    s32 unk2c;
+    u8 unk30[4];
 } MovieRec;
 
 typedef struct Data801e7edc {
@@ -622,7 +638,8 @@ typedef struct Record44 {
     u8 unk4;
     u8 unk5;
     u16 unk6[8];
-    u8 unk16[4];
+    u16 unk16;      /* +0x16: frame period of an hp point (func_80030fcc), 0 for none */
+    u16 unk18;      /* +0x18: frame period of a Data801b24e4.unk1c point, 0 for none */
     u16 unk1a;      /* +0x1a: reach of the swing probe (func_8002d2a0) */
     u16 unk1c;      /* +0x1c..+0x32: per hand the swing speed, hit time, limits and steps
                      * func_8002d2a0 runs the swing with (WIP names) */
@@ -652,12 +669,13 @@ typedef s32 (*FdatHandler)();
 
 /*
  * Area state func_80017664 and func_8001796c set up (WIP). Only the scene
- * module and the render module (func_80040ae4 reads step lhu + sll) see the
+ * module, the render module (func_80040ae4 reads step lhu + sll) and the
+ * player frame (func_80030fcc reloads it for each of five compares) see the
  * step the CD callbacks set as volatile: the menu module's accesses to the
  * same object show none of that (a volatile member changes how GCC 2.6
  * reaches every member of the aggregate; see game/cd.h).
  */
-#if defined(GAME_SCENE_MODULE) || defined(GAME_RENDER_MODULE)
+#if defined(GAME_SCENE_MODULE) || defined(GAME_RENDER_MODULE) || defined(GAME_FLOOR_SELECT_MODULE)
 #define SCENE_STEP_SHARED volatile
 #else
 #define SCENE_STEP_SHARED

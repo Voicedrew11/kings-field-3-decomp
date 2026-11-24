@@ -57,12 +57,13 @@ void func_8002c30c(s32 id, ...);
 
 /*
  * The same WIP module after func_8002c30c: src/game/player_cast.c,
- * player_spell.c and player_action.c (func_8002d2a0 is not reconstructed
+ * player_spell.c and player_action.c (func_8002d2a0 is not exact
  * yet).
  */
 void func_8002cea8(s32 vertex, VECTOR *out);
 s32 func_8002cfe0(s32 hand);
 void func_8002d130(s32 id, s32 pay, s32 dir);
+void func_8002d2a0(void);
 void func_8002deec(s32 id);
 s32 func_8002e3f8(s32 angle, s32 speed);
 void func_8002ecbc(void);
