@@ -57,7 +57,7 @@ IMAGE_LINKS = {
                           evidence='signature census: NONE2 MALLOC CARD | game | CD SPU/SND PRESS '
                                    'GTE ETC API GPU'),
     'OPEN.EXE': ImageLink(('LIBAPI', 'LIBC', 'LIBPRESS', 'LIBGPU', 'LIBGTE', 'LIBCD', 'LIBETC',
-                           'LIBSND', 'LIBSPU'),
+                           'LIBSND', 'LIBSPU', 'LIBCARD'),
                           startup='NONE2.OBJ', startup_before='open.movie', allocator=True,
                           allocator_after='open.card',
                           evidence='signature census: game | NONE2 | game | MALLOC | PRESS GPU GTE '
