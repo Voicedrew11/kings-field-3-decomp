@@ -2,9 +2,9 @@
  * GAME.EXE: the in-game movie player's Sony movie-sample stream functions
  * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
  * decode environment lives in DAT_801e7edc.dec, the ring buffer is
- * DAT_801c17a4, and the display swaps through DAT_80199154. The player
- * func_80060d20 and the decode set-up func_80061364 (not exact) precede them.
- * func_80061940 steps the movie state; its jump table is this unit's .rdata
+ * DAT_801c17a4, and the display swaps through DAT_80199154. The decode
+ * set-up func_80061364 (not exact) leads; the player func_80060d20 precedes
+ * it. func_80061940 steps the movie state; its jump table is this unit's .rdata
  * (after func_80060d20's file names, so the TU starts at or before it).
  */
 #include <kf/lib/address.h>
@@ -28,6 +28,27 @@ RODATA(0x800136a0, 0x44)
 #define RING_SIZE 32
 /* CdRead2 mode: CdlModeStream | CdlModeSpeed | CdlModeRT as the 3.4 library spells it. */
 #define STREAM_MODE (0x100 | CdlModeSpeed | CdlModeRT)
+
+/* Sets up the decode environment for a 320x240 movie drawn into the display buffer not shown. */
+ADDRESS(0x80061364, 0x170)
+void func_80061364(void)
+{
+    DECENV *dec = &DAT_801e7edc.dec;
+
+    dec->vlcbuf[0] = DAT_801e7edc.unk374[0];
+    dec->vlcbuf[1] = DAT_801e7edc.unk374[1];
+    dec->vlcid = 0;
+    dec->imgbuf = DAT_801e7edc.unk37c;
+    dec->rectid = 0;
+    dec->isdone = 0;
+    setRECT(&dec->rect[DAT_80199154.frame & 1], 0, 0, 320, 240);
+    setRECT(&dec->rect[(DAT_80199154.frame + 1) & 1], 0, 240, 320, 240);
+    if (DAT_80199154.frame) {
+        setRECT(&DAT_801e7edc.dec.slice, 0, 240, 16, 240);
+    } else {
+        setRECT(&DAT_801e7edc.dec.slice, 0, 0, 16, 240);
+    }
+}
 
 ADDRESS(0x800614d4, 0x7c)
 void func_800614d4(CdlLOC *loc)
