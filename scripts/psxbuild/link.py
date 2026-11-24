@@ -59,6 +59,7 @@ IMAGE_LINKS = {
     'OPEN.EXE': ImageLink(('LIBAPI', 'LIBC', 'LIBPRESS', 'LIBGPU', 'LIBGTE', 'LIBCD', 'LIBETC',
                            'LIBSND', 'LIBSPU'),
                           startup='NONE2.OBJ', startup_before='open.movie', allocator=True,
+                          allocator_after='open.card',
                           evidence='signature census: game | NONE2 | game | MALLOC | PRESS GPU GTE '
                                    'CD ETC SND API SPU'),
     'END.EXE': ImageLink(('LIBAPI', 'LIBC', 'LIBPRESS', 'LIBGPU', 'LIBGTE', 'LIBCD', 'LIBETC',
