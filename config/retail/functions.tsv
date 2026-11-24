@@ -3,6 +3,7 @@
 # Each address is qualified by image because GAME.EXE, OPEN.EXE and END.EXE are separate overlays sharing one load window.
 # Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.
 image	va	file_offset	size	body_size	fragments	kind	confidence	name	labels	provenance	note
+PSX.EXE	0x80010038	0x838	0xe0	0xe0	1	function	proven	main		jal from __SN_ENTRY_POINT (2MBYTE.OBJ)	ends before 2MBYTE.OBJ's __main; rebuilt byte-identical from src/psx/main.c
 PSX.EXE	0x80010120	0x920	0x24	0x24	1	function	entry	start		PS-X EXE header pc0	WIP boundary: same instruction shape as the KF2 Psy-Q startup stub
 GAME.EXE	0x800144f8	0x3cf8	0x10	0x10	1	function	entry	start		PS-X EXE header pc0	WIP boundary: same instruction shape as the KF2 Psy-Q startup stub
 OPEN.EXE	0x800136c8	0x2ec8	0x10	0x10	1	function	entry	start		PS-X EXE header pc0	WIP boundary: same instruction shape as the KF2 Psy-Q startup stub

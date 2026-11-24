@@ -3,3 +3,4 @@
 # Methods use name=owner_action with the owner and action columns populated.
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
+PSX.EXE	0x80010038	main			int		proven	proven	asm;called by 2MBYTE.OBJ __SN_ENTRY_POINT;calls 2MBYTE.OBJ __main	loads and executes OPEN, GAME and END by index
