@@ -32,7 +32,10 @@ Object4c *func_80053b64(void);
 void func_80053ba8(Object4c *obj, s32 a1, s32 scale, s32 a3);
 void func_80053be4(Object4c *obj, s32 a1, s32 scale, s32 a3);
 void func_80053c20(Object4c *obj, s32 a1, s32 a2, s32 a3);
-/* Called with 7 to 12 arguments: no prototype (WIP). */
+/*
+ * K&R definition (u8 kind, flags and id arrive as int); callers pass 5 to 12
+ * arguments and it reads those after vel through &vel, so no prototype.
+ */
 Object4c *func_80053c84();
 void func_80055b4c(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale);
 s32 func_80055bd8(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel);
@@ -54,5 +57,6 @@ void func_8005bc24(u32 *src);
 void func_8005bc50(void);
 
 extern SVECTOR DAT_8009c33c;
+extern Object4cTrail DAT_801e7594[4][24];
 
 #endif

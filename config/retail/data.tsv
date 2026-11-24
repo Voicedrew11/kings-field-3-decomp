@@ -141,7 +141,8 @@ GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	DAT_8009c2d8	RECT	asm;src/game/re
 GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/render.c game.render	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
-GAME.EXE	0x8009c2f0	0x8baf0	0x4c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2f0	0x8baf0	0x48	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c338	0x8bb38	0x4	defined	proven	DAT_8009c338	s32	asm;src/game/object4c.c game.object4c	.sdata ($gp+0x124); 0: index of the next DAT_801e7594 trail set (func_80053c84)
 GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	DAT_8009c33c	SVECTOR	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity func_800561d8 passes to func_80053c84
 GAME.EXE	0x8009c344	0x8bb44	0x64	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	DAT_8009c3a8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
@@ -154,7 +155,9 @@ GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/car
 GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
 GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
 GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	DAT_8009c3cc	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by func_8002fe1c, followed through Data801b24e4.unka8
-GAME.EXE	0x8009c3d4	0x8bbd4	0x42c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3d4	0x8bbd4	0x1c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	DAT_8009c3f0	s32	asm;src/game/object4c.c game.object4c	.sbss; $gp+0x1dc; id 112 rate limit frame (func_80053c84)
+GAME.EXE	0x8009c3f4	0x8bbf4	0x40c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
