@@ -141,6 +141,17 @@ END.EXE	0x8001c3f8	0xbbf8	0x4	unclassified	coverage-gap			payload-complement	may
 END.EXE	0x80023178	0x12978	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80023188	0x12988	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x800232a0	0x12aa0	0x14560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80037498	0x26c98	0x4	bss	proven	movie_unused_0	int	asm;src/end/movie.c end.movie	.sbss fixed; $gp+0; never referenced (could equally be end.main .sbss)
+END.EXE	0x8003749c	0x26c9c	0x4	bss	proven	movie_unused_1	int	asm;src/end/movie.c end.movie	.sbss fixed; $gp+4; never referenced (could equally be end.main .sbss)
+END.EXE	0x800374a0	0x26ca0	0x4	bss	proven	frame_no	int	asm;src/end/movie.c end.movie	.sbss fixed; $gp+8; frameCount of the last frame header
+END.EXE	0x800374d4	0x26cd4	0x4	bss	proven	cdb	DB *	asm;src/end/main.c end.main	.sbss COMMON; $gp+60; the display buffer being drawn
+END.EXE	0x800374d8	0x26cd8	0x4	bss	proven	prim_next	u_long *	asm;src/end/main.c end.main	.sbss COMMON; $gp+64; next free primitive word, reset per frame
+END.EXE	0x800374dc	0x26cdc	0x50000	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/end/movie.c end.movie	.bss fixed, first; the two VLC buffers
+END.EXE	0x800874dc	0x76cdc	0x3c00	bss	proven	image_buffer	u_long[2][0x780]	asm;src/end/movie.c end.movie	.bss fixed; DecDCTout slice buffer (two 16x240 slices)
+END.EXE	0x8008b0dc	0x7a8dc	0x10000	bss	proven	ring_buffer	u_long[0x4000]	asm;src/end/movie.c end.movie	.bss fixed; StSetRing buffer (32 sectors)
+END.EXE	0x8009b0dc	0x8a8dc	0x30	bss	proven	dec	DECENV	asm;src/end/movie.c end.movie	.bss fixed; movie decode environment; LIBGPU statics follow
+END.EXE	0x8009df0c	0x8d70c	0x8e8	bss	proven	db	DB[2]	asm;src/end/main.c end.main	.bss COMMON; the two display buffers
+END.EXE	0x8009e804	0x8e004	0x2000	bss	proven	prim_buffer	u_long[2][0x400]	asm;src/end/main.c end.main	.bss COMMON; primitive area of each display buffer
 FDAT_002.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

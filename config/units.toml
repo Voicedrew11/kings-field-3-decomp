@@ -37,3 +37,15 @@ unit = "psx.main"
 image = "PSX.EXE"
 source = "src/psx/main.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "end.main"
+image = "END.EXE"
+source = "src/end/main.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "end.movie"
+image = "END.EXE"
+source = "src/end/movie.c"
+profile = "gcc260-o2-g8"

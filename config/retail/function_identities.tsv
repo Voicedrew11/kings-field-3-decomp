@@ -631,19 +631,19 @@ OPEN.EXE	0x80014174	func_80014174			unknown		address-only	candidate	mips-live-in
 OPEN.EXE	0x80014264	func_80014264			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPEN.EXE	0x80014438	func_80014438			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 OPEN.EXE	0x800144ac	func_800144ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800119b8	func_800119b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011ae0	func_80011ae0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011c24	func_80011c24			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011c60	func_80011c60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011cb0	func_80011cb0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011d14	func_80011d14			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80011f64	func_80011f64			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x8001208c	func_8001208c			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800120fc	func_800120fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012220	func_80012220			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800122b4	func_800122b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x80012348	func_80012348			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-END.EXE	0x800123c0	func_800123c0			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x800119b8	main			int		supported	proven	asm;called by NONE2.OBJ __SN_ENTRY_POINT	sets up display and sound, plays the closing movies, sets PSX next-program 0 and stops
+END.EXE	0x80011ae0	init_graphics			void		supported	proven	asm;called once by main	ResetGraph, geometry and the two display buffers
+END.EXE	0x80011c24	init_sound			void		supported	proven	asm;called once by main	SsInit, master volume 0, serial A mix on
+END.EXE	0x80011c60	swap_buffers			void		supported	proven	asm;called per frame by play_movie	toggles cdb, clears its ordering table, resets prim_next
+END.EXE	0x80011cb0	flip_buffers			void		supported	proven	asm;called per frame by play_movie	DrawSync, VSync, puts cdb's environments, draws its ordering table
+END.EXE	0x80011d14	play_movie			void	int movie	supported	proven	asm;called by main with 0, 1, 2	plays \OP\M4.S, M5.S or M6.S up to its last frame (Sony movie-sample shape)
+END.EXE	0x80011f64	strSetDefDecEnv			void	int movie	supported	proven	asm;Sony movie sample shape	sets the global DECENV's buffers and frame/slice areas; movie 0 is letterboxed
+END.EXE	0x8001208c	strInit			void	CdlLOC *loc	supported	proven	asm;Sony movie sample shape	DecDCTReset, output callback, ring buffer, StSetStream, strKickCD
+END.EXE	0x800120fc	strCallback			void		supported	proven	asm;DecDCToutCallback target set by strInit	loads one decoded slice, starts the next or flips the frame area
+END.EXE	0x80012220	strNextVlc			int		supported	proven	asm;Sony movie sample shape	waits for the next frame and VLC-decodes it; -1 on timeout
+END.EXE	0x800122b4	strNext			u_long *	DECENV *dec	supported	proven	asm;Sony movie sample shape	next ring frame whose header matches its sector; records frame_no
+END.EXE	0x80012348	strSync			void	DECENV *dec	supported	proven	asm;Sony movie sample shape	waits until the decoded frame is fully loaded (timeout flips anyway)
+END.EXE	0x800123c0	strKickCD			void	CdlLOC *loc	supported	proven	asm;Sony movie sample shape	CdlSeekL then CdRead2 in stream mode, each retried until accepted
 FDAT_002.BIN	0x801e83a8	func_801e83a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801e83b0	func_801e83b0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801e85b8	func_801e85b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

@@ -7,3 +7,14 @@ PSX.EXE	0x8001024c	0xc	program_paths	static	load	char *[3]	main	supported	asm;sr
 PSX.EXE	0x80010260	0x4	program_index	global	load	int	main	supported	asm;src/psx/main.c psx.main exact	$gp+0; the program to load next, read back from the next-program byte
 PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800102f0
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
+END.EXE	0x80037498	0x4	movie_unused_0	static	bss	int		supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+0; never referenced (could equally be end.main .sbss)
+END.EXE	0x8003749c	0x4	movie_unused_1	static	bss	int		supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+4; never referenced (could equally be end.main .sbss)
+END.EXE	0x800374a0	0x4	frame_no	static	bss	int	strNext	supported	asm;src/end/movie.c end.movie	.sbss fixed; $gp+8; frameCount of the last frame header
+END.EXE	0x800374d4	0x4	cdb	global	bss	DB *	swap_buffers	supported	asm;src/end/main.c end.main	.sbss COMMON; $gp+60; the display buffer being drawn
+END.EXE	0x800374d8	0x4	prim_next	global	bss	u_long *	swap_buffers	supported	asm;src/end/main.c end.main	.sbss COMMON; $gp+64; next free primitive word, reset per frame
+END.EXE	0x800374dc	0x50000	vlc_buffer	static	bss	u_long[2][0xa000]	strSetDefDecEnv	supported	asm;src/end/movie.c end.movie	.bss fixed, first; the two VLC buffers
+END.EXE	0x800874dc	0x3c00	image_buffer	static	bss	u_long[2][0x780]	strSetDefDecEnv	supported	asm;src/end/movie.c end.movie	.bss fixed; DecDCTout slice buffer (two 16x240 slices)
+END.EXE	0x8008b0dc	0x10000	ring_buffer	static	bss	u_long[0x4000]	strInit	supported	asm;src/end/movie.c end.movie	.bss fixed; StSetRing buffer (32 sectors)
+END.EXE	0x8009b0dc	0x30	dec	static	bss	DECENV	strCallback	supported	asm;src/end/movie.c end.movie	.bss fixed; movie decode environment; LIBGPU statics follow
+END.EXE	0x8009df0c	0x8e8	db	global	bss	DB[2]	init_graphics	supported	asm;src/end/main.c end.main	.bss COMMON; the two display buffers
+END.EXE	0x8009e804	0x2000	prim_buffer	global	bss	u_long[2][0x400]	init_graphics	supported	asm;src/end/main.c end.main	.bss COMMON; primitive area of each display buffer
