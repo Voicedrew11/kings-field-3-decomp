@@ -4,24 +4,21 @@
 # Defined rows plus unclassified gaps account for every byte of every loaded payload.
 image	va	file_offset	size	kind	confidence	name	datatype	provenance	note
 PSX.EXE	0x80010000	0x800	0x38	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-PSX.EXE	0x80010118	0x918	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
-PSX.EXE	0x800101cc	0x9cc	0x7c	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+PSX.EXE	0x80010118	0x918	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
+PSX.EXE	0x800101cc	0x9cc	0x7c	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
 PSX.EXE	0x80010248	0xa48	0x5b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80011000	0x800	0x34f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800144f0	0x3cf0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
-GAME.EXE	0x80014508	0x3d08	0x640	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
-GAME.EXE	0x800327f0	0x21ff0	0x1320	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800470c4	0x368c4	0x4460	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80056910	0x46110	0x52e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80061be4	0x513e4	0x1c8e0	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x800144f0	0x3cf0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x80014508	0x3d08	0x640	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
+GAME.EXE	0x80061be4	0x513e4	0x1c8e0	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
 GAME.EXE	0x8007e4c4	0x6dcc4	0x1e33c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-OPEN.EXE	0x800136c0	0x2ec0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
-OPEN.EXE	0x800144f4	0x3cf4	0x17cc4	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+OPEN.EXE	0x800136c0	0x2ec0	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
+OPEN.EXE	0x800144f4	0x3cf4	0x17cc4	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
 OPEN.EXE	0x8002c1b8	0x1b9b8	0x14648	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80011000	0x800	0x9b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-END.EXE	0x80011cfc	0x14fc	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
-END.EXE	0x8001240c	0x1c0c	0x10e94	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Library 3.4/3.3 vendored re-seed (docs/function-and-data-inventory.md)
+END.EXE	0x80011cfc	0x14fc	0x8	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
+END.EXE	0x8001240c	0x1c0c	0x10e94	unclassified	coverage-gap			payload-complement	Psy-Q library text band: starts and provider ownership pending the Runtime Library 3.3 vendored re-seed (docs/function-and-data-inventory.md)
 END.EXE	0x800232a0	0x12aa0	0x14560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -41,7 +38,7 @@ FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	
 FDAT_023.BIN	0x801e8908	0x600	0x200	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e89c8	0x6c0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_029.BIN	0x801e8308	0x0	0x16c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_029.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_029.BIN	0x801e8c0c	0x904	0x6fc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_032.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_032.BIN	0x801e8a64	0x75c	0xa4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
