@@ -54,12 +54,18 @@ class RetailDisc:
 
 @dataclass(frozen=True)
 class RetailArchive:
-    """A FromSoftware `.T` archive: u16 entry count, then u16 sector offsets."""
+    """A FromSoftware `.T` archive: u16 entry count, then u16 sector offsets.
+
+    `handler_count` absolute u32 code pointers at `handler_offset` open every
+    overlay read from this archive (its dispatch table); zero means none.
+    """
 
     name: str
     disc_path: str
     sha256: str
     file_size: int
+    handler_offset: int = 0
+    handler_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -325,6 +331,18 @@ def verify_retail_image(path: Path, image: str) -> bytes:
     if parse_psx_exe(path) != layout:
         raise ValueError(f"{path}: retail identity/layout mismatch")
     return path.read_bytes()
+
+
+def overlay_handlers(image: str, payload: bytes) -> list[int]:
+    """The dispatch-table code pointers that open an overlay, in slot order."""
+    source = OVERLAY_SOURCES.get(image)
+    if source is None:
+        return []
+    archive = RETAIL_ARCHIVES[source.archive]
+    end = archive.handler_offset + 4 * archive.handler_count
+    if end > len(payload):
+        raise ValueError(f"{image}: handler table exceeds the overlay")
+    return list(struct.unpack_from(f"<{archive.handler_count}I", payload, archive.handler_offset))
 
 
 def load_payload(path: Path, image: str) -> tuple[int, bytes]:

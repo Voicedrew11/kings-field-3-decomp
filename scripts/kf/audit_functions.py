@@ -16,7 +16,14 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, load_payload, parse_int, read_tsv
+from scripts.kf.retail import (
+    IMAGE_LAYOUTS,
+    IMAGE_ORDER,
+    load_payload,
+    overlay_handlers,
+    parse_int,
+    read_tsv,
+)
 
 
 FIELDS = (
@@ -180,6 +187,10 @@ class ImageWords:
     def __init__(self, path: Path, image: str):
         self.layout = IMAGE_LAYOUTS[image]
         _load_address, self.payload = load_payload(path, image)
+        self.handlers = [
+            pointer for pointer in overlay_handlers(image, self.payload)
+            if self.contains_word(pointer)
+        ]
 
     def contains_word(self, address: int) -> bool:
         return self.layout.contains(address, 4) and not (address & 3)
@@ -539,7 +550,11 @@ def audit_image(
     # unconditional transfer (BIOS stubs end in `jr $t2`, not `jr $ra`). A
     # target inside an admitted extent splits it only when the preceding code
     # cannot fall through into it; otherwise it is an interior entry label.
+    # An overlay's dispatch-table pointers (its host calls them through the
+    # table) are carved the same way but keep their own evidence label.
     calls = call_targets(words, extents)
+    handlers = Counter(getattr(words, "handlers", ()))
+    calls.update(handlers)
     boundaries = sorted(
         known_starts
         | {parse_int(str(row["va"])) for row in rows if row["confidence"] in ADMISSIBLE}
@@ -567,10 +582,12 @@ def audit_image(
     # Every accepted target bounds the carve of the one before it.
     boundaries = sorted(set(boundaries) | set(splits) | set(gaps))
     for target in sorted([*gaps, *splits]):
-        count = calls[target]
+        count = calls[target] - handlers[target]
         index = bisect.bisect_right(boundaries, target)
         stop = boundaries[index] if index < len(boundaries) else words.layout.load_end
-        evidence = [f"jal-target x{count}"]
+        evidence = [f"jal-target x{count}"] if count else []
+        if handlers[target]:
+            evidence.append(f"handler-pointer x{handlers[target]}")
         if target not in splits:
             end = transfer_end(words, target, stop)
             if end is None and stop in known_starts and stop - target <= CALL_EXTEND_LIMIT and all(

@@ -114,6 +114,17 @@ class FunctionAuditTests(unittest.TestCase):
         self.assertEqual(split[0]["va"], f"0x{BASE + 0x10:08x}")
         self.assertEqual(split[0]["boundary"], f"split-owner-end=0x{BASE + 0x0C:08x}")
 
+    def test_overlay_dispatch_pointer_carves_the_default_handler(self) -> None:
+        # FDAT module shape: the lowest handler slot names a `jr ra; nop`
+        # default handler right after the header, with no return before it.
+        code = words(JR_RA, NOP, 0x27BDFFE8, 0xAFBF0010, 0x8FBF0010, 0x27BD0018, JR_RA, NOP)
+        code.handlers = [BASE, BASE, BASE + 8]
+        rows = audit_image("T.EXE", code, [FunctionExtent(BASE + 8, BASE + 0x20)], {})
+        self.assertEqual([(row["va"], row["confidence"], row["return_va"], row["note"])
+                          for row in rows],
+                         [(f"0x{BASE:08x}", "call-target", f"0x{BASE:08x}",
+                           "handler-pointer x2+first-unconditional-transfer")])
+
     def test_call_target_after_fallthrough_code_is_an_interior_entry(self) -> None:
         code = words(0x20A70060, 0x24060000, 0x8CE80048, NOP, JR_RA, NOP)
         self.assertIsNone(fallthrough_boundary(code, BASE + 8))

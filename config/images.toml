@@ -78,16 +78,23 @@ load_size = 0x26800
 # words at 0x800136E8. Each module is loaded whole there, so it shares
 # GAME.EXE's address space and calls straight into GAME.EXE's text.
 # `load_size` is the sector-granular entry span. Every module starts with a
-# u32 id word (5, 6, ..., 0x20, one per module) and 31 absolute handler
-# pointers; the lowest pointer is where the code starts and every pointer
-# lands inside its own module on a function boundary. No two modules are
-# byte-identical. Modules are named by archive entry index, not by area,
-# because the area-to-entry relation is not yet proven.
+# u32 id word (5, 6, ..., 0x20, one per module), 32 absolute handler pointers
+# (0x04..0x83; `handler_offset`/`handler_count` below) and a u32 equal to the
+# id plus 0x20 at 0x84, which GAME.EXE's table also points at (0x801E838C).
+# Every handler pointer lands inside its own module; the lowest is a shared
+# `jr ra; nop` default handler, and the slots that use it are the unused
+# ones. In seven modules more bytes sit between 0x88 and that default
+# handler: short code-pointer tables and functions no handler names. No two
+# modules are byte-identical. Modules
+# are named by archive entry index, not by area, because the area-to-entry
+# relation is not yet proven.
 [[archive]]
 name = "FDAT.T"
 disc_path = "CD/COM/FDAT.T"
 sha256 = "2ece40fb09b5c7dc74b71387725ce5e97d5b0823752bd852f6709b1e932bc9c7"
 file_size = 0x41B000
+handler_offset = 0x4
+handler_count = 32
 
 [[overlay]]
 name = "FDAT_002.BIN"

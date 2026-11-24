@@ -120,6 +120,8 @@ def proposed_functions(
             raise ValueError(f"candidate overlaps admitted function: {image} {start:#x}")
         intervals[image].append((start, end))
         confidence = FUNCTION_CONFIDENCE[candidate["confidence"]]
+        if candidate["note"].startswith("handler-pointer"):
+            confidence = confidence.replace("-call-", "-handler-")
         added.append({
             "image": image,
             "va": format_hex(start),
