@@ -74,10 +74,10 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (obj->unk4 != 0x53) {
         return;
     }
-    if (obj->unk3d[0] >= 151) {
+    if (obj->arg.b.unk3d[0] >= 151) {
         return;
     }
-    if (func_8005d7bc(obj->unk3d[0]) == 0) {
+    if (func_8005d7bc(obj->arg.b.unk3d[0]) == 0) {
         return;
     }
     if (obj->unka == 0 || obj->unka >= 4095) {
@@ -100,7 +100,7 @@ void func_801e8684(void)
 ADDRESS(0x801e868c, 0xc0)
 void func_801e868c(Object44 *obj)
 {
-    if (obj->unk3a.bytes[1] != 10) {
+    if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
     if (func_80046884(0x1c, 0x1e, 3, 4, 0x8000) != 0) {
@@ -150,9 +150,9 @@ void func_801e8774(Object88 *record, s32 event)
         obj = DAT_8018fb3c.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
             if (obj->unk4 == 0x56) {
-                obj->unk2c.vx = obj->unk2c.vy = obj->unk2c.vz = 0;
-                obj->unk38 = 0;
-                obj->unk0[0] = 0;
+                obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
+                obj->arg.b.unk38 = 0;
+                obj->unk0 = 0;
                 obj->unk4 = 0xff;
             }
         }
@@ -191,9 +191,9 @@ void func_801e8880(void)
         obj = DAT_8018fb3c.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
             if (obj->unk4 == 0x56) {
-                obj->unk2c.vx = obj->unk2c.vy = obj->unk2c.vz = 0;
-                obj->unk38 = 0;
-                obj->unk0[0] = 0;
+                obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
+                obj->arg.b.unk38 = 0;
+                obj->unk0 = 0;
                 obj->unk4 = 0xff;
             }
         }

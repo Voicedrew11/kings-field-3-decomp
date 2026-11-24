@@ -144,7 +144,7 @@ void func_801e86d8(u8 id)
         func_80029500();
         obj = &DAT_8018fb3c.objects[15];
         DAT_8018fb3c.objects[15].unk5 = 0x32;
-        DAT_8018fb3c.objects[15].unk0[2] = 5;
+        DAT_8018fb3c.objects[15].unk2 = 5;
         for (i = 15; i != -1; i--) {
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {
@@ -159,7 +159,7 @@ void func_801e86d8(u8 id)
         obj->unk6 = 0xff;
         obj = &DAT_8018fb3c.objects[86];
         DAT_8018fb3c.objects[86].unk5 = 0x32;
-        DAT_8018fb3c.objects[86].unk0[2] = 5;
+        DAT_8018fb3c.objects[86].unk2 = 5;
         for (i = 15; i != -1; i--) {
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {

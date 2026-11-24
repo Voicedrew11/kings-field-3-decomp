@@ -82,10 +82,10 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
             if (func_80016a2c(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
                 return;
             }
-            if (obj->unk38 != 0xff) {
+            if (obj->arg.b.unk38 != 0xff) {
                 return;
             }
-            obj->unk38 = item;
+            obj->arg.b.unk38 = item;
             obj->unk8 = 0;
             DAT_801ba984.unk0 = 1;
             func_8005d7f8(0x85);
@@ -114,7 +114,7 @@ void func_801e86ec(void)
 ADDRESS(0x801e86f4, 0xc0)
 void func_801e86f4(Object44 *obj)
 {
-    if (obj->unk3a.bytes[1] != 10) {
+    if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
     if (func_80046884(0x12, 0x1c, 3, 3, 0x8000) != 0) {
@@ -131,7 +131,7 @@ void func_801e86f4(Object44 *obj)
 ADDRESS(0x801e87b4, 0x1c)
 void func_801e87b4(Object44 *obj, Object44Def *def)
 {
-    if (def->unk0[0] == 0xa7) {
+    if (def->unk0 == 0xa7) {
         obj->unk4 = 0xa7;
     }
 }
@@ -152,15 +152,15 @@ void func_801e87d0(void)
     if (obj->unk4 != 0xa7) {
         return;
     }
-    if (func_80046914(obj, &DAT_8018fb3c.objects[380 + obj->unk39], &DAT_801e8908, &DAT_801e8910,
+    if (func_80046914(obj, &DAT_8018fb3c.objects[380 + obj->arg.b.unk39], &DAT_801e8908, &DAT_801e8910,
                       0, 20) == 0) {
         return;
     }
     other = DAT_8018fb3c.objects;
     for (i = 0x18c; i != 0; i--, other++) {
         if (other->unk4 == 0xe8) {
-            other->unk0[1] = 0x81;
-            other->unk40 = 0;
+            other->unk1 = 0x81;
+            other->arg.b.unk40 = 0;
         }
     }
     DAT_801ba984.unk0 = 1;

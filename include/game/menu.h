@@ -200,7 +200,6 @@ extern MenuFont DAT_8007e564[];
 /* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
  * yes/no positions [10] and [11], message titles from [28]. */
 extern MenuText DAT_8007e660[];
-extern u16 DAT_80081868[];
 extern MenuEntry DAT_8007f620[];
 extern MenuEntry DAT_8007f230[10];
 extern MenuEntry DAT_80080430[];

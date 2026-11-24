@@ -100,8 +100,8 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
         func_800448b8(obj);
         id = DAT_8018fb3c.unk885e++;
         obj->unke = -100;
-        obj->unk0[0] = 2;
-        *(u16 *)&obj->unk3c = id;
+        obj->unk0 = 2;
+        obj->arg.h.unk3c = id;
         obj->unk6 = item;
         obj->unk4 = 0xff;
         obj->angle.vz = 0;
@@ -110,7 +110,7 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
         from = DAT_801b24e4.pos;
         obj->pos = from;
         obj->pos.vy -= 1330;
-        obj->unk38 = 0;
+        obj->arg.b.unk38 = 0;
         to = target->pos;
         to.vy -= 50;
         for (t = 0; t < 4096; t += 64) {
@@ -142,12 +142,12 @@ void func_801e8958(s32 index, s32 state)
     switch (state) {
     case 0:
         obj = &DAT_8018fb3c.objects[index];
-        obj->unk3f = 0;
+        obj->arg.b.unk3f = 0;
         obj->unk8 = 1;
         break;
     case 1:
         obj = &DAT_8018fb3c.objects[index];
-        obj->unk3f = 1;
+        obj->arg.b.unk3f = 1;
         obj->unk8 = 1;
         break;
     }
@@ -199,7 +199,7 @@ void func_801e89c0(Object88 *obj)
 ADDRESS(0x801e8b10, 0x214)
 void func_801e8b10(Object44 *obj)
 {
-    switch (obj->unk3a.bytes[1]) {
+    switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
         if (DAT_801ba984.unk32[0x23] == 0) {
             DAT_801ba984.unk32[0x23] = 1;
@@ -267,10 +267,10 @@ void func_801e8d4c(u8 id)
 
     if (id == 9) {
         obj = &DAT_8018fb3c.objects[50];
-        obj->unk0[0] = 0;
+        obj->unk0 = 0;
         obj += 2;
         for (i = 9; i != -1; i--) {
-            obj->unk0[0] = 2;
+            obj->unk0 = 2;
             obj++;
         }
         func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
@@ -306,8 +306,8 @@ void func_801e8e08(Object88 *record, s32 event)
             func_8002bb84(0x4f, 3);
             func_8005db30(NULL, 0x3c);
             func_8002bb84(0x3c, 4);
-            DAT_8018fb3c.objects[63].unk0[0] = 2;
-            DAT_8018fb3c.objects[63].unk3f = 0xff;
+            DAT_8018fb3c.objects[63].unk0 = 2;
+            DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
         }
         break;
     case 1:
@@ -354,63 +354,63 @@ void func_801e8f84(void)
     }
     DAT_80185da8.objects[15].unk0 = 8;
     if (DAT_801ba984.unk32[0x24] != 0) {
-        DAT_8018fb3c.objects[63].unk0[0] = 2;
-        DAT_8018fb3c.objects[63].unk3f = 0xff;
+        DAT_8018fb3c.objects[63].unk0 = 2;
+        DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
     } else {
-        DAT_8018fb3c.objects[63].unk0[0] = 0;
-        DAT_8018fb3c.objects[63].unk3f = 0;
+        DAT_8018fb3c.objects[63].unk0 = 0;
+        DAT_8018fb3c.objects[63].arg.b.unk3f = 0;
     }
     if (DAT_801ba984.unk32[0x25] == 0) {
         p = &DAT_8018fb3c.objects[50];
-        p->unk0[0] = 2;
+        p->unk0 = 2;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0[0] = 0;
+            p->unk0 = 0;
             p++;
         }
         func_800445b8(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 8;
         DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0[0] = 2;
+        DAT_8018fb3c.objects[11].unk0 = 2;
     } else if (DAT_801ba984.unk32[0x25] == 1) {
         p = &DAT_8018fb3c.objects[50];
-        p->unk0[0] = 0;
+        p->unk0 = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0[0] = 2;
+            p->unk0 = 2;
             p++;
         }
         func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 1;
         DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0[0] = 2;
+        DAT_8018fb3c.objects[11].unk0 = 2;
         obj = func_80046034(0x15e, 10, DAT_8018fb3c.unk885e);
         func_800448b8(obj);
         id = DAT_8018fb3c.unk885e++;
         obj->unke = -100;
         obj->unk6 = 0x8f;
-        *(u16 *)&obj->unk3c = id;
-        obj->unk0[0] = 2;
+        obj->arg.h.unk3c = id;
+        obj->unk0 = 2;
         obj->unk4 = 0xff;
         obj->angle.vz = 0;
         obj->angle.vx = 0;
         obj->angle.vy = DAT_8018fb3c.objects[11].angle.vy;
-        obj->unk38 = 0;
+        obj->arg.b.unk38 = 0;
         obj->pos.vx = DAT_8018fb3c.objects[11].pos.vx;
         obj->pos.vy = DAT_8018fb3c.objects[11].pos.vy - 50;
         obj->pos.vz = DAT_8018fb3c.objects[11].pos.vz;
     } else {
         p = &DAT_8018fb3c.objects[50];
-        p->unk0[0] = 0;
+        p->unk0 = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0[0] = 2;
+            p->unk0 = 2;
             p++;
         }
         func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 8;
         DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0[0] = 0;
+        DAT_8018fb3c.objects[11].unk0 = 0;
     }
     DAT_801ba984.unk32[0x26] = 1;
     DAT_801ba984.unk84[5] = 0x11;

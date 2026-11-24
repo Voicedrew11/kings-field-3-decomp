@@ -122,7 +122,7 @@ GAME.EXE	0x8009c280	0x8ba80	0x40	unclassified	coverage-gap			payload-complement	
 GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	DAT_8009c2c0	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2c1	0x8bac1	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	DAT_8009c2d0	RECT	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
-GAME.EXE	0x8009c2d8	0x8bad8	0x8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	DAT_8009c2d8	RECT	asm;src/game/anim.c game.anim	.sdata; {960, 256, 64, 240}: the picture area func_800441d4 clears before loading a TIM into it
 GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame

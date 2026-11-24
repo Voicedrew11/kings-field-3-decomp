@@ -98,12 +98,12 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
-        if ((def->unk0[0] == 9 || def->unk0[0] == 0x15) && obj->unk3c != 0) {
-            if (obj->unk3a.index == 0xffff) {
+        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+            if (obj->arg.b.unk3a.index == 0xffff) {
             message:
-                if (obj->unk3f != 0) {
-                    if (obj->unk3f < 35) {
-                        func_80041eec(obj->unk3f);
+                if (obj->arg.b.unk3f != 0) {
+                    if (obj->arg.b.unk3f < 35) {
+                        func_80041eec(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
                         func_80041eec(0x1a);
@@ -124,17 +124,17 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->unk3a.index];
+                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
-                link->unk0[0] = obj->unk40;
-                link->unk38 = 0xff;
+                link->unk0 = obj->arg.b.unk40;
+                link->arg.b.unk38 = 0xff;
                 func_8005db30(link);
-                link->unk0[0] = 0;
-                link->unk38 = 0;
+                link->unk0 = 0;
+                link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
-                    obj->unk3a.index = 0xffff;
+                    obj->arg.b.unk3a.index = 0xffff;
                 }
             }
         }
@@ -171,7 +171,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
         obj = &DAT_8018fb3c.objects[0x8d];
         DAT_80185da8.objects[7].unk0 = 8;
         DAT_80185da8.objects[26].unk0 = 1;
-        DAT_8018fb3c.objects[0x8d].unk0[2] = 5;
+        DAT_8018fb3c.objects[0x8d].unk2 = 5;
         DAT_8018fb3c.objects[0x8d].unk10 = 0xfff;
         for (j = 15; j != -1; j--) {
             if ((s16)(obj->unk10 -= 256) < 0) {
@@ -184,7 +184,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
             func_800422b8(&at, &facing);
         }
         obj->unk5 = 0x32;
-        obj->unk0[2] = 5;
+        obj->unk2 = 5;
         for (j = 15; j != -1; j--) {
             func_801e8488(16 - j);
             func_800341e8();
@@ -202,11 +202,11 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
         }
         obj->unk6 = 0xff;
         obj->unk4 = 0xff;
-        obj->unk0[0] = 0;
+        obj->unk0 = 0;
         DAT_8018fb3c.objects[159].unk6 = 0xff;
         k = 74;
-        if (DAT_8018fb3c.objects[k].unk38 < 253) {
-            DAT_8018fb3c.objects[k].unk38 = 0xff;
+        if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
+            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
             func_80041eec(0x18);
         }
         DAT_801ba984.unke[0xf] = 1;
@@ -228,7 +228,7 @@ void func_801e89ac(void)
 ADDRESS(0x801e89b4, 0x134)
 void func_801e89b4(Object44 *obj)
 {
-    switch (obj->unk3a.bytes[1]) {
+    switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
         if (DAT_801ba984.unke[0xf] == 0) {
             DAT_8018fb3c.objects[115].pos.vx = obj->pos.vx - 1024;
@@ -298,7 +298,7 @@ void func_801e8b30(u8 id)
     func_80029500();
     obj = &DAT_8018fb3c.objects[55];
     DAT_8018fb3c.objects[55].unk5 = 0x32;
-    DAT_8018fb3c.objects[55].unk0[2] = 5;
+    DAT_8018fb3c.objects[55].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -313,7 +313,7 @@ void func_801e8b30(u8 id)
     obj->unk6 = 0xff;
     obj = &DAT_8018fb3c.objects[148];
     DAT_8018fb3c.objects[148].unk5 = 0x32;
-    DAT_8018fb3c.objects[148].unk0[2] = 5;
+    DAT_8018fb3c.objects[148].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -373,8 +373,8 @@ void func_801e8da8(void)
         DAT_8018fb3c.objects[0x8d].unk6 = 0xff;
         DAT_8018fb3c.objects[159].unk6 = 0xff;
         k = 74;
-        if (DAT_8018fb3c.objects[k].unk38 < 253) {
-            DAT_8018fb3c.objects[k].unk38 = 0xff;
+        if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
+            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
         }
         func_801e8488(16);
     } else {

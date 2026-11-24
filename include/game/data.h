@@ -299,46 +299,88 @@ typedef struct Data801e7edc {
  */
 /* Object44 +0x3a as the FDAT module handlers read it (WIP). */
 typedef union Object44Link {
-    u16 index;      /* slot 0: a linked object, 0xffff for none */
-    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value */
+    u16 index;      /* slot 0: a linked object, 0xffff for none; kind 7 (func_80044c34) */
+    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value; func_80044900 reads
+                     * bytes[0] and bytes[1] as angles */
 } Object44Link;
 
-typedef struct Object44 {
-    u8 unk0[3];
-    u8 unk3;        /* +0x03: flags; 0x10 scales its radius by unk38, 0x4 takes Object44Def.unke/unk10 */
-    u8 unk4;
-    u8 unk5;
-    u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
-    u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
-    u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
-    u8 unkc[2];
-    s16 unke;       /* +0x0e: FDAT_053 sets -100 on the object it spawns */
-    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
-    u8 unk12[2];
-    VECTOR pos;     /* +0x14 */
-    SVECTOR angle;  /* +0x24 (func_8005bee0) */
-    SVECTOR unk2c;  /* +0x2c: FDAT_017 clears vx, vy and vz */
+/*
+ * Per-kind state of an Object44 from +0x34 (WIP views, by Object44.unk4): the
+ * GAME and FDAT code read it as bytes or halfwords by kind; func_8004485c
+ * clears the first three words.
+ */
+typedef struct Object44Bytes {
     u8 unk34[4];
-    u8 unk38;       /* +0x38: radius scale, 0x80 = 1 */
+    u8 unk38;       /* +0x38: radius scale, 0x80 = 1 (flag 0x10) */
     u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
     Object44Link unk3a; /* +0x3a */
     u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
     u8 unk3d[2];
     u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
-    u8 unk40;       /* +0x40: FDAT slot 0 copies it to the linked object's unk0[0] */
+    u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (func_80046914); FDAT slot 0
+                     * copies it to the linked object's unk0 */
     u8 unk41[3];
+} Object44Bytes;
+
+typedef struct Object44Halves {
+    u16 unk34[2];
+    u16 unk38;
+    u16 unk3a;
+    u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
+    s16 unk3e;
+    u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914) */
+    u16 unk42;
+} Object44Halves;
+
+typedef struct Object44Words {
+    s32 unk34;
+    s32 unk38;
+    s32 unk3c;
+    s32 unk40;      /* +0x40: kind 0x10: height it started from */
+} Object44Words;
+
+typedef union Object44Arg {
+    Object44Bytes b;
+    Object44Halves h;
+    Object44Words w;
+} Object44Arg;
+
+typedef struct Object44 {
+    u8 unk0;        /* +0x00: area (1 or 2): picks the map cell layer */
+    u8 unk1;        /* +0x01: 0x80 after set-up */
+    u8 unk2;
+    u8 unk3;        /* +0x03: flags; 0x10 scales its radius by arg.b.unk38, 0x4 takes Object44Def.unke/unk10 */
+    u8 unk4;        /* +0x04: kind, 0xff when free */
+    u8 unk5;
+    u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
+    u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
+    u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
+    u16 unkc;       /* +0x0c: reach below its position (collision tests) */
+    s16 unke;
+    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
+    u8 unk12[2];
+    VECTOR pos;     /* +0x14 */
+    SVECTOR angle;  /* +0x24 (func_8005bee0) */
+    SVECTOR scale;  /* +0x2c: 0x1000 = 1; FDAT_017 clears vx, vy and vz */
+    Object44Arg arg; /* +0x34 */
 } Object44;
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
 typedef struct Object44Def {
-    u8 unk0[4];
+    u8 unk0;        /* +0x00: type (func_80044900) */
+    u8 unk1;        /* +0x01: picks the kind func_800460bc gives a spawned record */
+    u8 unk2;
+    u8 unk3;        /* +0x03: Object44.unk3 flags at set-up */
     u16 unk4;       /* +0x04: radius */
-    u8 unk6[2];
+    u16 unk6;       /* +0x06: radius of the turned kinds (func_80045c7c) */
     u16 unk8;       /* +0x08: height */
-    u8 unka[4];
+    u16 unka;
+    u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none */
+    u8 unkd;
     u16 unke;
     u16 unk10;
-    u8 unk12[6];
+    u8 unk12[5];
+    u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set */
 } Object44Def;
 
 typedef struct Object4c {
@@ -570,10 +612,13 @@ typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[8];
-    Object44 *unk8858;      /* +0x8858: the object FDAT slot 9 handlers test */
+    Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test; the object
+                             * FDAT slot 9 handlers test */
     u8 unk885c[2];
-    u16 unk885e;            /* +0x885e: FDAT_053 numbers the objects it spawns with it */
-    u8 unk8860[8];
+    u16 unk885e;
+    u16 unk8860;
+    u16 unk8862;
+    u8 unk8864[4];
 } Data8018fb3c;
 
 /*

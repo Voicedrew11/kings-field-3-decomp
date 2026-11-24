@@ -201,6 +201,24 @@ source = "src/game/anim.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.map_patch"
+image = "GAME.EXE"
+source = "src/game/map_patch.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44"
+image = "GAME.EXE"
+source = "src/game/object44.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44_find"
+image = "GAME.EXE"
+source = "src/game/object44_find.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.entity"
 image = "GAME.EXE"
 source = "src/game/entity.c"

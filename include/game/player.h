@@ -96,4 +96,8 @@ void func_80030e14(void);
 void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id);
 void func_8005e2d0(VECTOR *pos, SVECTOR *angle);
 
+/* Pad button bits by action (owned by the player module); [7] toggles a
+ * setting in Data801b24e4.unk178 (func_80043bb8). */
+extern u16 DAT_80081868[];
+
 #endif

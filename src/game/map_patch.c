@@ -1,0 +1,149 @@
+/*
+ * GAME.EXE: map cell patches (WIP module): records that rewrite the layer
+ * bytes of map cells around a point, turned by an angle, and a block copy
+ * of cells to a turned destination. Callers: the Object44 set-up
+ * func_80044d9c and the big switch func_80047010.
+ */
+#include <kf/lib/address.h>
+#include <kf/lib/types.h>
+#include <sys/types.h>
+#include <psyq/sdk.h>
+#include <game/data.h>
+#include <game/map_patch.h>
+
+/*
+ * Applies the patch records at rec (variant index) to the cells around
+ * (x, z) turned by angle: the area's own layer takes bytes 0 and 2 of the
+ * variant, the other layer bytes 1 and 3 (0xfc / 0xff keep a byte); a flags
+ * value other than 0xff replaces bits 0-6 of unk4 on both layers.
+ */
+ADDRESS(0x800443c8, 0x1f0)
+void func_800443c8(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags)
+{
+    s32 c;
+    s32 s;
+    s32 px;
+    s32 pz;
+    MapCell *cell;
+    MapLayer *own;
+    MapLayer *other;
+    u8 *bytes;
+    s32 near;
+    s32 far;
+
+    x >>= 11;
+    z >>= 11;
+    c = rcos(angle);
+    s = rsin(angle);
+    near = area == 1 ? 0 : 5;
+    far = near == 0 ? 5 : 0;
+    while (rec->bytes[0][0] != 0xff) {
+        px = ((rec->dx * c - rec->dz * s) >> 12) + x;
+        pz = ((rec->dz * c + rec->dx * s) >> 12) + z;
+        cell = &DAT_801d4464.cells[pz][px];
+        bytes = rec->bytes[index];
+        own = (MapLayer *)((u8 *)cell + near);
+        other = (MapLayer *)((u8 *)cell + far);
+        if (bytes[0] != 0xfc) {
+            own->unk3 = bytes[0];
+        }
+        if (bytes[1] != 0xfc) {
+            other->unk3 = bytes[1];
+        }
+        if (bytes[2] != 0xff) {
+            own->unk0 = bytes[2];
+        }
+        if (bytes[3] != 0xff) {
+            other->unk0 = bytes[3];
+        }
+        if (flags != 0xff) {
+            own->unk4 = (own->unk4 & 0x7f) | flags;
+            other->unk4 = (other->unk4 & 0x7f) | flags;
+        }
+        rec++;
+    }
+}
+
+/*
+ * Copies a w x h block of map cells from (sx, sz) to (dx, dz), turned by
+ * angle in quarter turns; mask picks the layer 1 bytes and bits copied
+ * (bits 0-1 of unk2 are turned with the block). flags bit 1 enables the copy.
+ */
+ADDRESS(0x800445b8, 0x274)
+void func_800445b8(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle, s32 mask)
+{
+    s32 turn;
+    s32 col;
+    s32 row;
+    MapCell *src_row;
+    MapCell *dst_row;
+    MapCell *src;
+    MapCell *dst;
+    s32 i;
+    s32 j;
+    s32 copy;
+
+    if (sx == 0xff || dx == 0xff || w == 0xff) {
+        return;
+    }
+    turn = -(angle >> 10) & 3;
+    switch (turn) {
+    case 0:
+        col = 1;
+        row = 80;
+        break;
+    case 1:
+        col = -80;
+        row = 1;
+        dz += w - 1;
+        break;
+    case 2:
+        col = -1;
+        row = -80;
+        dx += w - 1;
+        dz += h - 1;
+        break;
+    case 3:
+        col = 80;
+        row = -1;
+        dx += h - 1;
+        break;
+    }
+    copy = flags & 2;
+    src_row = &DAT_801d4464.cells[sz][sx];
+    dst_row = &DAT_801d4464.cells[dz][dx];
+    for (i = h - 1; i != -1; i--) {
+        src = src_row;
+        dst = dst_row;
+        src_row += 80;
+        dst_row += row;
+        j = w;
+        while (--j != -1) {
+            if (copy) {
+                if (mask & 1) {
+                    dst->layer[1].unk0 = src->layer[1].unk0;
+                }
+                if (mask & 2) {
+                    dst->layer[1].unk1 = src->layer[1].unk1;
+                }
+                if (mask & 4) {
+                    dst->layer[1].unk2 = (dst->layer[1].unk2 & 0xfc) | ((src->layer[1].unk2 + turn) & 3);
+                }
+                if (mask & 8) {
+                    dst->layer[1].unk3 = src->layer[1].unk3;
+                }
+                if (mask & 0x10) {
+                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x3f) | (dst->layer[1].unk4 & 0xc0);
+                }
+                if (mask & 0x20) {
+                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x40) | (dst->layer[1].unk4 & 0xbf);
+                }
+                if (mask & 0x40) {
+                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x80) | (dst->layer[1].unk4 & 0x7f);
+                }
+            }
+            src++;
+            dst += col;
+        }
+    }
+}

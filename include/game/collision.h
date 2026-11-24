@@ -18,6 +18,5 @@ s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, s32 mask);
 
 /* Callees outside the module; signatures from these call sites. */
 s32 func_8003260c(s32 x, s32 y, s32 z, s32 radius, s32 shape);
-s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 
 #endif

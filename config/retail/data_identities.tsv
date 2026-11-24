@@ -44,6 +44,7 @@ GAME.EXE	0x8009c278	0x4	DAT_8009c278	global	load	s32	func_8001ec84	address-only	
 GAME.EXE	0x8009c27c	0x4	DAT_8009c27c	global	load	s32	func_8001f274	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
 GAME.EXE	0x8009c2c0	0x1	DAT_8009c2c0	global	load	u8	func_8002860c	address-only	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2d0	0x8	DAT_8009c2d0	global	load	RECT	func_8003daec	address-only	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
+GAME.EXE	0x8009c2d8	0x8	DAT_8009c2d8	global	load	RECT	func_800441d4	address-only	asm;src/game/anim.c game.anim	.sdata; {960, 256, 64, 240}: the picture area func_800441d4 clears before loading a TIM into it
 GAME.EXE	0x8009c2e0	0x4	DAT_8009c2e0	global	load	CVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8	DAT_8009c2e4	global	load	SVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x4	DAT_8009c2ec	global	load	s32	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame

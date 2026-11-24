@@ -27,6 +27,8 @@
 #include <game/entity.h>
 #include <game/misc.h>
 #include <game/menu.h>
+#include <game/map_patch.h>
+#include <game/object44.h>
 
 /* The table at the module's first byte (WIP layout). */
 typedef struct FdatHeader {
@@ -36,16 +38,6 @@ typedef struct FdatHeader {
 } FdatHeader;
 
 /* GAME.EXE functions the modules call (no GAME source or prototype yet). */
-void func_800445b8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
-                   s32 arg7, s32 arg8);
-void func_800448b8(Object44 *obj);
-void func_800463bc(s32 arg0);
-void func_800466e8(s32 arg0);
-s32 func_80045c7c(s32 start, VECTOR *pos, s32 range, s32 height, s32 angle, s32 arc);
-s32 func_80046608(Object44 *obj, s32 item);
-s32 func_80046884(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_80046914(Object44 *obj, Object44 *target, SVECTOR *from, SVECTOR *to, s32 arg4,
-                  s32 arg5);
 void func_8005c308(Object88 *obj);
 /* Varargs: with obj NULL it takes the object index from the second argument. */
 void func_8005db30(Object44 *obj, ...);

@@ -149,7 +149,7 @@ void func_801e8850(void)
 ADDRESS(0x801e8858, 0xb8)
 void func_801e8858(Object44 *obj)
 {
-    switch (obj->unk3a.bytes[1]) {
+    switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
         if (DAT_801ba984.unk32[0x30] != 1) {
             DAT_801ba984.unk32[0x30] = 1;
@@ -218,7 +218,7 @@ void func_801e8958(u8 id)
     func_80029500();
     obj = &DAT_8018fb3c.objects[6];
     DAT_8018fb3c.objects[6].unk5 = 0x32;
-    DAT_8018fb3c.objects[6].unk0[2] = 5;
+    DAT_8018fb3c.objects[6].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -233,7 +233,7 @@ void func_801e8958(u8 id)
     obj->unk6 = 0xff;
     obj = &DAT_8018fb3c.objects[87];
     DAT_8018fb3c.objects[87].unk5 = 0x32;
-    DAT_8018fb3c.objects[87].unk0[2] = 5;
+    DAT_8018fb3c.objects[87].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {

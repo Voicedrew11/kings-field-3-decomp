@@ -60,12 +60,12 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
-        if ((def->unk0[0] == 9 || def->unk0[0] == 0x15) && obj->unk3c != 0) {
-            if (obj->unk3a.index == 0xffff) {
+        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+            if (obj->arg.b.unk3a.index == 0xffff) {
             message:
-                if (obj->unk3f != 0) {
-                    if (obj->unk3f < 35) {
-                        func_80041eec(obj->unk3f);
+                if (obj->arg.b.unk3f != 0) {
+                    if (obj->arg.b.unk3f < 35) {
+                        func_80041eec(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
                         func_80041eec(0x1a);
@@ -86,17 +86,17 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->unk3a.index];
+                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
-                link->unk0[0] = obj->unk40;
-                link->unk38 = 0xff;
+                link->unk0 = obj->arg.b.unk40;
+                link->arg.b.unk38 = 0xff;
                 func_8005db30(link);
-                link->unk0[0] = 0;
-                link->unk38 = 0;
+                link->unk0 = 0;
+                link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
-                    obj->unk3a.index = 0xffff;
+                    obj->arg.b.unk3a.index = 0xffff;
                 }
             }
         }
@@ -173,14 +173,14 @@ void func_801e8680(void)
 {
     if (DAT_801ba984.unk32[0x2e] == 0) {
         DAT_80185da8.objects[25].unk0 = 1;
-        DAT_8018fb3c.objects[28].unk0[0] = 0;
-        DAT_8018fb3c.objects[28].unk3c = 0;
-        DAT_8018fb3c.objects[95].unk3d[1] = 0;
+        DAT_8018fb3c.objects[28].unk0 = 0;
+        DAT_8018fb3c.objects[28].arg.b.unk3c = 0;
+        DAT_8018fb3c.objects[95].arg.b.unk3d[1] = 0;
     } else {
         DAT_80185da8.objects[25].unk0 = 8;
-        DAT_8018fb3c.objects[28].unk0[0] = 2;
-        DAT_8018fb3c.objects[28].unk3c = 0xff;
-        DAT_8018fb3c.objects[95].unk3d[1] = 0xff;
+        DAT_8018fb3c.objects[28].unk0 = 2;
+        DAT_8018fb3c.objects[28].arg.b.unk3c = 0xff;
+        DAT_8018fb3c.objects[95].arg.b.unk3d[1] = 0xff;
     }
     DAT_801ba984.unk84[5] = 0x16;
 }

@@ -68,8 +68,8 @@ void func_801e85b8(Object88 *obj)
 {
     if (obj - DAT_80185da8.objects == 20) {
         DAT_801ba984.unk32[0x27] = 1;
-        DAT_8018fb3c.objects[85].unk3f = 0xff;
-        DAT_8018fb3c.objects[85].unk0[0] = 2;
+        DAT_8018fb3c.objects[85].arg.b.unk3f = 0xff;
+        DAT_8018fb3c.objects[85].unk0 = 2;
     }
 }
 
@@ -118,11 +118,11 @@ void func_801e8650(void)
         DAT_80185da8.objects[17].unk0 = 1;
     }
     if (DAT_801ba984.unk32[0x27] != 0) {
-        DAT_8018fb3c.objects[85].unk3f = 0xff;
-        DAT_8018fb3c.objects[85].unk0[0] = 2;
+        DAT_8018fb3c.objects[85].arg.b.unk3f = 0xff;
+        DAT_8018fb3c.objects[85].unk0 = 2;
     } else {
-        DAT_8018fb3c.objects[85].unk3f = 0;
-        DAT_8018fb3c.objects[85].unk0[0] = 0;
+        DAT_8018fb3c.objects[85].arg.b.unk3f = 0;
+        DAT_8018fb3c.objects[85].unk0 = 0;
     }
     DAT_801ba984.unk84[5] = 0x13;
 }

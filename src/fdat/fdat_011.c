@@ -91,7 +91,7 @@ void func_801e85d0(void)
 ADDRESS(0x801e85d8, 0xc0)
 void func_801e85d8(Object44 *obj)
 {
-    if (obj->unk3a.bytes[1] != 10) {
+    if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
     if (func_80046884(6, 0x1e, 3, 4, 0x8000) != 0) {

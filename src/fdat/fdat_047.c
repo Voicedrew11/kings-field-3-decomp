@@ -79,8 +79,8 @@ void func_801e85b8(s32 a, s32 b)
     second = &DAT_8018fb3c.objects[b];
     first->unk5 = 0x32;
     second->unk5 = 0x32;
-    first->unk0[2] = 5;
-    second->unk0[2] = 5;
+    first->unk2 = 5;
+    second->unk2 = 5;
     for (i = 15; i != -1; i--) {
         first->unk10 += 256;
         second->unk10 += 256;

@@ -61,12 +61,12 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
-        if ((def->unk0[0] == 9 || def->unk0[0] == 0x15) && obj->unk3c != 0) {
-            if (obj->unk3a.index == 0xffff) {
+        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+            if (obj->arg.b.unk3a.index == 0xffff) {
             message:
-                if (obj->unk3f != 0) {
-                    if (obj->unk3f < 35) {
-                        func_80041eec(obj->unk3f);
+                if (obj->arg.b.unk3f != 0) {
+                    if (obj->arg.b.unk3f < 35) {
+                        func_80041eec(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
                         func_80041eec(0x1a);
@@ -83,17 +83,17 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->unk3a.index];
+                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
-                link->unk0[0] = obj->unk40;
-                link->unk38 = 0xff;
+                link->unk0 = obj->arg.b.unk40;
+                link->arg.b.unk38 = 0xff;
                 func_8005db30(link);
-                link->unk0[0] = 0;
-                link->unk38 = 0;
+                link->unk0 = 0;
+                link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
-                    obj->unk3a.index = 0xffff;
+                    obj->arg.b.unk3a.index = 0xffff;
                 }
             }
         }
@@ -123,16 +123,16 @@ void func_801e85dc(Object88 *obj)
 
     if (obj - DAT_80185da8.objects == 3) {
         DAT_801ba984.unk32[0xe] = 1;
-        DAT_8018fb3c.objects[20].unk0[0] = 0;
-        DAT_8018fb3c.objects[20].unk3c = 0;
-        if (DAT_8018fb3c.objects[20].unk3a.index != 0xffff) {
-            link = &DAT_8018fb3c.objects[DAT_8018fb3c.objects[20].unk3a.index];
+        DAT_8018fb3c.objects[20].unk0 = 0;
+        DAT_8018fb3c.objects[20].arg.b.unk3c = 0;
+        if (DAT_8018fb3c.objects[20].arg.b.unk3a.index != 0xffff) {
+            link = &DAT_8018fb3c.objects[DAT_8018fb3c.objects[20].arg.b.unk3a.index];
             if (link->unk6 != 0xff) {
-                link->unk0[0] = 2;
-                link->unk38 = 0xff;
+                link->unk0 = 2;
+                link->arg.b.unk38 = 0xff;
             }
         }
-        DAT_8018fb3c.objects[33].unk3d[1] = 0;
+        DAT_8018fb3c.objects[33].arg.b.unk3d[1] = 0;
     }
 }
 
@@ -140,7 +140,7 @@ void func_801e85dc(Object88 *obj)
 ADDRESS(0x801e8680, 0xc0)
 void func_801e8680(Object44 *obj)
 {
-    if (obj->unk3a.bytes[1] != 10) {
+    if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
     if (func_80046884(0x39, 0x21, 3, 3, 0x8000) != 0) {
@@ -190,21 +190,21 @@ void func_801e8770(void)
     Object44 *link;
 
     if (DAT_801ba984.unk32[0xe] == 0) {
-        DAT_8018fb3c.objects[20].unk0[0] = 2;
-        DAT_8018fb3c.objects[20].unk3c = 0xff;
-        DAT_8018fb3c.objects[33].unk3d[1] = 0xff;
+        DAT_8018fb3c.objects[20].unk0 = 2;
+        DAT_8018fb3c.objects[20].arg.b.unk3c = 0xff;
+        DAT_8018fb3c.objects[33].arg.b.unk3d[1] = 0xff;
     } else {
-        DAT_8018fb3c.objects[20].unk0[0] = 0;
-        DAT_8018fb3c.objects[20].unk3c = 0;
-        if (DAT_8018fb3c.objects[20].unk3a.index != 0xffff) {
-            link = &DAT_8018fb3c.objects[DAT_8018fb3c.objects[20].unk3a.index];
+        DAT_8018fb3c.objects[20].unk0 = 0;
+        DAT_8018fb3c.objects[20].arg.b.unk3c = 0;
+        if (DAT_8018fb3c.objects[20].arg.b.unk3a.index != 0xffff) {
+            link = &DAT_8018fb3c.objects[DAT_8018fb3c.objects[20].arg.b.unk3a.index];
             if (link->unk6 != 0xff) {
-                link->unk0[0] = 2;
-                link->unk38 = 0xff;
-                DAT_8018fb3c.objects[20].unk3a.index = 0xffff;
+                link->unk0 = 2;
+                link->arg.b.unk38 = 0xff;
+                DAT_8018fb3c.objects[20].arg.b.unk3a.index = 0xffff;
             }
         }
-        DAT_8018fb3c.objects[33].unk3d[1] = 0;
+        DAT_8018fb3c.objects[33].arg.b.unk3d[1] = 0;
     }
     DAT_801ba984.unk84[5] = 0xb;
 }
