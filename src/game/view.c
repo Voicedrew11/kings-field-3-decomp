@@ -530,10 +530,9 @@ void func_800351fc(void)
                     scroll->unk4 -= scroll->unk10.h;
                 }
                 x = scroll->unk8.x;
-                y = scroll->unk8.y;
-                step = scroll->unk4;
+                y = scroll->unk8.y + (step = scroll->unk4);
                 rect.h = scroll->unk10.h - step;
-                MoveImage(&rect, x, y + step);
+                MoveImage(&rect, x, y);
                 if (scroll->unk4 != 0) {
                     y = scroll->unk8.y;
                     rect.y = scroll->unk10.y + rect.h;
