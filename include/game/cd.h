@@ -16,9 +16,7 @@
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBCD.H>
+#include <psyq/cd.h>
 
 #ifdef GAME_CD_MODULE
 #define CD_VSYNC_SHARED volatile
@@ -88,7 +86,8 @@ typedef struct CdState {
     s32 vsync_event;            /* +0x000: root counter 3 interrupt */
     u32 frames;                 /* +0x004: VSyncs since start-up */
     CD_VSYNC_SHARED u32 frame_gate; /* +0x008: VSyncs since the last func_80019614 */
-    u32 unkc;                   /* +0x00c: counts VSyncs; nothing reads it yet */
+    u32 unkc;                   /* +0x00c: counts VSyncs; func_80029500 stores the
+                                 * player's +0xa0 in it; nothing reads it yet */
     s32 error_event;            /* +0x010: HwCdRom EvSpERROR */
     s32 complete_event;         /* +0x014: HwCdRom EvSpCOMP */
     s32 unk18;

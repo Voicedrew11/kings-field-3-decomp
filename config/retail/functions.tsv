@@ -1208,7 +1208,7 @@ OPEN.EXE	0x800136c8	0x2ec8	0x10	0x10	1	function	entry	start		PS-X EXE header pc0
 OPEN.EXE	0x800136d8	0x2ed8	0x494	0x494	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x5); stack-frame+ra-save+matching-stack-return
 OPEN.EXE	0x80013b6c	0x336c	0x128	0x128	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); previous-return+return-delimited-valid-code
 OPEN.EXE	0x80013c94	0x3494	0x70	0x70	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
-OPEN.EXE	0x80013d04	0x3504	0x124	0x124	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=candidate (carved from frame/return shape only); stack-frame+ra-save+matching-stack-return
+OPEN.EXE	0x80013d04	0x3504	0x124	0x124	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=validated (reviewed lui/addiu relocation in strInit 0x80013c94 passes it to DecDCToutCallback; no direct call); stack-frame+ra-save+matching-stack-return
 OPEN.EXE	0x80013e28	0x3628	0x94	0x94	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x2); stack-frame+ra-save+matching-stack-return
 OPEN.EXE	0x80013ebc	0x36bc	0x94	0x94	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
 OPEN.EXE	0x80013f50	0x3750	0x78	0x78	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); previous-return+return-delimited-valid-code
@@ -1677,7 +1677,7 @@ END.EXE	0x80011d04	0x1504	0x10	0x10	1	function	entry	start		PS-X EXE header pc0	
 END.EXE	0x80011d14	0x1514	0x250	0x250	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x3); stack-frame+ra-save+matching-stack-return
 END.EXE	0x80011f64	0x1764	0x128	0x128	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); previous-return+return-delimited-valid-code
 END.EXE	0x8001208c	0x188c	0x70	0x70	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
-END.EXE	0x800120fc	0x18fc	0x124	0x124	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=candidate (carved from frame/return shape only); stack-frame+ra-save+matching-stack-return
+END.EXE	0x800120fc	0x18fc	0x124	0x124	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=validated (reviewed lui/addiu relocation in strInit 0x8001208c passes it to DecDCToutCallback; no direct call); stack-frame+ra-save+matching-stack-return
 END.EXE	0x80012220	0x1a20	0x94	0x94	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x2); stack-frame+ra-save+matching-stack-return
 END.EXE	0x800122b4	0x1ab4	0x94	0x94	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
 END.EXE	0x80012348	0x1b48	0x78	0x78	1	function	mips-return-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); previous-return+return-delimited-valid-code

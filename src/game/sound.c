@@ -8,10 +8,9 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
 #include <psyq/kernel.h>
-#include <LIBGTE.H>
-#include <LIBCD.H>
-#include <LIBSND.H>
 #include <LIBSPU.H>
 #include <game/math.h>
 #include <game/sound.h>

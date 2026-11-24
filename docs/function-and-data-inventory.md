@@ -20,14 +20,14 @@ symbols or pretending that WIP names are original symbols:
 
 ## Current census
 
-| Image | Game functions | `proven` | `candidate` | Bytes |
-| :---- | -------------: | -------: | ----------: | ----: |
-| `PSX.EXE` | 1 | 1 | 0 | `0xe0` |
-| `GAME.EXE` | 593 | 537 | 56 | `0x4d09c` |
-| `OPEN.EXE` | 34 | 33 | 1 | `0x26c8` |
-| `END.EXE` | 13 | 12 | 1 | `0xa3c` |
-| 28 `FDAT_nnn.BIN` | 437 (14–22 each) | 10 | 427 | `0xb208` |
-| **Total** | **1,078** | **593** | **485** | |
+| Image | Game functions | `proven` | `validated` | `candidate` | Bytes |
+| :---- | -------------: | -------: | ----------: | ----------: | ----: |
+| `PSX.EXE` | 1 | 1 | 0 | 0 | `0xe0` |
+| `GAME.EXE` | 593 | 537 | 0 | 56 | `0x4d09c` |
+| `OPEN.EXE` | 34 | 33 | 1 | 0 | `0x26c8` |
+| `END.EXE` | 13 | 12 | 1 | 0 | `0xa3c` |
+| 28 `FDAT_nnn.BIN` | 437 (14–22 each) | 10 | 0 | 427 | `0xb208` |
+| **Total** | **1,078** | **593** | **2** | **483** | |
 
 These are the denominator. `functions.tsv` also holds the four PS-X EXE
 entry rows (Psy-Q startup objects) and the 1,383 Psy-Q library functions
@@ -46,8 +46,10 @@ decoded from carved code, including the 52 `GAME.EXE` functions that FDAT
 modules call directly. `tier=candidate` is everything else: 412 FDAT rows
 are named by their module's dispatch table (stored pointers that
 `GAME.EXE` calls indirectly), and the rest are carved from frame or return
-shape alone. No game function is `validated` yet: that tier needs reviewed
-relocation rows, and `relocs.tsv` holds only `PSX.EXE` `main`'s.
+shape alone. `tier=validated` needs a reviewed relocation row that passes
+the safe delinker's checks: END's and OPEN's `strCallback`, which nothing
+calls directly, are validated by the reviewed `lui`/`addiu` pair in
+`strInit` that passes them to `DecDCToutCallback`.
 
 ### Function starts
 

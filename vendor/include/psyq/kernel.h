@@ -29,10 +29,11 @@ extern long StartRCnt(unsigned long spec);
 
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
-extern int ResetCallback(void); /* LIBETC.H 3.3 spelling */
+/* As Runtime Library 3.3 LIBETC.H declares them, so both headers can meet. */
+extern int ResetCallback(void);
 extern int StopCallback(void);
 
-extern void InitHeap(unsigned long *head, unsigned long size); /* MALLOC.H 3.3 spelling */
+/* InitHeap: Runtime Library 3.3 MALLOC.H (psyq/libc.h) declares it. */
 extern void InitCARD(long pad_enable);
 extern long StartCARD(void);
 extern long StopCARD(void);

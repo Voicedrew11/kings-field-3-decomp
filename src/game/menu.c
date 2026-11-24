@@ -8,15 +8,16 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBETC.H>
-#include <LIBSND.H>
-#include <LIBCD.H>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
+#include <psyq/kernel.h>
 #include <game/sound.h>
 #include <game/data.h>
 #include <game/cd.h>
 #include <game/memory.h>
+#include <game/render.h>
+#include <game/card.h>
+#include <game/player.h>
 #include <game/menu.h>
 
 RODATA(0x80011448, 0x18)
@@ -203,8 +204,8 @@ ADDRESS(0x8001a9dc, 0xa8)
 void func_8001a9dc(void)
 {
     MenuText text;
-    s32 x = DAT_801b24e4.x >> 11;
-    s32 z = DAT_801b24e4.z >> 11;
+    s32 x = DAT_801b24e4.pos.vx >> 11;
+    s32 z = DAT_801b24e4.pos.vz >> 11;
 
     text.x = 0xf7;
     text.y = 0xd2;
@@ -278,8 +279,8 @@ s32 func_8001aa84(void)
             } else if (item == 0x85) {
                 if (DAT_8018fad4.unk9 != 0x19 && DAT_8018fad4.unk9 != 0x1b
                     && (DAT_8018fad4.unk9 != 7
-                        || !(DAT_801b24e4.x / 2048 >= 62 && DAT_801b24e4.x / 2048 <= 70
-                             && DAT_801b24e4.z / 2048 < 12))) {
+                        || !(DAT_801b24e4.pos.vx / 2048 >= 62 && DAT_801b24e4.pos.vx / 2048 <= 70
+                             && DAT_801b24e4.pos.vz / 2048 < 12))) {
                     func_80027e60();
                     func_80027b5c();
                     picked = func_8001c030();
@@ -305,8 +306,8 @@ s32 func_8001aa84(void)
     func_80027c8c();
     if (result >= 104 && result <= 120) {
         if (!(DAT_8018fad4.unk9 == 2
-              && DAT_801b24e4.x / 2048 >= 10 && DAT_801b24e4.x / 2048 <= 13
-              && DAT_801b24e4.z / 2048 >= 38 && DAT_801b24e4.z / 2048 <= 42
+              && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
+              && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42
               && (result == 104 || result == 107 || result == 108 || result == 109))) {
             func_8001b254(result);
         }
@@ -346,12 +347,12 @@ s32 func_8001af88(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s
     for (i = first; i < last; count++, i++, src++) {
         if (*count != 0) {
             *counts = *count;
-            if (i == DAT_801b24e4.unkcb || i == DAT_801b24e4.unkf0[0] || i == DAT_801b24e4.unkf0[1]
-                || i == DAT_801b24e4.unkf0[2] || i == DAT_801b24e4.unkf0[3]
-                || i == DAT_801b24e4.unkf0[4] || i == DAT_801b24e4.unkf0[5]
-                || i == DAT_801b24e4.unkf0[6] || i == DAT_801b24e4.unkc9) {
+            if (i == DAT_801b24e4.unkcb || i == DAT_801b24e4.unkf0 || i == DAT_801b24e4.unkf1
+                || i == DAT_801b24e4.unkf2 || i == DAT_801b24e4.unkf3
+                || i == DAT_801b24e4.unkf4 || i == DAT_801b24e4.unkf5
+                || i == DAT_801b24e4.unkf6 || i == DAT_801b24e4.unkc9) {
                 (*counts)--;
-                if (i == DAT_801b24e4.unkf0[5] && i == DAT_801b24e4.unkf0[6]) {
+                if (i == DAT_801b24e4.unkf5 && i == DAT_801b24e4.unkf6) {
                     (*counts)--;
                 }
             }
@@ -399,14 +400,14 @@ void func_8001b254(s32 item)
         return;
     }
     if (item == 104) {
-        DAT_801b24e4.unk18 += 50;
+        DAT_801b24e4.hp += 50;
     } else if (item == 105) {
-        DAT_801b24e4.unk18 += 15;
+        DAT_801b24e4.hp += 15;
         DAT_801b24e4.unk78 = 0;
     } else if (item == 106) {
-        DAT_801b24e4.unk18 = DAT_801b24e4.unk16;
+        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
     } else if (item == 107) {
-        DAT_801b24e4.unk18 = DAT_801b24e4.unk16;
+        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
         DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
         func_8001b4f8();
     } else if (item == 108) {
@@ -423,14 +424,14 @@ void func_8001b254(s32 item)
     } else if (item == 111) {
     } else if (item == 112) {
     } else if (item == 119) {
-        DAT_801b24e4.unk18 += 100;
+        DAT_801b24e4.hp += 100;
     } else if (item == 120) {
-        DAT_801b24e4.unk18 += 200;
+        DAT_801b24e4.hp += 200;
         DAT_801b24e4.unk1c += 100;
         func_8001b4f8();
     }
-    if (DAT_801b24e4.unk18 > DAT_801b24e4.unk16) {
-        DAT_801b24e4.unk18 = DAT_801b24e4.unk16;
+    if (DAT_801b24e4.hp > DAT_801b24e4.hp_max) {
+        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
     }
     if (DAT_801b24e4.unk1c > DAT_801b24e4.unk1a) {
         DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
@@ -522,8 +523,8 @@ void func_8001b5c4(u8 item)
                     n = 0;
                 }
                 area = DAT_8018fad4.unk9;
-                func_80027494((area & 3) * 56 + DAT_801b24e4.x / 2560 + 40,
-                              0xbc - DAT_801b24e4.z / 2560 - (area >> 2) * 56,
+                func_80027494((area & 3) * 56 + DAT_801b24e4.pos.vx / 2560 + 40,
+                              0xbc - DAT_801b24e4.pos.vz / 2560 - (area >> 2) * 56,
                               15, 15, n * 16 + 128, 0x90, 15, 15);
                 func_80027530(0x1c);
             }
@@ -616,7 +617,7 @@ void func_8001babc(void)
             if (DAT_8018fad4.unk9 == 0x19 || DAT_8018fad4.unk9 == 0x1b) {
                 func_80027494(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, 15, 15);
             } else {
-                func_80027494(DAT_801b24e4.x / 1024 + 72, 0xbc - DAT_801b24e4.z / 1024, 15, 15,
+                func_80027494(DAT_801b24e4.pos.vx / 1024 + 72, 0xbc - DAT_801b24e4.pos.vz / 1024, 15, 15,
                               n * 16 + 128, 0x90, 15, 15);
             }
             func_80027530(0x1d);

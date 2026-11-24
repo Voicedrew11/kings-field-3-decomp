@@ -114,7 +114,10 @@
   `lui` plus `ori` is not interchangeable. Audit the exact low opcode and
   target addend.
 - `jalr` and non-return `jr` are unresolved indirect control flow until a table
-  or value chain is proved. Do not invent a callee from proximity.
+  or value chain is proved. Do not invent a callee from proximity. The
+  known-reference closure gate exempts indirect sites inside vendored Sony
+  (Psy-Q) functions by project decision, listing each as a
+  `vendored-indirect` witness row; game-code sites still need a proof.
 - Signedness and width are first-class codegen facts. Propagate `char`, `u8`,
   `s16`, `u16`, `int`, and pointer types through callers and callees; `lb/lbu`,
   `lh/lhu`, extension instructions, comparisons, and stack argument slots are
@@ -179,6 +182,10 @@
   remove the real source reference to accommodate an incomplete target object.
 - BSS, overlay RAM, pointer tables, and GP-relative data require explicit
   ownership work. Do not infer initialized storage from aggregate objdiff data.
+- A check that cannot run is skipped only by a recorded, reasoned row in
+  `config/check_exemptions.tsv` (today only `common-placement`: COMMON whose
+  address depends on unpreserved SDK objects). Reports print it as EXEMPT;
+  never fake an address or drop a claim to pass a gate.
 - Generated build products, reports, and local retail paths are not committed.
 
 ## Verification and change discipline

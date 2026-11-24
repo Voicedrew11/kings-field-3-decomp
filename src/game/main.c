@@ -9,20 +9,20 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
+#include <psyq/press.h>
 #include <psyq/kernel.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBETC.H>
-#include <LIBCD.H>
-#include <LIBSND.H>
-#include <LIBPRESS.H>
 #include <MALLOC.H>
 #include <game/sound.h>
 #include <game/data.h>
 #include <game/memory.h>
 #include <game/image.h>
 #include <game/scene.h>
+#include <game/render.h>
 #include <game/funcs.h>
+#include <game/card.h>
+#include <game/player.h>
 
 /*
  * PSX.EXE's next-program byte (0 OPEN, 1 GAME, 2 END) and the mailbox byte
@@ -74,7 +74,7 @@ void func_80014bd4(void)
     s32 exit;
 
     func_80018fbc((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
-    func_80018fbc(DAT_80199154, 0, sizeof(DAT_80199154) / 4);
+    func_80018fbc((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
     func_80018fbc((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
     func_80018fbc((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
     func_80018fbc((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);

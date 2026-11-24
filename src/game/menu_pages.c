@@ -8,16 +8,17 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
 #include <psyq/libc.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBETC.H>
-#include <LIBCD.H>
-#include <LIBSND.H>
+#include <psyq/kernel.h>
 #include <game/sound.h>
 #include <game/data.h>
 #include <game/cd.h>
 #include <game/memory.h>
+#include <game/render.h>
+#include <game/card.h>
+#include <game/player.h>
 #include <game/menu.h>
 #include <game/funcs.h>
 
@@ -184,13 +185,13 @@ void func_8001c9c0(MenuEntry *out)
 
     slots[0] = DAT_801b24e4.unkcb;
     slots[1] = DAT_801b24e4.unkc7;
-    slots[2] = DAT_801b24e4.unkf0[2];
-    slots[3] = DAT_801b24e4.unkf0[0];
-    slots[4] = DAT_801b24e4.unkf0[1];
-    slots[5] = DAT_801b24e4.unkf0[3];
-    slots[6] = DAT_801b24e4.unkf0[4];
-    slots[7] = DAT_801b24e4.unkf0[5];
-    slots[8] = DAT_801b24e4.unkf0[6];
+    slots[2] = DAT_801b24e4.unkf2;
+    slots[3] = DAT_801b24e4.unkf0;
+    slots[4] = DAT_801b24e4.unkf1;
+    slots[5] = DAT_801b24e4.unkf3;
+    slots[6] = DAT_801b24e4.unkf4;
+    slots[7] = DAT_801b24e4.unkf5;
+    slots[8] = DAT_801b24e4.unkf6;
     if (DAT_801b24e4.unkc8 == 0xff) {
         slots[9] = DAT_801b24e4.unkc9;
     } else {
@@ -241,40 +242,40 @@ void func_8001cbb8(s32 slot)
         break;
     case 2:
         first = 0x33;
-        equipped = DAT_801b24e4.unkf0[2];
+        equipped = DAT_801b24e4.unkf2;
         last = 0x3e;
         break;
     case 3:
         first = 0x22;
-        equipped = DAT_801b24e4.unkf0[0];
+        equipped = DAT_801b24e4.unkf0;
         last = 0x29;
         break;
     case 4:
         first = 0x2a;
-        equipped = DAT_801b24e4.unkf0[1];
+        equipped = DAT_801b24e4.unkf1;
         last = 0x32;
         break;
     case 5:
         first = 0x3f;
-        equipped = DAT_801b24e4.unkf0[3];
+        equipped = DAT_801b24e4.unkf3;
         last = 0x47;
         break;
     case 6:
         first = 0x48;
-        equipped = DAT_801b24e4.unkf0[4];
+        equipped = DAT_801b24e4.unkf4;
         last = 0x50;
         break;
     case 7:
     case 8:
         if (slot == 7) {
-            equipped = DAT_801b24e4.unkf0[5];
+            equipped = DAT_801b24e4.unkf5;
         } else {
-            equipped = DAT_801b24e4.unkf0[6];
+            equipped = DAT_801b24e4.unkf6;
         }
         if (slot == 7) {
-            other = DAT_801b24e4.unkf0[6];
+            other = DAT_801b24e4.unkf6;
         } else {
-            other = DAT_801b24e4.unkf0[5];
+            other = DAT_801b24e4.unkf5;
         }
         first = 0x51;
         if (other != 0xff) {
@@ -995,7 +996,7 @@ s32 func_8001e484(void)
 ADDRESS(0x8001e710, 0x324)
 s32 func_8001e710(void)
 {
-    char dir[600];
+    struct DIRENTRY dir[15];
     MenuList list;
     MenuEntry entries[8];
     u32 experience[8];
@@ -1080,7 +1081,7 @@ s32 func_8001e710(void)
 }
 
 ADDRESS(0x8001ea34, 0x108)
-s32 func_8001ea34(char *dir, u8 *p, u32 *experience, u8 *levels, s32 *numbers)
+s32 func_8001ea34(struct DIRENTRY *dir, u8 *p, u32 *experience, u8 *levels, s32 *numbers)
 {
     s32 n = 0;
     s32 i = 0;
@@ -1089,7 +1090,7 @@ s32 func_8001ea34(char *dir, u8 *p, u32 *experience, u8 *levels, s32 *numbers)
     s32 number;
 
     for (; i < 15; i++) {
-        if (func_80028398(dir, &points, &level, &number) == 0) {
+        if (func_80028398(dir->name, &points, &level, &number) == 0) {
             *p++ = 3;
             *p++ = 0;
             *p++ = 0x13;
@@ -1102,7 +1103,7 @@ s32 func_8001ea34(char *dir, u8 *p, u32 *experience, u8 *levels, s32 *numbers)
             *levels++ = level;
             *numbers++ = number;
         }
-        dir += 40;
+        dir++;
     }
     return n;
 }
@@ -1569,7 +1570,7 @@ s32 func_8001fa60(void)
 {
     s32 result = -1;
     u8 *mailbox = MAILBOX_BYTE_A;
-    char dir[600];
+    struct DIRENTRY dir[15];
     MenuText text[4];
     s32 status;
     s32 i;
@@ -1622,7 +1623,7 @@ loaded:
 }
 
 ADDRESS(0x8001fc5c, 0x240)
-s32 func_8001fc5c(char *dir)
+s32 func_8001fc5c(struct DIRENTRY *dir)
 {
     MenuList list;
     MenuEntry entries[8];
@@ -1713,7 +1714,7 @@ void func_8001ff94(MenuText *lines)
 ADDRESS(0x8002008c, 0x33c)
 void func_8002008c(void)
 {
-    char dir[600];
+    struct DIRENTRY dir[15];
     MenuList list;
     MenuEntry entries[8];
     u32 experience[8];

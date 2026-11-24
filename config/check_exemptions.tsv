@@ -1,0 +1,7 @@
+# MANUALLY MANAGED - recorded exemptions from checks that cannot run (scripts/kf/check_exemptions.py).
+# Every report that applies a row prints it as EXEMPT; the README exact-data count excludes exempt units.
+# common-placement: the unit's global .sbss/.bss claims are COMMON requests PSYLINK places by symbol-hash
+# bucket among the SDK's own COMMON; their sizes and COMMON-ness are still checked, their addresses are not.
+image	unit	check	sections	reason
+OPEN.EXE	open.main	common-placement	.sbss,.bss	layout depends on unpreserved Psy-Q Library 3.4 objects: their COMMON requests share PSYLINK's hash buckets with these, and the 3.3 archives supply a different set
+END.EXE	end.main	common-placement	.sbss,.bss	layout depends on unpreserved post-3.3 LIBGPU SYS and LIBSND objects: their COMMON requests share PSYLINK's hash buckets with these, and the 3.3 archives supply a different set

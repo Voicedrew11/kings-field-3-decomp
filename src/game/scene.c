@@ -11,16 +11,17 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBCD.H>
+#include <psyq/sdk.h>
+#include <psyq/cd.h>
 #include <game/sound.h>
 #include <game/cd.h>
 #include <game/memory.h>
 #include <game/image.h>
 #include <game/scene.h>
+#include <game/render.h>
 #include <game/data.h>
 #include <game/funcs.h>
+#include <game/player.h>
 
 /* archive file numbers (func_8001a34c table slots) */
 #define FILE_FDAT 4
@@ -65,11 +66,11 @@ void func_80017664(void)
     func_80015ce0(2, 0, 0);
     func_80018f5c((u32 *)&DAT_8018fb3c, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80018f5c(DAT_801d37a4, p + 1, *p >> 2);
+    func_80018f5c((u32 *)DAT_801d37a4, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c(DAT_801e64b8, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80018f5c(DAT_8009f114, p + 1, *p >> 2);
+    func_80018f5c((u32 *)DAT_8009f114, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c((u32 *)&DAT_801b77ec, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
@@ -83,9 +84,9 @@ void func_80017664(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c(DAT_80116154, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80042ba8(0, DAT_80116154);
+    func_80042ba8(0, (u8 *)DAT_80116154);
     func_80018f5c(DAT_800aedc4, p + 1, *p >> 2);
-    func_80042ba8(0x28, DAT_800aedc4);
+    func_80042ba8(0x28, (u8 *)DAT_800aedc4);
     func_8002b64c();
 }
 
@@ -122,15 +123,15 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     Object4c *a;
     Object44 *b;
     Object88 *c;
-    Object18 *d;
+    Effect *d;
     u16 i;
     u16 j;
     u16 k;
     u16 l;
 
-    DAT_801b24e4.x += dx;
-    DAT_801b24e4.z += dz;
-    DAT_801b24e4.y += dy;
+    DAT_801b24e4.pos.vx += dx;
+    DAT_801b24e4.pos.vz += dz;
+    DAT_801b24e4.pos.vy += dy;
     a = DAT_801b77ec.objects;
     i = 128;
     while (i--) {
@@ -155,19 +156,19 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     k = 200;
     while (k--) {
         if (c->unk0 != 0xff) {
-            c->x += dx;
-            c->z += dz;
-            c->y += dy;
+            c->pos.vx += dx;
+            c->pos.vz += dz;
+            c->pos.vy += dy;
         }
         c++;
     }
     d = DAT_80182968;
     l = 128;
     while (l--) {
-        if (d->unk0 != 0xffff) {
-            d->x += dx;
-            d->z += dz;
-            d->y += dy;
+        if (d->id != 0xffff) {
+            d->pos.vx += dx;
+            d->pos.vz += dz;
+            d->pos.vy += dy;
         }
         d++;
     }

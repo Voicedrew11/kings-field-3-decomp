@@ -9,13 +9,15 @@
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
-#include <LIBETC.H>
-#include <LIBCD.H>
+#include <psyq/sdk.h>
+#include <psyq/audio.h>
+#include <psyq/kernel.h>
 #include <game/data.h>
 #include <game/cd.h>
 #include <game/memory.h>
+#include <game/render.h>
+#include <game/card.h>
+#include <game/player.h>
 #include <game/menu.h>
 
 RODATA(0x800110b0, 0x60)

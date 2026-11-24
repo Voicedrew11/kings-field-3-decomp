@@ -530,6 +530,11 @@ def check(
         print("check FAILED: " + ", ".join(reasons), file=sys.stderr)
         return 1
     skipped = len(selected) - len(gated)
+    from scripts.kf.check_exemptions import load as load_exemptions
+
+    exemptions = [row for row in load_exemptions() if row.image in selected]
+    for row in exemptions:
+        print(row.describe())
     if gated:
         verified = (f"verified target relink and no known-reference ownership gaps in "
                     f"{len(gated)} gated image(s)")
@@ -537,7 +542,9 @@ def check(
         verified = "no image gated for target relink or ownership closure"
     print(f"check OK: exact claimed data, {verified}"
           + (f" ({skipped} image(s) without source units not gated)" if skipped else "")
-          + ", and no unchanged-input regressions or lost banked functions")
+          + ", and no unchanged-input regressions or lost banked functions"
+          + (f"; {len(exemptions)} recorded exemption(s) EXEMPT, not verified"
+             if exemptions else ""))
     return 0
 
 

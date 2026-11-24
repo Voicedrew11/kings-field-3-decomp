@@ -78,7 +78,19 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x1dd68	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4c4	0x6dcc4	0x3354	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081818	0x71018	0xd	defined	supported	DAT_80081818	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
+GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	DAT_80081828	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
+GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	DAT_80081868	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
+GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	DAT_80081884	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
+GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	DAT_800818c0	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
+GAME.EXE	0x800818e3	0x710e3	0x45	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
+GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
+GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x80081c8c	0x7148c	0x1a5a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
 GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
 GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	DAT_8009c22e	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
@@ -103,7 +115,25 @@ GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	DAT_8009c270	s32	asm;src/game/men
 GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	DAT_8009c274	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
 GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	DAT_8009c278	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
 GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	DAT_8009c27c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
-GAME.EXE	0x8009c280	0x8ba80	0x580	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c280	0x8ba80	0x40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	DAT_8009c2c0	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
+GAME.EXE	0x8009c2c1	0x8bac1	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	DAT_8009c2d0	RECT	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
+GAME.EXE	0x8009c2d8	0x8bad8	0x8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
+GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
+GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
+GAME.EXE	0x8009c2f0	0x8baf0	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	DAT_8009c3a8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
+GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	DAT_8009c3ac	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
+GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	DAT_8009c3b0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event
+GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	DAT_8009c3b4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a0; card error event
+GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	DAT_8009c3b8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a4; never referenced
+GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	DAT_8009c3bc	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a8; never referenced
+GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
+GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
+GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
+GAME.EXE	0x8009c3cc	0x8bbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -142,7 +172,40 @@ OPEN.EXE	0x8002c178	0x1b978	0x4	unclassified	coverage-gap			payload-complement	m
 OPEN.EXE	0x8002c188	0x1b988	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x8002c198	0x1b998	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x8002c1a8	0x1b9a8	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-OPEN.EXE	0x8002c1b8	0x1b9b8	0x14648	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x8002c1b8	0x1b9b8	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x8002c1bc	0x1b9bc	0xd	defined	proven	save_prefix	char[13]	asm;src/open/card.c open.card	.data; first .data of the image; BASLUS-00255
+OPEN.EXE	0x8002c1c9	0x1b9c9	0x1422b	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x800403f4	0x2fbf4	0x4	pointer	proven	next_program	u8 *	asm;src/open/main.c open.main	.sdata; $gp+0; points at PSX.EXE next-program byte 0x800102f0
+OPEN.EXE	0x800403f8	0x2fbf8	0x4	defined	proven	logo_level	int	asm;src/open/main.c open.main	.sdata; $gp+4; logo brightness
+OPEN.EXE	0x800403fc	0x2fbfc	0x4	defined	proven	logo_state	int	asm;src/open/main.c open.main	.sdata; $gp+8; 0 fading in, else holding
+OPEN.EXE	0x80040400	0x2fc00	0x4	defined	proven	press_level	int	asm;src/open/main.c open.main	.sdata; $gp+12
+OPEN.EXE	0x80040404	0x2fc04	0x4	defined	proven	press_state	int	asm;src/open/main.c open.main	.sdata; $gp+16
+OPEN.EXE	0x80040408	0x2fc08	0x4	defined	proven	menu_level	int	asm;src/open/main.c open.main	.sdata; $gp+20
+OPEN.EXE	0x8004040c	0x2fc0c	0x4	defined	proven	menu_state	int	asm;src/open/main.c open.main	.sdata; $gp+24
+OPEN.EXE	0x80040410	0x2fc10	0x4	defined	proven	old_pad	u_long	asm;src/open/main.c open.main	.sdata; $gp+28; last PadRead(1) for edge detection
+OPEN.EXE	0x80040414	0x2fc14	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x80040420	0x2fc20	0x4	defined	proven	movie_unused_0	int	asm;src/open/movie.c open.movie	.sdata; $gp+44; never referenced
+OPEN.EXE	0x80040424	0x2fc24	0x4	defined	proven	movie_unused_1	int	asm;src/open/movie.c open.movie	.sdata; $gp+48; never referenced
+OPEN.EXE	0x80040428	0x2fc28	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x80040434	0x2fc34	0x4	bss	proven	frame_no	int	asm;src/open/movie.c open.movie	.sbss fixed; $gp+64; frameCount of the last frame header
+OPEN.EXE	0x80040438	0x2fc38	0x4	bss	proven	ev0	long	asm;src/open/card.c open.card	.sbss fixed; $gp+68; card I/O end event
+OPEN.EXE	0x8004043c	0x2fc3c	0x4	bss	proven	ev1	long	asm;src/open/card.c open.card	.sbss fixed; $gp+72; card timeout event
+OPEN.EXE	0x80040440	0x2fc40	0x4	bss	proven	ev2	long	asm;src/open/card.c open.card	.sbss fixed; $gp+76; new card event
+OPEN.EXE	0x80040444	0x2fc44	0x4	bss	proven	ev3	long	asm;src/open/card.c open.card	.sbss fixed; $gp+80; card error event
+OPEN.EXE	0x80040448	0x2fc48	0x4	bss	proven	ev10	long	asm;src/open/card.c open.card	.sbss fixed; $gp+84; Sony card sample hardware-event handle, never referenced
+OPEN.EXE	0x8004044c	0x2fc4c	0x4	bss	proven	ev11	long	asm;src/open/card.c open.card	.sbss fixed; $gp+88; never referenced
+OPEN.EXE	0x80040450	0x2fc50	0x4	bss	proven	ev12	long	asm;src/open/card.c open.card	.sbss fixed; $gp+92; never referenced
+OPEN.EXE	0x80040454	0x2fc54	0x4	bss	proven	ev13	long	asm;src/open/card.c open.card	.sbss fixed; $gp+96; never referenced; MALLOC.OBJ .sbss follows
+OPEN.EXE	0x80040458	0x2fc58	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x80040488	0x2fc88	0x2	bss	proven	vab_id	short	asm;src/open/main.c open.main	.sbss COMMON; $gp+148; WIP spelling inside the retail bucket order
+OPEN.EXE	0x8004048a	0x2fc8a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x8004048c	0x2fc8c	0x4	bss	proven	vh_addr	u_char *	asm;src/open/main.c open.main	.sbss COMMON; $gp+152; OP.D sound bank header; WIP spelling inside the retail bucket order
+OPEN.EXE	0x80040490	0x2fc90	0x4	bss	proven	cdb	DB *	asm;src/open/main.c open.main	.sbss COMMON; $gp+156; the display buffer being drawn
+OPEN.EXE	0x80040494	0x2fc94	0x4	bss	proven	data_buf	u_long *	asm;src/open/main.c open.main	.sbss COMMON; $gp+160; malloc'd OP.D; WIP spelling inside the retail bucket order
+OPEN.EXE	0x80040498	0x2fc98	0x1	bss	proven	fade	u_char	asm;src/open/main.c open.main	.sbss COMMON; $gp+164; amount add_sprite darkens each sprite; WIP spelling inside the retail bucket order
+OPEN.EXE	0x80040499	0x2fc99	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+OPEN.EXE	0x8004049c	0x2fc9c	0x4	bss	proven	prim_next	POLY_FT4 *	asm;src/open/main.c open.main	.sbss COMMON; $gp+168; next free sprite, reset per frame
+OPEN.EXE	0x800404a0	0x2fca0	0x360	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/open/movie.c open.movie	.bss fixed, first; the two VLC buffers; continues past the load image (0x50000 B in all)
 END.EXE	0x80011000	0x800	0x9b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80012a34	0x2234	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80012a44	0x2244	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -167,7 +230,14 @@ END.EXE	0x8001c0d8	0xb8d8	0x4	unclassified	coverage-gap			payload-complement	may
 END.EXE	0x8001c3f8	0xbbf8	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80023178	0x12978	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80023188	0x12988	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-END.EXE	0x800232a0	0x12aa0	0x14560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x800232a0	0x12aa0	0x141f8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x80037498	0x26c98	0x4	defined	proven	movie_unused_0	int	asm;src/end/movie.c end.movie	.sdata; $gp+0; never referenced (OPEN's player has the same pair)
+END.EXE	0x8003749c	0x26c9c	0x4	defined	proven	movie_unused_1	int	asm;src/end/movie.c end.movie	.sdata; $gp+4; never referenced
+END.EXE	0x800374a0	0x26ca0	0x4	bss	proven	frame_no	int	asm;src/end/movie.c end.movie	.sbss fixed; $gp+8; frameCount of the last frame header
+END.EXE	0x800374a4	0x26ca4	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+END.EXE	0x800374d4	0x26cd4	0x4	bss	proven	cdb	DB *	asm;src/end/main.c end.main	.sbss COMMON; $gp+60; the display buffer being drawn
+END.EXE	0x800374d8	0x26cd8	0x4	bss	proven	prim_next	u_long *	asm;src/end/main.c end.main	.sbss COMMON; $gp+64; next free primitive word, reset per frame
+END.EXE	0x800374dc	0x26cdc	0x324	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/end/movie.c end.movie	.bss fixed, first; the two VLC buffers; continues past the load image (0x50000 B in all)
 FDAT_002.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

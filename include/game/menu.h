@@ -9,8 +9,8 @@
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
-#include <LIBGTE.H>
-#include <LIBGPU.H>
+#include <psyq/sdk.h>
+#include <psyq/kernel.h>
 
 /* Results of the menu pages (anything else is an item or action id). */
 #define MENU_NONE (-99)
@@ -111,14 +111,14 @@ void func_8001dee4(void);
 void func_8001e1b4(void);
 s32 func_8001e484(void);
 s32 func_8001e710(void);
-s32 func_8001ea34(char *dir, u8 *text, u32 *experience, u8 *levels, s32 *numbers);
+s32 func_8001ea34(struct DIRENTRY *dir, u8 *text, u32 *experience, u8 *levels, s32 *numbers);
 void func_8001eb3c(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
 void func_8001ec84(void);
 void func_8001f004(void);
 void func_8001f274(void);
 void func_8001f31c(void);
 void func_8001f4c0(void);
-s32 func_8001fc5c(char *dir);
+s32 func_8001fc5c(struct DIRENTRY *dir);
 void func_8001fe9c(MenuText *lines);
 void func_8001ff94(MenuText *lines);
 s32 func_8001f8b4(void);
@@ -134,15 +134,6 @@ void func_8002008c(void);
 void func_800203c8(s32 number);
 s32 func_80020560(void);
 void func_80020fe8(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
-void func_800285dc(void);
-s32 func_80028750(s32 number);
-/* memory card helpers past the menu (game/card.h on band D) */
-void func_80028034(void);
-void func_80028090(void);
-s32 func_800280d4(void);
-s32 func_800281c4(char *dir, s32 *status);
-s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number);
-s32 func_8002860c(s32 number);
 s32 func_800221e8(s32 selected, s32 last, s32 *chosen, s32 *confirmed, s32 *result);
 void func_800227ec(void);
 void func_800252f4(s32 page, s32 count, s32 selected, s32 flags);
@@ -155,16 +146,10 @@ void func_80026fe4(void);
 void func_800270f8(void);
 void func_80027198(void);
 void func_80027310(s32 a0);
-void func_800277c0(s32 value, s32 width, s32 a2, s32 a3, u8 *out);
 void func_8002792c(s32 se);
 s32 func_800279a4(void);
 void func_80027a40(void);
 void func_8002deec(s32 a0);
-void func_8002bb84(u8 item, s32 slot);
-void func_8002bdc0(u8 item);
-void func_8002b928(u8 spell);
-void func_8002ba38(u8 spell);
-void func_8002bb5c(u8 item);
 void func_80023300(void);
 void func_80024a78(u8 *levels);
 void func_800246bc(u8 *options);
@@ -195,8 +180,6 @@ void func_80026e4c(s32 x, s32 y, s32 w, s32 h);
 void func_80027a70(void);
 void func_800279d8(void);
 void func_80027d88(s32 file, u16 entry);
-/* the TIM upload of the model/animation module (game/render.h on band B) */
-void func_80043b38(u8 *file);
 
 extern MenuFont DAT_8007e564[];
 /* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
