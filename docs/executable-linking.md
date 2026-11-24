@@ -114,13 +114,16 @@ its units compile `-G0`. A partially claimed module is reported `partial` like
 a partial program. `kf link --compare-only` compares a module's file bytes
 strictly (header size 0) and keeps it out of the island report.
 
-Twenty modules are claimed whole (`src/fdat/fdat_nnn.c`). Fifteen of them
-(`FDAT_011`, `017`, `023`, `035`, `041`, `044`, `047`, `050`, `056`, `059`,
-`062`, `065`, `068`, `071`, `074`) relink byte-identically, checksum frame
-included, which proves the module link model: one compilation unit per
-module, `.rdata` (the handler table) first, then `.text`, then `.data`
-(`FDAT_023.BIN`'s two `SVECTOR` offsets), no padding between units. The
-other five link with one or two non-exact functions each.
+All 28 modules are claimed whole (`src/fdat/fdat_nnn.c`). Twenty-three of
+them (`FDAT_005`, `008`, `011`, `014`, `017`, `023`, `026`, `029`, `035`,
+`038`, `041`, `044`, `047`, `050`, `053`, `056`, `059`, `062`, `065`, `068`,
+`071`, `074`, `080`) relink byte-identically, checksum frame included, which
+proves the module link model: one compilation unit per module, `.rdata`
+(the handler table, then the switch tables in function order) first, then
+`.text`, then `.data` (`FDAT_023.BIN`'s two `SVECTOR` offsets, the light
+records of `FDAT_014`/`020`/`080`, `FDAT_008`'s bit table), no padding
+between units. The other five (`FDAT_002`, `020`, `032`,
+`077`, `083`) link with one to three non-exact functions each.
 
 ## PSX.EXE
 

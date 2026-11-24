@@ -17,9 +17,6 @@
 
 RODATA(0x801e8308, 0xa0)
 
-/* GAME.EXE .sdata word (owner unit unknown): the swing step of object 158. */
-extern s32 DAT_8009c21c;
-
 void func_801e83a8(void);
 void func_801e85b8(void);
 void func_801e8704(void);
