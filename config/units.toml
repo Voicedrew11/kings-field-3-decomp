@@ -57,6 +57,12 @@ source = "src/game/math.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.memory"
+image = "GAME.EXE"
+source = "src/game/memory.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.cd"
 image = "GAME.EXE"
 source = "src/game/cd.c"

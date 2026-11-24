@@ -19,6 +19,7 @@
 #include <MALLOC.H>
 #include <game/sound.h>
 #include <game/data.h>
+#include <game/memory.h>
 #include <game/funcs.h>
 
 /*
