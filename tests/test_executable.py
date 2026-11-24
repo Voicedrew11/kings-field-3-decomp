@@ -41,6 +41,26 @@ class ComparisonTests(unittest.TestCase):
             self.assertEqual(json.loads((root / 'build.json').read_text()), report)
             self.assertFalse((root / 'fuzzy-comparison.json').exists())
 
+    def test_compare_only_skips_images_without_a_linked_exe_unless_selected(self):
+        image = RetailImage.synthetic('PSX.EXE', 0x80010000, bytes(range(64)))
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            root = build / 'link/psx'
+            root.mkdir(parents=True)
+            (root / 'PSX.EXE').write_bytes(image.data)
+            with (mock.patch.object(executable, 'BUILD', build),
+                  mock.patch.object(RetailImage, 'load', return_value=image),
+                  mock.patch.object(executable, 'refresh_executable'),
+                  contextlib.redirect_stdout(io.StringIO()) as output):
+                self.assertEqual(executable.main(['--compare-only']), 0)
+            self.assertIn('GAME.EXE: no linked EXE yet; comparison skipped', output.getvalue())
+            self.assertTrue((root / 'fuzzy-comparison.json').is_file())
+            with (mock.patch.object(executable, 'BUILD', build),
+                  mock.patch.object(RetailImage, 'load', return_value=image),
+                  contextlib.redirect_stderr(io.StringIO()),
+                  self.assertRaises(SystemExit)):
+                executable.main(['--compare-only', '--image', 'game'])
+
     def test_file_tail_and_header_are_compared_without_masks(self):
         image = RetailImage.synthetic('PSX.EXE', 0x80010000, b'abcdefgh')
         self.assertTrue(compare(image.data, image)['file_equal'])

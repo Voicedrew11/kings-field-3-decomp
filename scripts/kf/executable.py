@@ -131,6 +131,10 @@ def main(argv: list[str] | None = None) -> int:
         filename = 'fuzzy-comparison.json' if args.compare_only else 'build.json'
         for name in names:
             root = BUILD / 'link' / name[:-4].lower()
+            if args.compare_only and not args.image and not (root / name).is_file():
+                # An image no source claims yet has no EXE to compare.
+                print(f'{name}: no linked EXE yet; comparison skipped')
+                continue
             report = ({'image': name, 'mode': 'compare-existing', 'executable': str(root / name)}
                       if args.compare_only else build_image(name, manifest, root))
             if args.compare_only:
