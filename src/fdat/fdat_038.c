@@ -195,14 +195,19 @@ void func_801e878c(void)
 ADDRESS(0x801e8794, 0xa8)
 void func_801e8794(void)
 {
-    if (DAT_801ba984.unk32[0x10] == 1 && DAT_8018fb3c.objects[241].arg.b.unk38 == 0x64) {
-        DAT_8018fb3c.objects[241].arg.b.unk38 = 0xff;
+    s32 k;
+
+    k = 241;
+    if (DAT_801ba984.unk32[0x10] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x64) {
+        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
     }
-    if (DAT_801ba984.unk32[0x11] == 1 && DAT_8018fb3c.objects[242].arg.b.unk38 == 0x65) {
-        DAT_8018fb3c.objects[242].arg.b.unk38 = 0xff;
+    k = 242;
+    if (DAT_801ba984.unk32[0x11] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x65) {
+        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
     }
-    if (DAT_801ba984.unk32[0x12] == 1 && DAT_8018fb3c.objects[243].arg.b.unk38 == 0x66) {
-        DAT_8018fb3c.objects[243].arg.b.unk38 = 0xff;
+    k = 243;
+    if (DAT_801ba984.unk32[0x12] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x66) {
+        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
     }
     DAT_801ba984.unk84[5] = 0xc;
 }

@@ -54,18 +54,21 @@ void func_801e8390(void)
 ADDRESS(0x801e85a0, 0xa4)
 void func_801e85a0(void)
 {
-    if ((*(u32 *)&DAT_801ba984.unk2c[4] & 0xff00ff) != 1) {
+    s32 i;
+
+    if (DAT_801ba984.unk2c[4] != 1 || DAT_801ba984.unk32[0] != 0) {
         return;
     }
-    if (DAT_80185da8.objects[1].unk9 == 1) {
+    i = 1;
+    if (DAT_80185da8.objects[i].unk9 == 1) {
         return;
     }
     if (func_80016a2c(DAT_801b24e4.unk124.vy,
-                      func_80016ab8(DAT_80185da8.objects[1].pos.vx - DAT_801b24e4.pos.vx,
-                                    DAT_80185da8.objects[1].pos.vz - DAT_801b24e4.pos.vz),
+                      func_80016ab8(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
+                                    DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
                       600) == 0) {
-        DAT_80185da8.objects[1].unk9 = 0;
-        DAT_80185da8.objects[1].unk0 = 2;
+        DAT_80185da8.objects[i].unk9 = 0;
+        DAT_80185da8.objects[i].unk0 = 2;
     }
 }
 
