@@ -222,9 +222,17 @@ s32 func_8004e914(s32 angle, s32 target)
     return difference <= 2048;
 }
 
-/* Turns obj toward target: the turn rate obj->unk58 grows by accel up to max. */
+/*
+ * Turns obj toward target: the turn rate obj->unk58 grows by accel up to max.
+ * K&R definition: target arrives as int (func_800500a8 passes
+ * func_80016ab8's result and Object88.unk20 unconverted).
+ */
 ADDRESS(0x8004e928, 0x154)
-void func_8004e928(Object88 *obj, s16 target, s32 max, s32 accel)
+void func_8004e928(obj, target, max, accel)
+    Object88 *obj;
+    s16 target;
+    s32 max;
+    s32 accel;
 {
     s32 yaw;
 
@@ -324,15 +332,16 @@ s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
     return r;
 }
 
+/* Returns func_8004ec08's result (func_800500a8 tests it). */
 ADDRESS(0x8004ed50, 0x90)
-void func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, s32 mode)
+s32 func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, s32 mode)
 {
     Object88 *obj;
 
     obj = DAT_80185da8.current;
     func_8004e928(obj, angle->vy, max, accel);
     obj->angle.vx = func_80015f18(obj->angle.vx, angle->vx, 8);
-    func_8004ec08(&obj->angle, scale_a, scale_b, mode);
+    return func_8004ec08(&obj->angle, scale_a, scale_b, mode);
 }
 
 /* A vertex of obj's posed model relative to its position. */

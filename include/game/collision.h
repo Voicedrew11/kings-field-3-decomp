@@ -14,7 +14,7 @@ s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height);
 void func_80033c4c(s32 x, s32 z, s32 radius, s32 count);
 s32 func_80033d08(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 void func_80033d84(void);
-s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, s32 mask);
+s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask);
 
 /* Callees outside the module; signatures from these call sites. */
 s32 func_8003260c(s32 x, s32 y, s32 z, s32 radius, s32 shape);

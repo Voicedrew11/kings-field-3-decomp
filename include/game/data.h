@@ -572,10 +572,13 @@ typedef struct Object88 {
     s16 unk6a;
     s16 unk6c;
     u8 unk6e[2];
-    s16 unk70;      /* +0x70: FDAT slot 17 phase 0..2 */
-    u8 unk72[2];
-    s16 unk74;      /* +0x74: FDAT slot 17 toggles it when the turn completes */
-    u8 unk76[0xe];
+    s16 unk70;      /* +0x70: script phase (FDAT slot 17: 0..2); script 5 keeps two
+                     * byte flags here (OBJECT88_B70/B71) */
+    SVECTOR unk72;  /* +0x72: script direction; vx/vy also counters and indexes, pad a
+                     * height (script 12); FDAT slot 17 toggles vy when the turn completes */
+    u8 unk7a[6];
+    s16 unk80;      /* +0x80: phase of script 31 */
+    u8 unk82[2];
     u8 unk84;       /* +0x84: cleared by a hit below the hurt threshold (func_8004c668) */
     u8 unk85[3];
 } Object88;
@@ -604,8 +607,8 @@ typedef struct Object78 {
     u16 unk1c;
     s16 unk1e;      /* +0x1e: passed to func_8002a310 when the record dies */
     u16 unk20[8];   /* +0x20: resistances to the eight attack stats (func_8004c668) */
-    u8 unk30[2];
-    u16 unk32;
+    u16 unk30;      /* +0x30: drop id (func_80046294) when script 3 ends */
+    u16 unk32;      /* +0x32: scale */
     u32 unk34;      /* +0x34: flags copied to Object88.unk28 */
     u8 *scripts[16]; /* +0x38: script records, the first byte their id; 0 ends */
 } Object78;
@@ -616,8 +619,7 @@ typedef struct Data80185da8 {
     u8 unk7d00[0x2000];
     u8 unk9d00;             /* +0x9d00: Object88.unk28 flags the searches skip */
     u8 unk9d01[3];
-    u16 unk9d04;            /* +0x9d04: passed to the collision tests */
-    u8 unk9d06[2];
+    s32 unk9d04;            /* +0x9d04: mask passed to the collision tests */
     Object78 *def;          /* +0x9d08: record of current */
     Object88 *current;      /* +0x9d0c: the record being updated */
     Object78 *target_def;   /* +0x9d10: record of target */

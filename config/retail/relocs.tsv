@@ -7156,6 +7156,7 @@ GAME.EXE	0x80050300	0x3fb00		mips26	reachable-code	0x800503d0	load		j		manual-de
 GAME.EXE	0x80050330	0x3fb30		mips26	reachable-code	0x8005035c	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x80050360	0x3fb60		mips26	reachable-code	0x800503d0	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8005039c	0x3fb9c		mips26	reachable-code	0x800503b0	load		j		manual-decoded	reviewed	game-f asm review
+GAME.EXE	0x800503e4	0x3fbe4	0x800503e8	mips_hi16_lo16	reachable-code	0x800128f0	load		lui+addiu		manual-decoded	reviewed	game-500a8 asm review
 GAME.EXE	0x8005041c	0x3fc1c		mips26	reachable-code	0x8004c130	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x80050450	0x3fc50		mips26	reachable-code	0x8004db3c	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x80050474	0x3fc74		mips26	reachable-code	0x8005058c	load		j		manual-decoded	reviewed	game-f asm review

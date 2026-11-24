@@ -30,7 +30,7 @@ void fdat_801e87a0(void)
         obj->unk16 = -12000;
         obj->unk14 = 0x32;
         obj->unk70 = 0;
-        obj->unk74 = 0;
+        obj->unk72.vy = 0;
         obj->unk18 = 0;
         obj->unk13 = 7;
         func_8004c130(script[1]);
@@ -41,14 +41,14 @@ void fdat_801e87a0(void)
     step_x = ((u16 *)script)[6] * rcos(angle) >> 12;
     step_z = ((u16 *)script)[6] * rsin(angle) >> 12;
     obj->unk64 = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
-    if (obj->unk74 == 0) {
+    if (obj->unk72.vy == 0) {
         turned = func_8004ea7c(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7], def->unk1[2],
                                def->unk1[3], 5);
     } else {
         turned = func_8004e824(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], 5);
     }
     if (turned != 0) {
-        obj->unk74 = obj->unk74 == 0;
+        obj->unk72.vy = obj->unk72.vy == 0;
     }
     dist = dx * dx + dz * dz;
     range = ((u16 *)script)[10] * ((u16 *)script)[10];
