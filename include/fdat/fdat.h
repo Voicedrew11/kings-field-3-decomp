@@ -43,9 +43,11 @@ typedef struct FdatHeader {
 /* GAME.EXE .sdata word ($gp+0x8, owner unit unknown): FDAT_002 swings object 158 by it. */
 extern s32 DAT_8009c21c;
 
-/* GAME.EXE functions the modules call (no GAME source or prototype yet). */
-void func_8005c308(Object88 *obj);
-/* Varargs: with obj NULL it takes the object index from the second argument. */
+/*
+ * GAME.EXE function the modules call (game.item_count; no GAME header
+ * prototype yet). Varargs: with obj NULL it takes the object index from the
+ * second argument. func_8005c308 comes from game/misc.h.
+ */
 void func_8005db30(Object44 *obj, ...);
 
 /* src/fdat/shared/fdat_801e83a4.inc (4 modules) */
