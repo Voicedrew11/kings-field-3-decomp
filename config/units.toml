@@ -169,3 +169,15 @@ unit = "game.entity_load"
 image = "GAME.EXE"
 source = "src/game/entity_load.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c"
+image = "GAME.EXE"
+source = "src/game/object4c.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c_move"
+image = "GAME.EXE"
+source = "src/game/object4c_move.c"
+profile = "gcc260-o2-g8"

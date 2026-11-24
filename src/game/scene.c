@@ -133,9 +133,9 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     i = 128;
     while (i--) {
         if (a->unk0 != 0xff && (a->unk8 & 0xc) != 0xc) {
-            a->x += dx;
-            a->z += dz;
-            a->y += dy;
+            a->pos.vx += dx;
+            a->pos.vz += dz;
+            a->pos.vy += dy;
         }
         a++;
     }

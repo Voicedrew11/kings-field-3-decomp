@@ -25,7 +25,9 @@ typedef struct Data801b24e4 {
     u16 unk1e;      /* +0x1e: out of 5000 */
     u16 unk20;
     u16 unk22;      /* +0x22: out of 5000 */
-    u8 unk24[0x60];
+    u8 unk24[0x1e];
+    u16 unk42[5];   /* +0x42: func_80053624 averages those of the bits of Record18.unk5 */
+    u8 unk4c[0x38];
     s16 unk84;      /* +0x84 */
     u8 unk86[0x1e];
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
@@ -68,7 +70,11 @@ typedef struct Data801d4464 {
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
     s32 unk1200c;   /* +0x1200c: height given to Object88 records with flag 0x400 */
     s32 unk12010;   /* +0x12010: floor height of the last collision test */
-    u8 unk12014[0x28];
+    u8 unk12014[4];
+    s32 unk12018[3]; /* +0x12018: [0] height the Object4c spawns of func_80056268 must reach */
+    u8 unk12024[4];
+    s32 unk12028;   /* +0x12028: index of an Object88 record (func_800533e8) */
+    u8 unk1202c[0x10];
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
     u8 unk1204c[8];
 } Data801d4464;
@@ -102,14 +108,31 @@ typedef struct Object44 {
 } Object44;
 
 typedef struct Object4c {
-    u8 unk0;        /* +0x00: 0xff when free */
-    u8 unk1[7];
+    u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
+                     * 0x40 averages the Record18.unk5 stats (func_80053624) */
+    u8 unk1;        /* +0x01: index of its Record18 record */
+    u8 unk2;
+    u8 unk3;        /* +0x03: model id - 40 (func_80053a0c) */
+    u8 unk4;        /* +0x04: animation */
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
     u8 unk8;        /* +0x08: both of bits 2 and 3 set keeps it in place */
-    u8 unk9[0xf];
-    s32 x;          /* +0x18 */
-    s32 y;
-    s32 z;
-    u8 unk24[0x28];
+    u8 unk9;
+    u8 unka;
+    u8 unkb;        /* +0x0b: frames before the collision test (func_80053310) */
+    u8 unkc;
+    u8 unkd;
+    u16 unke;
+    s16 unk10;
+    u16 unk12;
+    u16 unk14;      /* +0x14: animation time */
+    u8 unk16[2];
+    VECTOR pos;     /* +0x18 */
+    SVECTOR angle;  /* +0x28 */
+    SVECTOR scale;  /* +0x30: 0x1000 = 1 */
+    SVECTOR vel;    /* +0x38 */
+    u8 unk40[0xc];
 } Object4c;
 
 typedef struct Object88 {
@@ -182,7 +205,8 @@ typedef struct Object78 {
     s16 unk10;
     u16 unk12;
     u16 unk14;
-    u8 unk16[4];
+    u8 unk16[2];
+    s16 unk18;      /* +0x18: yaw range (func_800533e8) */
     u16 unk1a;
     u16 unk1c;
     u8 unk1e[0x14];
@@ -236,10 +260,31 @@ typedef struct Data8018fb3c {
     u8 unk8850[0x18];
 } Data8018fb3c;
 
+/* 0x18-byte records at the start of DAT_801b77ec (WIP). */
+typedef struct Record18 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;        /* +0x05: bits 0-4 pick Data801b24e4.unk42[0..4] */
+    u16 unk6;
+    u16 unk8;
+    u16 unka;
+    u16 unkc;
+    u16 unke;
+    u16 unk10;
+    u16 unk12;
+    u16 unk14;
+    u8 unk16[2];
+} Record18;
+
 typedef struct Data801b77ec {
-    u8 unk0[0x900];
-    Object4c objects[128];
-    u8 unk2f00[0xc];
+    Record18 unk0[96];
+    Object4c objects[128];  /* +0x900 */
+    Record18 *unk2f00;      /* +0x2f00: record of unk2f04 */
+    Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
+    u8 unk2f08[4];
 } Data801b77ec;
 
 /*
