@@ -182,6 +182,10 @@
   remove the real source reference to accommodate an incomplete target object.
 - BSS, overlay RAM, pointer tables, and GP-relative data require explicit
   ownership work. Do not infer initialized storage from aggregate objdiff data.
+- A check that cannot run is skipped only by a recorded, reasoned row in
+  `config/check_exemptions.tsv` (today only `common-placement`: COMMON whose
+  address depends on unpreserved SDK objects). Reports print it as EXEMPT;
+  never fake an address or drop a claim to pass a gate.
 - Generated build products, reports, and local retail paths are not committed.
 
 ## Verification and change discipline
