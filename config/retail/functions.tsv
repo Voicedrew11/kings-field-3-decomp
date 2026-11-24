@@ -23,7 +23,7 @@ GAME.EXE	0x80014a18	0x4218	0x14	0x14	1	function	mips-return-carve			scripts/kf/a
 GAME.EXE	0x80014a2c	0x422c	0x90	0x90	1	function	mips-frame-carve			scripts/kf/audit_functions.py	Psy-Q library band; anonymous WIP start; tier=candidate (carved from frame/return shape only); stack-frame+ra-save+matching-stack-return
 GAME.EXE	0x80014abc	0x42bc	0x58	0x58	1	function	mips-frame-carve			scripts/kf/audit_functions.py	Psy-Q library band; anonymous WIP start; tier=candidate (carved from frame/return shape only); stack-frame+ra-save+hoisted-prologue+matching-stack-return
 GAME.EXE	0x80014b14	0x4314	0x34	0x34	1	function	mips-frame-carve			scripts/kf/audit_functions.py	Psy-Q library band; anonymous WIP start; tier=candidate (carved from frame/return shape only); stack-frame+ra-save+matching-stack-return
-GAME.EXE	0x80014b48	0x4348	0x8c	0x8c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (j x1); stack-frame+ra-save+matching-stack-return+cross-extent-jump
+GAME.EXE	0x80014b48	0x4348	0x8c	0x8c	1	function	mips-frame-carve	main		scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (j x1); stack-frame+ra-save+matching-stack-return+cross-extent-jump
 GAME.EXE	0x80014bd4	0x43d4	0x490	0x490	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
 GAME.EXE	0x80015064	0x4864	0x38	0x38	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x3); stack-frame+ra-save+matching-stack-return
 GAME.EXE	0x8001509c	0x489c	0x1a4	0x1a4	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
