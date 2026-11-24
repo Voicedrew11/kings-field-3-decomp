@@ -542,6 +542,7 @@ void func_8002a310(amount)
 s16 amount;
 {
     Record0c *r;
+    Record0c *prev;
     s32 i;
     u8 level;
 
@@ -551,10 +552,10 @@ s16 amount;
         DAT_801b24e4.experience = 999999;
     }
     while (DAT_801b24e4.experience >= DAT_801b24e4.unk4) {
+        level = DAT_801b24e4.level;
         if (DAT_801b24e4.level >= 255) {
             return;
         }
-        level = DAT_801b24e4.level;
         DAT_801b24e4.level++;
         if (level < 99) {
             r = &DAT_8009f114[level];
@@ -568,7 +569,9 @@ s16 amount;
             }
             DAT_801b24e4.unk4 = r->unk8;
         } else {
-            DAT_801b24e4.unk16 += DAT_8009f114[99].unk0 - DAT_8009f114[98].unk0;
+            r = &DAT_8009f114[99];
+            prev = &DAT_8009f114[98];
+            DAT_801b24e4.unk16 += r->unk0 - prev->unk0;
             DAT_801b24e4.unk1a += DAT_8009f114[99].unk2 - DAT_8009f114[98].unk2;
             DAT_801b24e4.unk32 += DAT_8009f114[99].unk4;
             for (i = 4; i != -1; i--) {
@@ -576,7 +579,7 @@ s16 amount;
                     DAT_801b24e4.unk34[i]++;
                 }
             }
-            DAT_801b24e4.unk4 += DAT_8009f114[99].unk8 - DAT_8009f114[98].unk8;
+            DAT_801b24e4.unk4 += r->unk8 - prev->unk8;
         }
         func_80041eec(0);
         if (DAT_801b24e4.unk16 >= 1000) {
