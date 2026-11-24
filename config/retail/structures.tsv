@@ -17,10 +17,16 @@ Data801ba984	0x5144	supported	asm;game loop word-count clear;band A field access
 Data801d4464	0x12054	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
 Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
+MapRect	0x4	supported	asm;func_8001bd48/func_8001bea8 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
+MenuEntry	0x18	supported	asm;func_8001aea4 24-byte unaligned (lwl/lwr) record copies from DAT_8007f230	WIP (game-e)
+MenuFont	0xc	supported	asm;func_80025f38 reads six s16 at +0..+10;func_8001eb3c derives [1] from [5] - 48	WIP (game-e)
+MenuList	0x38	supported	asm;func_80027688/func_80027728 field stores;0x38-byte locals of the list pages	WIP (game-e)
+MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
 Object18	0x18	supported	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records	WIP (game-c)
 Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records	WIP (game-c)
+Record18	0x18	supported	asm;func_8001c6c0 24-byte stride from DAT_801b77ec, u8 +0 flag and u16 +0x16 value	WIP (game-e)
 SoundBank	0x8	supported	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP extent; fields band A does not touch are opaque
 SoundEffect	0xa	supported	asm;func_80015790 indexes se*10	WIP extent; fields band A does not touch are opaque
 SoundSlot	0x8	supported	asm;sound init and func_80015b9c (8-byte stride, 11 entries)	WIP extent; fields band A does not touch are opaque
