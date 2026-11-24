@@ -32,7 +32,7 @@ void func_80044b40(Object44 *obj, s32 mode, u8 value);
 void func_80044c34(s32 mode);
 void func_80044d9c(Object44Place *place);
 s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape);
-/* K&R definition: angle and range are s16 in the callee, int at the call (FDAT callers). */
+/* angle and range travel as int (FDAT callers); the callee narrows them to s16 at entry. */
 s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle, int range);
 void func_80046014(Object44 *obj, u8 kind);
 Object44 *func_80046034(s32 first, s32 count, s32 stamp);

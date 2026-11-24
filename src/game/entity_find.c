@@ -83,24 +83,30 @@ void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 
 ADDRESS(0x8004d254, 0x170)
 s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
 {
-    Object88 *obj;
+    s32 offset = height << 5;
+    Object88 *obj = DAT_80185da8.current;
+    VECTOR *target;
     VECTOR pos;
     s32 dist;
+    s32 angle;
 
-    obj = DAT_80185da8.current;
+    near <<= 6;
+    range <<= 6;
+    cone <<= 4;
     pos.vx = obj->pos.vx;
-    pos.vy = obj->pos.vy - (height << 5);
+    pos.vy = obj->pos.vy - offset;
     pos.vz = obj->pos.vz;
-    dist = func_80016ec8(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, range << 6, 0, 0x6a4);
-    if (dist == -1) {
+    dist = func_80016ec8(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, range, 0, 0x6a4);
+    if (dist == -1 || dist < near) {
         return 0;
     }
-    if (dist < near << 6) {
+
+    target = &DAT_801b24e4.pos;
+    angle = func_80016ab8(target->vx - pos.vx, target->vz - pos.vz);
+    if (!func_80016a2c(obj->angle.vy, angle, cone)) {
         return 0;
     }
-    if (!func_80016a2c(obj->angle.vy, func_80016ab8(DAT_801b24e4.pos.vx - pos.vx, DAT_801b24e4.pos.vz - pos.vz), cone << 4)) {
-        return 0;
-    }
+
     func_8002ab18(a4, a5, a6, a7, 0, 0, 0, 0, 0, 0x1000, 10, &pos);
     return 1;
 }
@@ -334,162 +340,170 @@ s32 func_8004db98(Object88 *obj, u16 time)
 ADDRESS(0x8004dbc8, 0x4cc)
 s32 func_8004dbc8(SVECTOR *vel, s32 mode)
 {
-    Object88 *obj;
-    VECTOR p;
-    s32 hits;
-    s32 slid;
-    s32 cornered;
-    s32 turns;
+    Object88 *obj = DAT_80185da8.current;
     s32 dx;
     s32 dz;
     s32 dx0;
     s32 dz0;
+    VECTOR p;
     s32 hit;
-    s32 floor;
-    s32 step_x;
-    s32 step_z;
-    s32 angle;
-    s32 len;
+    s32 slid;
+    s32 cornered;
+    s32 turns;
+    s32 hits = 0;
 
-    hits = 0;
-    obj = DAT_80185da8.current;
     if (vel->vx == 0 && vel->vz == 0) {
         return 0;
     }
     turns = 0;
     cornered = 0;
     slid = 0;
-    dx = vel->vx;
-    dz = vel->vz;
-    dx0 = dx;
-    dz0 = dz;
-    for (;;) {
-        p.vx = dx + obj->pos.vx;
-        p.vz = dz + obj->pos.vz;
-        hit = func_80033f38(p.vx, obj->pos.vy, p.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
-        if (hit == 0) {
-        clear:
-            if (obj->unkd == 0 && (mode & 0x24)) {
-                floor = DAT_801d4464.unk12010;
+    dx0 = dx = vel->vx;
+    dz0 = dz = vel->vz;
+
+retry:
+    p.vx = obj->pos.vx + dx;
+    p.vz = obj->pos.vz + dz;
+    hit = func_80033f38(p.vx, obj->pos.vy, p.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
+    if (hit == 0) {
+    clear:
+        if (obj->unkd == 0 && (mode & 0x24)) {
+            s32 floor = DAT_801d4464.unk12010;
+            s32 step_x;
+            s32 step_z;
+
+            if (dx == 0) {
                 step_x = 0;
-                if (dx != 0) {
-                    if (dx > 0) {
-                        step_x = obj->unk1c << 1;
-                    } else {
-                        step_x = -obj->unk1c << 1;
-                    }
-                }
-                step_z = 0;
-                if (dz != 0) {
-                    if (dz > 0) {
-                        step_z = obj->unk1c << 1;
-                    } else {
-                        step_z = -obj->unk1c << 1;
-                    }
-                }
-                func_80033d08(obj->pos.vx, obj->pos.vy, step_z + obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
-                if (floor < DAT_801d4464.unk12010) {
-                    floor = DAT_801d4464.unk12010;
-                }
-                func_80033d08(step_x + obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
-                if (floor < DAT_801d4464.unk12010) {
-                    floor = DAT_801d4464.unk12010;
-                }
-                if (obj->pos.vy < floor - 1100) {
-                    hits |= 0x100;
-                    if (mode & 4) {
-                        goto blocked;
-                    }
-                }
-            }
-            obj->pos.vx = p.vx;
-            obj->pos.vz = p.vz;
-            break;
-        }
-        hits |= hit;
-        if (!(mode & 3)) {
-            break;
-        }
-        if (hit & 0xb0) {
-            if (++turns == 2) {
-                break;
-            }
-            func_80033d84();
-            angle = func_80016ab8(DAT_801d4464.unk1203c.vx - obj->pos.vx, DAT_801d4464.unk1203c.vz - obj->pos.vz);
-            if (func_80016a68(func_80016ab8(dx, dz), angle)) {
-                angle += 1024;
+            } else if (dx > 0) {
+                step_x = obj->unk1c * 2;
             } else {
-                angle -= 1024;
+                step_x = -obj->unk1c * 2;
             }
-            angle &= 0xfff;
-            len = SquareRoot0(dx * dx + dz * dz);
-            dx = -(rsin(angle) * len) >> 13;
-            dz = (rcos(angle) * len) >> 13;
-            continue;
-        }
-        if (!(mode & 0x10)) {
-            if (obj->unk28 & 0x4000) {
-                goto blocked;
+            if (dz == 0) {
+                step_z = 0;
+            } else if (dz > 0) {
+                step_z = obj->unk1c * 2;
+            } else {
+                step_z = -obj->unk1c * 2;
             }
-            if (!(hit & ~0x205)) {
-                if (DAT_801d4464.unk12010 + 800 < obj->pos.vy) {
+            func_80033d08(obj->pos.vx, obj->pos.vy, obj->pos.vz + step_z, obj->unk1c, OBJECT88_SHAPE(obj));
+            if (floor < DAT_801d4464.unk12010) {
+                floor = DAT_801d4464.unk12010;
+            }
+            func_80033d08(obj->pos.vx + step_x, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
+            if (floor < DAT_801d4464.unk12010) {
+                floor = DAT_801d4464.unk12010;
+            }
+            if (obj->pos.vy < floor - 1100) {
+                hits |= 0x100;
+                if (mode & 4) {
                     goto blocked;
                 }
-                goto clear;
             }
         }
-        if (hit & 1) {
-        blocked:
-            if (slid) {
-                dz = 0;
-                dx = 0;
-                break;
-            }
-            if (dx != 0) {
-                dx = 0;
-                if (mode & 1) {
-                    dz = SquareRoot0(dx0 * dx0 + dz0 * dz0);
-                    if (dz0 <= 0) {
-                        dz = -dz;
-                    }
-                } else {
-                    dz = dz0;
-                }
-                continue;
-            }
-            if (dz != 0) {
-                dz = 0;
-                if (mode & 1) {
-                    dx = SquareRoot0(dx0 * dx0 + dz0 * dz0);
-                    if (dx0 <= 0) {
-                        dx = -dx;
-                    }
-                } else {
-                    dz = dz0;
-                }
-                slid = 1;
-                continue;
-            }
+        obj->pos.vx = p.vx;
+        obj->pos.vz = p.vz;
+        goto finish;
+    }
+
+    hits |= hit;
+    if (!(mode & 3)) {
+        goto finish;
+    }
+    if (hit & 0xb0) {
+        s32 angle;
+        s32 heading;
+        s32 len;
+
+        turns++;
+        if (turns == 2) {
+            goto finish;
         }
-        if (!(hit & 2)) {
-            break;
+        func_80033d84();
+        angle = func_80016ab8(DAT_801d4464.unk1203c.vx - obj->pos.vx, DAT_801d4464.unk1203c.vz - obj->pos.vz);
+        heading = func_80016ab8(dx, dz);
+        if (func_80016a68(heading, angle)) {
+            angle = (angle + 1024) & 0xfff;
+        } else {
+            angle = (angle - 1024) & 0xfff;
         }
-        if (cornered) {
+        len = SquareRoot0(dx * dx + dz * dz);
+        dx = -(rsin(angle) * len) >> 13;
+        dz = (rcos(angle) * len) >> 13;
+        goto retry;
+    }
+    if (!(mode & 0x10)) {
+        if (obj->unk28 & 0x4000) {
             goto blocked;
         }
-        switch (DAT_801d4464.unk12004[2] & 3) {
-        case 0:
-        case 2:
-            dz = (dx0 + dz0) >> 1;
-            dx = dz;
-            break;
-        default:
-            dx = (dx0 - dz0) >> 1;
-            dz = -dx;
-            break;
+        if (!(hit & ~0x205)) {
+            if (obj->pos.vy <= DAT_801d4464.unk12010 + 800) {
+                goto clear;
+            }
+            goto blocked;
         }
-        cornered = 1;
     }
+    if (!(hit & 1)) {
+        goto diagonal;
+    }
+
+blocked:
+    if (slid) {
+        dz = 0;
+        dx = 0;
+        goto finish;
+    }
+    if (dx != 0) {
+        dx = 0;
+        if (mode & 1) {
+            s32 len = SquareRoot0(dx0 * dx0 + dz0 * dz0);
+
+            dz = len;
+            if (dz0 <= 0) {
+                dz = -dz;
+            }
+        } else {
+            dz = dz0;
+        }
+        goto retry;
+    }
+    if (dz != 0) {
+        dz = 0;
+        if (mode & 1) {
+            s32 len = SquareRoot0(dx0 * dx0 + dz0 * dz0);
+
+            dx = len;
+            if (dx0 <= 0) {
+                dx = -dx;
+            }
+        } else {
+            dz = dz0;
+        }
+        slid = 1;
+        goto retry;
+    }
+diagonal:
+    if (!(hit & 2)) {
+        goto finish;
+    }
+    if (cornered) {
+        goto blocked;
+    }
+    switch (DAT_801d4464.unk12004[2] & 3) {
+    case 0:
+    case 2:
+        dx = (dx0 + dz0) >> 1;
+        dz = dx;
+        break;
+    default:
+        dx = (dx0 - dz0) >> 1;
+        dz = -dx;
+        break;
+    }
+    cornered = 1;
+    goto retry;
+
+finish:
     if (mode & 8) {
         vel->vx = dx;
         vel->vz = dz;

@@ -518,15 +518,15 @@ void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
-        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].count++;
+        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].r += (r * scale) >> 12;
         DAT_80199154.sum[0].g += (g * scale) >> 12;
         DAT_80199154.sum[0].b += (b * scale) >> 12;
         break;
     case 2:
-        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].count++;
+        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].r += (r * scale) >> 12;
         DAT_80199154.sum[1].g += (g * scale) >> 12;
         DAT_80199154.sum[1].b += (b * scale) >> 12;
@@ -1366,36 +1366,30 @@ u8 func_80040694(VECTOR *pos)
 ADDRESS(0x80040708, 0xc4)
 u8 func_80040708(VECTOR *pos, s32 radius)
 {
-    u8 cells;
-    s32 row;
-    s32 col0;
+    u8 cells = 0;
+    s32 row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
+    s32 col0 = (pos->vx >> 11) + DAT_80199154.grid_x - radius;
     s32 col;
     s32 i;
     s32 j;
-    u8 *line;
-    u8 *cell;
 
-    cells = 0;
-    i = radius * 2;
-    row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
-    col0 = (pos->vx >> 11) + DAT_80199154.grid_x - radius;
-    line = DAT_80199154.grid[row];
+    radius *= 2;
+    i = radius;
     do {
         if (row >= 0 && (u32)row < 25) {
-                j = radius * 2;
-                col = col0;
-                cell = &line[col];
-                do {
-                    if (col >= 0 && (u32)col < 25) {
-                        cells |= *cell;
-                    }
-                    cell++;
-                    col++;
-                } while (--j != -1);
+            col = col0;
+            j = radius;
+            do {
+                if (col >= 0 && (u32)col < 25) {
+                    cells |= DAT_80199154.grid[row][col];
+                }
+                col++;
+                j--;
+            } while (j != -1);
         }
-        line += 25;
         row++;
-    } while (--i != -1);
+        i--;
+    } while (i != -1);
     return cells;
 }
 
@@ -1432,17 +1426,17 @@ void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
 {
     u8 *wanted;
     s32 end;
-    SoundSlot *slot;
+    s32 i;
 
     wanted = SCRATCH->u.load.sound_wanted;
-    for (end = count + entry; entry < end; entry++, bank++) {
-        slot = DAT_801b09fc.banks[bank].slot;
+    for (i = entry, end = count + entry; i < end; i++, bank++) {
+        SoundBank *record = &DAT_801b09fc.banks[bank];
+        SoundSlot *slot = record->slot;
+
         if (*wanted++ != 0) {
             if (slot == NULL) {
-                func_80015ce0(file, entry, bank);
-                continue;
-            }
-            if (slot->state == 2) {
+                func_80015ce0(file, i, bank);
+            } else if (slot->state == 2) {
                 slot->state = 1;
             }
         } else if (slot != NULL && slot->state == 1) {
@@ -2336,35 +2330,30 @@ s16 *func_8004316c(s16 *deltas, s32 index)
 ADDRESS(0x800431e8, 0x344)
 s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
 {
-    AnimSlot *slot;
-    s32 index;
-    s32 frac;
-    ModelFile *model;
+    ModelFile *model = (ModelFile *)DAT_80199154.models[id];
+    AnimSlot *slot = *owner;
+    ScratchPad *scratch = SCRATCH;
     AnimKey *key;
     s32 *deltas;
-    u8 *data;
-    u16 n;
     u16 *ids;
-    u32 *src;
-    u32 *dst;
-    ScratchPad *scratch;
-    s32 i;
-    u16 c;
+    u16 n;
+    s32 index;
+    s32 frac;
 
-    slot = *owner;
-    model = (ModelFile *)DAT_80199154.models[id];
-    scratch = SCRATCH;
     if (model->unk4 == 0) {
+        u8 *data;
+
         if (slot != NULL) {
             func_80043894(slot);
         }
         data = DAT_80199154.models[id];
         data += ((ModelFile *)data)->vertices;
         scratch->model = data;
-        scratch->part = ((ModelData *)data)->parts;
-        scratch->vertices = *(s32 *)(data + 12) + 12 + data;
+        scratch->part = ((ModelData *)scratch->model)->parts;
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
         return 1;
     }
+
     if (slot == NULL) {
         func_800439b0(&slot);
         if (slot == NULL) {
@@ -2382,26 +2371,25 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         slot->anim = 0xff;
         goto init;
     }
+
     key = func_80042cac(model, anim, time, &index, &frac);
     if (slot->anim != anim || slot->key != index) {
         scratch->part = ((ModelData *)scratch->model)->parts;
-        scratch->vertices = *(s32 *)(scratch->model + 12) + 12 + scratch->model;
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
         deltas = (s32 *)((u8 *)model + model->deltas);
         n = key->count;
         if (n != 0) {
             ids = key->ids;
-            n--;
             func_80042d70(slot->pose, (SVECTOR *)scratch->vertices,
                           (s16 *)((u8 *)model + deltas[key->first]));
-            while (n != 0) {
-                i = *ids++;
-                n--;
-                func_80042e34(slot->pose, (s16 *)((u8 *)model + deltas[i]));
+            for (--n; n != 0; --n) {
+                func_80042e34(slot->pose, (s16 *)((u8 *)model + deltas[*ids++]));
             }
         } else {
-            src = (u32 *)scratch->vertices;
-            dst = (u32 *)slot->pose;
-            c = count;
+            u32 *src = (u32 *)scratch->vertices;
+            u32 *dst = (u32 *)slot->pose;
+            u16 c = count;
+
             do {
                 *dst++ = *src++;
                 *dst++ = *src++;
@@ -2409,18 +2397,22 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         }
         slot->base = deltas[key->base];
     }
-    src = (u32 *)slot->pose;
-    dst = (u32 *)DAT_80199154.pose;
     slot->anim = anim;
     slot->key = index;
-    c = count;
-    do {
-        *dst++ = *src++;
-        *dst++ = *src++;
-    } while (--c != 0);
+
+    {
+        u16 c = count;
+        u32 *src = (u32 *)slot->pose;
+        u32 *dst = (u32 *)DAT_80199154.pose;
+
+        do {
+            *dst++ = *src++;
+            *dst++ = *src++;
+        } while (--c != 0);
+    }
     func_80042eb0(DAT_80199154.pose, (s16 *)((u8 *)model + slot->base), frac);
-    scratch->vertices = (u8 *)DAT_80199154.pose;
     slot->state = 2;
+    scratch->vertices = (u8 *)DAT_80199154.pose;
 }
 
 ADDRESS(0x8004352c, 0x29c)

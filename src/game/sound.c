@@ -128,7 +128,7 @@ void func_80015354(void)
  * and the near-volume and turn temporaries (unattributed allocation residue).
  */
 ADDRESS(0x80015410, 0x244)
-s32 func_80015410(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note)
+s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note)
 {
     s32 dx = (pos->vx - DAT_801b09fc.listener.vx) >> 3;
     s32 dy = (pos->vy - DAT_801b09fc.listener.vy) >> 3;
@@ -156,7 +156,8 @@ s32 func_80015410(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 n
     if (!near) {
         left = volume + (127 - volume) / 4;
     } else {
-        left = volume + 32 + (127 - volume) / 2;
+        left = volume + 32;
+        left += (127 - volume) / 2;
         if (left >= 128) {
             left = 127;
         }

@@ -70,29 +70,27 @@ s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
 
 /*
  * Hit by the current record: the player (kind 0x80) or the Object88 record
- * of unk12028 (0x10). K&R definition: func_800536f8 passes a3 unmasked, so
- * the narrow parameters arrive as int. Not exact: retail spills a3 with sw
+ * of unk12028 (0x10). func_800536f8 passes a3 unmasked, so the narrow
+ * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
  * and reads it back with lhu; this source spills it with sh.
  */
 ADDRESS(0x800533e8, 0x23c)
-void func_800533e8(flags, kind, rec, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, target)
-s32 flags;
-s32 kind;
-Record18 *rec;
-u16 a3;
-u16 a4;
-u8 a5;
-u16 a6;
-u16 a7;
-u16 a8;
-u16 a9;
-u16 a10;
-u16 a11;
-u16 a12;
-u16 a13;
-u16 a14;
-VECTOR *target;
+void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int a5_in, int a6_in,
+                   int a7_in, int a8_in, int a9_in, int a10_in, int a11_in, int a12_in, int a13_in,
+                   int a14_in, VECTOR *target)
 {
+    u16 a3 = a3_in;
+    u16 a4 = a4_in;
+    u8 a5 = a5_in;
+    u16 a6 = a6_in;
+    u16 a7 = a7_in;
+    u16 a8 = a8_in;
+    u16 a9 = a9_in;
+    u16 a10 = a10_in;
+    u16 a11 = a11_in;
+    u16 a12 = a12_in;
+    u16 a13 = a13_in;
+    u16 a14 = a14_in;
     s32 mode;
     Object88 *obj;
     Object78 *def;

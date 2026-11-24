@@ -75,7 +75,7 @@ void func_8001509c(void);
 void func_80015240(void);
 void func_800152f8(void);
 void func_80015354(void);
-s32 func_80015410(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note);
+s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note);
 s32 func_80015654(s32 se, VECTOR *pos, s16 unused, s32 note);
 s32 func_80015688(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note);
 void func_800156bc(VECTOR *listener, SVECTOR *angle);

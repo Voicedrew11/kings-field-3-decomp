@@ -73,14 +73,10 @@ s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
  * yaw.
  */
 ADDRESS(0x80045c7c, 0x398)
-s32 func_80045c7c(start, pos, height, reach_up, angle, range)
-    s32 start;
-    VECTOR *pos;
-    s32 height;
-    s32 reach_up;
-    s16 angle;
-    s16 range;
+s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in, int range_in)
 {
+    s16 angle = angle_in;
+    s16 range = range_in;
     SVECTOR offset;
     VECTOR at;
     MATRIX m;

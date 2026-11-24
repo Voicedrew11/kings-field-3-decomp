@@ -99,7 +99,7 @@ s32 func_8004e6f8(s32 speed, s32 mode);
 s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode);
 s32 func_8004e8ec(s32 angle, s32 target);
 s32 func_8004e914(s32 angle, s32 target);
-/* K&R definition: target is s16 in the callee, int at the calls (func_800500a8). */
+/* target travels as int (func_800500a8); the callee narrows it to s16 for its angle tests. */
 void func_8004e928(Object88 *obj, int target, s32 max, s32 accel);
 s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode);
 s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel, s32 mode);
