@@ -1161,11 +1161,10 @@ void func_8001d0c4(void)
     func_80027688(&list, 0, 2);
     list.rows = 4;
     list.count = n;
-    n--;
     list.entries = entries;
     list.values = values;
     list.y = 0x83;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n - 1; i++) {
         if (ids[i] == DAT_801b24e4.unkc7) {
             func_80027728(&list, i);
             i = 32;
