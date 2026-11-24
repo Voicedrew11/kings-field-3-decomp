@@ -1,11 +1,12 @@
 /*
- * GAME.EXE: band B's render module from 0x8003c35c (WIP name): the 3D overlay
- * and model drawing front ends, full-screen 2D effects and the loading
- * screen, object model files, the map cell grid and the per-frame object
- * drawer, the 2D overlay sprites and messages, the animated model poses and
- * the picture fade. One TU: func_8003c35c/func_8003df50/func_800400ac read
- * DAT_8009c2e0 and func_800441d4 reads DAT_8009c2d0 $gp-relative, which ASPSX
- * emits only for .sdata defined in the same file.
+ * GAME.EXE: band B's render module from 0x8003bfd0 (WIP name): the map
+ * layers of the view grid, the 3D overlay and model drawing front ends,
+ * full-screen 2D effects and the loading screen, object model files, the map
+ * cell grid and the per-frame object drawer, the 2D overlay sprites and
+ * messages, the animated model poses and the picture fade. One TU:
+ * func_8003bfd0/func_8003c35c/func_8003df50/func_800400ac read DAT_8009c2e0
+ * and func_800441d4 reads DAT_8009c2d0 $gp-relative, which ASPSX emits only
+ * for .sdata defined in the same file.
  */
 /* func_80040ae4 reads Data8018fad4.step as volatile (see game/data.h). */
 #define GAME_RENDER_MODULE
@@ -50,6 +51,81 @@ SVECTOR DAT_8009c2e4 = { 0x1000, 0x1000, 0x1000, 0 };
 
 DATA(0x8009c2ec, 0x4, ".sdata")
 s32 DAT_8009c2ec = 0;
+
+/*
+ * Draws the map layers of the 25 x 25 cell grid around the viewer
+ * (Data80199154.grid, flags per cell as func_8003be34 takes them).
+ */
+ADDRESS(0x8003bfd0, 0x38c)
+void func_8003bfd0(void)
+{
+    SVECTOR *pos;
+    VECTOR *origin;
+    MapCell *cell;
+    u8 *grid;
+    s32 kind;
+    s32 x;
+    s32 z;
+    s32 i;
+    s32 j;
+
+    pos = &SCRATCH->u.layer.unk100;
+    origin = &SCRATCH->u.layer.unk108;
+    SCRATCH->model = DAT_80199154.unk10148[0];
+    SCRATCH->ot = DAT_80199154.ot + 240;
+    *(u32 *)&SCRATCH->w.map.rgb = *(u32 *)&DAT_8009c2e0;
+    SCRATCH->next = DAT_80199154.pool->next;
+    SCRATCH->end = DAT_80199154.pool->end;
+    SCRATCH->w.map.clip = 100;
+    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->u.layer.unk108.vx = DAT_80199154.unk15af8.vx;
+    SCRATCH->u.layer.unk108.vy = DAT_80199154.unk15af8.vy;
+    SCRATCH->u.layer.unk108.vz = DAT_80199154.unk15af8.vz;
+    SCRATCH->u.layer.unk108.pad = DAT_80199154.unk15af8.pad;
+    SCRATCH->w.map.count = DAT_80199154.unk159bc;
+    SCRATCH->w.map.ot_count = DAT_80199154.ot_count;
+    SCRATCH->w.map.prim_count = DAT_80199154.prim_count;
+    func_80018f5c((u32 *)SCRATCH->u.view.grid, (u32 *)DAT_80199154.grid, 0x9c);
+    grid = &SCRATCH->u.view.grid[0][0];
+    SCRATCH->u.view.x = DAT_80199154.unk15b20;
+    SCRATCH->u.view.z = DAT_80199154.unk15b24;
+    z = DAT_80199154.unk15b24;
+    for (i = 25; i != 0; z++, i--) {
+        if (z >= 0 && z < 80) {
+            x = SCRATCH->u.view.x;
+            for (j = 25; j != 0; x++, j--, grid++) {
+                if (x >= 0 && x < 80 && *grid != 0) {
+                    cell = &DAT_801d4464.cells[z][x];
+                    kind = cell->layer[0].unk0;
+                    if ((*grid & 2) && kind < 240) {
+                        pos->vx = (x << 11) - origin->vx + 1024;
+                        pos->vy = (-cell->layer[0].unk1 << 7) - origin->vy;
+                        pos->vz = (z << 11) - origin->vz + 1024;
+                        func_8003bb04(&cell->layer[0], pos, *grid);
+                        kind = cell->layer[1].unk0;
+                        if ((*grid & 2) && kind < 240) {
+                            pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
+                            func_8003bb04(&cell->layer[1], pos, *grid);
+                        }
+                    } else {
+                        kind = cell->layer[1].unk0;
+                        if ((*grid & 2) && kind < 240) {
+                            pos->vx = (x << 11) - origin->vx + 1024;
+                            pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
+                            pos->vz = (z << 11) - origin->vz + 1024;
+                            func_8003bb04(&cell->layer[1], pos, *grid);
+                        }
+                    }
+                }
+            }
+        } else {
+            grid += 25;
+        }
+    }
+    DAT_80199154.unk159bc = SCRATCH->w.map.count;
+    DAT_80199154.ot_count = SCRATCH->w.map.ot_count;
+    DAT_80199154.pool->next = SCRATCH->next;
+}
 
 /*
  * Draws the 3D overlays (the compass needles of DAT_80081c20, visible == 1)

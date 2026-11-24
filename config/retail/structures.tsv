@@ -47,6 +47,7 @@ Object44Def	0x18	supported	asm;func_80033d84 &DAT_8018fb3c + Object44.unk6 * 24 
 Object44DefArg	0xc	supported	asm;func_80047010 reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
 Object44DefBytes	0xc	supported	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
 Object44DefHalves	0xc	supported	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (func_80033f38 radius/height); func_80045ac8/func_80033d84 lhu +0xe/+0x10	WIP (game-47010)
+Object44DefSHalves	0xc	supported	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
 Object44Halves	0x10	supported	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40	WIP (game-k)
 Object44Link	0x2	supported	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules)	WIP (fdat)
 Object44Model	0x10	supported	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e	WIP (render-tu)

@@ -498,9 +498,18 @@ typedef struct Object44DefHalves {
     u8 unk12[6];
 } Object44DefHalves;
 
+/* Signed view of the same halfwords: the pick-up offsets of the item kinds (func_8005db30). */
+typedef struct Object44DefSHalves {
+    s16 unkc;       /* +0x0c: items: height offset of the held position (func_8005be28 dy) */
+    s16 unke;       /* +0x0e: items: distance of the held position (dz) */
+    s16 unk10;      /* +0x10: items: Object44.unke while held */
+    u8 unk12[6];
+} Object44DefSHalves;
+
 typedef union Object44DefArg {
     Object44DefBytes b;
     Object44DefHalves h;
+    Object44DefSHalves sh;
 } Object44DefArg;
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
