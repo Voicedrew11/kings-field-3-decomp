@@ -2423,8 +2423,13 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
     return (s32)slot;
 }
 
+/*
+ * id is a full int (narrowed only for func_800405e8): a narrow first
+ * parameter would emit an entry conversion, and GCC then drops the stack
+ * equivalence of `out`, which changes its allocation priority ($s6/$s7).
+ */
 ADDRESS(0x8004352c, 0x29c)
-s32 func_8004352c(u16 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
+s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
 {
     u8 *loaded;
     ModelFile *file;

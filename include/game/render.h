@@ -495,7 +495,7 @@ void func_80042e34(SVECTOR *pose, s16 *deltas);
 void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t);
 s16 *func_8004316c(s16 *deltas, s32 index);
 s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count);
-s32 func_8004352c(u16 id, s32 anim, s32 time, s32 vertex, SVECTOR *out);
+s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out);
 s32 func_800437c8(s32 id, s32 part);
 void func_80043828(void);
 void func_80043858(void);
