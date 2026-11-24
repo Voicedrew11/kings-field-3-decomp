@@ -505,8 +505,8 @@ void func_8002fe1c(void)
                 }
                 DAT_801b24e4.unkf = flag;
             }
-            DAT_801b24e4.unk10 = 1;
             DAT_801b24e4.unk22 -= 500;
+            DAT_801b24e4.unk10 = 1;
             if ((s16)DAT_801b24e4.unk22 <= 0) {
                 DAT_801b24e4.unk22 = 0;
                 if (DAT_801b24e4.unkf4 != 0x4d && DAT_801b24e4.unkf4 != 0x4f) {
