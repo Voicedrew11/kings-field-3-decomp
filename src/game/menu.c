@@ -4762,6 +4762,7 @@ void func_800261dc(MenuFont *font, MenuText *text)
     s32 dx;
     s32 u;
     s32 v;
+    s32 ch;
 
     c = text->text;
     func_80027610(3, font->unk0);
@@ -4772,8 +4773,9 @@ void func_800261dc(MenuFont *font, MenuText *text)
         DAT_8009c378->y0 = text->y - 1;
         DAT_8009c378->w = font->unk8;
         DAT_8009c378->h = font->unka;
-        u = (*c & 0xf) * 8;
-        v = (*c >> 4) * 15;
+        ch = *c;
+        u = (ch & 0xf) * 8;
+        v = (ch >> 4) * 15;
         DAT_8009c378->u0 = u;
         DAT_8009c378->v0 = v;
         func_800275e0(2);
@@ -4848,7 +4850,10 @@ void func_80026570(s32 x, s32 y, char *text, s32 shadow, s32 row)
         shade = (DAT_801b24e4.unkfd - 128) / 2;
     }
     shade += 112;
-    while (*text != 0) {
+    for (;;) {
+        if (*text == 0) {
+            return;
+        }
         func_80027560();
         if (shadow == 0) {
             setRGB0(DAT_8009c378, shade, shade, shade);
