@@ -17,7 +17,7 @@ s32 func_8004ffa0(Object88 *obj)
 {
     s32 note;
 
-    note = 16 - (s8)(obj->unk4a >> 8);
+    note = 16 - (s8)(obj->scale.vy >> 8);
     if (note > 12) {
         note = 12;
     } else if (note < -12) {

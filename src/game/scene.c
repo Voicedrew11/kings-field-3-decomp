@@ -429,7 +429,7 @@ void func_80018358(void)
             obj88 = DAT_80185da8.objects;
             for (i = 199; i != -1; i--) {
                 if (obj88->unk5c != 0) {
-                    func_80043894((AnimSlot *)obj88->unk5c);
+                    func_80043894(obj88->unk5c);
                 }
                 obj88->unk0 = 0xff;
                 obj88++;

@@ -239,21 +239,36 @@ typedef struct Data80199154 {
 
 extern Data80199154 DAT_80199154;
 
-/* Scratchpad words from +0x118 while an area loads. */
+/* Scratchpad words from +0x100 while the map layers are drawn (func_8003be34). */
+typedef struct ScratchLayer {
+    SVECTOR unk100;     /* +0x100: map layer position func_8003be34 hands func_8003bb04 */
+    VECTOR unk108;      /* +0x108: origin of the map layer positions */
+} ScratchLayer;
+
+/*
+ * Scratchpad words from +0x100 while the objects are drawn (func_80040ae4):
+ * each pass flags the model ids and sound banks its objects use, and
+ * func_800409c8/func_800408d0 keep those loaded through the wanted pointers.
+ */
 typedef struct ScratchLoad {
-    u8 unk0[4];
+    u8 unk100[0x14];
+    SVECTOR angle;      /* +0x114: rotation handed to the model front ends */
     u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
     u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
+    u8 models[332];     /* +0x124: model flags from id 128 (Object88) or 256 (Object44) */
+    u8 sounds[96];      /* +0x270: sound bank flags from 51 (Object88) or 147 (Object44) */
 } ScratchLoad;
 
-/* Scratchpad words from +0x118 while a frame is built (func_80034bf4). */
+/* Scratchpad words from +0x100 while a frame is built (func_80034bf4). */
 typedef struct ScratchView {
+    u8 unk100[0x18];
     s32 x;              /* +0x118: map cell x of grid column 0 */
     s32 z;              /* +0x11c: map cell z of grid row 0 */
     u8 grid[25][25];    /* +0x120: copied to Data80199154.grid */
 } ScratchView;
 
 typedef union ScratchPhase {
+    ScratchLayer layer;
     ScratchLoad load;
     ScratchView view;
 } ScratchPhase;
@@ -292,7 +307,7 @@ typedef union ScratchDraw {
 typedef struct ScratchPad {
     u8 unk0[8];
     u32 *ot;            /* +0x08: Data80199154.ot while a model is drawn */
-    u8 unkc[4];
+    u32 *ot2;           /* +0x0c: Data80199154.ot2 (func_80040ae4) */
     u8 *model;          /* +0x10: data of the model being drawn */
     u8 *next;           /* +0x14: Data80199154.pool->next while a model is drawn;
                          * func_8003bb04 drops flag 4 within 10240 of end */
@@ -312,9 +327,7 @@ typedef struct ScratchPad {
     s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
     ScratchDraw draw;   /* +0x74 */
     u8 unk94[0x6c];
-    SVECTOR unk100;     /* +0x100: map layer position func_8003be34 hands func_8003bb04 */
-    VECTOR unk108;      /* +0x108: origin of the map layer positions */
-    ScratchPhase u;     /* +0x118 */
+    ScratchPhase u;     /* +0x100 */
 } ScratchPad;
 
 #define SCRATCH ((ScratchPad *)0x1f800000)
@@ -356,6 +369,12 @@ typedef struct Data80081c20 {
 
 extern Data80081c20 DAT_80081c20[3];
 
+/*
+ * View matrix func_80040ae4 hands the model front ends for the objects drawn
+ * without the view rotation (load-image .data; owner unit unknown).
+ */
+extern MATRIX DAT_8007e4c4;
+
 extern RECT DAT_8009c2d0;
 extern CVECTOR DAT_8009c2e0;
 extern SVECTOR DAT_8009c2e4;
@@ -395,7 +414,7 @@ void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which);
 void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step);
 
 void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
-                   s32 light_id, u16 depth);
+                   s32 light_id, int depth);
 u16 func_80040568(u16 id);
 void func_800405e8(u16 id, u8 **out);
 void func_80040658(u8 *file);
@@ -473,11 +492,12 @@ void func_8003ab04(void);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
+/* func_800400ac has a K&R definition: depth (u16 there) travels as int. */
 void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    s32 flags, s32 depth);
 void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    u8 flags, s32 depth);
 void func_80040ae4(void);
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);

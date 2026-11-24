@@ -12,7 +12,7 @@
 #include <INLINE.H>
 
 /*
- * Draws one map layer at pos (relative to SCRATCH->unk108): loads its light
+ * Draws one map layer at pos (relative to SCRATCH->u.layer.unk108): loads its light
  * record (layer->unk4) turned by layer->unk2, the fog and the view transform,
  * then runs the near (flags bit 2) or far ground renderer on model part
  * layer->unk0.
@@ -77,19 +77,19 @@ void func_8003be34(s32 x, s32 z, s32 flags)
     MapCell *cell;
     s32 kind;
 
-    pos = &SCRATCH->unk100;
-    origin = &SCRATCH->unk108;
+    pos = &SCRATCH->u.layer.unk100;
+    origin = &SCRATCH->u.layer.unk108;
     cell = &DAT_801d4464.cells[z][x];
     kind = cell->layer[0].unk0;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;
         pos->vz = (z << 11) - origin->vz + 1024;
         pos->vy = (-cell->layer[0].unk1 << 7) - origin->vy;
-        func_8003bb04(&cell->layer[0], &SCRATCH->unk100, flags);
+        func_8003bb04(&cell->layer[0], &SCRATCH->u.layer.unk100, flags);
         kind = cell->layer[1].unk0;
         if (kind < 240) {
             pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
-            func_8003bb04(&cell->layer[1], &SCRATCH->unk100, flags);
+            func_8003bb04(&cell->layer[1], &SCRATCH->u.layer.unk100, flags);
         }
     } else {
         kind = cell->layer[1].unk0;
