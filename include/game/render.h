@@ -270,7 +270,8 @@ typedef struct PrimTag {
 /* Scratchpad words from +0x74 while a model is drawn: the frame counters,
  * copied in and back by the model front ends (func_8004290c). */
 typedef struct ScratchCount {
-    s32 unk0;           /* +0x74 */
+    s16 unk0;           /* +0x74 */
+    s16 unk2;           /* +0x76: func_8003e34c sets 100 */
     s32 unk4;           /* +0x78: Data80199154.unk159bc; the renderers add each part's
                          * primitive count */
     s32 ot_count;       /* +0x7c */
@@ -302,7 +303,7 @@ typedef struct ScratchPad {
     u8 *normals;        /* +0x28: the part's normals (records index them by byte offset) */
     u8 unk2c[0x18];
     ScreenVertex *screen; /* +0x44: the part's projected vertices */
-    u8 unk48[4];
+    ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too */
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
     u8 unk50[4];
     VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
@@ -463,12 +464,17 @@ void func_8003be34(s32 x, s32 z, s32 flags);
 
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
+void func_800366a8(u16 part);
+void func_80037bec(u16 part, s32 depth, s32 mode);
 void func_80039428(u16 part, s16 depth, s32 shade);
 void func_80039d50(void);
 void func_8003ab04(void);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
+void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, u16 t,
+                   s32 flags, s32 depth);
 void func_80040ae4(void);
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80043b38(u8 *file);

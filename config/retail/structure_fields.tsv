@@ -724,7 +724,8 @@ SaveHeader	0x60	0x20	clut	u16[16]	candidate	asm;src/game/card.c game.card (func_
 SaveHeader	0x80	0x180	icon	u8[3][128]	candidate	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 SaveHeader	0x200	0x4	checksum	u32	candidate	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 SaveHeader	0x204	0x7c	unk204	u8[124]	opaque	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
-ScratchCount	0x0	0x4	unk0	s32	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0x0	0x2	unk0	s16	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0x2	0x2	unk2	s16	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
 ScratchCount	0x4	0x4	unk4	s32	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
 ScratchCount	0x8	0x4	ot_count	s32	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
 ScratchCount	0xc	0x4	prim_count	s32	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
@@ -747,7 +748,7 @@ ScratchPad	0x24	0x4	part	ModelPart *	candidate	asm;scratchpad words 0x1f800010/2
 ScratchPad	0x28	0x4	normals	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x2c	0x18	unk2c	u8[24]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x44	0x4	screen	ScreenVertex *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
-ScratchPad	0x48	0x4	unk48	u8[4]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
+ScratchPad	0x48	0x4	unk48	ScreenVertex *	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x4c	0x4	vertices	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
 ScratchPad	0x50	0x4	unk50	u8[4]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x54	0x10	unk54	VECTOR	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
