@@ -78,7 +78,27 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x1e33c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4c4	0x6dcc4	0x3354	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081818	0x71018	0xd	defined	supported	DAT_80081818	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
+GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	DAT_80081828	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
+GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	DAT_80081868	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
+GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	DAT_80081884	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
+GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	DAT_800818c0	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
+GAME.EXE	0x800818e3	0x710e3	0x1a9dd	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	DAT_8009c2c0	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
+GAME.EXE	0x8009c2c1	0x8bac1	0xe7	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	DAT_8009c3a8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
+GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	DAT_8009c3ac	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
+GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	DAT_8009c3b0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event
+GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	DAT_8009c3b4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a0; card error event
+GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	DAT_8009c3b8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a4; never referenced
+GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	DAT_8009c3bc	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a8; never referenced
+GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
+GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
+GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
+GAME.EXE	0x8009c3cc	0x8bbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

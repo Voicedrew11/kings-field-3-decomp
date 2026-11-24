@@ -2,10 +2,23 @@
 # A supported layout proves current size/offset modeling, not an original typedef spelling.
 name	size	layout_confidence	evidence	note
 CdRequest	0x2c	supported	asm;band A field accesses (func_80015908, func_80015a48, func_80015ce0);func_8001967c 0x2c stride	WIP: only the fields band A touches are named; owner is the CD module
-Data801b24e4	0x19c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
-Data801ba984	0x5144	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
-Data801d4464	0x12054	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Data80185da8	0x9d2c	supported	asm;game loop word-count clear;band C func_80017aa4 records at +0;func_8002c164 120-byte records at +0x6a40, word +0x9d28	WIP (game-d)
+Data8018fad4	0x68	supported	asm;game loop word-count clear;band C src/game/scene.c field accesses;band D func_80029188	WIP (game-d)
+Data80199154	0x178a8	supported	asm;game loop word-count clear;func_800290d8 pointer table at +0x1015c	WIP (game-d)
+Data801b24e4	0x19c	supported	asm;game loop word-count clear;band A field accesses;band D player module field accesses	WIP (game-d)
+Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;func_80029f1c/func_8002b468 24-byte records at +0;band C records at +0x900	WIP (game-d)
+Data801ba984	0x5144	supported	asm;game loop word-count clear;band D func_80029500/func_80029f1c/func_8002bdc0 byte accesses	WIP (game-d)
+Data801d4464	0x12054	supported	asm;game loop word-count clear;func_800293e4/func_8002bb84 0x20-byte records at +0x11c14;func_80028d54 heights +0x12018	WIP (game-d)
 Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Object2c	0x2c	supported	asm;func_8002c164 reads +0x2 and +0x28 of func_8004d3c4 result (referenced prefix)	WIP (game-d)
+Object4c	0x4c	supported	asm;band C func_80017aa4 76-byte stride, 128 records	WIP (game-d)
+Object88	0x88	supported	asm;band C func_80017aa4 136-byte stride, 200 records	WIP (game-d)
+Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
+Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec	WIP (game-d)
+Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
+Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4	WIP (game-d)
+Record78	0x78	supported	asm;func_8002c164 120-byte stride at DAT_80185da8+0x6a40	WIP (game-d)
+SaveHeader	0x280	supported	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 SoundBank	0x8	supported	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP extent; fields band A does not touch are opaque
 SoundEffect	0xa	supported	asm;func_80015790 indexes se*10	WIP extent; fields band A does not touch are opaque
 SoundSlot	0x8	supported	asm;sound init and func_80015b9c (8-byte stride, 11 entries)	WIP extent; fields band A does not touch are opaque
