@@ -31,7 +31,7 @@ extern void ExitCriticalSection(void);
 extern int ResetCallback(void);
 extern int StopCallback(void);
 
-extern void InitHeap(void *head, long size);
+/* InitHeap: Runtime Library 3.3 MALLOC.H (psyq/libc.h) declares it. */
 extern void InitCARD(long pad_enable);
 extern long StartCARD(void);
 extern long StopCARD(void);
