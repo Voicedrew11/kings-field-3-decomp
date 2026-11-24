@@ -1402,19 +1402,16 @@ u8 func_80040708(VECTOR *pos, s32 radius)
 ADDRESS(0x800407cc, 0x64)
 s32 func_800407cc(VECTOR *pos, s32 range_x, s32 range_z)
 {
-    s32 inside;
+    s32 z = pos->vz >> 11;
     s32 x;
-    s32 z;
 
-    inside = 0;
-    z = pos->vz >> 11;
-    if (z - range_z <= DAT_80199154.unk15b14 && z + range_z >= DAT_80199154.unk15b14) {
+    if (z - range_z <= DAT_80199154.unk15b14 && DAT_80199154.unk15b14 <= z + range_z) {
         x = pos->vx >> 11;
-        if (x - range_x <= DAT_80199154.unk15b10) {
-            inside = x + range_x >= DAT_80199154.unk15b10;
+        if (x - range_x <= DAT_80199154.unk15b10 && DAT_80199154.unk15b10 <= x + range_x) {
+            return 1;
         }
     }
-    return inside;
+    return 0;
 }
 
 ADDRESS(0x80040830, 0xa0)

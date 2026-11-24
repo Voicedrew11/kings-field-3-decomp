@@ -562,20 +562,19 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
     return 0;
 }
 
-/* Runs frames while the screen tint (mode) steps its level from level to end. */
+/* Runs frames while the screen tint (mode) steps its level from phase to last. */
 ADDRESS(0x80046c00, 0xb0)
-void func_80046c00(mode, level, end, step)
-    u8 mode;
-    s32 level;
-    s32 end;
-    s32 step;
+void func_80046c00(int mode, s32 phase, s32 last, s32 step)
 {
     VECTOR pos;
     SVECTOR angle;
-    s32 v;
+    s32 end = last;
+    s32 increment = step;
+    s32 level = phase;
 
     for (;;) {
-        v = level * level >> 16;
+        s32 v = level * level >> 16;
+
         if (v >= 256) {
             v = 0xff;
         }
@@ -587,7 +586,7 @@ void func_80046c00(mode, level, end, step)
         if (level == end) {
             break;
         }
-        level += step;
+        level += increment;
     }
 }
 

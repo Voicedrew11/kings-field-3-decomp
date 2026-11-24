@@ -5284,21 +5284,29 @@ ADDRESS(0x800277c0, 0x16c)
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out)
 {
     s32 i;
-    s32 fill;
+    u8 fill;
+    u8 *cursor;
+    s16 frame_reserve[4]; /* unreferenced; reproduces retail's 8-byte frame slot */
 
-    i = 0;
     if (arg3 == 1 || arg3 == 2) {
-        digits += 1;
+        digits++;
     } else if (arg3 == 3 || arg3 == 5) {
         digits += 2;
     } else if (arg3 == 4) {
         digits += 3;
     }
+
+    i = 0;
     fill = arg2 == 0 ? 10 : 0;
-    for (i = 0; i < digits; i++) {
-        out[i] = fill;
+    if (digits > 0) {
+        cursor = out;
+        do {
+            *cursor++ = fill;
+            i++;
+        } while (i < digits);
     }
     out[digits] = 0xff;
+
     if (arg3 == 1) {
         out[0] = 0x13;
     } else if (arg3 == 2) {
@@ -5315,7 +5323,8 @@ void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out)
         out[0] = 0xe;
         out[1] = 0x11;
     }
-    for (i = digits - 1; i >= 0; i--) {
+
+    for (i = digits - 1; i > -1; i--) {
         out[i] = value % 10;
         value /= 10;
         if (value == 0) {
