@@ -4182,34 +4182,34 @@ ADDRESS(0x80024a78, 0x1f8)
 void func_80024a78(u8 *levels)
 {
     s32 i;
-    s32 y;
-    s32 bar_y;
+    s32 k;
 
     func_80027610(0x32, DAT_8007e564[10].unk0);
-    for (i = 0, y = 0x3c, bar_y = 0x34; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         func_80027560();
         setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-        DAT_8009c378->clut = DAT_8007e564[10].unk2;
+        k = 10;
+        DAT_8009c378->clut = DAT_8007e564[k].unk2;
         DAT_8009c378->x0 = 0xa5;
-        DAT_8009c378->y0 = bar_y;
-        DAT_8009c378->w = DAT_8007e564[10].unk8;
-        DAT_8009c378->h = DAT_8007e564[10].unka;
-        DAT_8009c378->u0 = DAT_8007e564[10].unk4;
-        DAT_8009c378->v0 = DAT_8007e564[10].unk6;
+        DAT_8009c378->y0 = i * 26 + 0x34;
+        DAT_8009c378->w = DAT_8007e564[k].unk8;
+        DAT_8009c378->h = DAT_8007e564[k].unka;
+        DAT_8009c378->u0 = DAT_8007e564[k].unk4;
+        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
         SetSemiTrans(DAT_8009c378, DAT_801b24e4.unk100);
         func_800275e0(0x32);
         func_80027560();
         setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-        DAT_8009c378->clut = DAT_8007e564[9].unk2;
-        DAT_8009c378->x0 = *levels++ * 96 / 128 + 172;
-        DAT_8009c378->y0 = y;
-        DAT_8009c378->w = DAT_8007e564[9].unk8;
-        DAT_8009c378->h = DAT_8007e564[9].unka;
-        DAT_8009c378->u0 = DAT_8007e564[9].unk4 + DAT_801b24e4.unk100 * 16;
-        DAT_8009c378->v0 = DAT_8007e564[9].unk6;
+        k = 9;
+        DAT_8009c378->clut = DAT_8007e564[k].unk2;
+        DAT_8009c378->x0 = *levels * 96 / 128 + 172;
+        DAT_8009c378->y0 = i * 26 + 0x3c;
+        DAT_8009c378->w = DAT_8007e564[k].unk8;
+        DAT_8009c378->h = DAT_8007e564[k].unka;
+        DAT_8009c378->u0 = DAT_8007e564[k].unk4 + DAT_801b24e4.unk100 * 16;
+        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
         func_800275e0(0x31);
-        y += 26;
-        bar_y += 26;
+        levels++;
     }
 }
 
