@@ -158,7 +158,6 @@ void func_8002d2a0(void)
     s32 n;
     s32 found;
     s32 angle;
-    s32 scale;
 
     w = DAT_801b24e4.unkb0;
     switch (DAT_801b24e4.unkcb) {
@@ -261,6 +260,8 @@ void func_8002d2a0(void)
         break;
     default:
         if (DAT_801b24e4.unkc0 != -1) {
+            s32 scale;
+
             div = 0;
             if (DAT_801b24e4.unkca == 0) {
                 speed = w->unk1c;
