@@ -1377,7 +1377,6 @@ void func_8001d944(void)
     s32 n;
     s32 i;
     s32 j;
-    u8 *book;
     u32 pad;
 
     count = func_80060b0c();
@@ -1399,53 +1398,54 @@ void func_8001d944(void)
         func_80027a40();
         return;
     }
-    book = &books[page];
-        n = func_8001dbc4(*book, page, pages);
-        func_8001dcd0(page, pages[row]);
-        while (result == MENU_NONE) {
-            func_800279d8();
-            pad = func_800279a4();
-            if (pad & DAT_8009c250) {
-                func_8002792c(0xe);
-                result = -1;
-            } else if (pad & PADLup) {
-                func_8002792c(0xc);
-                if (row > 0) {
-                    row--;
-                    func_8001dcd0(page, pages[row]);
-                }
-            } else if (pad & PADLdown) {
-                func_8002792c(0xc);
-                if (row < n - 1) {
-                    row++;
-                    func_8001dcd0(page, pages[row]);
-                }
-            } else if (pad & PADLright) {
-                func_8002792c(0xc);
-                if (page > 0) {
-                    book--;
-                    page--;
-                    n = func_8001dbc4(*book, page, pages);
-                    row = 0;
-                    func_8001dcd0(page, pages[0]);
-                }
-            } else if (pad & PADLleft) {
-                func_8002792c(0xc);
-                if (page < count - 1) {
-                    book++;
-                    page++;
-                    n = func_8001dbc4(*book, page, pages);
-                    row = 0;
-                    func_8001dcd0(page, pages[0]);
-                }
+    j = page;
+    n = func_8001dbc4(books[page], page, pages);
+    func_8001dcd0(page, pages[row]);
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            return;
+        }
+        func_800279d8();
+        pad = func_800279a4();
+        if (pad & DAT_8009c250) {
+            func_8002792c(0xe);
+            result = -1;
+        } else if (pad & PADLup) {
+            func_8002792c(0xc);
+            if (row > 0) {
+                row--;
+                func_8001dcd0(page, pages[row]);
             }
-            for (i = 0; i < 2; i++) {
-                func_80026fe4();
-                func_80023ce8(*book);
-                func_800270f8();
+        } else if (pad & PADLdown) {
+            func_8002792c(0xc);
+            if (row < n - 1) {
+                row++;
+                func_8001dcd0(page, pages[row]);
+            }
+        } else if (pad & PADLleft) {
+            func_8002792c(0xc);
+            if (page > 0) {
+                page--;
+                n = func_8001dbc4(books[page], page, pages);
+                row = 0;
+                func_8001dcd0(page, pages[0]);
+            }
+        } else if (pad & PADLright) {
+            func_8002792c(0xc);
+            if (page < count - 1) {
+                page++;
+                n = func_8001dbc4(books[page], page, pages);
+                row = 0;
+                func_8001dcd0(page, pages[0]);
             }
         }
-    func_80027a40();
+        for (i = 0; i < 2; i++) {
+            func_80026fe4();
+            func_80023ce8(books[page]);
+            func_800270f8();
+        }
+    }
 }
 
 ADDRESS(0x8001dbc4, 0x10c)
@@ -4285,7 +4285,11 @@ s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item)
         labels[1].text[5] = 0xb;
         labels[1].text[6] = 0xff;
     }
-    while (result == MENU_NONE) {
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            break;
+        }
         func_800279d8();
         pad = func_800279a4();
         if ((pad & 0x1000) || (pad & 0x4000)) {
@@ -4311,7 +4315,6 @@ s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item)
             func_800270f8();
         }
     }
-    func_80027a40();
     return result;
 }
 
@@ -4337,10 +4340,9 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     rect.h = 0xfe;
     ClearImage(&rect, 0, 0, 0);
     if (mode == 0) {
-        if (DAT_801b24e4.unk4c < DAT_80081780[item]) {
+        entry = item + 390;
+        if (DAT_80081780[item] > DAT_801b24e4.unk4c) {
             entry = item + 540;
-        } else {
-            entry = item + 390;
         }
     } else if (mode == 1) {
         entry = item + 690;
@@ -4365,7 +4367,11 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     func_80019518(buffer);
     DAT_8009c230 = saved;
     func_80027a40();
-    while (result == MENU_NONE) {
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            break;
+        }
         func_800279d8();
         if (func_800279a4() & DAT_8009c250) {
             func_8002792c(0xe);
@@ -4397,7 +4403,6 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
             func_800270f8();
         }
     }
-    func_80027a40();
 }
 
 ADDRESS(0x800252f4, 0x174)
