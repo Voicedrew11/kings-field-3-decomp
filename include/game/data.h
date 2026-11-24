@@ -53,7 +53,7 @@ typedef struct Data801b24e4 {
     u16 unk1a;      /* +0x1a: maximum of unk1c; 0..999, from the level table */
     u16 unk1c;
     u16 unk1e;      /* +0x1e: out of 5000 */
-    s16 unk20;
+    u16 unk20;      /* +0x20: copy of unk1e; scales the swing hit (func_8002d2a0) */
     u16 unk22;      /* +0x22: out of 5000 */
     u16 unk24;      /* +0x24: counts up to 100 for a point of unk32 */
     u16 unk26[5];   /* +0x26: count up to 400 for a point of unk34[n] */
@@ -102,10 +102,10 @@ typedef struct Data801b24e4 {
     struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
-    s32 unkbc;
+    struct Object4c *unkbc; /* +0xbc: arrow of a bow shot (func_8002d2a0) */
     s16 unkc0;      /* +0xc0: -1 blocks the Object88 script records of ids 19 and 20 */
-    u16 unkc2;
-    u16 unkc4;
+    s16 unkc2;      /* +0xc2: swing time of the next hit (func_8002d2a0) */
+    s16 unkc4;      /* +0xc4: swing time of the next swing sound */
     u8 unkc6;
     u8 unkc7;
     u8 unkc8;
@@ -416,7 +416,9 @@ typedef struct Object4c {
     SVECTOR angle;  /* +0x28 */
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
-    u8 unk40[0xc];
+    u8 unk40[4];
+    u16 unk44;      /* +0x44: a shot arrow keeps its starting height here (func_8002d2a0) */
+    u8 unk46[6];
 } Object4c;
 
 typedef struct Object88 {
@@ -494,7 +496,7 @@ typedef struct Object78 {
     s16 unk10;
     u16 unk12;
     u16 unk14;
-    u8 unk16[2];
+    s16 unk16;      /* +0x16: yaw range of its front (func_8002d2a0) */
     s16 unk18;      /* +0x18: yaw range (func_800533e8) */
     u16 unk1a;
     u16 unk1c;
@@ -565,15 +567,21 @@ typedef struct Record44 {
     u8 unk4;
     u8 unk5;
     u16 unk6[8];
-    u8 unk16[8];
+    u8 unk16[4];
+    u16 unk1a;      /* +0x1a: reach of the swing probe (func_8002d2a0) */
+    u16 unk1c;      /* +0x1c..+0x32: per hand the swing speed, hit time, limits and steps
+                     * func_8002d2a0 runs the swing with (WIP names) */
     u16 unk1e;
-    u8 unk20[4];
+    u16 unk20;
+    u16 unk22;
     u16 unk24;
     u16 unk26;
-    u8 unk28[4];
+    u16 unk28;
+    u16 unk2a;
     u16 unk2c;
     u16 unk2e;
-    u8 unk30[4];
+    u16 unk30;
+    u16 unk32;
     u16 unk34;      /* +0x34..+0x42: model offsets of the weapon tip (func_8002cea8) */
     u16 unk36;
     u16 unk38;
