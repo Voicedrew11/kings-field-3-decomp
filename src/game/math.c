@@ -419,6 +419,10 @@ void func_80016c90(s32 dx, s32 dy, s32 dz, SVECTOR *out)
     out->vz = 0;
 }
 
+/*
+ * Not exact: retail joins both arms' slt result and branches once to return
+ * 0 or 1; every spelling tried folds the join into xori or splits it per arm.
+ */
 ADDRESS(0x80016d0c, 0x30)
 s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
 {
@@ -428,6 +432,11 @@ s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
     return 1;
 }
 
+/*
+ * Not exact: GCC cross-jumps the two height-test failures into one test,
+ * where retail keeps the below-y failure as its own return block (see
+ * func_80016ec8); the first two squares also land in other registers.
+ */
 ADDRESS(0x80016d3c, 0x18c)
 s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_width,
                   s32 half_depth, s32 reach_down, s32 reach_up)
@@ -455,6 +464,12 @@ s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_
     return distance;
 }
 
+/*
+ * Not exact: GCC cross-jumps the two height-test failures into one shared
+ * test; retail keeps them apart. Ending with `return -1` instead keeps them
+ * apart as retail does but then changes the radius test, so the retail
+ * shape of the whole tail is not yet found.
+ */
 ADDRESS(0x80016ec8, 0xec)
 s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, s32 reach_up)
 {
@@ -572,6 +587,11 @@ void func_800171b0(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
     }
 }
 
+/*
+ * Not exact: control flow, calls and constants agree; distance and height
+ * trade callee-saved registers ($s2/$s3) and the root/b temporaries trade
+ * $a0/$v0/$v1 (unattributed allocation residue).
+ */
 ADDRESS(0x80017210, 0x28c)
 s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s32 *time,
                   s32 *angle)

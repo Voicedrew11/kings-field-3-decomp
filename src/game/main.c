@@ -38,11 +38,6 @@
 #define EXIT_ENDING_A 3
 #define EXIT_ENDING_B 4
 
-/* FDAT window words: [2] its base, [4] the end of the loaded module, [5] the heap base. */
-extern u32 DAT_800136e8[6];
-
-/* Arena func_8001937c formats with a 0x4d800-byte free block. */
-extern u8 DAT_800c8954[0x4d800];
 
 SDATA(0x8009c214, 0x8)
 

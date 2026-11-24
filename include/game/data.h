@@ -2,7 +2,8 @@
 #define GAME_DATA_H
 
 /*
- * GAME.EXE BSS blocks that main's start-up clears word by word (WIP). Each
+ * GAME.EXE globals band A references outside the sound and CD headers (WIP),
+ * mostly the BSS blocks the game loop clears word by word at start-up. Each
  * extent is the word count main passes to func_80018fbc; whether a block is
  * one object or a run of several is not yet known, so the names stay
  * address-derived and only the fields band A touches are named.
@@ -40,6 +41,15 @@ typedef struct Data801e7edc {
     u8 unk384;
     u8 unk385[7];
 } Data801e7edc;
+
+/*
+ * FDAT window words in the load image (owner unit unknown): [2] the window
+ * base, [4] the end of the loaded module, [5] the heap base main stores.
+ */
+extern u32 DAT_800136e8[6];
+
+/* Arena func_8001937c formats with a 0x4d800-byte free block. */
+extern u8 DAT_800c8954[0x4d800];
 
 extern u32 DAT_80185da8[0x274b];
 extern u32 DAT_8018fad4[0x1a];

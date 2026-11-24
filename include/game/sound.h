@@ -9,6 +9,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <LIBGTE.H>
+#include <LIBSND.H>
 
 /* SoundBank.vab_id values besides a libsnd VAB id. */
 #define SOUND_VAB_NONE (-1)
@@ -55,6 +56,20 @@ typedef struct SoundState {
 } SoundState;
 
 extern SoundState DAT_801b09fc;
+
+/* Main-RAM buffers the sound slots read VAB bodies into. */
+extern u8 DAT_8014a958[2][0x1000];
+extern u8 DAT_8014c958[0x1000];
+extern u8 DAT_8017b964[2][0x1000];
+extern u8 DAT_8017d964[4][0x1000];
+extern u8 DAT_80181964[0x1000];
+extern u8 DAT_80183568[0x1000];
+
+/* libsnd sequence attribute table for SsSetTableSize(table, 2, 1). */
+extern char DAT_800c8768[SS_SEQ_TABSIZ * 2 * 1];
+
+/* The sequence the background music plays from. */
+extern u_long DAT_801b268c[];
 
 void func_8001509c(void);
 void func_80015240(void);

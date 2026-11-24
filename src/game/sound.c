@@ -18,20 +18,6 @@
 #include <game/data.h>
 #include <game/funcs.h>
 
-/* Main-RAM buffers the sound slots read VAB bodies into. */
-extern u8 DAT_8014a958[2][0x1000];
-extern u8 DAT_8014c958[0x1000];
-extern u8 DAT_8017b964[2][0x1000];
-extern u8 DAT_8017d964[4][0x1000];
-extern u8 DAT_80181964[0x1000];
-extern u8 DAT_80183568[0x1000];
-
-/* libsnd sequence attribute table for SsSetTableSize(table, 2, 1). */
-extern char DAT_800c8768[SS_SEQ_TABSIZ * 2 * 1];
-
-/* The sequence the background music plays from. */
-extern u_long DAT_801b268c[];
-
 DATA(0x801b09fc, 0x1ae8, ".bss")
 SoundState DAT_801b09fc;
 
@@ -136,6 +122,11 @@ void func_80015354(void)
     SsEnd();
 }
 
+/*
+ * Not exact: retail leaves `note` in its stack slot (loaded at the call) and
+ * saves no $s5; GCC here gives it $s5, which shifts se/near between $s3/$s4
+ * and the near-volume and turn temporaries (unattributed allocation residue).
+ */
 ADDRESS(0x80015410, 0x244)
 s32 func_80015410(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note)
 {
@@ -375,6 +366,11 @@ SoundSlot *func_80015b9c(s32 first_bank, s32 bank_count, s32 first_slot, s32 slo
     return 0;
 }
 
+/*
+ * Not exact: retail stores bank->slot and slot->state before it loads
+ * DAT_801c1724; GCC here schedules the load first. The callback's .text
+ * offset also follows func_80015410's size.
+ */
 ADDRESS(0x80015ce0, 0x238)
 void func_80015ce0(s32 file, s32 sector, s32 index)
 {
