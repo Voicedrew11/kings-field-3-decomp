@@ -3563,8 +3563,8 @@ void func_800227ec(void)
     func_800277c0(DAT_801b24e4.unk42[0], 6, 0, 0, number.text);
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
-    label.x += 35;
     label.y += 15;
+    label.x += 35;
     func_80027414();
     setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
     DAT_8009c374->tpage = 0x1d;
@@ -3587,8 +3587,8 @@ void func_800227ec(void)
     func_800277c0(DAT_801b24e4.unk42[3], 6, 0, 0, number.text);
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
-    label.x += 35;
     label.y += 15;
+    label.x += 35;
     func_80027414();
     setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
     DAT_8009c374->tpage = 0x1d;
