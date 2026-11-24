@@ -206,7 +206,10 @@ typedef struct Data801ba984 {
     u8 unk61;       /* +0x61: 1: the movie ends at start position 12 (func_80061940) */
     u8 unk62[3];
     u8 unk65;
-    u8 unk66[0xb];
+    u8 unk66[3];
+    u8 unk69;       /* +0x69: 1 when the ending is due (func_8005eb20 sets 2) */
+    u8 unk6a;       /* +0x6a: picks the ending (func_8005eb20) */
+    u8 unk6b[6];
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[9];
     u8 unk7f[5];    /* +0x7f: per magic element */
