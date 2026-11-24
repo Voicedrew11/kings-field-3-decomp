@@ -114,6 +114,14 @@ its units compile `-G0`. A partially claimed module is reported `partial` like
 a partial program. `kf link --compare-only` compares a module's file bytes
 strictly (header size 0) and keeps it out of the island report.
 
+Twenty modules are claimed whole (`src/fdat/fdat_nnn.c`). Fifteen of them
+(`FDAT_011`, `017`, `023`, `035`, `041`, `044`, `047`, `050`, `056`, `059`,
+`062`, `065`, `068`, `071`, `074`) relink byte-identically, checksum frame
+included, which proves the module link model: one compilation unit per
+module, `.rdata` (the handler table) first, then `.text`, then `.data`
+(`FDAT_023.BIN`'s two `SVECTOR` offsets), no padding between units. The
+other five link with one or two non-exact functions each.
+
 ## PSX.EXE
 
 `src/psx/main.c` (one unit, `psx.main`, profile `gcc260-o2-g8`) links with

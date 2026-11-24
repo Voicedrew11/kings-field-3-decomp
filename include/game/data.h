@@ -279,19 +279,35 @@ typedef struct Data801e7edc {
  * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
  * records it also moves are the placed effects (Effect, game/render.h).
  */
+/* Object44 +0x3a as the FDAT module handlers read it (WIP). */
+typedef union Object44Link {
+    u16 index;      /* slot 0: a linked object, 0xffff for none */
+    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value */
+} Object44Link;
+
 typedef struct Object44 {
     u8 unk0[3];
     u8 unk3;        /* +0x03: flags; 0x10 scales its radius by unk38, 0x4 takes Object44Def.unke/unk10 */
     u8 unk4;
     u8 unk5;
     u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
-    u8 unk8[0xc];
+    u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
+    u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
+    u8 unkc[4];
+    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff */
+    u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (func_8005bee0) */
-    u8 unk2c[0xc];
+    SVECTOR unk2c;  /* +0x2c: FDAT_017 clears vx, vy and vz */
+    u8 unk34[4];
     u8 unk38;       /* +0x38: radius scale, 0x80 = 1 */
     u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
-    u8 unk3a[0xa];
+    Object44Link unk3a; /* +0x3a */
+    u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
+    u8 unk3d[2];
+    u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
+    u8 unk40;       /* +0x40: FDAT slot 0 copies it to the linked object's unk0[0] */
+    u8 unk41[3];
 } Object44;
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
@@ -357,7 +373,7 @@ typedef struct Object88 {
     u8 unk13;
     u8 unk14;
     u8 unk15;
-    u16 unk16;
+    s16 unk16;      /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
     u16 unk18;      /* +0x18: animation time */
     u16 unk1a;
     u16 unk1c;
@@ -379,14 +395,16 @@ typedef struct Object88 {
     u8 unk5a[2];
     u32 unk5c;
     u8 *unk60;      /* +0x60: running script record */
-    u8 unk64[2];
+    s16 unk64;      /* +0x64: FDAT slot 17 stores the angle to the player */
     s16 unk66;
     s16 unk68;
     s16 unk6a;
     s16 unk6c;
     u8 unk6e[2];
-    s16 unk70;
-    u8 unk72[0x16];
+    s16 unk70;      /* +0x70: FDAT slot 17 phase 0..2 */
+    u8 unk72[2];
+    s16 unk74;      /* +0x74: FDAT slot 17 toggles it when the turn completes */
+    u8 unk76[0x12];
 } Object88;
 
 /*
@@ -511,7 +529,9 @@ typedef struct Data8018fad4 {
 typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
-    u8 unk8850[0x18];
+    u8 unk8850[8];
+    Object44 *unk8858;      /* +0x8858: the object FDAT slot 9 handlers test */
+    u8 unk885c[0xc];
 } Data8018fb3c;
 
 /*

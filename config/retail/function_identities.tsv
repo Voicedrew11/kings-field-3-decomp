@@ -645,7 +645,7 @@ END.EXE	0x800122b4	strNext			u_long *	DECENV *dec	supported	proven	asm;Sony movi
 END.EXE	0x80012348	strSync			void	DECENV *dec	supported	proven	asm;Sony movie sample shape	waits until the decoded frame is fully loaded (timeout flips anyway)
 END.EXE	0x800123c0	strKickCD			void	CdlLOC *loc	supported	proven	asm;Sony movie sample shape	CdlSeekL then CdRead2 in stream mode, each retried until accepted
 FDAT_002.BIN	0x801e83a8	func_801e83a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_002.BIN	0x801e83b0	func_801e83b0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e83b0	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_002.BIN	0x801e85b8	func_801e85b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801e8704	func_801e8704			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_002.BIN	0x801e870c	func_801e870c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -697,7 +697,7 @@ FDAT_008.BIN	0x801e8e08	func_801e8e08			unknown	unknown arg0;unknown arg1	addres
 FDAT_008.BIN	0x801e8eb4	func_801e8eb4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e8398	func_801e8398			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_011.BIN	0x801e83a0	func_801e83a0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e83a0	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_011.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -731,7 +731,7 @@ FDAT_014.BIN	0x801e8b30	func_801e8b30			unknown		address-only	candidate	mips-liv
 FDAT_014.BIN	0x801e8cc8	func_801e8cc8			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_014.BIN	0x801e8da8	func_801e8da8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_017.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_017.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_017.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_017.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_017.BIN	0x801e867c	func_801e867c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -761,7 +761,7 @@ FDAT_020.BIN	0x801e8904	func_801e8904			unknown		address-only	candidate	mips-liv
 FDAT_020.BIN	0x801e8934	func_801e8934			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_020.BIN	0x801e8a80	func_801e8a80			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_023.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_023.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_023.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_023.BIN	0x801e85a8	func_801e85a8			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_023.BIN	0x801e86e4	func_801e86e4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -783,7 +783,7 @@ FDAT_023.BIN	0x801e88d4	func_801e88d4			void		address-only	candidate	mips-live-i
 FDAT_023.BIN	0x801e88dc	func_801e88dc			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_023.BIN	0x801e88f4	func_801e88f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_026.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_026.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_026.BIN	0x801e85a0	func_801e85a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_026.BIN	0x801e8644	func_801e8644			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_026.BIN	0x801e8778	func_801e8778			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -812,7 +812,7 @@ FDAT_029.BIN	0x801e8a88	func_801e8a88			void		address-only	candidate	mips-live-i
 FDAT_029.BIN	0x801e8a90	func_801e8a90			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_029.BIN	0x801e8acc	func_801e8acc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_032.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_032.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_032.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_032.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_032.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -854,7 +854,7 @@ FDAT_038.BIN	0x801e8784	func_801e8784			void		address-only	candidate	mips-live-i
 FDAT_038.BIN	0x801e878c	func_801e878c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_038.BIN	0x801e8794	func_801e8794			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_041.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_041.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_041.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_041.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_041.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -884,12 +884,12 @@ FDAT_044.BIN	0x801e86a0	func_801e86a0			void		address-only	candidate	mips-live-i
 FDAT_044.BIN	0x801e86a8	func_801e86a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_044.BIN	0x801e86b0	func_801e86b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_047.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_047.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e85b8	func_801e85b8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_047.BIN	0x801e86d8	func_801e86d8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e86d8	fdat_801e86d8			void	s32 index;s32 count	candidate	candidate	relocation-masked-body	FDAT object record run state 8 (src/fdat/shared/fdat_801e86d8.inc), the same body in 2 modules; named by its FDAT_047.BIN address
 FDAT_047.BIN	0x801e870c	func_801e870c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e87d8	func_801e87d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e87e0	func_801e87e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -900,7 +900,7 @@ FDAT_047.BIN	0x801e8800	func_801e8800			void		address-only	candidate	mips-live-i
 FDAT_047.BIN	0x801e8808	func_801e8808			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_047.BIN	0x801e8810	func_801e8810			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_050.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_050.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_050.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_050.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_050.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -914,11 +914,11 @@ FDAT_050.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-i
 FDAT_050.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_050.BIN	0x801e85f8	func_801e85f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e8448	func_801e8448			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_053.BIN	0x801e8450	func_801e8450			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8450	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_053.BIN	0x801e8658	func_801e8658			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e86f8	func_801e86f8			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e891c	func_801e891c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_053.BIN	0x801e8924	func_801e8924			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8924	fdat_801e86d8			void	s32 index;s32 count	candidate	candidate	relocation-masked-body	FDAT object record run state 8 (src/fdat/shared/fdat_801e86d8.inc), the same body in 2 modules; named by its FDAT_047.BIN address
 FDAT_053.BIN	0x801e8958	func_801e8958			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e89c0	func_801e89c0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e8b10	func_801e8b10			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -932,7 +932,7 @@ FDAT_053.BIN	0x801e8de8	func_801e8de8			unknown	unknown arg0	address-only	candid
 FDAT_053.BIN	0x801e8e08	func_801e8e08			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_053.BIN	0x801e8f84	func_801e8f84			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_056.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_056.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_056.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_056.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_056.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -946,7 +946,7 @@ FDAT_056.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-i
 FDAT_056.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_056.BIN	0x801e85f8	func_801e85f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_059.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_059.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_059.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_059.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_059.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -960,7 +960,7 @@ FDAT_059.BIN	0x801e8640	func_801e8640			void		address-only	candidate	mips-live-i
 FDAT_059.BIN	0x801e8648	func_801e8648			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_059.BIN	0x801e8650	func_801e8650			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_062.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_062.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_062.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_062.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_062.BIN	0x801e8658	func_801e8658			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -976,7 +976,7 @@ FDAT_062.BIN	0x801e8730	func_801e8730			unknown	unknown arg0	address-only	candid
 FDAT_062.BIN	0x801e8828	func_801e8828			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_062.BIN	0x801e8830	func_801e8830			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_065.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_065.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_065.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_065.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_065.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1034,22 +1034,22 @@ FDAT_074.BIN	0x801e8634	func_801e8634			void		address-only	candidate	mips-live-i
 FDAT_074.BIN	0x801e863c	func_801e863c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_074.BIN	0x801e8644	func_801e8644			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_077.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_077.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_077.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e85a8	fdat_801e85a8			void	VECTOR *pos;SVECTOR *angle;s32 item	candidate	candidate	relocation-masked-body	FDAT handler slot 2 (src/fdat/shared/fdat_801e85a8.inc), the same body in 2 modules; named by its FDAT_077.BIN address
 FDAT_077.BIN	0x801e85dc	func_801e85dc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e85e4	func_801e85e4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8744	func_801e8744			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e874c	func_801e874c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8754	func_801e8754			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_077.BIN	0x801e875c	func_801e875c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_077.BIN	0x801e87a0	func_801e87a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e875c	fdat_801e875c			s32	u8 *script;s32 dist	candidate	candidate	relocation-masked-body	FDAT handler slot 16 (src/fdat/shared/fdat_801e875c.inc), the same body in 2 modules; named by its FDAT_077.BIN address
+FDAT_077.BIN	0x801e87a0	fdat_801e87a0			void		candidate	candidate	relocation-masked-body	FDAT handler slot 17 (step differs per module) (src/fdat/shared/fdat_801e87a0.inc), the same body in 2 modules; named by its FDAT_077.BIN address
 FDAT_077.BIN	0x801e8af0	func_801e8af0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8af8	func_801e8af8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8b00	func_801e8b00			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e8390	func_801e8390			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e8474	func_801e8474			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_080.BIN	0x801e847c	func_801e847c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e847c	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_080.BIN	0x801e8684	func_801e8684			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e86bc	func_801e86bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e86c4	func_801e86c4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1066,16 +1066,16 @@ FDAT_080.BIN	0x801e8958	func_801e8958			unknown		address-only	candidate	mips-liv
 FDAT_080.BIN	0x801e8af0	func_801e8af0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e8b38	func_801e8b38			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_083.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8398	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_083.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_083.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e85a8	fdat_801e85a8			void	VECTOR *pos;SVECTOR *angle;s32 item	candidate	candidate	relocation-masked-body	FDAT handler slot 2 (src/fdat/shared/fdat_801e85a8.inc), the same body in 2 modules; named by its FDAT_077.BIN address
 FDAT_083.BIN	0x801e85dc	func_801e85dc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e85e4	func_801e85e4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e8694	func_801e8694			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e869c	func_801e869c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e86a4	func_801e86a4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_083.BIN	0x801e86ac	func_801e86ac			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_083.BIN	0x801e86f0	func_801e86f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e86ac	fdat_801e875c			s32	u8 *script;s32 dist	candidate	candidate	relocation-masked-body	FDAT handler slot 16 (src/fdat/shared/fdat_801e875c.inc), the same body in 2 modules; named by its FDAT_077.BIN address
+FDAT_083.BIN	0x801e86f0	fdat_801e87a0			void		candidate	candidate	relocation-masked-body	FDAT handler slot 17 (step differs per module) (src/fdat/shared/fdat_801e87a0.inc), the same body in 2 modules; named by its FDAT_077.BIN address
 FDAT_083.BIN	0x801e8a40	func_801e8a40			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e8a48	func_801e8a48			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_083.BIN	0x801e8a50	func_801e8a50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

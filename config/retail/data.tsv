@@ -230,7 +230,9 @@ FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-compleme
 FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_020.BIN	0x801e8ce8	0x9e0	0x620	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_023.BIN	0x801e8908	0x600	0x200	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	DAT_801e8908	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
+FDAT_023.BIN	0x801e8910	0x608	0x8	defined	supported	DAT_801e8910	SVECTOR	asm;src/fdat/fdat_023.c	.data; second slot 9 offset
+FDAT_023.BIN	0x801e8918	0x610	0x1f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e89c8	0x6c0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_029.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
