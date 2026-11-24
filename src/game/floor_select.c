@@ -272,6 +272,7 @@ void func_80030fcc(void)
         DAT_801b24e4.unk188.knock.dir.vy = 1;
         func_8002f320();
         func_8003047c();
+        /* unk134 and unk136 are tested as one word (lw). */
         if (*(s32 *)&DAT_801b24e4.unk134 == 0 && DAT_801b24e4.unk138 == 0) {
             func_8003078c();
         }
