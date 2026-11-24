@@ -18,7 +18,9 @@ PSX.EXE	0x80010264	0xa64	0x4	pointer	proven	next_program	u8 *	asm;src/psx/main.c
 PSX.EXE	0x80010268	0xa68	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 PSX.EXE	0x8001026c	0xa6c	0x3c	bss	proven	program_header	struct EXEC	asm;src/psx/main.c psx.main	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 PSX.EXE	0x800102a8	0xaa8	0x558	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80011000	0x800	0x34f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80011000	0x800	0x26e8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x800136e8	0x2ee8	0x18	defined	supported	DAT_800136e8	u32[6]	asm;band A relocs (main)	FDAT window words; main reads [2] and [4] and stores the heap base at [5]
+GAME.EXE	0x80013700	0x2f00	0xdf0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80061bf0	0x513f0	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80061c00	0x51400	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80061c10	0x51410	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

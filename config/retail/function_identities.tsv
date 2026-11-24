@@ -4,7 +4,7 @@
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
 PSX.EXE	0x80010038	main			int		proven	proven	asm;called by 2MBYTE.OBJ __SN_ENTRY_POINT;calls 2MBYTE.OBJ __main	loads and executes OPEN, GAME and END by index
-GAME.EXE	0x80014b48	func_80014b48			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80014b48	main			int		proven	proven	asm;tail-called by NONE2.OBJ __SN_ENTRY_POINT;calls NONE2.OBJ __main	GNU C 2.60 emits jal __main only in main; heap, CdInit, PadInit, InitCARD, then the game loop
 GAME.EXE	0x80014bd4	func_80014bd4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 GAME.EXE	0x80015064	func_80015064			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 GAME.EXE	0x8001509c	func_8001509c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
