@@ -26,14 +26,20 @@ reference shown as `validated` uses the same proof boundary as safe delinking.
 
 ## First-pass topology
 
-The four programs are processed independently:
+The 32 images (four programs and 28 FDAT modules) are processed
+independently, each under its `--image` key:
 
 ```text
-PSX.EXE  + config/retail/*.tsv -> build/delink/psx  -> build/objdiff/psx
-GAME.EXE + config/retail/*.tsv -> build/delink/game -> build/objdiff/game
-OPEN.EXE + config/retail/*.tsv -> build/delink/open -> build/objdiff/open
-END.EXE  + config/retail/*.tsv -> build/delink/end  -> build/objdiff/end
+PSX.EXE      + config/retail/*.tsv -> build/delink/psx      -> build/objdiff/psx
+GAME.EXE     + config/retail/*.tsv -> build/delink/game     -> build/objdiff/game
+OPEN.EXE     + config/retail/*.tsv -> build/delink/open     -> build/objdiff/open
+END.EXE      + config/retail/*.tsv -> build/delink/end      -> build/objdiff/end
+FDAT_005.BIN + config/retail/*.tsv -> build/delink/fdat_005 -> build/objdiff/fdat_005
+...
 ```
+
+A module's calls into `GAME.EXE` are cross-image references: they stay
+unmodeled targets until `GAME.EXE`'s owner is linked against the module.
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a

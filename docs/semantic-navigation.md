@@ -4,8 +4,8 @@
 > about retail bytes, linker order, SDK versions or compiler probes describe that
 > game. For King's Field III (`SLUS-00255`) they are hypotheses until re-proven.
 
-`kf sema` is the read-only investigation interface for the four linked King's
-Field II programs. It combines the manually curated function/data/relocation TSVs
+`kf sema` is the read-only investigation interface for the 32 King's Field III
+images (four programs and 28 FDAT modules). It combines the manually curated function/data/relocation TSVs
 with instruction bytes from the configured retail executables. It does not
 modify the TSVs, a Ghidra project, reconstruction sources, or the score ledger.
 
@@ -13,15 +13,15 @@ Every query requires an image:
 
 ```sh
 kf sema --image psx  map
-kf sema --image game addr 0x80021a68
-kf sema --image open disasm 0x80021a68 --blocks
+kf sema --image game addr 0x80014bd4
+kf sema --image fdat_005 disasm 0x801e8398 --blocks
 ```
 
 This qualification is mandatory because `GAME.EXE`, `OPEN.EXE` and `END.EXE`
-are separate linked overlays. For example, GAME and OPEN both currently have a
-function at `0x80021a68`, but the GAME extent is `0x178` bytes and the OPEN
-extent is `0x6c` bytes. A
-bare virtual address is therefore not a repository-wide identity.
+share the `0x80011000` load window and all 28 FDAT modules load at
+`0x801E8308`: the same address names a different function in `fdat_005` and
+`fdat_014`. A bare virtual address is therefore not a repository-wide
+identity.
 
 ## Evidence model
 
@@ -190,7 +190,7 @@ kf sema --image game match --worst 10
 ```
 
 `map gaps` distinguishes true inventory holes from admitted `unclassified`
-data rows. The current inventories cover all four load images, but the
+data rows. The current inventories cover all 32 load images, but the
 unclassified rows remain explicit places where code, tables, constants,
 padding, or writable data may still be missing. `match` reads existing objdiff
 reports; it does not build. Exact means `100%` unless `--loose` is explicitly

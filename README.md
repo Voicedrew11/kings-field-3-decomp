@@ -10,14 +10,31 @@ No game data is included: supply your own disc image. The Nix environment
 downloads the historical Psy-Q 3.0 SDK separately; see
 [the toolchain documentation](docs/toolchain.md).
 
-The disc carries four linked programs: the boot loader (`SLUS_002.55`, called `PSX.EXE` here) and the `OPEN.EXE`, `GAME.EXE` and `END.EXE` overlays, which share one load window at `0x80011000`. This is the game sold in North America as *King's Field II*; the Japanese original is *King's Field III* (`SLPS-00377`).
+This is the game sold in North America as *King's Field II*; the Japanese
+original is *King's Field III* (`SLPS-00377`). The disc carries four linked
+programs and 28 code modules, 32 images in all. `PSX.EXE` (the boot file
+`SLUS_002.55`) is a program sequencer: its table names, by index,
+`OPEN.EXE`, `GAME.EXE` and `END.EXE`, which share one load window at
+`0x80011000`. It runs index 0 (`OPEN.EXE`) first, then after each program
+returns it loads the index that program left in the byte at `0x800102F0`.
 
-| Image | Disc file | Load address | Load size |
-| :---- | :-------- | -----------: | --------: |
-| `PSX.EXE` | `SLUS_002.55` | `0x80010000` | `0x800` |
-| `GAME.EXE` | `GAME.EXE` | `0x80011000` | `0x8b800` |
-| `OPEN.EXE` | `OPEN.EXE` | `0x80011000` | `0x2f800` |
-| `END.EXE` | `END.EXE` | `0x80011000` | `0x26800` |
+| Image | Source | Load address | Load size | Game functions |
+| :---- | :----- | -----------: | --------: | -------------: |
+| `PSX.EXE` | `SLUS_002.55` | `0x80010000` | `0x800` | 1 |
+| `GAME.EXE` | `GAME.EXE` | `0x80011000` | `0x8b800` | 593 |
+| `OPEN.EXE` | `OPEN.EXE` | `0x80011000` | `0x2f800` | 34 |
+| `END.EXE` | `END.EXE` | `0x80011000` | `0x26800` | 13 |
+| `FDAT_nnn.BIN` (28) | `CD\COM\FDAT.T` entry *nnn* | `0x801E8308` | `0x800`–`0x1000` | 436 |
+
+`GAME.EXE` loads one headerless code module at a time from `CD\COM\FDAT.T`
+(entries 2, 5, ..., 83: the third member of each area's triplet; the other
+entries are data) at `0x801E8308`. The modules share `GAME.EXE`'s address
+space and call straight into its code; each starts with an id word and 32
+handler pointers that `GAME.EXE` calls through. They are named by archive
+entry (`--image fdat_005`) because the area each one belongs to is not yet
+proven. The game function counts exclude the Psy-Q library code, whose
+starts and ownership wait for the Library 3.4/3.3 re-seed (see
+[the inventory](docs/function-and-data-inventory.md#current-census)).
 
 ## Getting started
 
@@ -29,8 +46,10 @@ kf build
 kf status
 ```
 
-`config/images.toml` records the disc and executable hashes. `kf extract`
-refuses any other dump.
+`config/images.toml` records the disc, executable, archive and module
+hashes. `kf extract` refuses any other dump; it copies the programs and
+`FDAT.T` and slices the modules out of it (`kf init` re-derives missing
+module files from `retail/FDAT.T`).
 
 The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)

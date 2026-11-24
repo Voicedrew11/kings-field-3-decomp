@@ -3,7 +3,8 @@
 - Reconstruct the King's Field III (`SLUS-00255`) sources so the pinned PlayStation
   toolchain can emit objects matching the retail programs.
 - This repository contains four independent linked programs: `PSX.EXE`, `GAME.EXE`, `OPEN.EXE`, and `END.EXE`
-  (the boot loader plus three overlays at 0x80011000). Overlays share load windows, so an address is never an
+  (the boot loader plus three overlays at 0x80011000), and 28 headerless code modules `FDAT_nnn.BIN` that
+  `GAME.EXE` loads from `CD\COM\FDAT.T` at 0x801E8308. Images share load windows, so an address is never an
   identity without its image. `config/images.toml` is the authority.
 - The toolchain, compiler probes and linker model are inherited from the
   King's Field II (`SLPS-00069`) project. Re-prove each against this game's
@@ -25,7 +26,7 @@
 - Extract and initialize hash-identical retail files with
   `kf extract --disc PATH.cue && kf init --retail-dir retail` before binary queries.
 - Select one image explicitly for every semantic query:
-  `kf sema --image psx|game|open|end ...`.
+  `kf sema --image psx|game|open|end|fdat_nnn ...`.
 - Before editing a function, inspect its retail disassembly/CFG, callers,
   callees, strings, data references, relocation evidence, adjacent functions,
   source history, and current match state.
