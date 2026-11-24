@@ -733,7 +733,11 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
         gte_rt();
         gte_stlvnl(mat->t);
         gte_stflg(&flag);
-        layer = &DAT_801d4464.cells[pos->vz >> 11][pos->vx >> 11].layer[0];
+        {
+            MapCell *row = DAT_801d4464.cells[pos->vz >> 11];
+
+            layer = row[pos->vx >> 11].layer;
+        }
         if (area != 1) {
             layer++;
         }

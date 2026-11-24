@@ -1377,7 +1377,6 @@ void func_8001d944(void)
     s32 n;
     s32 i;
     s32 j;
-    u8 *book;
     u32 pad;
 
     count = func_80060b0c();
@@ -1399,53 +1398,54 @@ void func_8001d944(void)
         func_80027a40();
         return;
     }
-    book = &books[page];
-        n = func_8001dbc4(*book, page, pages);
-        func_8001dcd0(page, pages[row]);
-        while (result == MENU_NONE) {
-            func_800279d8();
-            pad = func_800279a4();
-            if (pad & DAT_8009c250) {
-                func_8002792c(0xe);
-                result = -1;
-            } else if (pad & PADLup) {
-                func_8002792c(0xc);
-                if (row > 0) {
-                    row--;
-                    func_8001dcd0(page, pages[row]);
-                }
-            } else if (pad & PADLdown) {
-                func_8002792c(0xc);
-                if (row < n - 1) {
-                    row++;
-                    func_8001dcd0(page, pages[row]);
-                }
-            } else if (pad & PADLright) {
-                func_8002792c(0xc);
-                if (page > 0) {
-                    book--;
-                    page--;
-                    n = func_8001dbc4(*book, page, pages);
-                    row = 0;
-                    func_8001dcd0(page, pages[0]);
-                }
-            } else if (pad & PADLleft) {
-                func_8002792c(0xc);
-                if (page < count - 1) {
-                    book++;
-                    page++;
-                    n = func_8001dbc4(*book, page, pages);
-                    row = 0;
-                    func_8001dcd0(page, pages[0]);
-                }
+    j = page;
+    n = func_8001dbc4(books[page], page, pages);
+    func_8001dcd0(page, pages[row]);
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            return;
+        }
+        func_800279d8();
+        pad = func_800279a4();
+        if (pad & DAT_8009c250) {
+            func_8002792c(0xe);
+            result = -1;
+        } else if (pad & PADLup) {
+            func_8002792c(0xc);
+            if (row > 0) {
+                row--;
+                func_8001dcd0(page, pages[row]);
             }
-            for (i = 0; i < 2; i++) {
-                func_80026fe4();
-                func_80023ce8(*book);
-                func_800270f8();
+        } else if (pad & PADLdown) {
+            func_8002792c(0xc);
+            if (row < n - 1) {
+                row++;
+                func_8001dcd0(page, pages[row]);
+            }
+        } else if (pad & PADLleft) {
+            func_8002792c(0xc);
+            if (page > 0) {
+                page--;
+                n = func_8001dbc4(books[page], page, pages);
+                row = 0;
+                func_8001dcd0(page, pages[0]);
+            }
+        } else if (pad & PADLright) {
+            func_8002792c(0xc);
+            if (page < count - 1) {
+                page++;
+                n = func_8001dbc4(books[page], page, pages);
+                row = 0;
+                func_8001dcd0(page, pages[0]);
             }
         }
-    func_80027a40();
+        for (i = 0; i < 2; i++) {
+            func_80026fe4();
+            func_80023ce8(books[page]);
+            func_800270f8();
+        }
+    }
 }
 
 ADDRESS(0x8001dbc4, 0x10c)
@@ -3948,8 +3948,6 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
                          "turn{left", "turn{right"};
     char types[7][8] = {"type{a", "type{b", "type{c", "type{d", "type{e", "type{f", "type{g"};
     s32 i;
-    s32 y;
-    s32 ny;
     s32 bright;
     s32 blue;
 
@@ -3979,11 +3977,9 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         order[3] = 1;
         break;
     }
-    for (i = 0, y = 0x32, ny = 0x31; i < 4; i++) {
-        func_800269c0(0x89, ny, i);
-        func_80026570(0x9b, y, actions[order[i]], 1, 0);
-        y += 14;
-        ny += 14;
+    for (i = 0; i < 4; i++) {
+        func_800269c0(0x89, i * 14 + 0x31, i);
+        func_80026570(0x9b, i * 14 + 0x32, actions[order[i]], 1, 0);
     }
     switch (layout) {
     case 0:
@@ -4043,11 +4039,9 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         order[5] = 5;
         break;
     }
-    for (i = 4, y = 0x70, ny = 0x6f; i < 10; i++) {
-        func_800269c0(0x89, ny, i);
-        func_80026570(0x9b, y, moves[order[i - 4]], 1, 0);
-        y += 14;
-        ny += 14;
+    for (i = 4; i < 10; i++) {
+        func_800269c0(0x89, (i - 4) * 14 + 0x6f, i);
+        func_80026570(0x9b, (i - 4) * 14 + 0x70, moves[order[i - 4]], 1, 0);
     }
     func_80026570(0x32, 0x32, "action", 1, 0);
     func_80026570(0x3a, 0x40, types[style], 1, 0);
@@ -4057,8 +4051,8 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         bright = DAT_8009c260 + DAT_8009c26c;
         blue = DAT_8009c260 / 2 + DAT_8009c26c;
     } else {
-        bright = DAT_8009c26c + 95 - DAT_8009c260;
-        blue = DAT_8009c26c + 47 - DAT_8009c260 / 2;
+        bright = 95 - DAT_8009c260 + DAT_8009c26c;
+        blue = 47 - DAT_8009c260 / 2 + DAT_8009c26c;
     }
     func_80027414();
     setRGB0(DAT_8009c374, bright, bright, blue);
@@ -4188,34 +4182,34 @@ ADDRESS(0x80024a78, 0x1f8)
 void func_80024a78(u8 *levels)
 {
     s32 i;
-    s32 y;
-    s32 bar_y;
+    s32 k;
 
     func_80027610(0x32, DAT_8007e564[10].unk0);
-    for (i = 0, y = 0x3c, bar_y = 0x34; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         func_80027560();
         setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-        DAT_8009c378->clut = DAT_8007e564[10].unk2;
+        k = 10;
+        DAT_8009c378->clut = DAT_8007e564[k].unk2;
         DAT_8009c378->x0 = 0xa5;
-        DAT_8009c378->y0 = bar_y;
-        DAT_8009c378->w = DAT_8007e564[10].unk8;
-        DAT_8009c378->h = DAT_8007e564[10].unka;
-        DAT_8009c378->u0 = DAT_8007e564[10].unk4;
-        DAT_8009c378->v0 = DAT_8007e564[10].unk6;
+        DAT_8009c378->y0 = i * 26 + 0x34;
+        DAT_8009c378->w = DAT_8007e564[k].unk8;
+        DAT_8009c378->h = DAT_8007e564[k].unka;
+        DAT_8009c378->u0 = DAT_8007e564[k].unk4;
+        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
         SetSemiTrans(DAT_8009c378, DAT_801b24e4.unk100);
         func_800275e0(0x32);
         func_80027560();
         setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-        DAT_8009c378->clut = DAT_8007e564[9].unk2;
-        DAT_8009c378->x0 = *levels++ * 96 / 128 + 172;
-        DAT_8009c378->y0 = y;
-        DAT_8009c378->w = DAT_8007e564[9].unk8;
-        DAT_8009c378->h = DAT_8007e564[9].unka;
-        DAT_8009c378->u0 = DAT_8007e564[9].unk4 + DAT_801b24e4.unk100 * 16;
-        DAT_8009c378->v0 = DAT_8007e564[9].unk6;
+        k = 9;
+        DAT_8009c378->clut = DAT_8007e564[k].unk2;
+        DAT_8009c378->x0 = *levels * 96 / 128 + 172;
+        DAT_8009c378->y0 = i * 26 + 0x3c;
+        DAT_8009c378->w = DAT_8007e564[k].unk8;
+        DAT_8009c378->h = DAT_8007e564[k].unka;
+        DAT_8009c378->u0 = DAT_8007e564[k].unk4 + DAT_801b24e4.unk100 * 16;
+        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
         func_800275e0(0x31);
-        y += 26;
-        bar_y += 26;
+        levels++;
     }
 }
 
@@ -4285,7 +4279,11 @@ s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item)
         labels[1].text[5] = 0xb;
         labels[1].text[6] = 0xff;
     }
-    while (result == MENU_NONE) {
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            break;
+        }
         func_800279d8();
         pad = func_800279a4();
         if ((pad & 0x1000) || (pad & 0x4000)) {
@@ -4311,7 +4309,6 @@ s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item)
             func_800270f8();
         }
     }
-    func_80027a40();
     return result;
 }
 
@@ -4337,10 +4334,9 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     rect.h = 0xfe;
     ClearImage(&rect, 0, 0, 0);
     if (mode == 0) {
-        if (DAT_801b24e4.unk4c < DAT_80081780[item]) {
+        entry = item + 390;
+        if (DAT_80081780[item] > DAT_801b24e4.unk4c) {
             entry = item + 540;
-        } else {
-            entry = item + 390;
         }
     } else if (mode == 1) {
         entry = item + 690;
@@ -4365,7 +4361,11 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     func_80019518(buffer);
     DAT_8009c230 = saved;
     func_80027a40();
-    while (result == MENU_NONE) {
+    for (;;) {
+        if (result != MENU_NONE) {
+            func_80027a40();
+            break;
+        }
         func_800279d8();
         if (func_800279a4() & DAT_8009c250) {
             func_8002792c(0xe);
@@ -4397,7 +4397,6 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
             func_800270f8();
         }
     }
-    func_80027a40();
 }
 
 ADDRESS(0x800252f4, 0x174)
@@ -4590,6 +4589,7 @@ ADDRESS(0x80025be8, 0x1d0)
 void func_80025be8(u8 item)
 {
     MATRIX m;
+    MATRIX unused[2];
     MATRIX light;
     MATRIX lights;
     MATRIX color;
@@ -4601,7 +4601,7 @@ void func_80025be8(u8 item)
         }
         if (DAT_8009c240 != 0) {
             CdControl(CdlPause, 0, 0);
-            if (func_80019b68(DAT_8009c37c, DAT_8009c240) != 0) {
+            if (func_80019b68(DAT_8009c37c, DAT_8009c240) == 0) {
                 DAT_8009c244 = -1;
             }
             DAT_8009c240 = 0;
@@ -4614,8 +4614,8 @@ void func_80025be8(u8 item)
             m.t[0] = DAT_8009c394.vx;
             m.t[1] = DAT_8009c394.vy;
             m.t[2] = DAT_8009c394.vz;
-            DAT_8009c39c.vx &= 0xfff;
             DAT_8009c39c.vy += DAT_8009c3a4;
+            DAT_8009c39c.vx &= 0xfff;
             DAT_8009c39c.vy &= 0xfff;
             DAT_8009c39c.vz &= 0xfff;
             RotMatrix(&DAT_8009c39c, &m);
@@ -4762,6 +4762,7 @@ void func_800261dc(MenuFont *font, MenuText *text)
     s32 dx;
     s32 u;
     s32 v;
+    s32 ch;
 
     c = text->text;
     func_80027610(3, font->unk0);
@@ -4772,8 +4773,9 @@ void func_800261dc(MenuFont *font, MenuText *text)
         DAT_8009c378->y0 = text->y - 1;
         DAT_8009c378->w = font->unk8;
         DAT_8009c378->h = font->unka;
-        u = (*c & 0xf) * 8;
-        v = (*c >> 4) * 15;
+        ch = *c;
+        u = (ch & 0xf) * 8;
+        v = (ch >> 4) * 15;
         DAT_8009c378->u0 = u;
         DAT_8009c378->v0 = v;
         func_800275e0(2);
@@ -4848,7 +4850,10 @@ void func_80026570(s32 x, s32 y, char *text, s32 shadow, s32 row)
         shade = (DAT_801b24e4.unkfd - 128) / 2;
     }
     shade += 112;
-    while (*text != 0) {
+    for (;;) {
+        if (*text == 0) {
+            return;
+        }
         func_80027560();
         if (shadow == 0) {
             setRGB0(DAT_8009c378, shade, shade, shade);
@@ -5235,7 +5240,7 @@ void func_80027688(MenuList *list, s32 page, s32 button)
     s32 i;
 
     dst = list->title;
-    src = DAT_8007e660[page * 9 + button + 1].text;
+    src = (&DAT_8007e660[page * 9])[button + 1].text;
     list->unk0 = 0x1f;
     list->unk2 = 0x20;
     for (i = 0; i < 16; i++) {
