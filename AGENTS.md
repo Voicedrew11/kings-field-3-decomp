@@ -6,9 +6,14 @@
   (the boot loader plus three overlays at 0x80011000), and 28 headerless code modules `FDAT_nnn.BIN` that
   `GAME.EXE` loads from `CD\COM\FDAT.T` at 0x801E8308. Images share load windows, so an address is never an
   identity without its image. `config/images.toml` is the authority.
-- The toolchain, compiler probes and linker model are inherited from the
-  King's Field II (`SLPS-00069`) project. Re-prove each against this game's
-  retail bytes before relying on it.
+- The tooling is inherited from the King's Field II (`SLPS-00069`) project;
+  the toolchain is this game's own (`docs/toolchain.md`): Sony's GNU C 2.60
+  CC1PSX with ASPSX 2.21, PSYLINK 2.27, CPE2X 1.5 and DMPSX 2.03 from the
+  Runtime Library 3.3 CD. It rebuilds `PSX.EXE` byte-identically. GAME and
+  OPEN link Library 3.4 and END a post-3.3 LIBGPU/LIBSND, none of which is
+  preserved, so their links against the 3.3 archives remain a probe; re-prove
+  any other inherited fact against this game's retail bytes before relying
+  on it.
 - The PS-X EXEs retain linked bytes, not symbols or relocation tables.
   Functions, data, labels, relocations, and TU ownership under `config/retail/`
   are curated working models, not recovered ground truth.
@@ -17,8 +22,10 @@
   not be distorted to protect a metric.
 - Exact means objdiff `100%`. `--loose` is display-only and is never a closure
   or banking criterion.
-- Exact compiler, assembler, linker, and optimization attribution remain open.
-  `probe-gcc260-o2-g0` is a productive probe, not historical proof.
+- `gcc260-o2-g8` (`-O2 -G8`) is proven only for `psx.main`; for every other
+  unit it, and `gcc260-o2-g0`, are probes until that unit matches. Small-data
+  use is mixed per TU (95 GAME functions are `$gp`-relative). Plain `char` is
+  unsigned under this compiler.
 
 ## Environment and evidence discipline
 
@@ -92,7 +99,8 @@
   bytes.
 - SDK macros or inline GTE forms may legitimately emit raw COP2 instructions;
   prove the header/macro identity and version rather than hand-transcribing
-  `.word` instructions into game source.
+  `.word` instructions into game source. The SDK's `INLINE.H`/`GTEMAC.H`
+  macros emit placeholder words that the build's DMPSX step rewrites.
 
 ## MIPS-I and PlayStation rules
 

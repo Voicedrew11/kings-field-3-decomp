@@ -45,7 +45,7 @@ class Profile:
 
 # Native probe compilers. Each is a Decompals old-gcc rebuild of a PSX GCC
 # target; neither is proven to be the historical King's Field III compiler.
-C_COMPILERS = ("gcc260-native", "gcc257-native", "gcc241-kit")
+C_COMPILERS = ("gcc260-sony", "gcc260-native", "gcc257-native", "gcc241-kit")
 
 
 @dataclass(frozen=True)
@@ -163,7 +163,7 @@ def _profile(name: str, row: object) -> Profile:
         compiler=compiler,
         optimization=str(optimization) if optimization is not None else None,
         small_data=small_data,
-        aspsx_version=str(row.get("aspsx_version", "1.07")),
+        aspsx_version=str(row.get("aspsx_version", "2.21")),
         cc1_flags=tuple(flags),
     )
 

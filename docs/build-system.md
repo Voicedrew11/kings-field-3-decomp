@@ -1,12 +1,14 @@
 # Build and progress system
 
-> **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
-> about retail bytes, linker order, SDK versions or compiler probes describe that
-> game. For King's Field III (`SLUS-00255`) they are hypotheses until re-proven.
+> **Inherited from the King's Field II (`SLPS-00069`) project.** The build
+> mechanics apply here. Retail addresses and evidence quoted from that game are
+> examples; the King's Field III tools and libraries are in
+> [`toolchain.md`](toolchain.md).
 
 `kf build` is the source-to-EXE build: the pinned compiler emits assembly,
-ASPSX emits native Psy-Q objects, PSYLINK links those objects with original
-SDK inputs, and CPE2X writes each executable. See
+ASPSX emits native Psy-Q objects (DMPSX rewrites any GTE macro placeholders),
+PSYLINK links those objects with original SDK inputs, and CPE2X writes each
+executable. See
 [the linking guide](executable-linking.md) for outputs and provenance.
 It does not read retail executable bytes, calculate match scores, or update
 the README. Tool failures stop the build; reconstruction checks are separate.
@@ -92,11 +94,12 @@ its anonymous `.sdata` constants once:
 SDATA(0x8006d6a4, 0xb)
 ```
 
-GCC 2.5.7's MIPS `SELECT_SECTION` sends every constant of at most `-G` bytes
+GCC 2.x's MIPS `SELECT_SECTION` sends every constant of at most `-G` bytes
 to `.sdata`, so a short literal (or a local `char buf[2] = " "` initializer)
 is an `.sdata` member, while the same text initializing a larger array keeps
-the array's type and stays in `.rdata`. ASPSX 1.07 still expands every access
-to `lui` plus a low instruction, so `-G8` changes placement, not code. The
+the array's type and stays in `.rdata`. ASPSX 2.21 reaches `.sdata`/`.sbss`
+with one `$gp`-relative instruction (patch 30, `X - sectstart(.sdata)`), so
+`-G8` changes both placement and code, as in `PSX.EXE`'s `main`. The
 delinker packs the claimed range among the unit's `.sdata` `DATA()` claims in
 address order and resolves code references to it as `.sdata` offsets; the
 range never becomes a symbol. Small statics (`.lcomm`, rounded to eight
@@ -242,7 +245,7 @@ image reuses it with a unit that binds by name:
 unit = "open.memory"
 image = "OPEN.EXE"
 source = "src/lib/memory.c"
-profile = "probe-gcc257-o2-g0"
+profile = "gcc260-o2-g8"
 bind = "name"
 defines = ["KF_OPEN"]
 ```

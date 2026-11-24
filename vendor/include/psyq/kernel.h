@@ -2,7 +2,7 @@
 #define KF_PSYQ_KERNEL_H
 
 /*
- * Psy-Q 3.0 kernel, controller, and BIOS file interfaces. KERNEL.H
+ * Runtime Library 3.3 kernel, controller, and BIOS file interfaces. KERNEL.H
  * and SYS/FILE.H provide the vendor constants and layouts, but this release
  * ships no LIBAPI header with callable declarations. Keep the missing BIOS
  * entry points here so game sources do not reproduce private extern blocks.

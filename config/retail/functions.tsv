@@ -3,7 +3,7 @@
 # Each address is qualified by image: the programs share load windows and the FDAT overlays share one window inside GAME.EXE's address space.
 # Function extents are WIP and may include owned jump tables/padding or miss indirect-only code.
 image	va	file_offset	size	body_size	fragments	kind	confidence	name	labels	provenance	note
-PSX.EXE	0x80010038	0x838	0xe0	0xe0	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (jal x1); stack-frame+ra-save+matching-stack-return
+PSX.EXE	0x80010038	0x838	0xe0	0xe0	1	function	proven	main		jal from __SN_ENTRY_POINT (2MBYTE.OBJ)	ends before 2MBYTE.OBJ's __main; rebuilt byte-identical from src/psx/main.c; tier=proven (jal x1)
 PSX.EXE	0x80010120	0x920	0xac	0xac	1	function	entry	start		PS-X EXE header pc0	WIP boundary read from asm: clears .bss, sets the stack and gp, calls two routines, then break; tier=proven (PS-X EXE entry)
 GAME.EXE	0x800144f8	0x3cf8	0x10	0x10	1	function	entry	start		PS-X EXE header pc0	WIP boundary: same instruction shape as the KF2 Psy-Q startup stub; tier=proven (PS-X EXE entry)
 GAME.EXE	0x80014b48	0x4348	0x8c	0x8c	1	function	mips-frame-carve			scripts/kf/audit_functions.py	anonymous WIP start; tier=proven (j x1); stack-frame+ra-save+matching-stack-return+cross-extent-jump

@@ -7,8 +7,8 @@ Original project contributions are dedicated to the public domain under
 [CC0 1.0 Universal](LICENSE), to the extent of the contributors' rights.
 This does not grant rights to FromSoftware's game or Sony/Psy-Q material.
 No game data is included: supply your own disc image. The Nix environment
-downloads the historical Psy-Q 3.0 SDK separately; see
-[the toolchain documentation](docs/toolchain.md).
+downloads Sony's GNU C 2.60 compiler and Runtime Library 3.3 SDK separately;
+see [the toolchain documentation](docs/toolchain.md).
 
 This is the game sold in North America as *King's Field II*; the Japanese
 original is *King's Field III* (`SLPS-00377`). The disc carries four linked
@@ -53,8 +53,11 @@ module files from `retail/FDAT.T`).
 
 The tooling and matching workflow come from the King's Field II
 (`SLPS-00069`) project, which builds on the King's Field (`SLPS-00017`)
-project. Its compiler probes, linker library order and SDK attribution were
-proven for King's Field II, so here they are starting hypotheses. See
+project. The toolchain is this game's own: Sony's GNU C 2.60 `CC1PSX` with
+ASPSX 2.21, PSYLINK 2.27 and CPE2X 1.5 from the Runtime Library 3.3 CD
+rebuilds `PSX.EXE` byte-identically. GAME and OPEN were linked against
+Library 3.4 and END against a slightly newer 3.3, which no public archive
+preserves, so their link layouts and libraries remain hypotheses. See
 [AGENTS.md](AGENTS.md) for the reconstruction rules.
 
 <!-- match-score:start -->
@@ -108,11 +111,11 @@ _Exact requires 100%. The denominator excludes identified Sony/Psy-Q library fun
 
 _Derived from ignored outputs made by the native Psy-Q executable chain. `kf build` rebuilds them; `kf link --compare-only` refreshes only this comparison._
 
-**No current EXE comparison reports are available.**
+**Overall (1/4 images): 100.00% island-aligned byte similarity &middot; 100.00% nonzero-byte similarity.**
 
 | Image | Same-offset file bytes | Island-aligned load bytes | Nonzero load bytes | Data modules exact |
 | :---- | --------------------: | -----------------------: | -----------------: | -----------------: |
-| `PSX.EXE` | — | — | — | — |
+| `PSX.EXE` | 100.00% | 100.00% | 100.00% | — |
 | `GAME.EXE` | — | — | — | — |
 | `OPEN.EXE` | — | — | — | — |
 | `END.EXE` | — | — | — | — |

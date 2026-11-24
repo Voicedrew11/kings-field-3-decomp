@@ -14,15 +14,17 @@
       environment = {
         PSYQ_C_INCLUDE = "${sdk.gcc257Headers}/include";
         PSYQ_SDK = "${sdk.psyqSdk}/psyq-3.0";
-        PSYQ_INCLUDE = "${sdk.psyqSdk}/include-lf";
         PSYQ_BIN = "${sdk.psyqSdk}/psyq-3.0/BIN";
-        PSYQ_LIB = "${sdk.psyqSdk}/psyq-3.0/LIB";
-        PSYQ_MALLOC_OBJ = "${sdk.psyqMallocObj}/MALLOC.OBJ";
-        PSYQ_ASPSX = "${sdk.aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${sdk.asmpsxNative}";
-        PSYQ_CPE2X = "${sdk.psyqRuntime30Cpe2x}/CPE2X.EXE";
+        PSYQ_INCLUDE = "${sdk.psyq33Sdk}/include-lf";
+        PSYQ_LIB = "${sdk.psyq33Sdk}/lib";
+        PSYQ_MALLOC_OBJ = "${sdk.psyq33Sdk}/lib/MALLOC.OBJ";
+        PSYQ_CC1PSX = "${sdk.sonyGcc260}/CC1PSX.EXE";
+        PSYQ_ASPSX = "${sdk.psyq33Sdk}/bin/ASPSX.EXE";
+        PSYQ_PSYLINK = "${sdk.psyq33Sdk}/bin/PSYLINK.EXE";
+        PSYQ_CPE2X = "${sdk.psyq33Sdk}/bin/CPE2X.EXE";
+        PSYQ_DMPSX = "${sdk.psyq33Sdk}/bin/DMPSX.EXE";
       };
-      buildTools = [ pkgs.python3 pkgs.dosbox-x sdk.cpppsx257 sdk.cc1psx257 ];
+      buildTools = [ pkgs.python3 pkgs.dosbox-x sdk.cpppsx260 sdk.cc1psx260 sdk.cpppsx257 sdk.cc1psx257 ];
       game = pkgs.stdenvNoCC.mkDerivation (environment // {
         pname = "kings-field";
         version = "1.0";
