@@ -77,6 +77,8 @@ s32 DAT_8009c27c = 0x80;
 /* Menu primitives and the loaded picture (WIP). */
 DATA(0x8009c374, 0x4, ".sbss")
 POLY_FT4 *DAT_8009c374;
+DATA(0x8009c378, 0x4, ".sbss")
+POLY_FT4 *DAT_8009c378;
 DATA(0x8009c37c, 0x4, ".sbss")
 u8 *DAT_8009c37c;
 DATA(0x8009c380, 0x4, ".sbss")

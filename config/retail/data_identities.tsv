@@ -33,6 +33,7 @@ GAME.EXE	0x8009c274	0x4	DAT_8009c274	global	load	s32	func_8001ec84	address-only	
 GAME.EXE	0x8009c278	0x4	DAT_8009c278	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
 GAME.EXE	0x8009c27c	0x4	DAT_8009c27c	global	load	s32	func_8001f274	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
 GAME.EXE	0x8009c374	0x4	DAT_8009c374	global	bss	POLY_FT4 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x160); the menu's current textured primitive (func_80027414 sets it)
+GAME.EXE	0x8009c378	0x4	DAT_8009c378	global	bss	POLY_FT4 *	func_800261dc	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x164); the menu text primitive (func_80027560 sets it)
 GAME.EXE	0x8009c37c	0x4	DAT_8009c37c	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x168); buffer of the picture being read from ITEM.T
 GAME.EXE	0x8009c380	0x4	DAT_8009c380	global	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x16c); read pointer into that buffer (the ready callback advances it)
 GAME.EXE	0x8009c384	0x1	DAT_8009c384	global	bss	u8	func_8001e710	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x170); nonzero while the menu sequence plays (save, options and menu entry pause/replay it)
