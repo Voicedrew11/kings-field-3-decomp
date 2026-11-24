@@ -18,6 +18,7 @@ Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 recor
 Data801983a8	0xda0	supported	asm;func_80060800 relates the three parts to one base (+0xc0, +0x1e0); WIP extent up to DAT_80199148	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);func_800290d8 pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
+Data801b24e4Mode	0x10	supported	asm;func_80030908/func_80030810/func_80030af8 views of +0x188	WIP (game-j)
 Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;func_80029f1c/func_8002b468 24-byte records at +0;func_80017aa4 records at +0x900	WIP (game-c, game-d)
 Data801ba984	0x5144	supported	asm;game loop word-count clear;band D func_80029500/func_80029f1c/func_8002bdc0 byte accesses	WIP (game-d)
 Data801d4464	0x12054	supported	asm;game loop word-count clear;func_800293e4/func_8002bb84 0x20-byte records at +0x11c14;func_80028d54 heights +0x12018;band F collision results +0x12004..+0x1204c	WIP (game-d, game-f)
@@ -28,7 +29,12 @@ FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler wor
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 MapCell	0xa	supported	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (func_80033b8c, func_80033c4c, func_8003be34)	WIP (game-h)
 MapLayer	0x5	supported	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);func_80033b8c/func_80033c4c/func_800345f4 field accesses	WIP (game-h)
+MapRect	0x4	supported	asm;func_8001bd48/func_8001bea8 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
 Matrix3x3	0x14	supported	asm;func_800341e8 20-byte lwl/lwr struct copies;func_80034300 20-byte stride passed to func_80016290	WIP (game-h)
+MenuEntry	0x18	supported	asm;func_8001aea4 24-byte unaligned (lwl/lwr) record copies from DAT_8007f230	WIP (game-e)
+MenuFont	0xc	supported	asm;func_80025f38 reads six s16 at +0..+10;func_8001eb3c derives [1] from [5] - 48	WIP (game-e)
+MenuList	0x38	supported	asm;func_80027688/func_80027728 field stores;0x38-byte locals of the list pages	WIP (game-e)
+MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
 ModelData	0x28	supported	asm;func_800431e8, func_8004352c, func_800437c8	WIP field names; untouched ranges opaque
 ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;func_8004352c/func_800437c8 28-byte stride	WIP field names; untouched ranges opaque
@@ -43,8 +49,10 @@ PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 nex
 Record04	0x4	supported	asm;func_80060800 4-byte stride at DAT_801983a8	WIP (game-i)
 Record06	0x6	supported	asm;func_80060800/func_800608ec 6-byte stride at DAT_801983a8+0xc0	WIP (game-i)
 Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
+Record0a	0xa	supported	asm;func_80030810/func_80030864 (u8 id, u8 0, unk12c copy at +0x18a)	WIP (game-j)
 Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
-Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec	WIP (game-d)
+Record10	0x10	supported	asm;func_80030908/func_8003047c 8-byte copies to +0x188/+0x190	WIP (game-j)
+Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec;game-e func_8001c6c0 u16 at +0x16	WIP (game-d)
 Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
 Record30	0x30	supported	asm;func_800341e8 48-byte stride source records at DAT_80081c8c;func_8003456c builds one on the stack	WIP (game-h)
 Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4	WIP (game-d)

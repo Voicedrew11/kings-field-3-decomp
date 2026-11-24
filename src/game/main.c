@@ -20,6 +20,9 @@
 #include <game/image.h>
 #include <game/scene.h>
 #include <game/render.h>
+#include <game/entity.h>
+#include <game/object4c.h>
+#include <game/misc.h>
 #include <game/funcs.h>
 #include <game/card.h>
 #include <game/player.h>
@@ -83,8 +86,8 @@ void func_80014bd4(void)
     func_80018fbc((u32 *)&DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
     func_80018fbc((u32 *)&DAT_801b09fc, 0, sizeof(DAT_801b09fc) / 4);
     func_80018fbc((u32 *)&DAT_801e7edc, 0, sizeof(DAT_801e7edc) / 4);
-    func_80018fbc(DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
-    func_80018fbc(DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
+    func_80018fbc((u32 *)DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
+    func_80018fbc((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
     func_8001a438();
     func_80035394();
     func_8003c9dc();

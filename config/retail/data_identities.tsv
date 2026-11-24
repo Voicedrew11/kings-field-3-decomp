@@ -13,15 +13,50 @@ GAME.EXE	0x80081828	0x3f	DAT_80081828	static	load	char[63]	func_80028750	address
 GAME.EXE	0x80081868	0x1c	DAT_80081868	global	load	u16[14]	func_8002b6f0	address-only	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits, func_8002b6f0 keeps [4] [6] [7] [12] held
 GAME.EXE	0x80081884	0x3c	DAT_80081884	global	load	s16[5][6]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the levels that teach the next spell, 0 ended
 GAME.EXE	0x800818c0	0x23	DAT_800818c0	global	load	u8[5][7]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the Record18 indices of its spells, 0xff ended
+GAME.EXE	0x8008190c	0xa	DAT_8008190c	static	load	MapCell	func_800324f0	address-only	asm;src/game/floor_select.c game.floor_select	the tile record func_800324f0 selects outside the map
 GAME.EXE	0x80081928	0x8c	DAT_80081928	global	load	SpriteRec[7]	func_80041f9c	address-only	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x26c	DAT_800819b4	global	load	SpriteRec[31]	func_80041e68	address-only	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x6c	DAT_80081c20	global	load	Data80081c20[3]	func_800422b8	address-only	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x8009c22c	0x1	DAT_8009c22c	global	load	u8	func_8001aa84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
+GAME.EXE	0x8009c22d	0x1	DAT_8009c22d	global	load	u8	func_8001c48c	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
+GAME.EXE	0x8009c22e	0x1	DAT_8009c22e	global	load	u8	func_8001dee4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
+GAME.EXE	0x8009c22f	0x1	DAT_8009c22f	global	load	u8	func_8001e1b4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
+GAME.EXE	0x8009c230	0x4	DAT_8009c230	global	load	s32	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c234	0x4	DAT_8009c234	global	load	s32	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c238	0x4	DAT_8009c238	global	load	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c23c	0x4	DAT_8009c23c	global	load	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
+GAME.EXE	0x8009c240	0x4	DAT_8009c240	global	load	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c244	0x4	DAT_8009c244	global	load	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c248	0x4	DAT_8009c248	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c24c	0x4	DAT_8009c24c	global	load	s32	func_8001c030	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
+GAME.EXE	0x8009c250	0x4	DAT_8009c250	global	load	s32	func_8001c030	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
+GAME.EXE	0x8009c254	0x4	DAT_8009c254	global	load	s32	func_8001c030	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c258	0x4	DAT_8009c258	global	load	s32	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
+GAME.EXE	0x8009c25c	0x4	DAT_8009c25c	global	load	s32	func_8001dee4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c260	0x4	DAT_8009c260	global	load	s32	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c264	0x4	DAT_8009c264	global	load	s32	func_800246bc	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c268	0x4	DAT_8009c268	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c26c	0x4	DAT_8009c26c	global	load	s32	func_8001f274	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
+GAME.EXE	0x8009c270	0x4	DAT_8009c270	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c274	0x4	DAT_8009c274	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c278	0x4	DAT_8009c278	global	load	s32	func_8001ec84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c27c	0x4	DAT_8009c27c	global	load	s32	func_8001f274	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
 GAME.EXE	0x8009c2c0	0x1	DAT_8009c2c0	global	load	u8	func_8002860c	address-only	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2d0	0x8	DAT_8009c2d0	global	load	RECT	func_8003daec	address-only	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
 GAME.EXE	0x8009c2e0	0x4	DAT_8009c2e0	global	load	CVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8	DAT_8009c2e4	global	load	SVECTOR	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x4	DAT_8009c2ec	global	load	s32	func_800422b8	address-only	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
 GAME.EXE	0x8009c33c	0x8	DAT_8009c33c	global	load	SVECTOR	func_800561d8	address-only	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}; func_800561d8 passes its address (lui/addiu) to func_80053c84 as the velocity; no other reference
+GAME.EXE	0x8009c374	0x4	DAT_8009c374	static	bss	POLY_FT4 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x160); the menu's current textured primitive (func_80027414 sets it)
+GAME.EXE	0x8009c378	0x4	DAT_8009c378	static	bss	SPRT *	func_800261dc	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x164); the menu text primitive (func_80027560 sets it)
+GAME.EXE	0x8009c37c	0x4	DAT_8009c37c	static	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x168); buffer of the picture being read from ITEM.T
+GAME.EXE	0x8009c380	0x4	DAT_8009c380	static	bss	u8 *	func_8001b5c4	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x16c); read pointer into that buffer (the ready callback advances it)
+GAME.EXE	0x8009c384	0x1	DAT_8009c384	static	bss	u8	func_8001e710	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x170); nonzero while the menu sequence plays (save, options and menu entry pause/replay it)
+GAME.EXE	0x8009c388	0x4	DAT_8009c388	static	bss	u8 *	func_800270f8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x174); the screen copy the menu draws over: func_80027198 stores the screen there, the present loads it back each frame
+GAME.EXE	0x8009c38c	0x8	DAT_8009c38c	static	bss	RECT	func_800270f8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x178); where that copy goes in VRAM: the half being drawn, 320x240
+GAME.EXE	0x8009c394	0x8	DAT_8009c394	static	bss	SVECTOR	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x180); item preview translation (vz the distance, 1000 at load)
+GAME.EXE	0x8009c39c	0x8	DAT_8009c39c	static	bss	SVECTOR	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x188); item preview rotation, vy advanced by DAT_8009c3a4 each frame
+GAME.EXE	0x8009c3a4	0x4	DAT_8009c3a4	static	bss	s32	func_80025be8	address-only	asm;src/game/menu.c game.menu	.sbss ($gp+0x190); item preview spin per frame (4 at load)
 GAME.EXE	0x8009c3a8	0x4	DAT_8009c3a8	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x194; card I/O end event
 GAME.EXE	0x8009c3ac	0x4	DAT_8009c3ac	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x198; card timeout event
 GAME.EXE	0x8009c3b0	0x4	DAT_8009c3b0	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x19c; new card event
@@ -31,6 +66,7 @@ GAME.EXE	0x8009c3bc	0x4	DAT_8009c3bc	static	bss	long		address-only	asm;src/game/
 GAME.EXE	0x8009c3c0	0x4	DAT_8009c3c0	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1ac; never referenced
 GAME.EXE	0x8009c3c4	0x4	DAT_8009c3c4	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1b0; never referenced
 GAME.EXE	0x8009c3c8	0x4	DAT_8009c3c8	static	bss	u8 *	func_80028034	address-only	asm;src/game/card.c game.card	.sbss $gp+0x1b4; the 0x6000-byte card file buffer
+GAME.EXE	0x8009c3cc	0x8	DAT_8009c3cc	static	bss	u16[4]	func_8002fe1c	address-only	asm;src/game/player_action.c game.player_action	.sbss $gp+0x1b8; pad-bit sequence rebuilt by func_8002fe1c, followed through Data801b24e4.unka8
 GAME.EXE	0x8009c3f8	0x4	DAT_8009c3f8	global	bss	s32	func_80014bd4	address-only	asm;src/game/main.c game.main	.sbss word ($gp+0x1e4); the game loop runs while it is 0; 2 returns to OPEN.EXE, 3 and 4 go to END.EXE with mailbox 2 or 3
 GAME.EXE	0x8009c3fc	0x4	DAT_8009c3fc	global	bss	u32	func_80017664	address-only	asm;src/game/scene.c game.scene	.sbss word ($gp+0x1e8): FDAT window base + 4, the loaded module's handler table; func_80018358 copies it to DAT_8018fad4.handlers
 GAME.EXE	0x8009f114	0x4b0	DAT_8009f114	global	bss	Record0c[100]	func_80017664	address-only	asm;band C relocs;src/game/player.c game.player	12-byte level records, one per level; func_80017664 copies them out of the first FDAT.T entry; func_8002a310 reads levels 0..98 and extrapolates past 99 from [98]/[99]; 100 records fill the gap to DAT_8009f5c4
@@ -60,9 +96,10 @@ GAME.EXE	0x80199154	0x178a8	DAT_80199154	global	bss	Data80199154	func_80014bd4	a
 GAME.EXE	0x801b09fc	0x1ae8	DAT_801b09fc	global	bss	SoundState	func_8001509c	address-only	asm;src/game/sound.c game.sound	sound state: sequence, listener, 0xb3 VAB banks, effect table, 11 body buffer slots; the game loop clears it as 0x6ba words
 GAME.EXE	0x801b24e4	0x19c	DAT_801b24e4	global	bss	Data801b24e4	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0x67 words; +0xe cleared each frame, +0xf7 effect volume, +0xf8 sequence volume
 GAME.EXE	0x801b268c	0x4	DAT_801b268c	global	bss	u_long[]	func_8001509c	address-only	asm;band A relocs	sequence data the sound state points at; extent unknown (referenced prefix)
-GAME.EXE	0x801b56cc	0x280	DAT_801b56cc	global	bss	u32[0xa0]	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0xa0 words; WIP extent
-GAME.EXE	0x801b594c	0x320	DAT_801b594c	global	bss	u32[0xc8]	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0xc8 words; WIP extent
+GAME.EXE	0x801b56cc	0x280	DAT_801b56cc	global	bss	u8[32][20]	func_80014bd4	address-only	asm;band A relocs;game-e func_8001bd48/func_8001bea8	cleared by the game loop as 0xa0 words; area map: 160 room bits per area (20 bytes x 32 areas, MSB first)
+GAME.EXE	0x801b594c	0x320	DAT_801b594c	global	bss	u8[80][10]	func_80014bd4	address-only	asm;band A relocs;game-e func_8001bea8	cleared by the game loop as 0xc8 words; 80 x 80 bit grid of visited cells (10 bytes a row, MSB first)
 GAME.EXE	0x801b77ec	0x2f0c	DAT_801b77ec	global	bss	Data801b77ec	func_80014bd4	address-only	asm;band A relocs;band G src/game/object4c*.c	Record18 records (96 x 0x18), Object4c records (+0x900, 128 x 0x4c) and the current record/Record18 pointers (+0x2f04/+0x2f00); cleared by the game loop as 0xbc3 words; WIP extent (may be several objects)
+GAME.EXE	0x801ba6fc	0x280	DAT_801ba6fc	global	bss	MapRect[160]	func_8001bd48	address-only	asm;src/game/menu.c game.menu	area map room rectangles (u8 x, y, w, h); WIP extent: indexed 0..159, between DAT_801b77ec and DAT_801ba984
 GAME.EXE	0x801ba984	0x5144	DAT_801ba984	global	bss	Data801ba984	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0x1451 words; +0xd set on a continued game
 GAME.EXE	0x801c12e4	0x4c0	DAT_801c12e4	global	bss	CdState	func_8001a438	address-only	asm;src/game/cd.c game.cd;src/game/player.c game.player	CD and VSync state: frame counters, CD event ids, 24 read requests (+0x20), write/read pointers (+0x440/+0x444, band A's DAT_801c1724/DAT_801c1728), archive file table (+0x448); one aggregate (func_8001a438 reaches the requests from the VSync event's base; func_80019bbc compares the write pointer with &requests[24] as one address); +0xc counts VSyncs and func_80029500 stores the player's +0xa0 there (band D's DAT_801c12f0)
 GAME.EXE	0x801c17a4	0x4	DAT_801c17a4	global	bss	u8[]	func_80015908	address-only	asm;band A relocs	sector buffer a sound read switches to after the VAB header; extent unknown (referenced prefix)

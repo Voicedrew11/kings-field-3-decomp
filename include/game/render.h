@@ -410,7 +410,7 @@ void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
 void func_80040ae4(void);
-void func_800277c0(u16 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
+void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80043b38(u8 *file);
 
 #endif

@@ -16,6 +16,26 @@
 #include <psyq/sdk.h>
 #include <kf/decenv.h>
 
+/* Data801b24e4.unk188 in modes 3, 0x10, 0x11 and 0x12 (func_80030908). */
+typedef struct Record10 {
+    SVECTOR dir;    /* +0x0 */
+    SVECTOR push;   /* +0x8: added to unk134..unk138 (func_8003047c) */
+} Record10;
+
+/* Data801b24e4.unk188 in modes 7, 8 and 9 (func_80030810). */
+typedef struct Record0a {
+    u8 id;          /* +0x0 */
+    u8 unk1;
+    SVECTOR angle;  /* +0x2: copy of Data801b24e4.unk12c */
+} Record0a;
+
+/* Data801b24e4.unk188: one view per unk101 mode (mode 5 counts in count). */
+typedef union Data801b24e4Mode {
+    Record10 knock;
+    Record0a turn;
+    s16 count;
+} Data801b24e4Mode;
+
 typedef struct Data801b24e4 {
     s32 experience; /* +0x00: the save title shows it as six digits */
     s32 unk4;
@@ -43,7 +63,7 @@ typedef struct Data801b24e4 {
     s16 unk3e;
     u16 unk40;      /* +0x40: 0..999 */
     u16 unk42[5];   /* +0x42: 0..999 each */
-    s16 unk4c;
+    u16 unk4c;      /* +0x4c: the menu shows it plus one (func_800227ec, lhu) */
     u8 unk4e[0x2];
     s32 unk50;
     u16 unk54[7];   /* +0x54: func_80029500 rebuilds them; never above 0x7fff */
@@ -74,11 +94,11 @@ typedef struct Data801b24e4 {
     s16 unk92;
     s16 unk94;
     u8 unk96[0x6];
-    s32 unk9c;
+    u32 unk9c;      /* +0x9c: frame counter (func_80030cbc periods) */
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
-    s32 unka8;
-    s32 unkac;
+    u16 *unka8;     /* +0xa8: next pad bit of the DAT_8009c3cc sequence (func_8002fe1c) */
+    struct Record18 *unkac; /* +0xac: &DAT_801b77ec.unk0[id] (func_8002d130) */
     struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
@@ -164,19 +184,13 @@ typedef struct Data801b24e4 {
     s16 unk172;
     s16 unk174;
     s16 unk176;
-    s16 unk178;
-    s16 unk17a;
+    u16 unk178;     /* +0x178: pad bits held (DAT_80081868) */
+    u16 unk17a;     /* +0x17a: pad bits held the frame before */
     u8 unk17c[0x4];
     s32 unk180;
     s32 unk184;
-    s16 unk188;
-    s16 unk18a;
-    s16 unk18c;
-    s16 unk18e;
-    s16 unk190;
-    s16 unk192;
-    s16 unk194;
-    u8 unk196[0x6];
+    Data801b24e4Mode unk188; /* +0x188: parameters of the unk101 mode */
+    u8 unk198[0x4];
 } Data801b24e4;
 
 typedef struct Data801ba984 {
@@ -212,7 +226,11 @@ typedef struct Record20 {
     u16 unke;
     u16 unk10;
     u16 unk12;
-    u8 unk14[0xc];
+    u16 unk14;      /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
+    u16 unk16;
+    u16 unk18;
+    u16 unk1a;
+    u8 unk1c[0x4];
 } Record20;
 
 /*
@@ -470,7 +488,7 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u8 unk16[2];
+    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130); func_8001c6c0 lists it */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -492,26 +510,47 @@ typedef struct Record0c {
 
 /* 0x44-byte records func_80029500 adds to the player's unk54[]/unk62 (WIP). */
 typedef struct Record44 {
-    u8 unk0[5];
+    u8 unk0[4];
+    u8 unk4;
     u8 unk5;
     u16 unk6[8];
     u8 unk16[8];
     u16 unk1e;
-    u8 unk20[6];
+    u8 unk20[4];
+    u16 unk24;
     u16 unk26;
     u8 unk28[4];
     u16 unk2c;
     u16 unk2e;
-    u8 unk30[0x14];
+    u8 unk30[4];
+    u16 unk34;      /* +0x34..+0x42: model offsets of the weapon tip (func_8002cea8) */
+    u16 unk36;
+    u16 unk38;
+    s16 unk3a;
+    u16 unk3c;
+    u16 unk3e;
+    u16 unk40;
+    s16 unk42;
 } Record44;
 
 /* One entry of a loaded FDAT module's handler table. */
 typedef s32 (*FdatHandler)();
 
-/* Area state func_80017664 and func_8001796c set up (WIP). */
+/*
+ * Area state func_80017664 and func_8001796c set up (WIP). Only the scene
+ * module sees the step the CD callbacks set as volatile: the menu module's
+ * accesses to the same object show none of that (a volatile member changes
+ * how GCC 2.6 reaches every member of the aggregate; see game/cd.h).
+ */
+#ifdef GAME_SCENE_MODULE
+#define SCENE_STEP_SHARED volatile
+#else
+#define SCENE_STEP_SHARED
+#endif
+
 typedef struct Data8018fad4 {
     u16 loading;    /* +0x00: func_8001796c steps func_80018358 until it clears */
-    volatile s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
+    SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
     u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
                      * the model id bank (func_80040568) */
     u8 unk9;
@@ -547,8 +586,10 @@ extern Data80185da8 DAT_80185da8;
 extern Data8018fad4 DAT_8018fad4;
 extern Data8018fb3c DAT_8018fb3c;
 extern Data801b24e4 DAT_801b24e4;
-extern u32 DAT_801b56cc[0xa0];
-extern u32 DAT_801b594c[0xc8];
+/* Area map bits: rooms seen per area (32 areas x 160 bits) and the 80 x 80 grid of
+ * visited cells func_8001bea8 marks rooms from. */
+extern u8 DAT_801b56cc[32][20];
+extern u8 DAT_801b594c[80][10];
 extern Data801b77ec DAT_801b77ec;
 
 /* A record of the table func_80017664 copies in (DAT_801983a8.unk0). */

@@ -21,7 +21,7 @@ void func_800293e4(s32 id);
 void func_80029500(void);
 void func_80029f1c(u32 element);
 void func_8002a074(void);
-void func_8002a10c(u8 *spell);
+void func_8002a10c(struct Record18 *spell);
 void func_8002a210(void);
 void func_8002a310(int amount);
 s32 func_8002a5f8(s32 power, s32 defense, s32 attack);
@@ -49,8 +49,51 @@ void func_8002bdc0(u8 id);
 void func_8002c040(s32 hand);
 struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
-/* Later in the module (not reconstructed yet). */
+/* Pad bit per action (WIP), defined in player.c. */
+extern u16 DAT_80081868[14];
+
+/*
+ * The same WIP module after func_8002c30c: src/game/player_cast.c,
+ * player_spell.c and player_action.c (func_8002c30c, func_8002d2a0 and
+ * func_8002e3f8 are not reconstructed yet).
+ */
+void func_8002c30c(); /* spell id; spills all four argument registers */
+void func_8002cea8(s32 vertex, VECTOR *out);
+s32 func_8002cfe0(s32 hand);
+void func_8002d130(s32 id, s32 pay, s32 dir);
+void func_8002deec(s32 id);
+void func_8002e3f8(s32 angle, s32 speed);
+void func_8002ecbc(void);
+void func_8002ed1c(s32 speed);
+void func_8002ed60(void);
+s32 func_8002f320(void);
+void func_8002f5c0(void);
+void func_8002f9bc(void);
+s32 func_8002fddc(s32 id);
+void func_8002fe1c(void);
+void func_8003047c(void);
+void func_80030568(void);
+void func_800305d8(void);
+void func_8003078c(void);
+void func_800307f4(u8 id);
+void func_80030810(u8 id);
+void func_80030864(u8 id);
+void func_800308b8(SVECTOR *dir);
+void func_800308f4(void);
 void func_80030908(SVECTOR *dir, SVECTOR *push, s16 lift);
 void func_800309c8(SVECTOR *dir, SVECTOR *push, s16 lift);
+void func_80030a6c(SVECTOR *dir);
+void func_80030af8(void);
+s16 func_80030b24(s16 *count, s16 *timer, s32 range, s32 scale);
+void func_80030be0(s32 amount);
+void func_80030c4c(s32 amount);
+void func_80030c6c(s32 amount);
+void func_80030cbc(struct Record20 *r);
+void func_80030d68(struct Record20 *r);
+void func_80030e14(void);
+
+/* Callees outside the module (no definition reconstructed yet). */
+void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id);
+void func_8005e2d0(VECTOR *pos, SVECTOR *angle);
 
 #endif
