@@ -502,6 +502,12 @@ void func_8001b594(void)
     }
 }
 
+/*
+ * Not exact: the map-marker argument loads (area, pos.vz) are scheduled and
+ * allocated differently. The two-frame repeat is a goto loop: as a nested
+ * loop its uses would be weighted by depth and the hoisted address would
+ * outrank the 0x66666667 constant and the item copy ($s2/$s3/$s4).
+ */
 ADDRESS(0x8001b5c4, 0x2c8)
 void func_8001b5c4(u8 item)
 {
@@ -532,34 +538,36 @@ void func_8001b5c4(u8 item)
     DAT_8009c230 = 0;
     func_80027a40();
     do {
-        do {
-            func_80026fe4();
-            func_8001b88c(item);
-            if (DAT_8018fad4.unk9 < 12 && item == 0x5f) {
-                func_80027414();
-                if (DAT_8009c260 < 48) {
-                    n = DAT_8009c260;
-                } else {
-                    n = 0x60 - DAT_8009c260;
-                }
-                setRGB0(DAT_8009c374, n - 128, n - 128, n - 128);
-                DAT_8009c374->tpage = 0x1e;
-                DAT_8009c374->clut = 0x7e45;
-                n = ((DAT_801b24e4.unk124.vy & 0xfff) + 256) >> 9;
-                if (n == 8) {
-                    n = 0;
-                }
-                area = DAT_8018fad4.unk9;
-                func_80027494((area & 3) * 56 + DAT_801b24e4.pos.vx / 2560 + 40,
-                              0xbc - DAT_801b24e4.pos.vz / 2560 - (area >> 2) * 56,
-                              15, 15, n * 16 + 128, 0x90, 15, 15);
-                func_80027530(0x1c);
+    again:
+        func_80026fe4();
+        func_8001b88c(item);
+        if (DAT_8018fad4.unk9 < 12 && item == 0x5f) {
+            func_80027414();
+            if (DAT_8009c260 < 48) {
+                n = DAT_8009c260;
+            } else {
+                n = 0x60 - DAT_8009c260;
             }
-            func_800269c0(0x80, 0xd6, DAT_8009c258);
-            func_80026570(0x8a, 0xd6, "return", 0, 0);
-            func_800270f8();
-            i++;
-        } while (i < 2);
+            setRGB0(DAT_8009c374, n - 128, n - 128, n - 128);
+            DAT_8009c374->tpage = 0x1e;
+            DAT_8009c374->clut = 0x7e45;
+            n = ((DAT_801b24e4.unk124.vy & 0xfff) + 256) >> 9;
+            if (n == 8) {
+                n = 0;
+            }
+            area = DAT_8018fad4.unk9;
+            func_80027494((area & 3) * 56 + DAT_801b24e4.pos.vx / 2560 + 40,
+                          0xbc - DAT_801b24e4.pos.vz / 2560 - (area >> 2) * 56,
+                          15, 15, n * 16 + 128, 0x90, 15, 15);
+            func_80027530(0x1c);
+        }
+        func_800269c0(0x80, 0xd6, DAT_8009c258);
+        func_80026570(0x8a, 0xd6, "return", 0, 0);
+        func_800270f8();
+        i++;
+        if (i < 2) {
+            goto again;
+        }
     } while (!func_800279a4());
     func_80027a70();
     func_80027a40();
