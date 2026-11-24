@@ -2437,7 +2437,11 @@ void func_80047010(void)
                 case 2:
                     if (obj->arg.h.unk40-- == 0) {
                         obj->unk8 = 3;
-                        layer = DAT_801d4464.cells[obj->pos.vz >> 11][obj->pos.vx >> 11].layer;
+                        {
+                            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+
+                            layer = row[obj->pos.vx >> 11].layer;
+                        }
                         if (obj->unk0 != 1) {
                             layer++;
                         }
@@ -2462,7 +2466,11 @@ void func_80047010(void)
                     if (obj->unk10 >= 4096) {
                         obj->unk10 = 0x1000;
                         obj->unk8 = 0;
-                        layer = DAT_801d4464.cells[obj->pos.vz >> 11][obj->pos.vx >> 11].layer;
+                        {
+                            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+
+                            layer = row[obj->pos.vx >> 11].layer;
+                        }
                         if (obj->unk0 != 1) {
                             layer++;
                         }
