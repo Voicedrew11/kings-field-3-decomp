@@ -1880,16 +1880,15 @@ void func_8001eb3c(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w,
 {
     s32 i;
     s32 j;
-    MenuText *title = &DAT_8007e660[message + 28];
     MenuText *line;
 
     for (i = 0; i < 2; i++) {
         func_80026fe4();
-        line = lines;
         if (message < 8) {
-            func_80025f38(&DAT_8007e564[MENU_FONT_FRAME], title);
-            func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], title);
+            func_80025f38(&DAT_8007e564[MENU_FONT_FRAME], &DAT_8007e660[message + 28]);
+            func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &DAT_8007e660[message + 28]);
         }
+        line = lines;
         for (j = 0; j < count; j++) {
             func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], line);
             line++;
