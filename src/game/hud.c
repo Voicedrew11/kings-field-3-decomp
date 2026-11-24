@@ -192,7 +192,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
     s32 i;
 
     DAT_8009c2e0.b = DAT_8009c2e0.g = DAT_8009c2e0.r = DAT_801b24e4.unkfd;
-    func_800357e8();
+    func_800357e8(pos, angle);
     func_800351fc();
     func_80041f9c();
     func_80034bf4();
@@ -215,7 +215,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
                         DAT_800819b4[29].visible = (DAT_801b24e4.unkf9 & 2) >> 1;
     i = DAT_801b24e4.unkfa - 1;
     if (i >= 0) {
-        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].unk1a, DAT_80199154.unk15b0a);
+        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].unk1a, DAT_80199154.unk15b08.vy);
         if (DAT_8009c2ec > 0) {
             DAT_8009c2ec -= (DAT_8009c2ec + 7) >> 3;
         } else if (DAT_8009c2ec < 0) {
@@ -223,7 +223,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
         }
         DAT_80081c20[i == 0].unk1a = DAT_80081c20[i].unk1a =
             DAT_80081c20[i].unk1a + (DAT_8009c2ec >> 6);
-        DAT_80081c20[i == 0].unk18 = DAT_80081c20[i].unk18 = DAT_80199154.unk15b08;
+        DAT_80081c20[i == 0].unk18 = DAT_80081c20[i].unk18 = DAT_80199154.unk15b08.vx;
     }
     if (DAT_801b24e4.unkf9 == 1) {
         DAT_800819b4[4].unka = DAT_800819b4[4].w = DAT_801b24e4.hp * 48 / DAT_801b24e4.hp_max;

@@ -63,7 +63,7 @@ typedef struct Data801b24e4 {
     s16 unk3e;
     u16 unk40;      /* +0x40: 0..999 */
     u16 unk42[5];   /* +0x42: 0..999 each */
-    s16 unk4c;
+    u16 unk4c;      /* +0x4c: the menu shows it plus one (func_800227ec, lhu) */
     u8 unk4e[0x2];
     s32 unk50;
     u16 unk54[7];   /* +0x54: func_80029500 rebuilds them; never above 0x7fff */
@@ -233,11 +233,32 @@ typedef struct Record20 {
     u8 unk1c[0x4];
 } Record20;
 
+/*
+ * One layer of a map cell; func_8003bb04 draws one (field names WIP).
+ */
+typedef struct MapLayer {
+    u8 unk0;        /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
+    u8 unk1;        /* +0x01: floor height / -128 */
+    u8 unk2;        /* +0x02: layer 0: bits 2-7 count the Object88 records on the
+                     * cell (func_80033c4c) */
+    u8 unk3;
+    u8 unk4;
+} MapLayer;
+
+/*
+ * One 2048-unit square of the area map (80 x 80 of them start DAT_801d4464,
+ * indexed [z >> 11][x >> 11]): layer 0 for area 1, layer 1 for area 2.
+ */
+typedef struct MapCell {
+    MapLayer layer[2];
+} MapCell;
+
 typedef struct Data801d4464 {
-    u8 unk0[0x11c14];
+    MapCell cells[80][80];
+    u8 unkfa00[0x2214];
     Record20 unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
-    u8 *unk12000;   /* +0x12000: floor tile record func_800324f0 selected */
+    MapCell *unk12000; /* +0x12000: cell of the last collision test */
     u8 *unk12004;   /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
     u8 unk12008[2];
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
@@ -246,13 +267,15 @@ typedef struct Data801d4464 {
     u8 unk12014[4];
     s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against; [0] the
                       * floor the Object4c spawns of func_80056268 must reach */
-    u8 unk12024[4];
-    s32 unk12028;   /* +0x12028: index of an Object88 record (func_800533e8) */
-    u8 unk1202c[0x10];
+    u32 unk12024;   /* +0x12024: hit bits of the last func_80033f38 test */
+    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (func_800533e8 reads it) */
+    s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
+    u8 unk12030[0xc];
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
-    u8 unk1204c[2];
-    u16 unk1204e;
-    u8 unk12050[4];
+    u16 unk1204c;   /* +0x1204c: radius of what was hit (func_80033d84) */
+    u16 unk1204e;   /* +0x1204e: height of what was hit */
+    u16 unk12050;
+    u8 unk12052[2];
 } Data801d4464;
 
 typedef struct Data801e7edc {
@@ -275,21 +298,31 @@ typedef struct Data801e7edc {
  * records it also moves are the placed effects (Effect, game/render.h).
  */
 typedef struct Object44 {
-    u8 unk0[4];
+    u8 unk0[3];
+    u8 unk3;        /* +0x03: flags; 0x10 scales its radius by unk38, 0x4 takes Object44Def.unke/unk10 */
     u8 unk4;
     u8 unk5;
-    u16 unk6;       /* +0x06: 0xff when free */
+    u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
     u8 unk8[0xc];
-    s32 x;          /* +0x14 */
-    s32 y;
-    s32 z;
-    u8 unk20[4];
+    VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (func_8005bee0) */
     u8 unk2c[0xc];
-    u8 unk38;
+    u8 unk38;       /* +0x38: radius scale, 0x80 = 1 */
     u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
     u8 unk3a[0xa];
 } Object44;
+
+/* The 0x18-byte records Object44.unk6 indexes (WIP). */
+typedef struct Object44Def {
+    u8 unk0[4];
+    u16 unk4;       /* +0x04: radius */
+    u8 unk6[2];
+    u16 unk8;       /* +0x08: height */
+    u8 unka[4];
+    u16 unke;
+    u16 unk10;
+    u8 unk12[6];
+} Object44Def;
 
 typedef struct Object4c {
     u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
@@ -437,7 +470,7 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130) */
+    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130); func_8001c6c0 lists it */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -485,17 +518,29 @@ typedef struct Record44 {
 /* One entry of a loaded FDAT module's handler table. */
 typedef s32 (*FdatHandler)();
 
-/* Area state func_80017664 and func_8001796c set up (WIP). */
+/*
+ * Area state func_80017664 and func_8001796c set up (WIP). Only the scene
+ * module sees the step the CD callbacks set as volatile: the menu module's
+ * accesses to the same object show none of that (a volatile member changes
+ * how GCC 2.6 reaches every member of the aggregate; see game/cd.h).
+ */
+#ifdef GAME_SCENE_MODULE
+#define SCENE_STEP_SHARED volatile
+#else
+#define SCENE_STEP_SHARED
+#endif
+
 typedef struct Data8018fad4 {
     u16 loading;    /* +0x00: func_8001796c steps func_80018358 until it clears */
-    volatile s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
+    SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
     u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
                      * the model id bank (func_80040568) */
     u8 unk9;
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
-    u8 unk15[2];
+    u8 unk15;
+    u8 unk16;       /* +0x16: func_8003bb04 limits the parts drawn while loading */
     u8 unk17;       /* +0x17 */
     u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
@@ -503,7 +548,7 @@ typedef struct Data8018fad4 {
 } Data8018fad4;
 
 typedef struct Data8018fb3c {
-    u8 unk0[0x1f20];
+    Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[0x18];
 } Data8018fb3c;
@@ -521,8 +566,10 @@ extern Data80185da8 DAT_80185da8;
 extern Data8018fad4 DAT_8018fad4;
 extern Data8018fb3c DAT_8018fb3c;
 extern Data801b24e4 DAT_801b24e4;
-extern u32 DAT_801b56cc[0xa0];
-extern u32 DAT_801b594c[0xc8];
+/* Area map bits: rooms seen per area (32 areas x 160 bits) and the 80 x 80 grid of
+ * visited cells func_8001bea8 marks rooms from. */
+extern u8 DAT_801b56cc[32][20];
+extern u8 DAT_801b594c[80][10];
 extern Data801b77ec DAT_801b77ec;
 
 /* A record of the table func_80017664 copies in (DAT_801983a8.unk0). */
@@ -564,7 +611,6 @@ extern Data801e7edc DAT_801e7edc;
  */
 extern Record0c DAT_8009f114[100];
 extern Record44 DAT_801d37a4[48];
-extern u32 DAT_80081c8c[];
 extern u32 DAT_800aedc4[];
 extern u32 DAT_80116154[];
 extern u32 DAT_801e64b8[];

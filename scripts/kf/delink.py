@@ -196,9 +196,14 @@ class Datum:
         # eight-byte allocation strides. Retail's menu-bank gap independently
         # confirms this for globals (game_menu_banks.md). Unknown linkage and
         # initialized data retain the narrower working constraint.
+        # Small (-G) .sbss objects are the exception: the native chain packs
+        # them at word strides (the menu's 0x8009c374/0x8009c378 statics sit
+        # four bytes apart), so an eight-byte VA does not imply an
+        # eight-byte request there.
         candidates = (
             (8, 4, 2)
             if self.storage == "bss" and self.scope in {"static", "global"}
+            and self.section_name != ".sbss"
             else (4, 2)
         )
         for candidate in candidates:

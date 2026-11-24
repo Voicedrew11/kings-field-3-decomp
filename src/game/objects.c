@@ -143,7 +143,7 @@ void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
     s32 end;
     SoundSlot *slot;
 
-    wanted = SCRATCH->sound_wanted;
+    wanted = SCRATCH->u.load.sound_wanted;
     for (end = count + entry; entry < end; entry++, bank++) {
         slot = DAT_801b09fc.banks[bank].slot;
         if (*wanted++ != 0) {
@@ -167,7 +167,7 @@ void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
     s32 end;
     u8 *model;
 
-    wanted = SCRATCH->model_wanted;
+    wanted = SCRATCH->u.load.model_wanted;
     for (end = count + entry; entry < end; entry++, id++) {
         if (*wanted++ != 0) {
             model = DAT_80199154.models[id];

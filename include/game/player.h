@@ -93,10 +93,6 @@ void func_80030d68(struct Record20 *r);
 void func_80030e14(void);
 
 /* Callees outside the module (no definition reconstructed yet). */
-s32 func_8001a774(void);
-void func_8001b254(s32 id);
-void func_8001bea8(void);
-void func_8003456c(s32 r, s32 g, s32 b, s32 near, s32 far, s32 scale);
 void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id);
 void func_8005e2d0(VECTOR *pos, SVECTOR *angle);
 

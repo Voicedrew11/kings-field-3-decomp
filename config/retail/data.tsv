@@ -87,12 +87,37 @@ GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	DAT_80081868	u16[14]	asm;src/
 GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	DAT_80081884	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
 GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	DAT_800818c0	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
 GAME.EXE	0x800818e3	0x710e3	0x29	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	DAT_8008190c	u8[10]	asm;src/game/floor_select.c game.floor_select	.data; the tile record func_800324f0 selects outside the map
+GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	DAT_8008190c	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record func_800324f0 selects outside the map
 GAME.EXE	0x80081916	0x71116	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
-GAME.EXE	0x80081c8c	0x7148c	0x1a634	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081c8c	0x7148c	0x1a5a0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
+GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
+GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	DAT_8009c22e	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
+GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	DAT_8009c22f	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
+GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	DAT_8009c230	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	DAT_8009c234	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	DAT_8009c238	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	DAT_8009c23c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
+GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	DAT_8009c240	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	DAT_8009c244	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	DAT_8009c248	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	DAT_8009c24c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
+GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	DAT_8009c250	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
+GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	DAT_8009c254	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	DAT_8009c258	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
+GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	DAT_8009c25c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	DAT_8009c260	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	DAT_8009c264	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	DAT_8009c268	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	DAT_8009c26c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
+GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	DAT_8009c270	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	DAT_8009c274	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	DAT_8009c278	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	DAT_8009c27c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
+GAME.EXE	0x8009c280	0x8ba80	0x40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	DAT_8009c2c0	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2c1	0x8bac1	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	DAT_8009c2d0	RECT	asm;src/game/screen.c game.screen	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores

@@ -35,9 +35,9 @@ ADDRESS(0x8005bee0, 0xe4)
 void func_8005bee0(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (from != NULL) {
-        obj->x = func_80017158(from->vx, to->vx, t);
-        obj->y = func_80017158(from->vy, to->vy, t);
-        obj->z = func_80017158(from->vz, to->vz, t);
+        obj->pos.vx = func_80017158(from->vx, to->vx, t);
+        obj->pos.vy = func_80017158(from->vy, to->vy, t);
+        obj->pos.vz = func_80017158(from->vz, to->vz, t);
     }
     if (afrom != NULL) {
         obj->angle.vx = func_80017170(afrom->vx, ato->vx, t);
@@ -50,9 +50,9 @@ ADDRESS(0x8005bfc4, 0x88)
 void func_8005bfc4(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
 {
     if (from != NULL) {
-        obj->x = func_80017158(from->vx, to->vx, t);
-        obj->y = func_80017158(from->vy, to->vy, t);
-        obj->z = func_80017158(from->vz, to->vz, t);
+        obj->pos.vx = func_80017158(from->vx, to->vx, t);
+        obj->pos.vy = func_80017158(from->vy, to->vy, t);
+        obj->pos.vz = func_80017158(from->vz, to->vz, t);
     }
 }
 

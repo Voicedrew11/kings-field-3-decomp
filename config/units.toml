@@ -111,6 +111,12 @@ source = "src/game/cd.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.menu"
+image = "GAME.EXE"
+source = "src/game/menu.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.card"
 image = "GAME.EXE"
 source = "src/game/card.c"
@@ -144,6 +150,30 @@ profile = "gcc260-o2-g8"
 unit = "game.floor_select"
 image = "GAME.EXE"
 source = "src/game/floor_select.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.collision"
+image = "GAME.EXE"
+source = "src/game/collision.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.view"
+image = "GAME.EXE"
+source = "src/game/view.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.model"
+image = "GAME.EXE"
+source = "src/game/model.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.tiles"
+image = "GAME.EXE"
+source = "src/game/tiles.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]

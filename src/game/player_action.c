@@ -13,6 +13,7 @@
 #include <game/data.h>
 #include <game/funcs.h>
 #include <game/player.h>
+#include <game/menu.h>
 #include <game/entity.h>
 #include <game/misc.h>
 #include <kf/lib/null.h>

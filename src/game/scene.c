@@ -6,6 +6,8 @@
  * is -G8: the handler-table pointer is a $gp-relative .sbss word, while the
  * FDAT window base is reached absolutely (declared without a size here).
  */
+/* The area step is volatile only here (see game/data.h). */
+#define GAME_SCENE_MODULE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -18,6 +20,7 @@
 #include <game/scene.h>
 #include <game/render.h>
 #include <game/data.h>
+#include <game/misc.h>
 #include <game/funcs.h>
 #include <game/player.h>
 
@@ -72,7 +75,7 @@ void func_80017664(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c((u32 *)&DAT_801b77ec, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80018f5c(DAT_80081c8c, p + 1, *p >> 2);
+    func_80018f5c((u32 *)DAT_80081c8c, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c((u32 *)&DAT_801e7edc, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
@@ -144,9 +147,9 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     j = 0x18c;
     while (j--) {
         if (b->unk6 != 0xff) {
-            b->x += dx;
-            b->z += dz;
-            b->y += dy;
+            b->pos.vx += dx;
+            b->pos.vz += dz;
+            b->pos.vy += dy;
         }
         b++;
     }
