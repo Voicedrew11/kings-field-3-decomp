@@ -96,6 +96,7 @@ VECTOR *func_8004eee0(Object88 *obj, VECTOR *out);
 void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed);
 s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out, s32 pitch,
                   s16 turn, s32 steps);
+void func_8004f414(s32 id, s32 kind, s32 vertex, ...);
 s32 func_8004ffa0(Object88 *obj);
 void func_80050010(Object88 *obj);
 void func_800500a8(void);
