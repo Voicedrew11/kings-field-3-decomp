@@ -5234,7 +5234,7 @@ void func_80027688(MenuList *list, s32 page, s32 button)
     s32 i;
 
     dst = list->title;
-    src = DAT_8007e660[page * 9 + button + 1].text;
+    src = (&DAT_8007e660[page * 9])[button + 1].text;
     list->unk0 = 0x1f;
     list->unk2 = 0x20;
     for (i = 0; i < 16; i++) {
