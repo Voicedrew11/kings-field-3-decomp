@@ -224,19 +224,16 @@ s32 func_8004e914(s32 angle, s32 target)
 
 /*
  * Turns obj toward target: the turn rate obj->unk58 grows by accel up to max.
- * K&R definition: target arrives as int (func_800500a8 passes
- * func_80016ab8's result and Object88.unk20 unconverted).
+ * target arrives as an int (func_800500a8 passes func_80016ab8's result
+ * and Object88.unk20 unconverted); retail narrows it to 16 bits for each
+ * angle helper call.
  */
 ADDRESS(0x8004e928, 0x154)
-void func_8004e928(obj, target, max, accel)
-    Object88 *obj;
-    s16 target;
-    s32 max;
-    s32 accel;
+void func_8004e928(Object88 *obj, int target, s32 max, s32 accel)
 {
     s32 yaw;
 
-    if (func_80016a98(target, obj->angle.vy) != 0) {
+    if (func_80016a98((s16)target, obj->angle.vy) != 0) {
         if (func_80016a68(target, obj->angle.vy)) {
             obj->unk58 += accel;
             if (obj->unk58 > max) {
@@ -251,11 +248,11 @@ void func_8004e928(obj, target, max, accel)
         yaw = obj->angle.vy;
         obj->angle.vy += obj->unk58;
         if (obj->unk58 > 0) {
-            if (func_80016a78(target, yaw) && !func_80016a78(target, obj->angle.vy)) {
+            if (func_80016a78((s16)target, yaw) && !func_80016a78((s16)target, obj->angle.vy)) {
                 obj->angle.vy = target;
             }
         } else {
-            if (func_80016a78(yaw, target) && !func_80016a78(obj->angle.vy, target)) {
+            if (func_80016a78(yaw, (s16)target) && !func_80016a78(obj->angle.vy, (s16)target)) {
                 obj->angle.vy = target;
             }
         }
@@ -279,26 +276,14 @@ s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 
 ADDRESS(0x8004eaf0, 0x118)
 s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel, s32 mode)
 {
-    Object88 *obj;
-    s32 dx;
-    s32 dz;
-    s32 angle;
+    Object88 *obj = DAT_80185da8.current;
+    s32 dx = x - obj->pos.vx;
+    s32 dz = z - obj->pos.vz;
+    s32 angle = func_80016ab8(dx, dz);
+    s32 distance = abs(dx) + abs(dz);
 
-    obj = DAT_80185da8.current;
-    dx = x - obj->pos.vx;
-    dz = z - obj->pos.vz;
-    angle = func_80016ab8(dx, dz);
-    if (dx < 0) {
-        dx = -dx;
-    }
-    if (dz < 0) {
-        dz = -dz;
-    }
-    dx += dz;
-    if (face != -1 && dx < 601) {
-        if (!func_80016a2c(angle, face, 0x320)) {
-            return -1;
-        }
+    if (face != -1 && distance <= 600 && !func_80016a2c(angle, face, 0x320)) {
+        return -1;
     }
     func_8004ea7c(angle, scale_x, max, scale_z, accel, mode);
     return angle & 0xfff;
@@ -378,17 +363,21 @@ VECTOR *func_8004eee0(Object88 *obj, VECTOR *out)
         return &obj->pos;
     case 1:
         def = &DAT_80185da8.defs[obj->unk2];
-        out->vx = def->unkc + obj->pos.vx;
-        out->vy = def->unke + obj->pos.vy;
-        out->vz = def->unk10 + obj->pos.vz;
+        out->vx = obj->pos.vx + def->unkc;
+        out->vy = obj->pos.vy + def->unke;
+        out->vz = obj->pos.vz + def->unk10;
         return out;
     case 2:
-        func_800168a8(&obj->angle, (SVECTOR *)&DAT_80185da8.defs[obj->unk2].unkc, out);
+        def = &DAT_80185da8.defs[obj->unk2];
+        func_800168a8(&obj->angle, (SVECTOR *)&def->unkc, out);
         out->vx += obj->pos.vx;
         out->vy += obj->pos.vy;
         out->vz += obj->pos.vz;
         return out;
+    default:
+        break;
     }
+    /* Mode 3 returns whatever is left in the return register. */
 }
 
 /* Picks the current record's walk animation from its turn rate and climb. */
