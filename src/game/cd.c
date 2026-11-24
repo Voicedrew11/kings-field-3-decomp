@@ -21,6 +21,7 @@
 #include <game/cd.h>
 #include <game/data.h>
 #include <game/memory.h>
+#include <game/image.h>
 #include <game/funcs.h>
 
 /* Checksum seed; the last word of a checked read holds the sum of the rest. */

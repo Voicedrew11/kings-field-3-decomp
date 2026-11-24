@@ -14,7 +14,6 @@
 void func_80017664(void);
 void func_8001796c(void);
 void func_80018358(void);
-void func_80018cd0(void);
 void func_80019ab4(void);
 void func_8001a438(void);
 void func_8001a5c0(void);

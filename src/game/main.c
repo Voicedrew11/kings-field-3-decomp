@@ -20,6 +20,7 @@
 #include <game/sound.h>
 #include <game/data.h>
 #include <game/memory.h>
+#include <game/image.h>
 #include <game/funcs.h>
 
 /*
