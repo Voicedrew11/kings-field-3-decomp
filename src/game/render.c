@@ -2327,6 +2327,11 @@ s16 *func_8004316c(s16 *deltas, s32 index)
     return NULL;
 }
 
+/*
+ * Returns 1 for an unanimated model, 0 when no slot is free, else the slot.
+ * The allocation retry is a goto loop: as a while loop, `count * 8` would be
+ * weighted by loop depth and `count` would outrank `scratch` ($s7/$s8).
+ */
 ADDRESS(0x800431e8, 0x344)
 s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
 {
@@ -2362,8 +2367,10 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
     init:
         slot->model = id;
         slot->owner = owner;
-        while ((slot->pose = func_800194b0(count * 8)) == NULL) {
+    retry:
+        if ((slot->pose = func_800194b0(count * 8)) == NULL) {
             func_800438e0();
+            goto retry;
         }
         *owner = slot;
     } else if (slot->model != id) {
@@ -2386,9 +2393,9 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
                 func_80042e34(slot->pose, (s16 *)((u8 *)model + deltas[*ids++]));
             }
         } else {
+            u16 c = count;
             u32 *src = (u32 *)scratch->vertices;
             u32 *dst = (u32 *)slot->pose;
-            u16 c = count;
 
             do {
                 *dst++ = *src++;
@@ -2411,8 +2418,9 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         } while (--c != 0);
     }
     func_80042eb0(DAT_80199154.pose, (s16 *)((u8 *)model + slot->base), frac);
-    slot->state = 2;
     scratch->vertices = (u8 *)DAT_80199154.pose;
+    slot->state = 2;
+    return (s32)slot;
 }
 
 ADDRESS(0x8004352c, 0x29c)
