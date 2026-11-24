@@ -745,7 +745,7 @@ void func_80030af8(void)
 ADDRESS(0x80030b24, 0xbc)
 s16 func_80030b24(s16 *count, s16 *timer, s32 range, s32 scale)
 {
-    s32 v;
+    s16 v;
     s16 n = *count;
     s16 t = 0;
 
