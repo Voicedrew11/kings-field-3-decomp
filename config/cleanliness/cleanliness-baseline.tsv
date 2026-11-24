@@ -3,8 +3,8 @@
 # a higher one is a regression and fails `kf verify board --gate`.
 # Data inventory counts are informational and have no floors.
 # Never hand-edit to raise a floor - reconstruct/name the symbol instead.
-src func_ refs	2812
-src DAT_ refs	3624
+src func_ refs	4189
+src DAT_ refs	3949
 GAME extern decls	0
 source-local extern decls	0
 # Modern checking requires explicit casts at the SDK/libc void-pointer
@@ -13,4 +13,4 @@ source-local extern decls	0
 # GAME's malloc/free wrappers and the raw arena it formats.
 void* views	5
 .c-local aggregates	0
-unresolved func_ identities	1029
+unresolved func_ identities	1004
