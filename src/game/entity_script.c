@@ -134,84 +134,93 @@ void func_8004c184(u8 anim)
 ADDRESS(0x8004c1f0, 0x33c)
 void func_8004c1f0(void)
 {
-    Object88 *obj;
-    Object78 *def;
-    u8 kind;
+    Object88 *obj = DAT_80185da8.current;
+    Object78 *def = DAT_80185da8.def;
+    u8 kind = obj->unk0;
     s32 dist;
-    u8 chance;
-    u8 *script;
 
-    obj = DAT_80185da8.current;
-    def = DAT_80185da8.def;
-    kind = obj->unk0;
     switch (obj->unk9) {
     case 0:
         dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, (def->unka + 1) << 11, 0, 0);
         if (dist == -1) {
-            break;
+            return;
         }
         if (kind == 3 || kind == 4) {
             if (DAT_80185da8.target->unk9 != 1) {
-                break;
+                return;
             }
             func_8004b868(DAT_80185da8.current);
             func_8004bf1c(dist);
-            break;
+            return;
         }
         if (kind == 2) {
-            chance = obj->unka;
+            u8 chance = obj->unka;
             if (chance != 0xff && chance < rand() >> 4) {
-                break;
+                return;
             }
-        } else if (dist < def->unka << 11 && DAT_801b24e4.unke == 0) {
-            goto wake;
-        } else if (kind != 1) {
-            if (kind != 0) {
+        } else {
+            if (dist < def->unka << 11 && DAT_801b24e4.unke == 0) {
                 goto wake;
             }
-            chance = obj->unka;
-            if (chance == 0 || chance < rand() >> 7) {
-                goto wake;
+            if (kind != 1) {
+                if (kind != 0) {
+                    goto wake;
+                }
+                if (obj->unka == 0 || obj->unka < rand() >> 7) {
+                    goto wake;
+                }
             }
         }
-        if (func_8004d644(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk12, def->unk14) == -1) {
-            func_8004b868(DAT_80185da8.current);
-            if ((script = func_8004c068(def, 0x15)) != NULL || (script = func_8004c068(def, 6)) != NULL ||
-                (script = func_8004c068(def, 0x1a)) != NULL) {
+        if (func_8004d644(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk12, def->unk14) != -1) {
+            if (kind != 2) {
+                obj->unk9 = 2;
+            }
+            return;
+        }
+        func_8004b868(DAT_80185da8.current);
+        {
+            u8 *script = func_8004c068(def, 0x15);
+            if (script == NULL) {
+                script = func_8004c068(def, 6);
+            }
+            if (script == NULL) {
+                script = func_8004c068(def, 0x1a);
+            }
+            if (script != NULL) {
                 func_8004b94c(obj, script);
-                break;
+                return;
             }
-            func_8004bf1c(dist);
-            break;
         }
+        func_8004bf1c(dist);
+        return;
     wake:
         if (kind != 2) {
             obj->unk9 = 2;
         }
-        break;
+        return;
     case 1:
-        if (func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0) != -1) {
-            break;
+        dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0);
+        if (dist != -1) {
+            return;
         }
         func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
         obj->unk9 = 0;
         func_8004b560(obj);
-        break;
+        return;
     case 2:
         if (kind == 3 || kind == 4) {
             if (DAT_80185da8.target->unk9 == 1) {
-                break;
+                return;
             }
-            obj->unk9 = 0;
-            func_8004b560(obj);
-            break;
-        }
-        if (func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0) != -1) {
-            break;
+        } else {
+            dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0);
+            if (dist != -1) {
+                return;
+            }
         }
         obj->unk9 = 0;
         func_8004b560(obj);
-        break;
+        return;
     }
 }
 
