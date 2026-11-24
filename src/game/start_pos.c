@@ -21,6 +21,8 @@
 #include <game/misc.h>
 #include <game/object44.h>
 #include <game/scene.h>
+#include <game/image.h>
+#include <game/sound.h>
 
 RODATA(0x800130f0, 0x1a4)
 
