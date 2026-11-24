@@ -98,7 +98,9 @@ GAME.EXE	0x8009c2d8	0x8bad8	0x8	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; func_800422b8 copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/hud.c game.hud	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
 GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/hud.c game.hud	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
-GAME.EXE	0x8009c2f0	0x8baf0	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c2f0	0x8baf0	0x4c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	DAT_8009c33c	SVECTOR	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity func_800561d8 passes to func_80053c84
+GAME.EXE	0x8009c344	0x8bb44	0x64	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	DAT_8009c3a8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
 GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	DAT_8009c3ac	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
 GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	DAT_8009c3b0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event

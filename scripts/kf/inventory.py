@@ -420,6 +420,8 @@ def _header_structure_layouts() -> dict[str, HeaderStructureLayout]:
         "EVECTOR": (0x2C, 4),
         "DISPENV": (0x14, 2),
         "CdlLOC": (4, 1),
+        # Sony movie-sample decode environment (kf/decenv.h, an unnamed-tag typedef).
+        "DECENV": (0x30, 4),
         "RECT": (8, 2),
         "POLY_F4": (0x18, 4),
         "POLY_FT4": (0x28, 4),

@@ -14,6 +14,7 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
+#include <kf/decenv.h>
 
 typedef struct Data801b24e4 {
     s32 experience; /* +0x00: the save title shows it as six digits */
@@ -192,7 +193,11 @@ typedef struct Data801ba984 {
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[9];
     u8 unk7f[5];    /* +0x7f: per magic element */
-    u8 unk84[0x50c0];
+    u8 unk84[0x26];
+    u8 unkaa;       /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
+    u8 unkab[0x59];
+    u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by func_8005ea64 */
+    u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (func_8005ef18) */
 } Data801ba984;
 
 /* 0x20-byte records func_800293e4 adds to the player's halfwords +0x66..+0x76. */
@@ -242,9 +247,10 @@ typedef struct Data801d4464 {
     s32 unk1200c;   /* +0x1200c: height given to Object88 records with flag 0x400 */
     s32 unk12010;   /* +0x12010: floor height of the last collision test */
     u8 unk12014[4];
-    s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against */
+    s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against; [0] the
+                      * floor the Object4c spawns of func_80056268 must reach */
     u32 unk12024;   /* +0x12024: hit bits of the last func_80033f38 test */
-    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none */
+    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (func_800533e8 reads it) */
     s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
     u8 unk12030[0xc];
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
@@ -256,13 +262,16 @@ typedef struct Data801d4464 {
 
 typedef struct Data801e7edc {
     u8 unk0[0x9c];
-    u8 unk9c[0x2d4];
+    u8 unk9c[0x2a4]; /* +0x9c: the in-game movie records (unk380 points into them) */
+    DECENV dec;     /* +0x340: the in-game movie player's decode environment */
     s16 unk370;
-    s16 unk372;
-    u8 unk374[0xc];
-    u8 *unk380;
-    u8 unk384;
-    u8 unk385[7];
+    s16 unk372;     /* +0x372: 99 once the stream passed the movie's last frame */
+    u_long *unk374[2]; /* +0x374: VLC buffers func_80061364 hands to dec */
+    u_long *unk37c; /* +0x37c: slice buffer */
+    u8 *unk380;     /* +0x380: the movie's record; u16 [1] its last frame */
+    u8 unk384;      /* +0x384: movie id, 0xff for none */
+    u8 unk385[3];
+    s32 unk388;     /* +0x388: frame number of the last sector (func_800616dc) */
 } Data801e7edc;
 
 /*
@@ -278,9 +287,11 @@ typedef struct Object44 {
     u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
     u8 unk8[0xc];
     VECTOR pos;     /* +0x14 */
-    u8 unk24[0x14];
+    SVECTOR angle;  /* +0x24 (func_8005bee0) */
+    u8 unk2c[0xc];
     u8 unk38;       /* +0x38: radius scale, 0x80 = 1 */
-    u8 unk39[0xb];
+    u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
+    u8 unk3a[0xa];
 } Object44;
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
@@ -296,14 +307,31 @@ typedef struct Object44Def {
 } Object44Def;
 
 typedef struct Object4c {
-    u8 unk0;        /* +0x00: 0xff when free */
-    u8 unk1[7];
+    u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
+                     * 0x40 averages the Record18.unk5 stats (func_80053624) */
+    u8 unk1;        /* +0x01: index of its Record18 record */
+    u8 unk2;
+    u8 unk3;        /* +0x03: model id - 40 (func_80053a0c) */
+    u8 unk4;        /* +0x04: animation */
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
     u8 unk8;        /* +0x08: both of bits 2 and 3 set keeps it in place */
-    u8 unk9[0xf];
-    s32 x;          /* +0x18 */
-    s32 y;
-    s32 z;
-    u8 unk24[0x28];
+    u8 unk9;
+    u8 unka;
+    u8 unkb;        /* +0x0b: frames before the collision test (func_80053310) */
+    u8 unkc;
+    u8 unkd;
+    u16 unke;
+    s16 unk10;
+    u16 unk12;
+    u16 unk14;      /* +0x14: animation time */
+    u8 unk16[2];
+    VECTOR pos;     /* +0x18 */
+    SVECTOR angle;  /* +0x28 */
+    SVECTOR scale;  /* +0x30: 0x1000 = 1 */
+    SVECTOR vel;    /* +0x38 */
+    u8 unk40[0xc];
 } Object4c;
 
 typedef struct Object88 {
@@ -379,7 +407,8 @@ typedef struct Object78 {
     s16 unk10;
     u16 unk12;
     u16 unk14;
-    u8 unk16[4];
+    u8 unk16[2];
+    s16 unk18;      /* +0x18: yaw range (func_800533e8) */
     u16 unk1a;
     u16 unk1c;
     u8 unk1e[0x14];
@@ -412,13 +441,26 @@ typedef struct Record18 {
     u8 unk0;        /* +0x00: func_80029f1c sets it to 1 */
     u8 unk1;
     u8 unk2;        /* +0x02: SoundState.effects[unk2 + 144], 0xff for none */
-    u8 unk3[0x15];
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;        /* +0x05: bits 0-4 pick Data801b24e4.unk42[0..4] */
+    u16 unk6;
+    u16 unk8;
+    u16 unka;
+    u16 unkc;
+    u16 unke;
+    u16 unk10;
+    u16 unk12;
+    u16 unk14;
+    u8 unk16[2];
 } Record18;
 
 typedef struct Data801b77ec {
     Record18 unk0[96];
-    Object4c objects[128];
-    u8 unk2f00[0xc];
+    Object4c objects[128];  /* +0x900 */
+    Record18 *unk2f00;      /* +0x2f00: record of unk2f04 */
+    Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
+    s32 unk2f08;            /* +0x2f08: index of unk2f04 (func_8005bc50) */
 } Data801b77ec;
 
 /* 12-byte level records (DAT_8009f114, one per level). */
@@ -488,7 +530,36 @@ extern Data801b24e4 DAT_801b24e4;
 extern u32 DAT_801b56cc[0xa0];
 extern u32 DAT_801b594c[0xc8];
 extern Data801b77ec DAT_801b77ec;
+
+/* A record of the table func_80017664 copies in (DAT_801983a8.unk0). */
+typedef struct Record04 {
+    u8 id;          /* 0xff ends the table */
+    u8 count;       /* slots in its run of DAT_801983a8.unk1e0 */
+    u16 unk2;
+} Record04;
+
+/* A record func_80060800 builds from a Record04 (DAT_801983a8.unkc0). */
+typedef struct Record06 {
+    u8 id;          /* 0xff ends the table */
+    u8 unk1;
+    u16 unk2;       /* Record04.unk2 */
+    u16 offset;     /* start of its run in DAT_801983a8.unk1e0, 0xffff for none */
+} Record06;
+
+/*
+ * Slot tables (WIP extent, up to DAT_80199148): the copied records, the
+ * records func_80060800 builds from them and their runs of slot bytes
+ * (bits 0-1 set: in use; 0xff: free or the end of a run).
+ */
+typedef struct Data801983a8 {
+    Record04 unk0[48];
+    Record06 unkc0[48];  /* +0xc0 */
+    u8 unk1e0[0xbc0];    /* +0x1e0 */
+} Data801983a8;
+extern Data801983a8 DAT_801983a8;
 extern Data801ba984 DAT_801ba984;
+/* Two counts per item id (0..149; func_8005d898 caps each at 99), cleared by func_8005ea64. */
+extern u8 DAT_800c85e8[2][150];
 extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;
 
@@ -501,7 +572,6 @@ extern Record0c DAT_8009f114[100];
 extern Record44 DAT_801d37a4[48];
 extern u32 DAT_800aedc4[];
 extern u32 DAT_80116154[];
-extern u32 DAT_801983a8[];
 extern u32 DAT_801e64b8[];
 extern u8 DAT_8014f164[];
 

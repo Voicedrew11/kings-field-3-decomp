@@ -205,3 +205,81 @@ unit = "game.entity_load"
 image = "GAME.EXE"
 source = "src/game/entity_load.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c"
+image = "GAME.EXE"
+source = "src/game/object4c.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c_move"
+image = "GAME.EXE"
+source = "src/game/object4c_move.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object4c_list"
+image = "GAME.EXE"
+source = "src/game/object4c_list.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.misc_5bd34"
+image = "GAME.EXE"
+source = "src/game/misc_5bd34.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.object44_move"
+image = "GAME.EXE"
+source = "src/game/object44_move.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.script_scan"
+image = "GAME.EXE"
+source = "src/game/script_scan.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.start_pos"
+image = "GAME.EXE"
+source = "src/game/start_pos.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.item_count"
+image = "GAME.EXE"
+source = "src/game/item_count.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.new_game"
+image = "GAME.EXE"
+source = "src/game/new_game.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.arena_ptr"
+image = "GAME.EXE"
+source = "src/game/arena_ptr.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.slot_table"
+image = "GAME.EXE"
+source = "src/game/slot_table.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.movie"
+image = "GAME.EXE"
+source = "src/game/movie.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.movie_start"
+image = "GAME.EXE"
+source = "src/game/movie_start.c"
+profile = "gcc260-o2-g8"
