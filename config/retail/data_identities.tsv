@@ -151,6 +151,12 @@ END.EXE	0x8008b0dc	0x10000	ring_buffer	static	bss	u_long[0x4000]	strInit	support
 END.EXE	0x8009b0dc	0x30	dec	static	bss	DECENV	strCallback	supported	asm;src/end/movie.c end.movie	.bss fixed; movie decode environment; LIBGPU statics follow
 END.EXE	0x8009df0c	0x8e8	db	global	bss	DB[2]	init_graphics	supported	asm;src/end/main.c end.main	.bss COMMON; the two display buffers
 END.EXE	0x8009e804	0x2000	prim_buffer	global	bss	u_long[2][0x400]	init_graphics	supported	asm;src/end/main.c end.main	.bss COMMON; primitive area of each display buffer
+FDAT_014.BIN	0x801e8e74	0x30	DAT_801e8e74	static	load	Record30	func_801e8488	address-only	asm;src/fdat/fdat_014.c fdat_014.main	.data; light record the lamp helper blends from
+FDAT_014.BIN	0x801e8ea4	0x30	DAT_801e8ea4	static	load	Record30	func_801e8488	address-only	asm;src/fdat/fdat_014.c fdat_014.main	.data; light record the lamp helper blends to
+FDAT_020.BIN	0x801e8ce8	0x30	DAT_801e8ce8	static	load	Record30	func_801e848c	address-only	asm;src/fdat/fdat_020.c fdat_020.main	.data; light record 42 blends from it
+FDAT_020.BIN	0x801e8d18	0x30	DAT_801e8d18	static	load	Record30	func_801e848c	address-only	asm;src/fdat/fdat_020.c fdat_020.main	.data; light record 43 blends from it
+FDAT_020.BIN	0x801e8d48	0x30	DAT_801e8d48	static	load	Record30	func_801e848c	address-only	asm;src/fdat/fdat_020.c fdat_020.main	.data; light record 44 blends from it
+FDAT_020.BIN	0x801e8d78	0x30	DAT_801e8d78	static	load	Record30	func_801e848c	address-only	asm;src/fdat/fdat_020.c fdat_020.main	.data; light record 42..44 blend to
 FDAT_023.BIN	0x801e8908	0x8	DAT_801e8908	static	load	SVECTOR	func_801e87d0	address-only	asm;src/fdat/fdat_023.c fdat_023.main	.data; the first offset slot 9 passes to func_80046914
 FDAT_023.BIN	0x801e8910	0x8	DAT_801e8910	static	load	SVECTOR	func_801e87d0	address-only	asm;src/fdat/fdat_023.c fdat_023.main	.data; the second offset slot 9 passes to func_80046914
 FDAT_080.BIN	0x801e8bb8	0x30	DAT_801e8bb8	static	load	Record30	func_801e86c4	address-only	asm;src/fdat/fdat_080.c fdat_080.main	.data; light record the lamp count blends from

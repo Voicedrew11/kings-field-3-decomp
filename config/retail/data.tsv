@@ -253,11 +253,17 @@ FDAT_008.BIN	0x801e8f80	0xc78	0x388	unclassified	coverage-gap			payload-compleme
 FDAT_011.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e87e0	0x4d8	0x328	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_014.BIN	0x801e8308	0x0	0x9c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_014.BIN	0x801e8e74	0xb6c	0x494	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_014.BIN	0x801e8e74	0xb6c	0x30	defined	supported	DAT_801e8e74	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends from
+FDAT_014.BIN	0x801e8ea4	0xb9c	0x30	defined	supported	DAT_801e8ea4	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends to
+FDAT_014.BIN	0x801e8ed4	0xbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_020.BIN	0x801e8ce8	0x9e0	0x620	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_020.BIN	0x801e8ce8	0x9e0	0x30	defined	supported	DAT_801e8ce8	Record30	asm;src/fdat/fdat_020.c	.data; light record 42 blends from it
+FDAT_020.BIN	0x801e8d18	0xa10	0x30	defined	supported	DAT_801e8d18	Record30	asm;src/fdat/fdat_020.c	.data; light record 43 blends from it
+FDAT_020.BIN	0x801e8d48	0xa40	0x30	defined	supported	DAT_801e8d48	Record30	asm;src/fdat/fdat_020.c	.data; light record 44 blends from it
+FDAT_020.BIN	0x801e8d78	0xa70	0x30	defined	supported	DAT_801e8d78	Record30	asm;src/fdat/fdat_020.c	.data; light record 42..44 blend to
+FDAT_020.BIN	0x801e8da8	0xaa0	0x560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	DAT_801e8908	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
 FDAT_023.BIN	0x801e8910	0x608	0x8	defined	supported	DAT_801e8910	SVECTOR	asm;src/fdat/fdat_023.c	.data; second slot 9 offset

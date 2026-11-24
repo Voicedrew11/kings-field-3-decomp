@@ -478,3 +478,24 @@ image = "FDAT_053.BIN"
 source = "src/fdat/fdat_053.c"
 profile = "gcc260-o2-g0"
 bind = "name"
+
+[[unit]]
+unit = "fdat_014.main"
+image = "FDAT_014.BIN"
+source = "src/fdat/fdat_014.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_020.main"
+image = "FDAT_020.BIN"
+source = "src/fdat/fdat_020.c"
+profile = "gcc260-o2-g0"
+bind = "name"
+
+[[unit]]
+unit = "fdat_005.main"
+image = "FDAT_005.BIN"
+source = "src/fdat/fdat_005.c"
+profile = "gcc260-o2-g0"
+bind = "name"
