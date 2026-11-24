@@ -19,7 +19,7 @@
 
 s32 func_800532d4(Object4c *obj, s32 se);
 s32 func_80053310(VECTOR *pos, s32 radius, s32 height);
-/* K&R definition: its u16/u8 parameters arrive as int. */
+/* Its u16/u8 parameters arrive as int and are narrowed at entry. */
 void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3, int a4, int a5, int a6, int a7,
                    int a8, int a9, int a10, int a11, int a12, int a13, int a14, VECTOR *target);
 u16 func_80053624(Object4c *obj);

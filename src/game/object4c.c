@@ -70,8 +70,8 @@ s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
 
 /*
  * Hit by the current record: the player (kind 0x80) or the Object88 record
- * of unk12028 (0x10). K&R definition: func_800536f8 passes a3 unmasked, so
- * the narrow parameters arrive as int. Not exact: retail spills a3 with sw
+ * of unk12028 (0x10). func_800536f8 passes a3 unmasked, so the narrow
+ * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
  * and reads it back with lhu; this source spills it with sh.
  */
 ADDRESS(0x800533e8, 0x23c)

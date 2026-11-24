@@ -274,24 +274,20 @@ void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback)
 }
 
 ADDRESS(0x80019d98, 0x58)
-void func_80019d98(file, entry, buffer, callback)
-u16 file;
-u16 entry;
-u8 *buffer;
-CdCallback callback;
+void func_80019d98(int file_in, int entry_in, u8 *buffer, CdCallback callback)
 {
+    u16 file = file_in;
+    u16 entry = entry_in;
     CdlLOC pos;
 
     func_80019bbc(CD_REQUEST_STREAM, &pos, func_80019cc4(file, entry, &pos), buffer, callback);
 }
 
 ADDRESS(0x80019df0, 0x58)
-void func_80019df0(file, entry, buffer, callback)
-u16 file;
-u16 entry;
-u8 *buffer;
-CdCallback callback;
+void func_80019df0(int file_in, int entry_in, u8 *buffer, CdCallback callback)
 {
+    u16 file = file_in;
+    u16 entry = entry_in;
     CdlLOC pos;
 
     func_80019bbc(CD_REQUEST_SOUND, &pos, func_80019cc4(file, entry, &pos), buffer, callback);
@@ -324,10 +320,10 @@ CdCallback callback;
 }
 
 ADDRESS(0x80019f14, 0x44)
-s32 func_80019f14(file, entry)
-u16 file;
-u16 entry;
+s32 func_80019f14(int file_in, int entry_in)
 {
+    u16 file = file_in;
+    u16 entry = entry_in;
     s32 first;
 
     first = DAT_801c12e4.files[file].sectors[entry];
@@ -398,11 +394,10 @@ void func_8001a118(u8 *buffer, CdExtent *extent, u32 bytes)
 }
 
 ADDRESS(0x8001a154, 0x94)
-void func_8001a154(file, entry, buffer)
-u16 file;
-u16 entry;
-u8 *buffer;
+void func_8001a154(int file_in, int entry_in, u8 *buffer)
 {
+    u16 file = file_in;
+    u16 entry = entry_in;
     CdlLOC pos;
     CdFile *f = &DAT_801c12e4.files[file];
     s32 first = f->sectors[entry];
@@ -457,10 +452,9 @@ s32 func_8001a298(u8 *buffer, char *name, u32 bytes)
 }
 
 ADDRESS(0x8001a34c, 0xec)
-void func_8001a34c(index, name)
-u16 index;
-char *name;
+void func_8001a34c(int index_in, char *name)
 {
+    u16 index = index_in;
     u8 buffer[0x800];
     char unused[64]; /* the frame keeps 64 unused bytes here */
     CdlFILE file;

@@ -31,10 +31,11 @@ void func_80018c54(CdRequest *request)
 }
 
 ADDRESS(0x80018c60, 0x34)
-void func_80018c60(file, entry)
-u16 file;
-u16 entry;
+void func_80018c60(int file_in, int entry_in)
 {
+    u16 file = file_in;
+    u16 entry = entry_in;
+
     func_80019e48(file, entry, DAT_801c17a4, func_80018c54);
 }
 

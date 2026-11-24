@@ -558,9 +558,9 @@ void func_8002a210(void)
 }
 
 ADDRESS(0x8002a310, 0x2e8)
-void func_8002a310(amount)
-s16 amount;
+void func_8002a310(int amount_in)
 {
+    s16 amount = amount_in;
     Record0c *r;
     Record0c *prev;
     s32 i;
