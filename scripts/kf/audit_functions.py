@@ -21,6 +21,7 @@ from scripts.kf.retail import (
     IMAGE_ORDER,
     load_payload,
     overlay_handlers,
+    overlay_header_end,
     parse_int,
     read_tsv,
 )
@@ -202,6 +203,7 @@ class ImageWords:
             pointer for pointer in overlay_handlers(image, self.payload)
             if self.contains_word(pointer)
         ]
+        self.header_end = overlay_header_end(image)
 
     def contains_word(self, address: int) -> bool:
         return self.layout.contains(address, 4) and not (address & 3)
@@ -262,9 +264,10 @@ def matching_return(
     for site in range(address + 4, end, 4):
         if not is_jr_ra(words.word(site)) or not words.contains_word(site + 4):
             continue
-        # GCC 2.5.7 (and the Psy-Q library band) restores the stack in the
-        # return's delay slot (`jr ra; addiu sp`); the GCC 2.6/2.7 that built
-        # the game code restores it first (`lw ra; addiu sp; jr ra; nop`).
+        # Some compilers restore the stack in the return's delay slot
+        # (`jr ra; addiu sp`); the GCC 2.6 that built the game code always
+        # restores it first (`lw ra; addiu sp; jr ra; nop`). The Psy-Q library
+        # text has both forms, so only the converse marks library code.
         if (
             stack_adjust(words.word(site + 4)) == frame.size
             or stack_adjust(words.word(site - 4)) == frame.size
@@ -340,6 +343,7 @@ def hoisted_start(words: ImageWords, address: int, limit: int = 8) -> int | None
     boundary.
     """
     back = 0
+    overflow_trap = None
     while back < limit:
         back += 1
         start = address - 4 * back
@@ -349,8 +353,15 @@ def hoisted_start(words: ImageWords, address: int, limit: int = 8) -> int | None
         delay_slot = words.contains_word(start - 4) and trap_skip(words, start - 4, address)
         if (word == 0 and not delay_slot) or not valid_instruction(word):
             return None
-        if word in DIVISION_TRAPS:  # a division check: allow its words too
+        # One widening per division expansion. Walking back, a signed
+        # division shows its `break 6` first and its `break 7` 6 words above.
+        if word == 0x0006000D:
+            overflow_trap = start
             limit += DIVISION_CHECK_SIZE // 4
+        elif word == 0x0007000D:
+            if overflow_trap is None or overflow_trap - start > 0x18:
+                limit += DIVISION_CHECK_SIZE // 4
+            overflow_trap = None
         if is_control_transfer(word) and not trap_skip(words, start, address):
             return None
         if boundary_before(words, start):
@@ -390,11 +401,38 @@ def fallthrough_boundary(words: ImageWords, address: int) -> int | None:
     return None
 
 
-def transfer_end(words: ImageWords, address: int, stop: int, limit: int = 0x1000) -> int | None:
-    """End (after the delay slot) of the first unconditional transfer from `address`."""
-    end = min(words.layout.load_end - 4, address + limit, stop)
+def forward_target(site: int, word: int) -> int | None:
+    """Target of a conditional branch or a `j` at `site`, if it is forward."""
+    op = opcode(word)
+    if op in {0x04, 0x05, 0x06, 0x07} or (op == 0x01 and rt(word) in {0x00, 0x01}):
+        target = site + 4 + (signed16(word & 0xFFFF) << 2)
+    elif op == 0x02:
+        target = function_target(site, word)
+    else:
+        return None
+    return target if target > site else None
+
+
+def transfer_end(words: ImageWords, address: int, stop: int) -> int | None:
+    """End (after the delay slot) of the code a carve from `address` owns.
+
+    That is the first unconditional transfer (`j`, `jr reg`) at or past the
+    furthest forward branch or jump target seen so far below `stop`: a switch
+    dispatch or an intra-function `j` that later code is branched to does not
+    end the function. A jump to `stop` or beyond (a tail call) does not count.
+    """
+    end = min(words.layout.load_end - 4, stop)
+    furthest = address
     for site in range(address, end, 4):
-        if is_unconditional_transfer(words.word(site)) and words.contains_word(site + 4):
+        word = words.word(site)
+        target = forward_target(site, word)
+        if target is not None and target < stop:
+            furthest = max(furthest, target)
+        if (
+            is_unconditional_transfer(word)
+            and words.contains_word(site + 4)
+            and furthest <= site + 4
+        ):
             return site + 8 if site + 8 <= stop else None
     return None
 
@@ -573,10 +611,12 @@ def audit_image(
     ]
     boundaries = sorted(known_starts | {start for start, _end in strong_ranges})
     rows_by_start = {parse_int(str(row["va"])): row for row in rows}
-    for return_site in words.addresses():
-        if not is_jr_ra(words.word(return_site)):
-            continue
-        address = return_site + 8
+    # An overlay's handler header ends at a boundary as firm as a return.
+    origins = [(site + 8, "previous-return") for site in words.addresses()
+               if is_jr_ra(words.word(site))]
+    if getattr(words, "header_end", None) is not None:
+        origins.insert(0, (words.header_end, "overlay-header-end"))
+    for address, origin in origins:
         padding_words = 0
         while (
             padding_words < 3
@@ -603,7 +643,7 @@ def audit_image(
         if size < 8:
             continue
         reloc_count = relocations.get((image, address), 0)
-        evidence = ["previous-return", "return-delimited-valid-code"]
+        evidence = [origin, "return-delimited-valid-code"]
         if padding_words:
             evidence.append(f"skipped-{padding_words}-padding-nop")
         if pointer_refs[address]:
@@ -625,9 +665,7 @@ def audit_image(
             "reloc_refs": reloc_count,
             "valid_first_12": first_window_score(words, address),
             "boundary": (
-                f"previous-return+{padding_words}-padding-nop"
-                if padding_words
-                else "previous-return"
+                f"{origin}+{padding_words}-padding-nop" if padding_words else origin
             ),
             "confidence": "strong-leaf",
             "note": "+".join(evidence),
@@ -675,6 +713,8 @@ def audit_image(
     # Every accepted target bounds the carve of the one before it.
     boundaries = sorted(set(boundaries) | set(splits) | set(gaps))
     for target in sorted([*gaps, *splits]):
+        # Only a non-admissible candidate at this same start is replaced.
+        existing = rows_by_start.get(target)
         count = calls[target] - handlers[target]
         index = bisect.bisect_right(boundaries, target)
         stop = boundaries[index] if index < len(boundaries) else words.layout.load_end

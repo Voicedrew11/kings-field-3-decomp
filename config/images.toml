@@ -95,6 +95,7 @@ sha256 = "2ece40fb09b5c7dc74b71387725ce5e97d5b0823752bd852f6709b1e932bc9c7"
 file_size = 0x41B000
 handler_offset = 0x4
 handler_count = 32
+header_size = 0x88
 
 [[overlay]]
 name = "FDAT_002.BIN"

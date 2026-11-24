@@ -58,6 +58,7 @@ class RetailArchive:
 
     `handler_count` absolute u32 code pointers at `handler_offset` open every
     overlay read from this archive (its dispatch table); zero means none.
+    `header_size` is where that header ends and code or data begins.
     """
 
     name: str
@@ -66,6 +67,7 @@ class RetailArchive:
     file_size: int
     handler_offset: int = 0
     handler_count: int = 0
+    header_size: int = 0
 
 
 @dataclass(frozen=True)
@@ -343,6 +345,14 @@ def overlay_handlers(image: str, payload: bytes) -> list[int]:
     if end > len(payload):
         raise ValueError(f"{image}: handler table exceeds the overlay")
     return list(struct.unpack_from(f"<{archive.handler_count}I", payload, archive.handler_offset))
+
+
+def overlay_header_end(image: str) -> int | None:
+    """Load address of the first byte after an overlay's handler header."""
+    source = OVERLAY_SOURCES.get(image)
+    if source is None or not RETAIL_ARCHIVES[source.archive].header_size:
+        return None
+    return IMAGE_LAYOUTS[image].load_address + RETAIL_ARCHIVES[source.archive].header_size
 
 
 def load_payload(path: Path, image: str) -> tuple[int, bytes]:
