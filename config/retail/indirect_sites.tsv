@@ -2,3 +2,21 @@
 # load_offset: every definition of the jump register reaching the site must be lw r, load_offset(base).
 # holder_va (optional): every definition of that base must be lw base, k(p) with p holding the constant holder_va - k.
 image	site_va	function_va	function	pointer	load_offset	holder_va	evidence
+GAME.EXE	0x80017a88	0x8001796c	func_8001796c	FdatHandlers.unk14	0x14	0x8018fae0	DAT_8018fae0->unk14()
+GAME.EXE	0x800188f0	0x80018358	func_80018358	FdatHandlers.unk14	0x14	0x8018fae0	DAT_8018fae0->unk14()
+GAME.EXE	0x80045a70	0x80044d9c	func_80044d9c	FdatHandlers.unk20	0x20	0x8018fae0	DAT_8018fae0->unk20()
+GAME.EXE	0x8004a90c	0x80047010	func_80047010	FdatHandlers.unk0c	0xc	0x8018fae0	DAT_8018fae0->unk0c()
+GAME.EXE	0x8004b4c8	0x80047010	func_80047010	FdatHandlers.unk24	0x24	0x8018fae0	DAT_8018fae0->unk24()
+GAME.EXE	0x8004b828	0x8004b794	func_8004b794	FdatHandlers.unk4c	0x4c	0x8018fae0	DAT_8018fae0->unk4c()
+GAME.EXE	0x8004bebc	0x8004b984	func_8004b984	FdatHandlers.unk40	0x40	0x8018fae0	DAT_8018fae0->unk40()
+GAME.EXE	0x8004c998	0x8004c668	func_8004c668	FdatHandlers.unk48	0x48	0x8018fae0	DAT_8018fae0->unk48()
+GAME.EXE	0x8005087c	0x800500a8	func_800500a8	FdatHandlers.unk4c	0x4c	0x8018fae0	DAT_8018fae0->unk4c()
+GAME.EXE	0x80052c0c	0x800500a8	func_800500a8	FdatHandlers.unk44	0x44	0x8018fae0	DAT_8018fae0->unk44()
+GAME.EXE	0x8005c4e4	0x8005c308	func_8005c308	FdatHandlers.unk10	0x10	0x8018fae0	DAT_8018fae0->unk10()
+GAME.EXE	0x8005d75c	0x8005cbe0	func_8005cbe0	FdatHandlers.unk08	0x8	0x8018fae0	DAT_8018fae0->unk08()
+GAME.EXE	0x8005d87c	0x8005d7f8	func_8005d7f8	FdatHandlers.unk2c	0x2c	0x8018fae0	DAT_8018fae0->unk2c()
+GAME.EXE	0x8005d92c	0x8005d898	func_8005d898	FdatHandlers.unk18	0x18	0x8018fae0	DAT_8018fae0->unk18()
+GAME.EXE	0x8005ea2c	0x8005e2d0	func_8005e2d0	FdatHandlers.unk00	0x0	0x8018fae0	DAT_8018fae0->unk00()
+GAME.EXE	0x8005eb40	0x8005eb20	func_8005eb20	FdatHandlers.unk04	0x4	0x8018fae0	DAT_8018fae0->unk04()
+GAME.EXE	0x80061a88	0x80061940	func_80061940	FdatHandlers.unk28	0x28	0x8018fae0	DAT_8018fae0->unk28()
+GAME.EXE	0x80061b94	0x80061940	func_80061940	FdatHandlers.unk1c	0x1c	0x8018fae0	DAT_8018fae0->unk1c()
