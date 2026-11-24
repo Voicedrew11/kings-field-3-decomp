@@ -52,8 +52,8 @@ void func_80035ca4(u16 id, s32 depth)
     n = SCRATCH->part->prim_count;
     SCRATCH->draw.count.unk4 += n;
     while (n-- != 0) {
-        opz = &SCRATCH->opz;
-        rgb = &SCRATCH->rgb;
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
         scratch->prim++;
         switch (scratch->tag.code & 0xfd) {
@@ -64,7 +64,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -98,7 +98,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
@@ -135,7 +135,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -171,7 +171,7 @@ void func_80035ca4(u16 id, s32 depth)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);

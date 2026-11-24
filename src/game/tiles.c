@@ -16,8 +16,6 @@
  * record (layer->unk4) turned by layer->unk2, the fog and the view transform,
  * then runs the near (flags bit 2) or far ground renderer on model part
  * layer->unk0.
- * Not exact: retail converts the part number to u16 (andi 0xffff) in each
- * branch; GCC drops the conversion of the byte it loaded once.
  */
 ADDRESS(0x8003bb04, 0x330)
 void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
@@ -56,11 +54,11 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
     if (flags & 4) {
         scratch->part = &((ModelData *)scratch->model)->parts[part];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
-        func_8003ab04();
+        func_8003ab04(part);
     } else {
         scratch->part = &((ModelData *)scratch->model)->parts[part];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
-        func_80039d50();
+        func_80039d50(part);
     }
 }
 

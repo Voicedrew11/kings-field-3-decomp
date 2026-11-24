@@ -282,6 +282,32 @@ typedef struct PrimTag {
     u8 code;
 } PrimTag;
 
+/* Scratchpad words from +0x54 while a model part is drawn. */
+typedef struct ScratchModelWork {
+    VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
+    CVECTOR rgb;        /* +0x64: colour the models are lit with */
+    u8 unk68[8];
+    s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
+} ScratchModelWork;
+
+/* Scratchpad words from +0x54 while a map layer part is drawn (func_80039d50). */
+typedef struct ScratchMapWork {
+    CVECTOR rgb;        /* +0x54: colour the ground is lit with */
+    s32 near;           /* +0x58: Data80199154.unk15b28 (fog near) */
+    s32 far;            /* +0x5c: Data80199154.unk15b2c (fog far) */
+    s32 opz;            /* +0x60: gte_nclip result of the face being drawn */
+    s16 z;              /* +0x64: ordering table depth of the face */
+    s16 clip;           /* +0x66: faces with every vertex nearer than this are dropped */
+    s32 count;          /* +0x68: the renderers add each part's primitive count */
+    s32 ot_count;       /* +0x6c */
+    s32 prim_count;     /* +0x70 */
+} ScratchMapWork;
+
+typedef union ScratchWork {
+    ScratchModelWork model;
+    ScratchMapWork map;
+} ScratchWork;
+
 /* Scratchpad words from +0x74 while a model is drawn: the frame counters,
  * copied in and back by the model front ends (func_8004290c). */
 typedef struct ScratchCount {
@@ -318,15 +344,13 @@ typedef struct ScratchPad {
     u8 *normals;        /* +0x28: the part's normals (records index them by byte offset) */
     u8 *poly;           /* +0x2c: the packet being filled (func_80037bec) */
     ScreenVertex *vert[4]; /* +0x30: its projected vertices (func_80037bec) */
-    u8 unk40[4];
+    CVECTOR lit;        /* +0x40: map layers: a face's lit colour before depth cueing */
     ScreenVertex *screen; /* +0x44: the part's projected vertices */
-    ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too */
+    ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too; the map layer
+                           * renderers' vertex loop cursor */
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
-    u8 unk50[4];
-    VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
-    CVECTOR rgb;        /* +0x64: colour the models are lit with */
-    u8 unk68[8];
-    s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
+    u8 *vertex;         /* +0x50: map layers: vertex loop cursor */
+    ScratchWork w;      /* +0x54 */
     ScratchDraw draw;   /* +0x74 */
     u8 unk94[0x6c];
     ScratchPhase u;     /* +0x100 */
@@ -513,8 +537,8 @@ void func_800366a8(u16 part);
 void func_80037bec(u16 part, s32 depth, s32 mode);
 void func_80038844(u16 part, s32 depth, s32 shift, s32 dist);
 void func_80039428(u16 part, s16 depth, s32 shade);
-void func_80039d50(void);
-void func_8003ab04(void);
+void func_80039d50(u16 id);
+void func_8003ab04(u16 id);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);

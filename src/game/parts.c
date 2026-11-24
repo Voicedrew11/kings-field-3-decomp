@@ -31,8 +31,8 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
     n = SCRATCH->part->prim_count;
     SCRATCH->draw.count.unk4 += n;
     while (n-- != 0) {
-        opz = &SCRATCH->opz;
-        rgb = &SCRATCH->rgb;
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
         scratch->prim++;
         switch (scratch->tag.code & 0xfd) {
@@ -44,7 +44,7 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
                        *(u32 *)&scratch->vert[2]->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             scratch->poly = scratch->next;
@@ -81,7 +81,7 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
                        *(u32 *)&scratch->vert[2]->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
@@ -123,7 +123,7 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
                        *(u32 *)&scratch->vert[2]->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             scratch->poly = scratch->next;
@@ -163,7 +163,7 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
                        *(u32 *)&scratch->vert[2]->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
@@ -235,8 +235,8 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
     n = SCRATCH->part->prim_count;
     SCRATCH->draw.count.unk4 += n;
     while (n-- != 0) {
-        opz = &SCRATCH->opz;
-        rgb = &SCRATCH->rgb;
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
         scratch->prim++;
         switch (scratch->tag.code & 0xfd) {
@@ -247,7 +247,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -284,7 +284,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
@@ -324,7 +324,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -363,7 +363,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
@@ -410,7 +410,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
 
 /*
  * Draws part id of the model in SCRATCH->model as Gouraud-shaded faces lit
- * with gte_ncct/gte_nccs: textured faces take their colour from SCRATCH->rgb
+ * with gte_ncct/gte_nccs: textured faces take their colour from SCRATCH->w.model.rgb
  * and the blend rate shade in their tpage, plain ones the colour at the head of
  * the record. Front faces only (gte_nclip); each face is linked into
  * SCRATCH->ot2 at depth.
@@ -436,8 +436,8 @@ void func_80039428(u16 id, s16 depth, s32 shade)
     SCRATCH->draw.count.unk4 += n;
     shade <<= 5;
     while (n-- != 0) {
-        opz = &SCRATCH->opz;
-        rgb = &SCRATCH->rgb;
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
         scratch->prim++;
         switch (scratch->tag.code & 0xfd) {
@@ -448,7 +448,7 @@ void func_80039428(u16 id, s16 depth, s32 shade)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -482,7 +482,7 @@ void func_80039428(u16 id, s16 depth, s32 shade)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
@@ -523,7 +523,7 @@ void func_80039428(u16 id, s16 depth, s32 shade)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             p = scratch->next;
@@ -552,7 +552,7 @@ void func_80039428(u16 id, s16 depth, s32 shade)
             gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
             gte_nclip();
             gte_stopz(opz);
-            if (scratch->opz <= 0) {
+            if (scratch->w.model.opz <= 0) {
                 break;
             }
             v3 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
