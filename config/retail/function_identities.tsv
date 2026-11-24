@@ -3,3 +3,1080 @@
 # Methods use name=owner_action with the owner and action columns populated.
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	name	owner	action	return_type	parameters	name_confidence	signature_confidence	evidence	note
+PSX.EXE	0x80010038	func_80010038			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80014b48	func_80014b48			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80014bd4	func_80014bd4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015064	func_80015064			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001509c	func_8001509c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015240	func_80015240			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800152f8	func_800152f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015354	func_80015354			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015410	func_80015410			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015654	func_80015654			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015688	func_80015688			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800156bc	func_800156bc			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001576c	func_8001576c			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015790	func_80015790			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015908	func_80015908			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015a48	func_80015a48			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015b9c	func_80015b9c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015ce0	func_80015ce0			unknown	unknown arg0;unknown arg1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015f18	func_80015f18			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80015fdc	func_80015fdc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016044	func_80016044			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016168	func_80016168			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016240	func_80016240			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016290	func_80016290			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800164b4	func_800164b4			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016598	func_80016598			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001660c	func_8001660c			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016680	func_80016680			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800166f4	func_800166f4			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016760	func_80016760			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800167cc	func_800167cc			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800168a8	func_800168a8			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800168f0	func_800168f0			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016928	func_80016928			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016978	func_80016978			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800169b0	func_800169b0			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016a00	func_80016a00			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016a2c	func_80016a2c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016a68	func_80016a68			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016a78	func_80016a78			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016a98	func_80016a98			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016ab8	func_80016ab8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016c08	func_80016c08			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016c44	func_80016c44			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016c90	func_80016c90			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016d0c	func_80016d0c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016d3c	func_80016d3c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016ec8	func_80016ec8			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80016fb4	func_80016fb4			unknown	unknown *object;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800170c0	func_800170c0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017108	func_80017108			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017158	func_80017158			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017170	func_80017170			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800171b0	func_800171b0			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017210	func_80017210			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001749c	func_8001749c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800175a8	func_800175a8			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017600	func_80017600			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001765c	func_8001765c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017664	func_80017664			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001796c	func_8001796c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017aa4	func_80017aa4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80017c78	func_80017c78			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800182e0	func_800182e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800182f8	func_800182f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018310	func_80018310			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018328	func_80018328			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018340	func_80018340			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018358	func_80018358			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018c54	func_80018c54			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018c60	func_80018c60			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018c94	func_80018c94			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018cd0	func_80018cd0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018f5c	func_80018f5c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018f8c	func_80018f8c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018fbc	func_80018fbc			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80018fe0	func_80018fe0			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019004	func_80019004			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019088	func_80019088			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800190a8	func_800190a8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800191f8	func_800191f8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019294	func_80019294			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001937c	func_8001937c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001939c	func_8001939c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019454	func_80019454			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019474	func_80019474			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001947c	func_8001947c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019488	func_80019488			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019490	func_80019490			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001949c	func_8001949c			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800194a4	func_800194a4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800194b0	func_800194b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800194f0	func_800194f0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019518	func_80019518			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019538	func_80019538			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019570	func_80019570			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019614	func_80019614			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001967c	func_8001967c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800196e8	func_800196e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019848	func_80019848			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800198d0	func_800198d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800198d8	func_800198d8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800198f8	func_800198f8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019934	func_80019934			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800199b8	func_800199b8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019a74	func_80019a74			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019ab4	func_80019ab4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019b1c	func_80019b1c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019b68	func_80019b68			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019bbc	func_80019bbc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019cc4	func_80019cc4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019d48	func_80019d48			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019d98	func_80019d98			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019df0	func_80019df0			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019e48	func_80019e48			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019f14	func_80019f14			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019f58	func_80019f58			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80019f60	func_80019f60			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a0bc	func_8001a0bc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a118	func_8001a118			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a154	func_8001a154			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a1e8	func_8001a1e8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a298	func_8001a298			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a34c	func_8001a34c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a438	func_8001a438			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a5c0	func_8001a5c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a62c	func_8001a62c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a634	func_8001a634			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a774	func_8001a774			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001a9dc	func_8001a9dc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001aa84	func_8001aa84			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001aea4	func_8001aea4			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001af88	func_8001af88			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b150	func_8001b150			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b254	func_8001b254			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b4f8	func_8001b4f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b564	func_8001b564			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b594	func_8001b594			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b5c4	func_8001b5c4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001b88c	func_8001b88c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001babc	func_8001babc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001bd48	func_8001bd48			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001bea8	func_8001bea8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001c030	func_8001c030			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001c48c	func_8001c48c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001c6c0	func_8001c6c0			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001c7a8	func_8001c7a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001c9c0	func_8001c9c0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001cbb8	func_8001cbb8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001d0c4	func_8001d0c4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001d3a0	func_8001d3a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001d784	func_8001d784			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001d8a4	func_8001d8a4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001d944	func_8001d944			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001dbc4	func_8001dbc4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001dcd0	func_8001dcd0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001dd94	func_8001dd94			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001dee4	func_8001dee4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001e1b4	func_8001e1b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001e484	func_8001e484			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001e710	func_8001e710			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001ea34	func_8001ea34			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001eb3c	func_8001eb3c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001ec84	func_8001ec84			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001f004	func_8001f004			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001f274	func_8001f274			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001f31c	func_8001f31c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001f4c0	func_8001f4c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001f8b4	func_8001f8b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001fa60	func_8001fa60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001fc5c	func_8001fc5c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001fe9c	func_8001fe9c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8001ff94	func_8001ff94			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002008c	func_8002008c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800203c8	func_800203c8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020560	func_80020560			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002090c	func_8002090c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002098c	func_8002098c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020a84	func_80020a84			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020b7c	func_80020b7c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020c74	func_80020c74			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020d6c	func_80020d6c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020dec	func_80020dec			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020e6c	func_80020e6c			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80020fe8	func_80020fe8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021114	func_80021114			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021298	func_80021298			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800216a4	func_800216a4			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021724	func_80021724			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021a4c	func_80021a4c			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021aac	func_80021aac			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80021d94	func_80021d94			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002200c	func_8002200c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800221e8	func_800221e8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800222fc	func_800222fc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800227ec	func_800227ec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80023300	func_80023300			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80023ce8	func_80023ce8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80023fd4	func_80023fd4			unknown	unknown arg0;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800246bc	func_800246bc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80024a78	func_80024a78			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80024c70	func_80024c70			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80024f88	func_80024f88			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800252f4	func_800252f4			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025468	func_80025468			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025b24	func_80025b24			void	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025be8	func_80025be8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025db8	func_80025db8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025e80	func_80025e80			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80025f38	func_80025f38			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026020	func_80026020			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026158	func_80026158			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800261dc	func_800261dc			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002636c	func_8002636c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026570	func_80026570			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026794	func_80026794			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800269c0	func_800269c0			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026acc	func_80026acc			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026e4c	func_80026e4c			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80026fe4	func_80026fe4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800270f8	func_800270f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027198	func_80027198			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027310	func_80027310			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027414	func_80027414			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027494	func_80027494			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027530	func_80027530			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027560	func_80027560			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800275e0	func_800275e0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027610	func_80027610			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027688	func_80027688			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027728	func_80027728			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800277c0	func_800277c0			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002792c	func_8002792c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800279a4	func_800279a4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800279d8	func_800279d8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027a40	func_80027a40			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027a70	func_80027a70			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027a9c	func_80027a9c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027ac0	func_80027ac0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027b5c	func_80027b5c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027bb4	func_80027bb4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027c8c	func_80027c8c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027d88	func_80027d88			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027e60	func_80027e60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027ea8	func_80027ea8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027f2c	func_80027f2c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80027fe4	func_80027fe4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028034	func_80028034			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028090	func_80028090			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800280d4	func_800280d4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800281c4	func_800281c4			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028398	func_80028398			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800285dc	func_800285dc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002860c	func_8002860c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028750	func_80028750			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028b70	func_80028b70			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028c74	func_80028c74			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028c98	func_80028c98			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028d0c	func_80028d0c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028d54	func_80028d54			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028e48	func_80028e48			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028e9c	func_80028e9c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80028f90	func_80028f90			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800290d8	func_800290d8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80029188	func_80029188			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80029390	func_80029390			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800293e4	func_800293e4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80029500	func_80029500			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80029f1c	func_80029f1c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a074	func_8002a074			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a10c	func_8002a10c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a210	func_8002a210			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a310	func_8002a310			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a5f8	func_8002a5f8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a6a0	func_8002a6a0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002a6f4	func_8002a6f4			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002aa54	func_8002aa54			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002ab18	func_8002ab18			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b114	func_8002b114			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b330	func_8002b330			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b3a8	func_8002b3a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b468	func_8002b468			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b64c	func_8002b64c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b6f0	func_8002b6f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b760	func_8002b760			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b80c	func_8002b80c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b8d8	func_8002b8d8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002b928	func_8002b928			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002ba38	func_8002ba38			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002bb5c	func_8002bb5c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002bb84	func_8002bb84			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002bdc0	func_8002bdc0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002c040	func_8002c040			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002c164	func_8002c164			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002c30c	func_8002c30c			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002cea8	func_8002cea8			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002cfe0	func_8002cfe0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002d130	func_8002d130			unknown	unknown *object;unknown arg1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002d2a0	func_8002d2a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002deec	func_8002deec			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002e3f8	func_8002e3f8			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002ecbc	func_8002ecbc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002ed1c	func_8002ed1c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002ed60	func_8002ed60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002f320	func_8002f320			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002f5c0	func_8002f5c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002f9bc	func_8002f9bc			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002fddc	func_8002fddc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8002fe1c	func_8002fe1c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003047c	func_8003047c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030568	func_80030568			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800305d8	func_800305d8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003078c	func_8003078c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800307f4	func_800307f4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030810	func_80030810			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030864	func_80030864			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800308b8	func_800308b8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800308f4	func_800308f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030908	func_80030908			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800309c8	func_800309c8			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030a6c	func_80030a6c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030af8	func_80030af8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030b24	func_80030b24			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030be0	func_80030be0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030c4c	func_80030c4c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030c6c	func_80030c6c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030cbc	func_80030cbc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030d68	func_80030d68			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030e14	func_80030e14			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80030fcc	func_80030fcc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800324f0	func_800324f0			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003260c	func_8003260c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033b10	func_80033b10			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033b8c	func_80033b8c			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033c4c	func_80033c4c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033d08	func_80033d08			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033d84	func_80033d84			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80033f38	func_80033f38			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80034180	func_80034180			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800341e8	func_800341e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80034300	func_80034300			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80034394	func_80034394			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800344dc	func_800344dc			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003456c	func_8003456c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800345f4	func_800345f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800348f4	func_800348f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80034bf4	func_80034bf4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800350c0	func_800350c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800350fc	func_800350fc			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800351fc	func_800351fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035358	func_80035358			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035394	func_80035394			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035630	func_80035630			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035700	func_80035700			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800357e8	func_800357e8			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003591c	func_8003591c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035c44	func_80035c44			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035c84	func_80035c84			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80035ca4	func_80035ca4			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800366a8	func_800366a8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80037bec	func_80037bec			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80038844	func_80038844			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80039428	func_80039428			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80039d50	func_80039d50			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003ab04	func_8003ab04			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003bb04	func_8003bb04			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003be34	func_8003be34			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003bfd0	func_8003bfd0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003c35c	func_8003c35c			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003c868	func_8003c868			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003c968	func_8003c968			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003c9dc	func_8003c9dc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003cbc8	func_8003cbc8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003ccfc	func_8003ccfc			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003cec4	func_8003cec4			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d03c	func_8003d03c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d280	func_8003d280			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d38c	func_8003d38c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d41c	func_8003d41c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d4ac	func_8003d4ac			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d568	func_8003d568			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d624	func_8003d624			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d64c	func_8003d64c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d79c	func_8003d79c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003d8ec	func_8003d8ec			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003da10	func_8003da10			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003daec	func_8003daec			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003df50	func_8003df50			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003e34c	func_8003e34c			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8003f304	func_8003f304			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800400ac	func_800400ac			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040568	func_80040568			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800405e8	func_800405e8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040658	func_80040658			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040694	func_80040694			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040708	func_80040708			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800407cc	func_800407cc			unknown	unknown *object;unknown arg1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040830	func_80040830			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800408d0	func_800408d0			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800409c8	func_800409c8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80040ae4	func_80040ae4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041ad4	func_80041ad4			unknown	unknown *object;unknown arg1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041d9c	func_80041d9c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041e68	func_80041e68			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041eec	func_80041eec			unknown	unknown arg0;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041f8c	func_80041f8c			void	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80041f9c	func_80041f9c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800422b8	func_800422b8			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004290c	func_8004290c			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042b70	func_80042b70			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042ba8	func_80042ba8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042c64	func_80042c64			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042cac	func_80042cac			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042d70	func_80042d70			unknown	unknown *object;unknown *pointer1;unknown *pointer2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042e34	func_80042e34			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80042eb0	func_80042eb0			unknown	unknown *object;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004316c	func_8004316c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800431e8	func_800431e8			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004352c	func_8004352c			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800437c8	func_800437c8			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043828	func_80043828			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043858	func_80043858			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043894	func_80043894			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800438e0	func_800438e0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043940	func_80043940			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800439b0	func_800439b0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043a08	func_80043a08			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043b38	func_80043b38			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80043bb8	func_80043bb8			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800441d4	func_800441d4			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800443c8	func_800443c8			unknown	unknown *object;unknown *pointer1;unknown arg2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800445b8	func_800445b8			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004482c	func_8004482c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004485c	func_8004485c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800448b8	func_800448b8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80044900	func_80044900			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80044b40	func_80044b40			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80044c34	func_80044c34			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80044d9c	func_80044d9c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80045ac8	func_80045ac8			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80045c7c	func_80045c7c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046014	func_80046014			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046034	func_80046034			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800460bc	func_800460bc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046294	func_80046294			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800463bc	func_800463bc			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046608	func_80046608			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800466e8	func_800466e8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046760	func_80046760			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046884	func_80046884			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046914	func_80046914			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046c00	func_80046c00			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046cb0	func_80046cb0			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80046dcc	func_80046dcc			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80047010	func_80047010			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b524	func_8004b524			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b560	func_8004b560			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b624	func_8004b624			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b698	func_8004b698			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b770	func_8004b770			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b794	func_8004b794			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b868	func_8004b868			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b8c4	func_8004b8c4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b8fc	func_8004b8fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b94c	func_8004b94c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004b984	func_8004b984			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004bf1c	func_8004bf1c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c01c	func_8004c01c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c068	func_8004c068			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c0b0	func_8004c0b0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c104	func_8004c104			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c130	func_8004c130			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c184	func_8004c184			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c1f0	func_8004c1f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c52c	func_8004c52c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c5ec	func_8004c5ec			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004c668	func_8004c668			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ceac	func_8004ceac			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004d254	func_8004d254			unknown	unknown arg0;unknown arg1;unknown *pointer2;unknown *pointer3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004d3c4	func_8004d3c4			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004d644	func_8004d644			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004d838	func_8004d838			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004da2c	func_8004da2c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004db08	func_8004db08			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004db3c	func_8004db3c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004db98	func_8004db98			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004dbc8	func_8004dbc8			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e094	func_8004e094			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e27c	func_8004e27c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e31c	func_8004e31c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e330	func_8004e330			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e6f8	func_8004e6f8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e824	func_8004e824			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e8ec	func_8004e8ec			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e914	func_8004e914			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004e928	func_8004e928			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ea7c	func_8004ea7c			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004eaf0	func_8004eaf0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ec08	func_8004ec08			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ed50	func_8004ed50			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ede0	func_8004ede0			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004eee0	func_8004eee0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004f008	func_8004f008			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004f1d0	func_8004f1d0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004f414	func_8004f414			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8004ffa0	func_8004ffa0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80050010	func_80050010			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800500a8	func_800500a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80052e5c	func_80052e5c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053084	func_80053084			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800530f8	func_800530f8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800532d4	func_800532d4			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053310	func_80053310			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800533e8	func_800533e8			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053624	func_80053624			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800536f8	func_800536f8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800537e8	func_800537e8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053850	func_80053850			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053a0c	func_80053a0c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053af4	func_80053af4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053b64	func_80053b64			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053ba8	func_80053ba8			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053be4	func_80053be4			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053c20	func_80053c20			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80053c84	func_80053c84			unknown	unknown arg0;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80055b4c	func_80055b4c			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80055bd8	func_80055bd8			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80055db0	func_80055db0			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80055f74	func_80055f74			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80056134	func_80056134			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800561d8	func_800561d8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80056268	func_80056268			unknown	unknown *object;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800562f0	func_800562f0			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80056580	func_80056580			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800566d4	func_800566d4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80056800	func_80056800			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80056840	func_80056840			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800568bc	func_800568bc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bbf4	func_8005bbf4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bc24	func_8005bc24			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bc50	func_8005bc50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bd34	func_8005bd34			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bd58	func_8005bd58			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bd78	func_8005bd78			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005be18	func_8005be18			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005be20	func_8005be20			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005be28	func_8005be28			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bee0	func_8005bee0			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005bfc4	func_8005bfc4			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c04c	func_8005c04c			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c0d4	func_8005c0d4			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c18c	func_8005c18c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c1e8	func_8005c1e8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c308	func_8005c308			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c7e8	func_8005c7e8			void	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005c864	func_8005c864			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005cbe0	func_8005cbe0			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005d7bc	func_8005d7bc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005d7f8	func_8005d7f8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005d898	func_8005d898			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005d948	func_8005d948			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005da94	func_8005da94			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005db30	func_8005db30			unknown	unknown *object;unknown *pointer1;unknown *pointer2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005e2d0	func_8005e2d0			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005ea64	func_8005ea64			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005eb20	func_8005eb20			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005ee58	func_8005ee58			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005eea8	func_8005eea8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005ef18	func_8005ef18			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005ef64	func_8005ef64			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005efd4	func_8005efd4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005f444	func_8005f444			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005f7bc	func_8005f7bc			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8005ffd0	func_8005ffd0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060800	func_80060800			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800608ec	func_800608ec			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060a10	func_80060a10			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060b0c	func_80060b0c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060ba8	func_80060ba8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060c54	func_80060c54			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060cd0	func_80060cd0			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80060d20	func_80060d20			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061364	func_80061364			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800614d4	func_800614d4			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061550	func_80061550			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061650	func_80061650			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x800616dc	func_800616dc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8006179c	func_8006179c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x8006182c	func_8006182c			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061878	func_80061878			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061894	func_80061894			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061918	func_80061918			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061940	func_80061940			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+GAME.EXE	0x80061bc4	func_80061bc4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80011e14	func_80011e14			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800123cc	func_800123cc			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80012494	func_80012494			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80012500	func_80012500			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80012644	func_80012644			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800126ac	func_800126ac			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x8001273c	func_8001273c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x8001279c	func_8001279c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80012b0c	func_80012b0c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80012ea0	func_80012ea0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800131ac	func_800131ac			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800132f4	func_800132f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x8001333c	func_8001333c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800133c8	func_800133c8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013418	func_80013418			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013464	func_80013464			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800135bc	func_800135bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x8001362c	func_8001362c			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800136d8	func_800136d8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013b6c	func_80013b6c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013c94	func_80013c94			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013d04	func_80013d04			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013e28	func_80013e28			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013ebc	func_80013ebc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013f50	func_80013f50			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80013fc8	func_80013fc8			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80014014	func_80014014			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800140d4	func_800140d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80014124	func_80014124			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x8001414c	func_8001414c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80014174	func_80014174			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80014264	func_80014264			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x80014438	func_80014438			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+OPEN.EXE	0x800144ac	func_800144ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x800119b8	func_800119b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011ae0	func_80011ae0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011c24	func_80011c24			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011c60	func_80011c60			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011cb0	func_80011cb0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011d14	func_80011d14			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80011f64	func_80011f64			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x8001208c	func_8001208c			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x800120fc	func_800120fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80012220	func_80012220			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x800122b4	func_800122b4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x80012348	func_80012348			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+END.EXE	0x800123c0	func_800123c0			void	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e83a8	func_801e83a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e83b0	func_801e83b0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e85b8	func_801e85b8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8704	func_801e8704			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e870c	func_801e870c			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8768	func_801e8768			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e87e0	func_801e87e0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8960	func_801e8960			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8968	func_801e8968			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8970	func_801e8970			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8978	func_801e8978			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8980	func_801e8980			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e89d0	func_801e89d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e89d8	func_801e89d8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8a34	func_801e8a34			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_002.BIN	0x801e8d68	func_801e8d68			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e85a8	func_801e85a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e8680	func_801e8680			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e8758	func_801e8758			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e8760	func_801e8760			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e87c4	func_801e87c4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e87cc	func_801e87cc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e87d4	func_801e87d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e87dc	func_801e87dc			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e889c	func_801e889c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88a4	func_801e88a4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88ac	func_801e88ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88b4	func_801e88b4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88bc	func_801e88bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88c4	func_801e88c4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88cc	func_801e88cc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e88e8	func_801e88e8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_005.BIN	0x801e89a8	func_801e89a8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e83c0	func_801e83c0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e83c8	func_801e83c8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e864c	func_801e864c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e86f4	func_801e86f4			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8824	func_801e8824			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e882c	func_801e882c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e888c	func_801e888c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e89d0	func_801e89d0			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e89fc	func_801e89fc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8bdc	func_801e8bdc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8be4	func_801e8be4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8bec	func_801e8bec			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8c1c	func_801e8c1c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8c3c	func_801e8c3c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8e08	func_801e8e08			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_008.BIN	0x801e8eb4	func_801e8eb4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e8398	func_801e8398			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e83a0	func_801e83a0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85c0	func_801e85c0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85c8	func_801e85c8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e85d8	func_801e85d8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e8698	func_801e8698			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e86a0	func_801e86a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e86a8	func_801e86a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e86b0	func_801e86b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e86b8	func_801e86b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e86c0	func_801e86c0			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_011.BIN	0x801e87c0	func_801e87c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e83a4	func_801e83a4			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8488	func_801e8488			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e84e0	func_801e84e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e84e8	func_801e84e8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8744	func_801e8744			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e874c	func_801e874c			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e89a4	func_801e89a4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e89ac	func_801e89ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e89b4	func_801e89b4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8ae8	func_801e8ae8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8af0	func_801e8af0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8af8	func_801e8af8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8b00	func_801e8b00			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8b08	func_801e8b08			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8b10	func_801e8b10			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8b30	func_801e8b30			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8cc8	func_801e8cc8			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e8da8	func_801e8da8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e867c	func_801e867c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8684	func_801e8684			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e868c	func_801e868c			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e874c	func_801e874c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8754	func_801e8754			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e875c	func_801e875c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8764	func_801e8764			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e876c	func_801e876c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8774	func_801e8774			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_017.BIN	0x801e8880	func_801e8880			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e83a8	func_801e83a8			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e848c	func_801e848c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8534	func_801e8534			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e853c	func_801e853c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e874c	func_801e874c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8754	func_801e8754			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e875c	func_801e875c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8764	func_801e8764			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e87a8	func_801e87a8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e88e4	func_801e88e4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e88ec	func_801e88ec			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e88f4	func_801e88f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e88fc	func_801e88fc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8904	func_801e8904			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8934	func_801e8934			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e8a80	func_801e8a80			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e85a8	func_801e85a8			unknown	unknown *object;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e86e4	func_801e86e4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e86ec	func_801e86ec			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e86f4	func_801e86f4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e87b4	func_801e87b4			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e87d0	func_801e87d0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e8884	func_801e8884			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e888c	func_801e888c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e8894	func_801e8894			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e889c	func_801e889c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88a4	func_801e88a4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88ac	func_801e88ac			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88b4	func_801e88b4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88bc	func_801e88bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88c4	func_801e88c4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88cc	func_801e88cc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88d4	func_801e88d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88dc	func_801e88dc			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_023.BIN	0x801e88f4	func_801e88f4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e85a0	func_801e85a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8644	func_801e8644			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8778	func_801e8778			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8780	func_801e8780			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e87e8	func_801e87e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e87f0	func_801e87f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e87f8	func_801e87f8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8800	func_801e8800			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8808	func_801e8808			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8810	func_801e8810			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8818	func_801e8818			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_026.BIN	0x801e8918	func_801e8918			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8474	func_801e8474			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e847c	func_801e847c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e86f4	func_801e86f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e86fc	func_801e86fc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8704	func_801e8704			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e870c	func_801e870c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8714	func_801e8714			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a68	func_801e8a68			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a70	func_801e8a70			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a78	func_801e8a78			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a80	func_801e8a80			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a88	func_801e8a88			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8a90	func_801e8a90			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8acc	func_801e8acc			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e85c0	func_801e85c0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8680	func_801e8680			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8688	func_801e8688			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8690	func_801e8690			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8698	func_801e8698			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e86a0	func_801e86a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e86a8	func_801e86a8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_032.BIN	0x801e8708	func_801e8708			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e85c4	func_801e85c4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e85cc	func_801e85cc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e85d4	func_801e85d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e85dc	func_801e85dc			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8680	func_801e8680			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8740	func_801e8740			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8748	func_801e8748			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8750	func_801e8750			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8758	func_801e8758			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8760	func_801e8760			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8768	func_801e8768			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_035.BIN	0x801e8770	func_801e8770			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e85d8	func_801e85d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e85e0	func_801e85e0			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e866c	func_801e866c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e875c	func_801e875c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8764	func_801e8764			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e876c	func_801e876c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8774	func_801e8774			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e877c	func_801e877c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8784	func_801e8784			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e878c	func_801e878c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_038.BIN	0x801e8794	func_801e8794			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e85b8	func_801e85b8			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8644	func_801e8644			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e864c	func_801e864c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8654	func_801e8654			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e865c	func_801e865c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8664	func_801e8664			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e866c	func_801e866c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e8674	func_801e8674			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e86d8	func_801e86d8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e88a0	func_801e88a0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_041.BIN	0x801e88d4	func_801e88d4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e85c4	func_801e85c4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e85cc	func_801e85cc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e85d4	func_801e85d4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e85dc	func_801e85dc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e85e4	func_801e85e4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8680	func_801e8680			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8688	func_801e8688			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8690	func_801e8690			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e8698	func_801e8698			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e86a0	func_801e86a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e86a8	func_801e86a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_044.BIN	0x801e86b0	func_801e86b0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e85b8	func_801e85b8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e86d8	func_801e86d8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e870c	func_801e870c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e87d8	func_801e87d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e87e0	func_801e87e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e87e8	func_801e87e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e87f0	func_801e87f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e87f8	func_801e87f8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8800	func_801e8800			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8808	func_801e8808			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_047.BIN	0x801e8810	func_801e8810			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85c0	func_801e85c0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85c8	func_801e85c8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85d8	func_801e85d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85e0	func_801e85e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_050.BIN	0x801e85f8	func_801e85f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8448	func_801e8448			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8450	func_801e8450			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8658	func_801e8658			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e86f8	func_801e86f8			unknown	unknown arg0;unknown *pointer1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e891c	func_801e891c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8924	func_801e8924			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8958	func_801e8958			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e89c0	func_801e89c0			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8b10	func_801e8b10			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d24	func_801e8d24			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d2c	func_801e8d2c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d34	func_801e8d34			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d3c	func_801e8d3c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d44	func_801e8d44			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8d4c	func_801e8d4c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8de8	func_801e8de8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8e08	func_801e8e08			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_053.BIN	0x801e8f84	func_801e8f84			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85c0	func_801e85c0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85c8	func_801e85c8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85d8	func_801e85d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85e0	func_801e85e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_056.BIN	0x801e85f8	func_801e85f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e85b8	func_801e85b8			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8618	func_801e8618			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8620	func_801e8620			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8628	func_801e8628			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8630	func_801e8630			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8638	func_801e8638			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8640	func_801e8640			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8648	func_801e8648			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_059.BIN	0x801e8650	func_801e8650			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8658	func_801e8658			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8660	func_801e8660			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8668	func_801e8668			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8670	func_801e8670			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8678	func_801e8678			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8680	func_801e8680			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8688	func_801e8688			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8690	func_801e8690			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8698	func_801e8698			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8730	func_801e8730			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8828	func_801e8828			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_062.BIN	0x801e8830	func_801e8830			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85a8	func_801e85a8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85b0	func_801e85b0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85b8	func_801e85b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85c0	func_801e85c0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85c8	func_801e85c8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85d8	func_801e85d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85e0	func_801e85e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_065.BIN	0x801e85f8	func_801e85f8			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e85f4	func_801e85f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e85fc	func_801e85fc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8604	func_801e8604			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e860c	func_801e860c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8614	func_801e8614			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e861c	func_801e861c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8624	func_801e8624			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e862c	func_801e862c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8634	func_801e8634			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e863c	func_801e863c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8644	func_801e8644			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_068.BIN	0x801e8680	func_801e8680			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e85e4	func_801e85e4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e85ec	func_801e85ec			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e86e4	func_801e86e4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e86ec	func_801e86ec			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e86f4	func_801e86f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e86fc	func_801e86fc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e8704	func_801e8704			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e870c	func_801e870c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e8714	func_801e8714			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e871c	func_801e871c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e8724	func_801e8724			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_071.BIN	0x801e872c	func_801e872c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85d0	func_801e85d0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85d8	func_801e85d8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85e0	func_801e85e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85e8	func_801e85e8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85f0	func_801e85f0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e85f8	func_801e85f8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8600	func_801e8600			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8608	func_801e8608			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8610	func_801e8610			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8618	func_801e8618			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8620	func_801e8620			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8634	func_801e8634			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e863c	func_801e863c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_074.BIN	0x801e8644	func_801e8644			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e85dc	func_801e85dc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e85e4	func_801e85e4			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8744	func_801e8744			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e874c	func_801e874c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8754	func_801e8754			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e875c	func_801e875c			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e87a0	func_801e87a0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8af0	func_801e8af0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8af8	func_801e8af8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_077.BIN	0x801e8b00	func_801e8b00			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8390	func_801e8390			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8474	func_801e8474			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e847c	func_801e847c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8684	func_801e8684			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e86bc	func_801e86bc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e86c4	func_801e86c4			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8758	func_801e8758			unknown	unknown *object;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8850	func_801e8850			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8858	func_801e8858			unknown	unknown *object	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8910	func_801e8910			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8918	func_801e8918			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8920	func_801e8920			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8928	func_801e8928			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8930	func_801e8930			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8938	func_801e8938			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8958	func_801e8958			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8af0	func_801e8af0			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8b38	func_801e8b38			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8390	func_801e8390			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8398	func_801e8398			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e85a0	func_801e85a0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e85a8	func_801e85a8			unknown	unknown arg0;unknown arg1;unknown arg2	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e85dc	func_801e85dc			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e85e4	func_801e85e4			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8694	func_801e8694			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e869c	func_801e869c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e86a4	func_801e86a4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e86ac	func_801e86ac			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e86f0	func_801e86f0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8a40	func_801e8a40			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8a48	func_801e8a48			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8a50	func_801e8a50			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8a64	func_801e8a64			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_083.BIN	0x801e8a6c	func_801e8a6c			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

@@ -13,4 +13,4 @@ source-local extern decls	0
 # storage or interfaces.
 void* views	0
 .c-local aggregates	0
-unresolved func_ identities	0
+unresolved func_ identities	1077
