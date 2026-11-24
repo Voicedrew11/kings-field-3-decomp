@@ -6657,6 +6657,552 @@ GAME.EXE	0x80046f88	0x36788		mips26	reachable-code	0x80016c44	load		jal		manual-
 GAME.EXE	0x80046fc0	0x367c0	0x80046fc4	mips_hi16_lo16	reachable-code	0x801b2600	bss	DAT_801b24e4	lui+addiu		manual-decoded	reviewed	game-k asm review
 GAME.EXE	0x80046fc8	0x367c8		mips26	reachable-code	0x800175a8	load		jal		manual-decoded	reviewed	game-k asm review
 GAME.EXE	0x80046fd0	0x367d0		mips26	reachable-code	0x80046e50	load		j		manual-decoded	reviewed	game-k asm review
+GAME.EXE	0x80047018	0x36818	0x8004701c	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047064	0x36864	0x80047068	mips_hi16_lo16	reachable-code	0x80198394	bss	DAT_8018fb3c	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047080	0x36880	0x80047084	mips_hi16_lo16	reachable-code	0x8018fb3c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004708c	0x3688c	0x80047090	mips_hi16_lo16	reachable-code	0x80198390	bss	DAT_8018fb3c	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800470a8	0x368a8	0x800470ac	mips_hi16_lo16	reachable-code	0x8001209c	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800470e4	0x368e4		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800470fc	0x368fc		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047118	0x36918		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047120	0x36920	0x80047124	mips_hi16_lo16	reachable-code	0x800828fc	load	DAT_800828fc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047148	0x36948		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047180	0x36980	0x80047184	mips_hi16_lo16	reachable-code	0x800828dc	load	DAT_800828dc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800471a4	0x369a4		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800471c8	0x369c8		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800471ec	0x369ec		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800471fc	0x369fc	0x80047200	mips_hi16_lo16	reachable-code	0x800828dc	load	DAT_800828dc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047220	0x36a20		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047234	0x36a34		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047258	0x36a58	0x8004725c	mips_hi16_lo16	reachable-code	0x800828fc	load	DAT_800828fc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004727c	0x36a7c		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047288	0x36a88		mips26	reachable-code	0x800496a8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800472b8	0x36ab8		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800472d4	0x36ad4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800472dc	0x36adc	0x800472e0	mips_hi16_lo16	reachable-code	0x8008291c	load	DAT_8008291c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047304	0x36b04		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004733c	0x36b3c	0x80047340	mips_hi16_lo16	reachable-code	0x800828dc	load	DAT_800828dc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047360	0x36b60		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004737c	0x36b7c		mips26	reachable-code	0x8004ac84	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800473a0	0x36ba0		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800473b0	0x36bb0	0x800473b4	mips_hi16_lo16	reachable-code	0x800828dc	load	DAT_800828dc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800473d4	0x36bd4		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800473e8	0x36be8		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004740c	0x36c0c	0x80047410	mips_hi16_lo16	reachable-code	0x8008291c	load	DAT_8008291c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047430	0x36c30		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004743c	0x36c3c		mips26	reachable-code	0x800496a8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004746c	0x36c6c		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047488	0x36c88		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047490	0x36c90	0x80047494	mips_hi16_lo16	reachable-code	0x8008295c	load	DAT_8008295c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800474b8	0x36cb8		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800474f0	0x36cf0	0x800474f4	mips_hi16_lo16	reachable-code	0x8008293c	load	DAT_8008293c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047514	0x36d14		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047530	0x36d30		mips26	reachable-code	0x8004ac84	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047554	0x36d54		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047564	0x36d64	0x80047568	mips_hi16_lo16	reachable-code	0x8008293c	load	DAT_8008293c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047588	0x36d88		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004759c	0x36d9c		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800475c0	0x36dc0	0x800475c4	mips_hi16_lo16	reachable-code	0x8008295c	load	DAT_8008295c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800475e4	0x36de4		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800475f0	0x36df0		mips26	reachable-code	0x800496a8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047618	0x36e18		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047634	0x36e34		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047668	0x36e68		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800476c8	0x36ec8		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800476d4	0x36ed4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047734	0x36f34		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047750	0x36f50		mips26	reachable-code	0x8004ac84	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047798	0x36f98		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800477ec	0x36fec		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800477f8	0x36ff8		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047850	0x37050		mips26	reachable-code	0x8004ac38	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047870	0x37070	0x80047874	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800478c0	0x370c0	0x800478c4	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800478cc	0x370cc	0x800478d0	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800478dc	0x370dc		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047920	0x37120	0x80047924	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047940	0x37140	0x80047944	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004794c	0x3714c	0x80047950	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004795c	0x3715c		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047980	0x37180		mips26	reachable-code	0x80047998	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004798c	0x3718c		mips26	reachable-code	0x80047998	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800479b0	0x371b0	0x800479b4	mips_hi16_lo16	reachable-code	0x801aec5e	bss	DAT_80199154	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800479bc	0x371bc		mips_gprel16	reachable-code	0x8009c3d4	load	DAT_8009c3d4	sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800479c4	0x371c4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800479fc	0x371fc		mips_gprel16	reachable-code	0x8009c3d4	load	DAT_8009c3d4	lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a0c	0x3720c		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a28	0x37228	0x80047a2c	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a34	0x37234	0x80047a38	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a40	0x37240		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a50	0x37250		mips_gprel16	reachable-code	0x8009c3d4	load	DAT_8009c3d4	lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a54	0x37254		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a68	0x37268	0x80047a6c	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a74	0x37274	0x80047a78	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a80	0x37280		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a90	0x37290	0x80047a94	mips_hi16_lo16	reachable-code	0x801b260a	bss	DAT_801b24e4	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047a98	0x37298		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ac4	0x372c4		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ad4	0x372d4		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047adc	0x372dc	0x80047ae0	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ae8	0x372e8	0x80047aec	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047af4	0x372f4	0x80047af8	mips_hi16_lo16	reachable-code	0x801b2646	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047afc	0x372fc	0x80047b00	mips_hi16_lo16	reachable-code	0x801b2648	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047b0c	0x3730c	0x80047b10	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047b14	0x37314	0x80047b18	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047b7c	0x3737c		mips26	reachable-code	0x8004ac48	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047bb4	0x373b4		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047bc4	0x373c4		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047c10	0x37410		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047c58	0x37458		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047c64	0x37464		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047c90	0x37490		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047cb4	0x374b4		mips26	reachable-code	0x8004813c	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047cd4	0x374d4	0x80047cd8	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047d24	0x37524	0x80047d28	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047d30	0x37530	0x80047d34	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047d40	0x37540		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047d84	0x37584	0x80047d88	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047da4	0x375a4	0x80047da8	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047db0	0x375b0	0x80047db4	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047dc0	0x375c0		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047de4	0x375e4		mips26	reachable-code	0x80047dfc	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047df0	0x375f0		mips26	reachable-code	0x80047dfc	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e14	0x37614	0x80047e18	mips_hi16_lo16	reachable-code	0x801aec5e	bss	DAT_80199154	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e20	0x37620		mips_gprel16	reachable-code	0x8009c3d8	load	DAT_8009c3d8	sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e28	0x37628		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e60	0x37660		mips_gprel16	reachable-code	0x8009c3d8	load	DAT_8009c3d8	lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e70	0x37670		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e8c	0x3768c	0x80047e90	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047e98	0x37698	0x80047e9c	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ea4	0x376a4		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047eb4	0x376b4		mips_gprel16	reachable-code	0x8009c3d8	load	DAT_8009c3d8	lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047eb8	0x376b8		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ecc	0x376cc	0x80047ed0	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ed8	0x376d8	0x80047edc	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ee4	0x376e4		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047ef4	0x376f4	0x80047ef8	mips_hi16_lo16	reachable-code	0x801b260a	bss	DAT_801b24e4	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047efc	0x376fc		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f28	0x37728		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f38	0x37738		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f40	0x37740	0x80047f44	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f4c	0x3774c	0x80047f50	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f58	0x37758	0x80047f5c	mips_hi16_lo16	reachable-code	0x801b2646	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f60	0x37760	0x80047f64	mips_hi16_lo16	reachable-code	0x801b2648	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f70	0x37770	0x80047f74	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047f78	0x37778	0x80047f7c	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80047fe0	0x377e0		mips26	reachable-code	0x8004ac48	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048000	0x37800		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048038	0x37838		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048048	0x37848		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048094	0x37894		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800480dc	0x378dc		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800480e8	0x378e8		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048114	0x37914		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048144	0x37944		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048170	0x37970	0x80048174	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004817c	0x3797c	0x80048180	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004818c	0x3798c		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800481d0	0x379d0	0x800481d4	mips_hi16_lo16	reachable-code	0x801aec5e	bss	DAT_80199154	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800481dc	0x379dc		mips_gprel16	reachable-code	0x8009c3dc	load	DAT_8009c3dc	sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800481e4	0x379e4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004821c	0x37a1c		mips_gprel16	reachable-code	0x8009c3dc	load	DAT_8009c3dc	lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004822c	0x37a2c		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048240	0x37a40	0x80048244	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004824c	0x37a4c	0x80048250	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048258	0x37a58		mips26	reachable-code	0x80016ab8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048268	0x37a68		mips_gprel16	reachable-code	0x8009c3dc	load	DAT_8009c3dc	lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004826c	0x37a6c		mips26	reachable-code	0x80016a2c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048298	0x37a98		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482a8	0x37aa8		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482b0	0x37ab0	0x800482b4	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482bc	0x37abc	0x800482c0	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482c8	0x37ac8	0x800482cc	mips_hi16_lo16	reachable-code	0x801b2646	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482d0	0x37ad0	0x800482d4	mips_hi16_lo16	reachable-code	0x801b2648	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482e0	0x37ae0	0x800482e4	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800482e8	0x37ae8	0x800482ec	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048344	0x37b44		mips26	reachable-code	0x8004ac48	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048354	0x37b54		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004838c	0x37b8c		mips26	reachable-code	0x8001660c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004839c	0x37b9c		mips26	reachable-code	0x80074840	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800483e8	0x37be8		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800483f8	0x37bf8		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004843c	0x37c3c		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048448	0x37c48		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004845c	0x37c5c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048474	0x37c74		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048480	0x37c80	0x80048484	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800484bc	0x37cbc	0x800484c0	mips_hi16_lo16	reachable-code	0x8001244c	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800484f4	0x37cf4		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048514	0x37d14		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004853c	0x37d3c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004854c	0x37d4c	0x80048550	mips_hi16_lo16	reachable-code	0x8009c2f4	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048554	0x37d54		mips26	reachable-code	0x800168a8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048560	0x37d60	0x80048564	mips_hi16_lo16	reachable-code	0x8009c2fc	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048568	0x37d68		mips26	reachable-code	0x800168a8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800485c0	0x37dc0		mips26	reachable-code	0x80017158	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800485e0	0x37de0		mips26	reachable-code	0x80017158	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048600	0x37e00		mips26	reachable-code	0x80017158	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048638	0x37e38		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048648	0x37e48		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048674	0x37e74		mips26	reachable-code	0x8004b0f0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800486b4	0x37eb4		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800486dc	0x37edc		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048708	0x37f08		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048740	0x37f40		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048758	0x37f58		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048764	0x37f64		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048774	0x37f74		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048788	0x37f88		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800487b0	0x37fb0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800487c0	0x37fc0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800487e0	0x37fe0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004880c	0x3800c		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048818	0x38018		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048834	0x38034		mips26	reachable-code	0x80076da0	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048870	0x38070		mips26	reachable-code	0x80076cc4	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004887c	0x3807c	0x80048880	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800488c8	0x380c8		mips26	reachable-code	0x80046dcc	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800488e8	0x380e8		mips26	reachable-code	0x80053c84	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048904	0x38104		mips26	reachable-code	0x80016168	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048930	0x38130		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048958	0x38158		mips26	reachable-code	0x8004a0c0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048980	0x38180		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048990	0x38190		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800489b0	0x381b0	0x800489b4	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800489ec	0x381ec		mips26	reachable-code	0x80044b40	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800489f8	0x381f8		mips26	reachable-code	0x8004a0bc	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a1c	0x3821c		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a28	0x38228		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a40	0x38240		mips26	reachable-code	0x80044b40	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a48	0x38248		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a7c	0x3827c		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048a84	0x38284		mips26	reachable-code	0x8004a0c0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048aac	0x382ac		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ac4	0x382c4		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048af4	0x382f4		mips26	reachable-code	0x80016240	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b00	0x38300		mips26	reachable-code	0x800168f0	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b30	0x38330		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b3c	0x3833c		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b4c	0x3834c		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b54	0x38354		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b80	0x38380		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048b8c	0x3838c		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ba8	0x383a8		mips26	reachable-code	0x80016240	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048bb4	0x383b4		mips26	reachable-code	0x800168f0	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048bf8	0x383f8		mips26	reachable-code	0x80044900	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c00	0x38400		mips26	reachable-code	0x8004a0c0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c0c	0x3840c		mips26	reachable-code	0x80015f18	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c2c	0x3842c		mips26	reachable-code	0x8004b0f0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c4c	0x3844c	0x80048c50	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c74	0x38474		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c7c	0x3847c	0x80048c80	mips_hi16_lo16	reachable-code	0x8018fad8	bss	DAT_8018fad4	lui+lbu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048c94	0x38494		mips26	reachable-code	0x80048ca0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ccc	0x384cc	0x80048cd0	mips_hi16_lo16	reachable-code	0x8001246c	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048cf4	0x384f4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048d10	0x38510		mips26	reachable-code	0x800463bc	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048d38	0x38538		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048d48	0x38548		mips26	reachable-code	0x8004a064	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048d54	0x38554		mips26	reachable-code	0x80049010	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048d64	0x38564		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048da8	0x385a8		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ddc	0x385dc		mips26	reachable-code	0x800463bc	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e04	0x38604		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e18	0x38618		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e24	0x38624		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e2c	0x3862c		mips26	reachable-code	0x8004b0f0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e60	0x38660		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048e84	0x38684		mips26	reachable-code	0x80048dc8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ea8	0x386a8		mips26	reachable-code	0x8004b4ac	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048ec4	0x386c4		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048eec	0x386ec		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048f08	0x38708		mips26	reachable-code	0x800490a4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048f48	0x38748		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048f9c	0x3879c	0x80048fa0	mips_hi16_lo16	reachable-code	0x8008288c	load	DAT_8008288c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048fb4	0x387b4		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80048fcc	0x387cc		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049014	0x38814		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004907c	0x3887c	0x80049080	mips_hi16_lo16	reachable-code	0x8008288c	load	DAT_8008288c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049094	0x38894		mips26	reachable-code	0x800443c8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004909c	0x3889c		mips26	reachable-code	0x800496ac	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800490b0	0x388b0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800490d8	0x388d8		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800490ec	0x388ec		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004910c	0x3890c		mips26	reachable-code	0x80049124	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049118	0x38918		mips26	reachable-code	0x80049124	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004914c	0x3894c		mips26	reachable-code	0x8004ac38	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049180	0x38980		mips26	reachable-code	0x8004ac38	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800491c4	0x389c4		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800491dc	0x389dc		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049224	0x38a24		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049254	0x38a54		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004925c	0x38a5c		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049264	0x38a64		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004926c	0x38a6c		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049298	0x38a98		mips26	reachable-code	0x80044b40	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800492a4	0x38aa4		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049318	0x38b18		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049374	0x38b74		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049388	0x38b88		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800493ac	0x38bac		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800493c8	0x38bc8		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800493ec	0x38bec		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049400	0x38c00		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049460	0x38c60		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049488	0x38c88		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800494a4	0x38ca4		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800494c8	0x38cc8		mips26	reachable-code	0x800493ec	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049504	0x38d04		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004952c	0x38d2c		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049548	0x38d48		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004956c	0x38d6c		mips26	reachable-code	0x800493ec	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004959c	0x38d9c		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800495e0	0x38de0		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049604	0x38e04		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049630	0x38e30		mips26	reachable-code	0x8004a0c0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800496a0	0x38ea0		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800496b0	0x38eb0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800496d8	0x38ed8		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800496e8	0x38ee8		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049704	0x38f04		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004972c	0x38f2c		mips26	reachable-code	0x80049780	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049748	0x38f48		mips26	reachable-code	0x80049780	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049760	0x38f60		mips26	reachable-code	0x80049780	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049794	0x38f94		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800497b4	0x38fb4		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800497d8	0x38fd8		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049828	0x39028		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049834	0x39034		mips26	reachable-code	0x80049924	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004985c	0x3905c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049878	0x39078		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049880	0x39080		mips26	reachable-code	0x8004ac84	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800498b0	0x390b0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800498c0	0x390c0		mips26	reachable-code	0x80049b78	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049900	0x39100		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049924	0x39124		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004992c	0x3912c		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004995c	0x3915c		mips26	reachable-code	0x80044b40	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049968	0x39168		mips26	reachable-code	0x80049988	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049988	0x39188		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x800499c0	0x391c0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049a08	0x39208		mips26	reachable-code	0x80044b40	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049a10	0x39210		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049a1c	0x3921c		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049a40	0x39240		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049a68	0x39268		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049ae4	0x392e4		mips26	reachable-code	0x800533e8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049aec	0x392ec		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049b38	0x39338		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049b68	0x39368		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049b80	0x39380		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049bb8	0x393b8		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049bc0	0x393c0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049c00	0x39400		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049c30	0x39430		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049c54	0x39454		mips26	reachable-code	0x80046760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049c7c	0x3947c		mips26	reachable-code	0x80033f38	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049cf4	0x394f4		mips26	reachable-code	0x800533e8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049cfc	0x394fc		mips26	reachable-code	0x80049d08	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049d7c	0x3957c		mips26	reachable-code	0x80049f0c	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049de0	0x395e0		mips26	reachable-code	0x80049dec	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049e00	0x39600		mips26	reachable-code	0x80049f0c	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049e4c	0x3964c		mips26	reachable-code	0x80049f0c	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049e7c	0x3967c		mips26	reachable-code	0x80049f0c	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049ee0	0x396e0		mips26	reachable-code	0x80049eec	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049f2c	0x3972c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049f40	0x39740		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049f94	0x39794		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049fc4	0x397c4		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x80049fe0	0x397e0	0x80049fe4	mips_hi16_lo16	reachable-code	0x80012494	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a024	0x39824		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a048	0x39848		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a064	0x39864		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a0c0	0x398c0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a118	0x39918		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a134	0x39934		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a154	0x39954	0x8004a158	mips_hi16_lo16	reachable-code	0x8009c304	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a17c	0x3997c		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a190	0x39990		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a19c	0x3999c	0x8004a1a0	mips_hi16_lo16	reachable-code	0x80191a9c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a1c4	0x399c4	0x8004a1c8	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a1cc	0x399cc	0x8004a1d0	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a1d4	0x399d4		mips26	reachable-code	0x80033c4c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a1ec	0x399ec	0x8004a1f0	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a204	0x39a04	0x8004a208	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a224	0x39a24	0x8004a228	mips_hi16_lo16	reachable-code	0x801b2644	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a23c	0x39a3c	0x8004a240	mips_hi16_lo16	reachable-code	0x801b2612	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a244	0x39a44		mips26	reachable-code	0x8002b760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a258	0x39a58	0x8004a25c	mips_hi16_lo16	reachable-code	0x801b2612	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a260	0x39a60	0x8004a264	mips_hi16_lo16	reachable-code	0x801b261a	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a270	0x39a70	0x8004a274	mips_hi16_lo16	reachable-code	0x801b2622	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a278	0x39a78	0x8004a27c	mips_hi16_lo16	reachable-code	0x801b262a	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a288	0x39a88	0x8004a28c	mips_hi16_lo16	reachable-code	0x801b260a	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a290	0x39a90		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a298	0x39a98		mips26	reachable-code	0x80019ab4	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a2ac	0x39aac		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a2c0	0x39ac0		mips26	reachable-code	0x8003d624	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a2c8	0x39ac8		mips26	reachable-code	0x8004a2d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a2d8	0x39ad8		mips26	reachable-code	0x8004b1c8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a318	0x39b18		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a33c	0x39b3c	0x8004a340	mips_hi16_lo16	reachable-code	0x80191a9c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a37c	0x39b7c		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a384	0x39b84		mips26	reachable-code	0x8004b794	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3a0	0x39ba0		mips26	reachable-code	0x80019538	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3a8	0x39ba8		mips26	reachable-code	0x80018358	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3b0	0x39bb0	0x8004a3b4	mips_hi16_lo16	reachable-code	0x8018fad4	bss	DAT_8018fad4	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3c4	0x39bc4	0x8004a3c8	mips_hi16_lo16	reachable-code	0x8018fad8	bss	DAT_8018fad4	lui+lbu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3f4	0x39bf4		mips26	reachable-code	0x80017c78	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a3fc	0x39bfc		mips26	reachable-code	0x8004a434	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a424	0x39c24		mips26	reachable-code	0x80017c78	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a42c	0x39c2c	0x8004a430	mips_hi16_lo16	reachable-code	0x801b24f2	bss	DAT_801b24e4	lui+sb		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a434	0x39c34		mips26	reachable-code	0x80019538	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a43c	0x39c3c		mips26	reachable-code	0x80018358	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a444	0x39c44	0x8004a448	mips_hi16_lo16	reachable-code	0x8018fad4	bss	DAT_8018fad4	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a458	0x39c58		mips26	reachable-code	0x80019ab4	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a460	0x39c60	0x8004a464	mips_hi16_lo16	reachable-code	0x801b25e5	bss	DAT_801b24e4	lui+sb		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a468	0x39c68	0x8004a46c	mips_hi16_lo16	reachable-code	0x801b2624	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a470	0x39c70	0x8004a474	mips_hi16_lo16	reachable-code	0x801b2622	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a478	0x39c78	0x8004a47c	mips_hi16_lo16	reachable-code	0x801b2620	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a480	0x39c80	0x8004a484	mips_hi16_lo16	reachable-code	0x801b2610	bss	DAT_801b24e4	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a488	0x39c88	0x8004a48c	mips_hi16_lo16	reachable-code	0x801b2608	bss	DAT_801b24e4	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a4cc	0x39ccc	0x8004a4d0	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a4dc	0x39cdc	0x8004a4e0	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a4ec	0x39cec	0x8004a4f0	mips_hi16_lo16	reachable-code	0x801b25f4	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a4f4	0x39cf4	0x8004a4f8	mips_hi16_lo16	reachable-code	0x801b2612	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a4fc	0x39cfc	0x8004a500	mips_hi16_lo16	reachable-code	0x801b260a	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a504	0x39d04		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a50c	0x39d0c		mips26	reachable-code	0x80019ab4	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a520	0x39d20		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a54c	0x39d4c		mips26	reachable-code	0x80017c78	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a554	0x39d54		mips26	reachable-code	0x8004a560	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a560	0x39d60	0x8004a564	mips_hi16_lo16	reachable-code	0x8018fad8	bss	DAT_8018fad4	lui+lbu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a5b0	0x39db0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a5cc	0x39dcc		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a5f0	0x39df0	0x8004a5f4	mips_hi16_lo16	reachable-code	0x80191a9c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a618	0x39e18	0x8004a61c	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a620	0x39e20	0x8004a624	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a628	0x39e28		mips26	reachable-code	0x80033c4c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a640	0x39e40		mips26	reachable-code	0x80046cb0	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a64c	0x39e4c	0x8004a650	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a654	0x39e54	0x8004a658	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a65c	0x39e5c		mips26	reachable-code	0x80033c4c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a664	0x39e64		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a680	0x39e80		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a6a0	0x39ea0	0x8004a6a4	mips_hi16_lo16	reachable-code	0x8009c304	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a6c8	0x39ec8		mips26	reachable-code	0x8003daec	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a6d4	0x39ed4	0x8004a6d8	mips_hi16_lo16	reachable-code	0x80191a9c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a6fc	0x39efc	0x8004a700	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a704	0x39f04	0x8004a708	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a70c	0x39f0c		mips26	reachable-code	0x80033c4c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a724	0x39f24	0x8004a728	mips_hi16_lo16	reachable-code	0x801b25f0	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a73c	0x39f3c	0x8004a740	mips_hi16_lo16	reachable-code	0x801b25f8	bss	DAT_801b24e4	lui+sw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a75c	0x39f5c	0x8004a760	mips_hi16_lo16	reachable-code	0x801b2644	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a774	0x39f74	0x8004a778	mips_hi16_lo16	reachable-code	0x801b2612	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a77c	0x39f7c		mips26	reachable-code	0x8002b760	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a790	0x39f90	0x8004a794	mips_hi16_lo16	reachable-code	0x801b2612	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a798	0x39f98	0x8004a79c	mips_hi16_lo16	reachable-code	0x801b261a	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7a8	0x39fa8	0x8004a7ac	mips_hi16_lo16	reachable-code	0x801b2622	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7b0	0x39fb0	0x8004a7b4	mips_hi16_lo16	reachable-code	0x801b262a	bss	DAT_801b24e4	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7c0	0x39fc0	0x8004a7c4	mips_hi16_lo16	reachable-code	0x801b260a	bss	DAT_801b24e4	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7c8	0x39fc8		mips26	reachable-code	0x8003daec	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7d0	0x39fd0		mips26	reachable-code	0x8004a7ec	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a7f0	0x39ff0		mips26	reachable-code	0x8004b1c8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a814	0x3a014		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a858	0x3a058		mips26	reachable-code	0x80017c78	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a860	0x3a060		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a884	0x3a084		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a8e0	0x3a0e0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a8f0	0x3a0f0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a8f8	0x3a0f8	0x8004a8fc	mips_hi16_lo16	reachable-code	0x8018fae0	bss	DAT_8018fad4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a914	0x3a114		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a920	0x3a120		mips26	reachable-code	0x800463bc	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a928	0x3a128		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a93c	0x3a13c	0x8004a940	mips_hi16_lo16	reachable-code	0x801baa2f	bss	DAT_801ba984	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a94c	0x3a14c		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a970	0x3a170		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a988	0x3a188	0x8004a98c	mips_hi16_lo16	reachable-code	0x801aeae9	bss	DAT_80199154	lui+sb		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a998	0x3a198	0x8004a99c	mips_hi16_lo16	reachable-code	0x801aeaea	bss	DAT_80199154	lui+sb		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a9a0	0x3a1a0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a9a8	0x3a1a8	0x8004a9ac	mips_hi16_lo16	reachable-code	0x801e8260	bss	DAT_801e7edc	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a9d8	0x3a1d8		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a9e8	0x3a1e8	0x8004a9ec	mips_hi16_lo16	reachable-code	0x801e824c	bss	DAT_801e7edc	lui+sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004a9f4	0x3a1f4		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aa24	0x3a224		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aa34	0x3a234	0x8004aa38	mips_hi16_lo16	reachable-code	0x801e824c	bss	DAT_801e7edc	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aa58	0x3a258		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aa7c	0x3a27c		mips26	reachable-code	0x80046884	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aaa4	0x3a2a4	0x8004aaa8	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aae0	0x3a2e0		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aaf8	0x3a2f8	0x8004aafc	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ab38	0x3a338		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ab60	0x3a360		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ab74	0x3a374		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ab94	0x3a394		mips26	reachable-code	0x8004abb8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aba0	0x3a3a0		mips26	reachable-code	0x8004abac	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004abb0	0x3a3b0		mips26	reachable-code	0x8004482c	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004abe4	0x3a3e4		mips26	reachable-code	0x8004ac38	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ac4c	0x3a44c		mips26	reachable-code	0x800445b8	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ac54	0x3a454		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ac88	0x3a488		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aca8	0x3a4a8	0x8004acac	mips_hi16_lo16	reachable-code	0x800124bc	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004acd8	0x3a4d8		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ad1c	0x3a51c	0x8004ad20	mips_hi16_lo16	reachable-code	0x801d4464	bss	DAT_801d4464	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ad50	0x3a550		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ad80	0x3a580		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ada0	0x3a5a0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004add4	0x3a5d4	0x8004add8	mips_hi16_lo16	reachable-code	0x801d4464	bss	DAT_801d4464	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ae2c	0x3a62c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ae48	0x3a648	0x8004ae4c	mips_hi16_lo16	reachable-code	0x80197f4c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004ae70	0x3a670	0x8004ae74	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aea0	0x3a6a0	0x8004aea4	mips_hi16_lo16	reachable-code	0x8009c308	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aea8	0x3a6a8	0x8004aeac	mips_hi16_lo16	reachable-code	0x8009c310	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aeb0	0x3a6b0		mips26	reachable-code	0x8004afb4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aecc	0x3a6cc	0x8004aed0	mips_hi16_lo16	reachable-code	0x80197f4c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aee8	0x3a6e8	0x8004aeec	mips_hi16_lo16	reachable-code	0x8018fad8	bss	DAT_8018fad4	lui+lbu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aefc	0x3a6fc	0x8004af00	mips_hi16_lo16	reachable-code	0x8018fad4	bss	DAT_8018fad4	lui+lh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004af10	0x3a710	0x8004af14	mips_hi16_lo16	reachable-code	0x8018fae4	bss	DAT_8018fad4	lui+lbu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004af24	0x3a724		mips_gprel16	reachable-code	0x8009c322	load		sh		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004af54	0x3a754	0x8004af58	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004af84	0x3a784		mips26	reachable-code	0x8004af90	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004afa4	0x3a7a4	0x8004afa8	mips_hi16_lo16	reachable-code	0x8009c318	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004afac	0x3a7ac	0x8004afb0	mips_hi16_lo16	reachable-code	0x8009c320	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004afbc	0x3a7bc		mips26	reachable-code	0x80046914	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004afcc	0x3a7cc	0x8004afd0	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004aff8	0x3a7f8		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b004	0x3a804	0x8004b008	mips_hi16_lo16	reachable-code	0x8009c328	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b00c	0x3a80c	0x8004b010	mips_hi16_lo16	reachable-code	0x8009c330	load		lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b030	0x3a830	0x8004b034	mips_hi16_lo16	reachable-code	0x80197754	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b03c	0x3a83c		mips26	reachable-code	0x80046914	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b050	0x3a850	0x8004b054	mips_hi16_lo16	reachable-code	0x80191a5c	bss	DAT_8018fb3c	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b0a8	0x3a8a8		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b0bc	0x3a8bc		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b0f0	0x3a8f0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b138	0x3a938		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b14c	0x3a94c		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b160	0x3a960		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b184	0x3a984	0x8004b188	mips_hi16_lo16	reachable-code	0x80185da8	bss	DAT_80185da8	lui+addiu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b1b0	0x3a9b0		mips26	reachable-code	0x8004b1c8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b1cc	0x3a9cc		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b1e8	0x3a9e8		mips26	reachable-code	0x80076cc4	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b1fc	0x3a9fc		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b208	0x3aa08	0x8004b20c	mips_hi16_lo16	reachable-code	0x801c12e8	bss	DAT_801c12e4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b220	0x3aa20		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b240	0x3aa40		mips26	reachable-code	0x8004b4d4	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b260	0x3aa60		mips26	reachable-code	0x80033b10	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b26c	0x3aa6c	0x8004b270	mips_hi16_lo16	reachable-code	0x801e646e	bss	DAT_801d4464	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b2c0	0x3aac0		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b2f8	0x3aaf8		mips26	reachable-code	0x8004b4a8	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b328	0x3ab28		mips26	reachable-code	0x80033b10	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b334	0x3ab34	0x8004b338	mips_hi16_lo16	reachable-code	0x801e646e	bss	DAT_801d4464	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b380	0x3ab80		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b3b4	0x3abb4		mips26	reachable-code	0x80033b10	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b3c0	0x3abc0	0x8004b3c4	mips_hi16_lo16	reachable-code	0x801e646e	bss	DAT_801d4464	lui+lhu		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b3f8	0x3abf8		mips26	reachable-code	0x80056268	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b454	0x3ac54		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b470	0x3ac70		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b488	0x3ac88		mips26	reachable-code	0x80015f18	load		jal		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b4ac	0x3acac		mips26	reachable-code	0x8004b4d0	load		j		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b4b4	0x3acb4	0x8004b4b8	mips_hi16_lo16	reachable-code	0x8018fae0	bss	DAT_8018fad4	lui+lw		manual-decoded	reviewed	game-47010 asm review
+GAME.EXE	0x8004b4e8	0x3ace8	0x8004b4ec	mips_hi16_lo16	reachable-code	0x80198394	bss	DAT_8018fb3c	lui+sw		manual-decoded	reviewed	game-47010 asm review
 GAME.EXE	0x8004b524	0x3ad24	0x8004b528	mips_hi16_lo16	reachable-code	0x8018c298	bss	DAT_80185da8	lui+addiu		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b5b0	0x3adb0		mips26	reachable-code	0x80033b8c	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b5d8	0x3add8	0x8004b5dc	mips_hi16_lo16	reachable-code	0x801e6470	bss	DAT_801d4464	lui+lw		manual-decoded	reviewed	game-f asm review
