@@ -4764,9 +4764,13 @@ void func_800261dc(MenuFont *font, MenuText *text)
     s32 v;
     s32 ch;
 
-    c = text->text;
     func_80027610(3, font->unk0);
-    for (dx = 0; *c != 0xff; dx += 7) {
+    c = text->text;
+    if (*c == 0xff) {
+        return;
+    }
+    dx = 0;
+    do {
         func_80027560();
         DAT_8009c378->clut = font->unk2;
         DAT_8009c378->x0 = text->x + dx - 1;
@@ -4790,7 +4794,8 @@ void func_800261dc(MenuFont *font, MenuText *text)
         DAT_8009c378->u0 = u;
         DAT_8009c378->v0 = v;
         func_800275e0(3);
-    }
+        dx += 7;
+    } while (*c != 0xff);
 }
 
 ADDRESS(0x8002636c, 0x204)
@@ -4799,9 +4804,13 @@ void func_8002636c(MenuFont *font, MenuText *text)
     u8 *c;
     s32 dx;
 
-    c = text->text;
     func_80027610(3, font->unk0);
-    for (dx = 0; *c != 0xff; dx += 7) {
+    c = text->text;
+    if (*c == 0xff) {
+        return;
+    }
+    dx = 0;
+    do {
         func_80027560();
         DAT_8009c378->clut = font->unk2;
         DAT_8009c378->x0 = text->x + dx - 1;
@@ -4832,7 +4841,8 @@ void func_8002636c(MenuFont *font, MenuText *text)
         }
         func_800275e0(3);
         c++;
-    }
+        dx += 7;
+    } while (*c != 0xff);
 }
 
 ADDRESS(0x80026570, 0x224)
