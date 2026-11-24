@@ -148,12 +148,7 @@ OPEN.EXE	0x80040494	0x2fc94	0x4	bss	proven	data_buf	u_long *	asm;src/open/main.c
 OPEN.EXE	0x80040498	0x2fc98	0x1	bss	proven	fade	u_char	asm;src/open/main.c open.main	.sbss COMMON; $gp+164; amount add_sprite darkens each sprite; WIP spelling inside the retail bucket order
 OPEN.EXE	0x80040499	0x2fc99	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x8004049c	0x2fc9c	0x4	bss	proven	prim_next	POLY_FT4 *	asm;src/open/main.c open.main	.sbss COMMON; $gp+168; next free sprite, reset per frame
-OPEN.EXE	0x800404a0	0x2fca0	0x50000	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/open/movie.c open.movie	.bss fixed, first; the two VLC buffers
-OPEN.EXE	0x800904a0	0x7fca0	0x3c00	bss	proven	image_buffer	u_long[2][0x780]	asm;src/open/movie.c open.movie	.bss fixed; DecDCTout slice buffer
-OPEN.EXE	0x800940a0	0x838a0	0x10000	bss	proven	ring_buffer	u_long[0x4000]	asm;src/open/movie.c open.movie	.bss fixed; StSetRing buffer (32 sectors)
-OPEN.EXE	0x800a40a0	0x938a0	0x30	bss	proven	dec	DECENV	asm;src/open/movie.c open.movie	.bss fixed; movie decode environment; LIBGPU statics follow
-OPEN.EXE	0x800a6f00	0x96700	0x8e8	bss	proven	db	DB[2]	asm;src/open/main.c open.main	.bss COMMON; the two display buffers
-OPEN.EXE	0x800a7804	0x97004	0x2000	bss	proven	prim_buffer	u_long[2][0x400]	asm;src/open/main.c open.main	.bss COMMON; primitive area of each display buffer
+OPEN.EXE	0x800404a0	0x2fca0	0x360	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/open/movie.c open.movie	.bss fixed, first; the two VLC buffers; continues past the load image (0x50000 B in all)
 END.EXE	0x80011000	0x800	0x9b8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80012a34	0x2234	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x80012a44	0x2244	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -185,12 +180,7 @@ END.EXE	0x800374a0	0x26ca0	0x4	bss	proven	frame_no	int	asm;src/end/movie.c end.m
 END.EXE	0x800374a4	0x26ca4	0x30	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 END.EXE	0x800374d4	0x26cd4	0x4	bss	proven	cdb	DB *	asm;src/end/main.c end.main	.sbss COMMON; $gp+60; the display buffer being drawn
 END.EXE	0x800374d8	0x26cd8	0x4	bss	proven	prim_next	u_long *	asm;src/end/main.c end.main	.sbss COMMON; $gp+64; next free primitive word, reset per frame
-END.EXE	0x800374dc	0x26cdc	0x50000	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/end/movie.c end.movie	.bss fixed, first; the two VLC buffers
-END.EXE	0x800874dc	0x76cdc	0x3c00	bss	proven	image_buffer	u_long[2][0x780]	asm;src/end/movie.c end.movie	.bss fixed; DecDCTout slice buffer (two 16x240 slices)
-END.EXE	0x8008b0dc	0x7a8dc	0x10000	bss	proven	ring_buffer	u_long[0x4000]	asm;src/end/movie.c end.movie	.bss fixed; StSetRing buffer (32 sectors)
-END.EXE	0x8009b0dc	0x8a8dc	0x30	bss	proven	dec	DECENV	asm;src/end/movie.c end.movie	.bss fixed; movie decode environment; LIBGPU statics follow
-END.EXE	0x8009df0c	0x8d70c	0x8e8	bss	proven	db	DB[2]	asm;src/end/main.c end.main	.bss COMMON; the two display buffers
-END.EXE	0x8009e804	0x8e004	0x2000	bss	proven	prim_buffer	u_long[2][0x400]	asm;src/end/main.c end.main	.bss COMMON; primitive area of each display buffer
+END.EXE	0x800374dc	0x26cdc	0x324	bss	proven	vlc_buffer	u_long[2][0xa000]	asm;src/end/movie.c end.movie	.bss fixed, first; the two VLC buffers; continues past the load image (0x50000 B in all)
 FDAT_002.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
