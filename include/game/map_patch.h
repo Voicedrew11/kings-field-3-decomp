@@ -16,6 +16,15 @@ typedef struct MapPatch {
     s8 dz;
 } MapPatch;
 
+/* Patch lists func_80044d9c applies (.data, owner unit unknown): [def * 2 + side] of
+ * four records each, and five lists of three. */
+extern MapPatch DAT_8008288c[2][4];
+extern MapPatch DAT_800828dc[3];
+extern MapPatch DAT_800828fc[3];
+extern MapPatch DAT_8008291c[3];
+extern MapPatch DAT_8008293c[3];
+extern MapPatch DAT_8008295c[3];
+
 void func_800443c8(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags);
 void func_800445b8(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
                    s32 mask);

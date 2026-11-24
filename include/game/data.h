@@ -195,8 +195,9 @@ typedef struct Data801b24e4 {
 
 typedef struct Data801ba984 {
     s32 unk0;
-    u8 unk4[9];
-    u8 unkd;        /* +0x0d: the game loop sets it to 1 on a continued game */
+    u8 unk4[9];     /* +0x04: script bytes from here (func_8005c1e8 tests unk4[n]); [0] the
+                     * highest area entered (func_80017c78) */
+    u8 unkd;       /* +0x0d: the game loop sets it to 1 on a continued game */
     u8 unke[0x1d];
     u8 unk2b;
     u8 unk2c[5];
@@ -207,8 +208,9 @@ typedef struct Data801ba984 {
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[9];
     u8 unk7f[5];    /* +0x7f: per magic element */
-    u8 unk84[0x26];
-    u8 unkaa;       /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
+    u8 unk84[6];
+    u8 unk8a[0x20]; /* +0x8a: per area, 1 once func_80017c78 loaded it */
+    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
     u8 unkab[0x59];
     u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by func_8005ea64 */
     u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (func_8005ef18) */
@@ -255,7 +257,9 @@ typedef struct MapCell {
 
 typedef struct Data801d4464 {
     MapCell cells[80][80];
-    u8 unkfa00[0x2214];
+    u8 unkfa00[0x600];
+    u8 unk10000[0x1c14]; /* +0x10000: func_80018358 copies an area file's second table
+                          * (0x2000 bytes, through unk11ff4) here */
     Record20 unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
     MapCell *unk12000; /* +0x12000: cell of the last collision test */
@@ -327,7 +331,7 @@ typedef struct Object44Halves {
     u16 unk38;
     u16 unk3a;
     u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
-    s16 unk3e;
+    s16 unk3e;      /* +0x3e: kind 0x1f reads it unsigned: delay in units of 6 VSyncs */
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914) */
     u16 unk42;
 } Object44Halves;
@@ -600,12 +604,13 @@ typedef struct Data8018fad4 {
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
-    u8 unk15;
+    u8 unk15;       /* +0x15: set once the loader shifted the origin (func_80018358) */
     u8 unk16;       /* +0x16: func_8003bb04 limits the parts drawn while loading */
     u8 unk17;       /* +0x17 */
     u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
-    u8 unk1c[0x4c];
+    s16 unk1c;      /* +0x1c: sequence volume while the loader fades it out */
+    u8 unk1e[0x4a];
 } Data8018fad4;
 
 typedef struct Data8018fb3c {

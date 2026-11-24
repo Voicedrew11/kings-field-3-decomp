@@ -78,7 +78,9 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x3354	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4c4	0x6dcc4	0x20	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	DAT_8007e4e4	FdatHandler[32]	asm;game-big relocs (func_80018358)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
+GAME.EXE	0x8007e564	0x6dd64	0x32b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081818	0x71018	0xd	defined	supported	DAT_80081818	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
 GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	DAT_80081828	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
@@ -93,7 +95,17 @@ GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;ga
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
 GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	DAT_80081c8c	Record30[64]	asm;band C/H relocs;FDAT_080 func_801e86c4	light records (render.h); func_80017664 copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
-GAME.EXE	0x8008288c	0x7208c	0x19990	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8008288c	0x7208c	0x50	defined	supported	DAT_8008288c	MapPatch[2][4]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): side 0/1 per Object44Def +0xe byte (func_80044d9c type 84)
+GAME.EXE	0x800828dc	0x720dc	0x1e	defined	supported	DAT_800828dc	MapPatch[3]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): func_80044d9c types 3 and 4
+GAME.EXE	0x800828fa	0x720fa	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x800828fc	0x720fc	0x1e	defined	supported	DAT_800828fc	MapPatch[3]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): func_80044d9c type 3
+GAME.EXE	0x8008291a	0x7211a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8008291c	0x7211c	0x1e	defined	supported	DAT_8008291c	MapPatch[3]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): func_80044d9c type 4
+GAME.EXE	0x8008293a	0x7213a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8008293c	0x7213c	0x1e	defined	supported	DAT_8008293c	MapPatch[3]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): func_80044d9c type 5
+GAME.EXE	0x8008295a	0x7215a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8008295c	0x7215c	0x1e	defined	supported	DAT_8008295c	MapPatch[3]	asm;game-big relocs (func_80044d9c)	.data; map patch list (10-byte records, 0xff ends): func_80044d9c type 5
+GAME.EXE	0x8008297a	0x7217a	0x198a2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	DAT_8009c21c	s32	asm;FDAT_002 func_801e85b8 relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it each swing of object 158 (owner unit unknown)
 GAME.EXE	0x8009c220	0x8ba20	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor

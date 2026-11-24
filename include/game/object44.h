@@ -9,12 +9,28 @@
 #include <sys/types.h>
 #include <game/data.h>
 
+/* One record of an area's Object44 placement table (func_80044d9c reads 350). */
+typedef struct Object44Place {
+    u8 unk0;        /* +0x00: Object44.unk0 (area) */
+    u8 unk1;        /* +0x01: map cell z */
+    u8 unk2;        /* +0x02: map cell x */
+    u8 unk3;
+    u16 unk4;       /* +0x04: Object44Def index, 0xffff for none */
+    u16 unk6;       /* +0x06: yaw, negated */
+    s16 unk8;       /* +0x08: z offset in the cell */
+    s16 unka;       /* +0x0a: x offset in the cell; kind 0xe0: 0xff or a target cell x */
+    s16 unkc;       /* +0x0c: height */
+    u8 unke[2];
+    u8 unk10[8];    /* +0x10: copied to Object44.arg from +0x38; [0] the scale, 0x80 = 1 */
+} Object44Place;
+
 void func_8004482c(Object44 *obj, s32 se);
 void func_8004485c(void);
 void func_800448b8(Object44 *obj);
 void func_80044900(s32 id, s32 mode, ...);
 void func_80044b40(Object44 *obj, s32 mode, u8 value);
 void func_80044c34(s32 mode);
+void func_80044d9c(Object44Place *place);
 s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 /* K&R definition: angle and range are s16 in the callee, int at the call (FDAT callers). */
 s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle, int range);
