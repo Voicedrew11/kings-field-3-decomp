@@ -72,7 +72,7 @@ void func_80017664(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c((u32 *)&DAT_801b77ec, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80018f5c(DAT_80081c8c, p + 1, *p >> 2);
+    func_80018f5c((u32 *)DAT_80081c8c, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c((u32 *)&DAT_801e7edc, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
@@ -144,9 +144,9 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     j = 0x18c;
     while (j--) {
         if (b->unk6 != 0xff) {
-            b->x += dx;
-            b->z += dz;
-            b->y += dy;
+            b->pos.vx += dx;
+            b->pos.vz += dz;
+            b->pos.vy += dy;
         }
         b++;
     }

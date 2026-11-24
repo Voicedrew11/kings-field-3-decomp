@@ -14,6 +14,8 @@
 #include <game/math.h>
 #include <game/memory.h>
 #include <game/cd.h>
+#include <game/collision.h>
+#include <game/data.h>
 
 /* Ordering table depth: draw functions only link primitives whose depth is
  * inside 1..OT_LENGTH-1. */
@@ -56,12 +58,17 @@ typedef struct ModelFile {
 typedef struct ModelPart {
     s32 vertices;   /* offset from the block start, less 12 */
     s32 unk4;
-    u8 unk8[0x14];
+    u8 unk8[8];
+    s32 prims;      /* +0x10: offset of the primitives from the block start, less 12 */
+    s32 prim_count; /* +0x14 */
+    u8 unk18[4];
 } ModelPart;
 
 /* The data block a ModelFile's vertices offset points at. */
 typedef struct ModelData {
-    u8 unk0[12];
+    u32 unk0;
+    u32 unk4;       /* +0x04: func_8003bb04 draws only parts below unk4 / 2 while loading */
+    s32 count;      /* +0x08: parts */
     ModelPart parts[1];
 } ModelData;
 
@@ -112,21 +119,65 @@ typedef struct EffectSpawn {
     s16 dy;
 } EffectSpawn;
 
+/* Counter the effect code keeps ahead of the records (WIP). */
+extern s32 DAT_80182964;
 extern Effect DAT_80182968[128];
+
+/* Heap the frame packet pools and the 2D quad buffer are carved from (WIP extent). */
+extern u8 DAT_80116954[];
+
+/* A 3x3 4.12 matrix without MATRIX's translation (20 bytes, 2-aligned). */
+typedef struct Matrix3x3 {
+    s16 m[3][3];
+    s16 unk12;
+} Matrix3x3;
+
+/* 48-byte light records of the area tables (DAT_80081c8c, WIP names). */
+typedef struct Record30 {
+    Matrix3x3 unk0;     /* func_800171b0 blends it into Record6c.unk0[0] */
+    Matrix3x3 unk14;    /* into Record6c.unk50 */
+    CVECTOR unk28;
+    u16 unk2c;          /* kept 4096 below unk2e */
+    u16 unk2e;
+} Record30;
+
+/* The area's light records (func_80017664 copies them out of the first FDAT.T entry). */
+extern Record30 DAT_80081c8c[64];
+
+/* The working copy of a Record30: unk0[0] and its three quarter turns. */
+typedef struct Record6c {
+    Matrix3x3 unk0[4];
+    Matrix3x3 unk50;
+    CVECTOR unk64;
+    u16 unk68;
+    u16 unk6a;
+} Record6c;
+
+/* A VRAM area copied from unk10 to unk8 every unk1 + 1 frames (func_800351fc). */
+typedef struct ScrollRec {
+    u8 mode;            /* 0xff free; 1 scrolls the source by unk3 rows */
+    u8 unk1;            /* frames between steps */
+    u8 unk2;            /* frames to the next step */
+    u8 unk3;            /* step */
+    s16 unk4;           /* rows scrolled */
+    u8 unk6[2];
+    RECT unk8;          /* destination */
+    RECT unk10;         /* source */
+} ScrollRec;
 
 typedef struct Data80199154 {
     u8 *buffer;                     /* +0x00000: 2D quads per frame; CD load buffer */
-    u8 *heap;                       /* +0x00004: base the packet pool is carved from */
-    PrimPool pool0;                 /* +0x00008 */
-    u8 *image;                      /* +0x00014: screen copy for the wipe effect */
-    u8 unk18[4];
+    PrimPool pools[2];              /* +0x00004: one per frame, carved from the heap
+                                     * (func_80035394); the wipe effect copies the
+                                     * screen to pools[1].end */
     PrimPool *pool;                 /* +0x0001c: the pool draw functions allocate from */
     u32 ot_buffer[2][0x2000];       /* +0x00020: OT_LENGTH entries each */
     u32 *ot;                        /* +0x10020 */
-    u8 unk10024[0x44];
+    u32 ot2_buffer[2][8];           /* +0x10024: drawn ahead of ot (func_80035700) */
+    u32 *ot2;                       /* +0x10064 */
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
-    u8 unk10148[0x10];
+    u8 *unk10148[4];                /* +0x10148: model data by id (func_80035c44) */
     u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
     u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
                                      * resident, area banks from 256 + area * 32
@@ -138,7 +189,8 @@ typedef struct Data80199154 {
     SVECTOR pose[1000];             /* +0x13a44: the blended pose being drawn */
     u16 message_arg[8];             /* +0x15984: number shown with message 25 */
     u8 frame;                       /* +0x15994: index of draw[]/disp[] in use */
-    u8 unk15995[2];
+    u8 unk15995;                    /* +0x15995: view range in map cells */
+    u8 unk15996;
     u8 fade_level;                  /* +0x15997 */
     u8 fade_hold;                   /* +0x15998 */
     u8 message_queue[8];            /* +0x15999: message ids, 0xff when free */
@@ -153,20 +205,48 @@ typedef struct Data80199154 {
     s32 unk159bc;
     s32 ot_count;                   /* +0x159c0: primitives linked this frame */
     s32 prim_count;                 /* +0x159c4: packets allocated this frame */
-    u8 unk159c8[0x140];
-    u16 unk15b08;                   /* +0x15b08 */
-    s16 unk15b0a;                   /* +0x15b0a: viewer yaw */
-    u8 unk15b0c[4];
+    ScrollRec scroll[2];            /* +0x159c8: VRAM scrolls, mode 0xff when free */
+    MATRIX unk159f8;                /* +0x159f8: view rotation */
+    u8 unk15a18[0x20];
+    MATRIX unk15a38[4];             /* +0x15a38: unk159f8 turned by 0..3 quarters */
+    MATRIX unk15ab8;                /* +0x15ab8: rotation about x by the view pitch */
+    u8 unk15ad8[0x20];
+    VECTOR unk15af8;                /* +0x15af8: viewer position */
+    SVECTOR unk15b08;               /* +0x15b08: viewer angles (vy the yaw) */
     s32 unk15b10;                   /* +0x15b10: map cell x of the viewer */
     s32 unk15b14;                   /* +0x15b14: map cell z of the viewer */
     s32 grid_x;                     /* +0x15b18: map cell x of grid column 0, negated */
     s32 grid_z;                     /* +0x15b1c: map cell z of grid row 0, negated */
-    u8 unk15b20[0x10];
+    s32 unk15b20;                   /* +0x15b20: map cell x of grid column 0 */
+    s32 unk15b24;                   /* +0x15b24: map cell z of grid row 0 */
+    s32 unk15b28;                   /* +0x15b28: fog near (func_80035358) */
+    s32 unk15b2c;                   /* +0x15b2c: fog far */
     u8 grid[25][25];                /* +0x15b30: map cells around the viewer */
-    u8 unk15da1[0x1b07];
+    u8 unk15da1[3];
+    s32 unk15da4;                   /* +0x15da4: unk15da8 turns need rebuilding */
+    Record6c unk15da8[64];          /* +0x15da8 */
 } Data80199154;
 
 extern Data80199154 DAT_80199154;
+
+/* Scratchpad words from +0x118 while an area loads. */
+typedef struct ScratchLoad {
+    u8 unk0[4];
+    u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
+    u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
+} ScratchLoad;
+
+/* Scratchpad words from +0x118 while a frame is built (func_80034bf4). */
+typedef struct ScratchView {
+    s32 x;              /* +0x118: map cell x of grid column 0 */
+    s32 z;              /* +0x11c: map cell z of grid row 0 */
+    u8 grid[25][25];    /* +0x120: copied to Data80199154.grid */
+} ScratchView;
+
+typedef union ScratchPhase {
+    ScratchLoad load;
+    ScratchView view;
+} ScratchPhase;
 
 /*
  * The R3000 data cache used as scratchpad RAM at 0x1f800000 (a fixed
@@ -175,13 +255,18 @@ extern Data80199154 DAT_80199154;
 typedef struct ScratchPad {
     u8 unk0[0x10];
     u8 *model;          /* +0x10: data of the model being drawn */
-    u8 unk14[0x10];
+    u32 unk14;          /* +0x14: func_8003bb04 drops flag 4 within 10240 of unk18 */
+    u32 unk18;
+    u8 unk1c[8];
     u8 *unk24;          /* +0x24: model data + 12 */
     u8 unk28[0x24];
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
-    u8 unk50[0xcc];
-    u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
-    u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
+    u8 unk50[0x24];
+    MATRIX unk74;       /* +0x74: map layer transform (func_8003bb04) */
+    u8 unk94[0x6c];
+    SVECTOR unk100;     /* +0x100: map layer position func_8003be34 hands func_8003bb04 */
+    VECTOR unk108;      /* +0x108: origin of the map layer positions */
+    ScratchPhase u;     /* +0x118 */
 } ScratchPad;
 
 #define SCRATCH ((ScratchPad *)0x1f800000)
@@ -292,20 +377,40 @@ void func_80043940(void);
 void func_800439b0(AnimSlot **out);
 void func_80043a08(EffectSpawn *spawn);
 
+void func_80034180(void);
+void func_800341e8(void);
+void func_80034300(void);
+void func_80034394(s32 flags, Record30 *src, Record6c *dst, s32 t);
+void func_800344dc(s32 flags, Record30 *src, s32 t);
+void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t);
+void func_800345f4(void);
+void func_800348f4(void);
+void func_80034bf4(void);
+ScrollRec *func_800350c0(void);
+void func_800350fc(RECT *rect, s32 delay, s32 step, s32 mode);
+void func_800351fc(void);
+void func_80035358(s32 near, s32 far);
+
+void func_80035394(void);
+void func_80035630(void);
+void func_80035700(void);
+void func_800357e8(VECTOR *pos, SVECTOR *angle);
+void func_8003591c(u8 *data);
+void func_80035c44(u16 id, u8 *data);
+void func_80035c84(u16 id, u8 *data);
+
+void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags);
+void func_8003be34(s32 x, s32 z, s32 flags);
+
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
-void func_80034bf4(void);
-void func_800351fc(void);
-void func_800357e8(void);
+void func_80039d50(void);
+void func_8003ab04(void);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
 void func_80040ae4(void);
-s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height);
 void func_800277c0(u16 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
-void func_80035630(void);
-void func_80035700(void);
-void func_8003591c(u8 *data);
 void func_80043b38(u8 *file);
 
 #endif

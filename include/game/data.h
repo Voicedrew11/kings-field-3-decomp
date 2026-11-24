@@ -210,11 +210,32 @@ typedef struct Record20 {
     u8 unk14[0xc];
 } Record20;
 
+/*
+ * One layer of a map cell; func_8003bb04 draws one (field names WIP).
+ */
+typedef struct MapLayer {
+    u8 unk0;        /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
+    u8 unk1;        /* +0x01: floor height / -128 */
+    u8 unk2;        /* +0x02: layer 0: bits 2-7 count the Object88 records on the
+                     * cell (func_80033c4c) */
+    u8 unk3;
+    u8 unk4;
+} MapLayer;
+
+/*
+ * One 2048-unit square of the area map (80 x 80 of them start DAT_801d4464,
+ * indexed [z >> 11][x >> 11]): layer 0 for area 1, layer 1 for area 2.
+ */
+typedef struct MapCell {
+    MapLayer layer[2];
+} MapCell;
+
 typedef struct Data801d4464 {
-    u8 unk0[0x11c14];
+    MapCell cells[80][80];
+    u8 unkfa00[0x2214];
     Record20 unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
-    u8 unk12000[4];
+    MapCell *unk12000; /* +0x12000: cell of the last collision test */
     u8 *unk12004;   /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
     u8 unk12008[2];
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
@@ -222,9 +243,15 @@ typedef struct Data801d4464 {
     s32 unk12010;   /* +0x12010: floor height of the last collision test */
     u8 unk12014[4];
     s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against */
-    u8 unk12024[0x18];
+    u32 unk12024;   /* +0x12024: hit bits of the last func_80033f38 test */
+    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none */
+    s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
+    u8 unk12030[0xc];
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
-    u8 unk1204c[8];
+    u16 unk1204c;   /* +0x1204c: radius of what was hit (func_80033d84) */
+    u16 unk1204e;   /* +0x1204e: height of what was hit */
+    u16 unk12050;
+    u8 unk12052[2];
 } Data801d4464;
 
 typedef struct Data801e7edc {
@@ -244,16 +271,29 @@ typedef struct Data801e7edc {
  * records it also moves are the placed effects (Effect, game/render.h).
  */
 typedef struct Object44 {
-    u8 unk0[4];
+    u8 unk0[3];
+    u8 unk3;        /* +0x03: flags; 0x10 scales its radius by unk38, 0x4 takes Object44Def.unke/unk10 */
     u8 unk4;
     u8 unk5;
-    u16 unk6;       /* +0x06: 0xff when free */
+    u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
     u8 unk8[0xc];
-    s32 x;          /* +0x14 */
-    s32 y;
-    s32 z;
-    u8 unk20[0x24];
+    VECTOR pos;     /* +0x14 */
+    u8 unk24[0x14];
+    u8 unk38;       /* +0x38: radius scale, 0x80 = 1 */
+    u8 unk39[0xb];
 } Object44;
+
+/* The 0x18-byte records Object44.unk6 indexes (WIP). */
+typedef struct Object44Def {
+    u8 unk0[4];
+    u16 unk4;       /* +0x04: radius */
+    u8 unk6[2];
+    u16 unk8;       /* +0x08: height */
+    u8 unka[4];
+    u16 unke;
+    u16 unk10;
+    u8 unk12[6];
+} Object44Def;
 
 typedef struct Object4c {
     u8 unk0;        /* +0x00: 0xff when free */
@@ -418,7 +458,8 @@ typedef struct Data8018fad4 {
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
-    u8 unk15[2];
+    u8 unk15;
+    u8 unk16;       /* +0x16: func_8003bb04 limits the parts drawn while loading */
     u8 unk17;       /* +0x17 */
     u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
@@ -426,7 +467,7 @@ typedef struct Data8018fad4 {
 } Data8018fad4;
 
 typedef struct Data8018fb3c {
-    u8 unk0[0x1f20];
+    Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[0x18];
 } Data8018fb3c;
@@ -458,7 +499,6 @@ extern Data801e7edc DAT_801e7edc;
  */
 extern Record0c DAT_8009f114[100];
 extern Record44 DAT_801d37a4[48];
-extern u32 DAT_80081c8c[];
 extern u32 DAT_800aedc4[];
 extern u32 DAT_80116154[];
 extern u32 DAT_801983a8[];
