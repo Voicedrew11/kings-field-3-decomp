@@ -23,7 +23,9 @@ class ImageLink:
     follow it directly. Archives no member is taken from have no effect.
     `startup` names the startup object and `startup_before` the unit it is
     linked directly before (None: after every unit; FIRST: before every
-    unit). `allocator` links MALLOC.OBJ directly after the startup object.
+    unit). `allocator` links MALLOC.OBJ directly after the startup object,
+    or directly after the unit `allocator_after` names when that unit is
+    built.
     `proven` is True only for a layout that has rebuilt its retail program
     byte-identically.
     """
@@ -32,6 +34,7 @@ class ImageLink:
     startup: str
     startup_before: str | None = None
     allocator: bool = False
+    allocator_after: str | None = None
     proven: bool = False
     evidence: str = ''
 
@@ -61,6 +64,7 @@ IMAGE_LINKS = {
     'END.EXE': ImageLink(('LIBAPI', 'LIBC', 'LIBPRESS', 'LIBGPU', 'LIBGTE', 'LIBCD', 'LIBETC',
                           'LIBSND', 'LIBSPU'),
                          startup='NONE2.OBJ', startup_before='end.movie', allocator=True,
+                         allocator_after='end.movie',
                          evidence='signature census: game | NONE2 | game | MALLOC | API PRESS GPU '
                                   'GTE CD ETC SND SPU'),
 }
@@ -173,7 +177,14 @@ def build_image(name, root, units, compile_one, *, repo, load_address) -> dict:
         position = (0 if layout.startup_before == FIRST else
                     names.index(layout.startup_before) if layout.startup_before in names
                     else len(objects))
+        allocator_unit = (objects[names.index(layout.allocator_after)]
+                          if layout.allocator and layout.allocator_after in names else None)
+        if allocator_unit:
+            startup.remove('MALLOC.OBJ')
         objects[position:position] = startup
+        if allocator_unit:
+            after = objects.index(allocator_unit) + 1
+            objects[after:after] = ['MALLOC.OBJ']
         report['startup']['after_source_units'] = position
         commands = [f'\torg\t${load_address:08x}', *SECTIONS,
                     *(f'\tinclude\t"{obj}"' for obj in objects),
