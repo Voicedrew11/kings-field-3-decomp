@@ -62,6 +62,7 @@ void func_8002c30c(); /* spell id; spills all four argument registers */
 void func_8002cea8(s32 vertex, VECTOR *out);
 s32 func_8002cfe0(s32 hand);
 void func_8002d130(s32 id, s32 pay, s32 dir);
+void func_8002d2a0(void);
 void func_8002deec(s32 id);
 void func_8002e3f8(s32 angle, s32 speed);
 void func_8002ecbc(void);
