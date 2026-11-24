@@ -55,10 +55,4 @@ void func_8005bc50(void);
 
 extern SVECTOR DAT_8009c33c;
 
-/* Callees outside the module; signatures from these call sites. */
-void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
-                   u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target);
-void func_8004ceac(VECTOR *pos, s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
-                   u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, s32 a14, u16 a15, Record18 *rec);
-
 #endif

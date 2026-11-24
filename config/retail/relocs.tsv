@@ -6690,6 +6690,7 @@ GAME.EXE	0x8004f520	0x3ed20	0x8004f524	mips_hi16_lo16	reachable-code	0x801b25f8	
 GAME.EXE	0x8004f544	0x3ed44		mips26	reachable-code	0x80017158	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004f54c	0x3ed4c		mips26	reachable-code	0x8004f55c	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004f554	0x3ed54		mips26	reachable-code	0x8004ede0	load		jal		manual-decoded	reviewed	game-f asm review
+GAME.EXE	0x8004f5a4	0x3eda4	0x8004f5a8	mips_hi16_lo16	reachable-code	0x800126e8	load		lui+addiu		manual-decoded	reviewed	game-ent asm review
 GAME.EXE	0x8004f5cc	0x3edcc		mips26	reachable-code	0x80015654	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004f600	0x3ee00		mips26	reachable-code	0x8004f1d0	load		jal		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004f618	0x3ee18		mips26	reachable-code	0x8004fba8	load		j		manual-decoded	reviewed	game-f asm review

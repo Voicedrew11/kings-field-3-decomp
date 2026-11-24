@@ -63,6 +63,11 @@ void func_8004c184(u8 anim);
 void func_8004c1f0(void);
 void func_8004c52c(u16 kind);
 s32 func_8004c5ec(s32 a, s32 b, s32 c);
+void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
+                   u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target);
+void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
+                   u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
+                   Record18 *rec);
 s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7);
 Object88 *func_8004d3c4(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
                         s32 *dist, s32 jitter);
@@ -91,6 +96,7 @@ VECTOR *func_8004eee0(Object88 *obj, VECTOR *out);
 void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed);
 s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out, s32 pitch,
                   s16 turn, s32 steps);
+void func_8004f414(s32 id, s32 kind, s32 vertex, ...);
 s32 func_8004ffa0(Object88 *obj);
 void func_80050010(Object88 *obj);
 void func_800500a8(void);

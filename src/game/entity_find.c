@@ -14,6 +14,71 @@
 #include <game/render.h>
 #include <game/entity.h>
 
+/*
+ * Hits every active record within reach of pos (mode: 0x8000 sphere, 0x8001
+ * sphere above its base, 0x8002 sphere outside the cone either side of the
+ * yaw kept in pos->pad, otherwise func_80016ec8's own mode) with
+ * func_8004c668, its strength falling off to falloff at the edge.
+ */
+ADDRESS(0x8004ceac, 0x3a8)
+void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
+                   u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
+                   Record18 *rec)
+{
+    Object88 *obj;
+    VECTOR *target;
+    s32 dist;
+    s32 angle;
+    s32 side;
+    u16 scale;
+    s16 i;
+
+    target = pos;
+    if (flags & 0x8000) {
+        target = NULL;
+    }
+    flags &= 0x7fff;
+    obj = DAT_80185da8.objects;
+    for (i = 0; i < 200; i++, obj++) {
+        if (obj->unk9 != 1 || obj == DAT_80185da8.current) {
+            continue;
+        }
+        if (mode == 0x8000) {
+            dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+        } else if (mode == 0x8001) {
+            if (pos->vy < obj->pos.vy - obj->unk1e) {
+                dist = -9999999;
+            } else {
+                dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            }
+        } else if (mode == 0x8002) {
+            dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            angle = (s16)ratan2(obj->pos.vz - pos->vz, obj->pos.vx - pos->vx);
+            side = func_80016a2c(angle, pos->pad + 1024, 0x40);
+            if (side == 1 && func_80016a2c(angle, pos->pad - 1024, 0x40) == side) {
+                dist = -9999999;
+            }
+        } else {
+            dist = func_80016ec8(&obj->pos, pos->vx, pos->vy, pos->vz, reach, obj->unk1e, mode);
+            if (dist == -1) {
+                dist = -9999999;
+            }
+        }
+        if (dist < near) {
+            continue;
+        }
+        if (falloff != 0x1000) {
+            scale = (dist << 12) / reach;
+            scale = (u32)(scale * (0x1000 - falloff)) >> 12;
+            scale = 0x1000 - scale;
+            scale = flags * scale >> 12;
+        } else {
+            scale = flags;
+        }
+        func_8004c668(i, a5, a6, a7, a8, a9, a10, a11, a12, a13, scale, a15, rec, target);
+    }
+}
+
 /* Fires (func_8002ab18) at the player when the player is within reach and the cone. */
 ADDRESS(0x8004d254, 0x170)
 s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
