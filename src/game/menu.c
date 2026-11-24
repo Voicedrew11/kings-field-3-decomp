@@ -705,6 +705,8 @@ void func_8001bea8(void)
                 for (y = y0; y < y1; y++) {
                     if (DAT_801b594c[x][y / 8] & (bit = 1 << (7 - y % 8))) {
                         DAT_801b56cc[DAT_8018fad4.unk9][i / 8] |= 1 << (7 - i % 8);
+                        x = x1;
+                        y = y1;
                     }
                 }
             }
