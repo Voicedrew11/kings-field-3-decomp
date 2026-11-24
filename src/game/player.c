@@ -452,13 +452,19 @@ void func_80029f1c(u32 element)
     if (element != 4 && DAT_801ba984.unk71[element] == 0) {
         return;
     }
+    n = 0;
     threshold = DAT_80081884[element];
     magic = &DAT_801b24e4.unk34[element];
-    n = 0;
+    goto check;
+
+learn:
+    r->unk0 = 1;
+    func_80041eec(3);
+    DAT_801ba984.unk0 = 1;
+    DAT_801ba984.unk7f[element] = 1;
+    goto advance;
+
 next:
-    if (*magic < *threshold) {
-        return;
-    }
     if (*threshold == 0) {
         return;
     }
@@ -469,16 +475,16 @@ next:
         }
         r = &DAT_801b77ec.unk0[*spell];
         if (r->unk0 == 0) {
-            r->unk0 = 1;
-            func_80041eec(3);
-            DAT_801ba984.unk0 = 1;
-            DAT_801ba984.unk7f[element] = 1;
-            break;
+            goto learn;
         }
     }
+advance:
     threshold++;
     n++;
-    goto next;
+check:
+    if (*magic >= *threshold) {
+        goto next;
+    }
 }
 
 ADDRESS(0x8002a074, 0x98)
