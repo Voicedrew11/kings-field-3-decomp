@@ -24,6 +24,7 @@ Data801d4464	0x12054	supported	asm;game loop word-count clear;func_800293e4/func
 Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
 Effect	0x18	supported	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	WIP field names; untouched ranges opaque
 EffectSpawn	0x10	supported	asm;func_80043a08 16-byte stride	WIP field names; untouched ranges opaque
+FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 MapCell	0xa	supported	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (func_80033b8c, func_80033c4c, func_8003be34)	WIP (game-h)
 MapLayer	0x5	supported	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);func_80033b8c/func_80033c4c/func_800345f4 field accesses	WIP (game-h)
@@ -33,6 +34,7 @@ ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header 
 ModelPart	0x1c	supported	asm;func_8004352c/func_800437c8 28-byte stride	WIP field names; untouched ranges opaque
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object44Def	0x18	supported	asm;func_80033d84 &DAT_8018fb3c + Object44.unk6 * 24 field reads	WIP (game-h)
+Object44Link	0x2	supported	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules)	WIP (fdat)
 Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
 Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (func_8004b624, func_80053084);func_8002c164	WIP (game-f)
 Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records;band F src/game/entity*.c field accesses;func_8002c164 reads +0x2 and +0x28 of func_8004d3c4's result	WIP (game-c)
