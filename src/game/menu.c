@@ -4600,7 +4600,7 @@ void func_80025be8(u8 item)
         }
         if (DAT_8009c240 != 0) {
             CdControl(CdlPause, 0, 0);
-            if (func_80019b68(DAT_8009c37c, DAT_8009c240) != 0) {
+            if (func_80019b68(DAT_8009c37c, DAT_8009c240) == 0) {
                 DAT_8009c244 = -1;
             }
             DAT_8009c240 = 0;
@@ -4613,8 +4613,8 @@ void func_80025be8(u8 item)
             m.t[0] = DAT_8009c394.vx;
             m.t[1] = DAT_8009c394.vy;
             m.t[2] = DAT_8009c394.vz;
-            DAT_8009c39c.vx &= 0xfff;
             DAT_8009c39c.vy += DAT_8009c3a4;
+            DAT_8009c39c.vx &= 0xfff;
             DAT_8009c39c.vy &= 0xfff;
             DAT_8009c39c.vz &= 0xfff;
             RotMatrix(&DAT_8009c39c, &m);
