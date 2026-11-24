@@ -4764,9 +4764,13 @@ void func_800261dc(MenuFont *font, MenuText *text)
     s32 v;
     s32 ch;
 
-    c = text->text;
     func_80027610(3, font->unk0);
-    for (dx = 0; *c != 0xff; dx += 7) {
+    c = text->text;
+    if (*c == 0xff) {
+        return;
+    }
+    dx = 0;
+    do {
         func_80027560();
         DAT_8009c378->clut = font->unk2;
         DAT_8009c378->x0 = text->x + dx - 1;
@@ -4790,7 +4794,8 @@ void func_800261dc(MenuFont *font, MenuText *text)
         DAT_8009c378->u0 = u;
         DAT_8009c378->v0 = v;
         func_800275e0(3);
-    }
+        dx += 7;
+    } while (*c != 0xff);
 }
 
 ADDRESS(0x8002636c, 0x204)
@@ -4799,9 +4804,13 @@ void func_8002636c(MenuFont *font, MenuText *text)
     u8 *c;
     s32 dx;
 
-    c = text->text;
     func_80027610(3, font->unk0);
-    for (dx = 0; *c != 0xff; dx += 7) {
+    c = text->text;
+    if (*c == 0xff) {
+        return;
+    }
+    dx = 0;
+    do {
         func_80027560();
         DAT_8009c378->clut = font->unk2;
         DAT_8009c378->x0 = text->x + dx - 1;
@@ -4832,7 +4841,8 @@ void func_8002636c(MenuFont *font, MenuText *text)
         }
         func_800275e0(3);
         c++;
-    }
+        dx += 7;
+    } while (*c != 0xff);
 }
 
 ADDRESS(0x80026570, 0x224)
@@ -5284,21 +5294,29 @@ ADDRESS(0x800277c0, 0x16c)
 void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out)
 {
     s32 i;
-    s32 fill;
+    u8 fill;
+    u8 *cursor;
+    s16 frame_reserve[4]; /* unreferenced; reproduces retail's 8-byte frame slot */
 
-    i = 0;
     if (arg3 == 1 || arg3 == 2) {
-        digits += 1;
+        digits++;
     } else if (arg3 == 3 || arg3 == 5) {
         digits += 2;
     } else if (arg3 == 4) {
         digits += 3;
     }
+
+    i = 0;
     fill = arg2 == 0 ? 10 : 0;
-    for (i = 0; i < digits; i++) {
-        out[i] = fill;
+    if (digits > 0) {
+        cursor = out;
+        do {
+            *cursor++ = fill;
+            i++;
+        } while (i < digits);
     }
     out[digits] = 0xff;
+
     if (arg3 == 1) {
         out[0] = 0x13;
     } else if (arg3 == 2) {
@@ -5315,7 +5333,8 @@ void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out)
         out[0] = 0xe;
         out[1] = 0x11;
     }
-    for (i = digits - 1; i >= 0; i--) {
+
+    for (i = digits - 1; i > -1; i--) {
         out[i] = value % 10;
         value /= 10;
         if (value == 0) {

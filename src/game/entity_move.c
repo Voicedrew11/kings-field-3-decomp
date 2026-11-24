@@ -73,16 +73,11 @@ void func_8004e31c(void)
 ADDRESS(0x8004e330, 0x3c8)
 void func_8004e330(void)
 {
-    Object88 *obj;
-    Object78 *def;
-    u16 *wet;
-    s32 y;
-    s32 hit;
+    Object88 *obj = DAT_80185da8.current;
+    Object78 *def = DAT_80185da8.def;
+    u16 *wet = &DAT_801d4464.unk1200a;
 
-    obj = DAT_80185da8.current;
-    def = DAT_80185da8.def;
     func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
-    wet = &DAT_801d4464.unk1200a;
     obj->unk3 = *wet == 0 ? 1 : 2;
     if (obj->unk28 & 0x400) {
         DAT_801d4464.unk12010 = DAT_801d4464.unk1200c;
@@ -99,47 +94,52 @@ void func_8004e330(void)
             obj->unkd = 0x10;
             obj->vel.vy = 0;
         }
-        break;
+        return;
     }
-    case 0x10:
-        y = obj->vel.vy + obj->pos.vy;
+    case 0x10: {
+        s32 y;
+        s32 hit;
+
+        y = obj->pos.vy + obj->vel.vy;
         hit = func_80033f38(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
         if (hit == 0) {
         fall:
             obj->pos.vy = y;
             obj->vel.vy += def->unk5;
-            break;
+            return;
         }
         if (hit == 0x80 && obj->vel.vy > 40) {
             func_8002ab18(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
         if (hit & 4) {
             if (obj->unk28 & 0x400) {
-                if (obj->pos.vy < DAT_801d4464.unk1200c) {
+                s32 floor = DAT_801d4464.unk1200c;
+
+                if (obj->pos.vy < floor) {
                     goto fall;
                 }
-                obj->pos.vy = DAT_801d4464.unk1200c;
+                obj->pos.vy = floor;
             } else {
                 obj->pos.vy = DAT_801d4464.unk12010;
             }
             obj->vel.vy = 0;
-            obj->unkd = 0;
-            break;
+            goto idle;
         }
         if (obj->unk28 & 0x400) {
             goto fall;
         }
-        obj->unkd = 0;
-        break;
+        goto idle;
+    }
     case 0x20:
         obj->pos.vy += obj->vel.vy;
         obj->vel.vy += 5;
         if (DAT_801d4464.unk12010 < obj->pos.vy && obj->vel.vy < 0) {
-            break;
+            return;
         }
         obj->pos.vy = DAT_801d4464.unk12010;
+    idle:
         obj->unkd = 0;
-        break;
+        return;
     case 0x30: {
         s32 jump_y;
         s32 jump_hit;
@@ -151,14 +151,14 @@ void func_8004e330(void)
             obj->pos.vy = jump_y;
             obj->vel.vy++;
             obj->unk3 = *wet == 0 ? 1 : 2;
-            break;
+            return;
         }
         if (jump_hit == 0x80) {
             func_8002ab18(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
         obj->unkd = 0x10;
         obj->vel.vy = 0;
-        break;
+        return;
     }
     case 0x60:
         break;

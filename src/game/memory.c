@@ -88,31 +88,31 @@ void func_80019088(HeapBlock *block)
     }
 }
 
-/*
- * Not exact: retail loads a second register with HEAP_CACHED for the run
- * scan; GCC here reuses the outer test's register.
- */
 ADDRESS(0x800190a8, 0x150)
 HeapBlock *func_800190a8(HeapBlock *arena, u32 size)
 {
-    HeapBlock *block;
+    HeapBlock *block = arena;
     HeapBlock *start;
 
-    for (block = arena; block->state != HEAP_END; block = HEAP_NEXT(block)) {
+    while (block->state != HEAP_END) {
         if (block->state == HEAP_FREE && block->size >= size) {
             return block;
         }
+        block = HEAP_NEXT(block);
     }
+
     block = arena;
     while (block->state != HEAP_END) {
+        start = block;
         if (block->state == HEAP_CACHED) {
-            start = block;
-            do {
+            while (block->state == HEAP_CACHED) {
                 block = HEAP_NEXT(block);
-            } while (block->state == HEAP_CACHED);
-            if ((u8 *)block - (u8 *)start - sizeof(HeapBlock) >= size) {
-                for (block = start; block->state == HEAP_CACHED; block = HEAP_NEXT(block)) {
+            }
+            if ((u32)((u8 *)block - (u8 *)start - sizeof(HeapBlock)) >= size) {
+                block = start;
+                while (block->state == HEAP_CACHED) {
                     func_80019088(block);
+                    block = HEAP_NEXT(block);
                 }
                 func_80019004(start);
                 return start;

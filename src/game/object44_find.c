@@ -212,20 +212,17 @@ ADDRESS(0x800460bc, 0x1d8)
 void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
 {
     Object44 *obj;
-    u16 *stamp;
-    s32 first;
     Object44Def *def;
 
     if (which == 0) {
-        stamp = &DAT_8018fb3c.unk8862;
-        first = 370;
+        obj = func_80046034(370, 10, DAT_8018fb3c.unk8862);
+        obj->arg.h.unk3c = DAT_8018fb3c.unk8862++;
+        obj->unk6 = def_id;
     } else {
-        first = 360;
-        stamp = &DAT_8018fb3c.unk8860;
+        obj = func_80046034(360, 10, DAT_8018fb3c.unk8860);
+        obj->arg.h.unk3c = DAT_8018fb3c.unk8860++;
+        obj->unk6 = def_id;
     }
-    obj = func_80046034(first, 10, *stamp);
-    obj->arg.h.unk3c = (*stamp)++;
-    obj->unk6 = def_id;
     func_800448b8(obj);
     def = &DAT_8018fb3c.defs[obj->unk6];
     if (def->unk3 & 0x10) {
@@ -562,20 +559,19 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
     return 0;
 }
 
-/* Runs frames while the screen tint (mode) steps its level from level to end. */
+/* Runs frames while the screen tint (mode) steps its level from phase to last. */
 ADDRESS(0x80046c00, 0xb0)
-void func_80046c00(mode, level, end, step)
-    u8 mode;
-    s32 level;
-    s32 end;
-    s32 step;
+void func_80046c00(int mode, s32 phase, s32 last, s32 step)
 {
     VECTOR pos;
     SVECTOR angle;
-    s32 v;
+    s32 end = last;
+    s32 increment = step;
+    s32 level = phase;
 
     for (;;) {
-        v = level * level >> 16;
+        s32 v = level * level >> 16;
+
         if (v >= 256) {
             v = 0xff;
         }
@@ -587,7 +583,7 @@ void func_80046c00(mode, level, end, step)
         if (level == end) {
             break;
         }
-        level += step;
+        level += increment;
     }
 }
 

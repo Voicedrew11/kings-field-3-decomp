@@ -419,24 +419,21 @@ void func_80016c90(s32 dx, s32 dy, s32 dz, SVECTOR *out)
     out->vz = 0;
 }
 
-/*
- * Not exact: retail joins both arms' slt result and branches once to return
- * 0 or 1; every spelling tried folds the join into xori or splits it per arm.
- */
 ADDRESS(0x80016d0c, 0x30)
 s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
 {
-    if (c < a ? c < a - b : a < c - d) {
-        return 0;
+    if (c < a) {
+        if (c < a - b) {
+            return 0;
+        }
+    } else {
+        if (a < c - d) {
+            return 0;
+        }
     }
     return 1;
 }
 
-/*
- * Not exact: GCC cross-jumps the two height-test failures into one test,
- * where retail keeps the below-y failure as its own return block (see
- * func_80016ec8); the first two squares also land in other registers.
- */
 ADDRESS(0x80016d3c, 0x18c)
 s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_width,
                   s32 half_depth, s32 reach_down, s32 reach_up)
@@ -445,10 +442,10 @@ s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_
     s32 dz = (pos->vz - z) >> 3;
     s32 distance = SquareRoot0(dx * dx + dz * dz) << 3;
     u16 angle = func_80016ab8(x - pos->vx, z - pos->vz);
-    s32 side = rcos(angle - rotation->vy + 1024) * distance >> 12;
-    s32 ahead = rsin(angle - rotation->vy + 1024) * distance >> 12;
 
-    if (side < -half_width || half_width < side || ahead < -half_depth || half_depth < ahead) {
+    dx = rcos(angle - rotation->vy + 1024) * distance >> 12;
+    dz = rsin(angle - rotation->vy + 1024) * distance >> 12;
+    if (dx < -half_width || half_width < dx || dz < -half_depth || half_depth < dz) {
         return -1;
     }
     if (y == 0xffff) {
@@ -459,24 +456,21 @@ s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_
             return -1;
         }
     } else if (y < pos->vy - reach_down) {
-        return -1;
+        goto reject;
     }
     return distance;
+reject:
+    return -1;
 }
 
-/*
- * Not exact: GCC cross-jumps the two height-test failures into one shared
- * test; retail keeps them apart. Ending with `return -1` instead keeps them
- * apart as retail does but then changes the radius test, so the retail
- * shape of the whole tail is not yet found.
- */
 ADDRESS(0x80016ec8, 0xec)
 s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, s32 reach_up)
 {
-    s32 dx = pos->vx - x;
+    s32 dx;
     s32 dz;
     s32 distance;
 
+    dx = pos->vx - x;
     if (dx < -radius || radius < dx) {
         return -1;
     }
@@ -490,16 +484,18 @@ s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, 
                 return -1;
             }
         } else if (y < pos->vy - reach_down) {
-            return -1;
+            goto reject;
         }
     }
     dx >>= 3;
     dz >>= 3;
     distance = SquareRoot0(dx * dx + dz * dz) << 3;
     if (radius < distance) {
-        return -1;
+        goto reject;
     }
     return distance;
+reject:
+    return -1;
 }
 
 ADDRESS(0x80016fb4, 0x10c)
@@ -587,11 +583,6 @@ void func_800171b0(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
     }
 }
 
-/*
- * Not exact: control flow, calls and constants agree; distance and height
- * trade callee-saved registers ($s2/$s3) and the root/b temporaries trade
- * $a0/$v0/$v1 (unattributed allocation residue).
- */
 ADDRESS(0x80017210, 0x28c)
 s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s32 *time,
                   s32 *angle)
@@ -599,40 +590,42 @@ s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s3
     s32 speed2 = speed * speed;
     s32 gravity2 = gravity * gravity;
     s32 v = speed2 >> 6;
-    s32 discriminant = v * v - (gravity2 * distance >> 10) * (distance >> 2)
-                     - (gravity * v >> 3) * (height >> 2);
-    s32 root;
+    s32 discriminant = v * v - ((gravity2 * distance >> 10) * (distance >> 2))
+                     - ((gravity * v >> 3) * (height >> 2));
     s32 b;
     s32 t1;
     s32 t2;
     s32 t;
     s32 sqrt_t;
+    s32 across;
+    s32 up;
 
     if (discriminant < 0) {
         return -1;
     }
-    root = SquareRoot0(discriminant << 4) << 2;
+    discriminant = SquareRoot0(discriminant << 4) << 2;
     b = (speed2 >> 2) - (height * gravity >> 2);
-    t1 = ((b + root) << 1) / gravity2;
-    t2 = ((b - root) << 1) / gravity2;
+    t1 = ((b + discriminant) << 1) / gravity2;
+    t2 = ((b - discriminant) << 1) / gravity2;
     if (t1 <= 0 && t2 <= 0) {
         return -1;
     }
     if (high == 0) {
         t = t2;
-        if (t1 > 0 && t2 >= t1) {
+        if (t1 > 0 && t1 <= t2) {
             t = t1;
         }
     } else {
         t = t2;
-        if (t1 >= t2) {
+        if (t2 <= t1) {
             t = t1;
         }
     }
     sqrt_t = SquareRoot0(t << 14);
+    across = ((distance << 14) / speed) / sqrt_t;
+    up = (((height + ((gravity * t) << 1)) << 12) / (speed >> 1)) / (sqrt_t >> 1);
     *time = sqrt_t;
-    *angle = func_80016ab8(((height + (gravity * t << 1)) << 12) / (speed >> 1) / (sqrt_t >> 1),
-                           (distance << 14) / speed / sqrt_t);
+    *angle = func_80016ab8(up, across);
     return 0;
 }
 

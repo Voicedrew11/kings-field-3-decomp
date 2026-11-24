@@ -781,7 +781,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     u8 *file;
     u8 *model;
     s32 n;
-    s32 mode;
+    u8 mode;
 
     mat = &m;
     scratch = SCRATCH;
@@ -792,8 +792,8 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
     SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
     SCRATCH->next = DAT_80199154.pool->next;
-    SCRATCH->end = DAT_80199154.pool->end;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
+    SCRATCH->end = DAT_80199154.pool->end;
     mode = flags;
     if (SCRATCH->end - 30720 < SCRATCH->next) {
         mode &= 0xbf;
@@ -882,8 +882,8 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     file = DAT_80199154.models[id];
     model = file + ((ModelFile *)file)->vertices;
     scratch->model = model;
-    n = 0;
     if (anim < 128) {
+        n = 0;
         part = ((ModelData *)model)->parts;
         if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) != 0) {
             goto draw;
@@ -903,9 +903,9 @@ draw:
             goto done;
         }
         {
-            u8 *vertex = scratch->vertices;
-            ScreenVertex *screen = scratch->screen;
             s32 i = part->unk4;
+            ScreenVertex *screen = scratch->screen;
+            u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
@@ -913,8 +913,8 @@ draw:
                 gte_stlvnl(&scratch->w.model.unk54);
                 screen->sxy.vx = scratch->w.model.unk54.vx;
                 screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->z = depth;
                 screen->fog = scratch->w.model.unk54.vz;
+                screen->z = depth;
                 screen++;
                 vertex += 8;
             }
@@ -922,9 +922,9 @@ draw:
         func_80035ca4(n, depth);
     } else if (mode & 4) {
         if (view != NULL) {
-            u8 *vertex = scratch->vertices;
-            ScreenVertex *screen = scratch->screen;
             s32 i = part->unk4;
+            ScreenVertex *screen = scratch->screen;
+            u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
@@ -947,9 +947,9 @@ draw:
                 vertex += 8;
             }
         } else {
-            u8 *vertex = scratch->vertices;
-            ScreenVertex *screen = scratch->screen;
             s32 i = part->unk4;
+            ScreenVertex *screen = scratch->screen;
+            u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
@@ -957,8 +957,8 @@ draw:
                 gte_stlvnl(&scratch->w.model.unk54);
                 screen->sxy.vx = scratch->w.model.unk54.vx;
                 screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->z = depth;
                 screen->fog = scratch->w.model.unk54.vz;
+                screen->z = depth;
                 screen++;
                 vertex += 8;
             }
@@ -966,9 +966,9 @@ draw:
         func_80037bec(n, depth, mode & 3);
     } else {
         if (view != NULL) {
-            u8 *vertex = scratch->vertices;
-            ScreenVertex *screen = scratch->screen;
             s32 i = part->unk4;
+            ScreenVertex *screen = scratch->screen;
+            u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
@@ -991,9 +991,9 @@ draw:
                 vertex += 8;
             }
         } else {
-            u8 *vertex = scratch->vertices;
-            ScreenVertex *screen = scratch->screen;
             s32 i = part->unk4;
+            ScreenVertex *screen = scratch->screen;
+            u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
@@ -1001,8 +1001,8 @@ draw:
                 gte_stlvnl(&scratch->w.model.unk54);
                 screen->sxy.vx = scratch->w.model.unk54.vx;
                 screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->z = depth;
                 screen->fog = scratch->w.model.unk54.vz;
+                screen->z = depth;
                 screen++;
                 vertex += 8;
             }
@@ -1076,9 +1076,10 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
         shift = 0;
         delta.vx >>= 4;
         delta.vy >>= 4;
-        rel.vz = delta.vz >>= 4;
+        delta.vz >>= 4;
         rel.vx = delta.vx;
         rel.vy = delta.vy;
+        rel.vz = delta.vz;
         gte_ldv0(&rel);
         gte_rt();
         gte_stlvnl(m.t);
@@ -1159,8 +1160,8 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     file = DAT_80199154.models[id];
     model = file + ((ModelFile *)file)->vertices;
     scratch->model = model;
-    n = 0;
     if (anim < 128) {
+        n = 0;
         part = ((ModelData *)model)->parts;
         if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) != 0) {
             goto draw;
@@ -1176,9 +1177,9 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
 draw:
     dist = SquareRoot0(mat->t[0] * mat->t[0] + mat->t[1] * mat->t[1] + mat->t[2] * mat->t[2]);
     if (view != NULL) {
-        u8 *vertex = scratch->vertices;
-        ScreenVertex *screen = scratch->screen;
         s32 i = part->unk4;
+        ScreenVertex *screen = scratch->screen;
+        u8 *vertex = scratch->vertices;
 
         while (--i != -1) {
             gte_ldv0(vertex);
@@ -1190,9 +1191,9 @@ draw:
             vertex += 8;
         }
     } else {
-        u8 *vertex = scratch->vertices;
-        ScreenVertex *screen = scratch->screen;
         s32 i = part->unk4;
+        ScreenVertex *screen = scratch->screen;
+        u8 *vertex = scratch->vertices;
 
         while (--i != -1) {
             gte_ldv0(vertex);
@@ -1200,8 +1201,8 @@ draw:
             gte_stlvnl(&scratch->w.model.unk54);
             screen->sxy.vx = scratch->w.model.unk54.vx;
             screen->sxy.vy = scratch->w.model.unk54.vy;
-            screen->z = depth;
             screen->fog = scratch->w.model.unk54.vz;
+            screen->z = depth;
             screen++;
             vertex += 8;
         }
@@ -1401,19 +1402,16 @@ u8 func_80040708(VECTOR *pos, s32 radius)
 ADDRESS(0x800407cc, 0x64)
 s32 func_800407cc(VECTOR *pos, s32 range_x, s32 range_z)
 {
-    s32 inside;
+    s32 z = pos->vz >> 11;
     s32 x;
-    s32 z;
 
-    inside = 0;
-    z = pos->vz >> 11;
-    if (z - range_z <= DAT_80199154.unk15b14 && z + range_z >= DAT_80199154.unk15b14) {
+    if (z - range_z <= DAT_80199154.unk15b14 && DAT_80199154.unk15b14 <= z + range_z) {
         x = pos->vx >> 11;
-        if (x - range_x <= DAT_80199154.unk15b10) {
-            inside = x + range_x >= DAT_80199154.unk15b10;
+        if (x - range_x <= DAT_80199154.unk15b10 && DAT_80199154.unk15b10 <= x + range_x) {
+            return 1;
         }
     }
-    return inside;
+    return 0;
 }
 
 ADDRESS(0x80040830, 0xa0)

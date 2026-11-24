@@ -288,15 +288,14 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
 ADDRESS(0x8004ffa0, 0x70)
 s32 func_8004ffa0(Object88 *obj)
 {
-    s32 note;
+    s32 note = 16 - (s8)(obj->scale.vy >> 8);
 
-    note = 16 - (s8)(obj->scale.vy >> 8);
     if (note > 12) {
         note = 12;
     } else if (note < -12) {
         note = -12;
     }
-    return note - 2 + ((rand() * 5) >> 15);
+    return note + (((rand() * 5) >> 15) - 2);
 }
 
 /* Plays the sound effect of obj's running script record at obj. */
