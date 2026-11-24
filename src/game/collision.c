@@ -43,12 +43,7 @@ s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height)
     return DAT_801d4464.unk12010;
 }
 
-/*
- * Adds count to the occupant count of every map cell a circle at (x, z) touches.
- * Not exact: control flow, calls and constants agree; the row index and the
- * column counter trade $t0/$t1 and retail shifts z - radius in place
- * (unattributed allocation residue).
- */
+/* Adds count to the occupant count of every map cell a circle at (x, z) touches. */
 ADDRESS(0x80033c4c, 0xbc)
 void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
 {
@@ -58,6 +53,7 @@ void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
     s32 nz;
     s32 i;
     u32 cx;
+    s32 cz;
     MapCell *row;
     MapCell *cell;
 
@@ -67,10 +63,11 @@ void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
     z0 = (z - radius) >> 11;
     nz = ((z + radius) >> 11) - z0;
     row = &DAT_801d4464.cells[z0][x0];
+    cz = z0;
     do {
         cell = row;
         row += 80;
-        if ((u32)z0 < 80) {
+        if ((u32)cz < 80) {
             cx = x0;
             i = nx;
             do {
@@ -81,7 +78,7 @@ void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
                 cell++;
             } while (--i != -1);
         }
-        z0++;
+        cz++;
     } while (--nz != -1);
 }
 
