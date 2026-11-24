@@ -296,6 +296,13 @@ image = "GAME.EXE"
 source = "src/game/arena_ptr.c"
 profile = "gcc260-o2-g8"
 
+# The save serialisers reach the menu's .sdata cursors through lui/low pairs.
+[[unit]]
+unit = "game.save_data"
+image = "GAME.EXE"
+source = "src/game/save_data.c"
+profile = "gcc260-o2-g0"
+
 [[unit]]
 unit = "game.slot_table"
 image = "GAME.EXE"

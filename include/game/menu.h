@@ -215,6 +215,9 @@ extern PrimPool DAT_8009c410;
 
 /* menu .sdata */
 extern u8 DAT_8009c22c;
+extern u8 DAT_8009c22d;
+extern u8 DAT_8009c22e;
+extern u8 DAT_8009c22f;
 extern s32 DAT_8009c230;
 extern s32 DAT_8009c234;
 extern s32 DAT_8009c24c;

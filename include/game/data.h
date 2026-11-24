@@ -729,12 +729,15 @@ typedef struct Record06 {
 /*
  * Slot tables (WIP extent, up to DAT_80199148): the copied records, the
  * records func_80060800 builds from them and their runs of slot bytes
- * (bits 0-1 set: in use; 0xff: free or the end of a run).
+ * (bits 0-1 set: in use; 0xff: free or the end of a run). The save code
+ * copies the 0x3c0 run bytes with word-aligned block moves, so the object
+ * is word-aligned; the rest of the extent is unread (WIP words).
  */
 typedef struct Data801983a8 {
     Record04 unk0[48];
     Record06 unkc0[48];  /* +0xc0 */
-    u8 unk1e0[0xbc0];    /* +0x1e0 */
+    u8 unk1e0[0x3c0];    /* +0x1e0: the runs (SaveData.unk5148) */
+    u32 unk5a0[0x200];   /* +0x5a0 */
 } Data801983a8;
 extern Data801983a8 DAT_801983a8;
 extern Data801ba984 DAT_801ba984;
