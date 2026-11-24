@@ -17,6 +17,8 @@
 #include <game/sound.h>
 #include <game/data.h>
 #include <game/funcs.h>
+#include <game/card.h>
+#include <game/player.h>
 
 /*
  * PSX.EXE's next-program byte (0 OPEN, 1 GAME, 2 END) and the mailbox byte
@@ -67,14 +69,14 @@ void func_80014bd4(void)
     s32 continued = 0;
     s32 exit;
 
-    func_80018fbc(DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
-    func_80018fbc(DAT_80199154, 0, sizeof(DAT_80199154) / 4);
+    func_80018fbc((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
+    func_80018fbc((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
     func_80018fbc((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
     func_80018fbc((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
     func_80018fbc((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);
     func_80018fbc(DAT_8018fb3c, 0, sizeof(DAT_8018fb3c) / 4);
-    func_80018fbc(DAT_80185da8, 0, sizeof(DAT_80185da8) / 4);
-    func_80018fbc(DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
+    func_80018fbc((u32 *)&DAT_80185da8, 0, sizeof(DAT_80185da8) / 4);
+    func_80018fbc((u32 *)&DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
     func_80018fbc((u32 *)&DAT_801b09fc, 0, sizeof(DAT_801b09fc) / 4);
     func_80018fbc((u32 *)&DAT_801e7edc, 0, sizeof(DAT_801e7edc) / 4);
     func_80018fbc(DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);

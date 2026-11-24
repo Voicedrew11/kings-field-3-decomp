@@ -8,7 +8,24 @@ PSX.EXE	0x80010260	0x4	program_index	global	load	int	main	supported	asm;src/psx/
 PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800102f0
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 GAME.EXE	0x800136e8	0x18	DAT_800136e8	global	load	u32[6]	main	address-only	asm;band A relocs	FDAT window words (0x801e8308, 0x801e8308, 0x801e8308, 0x801e838c, 0x801e92f8, 0x801e92f8 in the image); main reads [2] and [4] and stores the heap base at [5]; WIP extent, owner unit unknown
+GAME.EXE	0x80081818	0xd	DAT_80081818	static	load	char[13]	func_800281c4	address-only	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix (OPEN.EXE's card checks have the same string)
+GAME.EXE	0x80081828	0x3f	DAT_80081828	static	load	char[63]	func_80028750	address-only	asm;src/game/card.c game.card	.data; Shift-JIS save title func_80028b70 writes the save number, experience and level digits into
+GAME.EXE	0x80081868	0x1c	DAT_80081868	global	load	u16[14]	func_8002b6f0	address-only	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits, func_8002b6f0 keeps [4] [6] [7] [12] held
+GAME.EXE	0x80081884	0x3c	DAT_80081884	global	load	s16[5][6]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the levels that teach the next spell, 0 ended
+GAME.EXE	0x800818c0	0x23	DAT_800818c0	global	load	u8[5][7]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the Record18 indices of its spells, 0xff ended
+GAME.EXE	0x8009c2c0	0x1	DAT_8009c2c0	global	load	u8	func_8002860c	address-only	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
+GAME.EXE	0x8009c3a8	0x4	DAT_8009c3a8	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x194; card I/O end event
+GAME.EXE	0x8009c3ac	0x4	DAT_8009c3ac	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x198; card timeout event
+GAME.EXE	0x8009c3b0	0x4	DAT_8009c3b0	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x19c; new card event
+GAME.EXE	0x8009c3b4	0x4	DAT_8009c3b4	static	bss	long	func_80027f2c	address-only	asm;src/game/card.c game.card	.sbss $gp+0x1a0; card error event
+GAME.EXE	0x8009c3b8	0x4	DAT_8009c3b8	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1a4; Sony card sample hardware-event handle, never referenced
+GAME.EXE	0x8009c3bc	0x4	DAT_8009c3bc	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1a8; never referenced
+GAME.EXE	0x8009c3c0	0x4	DAT_8009c3c0	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1ac; never referenced
+GAME.EXE	0x8009c3c4	0x4	DAT_8009c3c4	static	bss	long		address-only	asm;src/game/card.c game.card	.sbss $gp+0x1b0; never referenced
+GAME.EXE	0x8009c3c8	0x4	DAT_8009c3c8	static	bss	u8 *	func_80028034	address-only	asm;src/game/card.c game.card	.sbss $gp+0x1b4; the 0x6000-byte card file buffer
 GAME.EXE	0x8009c3f8	0x4	DAT_8009c3f8	global	bss	s32	func_80014bd4	address-only	asm;src/game/main.c game.main	.sbss word ($gp+0x1e4); the game loop runs while it is 0; 2 returns to OPEN.EXE, 3 and 4 go to END.EXE with mailbox 2 or 3
+GAME.EXE	0x8009f114	0x4b0	DAT_8009f114	global	bss	Record0c[100]	func_8002a310	address-only	asm;src/game/player.c game.player	12-byte level records; func_8002a310 reads levels 0..98 and extrapolates past 99 from [98]/[99]; func_80017664 copies it from the first FDAT.T entry (band C)
+GAME.EXE	0x8009f5c4	0x4	DAT_8009f5c4	global	bss	u8[]	func_8002b64c	address-only	asm;src/game/player.c game.player	func_8002b64c stores its address in Data801b24e4.unkb4; it follows DAT_8009f114's 100 level records; extent unknown (referenced prefix)
 GAME.EXE	0x800c8768	0x158	DAT_800c8768	global	bss	char[SS_SEQ_TABSIZ * 2]	func_8001509c	address-only	asm;band A relocs	libsnd sequence attribute table for SsSetTableSize(table, 2, 1); extent is SS_SEQ_TABSIZ (172) * 2 * 1
 GAME.EXE	0x800c8954	0x4d800	DAT_800c8954	global	bss	u8[0x4d800]	func_80014bd4	address-only	asm;band A relocs	arena func_8001937c formats with a 0x4d800-byte free block
 GAME.EXE	0x8014a958	0x2000	DAT_8014a958	global	bss	u8[2][0x1000]	func_8001509c	address-only	asm;band A relocs	VAB body buffers of sound slots 0 and 1
@@ -28,9 +45,11 @@ GAME.EXE	0x801b56cc	0x280	DAT_801b56cc	global	bss	u32[0xa0]	func_80014bd4	addres
 GAME.EXE	0x801b594c	0x320	DAT_801b594c	global	bss	u32[0xc8]	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0xc8 words; WIP extent
 GAME.EXE	0x801b77ec	0x2f0c	DAT_801b77ec	global	bss	u32[0xbc3]	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0xbc3 words; WIP extent (may be several objects)
 GAME.EXE	0x801ba984	0x5144	DAT_801ba984	global	bss	Data801ba984	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0x1451 words; +0xd set on a continued game
+GAME.EXE	0x801c12f0	0x4	DAT_801c12f0	global	bss	s32	func_80029500	address-only	asm;src/game/player.c game.player	func_80029500 stores Data801b24e4.unka0 here when nonzero; band C models it as CdState (DAT_801c12e4) +0xc
 GAME.EXE	0x801c1724	0x4	DAT_801c1724	global	bss	CdRequest *	func_80015ce0	address-only	asm;band A relocs	CD request the sound bank loader fills; func_8001967c's request walk ends here
 GAME.EXE	0x801c1728	0x4	DAT_801c1728	global	bss	CdRequest *	func_80015a48	address-only	asm;band A relocs	CD request the VAB body transfer polls
 GAME.EXE	0x801c17a4	0x4	DAT_801c17a4	global	bss	u8[]	func_80015908	address-only	asm;band A relocs	sector buffer a sound read switches to after the VAB header; extent unknown (referenced prefix)
+GAME.EXE	0x801d37a4	0xcc0	DAT_801d37a4	global	bss	Record44[48]	func_80029500	address-only	asm;src/game/player.c game.player	0x44-byte records indexed by Data801b24e4.unkcb; 48 records fill the gap to DAT_801d4464; func_80017664 copies it from the first FDAT.T entry (band C)
 GAME.EXE	0x801d4464	0x12054	DAT_801d4464	global	bss	Data801d4464	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0x4815 words; func_800156bc copies the halfword at +0x1200a; WIP extent (may be several objects)
 GAME.EXE	0x801e7edc	0x38c	DAT_801e7edc	global	bss	Data801e7edc	func_80014bd4	address-only	asm;band A relocs	cleared by the game loop as 0xe3 words; a continued game sets +0x370..+0x384
 OPEN.EXE	0x8002c1bc	0xd	save_prefix	static	load	char[13]	card_list_saves	supported	asm;src/open/card.c open.card	.data; first .data of the image; BASLUS-00255

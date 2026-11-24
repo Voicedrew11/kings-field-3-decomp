@@ -85,3 +85,15 @@ unit = "game.math"
 image = "GAME.EXE"
 source = "src/game/math.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.card"
+image = "GAME.EXE"
+source = "src/game/card.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.player"
+image = "GAME.EXE"
+source = "src/game/player.c"
+profile = "gcc260-o2-g8"
