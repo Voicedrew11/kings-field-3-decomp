@@ -351,6 +351,13 @@ GAME.EXE	0x800174f0	0x6cf0		mips26	reachable-code	0x80016c08	load		jal		manual-d
 GAME.EXE	0x80017518	0x6d18		mips26	reachable-code	0x80017210	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x80017530	0x6d30		mips26	reachable-code	0x80076da0	load		jal		manual-decoded	reviewed	game-a asm review
 GAME.EXE	0x8001754c	0x6d4c		mips26	reachable-code	0x80076cc4	load		jal		manual-decoded	reviewed	game-a asm review
+GAME.EXE	0x8001843c	0x7c3c	0x80018440	mips_hi16_lo16	reachable-code	0x800182e0	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x8001845c	0x7c5c	0x80018460	mips_hi16_lo16	reachable-code	0x800182f8	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x80018588	0x7d88	0x8001858c	mips_hi16_lo16	reachable-code	0x80018310	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x800185ec	0x7dec	0x800185f0	mips_hi16_lo16	reachable-code	0x80018328	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x80018bac	0x83ac	0x80018bb0	mips_hi16_lo16	reachable-code	0x80018340	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x80018c74	0x8474	0x80018c78	mips_hi16_lo16	reachable-code	0x80018c54	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
+GAME.EXE	0x800408a0	0x300a0	0x800408a4	mips_hi16_lo16	reachable-code	0x80040658	load		lui+addiu		manual-decoded	reviewed	game cd request callback review
 GAME.EXE	0x8007e4e4	0x6dce4		mips32_candidate	data-word	0x8001765c	load		word		manual-decoded	reviewed	game default FDAT handler table review
 GAME.EXE	0x8007e4e8	0x6dce8		mips32_candidate	data-word	0x8001765c	load		word		manual-decoded	reviewed	game default FDAT handler table review
 GAME.EXE	0x8007e4ec	0x6dcec		mips32_candidate	data-word	0x8001765c	load		word		manual-decoded	reviewed	game default FDAT handler table review
