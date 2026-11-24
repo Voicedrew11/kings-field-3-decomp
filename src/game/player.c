@@ -16,6 +16,7 @@
 #include <game/funcs.h>
 #include <game/player.h>
 #include <game/entity.h>
+#include <game/misc.h>
 #include <kf/lib/null.h>
 
 RODATA(0x80011760, 0x84)

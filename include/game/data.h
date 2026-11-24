@@ -74,11 +74,11 @@ typedef struct Data801b24e4 {
     s16 unk92;
     s16 unk94;
     u8 unk96[0x6];
-    s32 unk9c;
+    u32 unk9c;      /* +0x9c: frame counter (func_80030cbc periods) */
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
-    s32 unka8;
-    s32 unkac;
+    u16 *unka8;     /* +0xa8: next pad bit of the DAT_8009c3cc sequence (func_8002fe1c) */
+    struct Record18 *unkac; /* +0xac: &DAT_801b77ec.unk0[id] (func_8002d130) */
     struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
@@ -164,19 +164,24 @@ typedef struct Data801b24e4 {
     s16 unk172;
     s16 unk174;
     s16 unk176;
-    s16 unk178;
-    s16 unk17a;
+    u16 unk178;     /* +0x178: pad bits held (DAT_80081868) */
+    u16 unk17a;     /* +0x17a: pad bits held the frame before */
     u8 unk17c[0x4];
     s32 unk180;
     s32 unk184;
-    s16 unk188;
-    s16 unk18a;
-    s16 unk18c;
-    s16 unk18e;
-    s16 unk190;
-    s16 unk192;
-    s16 unk194;
-    u8 unk196[0x6];
+    union {
+        struct {
+            SVECTOR dir;    /* +0x188: modes 3, 0x10, 0x11, 0x12 (func_80030908) */
+            SVECTOR push;   /* +0x190: added to unk134..unk138 (func_8003047c) */
+        } knock;
+        struct {
+            u8 id;          /* +0x188: modes 7, 8, 9 */
+            u8 unk189;
+            SVECTOR angle;  /* +0x18a: copy of unk12c */
+        } turn;
+        s16 count;          /* +0x188: mode 5 */
+    } unk188;               /* +0x188: per unk101 mode */
+    u8 unk198[0x4];
 } Data801b24e4;
 
 typedef struct Data801ba984 {
@@ -212,14 +217,18 @@ typedef struct Record20 {
     u16 unke;
     u16 unk10;
     u16 unk12;
-    u8 unk14[0xc];
+    u16 unk14;      /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
+    u16 unk16;
+    u16 unk18;
+    u16 unk1a;
+    u8 unk1c[0x4];
 } Record20;
 
 typedef struct Data801d4464 {
     u8 unk0[0x11c14];
     Record20 unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
-    u8 unk12000[4];
+    u8 *unk12000;   /* +0x12000: floor tile record func_800324f0 selected */
     u8 *unk12004;   /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
     u8 unk12008[2];
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
@@ -232,7 +241,9 @@ typedef struct Data801d4464 {
     s32 unk12028;   /* +0x12028: index of an Object88 record (func_800533e8) */
     u8 unk1202c[0x10];
     VECTOR unk1203c; /* +0x1203c: point of the last wall hit (func_80033d84) */
-    u8 unk1204c[8];
+    u8 unk1204c[2];
+    u16 unk1204e;
+    u8 unk12050[4];
 } Data801d4464;
 
 typedef struct Data801e7edc {
@@ -417,7 +428,7 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u8 unk16[2];
+    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130) */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -439,17 +450,27 @@ typedef struct Record0c {
 
 /* 0x44-byte records func_80029500 adds to the player's unk54[]/unk62 (WIP). */
 typedef struct Record44 {
-    u8 unk0[5];
+    u8 unk0[4];
+    u8 unk4;
     u8 unk5;
     u16 unk6[8];
     u8 unk16[8];
     u16 unk1e;
-    u8 unk20[6];
+    u8 unk20[4];
+    u16 unk24;
     u16 unk26;
     u8 unk28[4];
     u16 unk2c;
     u16 unk2e;
-    u8 unk30[0x14];
+    u8 unk30[4];
+    u16 unk34;      /* +0x34..+0x42: model offsets of the weapon tip (func_8002cea8) */
+    u16 unk36;
+    u16 unk38;
+    s16 unk3a;
+    u16 unk3c;
+    u16 unk3e;
+    u16 unk40;
+    s16 unk42;
 } Record44;
 
 /* One entry of a loaded FDAT module's handler table. */
