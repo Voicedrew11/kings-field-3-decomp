@@ -26,4 +26,16 @@ extern int VSync(int mode);
  * pointer is inherited from the SLPS-00017 callers; review against KF2 calls. */
 extern void ReadSZ2(long *depth, long *unused_depth);
 
+/* LIBGTE's DIVFT3A..DIVGT4A objects export the recursive polygon dividers,
+ * but Runtime Library 3.3's LIBGTE.H leaves their prototypes (and the
+ * Divide* front ends) commented out; these are its commented declarations. */
+extern u_long *RCpolyF3(POLY_F3 *s, DIVPOLYGON3 *divp);
+extern u_long *RCpolyF4(POLY_F4 *s, DIVPOLYGON4 *divp);
+extern u_long *RCpolyFT3(POLY_FT3 *s, DIVPOLYGON3 *divp);
+extern u_long *RCpolyFT4(POLY_FT4 *s, DIVPOLYGON4 *divp);
+extern u_long *RCpolyG3(POLY_G3 *s, DIVPOLYGON3 *divp);
+extern u_long *RCpolyG4(POLY_G4 *s, DIVPOLYGON4 *divp);
+extern u_long *RCpolyGT3(POLY_GT3 *s, DIVPOLYGON3 *divp);
+extern u_long *RCpolyGT4(POLY_GT4 *s, DIVPOLYGON4 *divp);
+
 #endif

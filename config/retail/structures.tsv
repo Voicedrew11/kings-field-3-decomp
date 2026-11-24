@@ -73,9 +73,12 @@ ScratchCount	0x20	supported	asm;func_8004290c/func_8003df50/func_800400ac copy D
 ScratchDraw	0x20	supported	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (func_8003bb04) or the model counters (func_8004290c)	WIP (game-gte)
 ScratchLayer	0x18	supported	asm;func_8003be34 SVECTOR at 0x1f800100 handed to func_8003bb04 and the VECTOR origin at 0x1f800108	WIP (render-tu)
 ScratchLoad	0x1d0	supported	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers	WIP (game-h)
+ScratchMapWork	0x20	supported	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70	WIP (game-gte2)
+ScratchModelWork	0x20	supported	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054	WIP (game-gte2)
 ScratchPad	0x394	supported	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	R3000 scratchpad at the fixed address 0x1f800000; WIP
 ScratchPhase	0x294	supported	asm;scratchpad 0x1f800100.. holds the map layer position/origin (func_8003be34), the object-draw state (func_80040ae4) or ScratchView while a frame is built	WIP (game-h)
 ScratchView	0x294	supported	asm;func_80034bf4/func_800345f4/func_800348f4 scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120	WIP (game-h)
+ScratchWork	0x20	supported	asm;scratchpad 0x1f800054..0x1f800074: model part view vs map layer view	WIP (game-gte2)
 ScreenTint	0x4	supported	asm;func_8003d4ac/func_8003d624	WIP field names; untouched ranges opaque
 ScreenVertex	0x8	supported	asm;func_8004290c/func_8003df50 gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;func_80035ca4 reads them by byte offset	WIP (game-gte)
 ScrollRec	0x18	supported	asm;func_800350c0/func_800350fc/func_800351fc 24-byte stride at Data80199154+0x159c8	WIP (game-h)

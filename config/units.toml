@@ -171,12 +171,6 @@ source = "src/game/model.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
-unit = "game.tiles"
-image = "GAME.EXE"
-source = "src/game/tiles.c"
-profile = "gcc260-o2-g8"
-
-[[unit]]
 unit = "game.render"
 image = "GAME.EXE"
 source = "src/game/render.c"
