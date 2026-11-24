@@ -1220,6 +1220,7 @@ void func_8001d3a0(void)
     s32 result;
     u8 saved;
     u8 item;
+    s32 n;
 
     confirmed = 0;
     result = MENU_NONE;
@@ -1231,13 +1232,13 @@ void func_8001d3a0(void)
     }
     saved = DAT_800c85e8[0][0x85];
     DAT_800c85e8[0][0x85] = 0;
-    i = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
+    n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
     DAT_800c85e8[0][0x85] = saved;
-    i += func_8001c6c0(DAT_801b77ec.unk0, &entries[i], &values[i], &spells[i], 0, 0x1e);
-    memcpy(&entries[i], &DAT_8007f230[11], 12);
-    i++;
+    n += func_8001c6c0(DAT_801b77ec.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
+    memcpy(&entries[n], &DAT_8007f230[11], 12);
+    n++;
     func_80027688(&list, 0, 2);
-    list.count = i;
+    list.count = n;
     list.entries = entries;
     list.counts = counts;
     list.values = values;
