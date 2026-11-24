@@ -144,9 +144,8 @@ void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t)
 /*
  * Hides the grid cells behind each wall cell, walking away from the viewer
  * (grid rows and columns ascending; for views facing +z).
- * Not exact: control flow, calls and constants agree; z and the x * 10 cell
- * offset trade $s5/$s6 (unattributed allocation residue; the mirror walk
- * below matches with the same shape).
+ * z is read before p: its longer life puts it just below the x * 10 cell
+ * offset in allocation priority ($s6 / $s5).
  */
 ADDRESS(0x800345f4, 0x300)
 void func_800345f4(void)
@@ -166,8 +165,8 @@ void func_800345f4(void)
     j = 24;
     start = SCRATCH->u.view.grid[0];
     end = &SCRATCH->u.view.grid[24][24];
-    p = SCRATCH->u.view.grid[0];
     z = SCRATCH->u.view.z;
+    p = SCRATCH->u.view.grid[0];
     do {
         if (z < 80) {
             x = SCRATCH->u.view.x;
