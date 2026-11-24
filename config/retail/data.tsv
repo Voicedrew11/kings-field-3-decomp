@@ -251,7 +251,8 @@ FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-compleme
 FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_005.BIN	0x801e8b78	0x870	0x790	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_008.BIN	0x801e8308	0x0	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_008.BIN	0x801e8f80	0xc78	0x388	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+FDAT_008.BIN	0x801e8f80	0xc78	0x44	defined	supported	DAT_801e8f80	u32[17]	asm;src/fdat/fdat_008.c	.data; per object 100..116 the settings (bits 0..5) that lower it
+FDAT_008.BIN	0x801e8fc4	0xcbc	0x344	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e87e0	0x4d8	0x328	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_014.BIN	0x801e8308	0x0	0x9c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

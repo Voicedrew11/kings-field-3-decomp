@@ -611,7 +611,8 @@ typedef struct Data8018fad4 {
 typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
-    u8 unk8850[8];
+    u8 unk8850[4];
+    u8 *unk8854;            /* +0x8854: FDAT_008 slot 9 passes its [15] to func_8004482c */
     Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test; the object
                              * FDAT slot 9 handlers test */
     u8 unk885c[2];
