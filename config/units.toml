@@ -109,3 +109,27 @@ unit = "game.cd"
 image = "GAME.EXE"
 source = "src/game/cd.c"
 profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.screen"
+image = "GAME.EXE"
+source = "src/game/screen.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.objects"
+image = "GAME.EXE"
+source = "src/game/objects.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.hud"
+image = "GAME.EXE"
+source = "src/game/hud.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
+unit = "game.anim"
+image = "GAME.EXE"
+source = "src/game/anim.c"
+profile = "gcc260-o2-g8"

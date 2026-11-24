@@ -1,6 +1,19 @@
 # MANUALLY MANAGED - exact target offsets/extents for every field in structures.tsv.
 # opaque means the byte range is modeled for layout but has no supported semantic meaning yet.
 structure	offset	size	name	datatype	meaning_confidence	evidence	note
+AnimKey	0x0	0x2	reverse	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimKey	0x2	0x2	length	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimKey	0x4	0x2	base	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimKey	0x6	0x2	count	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimKey	0x8	0x2	first	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimKey	0xa	0x2	ids	u16[1]	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
+AnimSlot	0x0	0x2	state	s16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0x2	0x2	model	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0x4	0x2	anim	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0x6	0x2	key	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0x8	0x4	base	s32	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0xc	0x4	pose	SVECTOR *	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimSlot	0x10	0x4	owner	AnimSlot **	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
 CdExtent	0x0	0x4	pos	CdlLOC	candidate	asm;func_8001a118 reads pos and size like a CdlFILE	WIP (game-c)
 CdExtent	0x4	0x4	size	u32	candidate	asm;func_8001a118 reads pos and size like a CdlFILE	WIP (game-c)
 CdFile	0x0	0x4	sectors	u16 *	candidate	asm;func_80019cc4/func_8001a34c 12-byte stride from +0x448	WIP (game-c)
@@ -38,33 +51,107 @@ CdState	0x20	0x420	requests	CdRequest[24]	candidate	asm;src/game/cd.c game.cd (f
 CdState	0x440	0x4	write	CdRequest *	candidate	asm;src/game/cd.c game.cd (func_8001a438 base+0x20 requests, func_80019bbc write == &requests[24])	WIP (game-c)
 CdState	0x444	0x4	read	CdRequest *	candidate	asm;src/game/cd.c game.cd (func_8001a438 base+0x20 requests, func_80019bbc write == &requests[24])	WIP (game-c)
 CdState	0x448	0x78	files	CdFile[10]	candidate	asm;src/game/cd.c game.cd (func_8001a438 base+0x20 requests, func_80019bbc write == &requests[24])	WIP (game-c)
+ColorSum	0x0	0x1	count	u8	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
+ColorSum	0x1	0x1	mode	u8	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
+ColorSum	0x2	0x2	r	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
+ColorSum	0x4	0x2	g	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
+ColorSum	0x6	0x2	b	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
+Data80081c20	0x0	0x1	visible	u8	candidate	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
+Data80081c20	0x1	0x17	unk1	u8[23]	opaque	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
+Data80081c20	0x18	0x2	unk18	u16	opaque	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
+Data80081c20	0x1a	0x2	unk1a	s16	opaque	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
+Data80081c20	0x1c	0x8	unk1c	u8[8]	opaque	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
 Data80185da8	0x0	0x6a40	objects	Object88[200]	candidate	asm;game loop word-count clear;func_80017aa4 records at +0	WIP (game-c)
 Data80185da8	0x6a40	0x32ec	unk6a40	u8[13036]	opaque	asm;game loop word-count clear;func_80017aa4 records at +0	WIP (game-c)
-Data8018fad4	0x0	0x2	loading	u16	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x2	0x2	step	s16	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x4	0x5	area	u8[5]	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x9	0x1	unk9	u8	opaque	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0xa	0x2	unka	u8[2]	opaque	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0xc	0x4	handlers	FdatHandler *	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x10	0x5	previous	u8[5]	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x15	0x4	unk15	u8[4]	opaque	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x19	0x3	shift	s8[3]	candidate	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
-Data8018fad4	0x1c	0x4c	unk1c	u8[76]	opaque	asm;game loop word-count clear;src/game/scene.c field accesses	WIP (game-c)
+Data8018fad4	0x0	0x2	loading	u16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x2	0x2	step	s16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x4	0x5	area	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x9	0x1	unk9	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0xa	0x2	unka	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0xc	0x4	handlers	FdatHandler *	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x10	0x5	previous	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x15	0x2	unk15	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x17	0x1	unk17	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x18	0x1	unk18	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x19	0x3	shift	s8[3]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
+Data8018fad4	0x1c	0x4c	unk1c	u8[76]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses	WIP field names (game-c, game-b)
 Data8018fb3c	0x0	0x1f20	unk0	u8[7968]	opaque	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
 Data8018fb3c	0x1f20	0x6930	objects	Object44[396]	candidate	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
 Data8018fb3c	0x8850	0x18	unk8850	u8[24]	opaque	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
-Data801b24e4	0x0	0xe	unk0	u8[14]	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
-Data801b24e4	0xe	0x1	unke	u8	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
-Data801b24e4	0xf	0x95	unkf	u8[149]	opaque	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0xa4	0x4	play_minutes	u32	candidate	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0xa8	0x4f	unka8	u8[79]	opaque	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0xf7	0x1	se_volume	u8	candidate	asm;game loop word-count clear;band A field accesses	WIP (game-a)
-Data801b24e4	0xf8	0x1	bgm_volume	u8	candidate	asm;game loop word-count clear;band A field accesses	WIP (game-a)
-Data801b24e4	0xf9	0x13	unkf9	u8[19]	opaque	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0x10c	0x4	x	s32	candidate	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0x110	0x4	y	s32	candidate	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0x114	0x4	z	s32	candidate	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
-Data801b24e4	0x118	0x84	unk118	u8[132]	opaque	asm;game loop word-count clear;band A field accesses;game-c func_80017aa4/func_80019570	WIP (game-c)
+Data80199154	0x0	0x4	buffer	u8 *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x4	0x4	heap	u8 *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x8	0xc	pool0	PrimPool	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x14	0x4	image	u8 *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x18	0x4	unk18	u8[4]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x1c	0x4	pool	PrimPool *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x20	0x10000	ot_buffer	u32[2][8192]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10020	0x4	ot	u32 *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10024	0x44	unk10024	u8[68]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10068	0xb8	draw	DRAWENV[2]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10120	0x28	disp	DISPENV[2]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10148	0x10	unk10148	u8[16]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x10158	0x4	vertices	u8 *	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x1015c	0x400	models	u8 *[256]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x1055c	0x14b4	unk1055c	u8[5300]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x11a10	0xf0	slots	AnimSlot[12]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x11b00	0x1f44	unk11b00	u8[8004]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x13a44	0x1f40	pose	SVECTOR[1000]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15984	0x10	message_arg	u16[8]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15994	0x1	frame	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15995	0x2	unk15995	u8[2]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15997	0x1	fade_level	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15998	0x1	fade_hold	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15999	0x8	message_queue	u8[8]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a1	0x1	message_tail	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a2	0x1	message_head	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a3	0x1	message_state	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a4	0x1	message_timer	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a5	0x1	message_level	u8	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159a6	0x4	tint	ScreenTint	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159aa	0x10	sum	ColorSum[2]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159ba	0x2	unk159ba	u8[2]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159bc	0x4	unk159bc	s32	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159c0	0x4	ot_count	s32	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159c4	0x4	prim_count	s32	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x159c8	0x140	unk159c8	u8[320]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b08	0x2	unk15b08	u16	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b0a	0x2	unk15b0a	s16	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b0c	0x4	unk15b0c	u8[4]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b10	0x4	unk15b10	s32	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b14	0x4	unk15b14	s32	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b18	0x4	grid_x	s32	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b1c	0x4	grid_z	s32	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b20	0x10	unk15b20	u8[16]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15b30	0x271	grid	u8[25][25]	candidate	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data80199154	0x15da1	0x1b07	unk15da1	u8[6919]	opaque	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members)	
+Data801b24e4	0x0	0xe	unk0	u8[14]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xe	0x1	unke	u8	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xf	0x7	unkf	u8[7]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x16	0x2	hp_max	u16	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x18	0x2	hp	u16	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x1a	0x2	unk1a	u16	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x1c	0x2	unk1c	u16	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x1e	0x2	unk1e	u16	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x20	0x2	unk20	u16	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x22	0x2	unk22	u16	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x24	0x80	unk24	u8[128]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xa4	0x4	play_minutes	u32	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xa8	0x4f	unka8	u8[79]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xf7	0x1	se_volume	u8	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xf8	0x1	bgm_volume	u8	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xf9	0x1	unkf9	u8	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xfa	0x1	unkfa	u8	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xfb	0x2	unkfb	u8[2]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xfd	0x1	unkfd	u8	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0xfe	0xe	unkfe	u8[14]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x10c	0x4	x	s32	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x110	0x4	y	s32	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x114	0x4	z	s32	candidate	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x118	0x3c	unk118	u8[60]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x154	0x4	unk154	s32	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x158	0x4	unk158	s32	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x15c	0x4	unk15c	s32	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
+Data801b24e4	0x160	0x3c	unk160	u8[60]	opaque	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570) and game-b field accesses	WIP field names; untouched ranges opaque
 Data801b77ec	0x0	0x900	unk0	u8[2304]	opaque	asm;game loop word-count clear;func_80017aa4 records at +0x900	WIP (game-c)
 Data801b77ec	0x900	0x2600	objects	Object4c[128]	candidate	asm;game loop word-count clear;func_80017aa4 records at +0x900	WIP (game-c)
 Data801b77ec	0x2f00	0xc	unk2f00	u8[12]	opaque	asm;game loop word-count clear;func_80017aa4 records at +0x900	WIP (game-c)
@@ -82,17 +169,38 @@ Data801e7edc	0x374	0xc	unk374	u8[12]	opaque	asm;game loop word-count clear;band 
 Data801e7edc	0x380	0x4	unk380	u8 *	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
 Data801e7edc	0x384	0x1	unk384	u8	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
 Data801e7edc	0x385	0x7	unk385	u8[7]	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
+Effect	0x0	0x2	id	u16	candidate	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x2	0x1	unk2	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x3	0x1	unk3	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x4	0x1	unk4	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x5	0x1	unk5	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x6	0x2	unk6	u8[2]	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+Effect	0x8	0x10	pos	VECTOR	candidate	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	
+EffectSpawn	0x0	0x2	id	u16	candidate	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x2	0x1	unk2	u8	opaque	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x3	0x1	unk3	u8	opaque	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x4	0x1	unk4	u8	opaque	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x5	0x1	cell_z	u8	candidate	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x6	0x1	cell_x	u8	candidate	asm;func_80043a08 16-byte stride	
+EffectSpawn	0x7	0x3	unk7	u8[3]	opaque	asm;func_80043a08 16-byte stride	
+EffectSpawn	0xa	0x2	dz	s16	candidate	asm;func_80043a08 16-byte stride	
+EffectSpawn	0xc	0x2	dx	s16	candidate	asm;func_80043a08 16-byte stride	
+EffectSpawn	0xe	0x2	dy	s16	candidate	asm;func_80043a08 16-byte stride	
 HeapBlock	0x0	0x1	state	u8	candidate	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x1	0x1	unk1	u8	opaque	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x2	0x2	unk2	u16	opaque	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x4	0x4	size	u32	candidate	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x8	0x4	owner	u8 **	candidate	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
-Object18	0x0	0x2	unk0	u16	opaque	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
-Object18	0x2	0x6	unk2	u8[6]	opaque	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
-Object18	0x8	0x4	x	s32	candidate	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
-Object18	0xc	0x4	y	s32	candidate	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
-Object18	0x10	0x4	z	s32	candidate	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
-Object18	0x14	0x4	unk14	u8[4]	opaque	asm;func_80017aa4 24-byte stride, 128 records	WIP (game-c)
+ModelData	0x0	0xc	unk0	u8[12]	opaque	asm;func_800431e8, func_8004352c, func_800437c8	
+ModelData	0xc	0x1c	parts	ModelPart[1]	candidate	asm;func_800431e8, func_8004352c, func_800437c8	
+ModelFile	0x0	0x4	unk0	u32	opaque	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
+ModelFile	0x4	0x4	unk4	s32	opaque	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
+ModelFile	0x8	0x4	vertices	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
+ModelFile	0xc	0x4	deltas	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
+ModelFile	0x10	0x4	anims	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
+ModelPart	0x0	0x4	vertices	s32	candidate	asm;func_8004352c/func_800437c8 28-byte stride	
+ModelPart	0x4	0x4	unk4	s32	opaque	asm;func_8004352c/func_800437c8 28-byte stride	
+ModelPart	0x8	0x14	unk8	u8[20]	opaque	asm;func_8004352c/func_800437c8 28-byte stride	
 Object44	0x0	0x4	unk0	u8[4]	opaque	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object44	0x4	0x1	unk4	u8	opaque	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
 Object44	0x5	0x1	unk5	u8	opaque	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
@@ -116,6 +224,22 @@ Object88	0x2c	0x4	x	s32	candidate	asm;func_80017aa4 136-byte stride, 200 records
 Object88	0x30	0x4	y	s32	candidate	asm;func_80017aa4 136-byte stride, 200 records	WIP (game-c)
 Object88	0x34	0x4	z	s32	candidate	asm;func_80017aa4 136-byte stride, 200 records	WIP (game-c)
 Object88	0x38	0x50	unk38	u8[80]	opaque	asm;func_80017aa4 136-byte stride, 200 records	WIP (game-c)
+PrimPool	0x0	0x4	base	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
+PrimPool	0x4	0x4	end	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
+PrimPool	0x8	0x4	next	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
+ScratchPad	0x0	0x10	unk0	u8[16]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x10	0x4	model	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x14	0x10	unk14	u8[16]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x24	0x4	unk24	u8 *	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x28	0x24	unk28	u8[36]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x4c	0x4	vertices	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x50	0xcc	unk50	u8[204]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x11c	0x4	model_wanted	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScratchPad	0x120	0x4	sound_wanted	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	
+ScreenTint	0x0	0x1	mode	u8	candidate	asm;func_8003d4ac/func_8003d624	
+ScreenTint	0x1	0x1	r	u8	candidate	asm;func_8003d4ac/func_8003d624	
+ScreenTint	0x2	0x1	g	u8	candidate	asm;func_8003d4ac/func_8003d624	
+ScreenTint	0x3	0x1	b	u8	candidate	asm;func_8003d4ac/func_8003d624	
 SoundBank	0x0	0x4	slot	SoundSlot *	candidate	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP (game-a)
 SoundBank	0x4	0x2	vab_id	s16	candidate	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP (game-a)
 SoundBank	0x6	0x2	pad	s16	opaque	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP (game-a)
@@ -141,3 +265,16 @@ SoundState	0x5f0	0x14a0	effects	SoundEffect[528]	candidate	asm;band A field acce
 SoundState	0x1a90	0x58	slots	SoundSlot[11]	candidate	asm;band A field accesses;game loop clears 0x6ba words	WIP (game-a)
 SoundUnk5c8	0x0	0x2	unk0	s16	opaque	asm;sound init loop (4-byte stride, 10 entries)	WIP (game-a)
 SoundUnk5c8	0x2	0x2	unk2	s16	opaque	asm;sound init loop (4-byte stride, 10 entries)	WIP (game-a)
+SpriteRec	0x0	0x1	visible	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x1	0x1	mode	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x2	0x1	u	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x3	0x1	v	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x4	0x1	w	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x5	0x1	h	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x6	0x2	x	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x8	0x2	y	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0xa	0x2	unka	s16	opaque	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0xc	0x2	unkc	s16	opaque	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0xe	0x2	clut	u16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x10	0x2	tpage	u16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x12	0x2	z	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	

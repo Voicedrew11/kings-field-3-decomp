@@ -19,6 +19,7 @@
 #include <game/memory.h>
 #include <game/image.h>
 #include <game/scene.h>
+#include <game/render.h>
 #include <game/funcs.h>
 
 /*
@@ -71,7 +72,7 @@ void func_80014bd4(void)
     s32 exit;
 
     func_80018fbc((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
-    func_80018fbc(DAT_80199154, 0, sizeof(DAT_80199154) / 4);
+    func_80018fbc((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
     func_80018fbc((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
     func_80018fbc((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
     func_80018fbc((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);

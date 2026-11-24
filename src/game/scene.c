@@ -16,6 +16,7 @@
 #include <game/memory.h>
 #include <game/image.h>
 #include <game/scene.h>
+#include <game/render.h>
 #include <game/data.h>
 #include <game/funcs.h>
 
@@ -80,9 +81,9 @@ void func_80017664(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     func_80018f5c(DAT_80116154, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80042ba8(0, DAT_80116154);
+    func_80042ba8(0, (u8 *)DAT_80116154);
     func_80018f5c(DAT_800aedc4, p + 1, *p >> 2);
-    func_80042ba8(0x28, DAT_800aedc4);
+    func_80042ba8(0x28, (u8 *)DAT_800aedc4);
     func_8002b64c();
 }
 
@@ -119,7 +120,7 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     Object4c *a;
     Object44 *b;
     Object88 *c;
-    Object18 *d;
+    Effect *d;
     u16 i;
     u16 j;
     u16 k;
@@ -161,10 +162,10 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
     d = DAT_80182968;
     l = 128;
     while (l--) {
-        if (d->unk0 != 0xffff) {
-            d->x += dx;
-            d->z += dz;
-            d->y += dy;
+        if (d->id != 0xffff) {
+            d->pos.vx += dx;
+            d->pos.vz += dz;
+            d->pos.vy += dy;
         }
         d++;
     }

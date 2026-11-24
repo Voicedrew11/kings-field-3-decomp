@@ -2,27 +2,45 @@
 #define GAME_DATA_H
 
 /*
- * GAME.EXE globals band A references outside the sound and CD headers (WIP),
- * mostly the BSS blocks the game loop clears word by word at start-up. Each
- * extent is the word count main passes to func_80018fbc; whether a block is
- * one object or a run of several is not yet known, so the names stay
- * address-derived and only the fields band A touches are named.
+ * GAME.EXE globals outside the sound, CD and render headers (WIP), mostly
+ * the BSS blocks the game loop clears word by word at start-up. Each extent
+ * is the word count main passes to func_80018fbc; whether a block is one
+ * object or a run of several is not yet known, so the names stay
+ * address-derived and only the fields the matched code touches are named.
+ * The block at 0x80199154 is Data80199154 and the effect records at
+ * 0x80182968 are Effect, both in game/render.h.
  */
 #include <kf/lib/types.h>
 
 typedef struct Data801b24e4 {
     u8 unk0[0xe];
     u8 unke;        /* +0x0e: cleared every frame by the game loop */
-    u8 unkf[0x95];
+    u8 unkf[7];
+    u16 hp_max;     /* +0x16 */
+    u16 hp;         /* +0x18 */
+    u16 unk1a;      /* +0x1a: maximum of unk1c */
+    u16 unk1c;
+    u16 unk1e;      /* +0x1e: out of 5000 */
+    u16 unk20;
+    u16 unk22;      /* +0x22: out of 5000 */
+    u8 unk24[0x80];
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
     u8 unka8[0x4f];
     u8 se_volume;   /* +0xf7: 0 mutes sound effects; scales them by n/128 */
     u8 bgm_volume;  /* +0xf8: 0 keeps the sequence off */
-    u8 unkf9[0x13];
+    u8 unkf9;       /* +0xf9: status overlay layout, bits 0-1 show its two halves */
+    u8 unkfa;       /* +0xfa: compass, bits 0-1 show its needles */
+    u8 unkfb[2];
+    u8 unkfd;       /* +0xfd: brightness of the status overlay */
+    u8 unkfe[0xe];
     s32 x;          /* +0x10c: func_80017aa4 moves it with the objects */
     s32 y;
     s32 z;
-    u8 unk118[0x84];
+    u8 unk118[0x3c];
+    s32 unk154;     /* +0x154: top edge of the full-screen overlay pair; >= 240 hides it */
+    s32 unk158;     /* +0x158: top edge of a single overlay; >= 240 hides it */
+    s32 unk15c;     /* +0x15c: top edge of a single overlay; >= 240 hides it */
+    u8 unk160[0x3c];
 } Data801b24e4;
 
 typedef struct Data801ba984 {
@@ -50,17 +68,9 @@ typedef struct Data801e7edc {
 
 /*
  * Object records func_80017aa4 moves when the area origin shifts (WIP: named
- * by size; 0xff/0xffff in the first field marks a free record).
+ * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
+ * records it also moves are the placed effects (Effect, game/render.h).
  */
-typedef struct Object18 {
-    u16 unk0;       /* +0x00: 0xffff when free */
-    u8 unk2[6];
-    s32 x;          /* +0x08 */
-    s32 y;
-    s32 z;
-    u8 unk14[4];
-} Object18;
-
 typedef struct Object44 {
     u8 unk0[4];
     u8 unk4;
@@ -105,12 +115,15 @@ typedef void (*FdatHandler)(void);
 typedef struct Data8018fad4 {
     u16 loading;    /* +0x00: func_8001796c steps func_80018358 until it clears */
     volatile s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
-    u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part */
+    u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
+                     * the model id bank (func_80040568) */
     u8 unk9;
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
-    u8 previous[5]; /* +0x10 */
-    u8 unk15[4];
+    u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
+    u8 unk15[2];
+    u8 unk17;       /* +0x17 */
+    u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
     u8 unk1c[0x4c];
 } Data8018fad4;
@@ -136,11 +149,9 @@ extern u32 DAT_800136e8[6];
 /* Arena func_8001937c formats with a 0x4d800-byte free block. */
 extern u8 DAT_800c8954[0x4d800];
 
-extern Object18 DAT_80182968[128];
 extern Data80185da8 DAT_80185da8;
 extern Data8018fad4 DAT_8018fad4;
 extern Data8018fb3c DAT_8018fb3c;
-extern u32 DAT_80199154[0x5e2a];
 extern Data801b24e4 DAT_801b24e4;
 extern u32 DAT_801b56cc[0xa0];
 extern u32 DAT_801b594c[0xc8];
