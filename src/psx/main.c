@@ -20,11 +20,15 @@
 RODATA(0x80010000, 0x35)
 
 /* GCC 2.6.0 emits the literals in reverse, so .rdata holds END, GAME, OPEN. */
+DATA(0x8001024c, 0xc, ".data")
 static char *program_paths[] = {
     "cdrom:OPEN.EXE;1", "cdrom:GAME.EXE;1", "cdrom:END.EXE;1",
 };
+DATA(0x80010260, 0x4, ".sdata")
 int program_index = 0;
+DATA(0x80010264, 0x4, ".sdata")
 u8 *next_program = NEXT_PROGRAM_BYTE;
+DATA(0x8001026c, 0x3c, ".bss")
 struct EXEC program_header;
 
 ADDRESS(0x80010038, 0xe0)

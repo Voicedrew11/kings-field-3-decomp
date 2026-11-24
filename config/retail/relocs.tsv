@@ -4,3 +4,24 @@
 # PS-X EXE retains no relocation directory: candidate does not mean linker truth.
 # BSS pair-scan rows remain withheld by safe delinking until individually reviewed.
 image	site_va	site_file_offset	paired_site_va	kind	channel	target_va	target_region	target_name	opcode	register	confidence	status	provenance
+PSX.EXE	0x80010044	0x844		mips26	reachable-code	0x80010118	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001004c	0x84c		mips26	reachable-code	0x800101ec	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010054	0x854		mips26	reachable-code	0x8001023c	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001005c	0x85c		mips26	reachable-code	0x800101fc	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010064	0x864	0x80010068	mips_hi16_lo16	reachable-code	0x8001024c	load	program_paths	lui+addiu		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001006c	0x86c		mips_gprel16	reachable-code	0x80010264	load	next_program	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010070	0x870	0x80010074	mips_hi16_lo16	reachable-code	0x8001026c	load	program_header	lui+addiu		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010084	0x884		mips_gprel16	reachable-code	0x80010260	load	program_index	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x80010098	0x898		mips26	reachable-code	0x8001021c	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100ac	0x8ac		mips26	reachable-code	0x8001023c	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100b4	0x8b4	0x800100b8	mips_hi16_lo16	reachable-code	0x8001028c	load	program_header	lui+sw		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100bc	0x8bc	0x800100c0	mips_hi16_lo16	reachable-code	0x80010290	load	program_header	lui+sw		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100c4	0x8c4		mips26	reachable-code	0x800101dc	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100d4	0x8d4		mips26	reachable-code	0x8001022c	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100dc	0x8dc		mips_gprel16	reachable-code	0x80010264	load	next_program	lw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100ec	0x8ec		mips_gprel16	reachable-code	0x80010260	load	program_index	sw	gp	manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100f0	0x8f0		mips26	reachable-code	0x800101fc	load		jal		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x800100f8	0x8f8		mips26	reachable-code	0x80010084	load		j		manual-decoded	reviewed	psx.main asm review
+PSX.EXE	0x8001024c	0xa4c		mips32_candidate	data-word	0x80010024	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010250	0xa50		mips32_candidate	data-word	0x80010010	load		word		manual-decoded	reviewed	psx.main program_paths review
+PSX.EXE	0x80010254	0xa54		mips32_candidate	data-word	0x80010000	load		word		manual-decoded	reviewed	psx.main program_paths review

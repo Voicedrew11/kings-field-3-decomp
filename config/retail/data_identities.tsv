@@ -3,3 +3,7 @@
 # Address-only DAT_ names and unknown scope are unresolved, not semantic claims.
 # Future analysis writes build/function-inventory proposals and never overwrites this file.
 image	va	size	name	scope	storage	datatype	owner	confidence	evidence	note
+PSX.EXE	0x8001024c	0xc	program_paths	static	load	char *[3]	main	supported	asm;src/psx/main.c psx.main exact	Load() path per program index (OPEN, GAME, END); main indexes it by program_index
+PSX.EXE	0x80010260	0x4	program_index	global	load	int	main	supported	asm;src/psx/main.c psx.main exact	$gp+0; the program to load next, read back from the next-program byte
+PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800102f0
+PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
