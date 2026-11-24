@@ -8,51 +8,219 @@
  * object or a run of several is not yet known, so the names stay
  * address-derived and only the fields the matched code touches are named.
  * The block at 0x80199154 is Data80199154 and the effect records at
- * 0x80182968 are Effect, both in game/render.h.
+ * 0x80182968 are Effect, both in game/render.h; the word at 0x801c12f0 is
+ * CdState.unkc (game/cd.h).
  */
 #include <kf/lib/types.h>
+#include <psyq/sdk.h>
 
 typedef struct Data801b24e4 {
-    u8 unk0[0xe];
+    s32 experience; /* +0x00: the save title shows it as six digits */
+    s32 unk4;
+    s32 unk8;
+    u8 level;       /* +0x0c: the save title shows it as two digits */
+    u8 unkd;
     u8 unke;        /* +0x0e: cleared every frame by the game loop */
-    u8 unkf[7];
-    u16 hp_max;     /* +0x16 */
-    u16 hp;         /* +0x18 */
-    u16 unk1a;      /* +0x1a: maximum of unk1c */
+    u8 unkf;
+    u8 unk10;
+    u8 unk11;
+    s16 unk12;
+    s16 unk14;
+    u16 hp_max;     /* +0x16: 0..999, from the level table */
+    u16 hp;         /* +0x18: 0 is death (func_8002a6a0) */
+    u16 unk1a;      /* +0x1a: maximum of unk1c; 0..999, from the level table */
     u16 unk1c;
     u16 unk1e;      /* +0x1e: out of 5000 */
-    u16 unk20;
+    s16 unk20;
     u16 unk22;      /* +0x22: out of 5000 */
-    u8 unk24[0x80];
+    u16 unk24;      /* +0x24: counts up to 100 for a point of unk32 */
+    u16 unk26[5];   /* +0x26: count up to 400 for a point of unk34[n] */
+    s16 unk30;
+    u16 unk32;      /* +0x32: func_80029500 copies it to unk40 */
+    u16 unk34[5];   /* +0x34: func_80029500 copies them to unk42 */
+    s16 unk3e;
+    u16 unk40;      /* +0x40: 0..999 */
+    u16 unk42[5];   /* +0x42: 0..999 each */
+    s16 unk4c;
+    u8 unk4e[0x2];
+    s32 unk50;
+    u16 unk54[7];   /* +0x54: func_80029500 rebuilds them; never above 0x7fff */
+    u16 unk62;
+    u8 unk64[0x2];
+    u16 unk66;      /* +0x66..+0x76: func_80029500 rebuilds them from Record20s */
+    u16 unk68;
+    u16 unk6a;
+    u16 unk6c;
+    u16 unk6e;
+    u16 unk70;
+    u16 unk72;
+    u16 unk74;
+    u16 unk76;
+    s16 unk78;
+    s16 unk7a;
+    s16 unk7c;
+    s16 unk7e;
+    s16 unk80;
+    s16 unk82;
+    s16 unk84;
+    s16 unk86;
+    s16 unk88;
+    s16 unk8a;
+    s16 unk8c;
+    s16 unk8e;
+    s16 unk90;
+    s16 unk92;
+    s16 unk94;
+    u8 unk96[0x6];
+    s32 unk9c;
+    s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
-    u8 unka8[0x4f];
+    s32 unka8;
+    s32 unkac;
+    struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
+    u8 *unkb4;      /* +0xb4 */
+    s32 unkb8;
+    s32 unkbc;
+    s16 unkc0;
+    u16 unkc2;
+    u16 unkc4;
+    u8 unkc6;
+    u8 unkc7;
+    u8 unkc8;
+    u8 unkc9;
+    u8 unkca;
+    u8 unkcb;
+    u8 unkcc;
+    u8 unkcd[0x1];
+    u8 unkce;
+    u8 unkcf;
+    u8 unkd0;
+    u8 unkd1[0x3];
+    struct Record20 *unkd4; /* +0xd4..+0xec: &DAT_801d4464.unk11c14[] of unkf0..unkf6 */
+    struct Record20 *unkd8;
+    struct Record20 *unkdc;
+    struct Record20 *unke0;
+    struct Record20 *unke4;
+    struct Record20 *unke8;
+    struct Record20 *unkec;
+    u8 unkf0;       /* +0xf0..+0xf6: Record20 indices, 0xff for none */
+    u8 unkf1;
+    u8 unkf2;
+    u8 unkf3;
+    u8 unkf4;
+    u8 unkf5;
+    u8 unkf6;
     u8 se_volume;   /* +0xf7: 0 mutes sound effects; scales them by n/128 */
     u8 bgm_volume;  /* +0xf8: 0 keeps the sequence off */
     u8 unkf9;       /* +0xf9: status overlay layout, bits 0-1 show its two halves */
     u8 unkfa;       /* +0xfa: compass, bits 0-1 show its needles */
-    u8 unkfb[2];
+    u8 unkfb;
+    u8 unkfc;
     u8 unkfd;       /* +0xfd: brightness of the status overlay */
-    u8 unkfe[0xe];
-    s32 x;          /* +0x10c: func_80017aa4 moves it with the objects */
-    s32 y;
-    s32 z;
-    u8 unk118[0x3c];
+    u8 unkfe;
+    u8 unkff;
+    u8 unk100;
+    u8 unk101;
+    u8 unk102[0x2];
+    u8 unk104;
+    u8 unk105;
+    u8 unk106;
+    u8 unk107;
+    u8 unk108;
+    u8 unk109;
+    u8 unk10a;
+    u8 unk10b[0x1];
+    VECTOR pos;     /* +0x10c: func_80017aa4 moves it with the objects */
+    s16 unk11c;
+    s16 unk11e;
+    s16 unk120;
+    u8 unk122[0x2];
+    SVECTOR unk124; /* +0x124 */
+    SVECTOR unk12c; /* +0x12c */
+    s16 unk134;
+    s16 unk136;
+    s16 unk138;
+    s16 unk13a;
+    s16 unk13c;
+    s16 unk13e;
+    s16 unk140;
+    u8 unk142[0x2];
+    s16 unk144;
+    s16 unk146;
+    s16 unk148;
+    u8 unk14a[0x2];
+    SVECTOR unk14c; /* +0x14c: func_8002c164 rotates it by unk124 */
     s32 unk154;     /* +0x154: top edge of the full-screen overlay pair; >= 240 hides it */
     s32 unk158;     /* +0x158: top edge of a single overlay; >= 240 hides it */
     s32 unk15c;     /* +0x15c: top edge of a single overlay; >= 240 hides it */
-    u8 unk160[0x3c];
+    u16 unk160;
+    s16 unk162;
+    s16 unk164;
+    s16 unk166;
+    s16 unk168;
+    s16 unk16a;
+    s16 unk16c;
+    s16 unk16e;
+    s16 unk170;
+    s16 unk172;
+    s16 unk174;
+    s16 unk176;
+    s16 unk178;
+    s16 unk17a;
+    u8 unk17c[0x4];
+    s32 unk180;
+    s32 unk184;
+    s16 unk188;
+    s16 unk18a;
+    s16 unk18c;
+    s16 unk18e;
+    s16 unk190;
+    s16 unk192;
+    s16 unk194;
+    u8 unk196[0x6];
 } Data801b24e4;
 
 typedef struct Data801ba984 {
-    u8 unk0[0xd];
+    s32 unk0;
+    u8 unk4[9];
     u8 unkd;        /* +0x0d: the game loop sets it to 1 on a continued game */
-    u8 unke[0x5136];
+    u8 unke[0x1d];
+    u8 unk2b;
+    u8 unk2c[5];
+    u8 unk31;
+    u8 unk32[0x33];
+    u8 unk65;
+    u8 unk66[0xb];
+    u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
+    u8 unk76[9];
+    u8 unk7f[5];    /* +0x7f: per magic element */
+    u8 unk84[0x50c0];
 } Data801ba984;
 
+/* 0x20-byte records func_800293e4 adds to the player's halfwords +0x66..+0x76. */
+typedef struct Record20 {
+    u8 unk0[2];
+    u16 unk2;
+    u16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unka;
+    u16 unkc;
+    u16 unke;
+    u16 unk10;
+    u16 unk12;
+    u8 unk14[0xc];
+} Record20;
+
 typedef struct Data801d4464 {
-    u8 unk0[0x1200a];
+    u8 unk0[0x11c14];
+    Record20 unk11c14[31]; /* +0x11c14: WIP count */
+    u8 unk11ff4[0xc];
+    u8 unk12000[0xa];
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
-    u8 unk1200c[0x48];
+    u8 unk1200c[0xc];
+    s32 unk12018[3]; /* +0x12018: heights func_80028d54 measures the player against */
+    u8 unk12024[0x30];
 } Data801d4464;
 
 typedef struct Data801e7edc {
@@ -103,10 +271,63 @@ typedef struct Object88 {
     u8 unk38[0x50];
 } Object88;
 
+/* 120-byte records func_8002c164 hands to func_8004c068 (WIP). */
+typedef struct Record78 {
+    u8 unk0[0x78];
+} Record78;
+
 typedef struct Data80185da8 {
     Object88 objects[200];
-    u8 unk6a40[0x32ec];
+    Record78 unk6a40[108];
+    u8 unk9ce0[0x48];
+    struct Object2c *unk9d28; /* +0x9d28: func_8002c164 keeps its last object here */
 } Data80185da8;
+
+/* What func_8004d3c4 returns to func_8002c164 (WIP, referenced prefix). */
+typedef struct Object2c {
+    u8 unk0[2];
+    u8 unk2;        /* +0x02: Data80185da8.unk6a40 index */
+    u8 unk3[0x25];
+    u32 unk28;      /* +0x28: flags; 0x100 skips func_8004b94c */
+} Object2c;
+
+/* 0x18-byte records at the start of DAT_801b77ec (WIP). */
+typedef struct Record18 {
+    u8 unk0;        /* +0x00: func_80029f1c sets it to 1 */
+    u8 unk1;
+    u8 unk2;        /* +0x02: SoundState.effects[unk2 + 144], 0xff for none */
+    u8 unk3[0x15];
+} Record18;
+
+typedef struct Data801b77ec {
+    Record18 unk0[96];
+    Object4c objects[128];
+    u8 unk2f00[0xc];
+} Data801b77ec;
+
+/* 12-byte level records (DAT_8009f114, one per level). */
+typedef struct Record0c {
+    u16 unk0;       /* new Data801b24e4.hp_max */
+    u16 unk2;       /* new Data801b24e4.unk1a */
+    u16 unk4;       /* added to Data801b24e4.unk32 */
+    u16 unk6;
+    s32 unk8;       /* experience for the next level */
+} Record0c;
+
+/* 0x44-byte records func_80029500 adds to the player's unk54[]/unk62 (WIP). */
+typedef struct Record44 {
+    u8 unk0[5];
+    u8 unk5;
+    u16 unk6[8];
+    u8 unk16[8];
+    u16 unk1e;
+    u8 unk20[6];
+    u16 unk26;
+    u8 unk28[4];
+    u16 unk2c;
+    u16 unk2e;
+    u8 unk30[0x14];
+} Record44;
 
 /* One entry of a loaded FDAT module's handler table. */
 typedef void (*FdatHandler)(void);
@@ -134,12 +355,6 @@ typedef struct Data8018fb3c {
     u8 unk8850[0x18];
 } Data8018fb3c;
 
-typedef struct Data801b77ec {
-    u8 unk0[0x900];
-    Object4c objects[128];
-    u8 unk2f00[0xc];
-} Data801b77ec;
-
 /*
  * FDAT window words in the load image (owner unit unknown): [2] the window
  * base, [4] the end of the loaded module, [5] the heap base main stores.
@@ -160,14 +375,21 @@ extern Data801ba984 DAT_801ba984;
 extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;
 
-/* Tables func_80017664 copies out of the first FDAT.T entry (WIP extents). */
+/*
+ * Tables func_80017664 copies out of the first FDAT.T entry: the level
+ * records (one per level; 100 fill the gap to DAT_8009f5c4), the 0x44-byte
+ * records (48 fill the gap to DAT_801d4464), and the rest (WIP extents).
+ */
+extern Record0c DAT_8009f114[100];
+extern Record44 DAT_801d37a4[48];
 extern u32 DAT_80081c8c[];
-extern u32 DAT_8009f114[];
 extern u32 DAT_800aedc4[];
 extern u32 DAT_80116154[];
 extern u32 DAT_801983a8[];
-extern u32 DAT_801d37a4[];
 extern u32 DAT_801e64b8[];
 extern u8 DAT_8014f164[];
+
+/* What func_8002b64c points Data801b24e4.unkb4 at (WIP extent). */
+extern u8 DAT_8009f5c4[];
 
 #endif

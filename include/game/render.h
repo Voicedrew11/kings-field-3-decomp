@@ -128,8 +128,11 @@ typedef struct Data80199154 {
     DISPENV disp[2];                /* +0x10120 */
     u8 unk10148[0x10];
     u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
-    u8 *models[0x100];              /* +0x1015c: loaded model files by id; 0..103 stay resident */
-    u8 unk1055c[0x14b4];
+    u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
+                                     * resident, area banks from 256 + area * 32
+                                     * (func_80040568), the 32 blocks of an area part
+                                     * from 556 + part * 32 (func_800290d8); WIP extent,
+                                     * up to slots */
     AnimSlot slots[12];             /* +0x11a10 */
     u8 unk11b00[0x1f44];
     SVECTOR pose[1000];             /* +0x13a44: the blended pose being drawn */
@@ -298,7 +301,7 @@ void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
 void func_80040ae4(void);
-s32 func_80033b8c(u8 area, s32 x, s32 z, s32 arg3, s32 arg4);
+s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height);
 void func_800277c0(u16 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80035630(void);
 void func_80035700(void);
