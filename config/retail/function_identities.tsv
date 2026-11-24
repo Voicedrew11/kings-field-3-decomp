@@ -712,7 +712,7 @@ FDAT_011.BIN	0x801e86b0	func_801e86b0			void		address-only	candidate	mips-live-i
 FDAT_011.BIN	0x801e86b8	func_801e86b8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e86c0	func_801e86c0			unknown	unknown arg0;unknown *pointer1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_011.BIN	0x801e87c0	func_801e87c0			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_014.BIN	0x801e83a4	func_801e83a4			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_014.BIN	0x801e83a4	fdat_801e83a4			void	Record30 *from;Record30 *to;Record30 *out;s32 t	candidate	candidate	relocation-masked-body	FDAT light record blend (src/fdat/shared/fdat_801e83a4.inc), the same body in 4 modules; named by its FDAT_014.BIN address
 FDAT_014.BIN	0x801e8488	func_801e8488			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_014.BIN	0x801e84e0	func_801e84e0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_014.BIN	0x801e84e8	func_801e84e8			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -744,7 +744,7 @@ FDAT_017.BIN	0x801e8764	func_801e8764			void		address-only	candidate	mips-live-i
 FDAT_017.BIN	0x801e876c	func_801e876c			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_017.BIN	0x801e8774	func_801e8774			unknown	unknown *object;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_017.BIN	0x801e8880	func_801e8880			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_020.BIN	0x801e83a8	func_801e83a8			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_020.BIN	0x801e83a8	fdat_801e83a4			void	Record30 *from;Record30 *to;Record30 *out;s32 t	candidate	candidate	relocation-masked-body	FDAT light record blend (src/fdat/shared/fdat_801e83a4.inc), the same body in 4 modules; named by its FDAT_014.BIN address
 FDAT_020.BIN	0x801e848c	func_801e848c			unknown	unknown arg0	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_020.BIN	0x801e8534	func_801e8534			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_020.BIN	0x801e853c	func_801e853c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -796,7 +796,7 @@ FDAT_026.BIN	0x801e8808	func_801e8808			void		address-only	candidate	mips-live-i
 FDAT_026.BIN	0x801e8810	func_801e8810			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_026.BIN	0x801e8818	func_801e8818			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_026.BIN	0x801e8918	func_801e8918			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_029.BIN	0x801e8390	func_801e8390			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_029.BIN	0x801e8390	fdat_801e83a4			void	Record30 *from;Record30 *to;Record30 *out;s32 t	candidate	candidate	relocation-masked-body	FDAT light record blend (src/fdat/shared/fdat_801e83a4.inc), the same body in 4 modules; named by its FDAT_014.BIN address
 FDAT_029.BIN	0x801e8474	func_801e8474			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_029.BIN	0x801e847c	func_801e847c			unknown	unknown arg0;unknown arg1	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_029.BIN	0x801e86f4	func_801e86f4			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
@@ -1047,7 +1047,7 @@ FDAT_077.BIN	0x801e87a0	fdat_801e87a0			void		candidate	candidate	relocation-mas
 FDAT_077.BIN	0x801e8af0	func_801e8af0			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8af8	func_801e8af8			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_077.BIN	0x801e8b00	func_801e8b00			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
-FDAT_080.BIN	0x801e8390	func_801e8390			void	unknown arg0;unknown arg1;unknown arg2;unknown arg3	address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
+FDAT_080.BIN	0x801e8390	fdat_801e83a4			void	Record30 *from;Record30 *to;Record30 *out;s32 t	candidate	candidate	relocation-masked-body	FDAT light record blend (src/fdat/shared/fdat_801e83a4.inc), the same body in 4 modules; named by its FDAT_014.BIN address
 FDAT_080.BIN	0x801e8474	func_801e8474			void		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review
 FDAT_080.BIN	0x801e847c	fdat_801e83b0			void	VECTOR *pos;SVECTOR *angle	candidate	candidate	relocation-masked-body	FDAT handler slot 0 (src/fdat/shared/fdat_801e83b0.inc), the same body in 17 modules; named by its FDAT_002.BIN address
 FDAT_080.BIN	0x801e8684	func_801e8684			unknown		address-only	candidate	mips-live-in-heuristic	initial static signature seed; requires call-site review

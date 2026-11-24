@@ -17,7 +17,7 @@ void func_801e8390(void);
 void func_801e8398(VECTOR *pos, SVECTOR *angle);
 void func_801e85d0(void);
 void func_801e85d8(void);
-void func_801e85e0(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,;
+void func_801e85e0(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void func_801e866c(Object88 *obj);
 void func_801e875c(void);
 void func_801e8764(void);

@@ -457,3 +457,10 @@ image = "FDAT_083.BIN"
 source = "src/fdat/fdat_083.c"
 profile = "gcc260-o2-g0"
 bind = "name"
+
+[[unit]]
+unit = "fdat_080.main"
+image = "FDAT_080.BIN"
+source = "src/fdat/fdat_080.c"
+profile = "gcc260-o2-g0"
+bind = "name"

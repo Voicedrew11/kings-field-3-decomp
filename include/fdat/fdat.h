@@ -39,6 +39,7 @@ typedef struct FdatHeader {
 void func_800445b8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
                    s32 arg7, s32 arg8);
 void func_800463bc(s32 arg0);
+void func_800466e8(s32 arg0);
 s32 func_80045c7c(s32 start, VECTOR *pos, s32 range, s32 height, s32 angle, s32 arc);
 s32 func_80046608(Object44 *obj, s32 item);
 s32 func_80046884(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -47,6 +48,8 @@ s32 func_80046914(Object44 *obj, Object44 *target, SVECTOR *from, SVECTOR *to, s
 /* Varargs: with obj NULL it takes the object index from the second argument. */
 void func_8005db30(Object44 *obj, ...);
 
+/* src/fdat/shared/fdat_801e83a4.inc (4 modules) */
+void fdat_801e83a4(Record30 *from, Record30 *to, Record30 *out, s32 t);
 /* src/fdat/shared/fdat_801e83b0.inc (slot 0 in 17 modules) */
 void fdat_801e83b0(VECTOR *pos, SVECTOR *angle);
 /* src/fdat/shared/fdat_801e85a8.inc (slot 2 in 2 modules) */

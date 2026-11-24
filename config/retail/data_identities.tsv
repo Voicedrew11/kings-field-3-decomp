@@ -17,6 +17,7 @@ GAME.EXE	0x8008190c	0xa	DAT_8008190c	static	load	MapCell	func_800324f0	address-o
 GAME.EXE	0x80081928	0x8c	DAT_80081928	global	load	SpriteRec[7]	func_80041f9c	address-only	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x26c	DAT_800819b4	global	load	SpriteRec[31]	func_80041e68	address-only	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
 GAME.EXE	0x80081c20	0x6c	DAT_80081c20	global	load	Data80081c20[3]	func_800422b8	address-only	asm;game-b hud relocs	compass needle records (0x24 bytes); func_800422b8 shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x80081c8c	0xc00	DAT_80081c8c	global	load	Record30[64]	func_800341e8	address-only	asm;band C/H relocs;FDAT_080 func_801e86c4	light records (render.h); func_80017664 copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
 GAME.EXE	0x8009c22c	0x1	DAT_8009c22c	global	load	u8	func_8001aa84	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
 GAME.EXE	0x8009c22d	0x1	DAT_8009c22d	global	load	u8	func_8001c48c	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
 GAME.EXE	0x8009c22e	0x1	DAT_8009c22e	global	load	u8	func_8001dee4	address-only	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
@@ -152,3 +153,5 @@ END.EXE	0x8009df0c	0x8e8	db	global	bss	DB[2]	init_graphics	supported	asm;src/end
 END.EXE	0x8009e804	0x2000	prim_buffer	global	bss	u_long[2][0x400]	init_graphics	supported	asm;src/end/main.c end.main	.bss COMMON; primitive area of each display buffer
 FDAT_023.BIN	0x801e8908	0x8	DAT_801e8908	static	load	SVECTOR	func_801e87d0	address-only	asm;src/fdat/fdat_023.c fdat_023.main	.data; the first offset slot 9 passes to func_80046914
 FDAT_023.BIN	0x801e8910	0x8	DAT_801e8910	static	load	SVECTOR	func_801e87d0	address-only	asm;src/fdat/fdat_023.c fdat_023.main	.data; the second offset slot 9 passes to func_80046914
+FDAT_080.BIN	0x801e8bb8	0x30	DAT_801e8bb8	static	load	Record30	func_801e86c4	address-only	asm;src/fdat/fdat_080.c fdat_080.main	.data; light record the lamp count blends from
+FDAT_080.BIN	0x801e8be8	0x30	DAT_801e8be8	static	load	Record30	func_801e86c4	address-only	asm;src/fdat/fdat_080.c fdat_080.main	.data; light record the lamp count blends to
