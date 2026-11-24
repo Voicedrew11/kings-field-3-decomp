@@ -129,6 +129,12 @@ source = "src/game/player_cast.c"
 profile = "gcc260-o2-g8"
 
 [[unit]]
+unit = "game.player_spell"
+image = "GAME.EXE"
+source = "src/game/player_spell.c"
+profile = "gcc260-o2-g8"
+
+[[unit]]
 unit = "game.player_action"
 image = "GAME.EXE"
 source = "src/game/player_action.c"

@@ -18,6 +18,7 @@ Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 recor
 Data801983a8	0xda0	supported	asm;func_80060800 relates the three parts to one base (+0xc0, +0x1e0); WIP extent up to DAT_80199148	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);func_800290d8 pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
+Data801b24e4Mode	0x10	supported	asm;func_80030908/func_80030810/func_80030af8 views of +0x188	WIP (game-j)
 Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;func_80029f1c/func_8002b468 24-byte records at +0;func_80017aa4 records at +0x900	WIP (game-c, game-d)
 Data801ba984	0x5144	supported	asm;game loop word-count clear;band D func_80029500/func_80029f1c/func_8002bdc0 byte accesses	WIP (game-d)
 Data801d4464	0x12054	supported	asm;game loop word-count clear;func_800293e4/func_8002bb84 0x20-byte records at +0x11c14;func_80028d54 heights +0x12018;band F collision results +0x12004..+0x1204c	WIP (game-d, game-f)
@@ -37,7 +38,9 @@ PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 nex
 Record04	0x4	supported	asm;func_80060800 4-byte stride at DAT_801983a8	WIP (game-i)
 Record06	0x6	supported	asm;func_80060800/func_800608ec 6-byte stride at DAT_801983a8+0xc0	WIP (game-i)
 Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
+Record0a	0xa	supported	asm;func_80030810/func_80030864 (u8 id, u8 0, unk12c copy at +0x18a)	WIP (game-j)
 Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
+Record10	0x10	supported	asm;func_80030908/func_8003047c 8-byte copies to +0x188/+0x190	WIP (game-j)
 Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec	WIP (game-d)
 Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
 Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4	WIP (game-d)

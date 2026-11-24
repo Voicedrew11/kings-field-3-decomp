@@ -487,18 +487,18 @@ void func_8002a074(void)
 }
 
 ADDRESS(0x8002a10c, 0x104)
-void func_8002a10c(u8 *spell)
+void func_8002a10c(Record18 *spell)
 {
     s32 mask = 0x10;
     s32 elements = 0;
     s32 i;
 
     if (spell != NULL) {
-        elements = spell[5];
+        elements = spell->unk5;
     }
     for (i = 4; i != -1; mask >>= 1, i--) {
         if (elements & mask) {
-            DAT_801b24e4.unk26[i] += spell[3];
+            DAT_801b24e4.unk26[i] += spell->unk3;
             if (DAT_801b24e4.unk26[i] >= 400) {
                 DAT_801b24e4.unk26[i] = 0;
                 DAT_801b24e4.unk34[i]++;

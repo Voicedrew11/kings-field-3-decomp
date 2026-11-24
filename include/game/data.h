@@ -16,6 +16,26 @@
 #include <psyq/sdk.h>
 #include <kf/decenv.h>
 
+/* Data801b24e4.unk188 in modes 3, 0x10, 0x11 and 0x12 (func_80030908). */
+typedef struct Record10 {
+    SVECTOR dir;    /* +0x0 */
+    SVECTOR push;   /* +0x8: added to unk134..unk138 (func_8003047c) */
+} Record10;
+
+/* Data801b24e4.unk188 in modes 7, 8 and 9 (func_80030810). */
+typedef struct Record0a {
+    u8 id;          /* +0x0 */
+    u8 unk1;
+    SVECTOR angle;  /* +0x2: copy of Data801b24e4.unk12c */
+} Record0a;
+
+/* Data801b24e4.unk188: one view per unk101 mode (mode 5 counts in count). */
+typedef union Data801b24e4Mode {
+    Record10 knock;
+    Record0a turn;
+    s16 count;
+} Data801b24e4Mode;
+
 typedef struct Data801b24e4 {
     s32 experience; /* +0x00: the save title shows it as six digits */
     s32 unk4;
@@ -169,18 +189,7 @@ typedef struct Data801b24e4 {
     u8 unk17c[0x4];
     s32 unk180;
     s32 unk184;
-    union {
-        struct {
-            SVECTOR dir;    /* +0x188: modes 3, 0x10, 0x11, 0x12 (func_80030908) */
-            SVECTOR push;   /* +0x190: added to unk134..unk138 (func_8003047c) */
-        } knock;
-        struct {
-            u8 id;          /* +0x188: modes 7, 8, 9 */
-            u8 unk189;
-            SVECTOR angle;  /* +0x18a: copy of unk12c */
-        } turn;
-        s16 count;          /* +0x188: mode 5 */
-    } unk188;               /* +0x188: per unk101 mode */
+    Data801b24e4Mode unk188; /* +0x188: parameters of the unk101 mode */
     u8 unk198[0x4];
 } Data801b24e4;
 

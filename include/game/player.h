@@ -21,7 +21,7 @@ void func_800293e4(s32 id);
 void func_80029500(void);
 void func_80029f1c(u32 element);
 void func_8002a074(void);
-void func_8002a10c(u8 *spell);
+void func_8002a10c(struct Record18 *spell);
 void func_8002a210(void);
 void func_8002a310(int amount);
 s32 func_8002a5f8(s32 power, s32 defense, s32 attack);
@@ -52,11 +52,16 @@ struct Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dis
 /* Pad bit per action (WIP), defined in player.c. */
 extern u16 DAT_80081868[14];
 
-/* src/game/player_action.c (the same WIP module after func_8002c30c). */
+/*
+ * The same WIP module after func_8002c30c: src/game/player_cast.c,
+ * player_spell.c and player_action.c (func_8002c30c, func_8002d2a0 and
+ * func_8002e3f8 are not reconstructed yet).
+ */
+void func_8002c30c(); /* spell id; spills all four argument registers */
 void func_8002cea8(s32 vertex, VECTOR *out);
 s32 func_8002cfe0(s32 hand);
 void func_8002d130(s32 id, s32 pay, s32 dir);
-void func_8002deec(u8 id);
+void func_8002deec(s32 id);
 void func_8002e3f8(s32 angle, s32 speed);
 void func_8002ecbc(void);
 void func_8002ed1c(s32 speed);
@@ -88,7 +93,6 @@ void func_80030d68(struct Record20 *r);
 void func_80030e14(void);
 
 /* Callees outside the module (no definition reconstructed yet). */
-void func_8002c30c();
 s32 func_8001a774(void);
 void func_8001b254(s32 id);
 void func_8001bea8(void);

@@ -13,8 +13,7 @@
 #include <game/data.h>
 #include <game/funcs.h>
 #include <game/player.h>
-#include <game/memory.h>
-#include <game/cd.h>
+#include <game/entity.h>
 #include <game/misc.h>
 #include <kf/lib/null.h>
 
@@ -657,7 +656,7 @@ void func_80030810(u8 id)
 {
     DAT_801b24e4.unk101 = 7;
     DAT_801b24e4.unk188.turn.id = id;
-    DAT_801b24e4.unk188.turn.unk189 = 0;
+    DAT_801b24e4.unk188.turn.unk1 = 0;
     DAT_801b24e4.unk188.turn.angle = DAT_801b24e4.unk12c;
 }
 
@@ -666,7 +665,7 @@ void func_80030864(u8 id)
 {
     DAT_801b24e4.unk101 = 9;
     DAT_801b24e4.unk188.turn.id = id;
-    DAT_801b24e4.unk188.turn.unk189 = 0;
+    DAT_801b24e4.unk188.turn.unk1 = 0;
     DAT_801b24e4.unk188.turn.angle = DAT_801b24e4.unk12c;
 }
 
