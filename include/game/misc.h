@@ -22,6 +22,7 @@ void func_8005bfc4(Object44 *obj, VECTOR *from, VECTOR *to, s32 t);
 void func_8005c04c(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t);
 void func_8005c0d4(Object88 *obj, u8 anim, u16 time, s32 target, u16 step);
 u8 func_8005c18c(u8 *script, u8 id);
+void func_8005c308(Object88 *obj);
 u8 *func_8005c1e8(Object88 *obj);
 void func_8005c7e8(Object44 *obj, s16 id);
 

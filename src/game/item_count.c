@@ -17,6 +17,10 @@
 #include <game/player.h>
 #include <game/misc.h>
 #include <game/object44.h>
+#include <game/entity.h>
+#include <game/cd.h>
+#include <game/menu.h>
+#include <game/memory.h>
 #include <psyq/libc.h>
 #include <stdarg.h>
 
@@ -303,4 +307,227 @@ back:
         obj->unk6 = 0xff;
     }
     func_8002b6f0();
+}
+
+/*
+ * The action button at pos facing angle: the Object88 within reach in front
+ * gets func_8005c308, then each Object44 record func_80045c7c finds in front
+ * acts by the type of its def (doors and locks show why they stay shut or
+ * open, items are picked up, the healing and save points fade the screen),
+ * and the loaded FDAT module's handler 0 gets the point last. The full
+ * restore (type 0x12) clamps both values like the heal (type 0x16) does.
+ */
+ADDRESS(0x8005e2d0, 0x794)
+void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
+{
+    VECTOR p;
+    Object88 *o88;
+    Object44 *obj;
+    Object44Def *def;
+    Object44 *link;
+    s32 i;
+
+    p.vx = pos->vx;
+    p.vy = pos->vy + 500;
+    p.vz = pos->vz;
+    DAT_801ba984.unk0 = 0;
+    i = func_8004d644(p.vx, p.vy, p.vz, 1400, 3200);
+    if (i != -1) {
+        o88 = &DAT_80185da8.objects[i];
+        if (func_80016a2c(angle->vy, func_80016ab8(o88->pos.vx - p.vx, o88->pos.vz - p.vz), 300)) {
+            func_8005c308(o88);
+        }
+    }
+    for (i = 0; (i = func_80045c7c(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
+        obj = &DAT_8018fb3c.objects[i];
+        def = &DAT_8018fb3c.defs[obj->unk6];
+        DAT_801ba984.unk0 = 1;
+        switch (def->unk0) {
+        case 0xa5:
+        case 0xff:
+            if (obj->unk6 == 0xf8) {
+                func_80041eec(0x1d);
+            } else if (obj->unk6 == 0xf9) {
+                func_80041eec(0x1c);
+            }
+            break;
+        case 0x40:
+            func_8005db30(obj);
+            if (obj->unk6 == 0xff) {
+                goto done;
+            }
+            break;
+        case 0x53:
+            if (obj->arg.b.unk3d[1] == 0) {
+                break;
+            }
+            if (obj->unk8 != 0) {
+                break;
+            }
+            if (obj->arg.b.unk3d[0] == 0xff) {
+                obj->unk8 = 1;
+            }
+            break;
+        case 0x57:
+            if (obj->unk8 == 0) {
+                obj->unk8 = 1;
+            }
+            break;
+        case 3:
+        case 4:
+        case 5:
+            if (obj->unk8 != 0) {
+                break;
+            }
+            if (obj->arg.b.unk38 == 0xff) {
+                obj->unk8 = 1;
+            } else {
+                func_80041eec(6);
+            }
+            break;
+        case 0:
+        case 1:
+        case 2:
+        case 0x1b:
+            if (obj->unk8 != 0) {
+                break;
+            }
+            switch (obj->arg.b.unk38) {
+            case 0x98:
+            case 0xf1:
+                func_80041eec(5);
+                break;
+            case 0x96:
+            case 0xf0:
+                func_80041eec(0x17);
+                break;
+            case 0x9a:
+            case 0xf2:
+                func_80041eec(0xf);
+                break;
+            case 0xfd:
+            case 0xfe:
+                if (obj->unk6 != 0xae) {
+                    obj->unk8 = 1;
+                    break;
+                }
+                func_80041eec(6);
+                break;
+            case 0xff:
+                obj->unk8 = 1;
+                break;
+            default:
+                func_80041eec(6);
+                break;
+            }
+            break;
+        case 0x51:
+            if (obj->unk8 != 0) {
+                break;
+            }
+            if (obj->arg.b.unk38 == 0xff) {
+                obj->unk8 = 1;
+            }
+            break;
+        case 0x52:
+            if (obj->unk8 != 0) {
+                break;
+            }
+            if (obj->arg.b.unk38 == 0xff) {
+                obj->unk8 = 1;
+            }
+            break;
+        case 6:
+        case 8:
+            if (!func_80016a2c(angle->vy, obj->angle.vy + 2048, 0x155)) {
+                break;
+            }
+            /* fall through */
+        case 7:
+        case 0x17:
+            switch (obj->arg.b.unk38) {
+            case 0xf1:
+                func_80041eec(5);
+                break;
+            case 0xf0:
+                func_80041eec(0x17);
+                break;
+            case 0xfe:
+                if (obj->arg.h.unk3a == 0xffff) {
+                missing:
+                    func_80041eec(0x1a);
+                } else {
+                    link = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                    if (link->unk6 == 0xff) {
+                        goto missing;
+                    }
+                }
+                break;
+            case 0xff:
+                obj->arg.b.unk38 = 0xfe;
+                break;
+            default:
+                func_80041eec(6);
+                break;
+            }
+            break;
+        case 0xd:
+        case 0x14:
+            if (obj->arg.b.unk3d[1] == 0) {
+                break;
+            }
+            if (obj->arg.b.unk3d[0] == 0 && !func_80016a2c(angle->vy, obj->angle.vy + 2048, 0x155)) {
+                break;
+            }
+            func_800441d4(6, obj->arg.h.unk38 + 150);
+            break;
+        case 0x12:
+            if (!func_80016a2c(angle->vy, func_80016ab8(obj->pos.vx - p.vx, obj->pos.vz - p.vz), 600)) {
+                break;
+            }
+            if (!func_80016a2c(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
+                break;
+            }
+            func_8005d948(512, 0, 0, 0, 128, 200, 255);
+            DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
+                DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            }
+            DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
+            if (DAT_801b24e4.unk1a < DAT_801b24e4.unk1c) {
+                DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
+            }
+            func_8002aa54(7);
+            func_8005d948(512, 128, 200, 255, 0, 0, 0);
+            func_8002b6f0();
+            break;
+        case 0x16:
+            if (!func_80016a2c(angle->vy, func_80016ab8(obj->pos.vx - p.vx, obj->pos.vz - p.vz), 600)) {
+                break;
+            }
+            if (!func_80016a2c(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
+                break;
+            }
+            func_8005d948(512, 0, 0, 0, 128, 128, 200);
+            DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
+                DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            }
+            func_8005d948(512, 128, 128, 200, 0, 0, 0);
+            func_8002b6f0();
+            break;
+        case 0xe:
+            if ((s16)DAT_8018fad4.loading != 1) {
+                func_80019ab4();
+                func_8001bea8();
+                func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+                func_8005efd4(DAT_8018fad4.area[0]);
+                func_80030568();
+                func_8002008c();
+            }
+            break;
+        }
+    }
+done:
+    DAT_8018fad4.handlers[0](&p, angle);
 }
