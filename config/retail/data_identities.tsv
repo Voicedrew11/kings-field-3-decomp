@@ -8,6 +8,7 @@ PSX.EXE	0x80010260	0x4	program_index	global	load	int	main	supported	asm;src/psx/
 PSX.EXE	0x80010264	0x4	next_program	global	load	u8 *	main	supported	asm;src/psx/main.c psx.main exact	$gp+4; points at the next-program byte 0x800102f0
 PSX.EXE	0x8001026c	0x3c	program_header	global	bss	struct EXEC	main	supported	asm;src/psx/main.c psx.main exact	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 GAME.EXE	0x800136e8	0x18	DAT_800136e8	global	load	u32[6]	main	address-only	asm;band A relocs	FDAT window words (0x801e8308, 0x801e8308, 0x801e8308, 0x801e838c, 0x801e92f8, 0x801e92f8 in the image); main reads [2] and [4] and stores the heap base at [5]; WIP extent, owner unit unknown
+GAME.EXE	0x8007e4e4	0x80	DAT_8007e4e4	global	load	FdatHandler[32]	func_80018358	address-only	asm;game-big relocs	.data; 32 copies of func_8001765c, the handler table func_80018358 installs while the FDAT module loads; owner unit unknown
 GAME.EXE	0x80081818	0xd	DAT_80081818	static	load	char[13]	func_800281c4	address-only	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix (OPEN.EXE's card checks have the same string)
 GAME.EXE	0x80081828	0x3f	DAT_80081828	static	load	char[63]	func_80028750	address-only	asm;src/game/card.c game.card	.data; Shift-JIS save title func_80028b70 writes the save number, experience and level digits into
 GAME.EXE	0x80081868	0x1c	DAT_80081868	global	load	u16[14]	func_8002b6f0	address-only	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits, func_8002b6f0 keeps [4] [6] [7] [12] held

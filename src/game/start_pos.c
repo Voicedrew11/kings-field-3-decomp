@@ -16,6 +16,7 @@
 #include <game/player.h>
 #include <game/misc.h>
 #include <game/object44.h>
+#include <game/scene.h>
 
 RODATA(0x800130f0, 0x70)
 

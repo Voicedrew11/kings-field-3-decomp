@@ -11,14 +11,14 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-void func_80017c78(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, s8 shift1,
-                   s8 shift2);
-void func_80018358(void);
 s32 func_8001fa60(void);
 void func_80030fcc(void);
 s32 func_800324f0(s32 x, s32 y, s32 z);
+void func_80044d9c(u8 *data);
 void func_80047010(void);
 void func_8005eb20(void);
+void func_8005efd4(s32 area);
+void func_8005f444(s32 area);
 void func_8005f7bc(u8 *data);
 void func_8005ffd0(u8 *data);
 void func_80061940(void);

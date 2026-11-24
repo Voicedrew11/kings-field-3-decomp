@@ -2,9 +2,13 @@
  * GAME.EXE: area set-up (WIP module). func_80017664 opens the archive
  * files, loads the first FDAT.T entry into the arena and copies its tables
  * out; func_8001796c asks for a full area load and steps the loader until it
- * finishes; func_80017aa4 shifts the player and every live object. Its unit
- * is -G8: the handler-table pointer is a $gp-relative .sbss word, while the
+ * finishes; func_80017aa4 shifts the player and every live object;
+ * func_80017c78 asks for a load of some area parts; func_80018358 is the
+ * loader's step machine (FDAT module, map, objects, image, sequence), whose
+ * CD requests complete through the five callbacks before it. Its unit is
+ * -G8: the handler-table pointer is a $gp-relative .sbss word, while the
  * FDAT window base is reached absolutely (declared without a size here).
+ * The RODATA claim holds the COM names and func_80018358's jump table.
  */
 /* The area step is volatile only here (see game/data.h). */
 #define GAME_SCENE_MODULE
@@ -13,6 +17,7 @@
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <psyq/cd.h>
+#include <psyq/kernel.h>
 #include <game/sound.h>
 #include <game/cd.h>
 #include <game/memory.h>
@@ -23,6 +28,9 @@
 #include <game/misc.h>
 #include <game/funcs.h>
 #include <game/player.h>
+#include <game/menu.h>
+#include <game/entity.h>
+#include <game/collision.h>
 
 /* archive file numbers (func_8001a34c table slots) */
 #define FILE_FDAT 4
@@ -31,8 +39,10 @@
 #define AREA_RELOAD 99
 #define AREA_KEEP 0xff
 #define SHIFT_NONE 0x7f
+/* step while a CD request is outstanding; its callback sets the next one. */
+#define STEP_WAIT 0xf0
 
-RODATA(0x80011000, 0x6c)
+RODATA(0x80011000, 0x8c)
 
 DATA(0x8009c3fc, 0x4, ".sbss")
 u32 DAT_8009c3fc;
@@ -172,5 +182,377 @@ void func_80017aa4(s32 dx, s32 dy, s32 dz)
             d->pos.vy += dy;
         }
         d++;
+    }
+}
+
+/*
+ * Asks for an area load: area0..area4 name the parts (0xff keeps a part, 200
+ * in area4 only restarts the sequence), shift0..shift2 the origin shift.
+ * While a load runs it waits for it (or for its CD request) first.
+ * Not exact: want1/next3 and want2/next4 trade registers (t0/t1, a2/a3);
+ * the code is otherwise instruction-identical.
+ */
+ADDRESS(0x80017c78, 0x668)
+void func_80017c78(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, s8 shift1,
+                   s8 shift2)
+{
+    u8 next0;
+    u8 next1;
+    u8 next2;
+    u8 next3;
+    u8 next4;
+    u8 want0;
+    u8 want1;
+    u8 want2;
+    u8 want3;
+    u8 want4;
+
+    if (area4 == 200) {
+        if (DAT_801b09fc.seq_playing == 0) {
+            func_80015240();
+        }
+        return;
+    }
+    if (area0 == AREA_KEEP) {
+        want0 = DAT_8018fad4.area[0];
+        next0 = DAT_8018fad4.previous[0];
+        if (area1 == AREA_KEEP) {
+            want1 = DAT_8018fad4.area[1];
+            next1 = DAT_8018fad4.previous[1];
+        } else {
+            want1 = next1 = area1;
+        }
+        if (area2 == AREA_KEEP) {
+            want2 = DAT_8018fad4.area[2];
+            next2 = DAT_8018fad4.previous[2];
+        } else {
+            want2 = next2 = area2;
+        }
+        if (area3 == AREA_KEEP) {
+            want3 = DAT_8018fad4.area[3];
+            next3 = DAT_8018fad4.previous[3];
+        } else {
+            want3 = next3 = area3;
+        }
+        if (area4 == AREA_KEEP) {
+            want4 = DAT_8018fad4.area[4];
+            next4 = DAT_8018fad4.previous[4];
+        } else {
+            want4 = next4 = area4;
+        }
+    } else {
+        next1 = area1;
+        next2 = area2;
+        next3 = area3;
+        next4 = area4;
+        next0 = area0;
+        want0 = area0;
+        want1 = DAT_8018fad4.area[1];
+        want2 = DAT_8018fad4.area[2];
+        want3 = DAT_8018fad4.area[3];
+        want4 = DAT_8018fad4.area[4];
+    }
+    if (DAT_8018fad4.loading != 0) {
+        goto busy;
+    }
+    if (DAT_8018fad4.area[0] == want0 && DAT_8018fad4.area[1] == want1
+        && DAT_8018fad4.area[2] == want2 && DAT_8018fad4.area[3] == want3
+        && DAT_8018fad4.area[4] == want4) {
+        return;
+    }
+start:
+    if (DAT_8018fad4.area[0] != AREA_RELOAD && DAT_8018fad4.area[0] != want0) {
+        func_8001bea8();
+        func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+        func_8005efd4(DAT_8018fad4.area[0]);
+    }
+    if (DAT_801ba984.unk4[0] < want0) {
+        DAT_801ba984.unk4[0] = want0;
+    }
+    DAT_801ba984.unk8a[want0] = 1;
+    DAT_8018fad4.loading = 1;
+    DAT_8018fad4.step = 0;
+    DAT_8018fad4.previous[0] = area0;
+    DAT_8018fad4.previous[1] = area1;
+    DAT_8018fad4.previous[2] = area2;
+    DAT_8018fad4.previous[3] = area3;
+    DAT_8018fad4.previous[4] = area4;
+    DAT_8018fad4.shift[0] = shift0;
+    DAT_8018fad4.shift[1] = shift1;
+    DAT_8018fad4.shift[2] = shift2;
+    DAT_8018fad4.unk15 = 0;
+    if (area1 == AREA_KEEP) {
+        DAT_8018fad4.unk16 = 0;
+    } else {
+        DAT_8018fad4.unk16 = 1;
+    }
+    return;
+busy:
+    if (((s16)DAT_8018fad4.loading != 1 || DAT_8018fad4.previous[0] == next0)
+        && DAT_8018fad4.previous[1] == next1 && DAT_8018fad4.previous[2] == next2
+        && DAT_8018fad4.previous[3] == next3 && DAT_8018fad4.previous[4] == next4) {
+        return;
+    }
+    if (DAT_8018fad4.previous[0] == AREA_KEEP && DAT_8018fad4.area[0] == want0) {
+        return;
+    }
+    if (DAT_8018fad4.previous[1] == AREA_KEEP && DAT_8018fad4.area[1] == area1) {
+        return;
+    }
+    if (DAT_8018fad4.previous[2] == AREA_KEEP && DAT_8018fad4.area[2] == area2) {
+        return;
+    }
+    if (DAT_8018fad4.previous[3] == AREA_KEEP && DAT_8018fad4.area[3] == area3) {
+        return;
+    }
+    if (DAT_8018fad4.previous[4] == AREA_KEEP && DAT_8018fad4.area[4] == area4) {
+        return;
+    }
+    if ((DAT_8018fad4.previous[0] != AREA_KEEP && area0 == AREA_KEEP)
+        || (DAT_8018fad4.previous[1] != AREA_KEEP && area1 == AREA_KEEP)
+        || (DAT_8018fad4.previous[2] != AREA_KEEP && area2 == AREA_KEEP)
+        || (DAT_8018fad4.previous[3] != AREA_KEEP && area3 == AREA_KEEP)
+        || (DAT_8018fad4.previous[4] != AREA_KEEP && area4 == AREA_KEEP)) {
+        while (DAT_8018fad4.loading != 0) {
+            func_80019538();
+            func_80018358();
+        }
+    } else {
+        while (DAT_8018fad4.step == STEP_WAIT) {
+            func_80019538();
+        }
+    }
+    ExitCriticalSection();
+    if (DAT_8018fad4.unk15 != 0 && area0 != AREA_KEEP && shift0 == SHIFT_NONE
+        && DAT_8018fad4.previous[0] != area0) {
+        shift0 = -DAT_8018fad4.shift[0];
+        shift2 = -DAT_8018fad4.shift[2];
+        shift1 = -DAT_8018fad4.shift[1];
+    }
+    goto start;
+}
+
+/* CD request callbacks of the area loader: each sets the next step. */
+ADDRESS(0x800182e0, 0x18)
+void func_800182e0(void)
+{
+    DAT_8018fad4.step = 1;
+}
+
+ADDRESS(0x800182f8, 0x18)
+void func_800182f8(void)
+{
+    DAT_8018fad4.step = 2;
+}
+
+ADDRESS(0x80018310, 0x18)
+void func_80018310(void)
+{
+    DAT_8018fad4.step = 3;
+}
+
+ADDRESS(0x80018328, 0x18)
+void func_80018328(void)
+{
+    DAT_8018fad4.step = 4;
+}
+
+ADDRESS(0x80018340, 0x18)
+void func_80018340(void)
+{
+    DAT_8018fad4.step = 6;
+}
+
+ADDRESS(0x80018358, 0x8fc)
+void func_80018358(void)
+{
+    u32 *data = (u32 *)DAT_801c17a4;
+    u32 *part;
+    s32 i;
+    u16 j;
+    Object44 *obj44;
+    Object88 *obj88;
+    MapCell *cell;
+    u8 *block;
+
+    switch ((s16)DAT_8018fad4.loading) {
+    case 0:
+        return;
+    case 1:
+        break;
+    default:
+        return;
+    }
+    switch (DAT_8018fad4.step) {
+    case 0:
+        if (DAT_8018fad4.previous[0] == AREA_KEEP) {
+            goto parts;
+        }
+        DAT_8018fad4.step = STEP_WAIT;
+        obj44 = DAT_8018fb3c.objects;
+        for (i = 395; i != -1; i--) {
+            obj44->unk4 = 0xff;
+            obj44++;
+        }
+        func_80019d48(FILE_FDAT, DAT_8018fad4.previous[0] * 3, DAT_801c17a4, func_800182e0);
+        break;
+    case 1:
+        DAT_8018fad4.step = STEP_WAIT;
+        DAT_8018fad4.handlers = DAT_8007e4e4;
+        func_80019d48(FILE_FDAT, DAT_8018fad4.previous[0] * 3 + 2, (u8 *)DAT_8009c400[0],
+                      func_800182f8);
+        func_80018f5c((u32 *)DAT_801d4464.cells, data + 1, 0x3e80);
+        data = (u32 *)((u8 *)data + (*data + 4));
+        func_80018f5c((u32 *)DAT_801d4464.unk10000, data + 1, 0x800);
+        func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+        if (DAT_8018fad4.shift[0] != SHIFT_NONE) {
+            DAT_8018fad4.unk15 = 1;
+            func_80017aa4(DAT_8018fad4.shift[0] << 11, -(DAT_8018fad4.shift[2] << 7),
+                          DAT_8018fad4.shift[1] << 11);
+        }
+        DAT_8018fad4.unk9 = DAT_8018fad4.previous[0];
+        break;
+    case 2:
+        DAT_8018fad4.step = STEP_WAIT;
+        func_80019d48(FILE_FDAT, DAT_8018fad4.previous[0] * 3 + 1, DAT_801c17a4, func_80018310);
+        DAT_8018fad4.handlers = (FdatHandler *)DAT_8009c3fc;
+        break;
+    case 3:
+    parts:
+        if (DAT_8018fad4.previous[1] != AREA_KEEP) {
+            DAT_8018fad4.step = STEP_WAIT;
+            func_80019d48(5, DAT_8018fad4.previous[1], DAT_8014f164, func_80018328);
+        }
+        if (DAT_8018fad4.previous[0] != AREA_KEEP) {
+            part = (u32 *)DAT_801c17a4;
+            obj88 = DAT_80185da8.objects;
+            for (i = 199; i != -1; i--) {
+                if (obj88->unk5c != 0) {
+                    func_80043894((AnimSlot *)obj88->unk5c);
+                }
+                obj88->unk0 = 0xff;
+                obj88++;
+            }
+            obj44 = DAT_8018fb3c.objects;
+            for (i = 395; i != -1; i--) {
+                if (obj44->arg.w.unk34 != 0) {
+                    func_80043894((AnimSlot *)obj44->arg.w.unk34);
+                }
+                switch (obj44->unk4) {
+                case 0x20:
+                    func_80019518((void *)obj44->arg.w.unk40);
+                    obj44->unk4 = 0xff;
+                    break;
+                case 0x22:
+                    func_80019518((void *)obj44->arg.w.unk40);
+                    obj44->unk4 = 0xff;
+                    break;
+                }
+                obj44->unk6 = 0xff;
+                obj44++;
+            }
+            if (DAT_8018fad4.shift[0] != SHIFT_NONE) {
+                cell = DAT_801d4464.cells[0];
+                for (i = 80 * 80; i != 0; i--) {
+                    cell->layer[0].unk2 &= 3;
+                    cell->layer[1].unk2 &= 3;
+                    cell++;
+                }
+                func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
+            }
+            func_80018f5c((u32 *)DAT_80185da8.defs, part + 1, 0xcb0);
+            func_80053084();
+            part = (u32 *)((u8 *)part + (*part + 4));
+            func_800530f8((Object88Place *)(part + 1));
+            part = (u32 *)((u8 *)part + (*part + 4));
+            func_80018f5c((u32 *)&DAT_8018fb3c.defs[300], part + 1, 0xc0);
+            part = (u32 *)((u8 *)part + (*part + 4));
+            func_80044d9c((u8 *)(part + 1));
+            part = (u32 *)((u8 *)part + (*part + 4));
+            func_80043a08((EffectSpawn *)(part + 1));
+            part = (u32 *)((u8 *)part + (*part + 4));
+            func_80018f5c((u32 *)DAT_801ba6fc, part + 1, 0xa0);
+            func_8005f444(DAT_8018fad4.previous[0]);
+            func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+            if (DAT_8018fad4.area[0] != DAT_8018fad4.previous[0]
+                && DAT_8018fad4.area[0] != AREA_RELOAD) {
+                for (j = DAT_8018fad4.area[0] * 32 + 556; j < DAT_8018fad4.area[0] * 32 + 588;
+                     j++) {
+                    block = DAT_80199154.models[j];
+                    if (block != NULL && func_8001947c(block) != 3) {
+                        func_80019474(block, 1);
+                    }
+                }
+            }
+            func_80061918();
+            DAT_8018fad4.handlers[5]();
+            DAT_801b24e4.unke = 1;
+            DAT_8018fad4.unk17 = 1;
+        }
+        if (DAT_8018fad4.previous[1] != AREA_KEEP) {
+            break;
+        }
+    case 4:
+        if (DAT_8018fad4.previous[2] != AREA_KEEP) {
+            func_80018c60(3, DAT_8018fad4.previous[2]);
+        }
+        DAT_8018fad4.unk16 = 0;
+        if (DAT_8018fad4.previous[3] == AREA_KEEP && DAT_8018fad4.previous[4] == AREA_KEEP) {
+        done:
+            DAT_8018fad4.unk17 = 0;
+            if (DAT_8018fad4.previous[0] != AREA_KEEP) {
+                DAT_8018fad4.area[0] = DAT_8018fad4.previous[0];
+            }
+            if (DAT_8018fad4.previous[1] != AREA_KEEP) {
+                DAT_8018fad4.area[1] = DAT_8018fad4.previous[1];
+            }
+            if (DAT_8018fad4.previous[2] != AREA_KEEP) {
+                DAT_8018fad4.area[2] = DAT_8018fad4.previous[2];
+            }
+            if (DAT_8018fad4.previous[3] != AREA_KEEP) {
+                DAT_8018fad4.area[3] = DAT_8018fad4.previous[3];
+            }
+            if (DAT_8018fad4.previous[4] != AREA_KEEP) {
+                DAT_8018fad4.area[4] = DAT_8018fad4.previous[4];
+            }
+            DAT_8018fad4.loading = 0;
+            break;
+        }
+        DAT_8018fad4.step = 5;
+        DAT_801b09fc.seq_ready = 0;
+        DAT_8018fad4.unk1c = DAT_801b24e4.bgm_volume;
+    case 5:
+        if (DAT_801b09fc.seq_playing != 0) {
+            DAT_8018fad4.unk1c -= 2;
+            if (DAT_8018fad4.unk1c <= 0) {
+                DAT_8018fad4.unk1c = 0;
+            }
+            SsSeqSetVol(DAT_801b09fc.seq_id, DAT_8018fad4.unk1c, DAT_8018fad4.unk1c);
+            if (DAT_8018fad4.unk1c != 0) {
+                break;
+            }
+            SsSeqStop(DAT_801b09fc.seq_id);
+            SsSeqClose(DAT_801b09fc.seq_id);
+            DAT_801b09fc.seq_playing = 0;
+        }
+        if (DAT_801b09fc.banks[1].vab_id != -1) {
+            DAT_801b09fc.banks[1].slot = NULL;
+        }
+        if (DAT_8018fad4.previous[3] != AREA_KEEP) {
+            func_80015ce0(2, DAT_8018fad4.previous[3] + 1, 1);
+        }
+        if (DAT_8018fad4.previous[4] == AREA_KEEP) {
+            goto done;
+        }
+        func_80019d48(2, (u8)(DAT_8018fad4.previous[4] % 100) + 546, (u8 *)DAT_801b09fc.seq_data,
+                      func_80018340);
+        DAT_8018fad4.step = STEP_WAIT;
+        break;
+    case 6:
+        if (DAT_8018fad4.previous[4] < 100) {
+            DAT_801b09fc.seq_ready = 1;
+            func_80015240();
+        }
+        goto done;
     }
 }

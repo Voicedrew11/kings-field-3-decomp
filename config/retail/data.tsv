@@ -78,7 +78,9 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x3354	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4c4	0x6dcc4	0x20	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	DAT_8007e4e4	FdatHandler[32]	asm;game-big relocs (func_80018358)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
+GAME.EXE	0x8007e564	0x6dd64	0x32b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081818	0x71018	0xd	defined	supported	DAT_80081818	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
 GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	DAT_80081828	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title

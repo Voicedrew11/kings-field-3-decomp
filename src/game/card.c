@@ -16,6 +16,7 @@
 #include <game/memory.h>
 #include <game/data.h>
 #include <game/funcs.h>
+#include <game/scene.h>
 
 #define SAVE_SLOTS 15
 
