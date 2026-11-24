@@ -14,7 +14,8 @@ ColorSum	0x8	supported	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte str
 Data80081c20	0x24	supported	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	WIP field names; untouched ranges opaque
 Data80185da8	0x9d2c	supported	asm;game loop word-count clear;func_80017aa4 records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, func_8002c164);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);func_8002c164 word +0x9d28	WIP (game-c, game-d, game-f)
 Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;func_80029188 field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 records at +0x1f20	WIP (game-c)
+Data8018fb3c	0x8868	supported	asm;game loop word-count clear;func_80017aa4 records at +0x1f20;func_80033d84 24-byte records at +0 indexed by Object44.unk6	WIP (game-c)
+Data801983a8	0xda0	supported	asm;func_80060800 relates the three parts to one base (+0xc0, +0x1e0); WIP extent up to DAT_80199148	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);func_800290d8 pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (func_80017aa4/func_80019570), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
 Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;func_80029f1c/func_8002b468 24-byte records at +0;func_80017aa4 records at +0x900	WIP (game-c, game-d)
@@ -24,7 +25,10 @@ Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesse
 Effect	0x18	supported	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;func_80017aa4 24-byte stride, 128 records	WIP field names; untouched ranges opaque
 EffectSpawn	0x10	supported	asm;func_80043a08 16-byte stride	WIP field names; untouched ranges opaque
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
+MapCell	0xa	supported	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (func_80033b8c, func_80033c4c, func_8003be34)	WIP (game-h)
+MapLayer	0x5	supported	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);func_80033b8c/func_80033c4c/func_800345f4 field accesses	WIP (game-h)
 MapRect	0x4	supported	asm;func_8001bd48/func_8001bea8 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
+Matrix3x3	0x14	supported	asm;func_800341e8 20-byte lwl/lwr struct copies;func_80034300 20-byte stride passed to func_80016290	WIP (game-h)
 MenuEntry	0x18	supported	asm;func_8001aea4 24-byte unaligned (lwl/lwr) record copies from DAT_8007f230	WIP (game-e)
 MenuFont	0xc	supported	asm;func_80025f38 reads six s16 at +0..+10;func_8001eb3c derives [1] from [5] - 48	WIP (game-e)
 MenuList	0x38	supported	asm;func_80027688/func_80027728 field stores;0x38-byte locals of the list pages	WIP (game-e)
@@ -33,18 +37,28 @@ ModelData	0x28	supported	asm;func_800431e8, func_8004352c, func_800437c8	WIP fie
 ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;func_8004352c/func_800437c8 28-byte stride	WIP field names; untouched ranges opaque
 Object44	0x44	supported	asm;func_80017aa4 68-byte stride, 0x18c records	WIP (game-c)
-Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records	WIP (game-c)
+Object44Def	0x18	supported	asm;func_80033d84 &DAT_8018fb3c + Object44.unk6 * 24 field reads	WIP (game-h)
+Object4c	0x4c	supported	asm;func_80017aa4 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
 Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (func_8004b624, func_80053084);func_8002c164	WIP (game-f)
 Object88	0x88	supported	asm;func_80017aa4 136-byte stride, 200 records;band F src/game/entity*.c field accesses;func_8002c164 reads +0x2 and +0x28 of func_8004d3c4's result	WIP (game-c)
 Object88Place	0x10	supported	asm;func_800530f8 16-byte placement records	WIP (game-f)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
+Record04	0x4	supported	asm;func_80060800 4-byte stride at DAT_801983a8	WIP (game-i)
+Record06	0x6	supported	asm;func_80060800/func_800608ec 6-byte stride at DAT_801983a8+0xc0	WIP (game-i)
+Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
 Record0c	0xc	supported	asm;func_8002a310/func_8002b468 12-byte stride at DAT_8009f114	WIP (game-d)
 Record18	0x18	supported	asm;func_80029f1c/func_8002b928 24-byte stride at DAT_801b77ec;game-e func_8001c6c0 u16 at +0x16	WIP (game-d)
 Record20	0x20	supported	asm;func_800293e4/func_8002bb84 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
+Record30	0x30	supported	asm;func_800341e8 48-byte stride source records at DAT_80081c8c;func_8003456c builds one on the stack	WIP (game-h)
 Record44	0x44	supported	asm;func_80029500/func_8002bdc0/func_8002c040 68-byte stride at DAT_801d37a4	WIP (game-d)
+Record6c	0x6c	supported	asm;func_800341e8/func_80034300/func_800344dc 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads	WIP (game-h)
 SaveHeader	0x280	supported	asm;src/game/card.c game.card (func_80028750 builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
-ScratchPad	0x124	supported	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	R3000 scratchpad at the fixed address 0x1f800000; WIP
+ScratchLoad	0xc	supported	asm;scratchpad words 0x1f80011c/120 read by the area loader (func_800407cc..)	WIP (game-h)
+ScratchPad	0x394	supported	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	R3000 scratchpad at the fixed address 0x1f800000; WIP
+ScratchPhase	0x27c	supported	asm;scratchpad 0x1f800118.. holds ScratchLoad while an area loads and ScratchView while a frame is built	WIP (game-h)
+ScratchView	0x27c	supported	asm;func_80034bf4/func_800345f4/func_800348f4 scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120	WIP (game-h)
 ScreenTint	0x4	supported	asm;func_8003d4ac/func_8003d624	WIP field names; untouched ranges opaque
+ScrollRec	0x18	supported	asm;func_800350c0/func_800350fc/func_800351fc 24-byte stride at Data80199154+0x159c8	WIP (game-h)
 SoundBank	0x8	supported	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP extent; fields band A does not touch are opaque
 SoundEffect	0xa	supported	asm;func_80015790 indexes se*10	WIP extent; fields band A does not touch are opaque
 SoundSlot	0x8	supported	asm;sound init and func_80015b9c (8-byte stride, 11 entries)	WIP extent; fields band A does not touch are opaque

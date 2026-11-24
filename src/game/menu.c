@@ -23,6 +23,7 @@
 #include <game/card.h>
 #include <game/player.h>
 #include <game/menu.h>
+#include <game/misc.h>
 #include <game/funcs.h>
 
 RODATA(0x800110b0, 0x68c)
@@ -254,7 +255,7 @@ s32 func_8001aa84(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = func_8001aea4(DAT_800c85e8, entries, counts, ids, 0x5f, 0x95);
+    n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x5f, 0x95);
     func_80027688(&list, 0, 0);
     list.count = n;
     list.entries = entries;
@@ -419,7 +420,7 @@ void func_8001b254(s32 item)
         || item == 118) {
         return;
     }
-    if (DAT_800c85e8[item] == 0) {
+    if (DAT_800c85e8[0][item] == 0) {
         return;
     }
     if (item == 104) {
@@ -459,9 +460,9 @@ void func_8001b254(s32 item)
     if (DAT_801b24e4.unk1c > DAT_801b24e4.unk1a) {
         DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
     }
-    DAT_800c85e8[item]--;
+    DAT_800c85e8[0][item]--;
     if (item == 119 || item == 120) {
-        DAT_800c85e8[118]++;
+        DAT_800c85e8[0][118]++;
     }
     func_8002792c(9);
 }
@@ -1040,12 +1041,12 @@ void func_8001cbb8(s32 slot)
         }
         first = 0x51;
         if (other != 0xff) {
-            DAT_800c85e8[other]--;
+            DAT_800c85e8[0][other]--;
         }
         last = 0x5e;
         break;
     }
-    n = func_8001aea4(DAT_800c85e8, entries, counts, ids, first, last);
+    n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, first, last);
     memcpy(&entries[n], &DAT_8007f230[11], 10);
     counts[n] = 0xff;
     ids[n] = 0xff;
@@ -1129,7 +1130,7 @@ void func_8001cbb8(s32 slot)
         }
     }
     if ((slot == 7 || slot == 8) && other != 0xff) {
-        DAT_800c85e8[other]++;
+        DAT_800c85e8[0][other]++;
     }
 }
 
@@ -1226,10 +1227,10 @@ void func_8001d3a0(void)
         ids[i] = 0xff;
         spells[i] = 0xff;
     }
-    saved = DAT_800c85e8[0x85];
-    DAT_800c85e8[0x85] = 0;
-    i = func_8001aea4(DAT_800c85e8, entries, counts, ids, 0x65, 0x92);
-    DAT_800c85e8[0x85] = saved;
+    saved = DAT_800c85e8[0][0x85];
+    DAT_800c85e8[0][0x85] = 0;
+    i = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
+    DAT_800c85e8[0][0x85] = saved;
     i += func_8001c6c0(DAT_801b77ec.unk0, &entries[i], &values[i], &spells[i], 0, 0x1e);
     memcpy(&entries[i], &DAT_8007f230[11], 12);
     i++;
@@ -1546,7 +1547,7 @@ void func_8001dee4(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = func_8001af88(DAT_800c85e8, entries, counts, ids, 0, 0x95);
+    n = func_8001af88(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
     func_80027688(&list, 2, 0);
     list.count = n;
     list.entries = entries;
@@ -1578,7 +1579,7 @@ void func_8001dee4(void)
         DAT_8009c22e = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[item + 150] + DAT_8009c25c >= 100) {
+            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[1][item] + DAT_8009c25c >= 100) {
                 func_8002792c(0xe);
                 confirmed = 0;
             } else {
@@ -1595,8 +1596,8 @@ void func_8001dee4(void)
         }
     }
     if (result != -1) {
-        DAT_800c85e8[result] -= DAT_8009c25c;
-        DAT_800c85e8[result + 150] += DAT_8009c25c;
+        DAT_800c85e8[0][result] -= DAT_8009c25c;
+        DAT_800c85e8[1][result] += DAT_8009c25c;
     }
 }
 
@@ -1616,7 +1617,7 @@ void func_8001e1b4(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = func_8001aea4(&DAT_800c85e8[150], entries, counts, ids, 0, 0x95);
+    n = func_8001aea4(DAT_800c85e8[1], entries, counts, ids, 0, 0x95);
     func_80027688(&list, 2, 1);
     list.count = n;
     list.entries = entries;
@@ -1648,7 +1649,7 @@ void func_8001e1b4(void)
         DAT_8009c22f = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[item] + DAT_8009c25c >= 100) {
+            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[0][item] + DAT_8009c25c >= 100) {
                 func_8002792c(0xe);
                 confirmed = 0;
             } else {
@@ -1665,8 +1666,8 @@ void func_8001e1b4(void)
         }
     }
     if (result != -1) {
-        DAT_800c85e8[result] += DAT_8009c25c;
-        DAT_800c85e8[result + 150] -= DAT_8009c25c;
+        DAT_800c85e8[0][result] += DAT_8009c25c;
+        DAT_800c85e8[1][result] -= DAT_8009c25c;
     }
 }
 
@@ -2854,7 +2855,7 @@ void func_80021298(s32 shop)
     s32 mode;
     u8 cursors[5] = {0, 0xb, 7, 2, 0};
     s32 kind;
-    u8 *bag = DAT_800c85e8;
+    u8 *bag = DAT_800c85e8[0];
     s32 n;
     s32 i;
     u8 item;
@@ -2957,7 +2958,7 @@ void func_80021724(s32 shop)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = func_8001af88(DAT_800c85e8, entries, counts, ids, 0, 0x95);
+    n = func_8001af88(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
     func_80021a4c(prices, ids, 0, n, shop);
     func_80027688(&list, 6, 1);
     list.count = n;
@@ -3009,7 +3010,7 @@ void func_80021724(s32 shop)
     }
     if (result != -1) {
         DAT_801b24e4.unk50 += list.values[list.cursor] * DAT_8009c25c;
-        DAT_800c85e8[result] -= DAT_8009c25c;
+        DAT_800c85e8[0][result] -= DAT_8009c25c;
         DAT_80080718[0][result] += DAT_8009c25c;
         if (DAT_80080718[0][result] >= 100) {
             DAT_80080718[0][result] = 99;
@@ -3042,7 +3043,7 @@ s32 func_80021aac(void)
     confirmed = 0;
     result = MENU_NONE;
     func_80027198();
-    n = func_8001b150(DAT_800c85e8, entries, counts, ids, 0, 0x95);
+    n = func_8001b150(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
     func_80027688(&list, 8, 0);
     list.count = n;
     list.entries = entries;
@@ -3174,7 +3175,7 @@ s32 func_80021d94(void)
     DAT_801b24e4.unkfb = 0;
     n = func_8001aea4(DAT_80080718[5], entries, counts, ids, 0, 0x95);
     for (i = 0; i < 5; i++) {
-        counts[i] = DAT_800c85e8[ids[i]] + DAT_800c85e8[ids[i] + 150];
+        counts[i] = DAT_800c85e8[0][ids[i]] + DAT_800c85e8[1][ids[i]];
     }
     func_80027688(&list, 8, 1);
     list.entries = entries;
@@ -3212,10 +3213,10 @@ s32 func_80021d94(void)
         }
     }
     if (result != -1) {
-        if (DAT_800c85e8[0x7c] != 0) {
-            DAT_800c85e8[0x7c]--;
-        } else if (DAT_800c85e8[150 + 0x7c] != 0) {
-            DAT_800c85e8[150 + 0x7c]--;
+        if (DAT_800c85e8[0][0x7c] != 0) {
+            DAT_800c85e8[0][0x7c]--;
+        } else if (DAT_800c85e8[1][0x7c] != 0) {
+            DAT_800c85e8[1][0x7c]--;
         }
     }
     DAT_801b24e4.unkfb = saved;
@@ -5078,7 +5079,7 @@ ADDRESS(0x80026fe4, 0x114)
 void func_80026fe4(void)
 {
     DAT_80199154.frame = DAT_80199154.frame == 0;
-    DAT_80199154.pool = &FRAME_POOLS[DAT_80199154.frame];
+    DAT_80199154.pool = &DAT_80199154.pools[DAT_80199154.frame];
     DAT_80199154.ot = DAT_80199154.ot_buffer[DAT_80199154.frame];
     ClearOTagR(DAT_80199154.ot, OT_LENGTH);
     DAT_80199154.pool->next = DAT_80199154.pool->base;
@@ -5120,10 +5121,10 @@ void func_80027198(void)
     DAT_80199154.draw[0].dfe = 0;
     DAT_80199154.draw[1].isbg = 0;
     DAT_80199154.draw[1].dfe = 0;
-    DAT_8009c404 = FRAME_POOLS[0];
-    DAT_8009c410 = FRAME_POOLS[1];
-    FRAME_POOLS[1].base = FRAME_POOLS[0].end = FRAME_POOLS[0].base + 0x7400;
-    DAT_8009c388 = FRAME_POOLS[1].end = FRAME_POOLS[1].base + 0x7400;
+    DAT_8009c404 = DAT_80199154.pools[0];
+    DAT_8009c410 = DAT_80199154.pools[1];
+    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
+    DAT_8009c388 = DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x7400;
     if (DAT_80199154.frame == 1) {
         DAT_8009c38c.x = 0;
         DAT_8009c38c.y = 0xf0;
@@ -5153,8 +5154,8 @@ void func_80027198(void)
 ADDRESS(0x80027310, 0x104)
 void func_80027310(s32 mode)
 {
-    FRAME_POOLS[0] = DAT_8009c404;
-    FRAME_POOLS[1] = DAT_8009c410;
+    DAT_80199154.pools[0] = DAT_8009c404;
+    DAT_80199154.pools[1] = DAT_8009c410;
     DAT_80199154.draw[0].isbg = 1;
     DAT_80199154.draw[0].dfe = 1;
     DAT_80199154.draw[1].isbg = 1;
@@ -5405,7 +5406,7 @@ ADDRESS(0x80027b5c, 0x58)
 void func_80027b5c(void)
 {
     if (DAT_8009c238 == 1) {
-        func_80019518(DAT_80199154.unk10154);
+        func_80019518(DAT_80199154.unk10148[3]);
     } else if (DAT_8009c230 != 0) {
         func_80019518(DAT_8009c37c);
     }

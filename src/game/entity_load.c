@@ -38,9 +38,9 @@ void func_80052e5c(void)
             }
             if (DAT_80185da8.def->unk34 & 0x10000) {
                 carrier = &DAT_8018fb3c.objects[obj->unk22];
-                obj->pos.vx = carrier->x;
-                obj->pos.vy = carrier->y - 500;
-                obj->pos.vz = carrier->z;
+                obj->pos.vx = carrier->pos.vx;
+                obj->pos.vy = carrier->pos.vy - 500;
+                obj->pos.vz = carrier->pos.vz;
                 if (obj->unk9 == 1) {
                     obj->angle.vy = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
                 }

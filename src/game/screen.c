@@ -355,10 +355,10 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
     g = rgb[1];
     b = rgb[2];
     DrawSync(0);
-    DAT_80199154.pool0.base = DAT_80199154.heap + 0x7400;
-    DAT_80199154.pool0.next = DAT_80199154.pool0.base;
-    DAT_80199154.image = DAT_80199154.pool0.base + 0x7400;
-    StoreImage(&DAT_8009c2d0, (u_long *)DAT_80199154.image);
+    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
+    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
+    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x7400;
+    StoreImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
     DrawSync(0);
     MoveImage(&DAT_80199154.draw[DAT_80199154.frame].clip, DAT_8009c2d0.x, DAT_8009c2d0.y);
     DrawSync(0);
@@ -444,9 +444,9 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
     }
     DAT_80199154.draw[0].isbg = 1;
     DAT_80199154.draw[1].isbg = 1;
-    LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.image);
-    DAT_80199154.pool0.base = DAT_80199154.heap + 0x1a000;
-    DAT_80199154.pool0.next = DAT_80199154.pool0.base;
-    DAT_80199154.image = DAT_80199154.pool0.base + 0x1a000;
+    LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
+    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
+    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
+    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x1a000;
     DrawSync(0);
 }

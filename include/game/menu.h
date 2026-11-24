@@ -165,10 +165,6 @@ void func_800246bc(u8 *options);
 void func_80023fd4(u8 style, u8 layout, s32 row);
 void func_80025b24(MenuText *yes, MenuText *no, s32 choice);
 void func_80023ce8(s32 page);
-/* book table helpers past the menu (call-site signatures) */
-u16 func_80060a10(u8 book, u8 page);
-u8 func_80060b0c(void);
-u8 func_80060c54(u8 index);
 s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item);
 void func_80024f88(MenuList *list, s32 a1, u8 item);
 u32 func_800222fc(MenuList *list, u8 *ids, s32 *confirmed, s32 *result, s32 a4);
@@ -197,7 +193,6 @@ void func_800275e0(s32 depth);
 void func_80027610(s32 depth, s16 tpage);
 void func_80027ac0(void);
 /* model code past the menu (call-site signatures) */
-void func_80035c44(s32 kind, u8 *data);
 void func_8004290c(void);
 void func_80026020(MenuFont *font, MenuText *text, s32 shade);
 void func_80026158(MenuFont *font, MenuText *text);
@@ -210,8 +205,6 @@ extern u16 DAT_80081868[];
 extern MenuEntry DAT_8007f620[];
 extern MenuEntry DAT_8007f230[10];
 extern MenuEntry DAT_80080430[];
-/* The bag: counts by item id, then the storage counts at [150 + id]. */
-extern u8 DAT_800c85e8[300];
 extern u8 DAT_80081780[];
 /* Shop stock counts per shop and item id, buy prices and sell prices. */
 extern u8 DAT_80080718[6][150];
@@ -219,12 +212,8 @@ extern u16 DAT_80080a9c[6][150];
 extern u16 DAT_800811a4[5][150];
 extern MapRect DAT_801ba6fc[160];
 
-/*
- * The two per-frame packet pools at DAT_80199154 + 4 (render.h names their words
- * heap, pool0 and image; func_80026fe4 picks pools[frame]). The menu saves both
- * while it is open and restores them when it closes.
- */
-#define FRAME_POOLS ((PrimPool *)&DAT_80199154.heap)
+/* The two frame packet pools (DAT_80199154.pools) as the menu saved them on
+ * opening (func_80027198); func_80027310 puts them back. */
 extern PrimPool DAT_8009c404;
 extern PrimPool DAT_8009c410;
 

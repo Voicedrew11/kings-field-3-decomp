@@ -17,15 +17,6 @@ typedef struct {
     u_long *prim;
 } DB;
 
-/* Sony's movie-sample decode environment, with one slice buffer. */
-typedef struct {
-    u_long *vlcbuf[2]; /* VLC (run-level) buffers */
-    int vlcid;
-    u_long *imgbuf; /* DecDCTout slice buffer */
-    RECT rect[2];   /* VRAM frame areas */
-    int rectid;
-    RECT slice; /* area one DecDCTout fills */
-    int isdone;
-} DECENV;
+#include <kf/decenv.h>
 
 #endif
