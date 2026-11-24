@@ -3948,8 +3948,6 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
                          "turn{left", "turn{right"};
     char types[7][8] = {"type{a", "type{b", "type{c", "type{d", "type{e", "type{f", "type{g"};
     s32 i;
-    s32 y;
-    s32 ny;
     s32 bright;
     s32 blue;
 
@@ -3979,11 +3977,9 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         order[3] = 1;
         break;
     }
-    for (i = 0, y = 0x32, ny = 0x31; i < 4; i++) {
-        func_800269c0(0x89, ny, i);
-        func_80026570(0x9b, y, actions[order[i]], 1, 0);
-        y += 14;
-        ny += 14;
+    for (i = 0; i < 4; i++) {
+        func_800269c0(0x89, i * 14 + 0x31, i);
+        func_80026570(0x9b, i * 14 + 0x32, actions[order[i]], 1, 0);
     }
     switch (layout) {
     case 0:
@@ -4043,11 +4039,9 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         order[5] = 5;
         break;
     }
-    for (i = 4, y = 0x70, ny = 0x6f; i < 10; i++) {
-        func_800269c0(0x89, ny, i);
-        func_80026570(0x9b, y, moves[order[i - 4]], 1, 0);
-        y += 14;
-        ny += 14;
+    for (i = 4; i < 10; i++) {
+        func_800269c0(0x89, (i - 4) * 14 + 0x6f, i);
+        func_80026570(0x9b, (i - 4) * 14 + 0x70, moves[order[i - 4]], 1, 0);
     }
     func_80026570(0x32, 0x32, "action", 1, 0);
     func_80026570(0x3a, 0x40, types[style], 1, 0);
@@ -4057,8 +4051,8 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         bright = DAT_8009c260 + DAT_8009c26c;
         blue = DAT_8009c260 / 2 + DAT_8009c26c;
     } else {
-        bright = DAT_8009c26c + 95 - DAT_8009c260;
-        blue = DAT_8009c26c + 47 - DAT_8009c260 / 2;
+        bright = 95 - DAT_8009c260 + DAT_8009c26c;
+        blue = 47 - DAT_8009c260 / 2 + DAT_8009c26c;
     }
     func_80027414();
     setRGB0(DAT_8009c374, bright, bright, blue);
