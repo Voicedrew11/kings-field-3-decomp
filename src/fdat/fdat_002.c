@@ -227,7 +227,6 @@ void func_801e89d8(u8 id)
 ADDRESS(0x801e8a34, 0x334)
 void func_801e8a34(Object88 *record, s32 event)
 {
-    u32 minutes;
     s32 hundreds;
 
     switch (event) {
@@ -254,15 +253,15 @@ void func_801e8a34(Object88 *record, s32 event)
         }
         break;
     case 2:
-        DAT_80185da8.objects[1].unk0 = 8;
         DAT_801ba984.unk4[2] = 1;
+        DAT_80185da8.objects[1].unk0 = 8;
         DAT_80185da8.objects[2].unk0 = 1;
         DAT_801ba984.unk4[4] = DAT_801b24e4.play_minutes % 60;
         DAT_801ba984.unk4[5] = DAT_801b24e4.experience % 10000 / 100;
         break;
     case 4:
-        minutes = DAT_801b24e4.play_minutes % 60;
-        if (minutes < DAT_801ba984.unk4[4] || minutes >= DAT_801ba984.unk4[4] + 10) {
+        if (DAT_801b24e4.play_minutes % 60 < DAT_801ba984.unk4[4] ||
+            DAT_801b24e4.play_minutes % 60 >= DAT_801ba984.unk4[4] + 10) {
             DAT_801ba984.unk4[6] = 1;
         }
         hundreds = DAT_801b24e4.experience % 10000 / 100;

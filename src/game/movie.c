@@ -173,10 +173,11 @@ void func_80060d20(void)
 ADDRESS(0x80061364, 0x170)
 void func_80061364(void)
 {
+    u_long **buf = DAT_801e7edc.unk374;
     DECENV *dec = &DAT_801e7edc.dec;
 
-    dec->vlcbuf[0] = DAT_801e7edc.unk374[0];
-    dec->vlcbuf[1] = DAT_801e7edc.unk374[1];
+    dec->vlcbuf[0] = buf[0];
+    dec->vlcbuf[1] = buf[1];
     dec->vlcid = 0;
     dec->imgbuf = DAT_801e7edc.unk37c;
     dec->rectid = 0;

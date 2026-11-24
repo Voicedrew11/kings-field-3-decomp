@@ -131,65 +131,99 @@ void func_801e86a8(Object88 *record, s32 event)
 ADDRESS(0x801e8708, 0x35c)
 void func_801e8708(void)
 {
-    Object88 *record;
+    Object44 *door;
     s32 i;
+    s32 k;
 
     if (DAT_801ba984.unk32[0xa] == 0) {
         DAT_801ba984.unk32[0xa] = 1;
     }
     if (DAT_801ba984.unk32[0xb] == 0) {
-        DAT_80185da8.objects[29].unk0 = 1;
-        DAT_8018fb3c.objects[253].unk0 = 0;
-        DAT_8018fb3c.objects[253].arg.b.unk38 = 0;
+        Object88 *record = &DAT_80185da8.objects[29];
+
+        record->unk0 = 1;
+        door = &DAT_8018fb3c.objects[253];
+        door->unk0 = 0;
+        k = 253;
+        DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
         func_800445b8(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-        DAT_8018fb3c.objects[90].unk0 = 0;
-        DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0;
-        record = DAT_80185da8.objects;
-        for (i = 14; i != -1; i--, record++) {
-            record->unk0 = 1;
-        }
-        record = &DAT_80185da8.objects[15];
-        for (i = 13; i != -1; i--, record++) {
-            record->unk0 = 8;
-        }
-    } else if (DAT_801ba984.unk84[5] == 10) {
-        if (DAT_801ba984.unk32[0xc] == 0) {
-            DAT_80185da8.objects[29].unk0 = 1;
-            DAT_8018fb3c.objects[253].unk0 = 0;
-            DAT_8018fb3c.objects[253].arg.b.unk38 = 0;
-            func_800445b8(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-            DAT_8018fb3c.objects[90].unk0 = 0;
-            DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0;
-            record = DAT_80185da8.objects;
-            for (i = 14; i != -1; i--, record++) {
-                record->unk0 = 1;
+        door = &DAT_8018fb3c.objects[90];
+        door->unk0 = 0;
+        k = 90;
+        DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0;
+        {
+            Object88 *records = DAT_80185da8.objects;
+
+            for (i = 14, k = 0; i != -1; i--, k++) {
+                records[k].unk0 = 1;
             }
-            record = &DAT_80185da8.objects[15];
-            for (i = 13; i != -1; i--, record++) {
-                record->unk0 = 8;
+        }
+        {
+            Object88 *records = DAT_80185da8.objects;
+
+            for (i = 13, k = 15; i != -1; i--, k++) {
+                records[k].unk0 = 8;
+            }
+        }
+    } else if (DAT_801ba984.unk84[5] != 10) {
+        func_800445b8(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+        DAT_8018fb3c.objects[90].unk0 = 2;
+        DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
+        {
+            Object88 *records = DAT_80185da8.objects;
+
+            for (i = 14, k = 0; i != -1; i--, k++) {
+                records[k].unk0 = 8;
+            }
+        }
+        if (DAT_801ba984.unk32[0xc] == 0) {
+            DAT_801ba984.unk32[0xc] = 1;
+            {
+                Object88 *records = DAT_80185da8.objects;
+
+                for (i = 13, k = 15; i != -1; i--, k++) {
+                    records[k].unk0 = 1;
+                }
+            }
+        }
+    } else {
+        if (DAT_801ba984.unk32[0xc] == 0) {
+            Object88 *record = &DAT_80185da8.objects[29];
+
+            record->unk0 = 1;
+            door = &DAT_8018fb3c.objects[253];
+            door->unk0 = 0;
+            k = 253;
+            DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
+            func_800445b8(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+            door = &DAT_8018fb3c.objects[90];
+            door->unk0 = 0;
+            k = 90;
+            DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0;
+            {
+                Object88 *records = DAT_80185da8.objects;
+
+                for (i = 14, k = 0; i != -1; i--, k++) {
+                    records[k].unk0 = 1;
+                }
+            }
+            {
+                Object88 *records = DAT_80185da8.objects;
+
+                for (i = 13, k = 15; i != -1; i--, k++) {
+                    records[k].unk0 = 8;
+                }
             }
         } else {
             func_800445b8(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
             DAT_8018fb3c.objects[90].unk0 = 2;
             DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
-            record = DAT_80185da8.objects;
-            for (i = 14; i != -1; i--, record++) {
-                record->unk0 = 8;
-            }
-        }
-    } else {
-        func_800445b8(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-        DAT_8018fb3c.objects[90].unk0 = 2;
-        DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
-        record = DAT_80185da8.objects;
-        for (i = 14; i != -1; i--, record++) {
-            record->unk0 = 8;
-        }
-        if (DAT_801ba984.unk32[0xc] == 0) {
-            DAT_801ba984.unk32[0xc] = 1;
-            record = &DAT_80185da8.objects[15];
-            for (i = 13; i != -1; i--, record++) {
-                record->unk0 = 1;
+            {
+                Object88 *records = DAT_80185da8.objects;
+
+                for (i = 14, k = 0; i != -1; i--, k++) {
+                    records[k].unk0 = 8;
+                }
             }
         }
     }
