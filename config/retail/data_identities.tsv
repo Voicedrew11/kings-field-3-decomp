@@ -14,6 +14,7 @@ GAME.EXE	0x80081828	0x3f	DAT_80081828	static	load	char[63]	func_80028750	address
 GAME.EXE	0x80081868	0x1c	DAT_80081868	global	load	u16[14]	func_8002b6f0	address-only	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits, func_8002b6f0 keeps [4] [6] [7] [12] held
 GAME.EXE	0x80081884	0x3c	DAT_80081884	global	load	s16[5][6]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the levels that teach the next spell, 0 ended
 GAME.EXE	0x800818c0	0x23	DAT_800818c0	global	load	u8[5][7]	func_80029f1c	address-only	asm;src/game/player.c game.player	.data; per magic element the Record18 indices of its spells, 0xff ended
+GAME.EXE	0x800818e4	0x28	DAT_800818e4	static	load	SVECTOR[5]	func_8002c30c	address-only	asm;src/game/player.c game.player	.data; unk14c offsets of the five shots of spells 72..74
 GAME.EXE	0x8008190c	0xa	DAT_8008190c	static	load	MapCell	func_800324f0	address-only	asm;src/game/floor_select.c game.floor_select	the tile record func_800324f0 selects outside the map
 GAME.EXE	0x80081928	0x8c	DAT_80081928	global	load	SpriteRec[7]	func_80041f9c	address-only	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x26c	DAT_800819b4	global	load	SpriteRec[31]	func_80041e68	address-only	asm;game-b hud relocs	status overlay sprites; func_800422b8 rewrites their positions and texture cells every frame; visible 0xff ends the list
