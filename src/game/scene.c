@@ -20,6 +20,7 @@
 #include <game/scene.h>
 #include <game/render.h>
 #include <game/data.h>
+#include <game/misc.h>
 #include <game/funcs.h>
 #include <game/player.h>
 
