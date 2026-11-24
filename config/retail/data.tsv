@@ -155,7 +155,13 @@ GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/car
 GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
 GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
 GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	DAT_8009c3cc	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by func_8002fe1c, followed through Data801b24e4.unka8
-GAME.EXE	0x8009c3d4	0x8bbd4	0x1c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	DAT_8009c3d4	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c0; door kind 0x1b start yaw (func_80047010)
+GAME.EXE	0x8009c3d6	0x8bbd6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	DAT_8009c3d8	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c4; door kind 0 start yaw (func_80047010)
+GAME.EXE	0x8009c3da	0x8bbda	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3dc	0x8bbdc	0x2	bss	supported	DAT_8009c3dc	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c8; door kind 1 start yaw (func_80047010)
+GAME.EXE	0x8009c3de	0x8bbde	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3e0	0x8bbe0	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	DAT_8009c3f0	s32	asm;src/game/object4c.c game.object4c	.sbss; $gp+0x1dc; id 112 rate limit frame (func_80053c84)
 GAME.EXE	0x8009c3f4	0x8bbf4	0x40c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

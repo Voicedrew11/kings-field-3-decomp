@@ -1596,7 +1596,7 @@ void func_80040ae4(void)
                 rec_def = &DAT_8018fb3c.defs[rec->unk6];
             } else {
                 rec_def = &DAT_8018fb3c.defs[rec->unk6];
-                cells = func_80040708(&rec->pos, rec_def->unkc);
+                cells = func_80040708(&rec->pos, rec_def->arg.b.unkc);
                 if (!(cells & rec->unk0) && !(rec->unk3 & 8)) {
                     break;
                 }

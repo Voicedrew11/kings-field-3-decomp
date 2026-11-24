@@ -117,8 +117,8 @@ void func_80033d84(void)
         if (carrier->unk3 & 0x10) {
             DAT_801d4464.unk1204c = def->unk4 * carrier->arg.b.unk38 >> 7;
         } else if (carrier->unk3 & 0x4) {
-            DAT_801d4464.unk12050 = def->unke;
-            DAT_801d4464.unk1204c = def->unk10;
+            DAT_801d4464.unk12050 = def->arg.h.unke;
+            DAT_801d4464.unk1204c = def->arg.h.unk10;
         } else {
             DAT_801d4464.unk1204c = def->unk4;
         }

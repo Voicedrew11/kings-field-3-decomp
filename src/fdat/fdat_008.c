@@ -262,7 +262,7 @@ ADDRESS(0x801e89fc, 0x1e0)
 void func_801e89fc(void)
 {
     Object44 *obj = DAT_8018fb3c.unk8858;
-    u8 *rec = DAT_8018fb3c.unk8854;
+    Object44Def *def = DAT_8018fb3c.unk8854;
     Object44 *other;
     s32 bit;
     s32 i;
@@ -275,7 +275,7 @@ void func_801e89fc(void)
     case 0:
         break;
     case 1:
-        func_8004482c(obj, rec[15]);
+        func_8004482c(obj, def->arg.b.unkf);
         if (obj->arg.b.unk38 != 0) {
             obj->unk1 = obj->arg.b.unk38 - 1;
         } else {
