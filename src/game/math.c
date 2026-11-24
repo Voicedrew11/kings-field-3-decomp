@@ -419,24 +419,21 @@ void func_80016c90(s32 dx, s32 dy, s32 dz, SVECTOR *out)
     out->vz = 0;
 }
 
-/*
- * Not exact: retail joins both arms' slt result and branches once to return
- * 0 or 1; every spelling tried folds the join into xori or splits it per arm.
- */
 ADDRESS(0x80016d0c, 0x30)
 s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
 {
-    if (c < a ? c < a - b : a < c - d) {
-        return 0;
+    if (c < a) {
+        if (c < a - b) {
+            return 0;
+        }
+    } else {
+        if (a < c - d) {
+            return 0;
+        }
     }
     return 1;
 }
 
-/*
- * Not exact: GCC cross-jumps the two height-test failures into one test,
- * where retail keeps the below-y failure as its own return block (see
- * func_80016ec8); the first two squares also land in other registers.
- */
 ADDRESS(0x80016d3c, 0x18c)
 s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_width,
                   s32 half_depth, s32 reach_down, s32 reach_up)
@@ -445,10 +442,10 @@ s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_
     s32 dz = (pos->vz - z) >> 3;
     s32 distance = SquareRoot0(dx * dx + dz * dz) << 3;
     u16 angle = func_80016ab8(x - pos->vx, z - pos->vz);
-    s32 side = rcos(angle - rotation->vy + 1024) * distance >> 12;
-    s32 ahead = rsin(angle - rotation->vy + 1024) * distance >> 12;
 
-    if (side < -half_width || half_width < side || ahead < -half_depth || half_depth < ahead) {
+    dx = rcos(angle - rotation->vy + 1024) * distance >> 12;
+    dz = rsin(angle - rotation->vy + 1024) * distance >> 12;
+    if (dx < -half_width || half_width < dx || dz < -half_depth || half_depth < dz) {
         return -1;
     }
     if (y == 0xffff) {
@@ -459,24 +456,21 @@ s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_
             return -1;
         }
     } else if (y < pos->vy - reach_down) {
-        return -1;
+        goto reject;
     }
     return distance;
+reject:
+    return -1;
 }
 
-/*
- * Not exact: GCC cross-jumps the two height-test failures into one shared
- * test; retail keeps them apart. Ending with `return -1` instead keeps them
- * apart as retail does but then changes the radius test, so the retail
- * shape of the whole tail is not yet found.
- */
 ADDRESS(0x80016ec8, 0xec)
 s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, s32 reach_up)
 {
-    s32 dx = pos->vx - x;
+    s32 dx;
     s32 dz;
     s32 distance;
 
+    dx = pos->vx - x;
     if (dx < -radius || radius < dx) {
         return -1;
     }
@@ -490,16 +484,18 @@ s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, 
                 return -1;
             }
         } else if (y < pos->vy - reach_down) {
-            return -1;
+            goto reject;
         }
     }
     dx >>= 3;
     dz >>= 3;
     distance = SquareRoot0(dx * dx + dz * dz) << 3;
     if (radius < distance) {
-        return -1;
+        goto reject;
     }
     return distance;
+reject:
+    return -1;
 }
 
 ADDRESS(0x80016fb4, 0x10c)
