@@ -115,7 +115,7 @@ void func_8004e330(void)
         }
         if (hit & 4) {
             if (obj->unk28 & 0x400) {
-                if (obj->pos.vy < DAT_801d4464.unk1200c) {
+                if (DAT_801d4464.unk1200c > obj->pos.vy) {
                     goto fall;
                 }
                 obj->pos.vy = DAT_801d4464.unk1200c;
