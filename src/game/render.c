@@ -518,15 +518,15 @@ void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
-        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].count++;
+        DAT_80199154.sum[0].mode = which;
         DAT_80199154.sum[0].r += (r * scale) >> 12;
         DAT_80199154.sum[0].g += (g * scale) >> 12;
         DAT_80199154.sum[0].b += (b * scale) >> 12;
         break;
     case 2:
-        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].count++;
+        DAT_80199154.sum[1].mode = which;
         DAT_80199154.sum[1].r += (r * scale) >> 12;
         DAT_80199154.sum[1].g += (g * scale) >> 12;
         DAT_80199154.sum[1].b += (b * scale) >> 12;
