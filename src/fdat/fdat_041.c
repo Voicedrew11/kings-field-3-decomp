@@ -153,7 +153,10 @@ void area_on_movie_start_unlock_element_and_remove_actor(u8 id)
     }
 }
 
-/* Slot 7: event 13 raises a stat and opens objects 15 and 86 over 16 frames each. */
+/*
+ * Slot 7: movie 13 raises a stat; objects 15 and 86 each fade out and are
+ * removed (death-fade preset 0x32, light blend up over 16 frames).
+ */
 ADDRESS(0x801e86d8, 0x1c8)
 void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {

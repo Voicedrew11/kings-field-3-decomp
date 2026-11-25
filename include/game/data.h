@@ -195,8 +195,8 @@ typedef struct Data801b24e4 {
 
 typedef struct Data801ba984 {
     s32 unk0;
-    u8 unk4[9];     /* +0x04: script bytes from here (event_target_stream_resolve_cursor tests unk4[n]); [0] the
-                     * highest area entered (resource_request_transition) */
+    u8 unk4[9];     /* +0x04: script bytes from here (event_target_stream_resolve_cursor tests
+                     * unk4[n]); [0] the highest area entered (resource_request_transition) */
     u8 unkd;       /* +0x0d: the game loop sets it to 1 on a continued game */
     u8 unke[0x1d];
     u8 unk2b;
@@ -217,7 +217,8 @@ typedef struct Data801ba984 {
     u8 unk7f[5];    /* +0x7f: per magic element */
     u8 unk84[6];
     u8 unk8a[0x20]; /* +0x8a: per area, 1 once resource_request_transition loaded it */
-    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script event_target_stream_resolve_cursor entered */
+    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script
+                    * event_target_stream_resolve_cursor entered */
     u8 unkab[0x59];
     u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by event_state_initialize */
     u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (event_saved_offsets_encode) */
@@ -395,7 +396,8 @@ typedef struct Object44SHalves {
     s16 unk38;
     s16 unk3a;
     s16 unk3c;
-    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect, map_object_spawn_scattered_effect) */
+    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect,
+                     * map_object_spawn_scattered_effect) */
     s16 unk40;      /* +0x40: kind 6: turn speed (angle_velocity_step) */
     s16 unk42;
 } Object44SHalves;
@@ -407,7 +409,8 @@ typedef struct Object44Words {
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
 } Object44Words;
 
-/* Kinds render_scene_and_update_resources draws with a model (0xf2 and the default kinds): pose slot first. */
+/* Kinds render_scene_and_update_resources draws with a model (0xf2 and the
+ * default kinds): pose slot first. */
 typedef struct Object44Model {
     struct AnimSlot *unk34; /* +0x34: pose slot (animation_prepare_asset_vertices) */
     u8 unk38;       /* +0x38: kind 0xf2: x range in map cells it is drawn from */
@@ -500,7 +503,8 @@ typedef struct Object44DefHalves {
 
 /* Signed view of the same halfwords: the pick-up offsets of the item kinds (event_map_object_interact). */
 typedef struct Object44DefSHalves {
-    s16 unkc;       /* +0x0c: items: height offset of the held position (scene_position_from_camera_offset dy) */
+    s16 unkc;       /* +0x0c: items: height offset of the held position
+                     * (scene_position_from_camera_offset dy) */
     s16 unke;       /* +0x0e: items: distance of the held position (dz) */
     s16 unk10;      /* +0x10: items: Object44.unke while held */
     u8 unk12[6];
@@ -733,7 +737,8 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u16 unk16;      /* +0x16: unk1c cost of the spell (player_dispatch_weapon_magic); menu_collect_available_magic_rows lists it */
+    u16 unk16;      /* +0x16: unk1c cost of the spell (player_dispatch_weapon_magic);
+                     * menu_collect_available_magic_rows lists it */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -803,7 +808,8 @@ typedef s32 (*FdatHandler)();
 #endif
 
 typedef struct Data8018fad4 {
-    u16 loading;    /* +0x00: resource_run_initial_transition steps resource_advance_transition until it clears */
+    u16 loading;    /* +0x00: resource_run_initial_transition steps resource_advance_transition
+                     * until it clears */
     SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks resource_transition_set_phase_1.. set it */
     u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
                      * the model id bank (map_object_asset_index) */
@@ -828,8 +834,8 @@ typedef struct Data8018fb3c {
     Object44 objects[0x18c];
     u8 unk8850[4];
     Object44Def *unk8854;   /* +0x8854: the def of unk8858 (map_object_update_actions) */
-    Object44 *unk8858;      /* +0x8858: the record map_object_find_collision_at_point does not test; the object
-                             * FDAT slot 9 handlers test */
+    Object44 *unk8858;      /* +0x8858: the record map_object_find_collision_at_point does not test;
+                             * the object FDAT slot 9 handlers test */
     u8 unk885c[2];
     u16 unk885e;
     u16 unk8860;
@@ -886,7 +892,8 @@ typedef struct Data801983a8 {
 } Data801983a8;
 extern Data801983a8 DAT_801983a8;
 extern Data801ba984 DAT_801ba984;
-/* Two counts per item id (0..149; game_counter_increment caps each at 99), cleared by event_state_initialize. */
+/* Two counts per item id (0..149; game_counter_increment caps each at 99), cleared by
+ * event_state_initialize. */
 extern u8 DAT_800c85e8[2][150];
 extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;

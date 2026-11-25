@@ -40,7 +40,7 @@ typedef struct FdatHeader {
     s32 unk84;              /* +0x84: id + 0x20 in every module */
 } FdatHeader;
 
-/* GAME.EXE .sdata word ($gp+0x8, owner unit unknown): FDAT_002 swings object 158 by it. */
+/* GAME.EXE .sdata word ($gp+0x8, owner unit unknown): FDAT_002's light-flicker step. */
 extern s32 DAT_8009c21c;
 
 /*

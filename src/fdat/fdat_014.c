@@ -171,8 +171,9 @@ void area_update_noop(void)
 }
 
 /*
- * Slot 2: item 0x7b used on object 0x8d in front sinks it, then raises it
- * again while the area light brightens over 16 frames, and frees object 159.
+ * Slot 2: item 0x7b used on object 0x8d in front lowers its light blend from
+ * 0xfff to 0, then fades it out (death-fade preset 0x32) while the area light
+ * brightens over 16 frames, and frees object 159.
  */
 ADDRESS(0x801e874c, 0x258)
 void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s32 item)
@@ -248,7 +249,10 @@ void area_on_actor_removed_noop(void)
 {
 }
 
-/* Slot 3: switches 0 and 1 move object 115 beside them; switch 10 shows one of two notes. */
+/*
+ * Slot 3: region operands 0 and 1 move object 115 beside them; region 10
+ * swaps the warp-arrival cells.
+ */
 ADDRESS(0x801e89b4, 0x134)
 void area_region_trigger_move_object_and_warp_cells(Object44 *obj)
 {
@@ -308,7 +312,10 @@ void area_on_movie_start_unlock_element(u8 id)
     }
 }
 
-/* Slot 7: raises a stat and opens objects 55 and 148 over 16 frames each. */
+/*
+ * Slot 7: raises a stat; objects 55 and 148 each fade out and are removed
+ * (death-fade preset 0x32, light blend up over 16 frames).
+ */
 ADDRESS(0x801e8b30, 0x198)
 void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {

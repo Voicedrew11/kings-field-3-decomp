@@ -177,7 +177,10 @@ void area_set_cell_toggle(s32 index, s32 state)
     }
 }
 
-/* Slot 19: records 11..13 each start their record run once, 15 and 56 move on. */
+/*
+ * Slot 19: actors 11..13 each disable one actor and set a cell toggle once;
+ * actor 15 is disabled once, actor 56 enabled.
+ */
 ADDRESS(0x801e89c0, 0x150)
 void area_on_actor_removed_set_toggles(Object88 *obj)
 {
@@ -217,8 +220,8 @@ void area_on_actor_removed_set_toggles(Object88 *obj)
 }
 
 /*
- * Slot 3: switch 0 sets flag 0x55, switch 1 trades item 0x38 for 0x39 behind
- * a fade, switches 0x61 and 0x63 hurt the player.
+ * Slot 3: region operand 0 sets flag 0x55, region 1 trades item 0x38 for 0x39
+ * behind a fade, regions 0x61 and 0x63 hurt the player.
  */
 ADDRESS(0x801e8b10, 0x214)
 void area_region_trigger_trade_item_and_damage(Object44 *obj)
@@ -282,7 +285,10 @@ void area_on_item_added_noop(void)
 {
 }
 
-/* Slot 10: event 9 closes object 50, opens objects 52..61 and shows a note. */
+/*
+ * Slot 10: movie 9 hides object 50, shows objects 52..61, copies a cell
+ * pattern and wakes actor 56.
+ */
 ADDRESS(0x801e8d4c, 0x9c)
 void area_on_movie_start_show_objects_and_wake_actor(u8 id)
 {

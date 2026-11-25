@@ -276,7 +276,8 @@ void player_update_weapon_attack(void)
                 add = w->unk32;
             }
             DAT_801b24e4.unkc0 += speed;
-            if (DAT_801b24e4.unkca == 0 && w->unk0[3] != 0xff && DAT_801b24e4.unkcf != 0 && player_meets_weapon_magic_requirement(0)
+            if (DAT_801b24e4.unkca == 0 && w->unk0[3] != 0xff && DAT_801b24e4.unkcf != 0
+                && player_meets_weapon_magic_requirement(0)
                 && (DAT_801b24e4.unk178 & DAT_80081868[6])) {
                 if (DAT_801b24e4.unkc0 >= w->unk20 && DAT_801b24e4.unkc0 <= w->unk22) {
                     if (DAT_801b24e4.unkce != 0) {

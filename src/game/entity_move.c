@@ -250,11 +250,13 @@ void actor_turn_toward_angle(Object88 *obj, int target, s32 max, s32 accel)
         yaw = obj->angle.vy;
         obj->angle.vy += obj->unk58;
         if (obj->unk58 > 0) {
-            if (angle_signed_greater_than((s16)target, yaw) && !angle_signed_greater_than((s16)target, obj->angle.vy)) {
+            if (angle_signed_greater_than((s16)target, yaw)
+                && !angle_signed_greater_than((s16)target, obj->angle.vy)) {
                 obj->angle.vy = target;
             }
         } else {
-            if (angle_signed_greater_than(yaw, (s16)target) && !angle_signed_greater_than(obj->angle.vy, (s16)target)) {
+            if (angle_signed_greater_than(yaw, (s16)target)
+                && !angle_signed_greater_than(obj->angle.vy, (s16)target)) {
                 obj->angle.vy = target;
             }
         }

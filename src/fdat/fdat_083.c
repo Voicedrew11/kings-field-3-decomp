@@ -3,7 +3,7 @@
  * 17 handlers, empty handlers, a record handler (slot 19), a flag setter and
  * the load handler (slot 5).
  */
-#define FDAT_801E87A0_STEP 64
+#define FADE_APPROACH_BLEND_STEP 64
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>

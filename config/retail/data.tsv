@@ -107,7 +107,7 @@ GAME.EXE	0x8008293c	0x7213c	0x1e	defined	supported	DAT_8008293c	MapPatch[3]	asm;
 GAME.EXE	0x8008295a	0x7215a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8008295c	0x7215c	0x1e	defined	supported	DAT_8008295c	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 5
 GAME.EXE	0x8008297a	0x7217a	0x198a2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	DAT_8009c21c	s32	asm;FDAT_002 area_update_light_flicker_and_actor_swap relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it each swing of object 158 (owner unit unknown)
+GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	DAT_8009c21c	s32	asm;FDAT_002 area_update_light_flicker_and_actor_swap relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it to reverse object 158's light flicker (owner unit unknown)
 GAME.EXE	0x8009c220	0x8ba20	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
 GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor

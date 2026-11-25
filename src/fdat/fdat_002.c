@@ -1,10 +1,10 @@
 /*
  * FDAT_002.BIN (WIP module): the handler table and the switch table of its
  * slot 4 handler, an empty default handler, the shared slot 0 handler (this
- * module's copy is the claim), a swinging object and distance check (slot
- * 1), record handlers (slots 18 and 19), a switch handler (slot 3), an item
- * check (slot 6), an event handler (slot 7), a record event handler (slot
- * 4) and the load handler (slot 5).
+ * module's copy is the claim), a light flicker and actor swap (slot 1),
+ * actor handlers (slots 18 and 19), a region-trigger handler (slot 3), an
+ * item check (slot 6), a movie handler (slot 7), a talk event handler
+ * (slot 4) and the load handler (slot 5).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -81,8 +81,9 @@ void area_handler_noop(void)
 #include "shared/area_interact_item_containers.inc"
 
 /*
- * Slot 1: swings object 158 back and forth; with flags 5 and 6 set and 0xb
- * clear, records 0..2 move on once record 1 is far from the player.
+ * Slot 1: drifts object 158's light blend (unk10) at random, a flicker; with
+ * flags 5 and 6 set and 0xb clear, once actor 1 is far from the player it
+ * disables actors 0 and 1 (state 8) and enables actor 2.
  */
 ADDRESS(0x801e85b8, 0x14c)
 void area_update_light_flicker_and_actor_swap(void)
@@ -127,7 +128,7 @@ void area_adjust_actor_magic_damage_lethal_only(Object88 *obj, s32 *out, s32 arg
     }
 }
 
-/* Slot 19: record 32 sets flag 0xc once and opens object 344. */
+/* Slot 19: actor 32 sets flag 0xc once and clears object 344's 0xf1 lock marker. */
 ADDRESS(0x801e8768, 0x78)
 void area_on_actor_removed_unlock_door(Object88 *obj)
 {
@@ -145,8 +146,9 @@ void area_on_actor_removed_unlock_door(Object88 *obj)
 }
 
 /*
- * Slot 3: switch 0 (with flag 0xa set and 0xb clear) starts records 0..2 and
- * sets the doors, then, like switch 10, shows one of two notes.
+ * Slot 3: region operand 0 (with flag 0xa set and 0xb clear) disables actors
+ * 0..2 and sets the doors, then, like region 10, copies the warp-arrival or
+ * the normal cell pattern.
  */
 ADDRESS(0x801e87e0, 0x180)
 void area_region_trigger_set_doors_and_warp_cells(Object44 *obj)
@@ -218,7 +220,8 @@ void area_update_actor_target_noop(void)
 ADDRESS(0x801e8980, 0x50)
 void area_on_item_added_check_items_held(void)
 {
-    if (game_counter_is_nonzero(0) > 0 && game_counter_is_nonzero(0x85) > 0 && game_counter_is_nonzero(0x64) > 0) {
+    if (game_counter_is_nonzero(0) > 0 && game_counter_is_nonzero(0x85) > 0 &&
+        game_counter_is_nonzero(0x64) > 0) {
         DAT_801ba984.unk4[7] = 1;
     }
 }
@@ -249,16 +252,16 @@ void area_talk_event_collect_items_and_wait(Object88 *record, s32 event)
 
     switch (event) {
     case 0:
-        if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
-            game_counter_is_nonzero(0x84) > 0) {
+        if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 &&
+            game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
             DAT_801ba984.unk4[3] = 1;
         } else {
             DAT_801ba984.unk4[3] = 0;
         }
         break;
     case 1:
-        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0 &&
-            game_counter_is_nonzero(2) > 0) {
+        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
+            game_counter_is_nonzero(0x84) > 0 && game_counter_is_nonzero(2) > 0) {
             DAT_801ba984.unk4[1] = 1;
             DAT_801ba984.unk0 = 1;
             game_counter_decrement(0x82);
@@ -288,7 +291,8 @@ void area_talk_event_collect_items_and_wait(Object88 *record, s32 event)
         }
         break;
     case 5:
-        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
+        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
+            game_counter_is_nonzero(0x84) > 0) {
             DAT_801ba984.unk4[1] = 1;
         } else {
             DAT_801ba984.unk4[1] = 0;
@@ -459,8 +463,8 @@ void area_on_load_restore_actors_and_doors(void)
         k = 172;
         DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
     }
-    if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
-        game_counter_is_nonzero(0x84) > 0) {
+    if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 &&
+        game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
         DAT_801ba984.unk4[3] = 1;
     } else {
         DAT_801ba984.unk4[3] = 0;

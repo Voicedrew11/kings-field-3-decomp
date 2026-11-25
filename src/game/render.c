@@ -4,9 +4,10 @@
  * full-screen 2D effects and the loading screen, object model files, the map
  * cell grid and the per-frame object drawer, the 2D overlay sprites and
  * messages, the animated model poses and the picture fade. One TU:
- * render_map_cell_window/render_active_model_rows/render_player_weapon/render_animated_object read DAT_8009c2e0
- * and menu_show_transition_image reads DAT_8009c2d0 $gp-relative, which ASPSX emits only
- * for .sdata defined in the same file.
+ * render_map_cell_window, render_active_model_rows, render_player_weapon and
+ * render_animated_object read DAT_8009c2e0 and menu_show_transition_image
+ * reads DAT_8009c2d0 $gp-relative, which ASPSX emits only for .sdata defined
+ * in the same file.
  */
 /* render_scene_and_update_resources reads Data8018fad4.step as volatile (see game/data.h). */
 #define GAME_RENDER_MODULE

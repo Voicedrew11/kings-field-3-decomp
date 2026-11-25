@@ -1586,8 +1586,9 @@ void map_object_update_actions(void)
                                                     obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
                                                     -obj->arg.b.unk3d[0] << 7) != 0 ||
                     obj->arg.b.unk38 == 0xff) {
-                    map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
+                    map_cell_apply_rotated_pattern(
+                        obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                        DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
                     obj->unk8 = 1;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
@@ -1610,8 +1611,9 @@ void map_object_update_actions(void)
                     obj->unk1 = 0;
                     obj->unka = 0;
                     obj->unk8 = 0;
-                    map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
+                    map_cell_apply_rotated_pattern(
+                        obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                        DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;

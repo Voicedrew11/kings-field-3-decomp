@@ -72,7 +72,8 @@ s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel
     return 0;
 }
 
-/* Homing: turns the current record toward an Object88 record (unk0 bit 6) or the player, then effect_move_probe. */
+/* Homing: turns the current record toward an Object88 record (unk0 bit 6) or the player, then
+ * effect_move_probe. */
 ADDRESS(0x80055db0, 0x1c4)
 s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
                         s32 cone)
@@ -1049,8 +1050,8 @@ void effect_update_dispatch(void)
             link = &DAT_801b77ec.objects[obj->arg.c.unk45];
             switch (obj->arg.c.unk44) {
             case 0:
-                effect_apply_current_magic_backstep(collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy,
-                                                                          0x30));
+                effect_apply_current_magic_backstep(
+                    collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy, 0x30));
                 collision_probe_floor_height(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
                 obj->pos.vy = DAT_801d4464.unk12010;
                 d = DAT_801d4464.unk12010 - DAT_801d4464.unk12014;

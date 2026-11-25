@@ -21,7 +21,8 @@
 
 RODATA(0x80011a78, 0x44)
 
-/* The pad bits of the sequence player_update_actions_and_charge follows, 0xffff ended (rebuilt every frame). */
+/* The pad bits of the sequence player_update_actions_and_charge follows, 0xffff ended (rebuilt
+ * every frame). */
 DATA(0x8009c3cc, 0x8, ".sbss")
 static u16 DAT_8009c3cc[4];
 
@@ -557,7 +558,8 @@ void player_update_actions_and_charge(void)
     }
     mask = DAT_80081868[7] | DAT_80081868[4] | DAT_80081868[6];
     if ((DAT_801b24e4.unk178 & mask) && !(DAT_801b24e4.unk17a & mask)) {
-        if (DAT_801b24e4.unkb0->unk24 != 0 && player_meets_weapon_magic_requirement(1) && DAT_801b24e4.unkb0->unk4 != 0xff
+        if (DAT_801b24e4.unkb0->unk24 != 0 && player_meets_weapon_magic_requirement(1)
+            && DAT_801b24e4.unkb0->unk4 != 0xff
             && (DAT_801b24e4.unk178 & *DAT_801b24e4.unka8)
             && (DAT_801b24e4.unka8 != DAT_8009c3cc
                 || (DAT_801b24e4.unk1e == 5000 && DAT_801b24e4.unk22 == DAT_801b24e4.unk1e))) {

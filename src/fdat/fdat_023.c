@@ -1,6 +1,6 @@
 /*
  * FDAT_023.BIN (WIP module): the handler table, the shared slot 0 handler,
- * a key handler (slot 2), a note handler (slot 3), object handlers (slots 8
+ * a key handler (slot 2), a warp-arrival cell handler (slot 3), object handlers (slots 8
  * and 9), an event handler (slot 4), the load handler (slot 5) and the two
  * offsets slot 9 passes.
  */
@@ -134,7 +134,11 @@ void area_on_actor_removed_noop(void)
 {
 }
 
-/* Slot 3: for an object whose unk3a.bytes[1] is 10, shows one of two notes. */
+/*
+ * Slot 3: region operand 10 (unk3a.bytes[1]): while the player is on the warp
+ * arrival pad copies the arrival cell pattern, else clears the arrival flag
+ * (player +0x10a) and copies the normal pattern back.
+ */
 ADDRESS(0x801e86f4, 0xc0)
 void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
 {

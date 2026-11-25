@@ -3,7 +3,7 @@
  * 17 handlers, empty handlers, a record handler (slot 19) and the load
  * handler (slot 5).
  */
-#define FDAT_801E87A0_STEP 1024
+#define FADE_APPROACH_BLEND_STEP 1024
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>

@@ -191,7 +191,7 @@ void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
-/* Slot 19: record 3 moves on. */
+/* Slot 19: actor 3 is enabled again (state 1) whenever it is removed. */
 ADDRESS(0x801e8764, 0x44)
 void area_on_actor_removed_make_persistent(Object88 *obj)
 {
@@ -200,7 +200,10 @@ void area_on_actor_removed_make_persistent(Object88 *obj)
     }
 }
 
-/* Slot 3: switch 0 shows one of two notes by the player's unkf4; switch 10 one of two notes. */
+/*
+ * Slot 3: region operand 0 copies one of two cell patterns by the armour in
+ * player +0xf4 (item 0x4b or not); region 10 swaps the warp-arrival cells.
+ */
 ADDRESS(0x801e87a8, 0x13c)
 void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj)
 {

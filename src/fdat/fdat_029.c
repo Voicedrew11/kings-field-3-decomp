@@ -157,9 +157,10 @@ void area_on_actor_removed_noop(void)
 }
 
 /*
- * Slot 3: switch 0 (with flag 0x38 set) opens objects 249 and 262 and starts
- * record 2; switch 1 strikes around object 58 until the four element flags
- * are set, then dissolves it over 16 frames; switch 10 shows one of two notes.
+ * Slot 3: region operand 0 (with flag 0x38 set) opens objects 249 and 262 and
+ * disables actor 2; region 1: object 58 deals radial damage until the four
+ * element flags are set, then fades out (death-fade preset 0x32, light blend
+ * up over 16 frames) and is removed; region 10 swaps the warp-arrival cells.
  */
 ADDRESS(0x801e8714, 0x354)
 void area_region_trigger_damage_barrier_and_doors(Object44 *obj)

@@ -312,11 +312,12 @@ back:
 
 /*
  * The action button at pos facing angle: the Object88 within reach in front
- * gets event_target_stream_execute, then each Object44 record map_object_find_interaction_target finds in front
- * acts by the type of its def (doors and locks show why they stay shut or
- * open, items are picked up, the healing and save points fade the screen),
- * and the loaded FDAT module's handler 0 gets the point last. The full
- * restore (type 0x12) clamps both values like the heal (type 0x16) does.
+ * gets event_target_stream_execute, then each Object44 record
+ * map_object_find_interaction_target finds in front acts by the type of its def
+ * (doors and locks show why they stay shut or open, items are picked up, the
+ * healing and save points fade the screen), and the loaded FDAT module's
+ * handler 0 gets the point last. The full restore (type 0x12) clamps both
+ * values like the heal (type 0x16) does.
  */
 ADDRESS(0x8005e2d0, 0x794)
 void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)

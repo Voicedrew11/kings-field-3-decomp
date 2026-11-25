@@ -585,8 +585,8 @@ void actor_update_behavior(void)
             obj->unkf = 0xf0;
             actor_set_animation(script[1]);
             obj->unk64 = rand() >> 3;
-        } else if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2],
-                                                     def->unk1[3], 5) ||
+        } else if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12),
+                                                     SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 5) ||
                    (rand() >> 5) < script[20]) {
             obj->unk64 = rand() >> 3;
         }
@@ -732,8 +732,8 @@ void actor_update_behavior(void)
             obj->unkf = 0xf0;
         }
         if (obj->unk70 == 0) {
-            actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3],
-                                                   0x11);
+            actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 12),
+                                                   SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 0x11);
         } else {
             dir.vx = -512;
             dir.vy = obj->unk72.vy + 2048;
@@ -1028,8 +1028,8 @@ void actor_update_behavior(void)
             hit = actor_move_with_collision(&obj->vel);
             if (hit != 0) {
                 if (hit & 0x80) {
-                    player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18), script[13], 0,
-                                        0, 0, 0, 0, 0x1000, 10, &obj->pos);
+                    player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
+                                        script[13], 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
                 }
                 obj->unk70 = 2;
             }
@@ -1422,8 +1422,8 @@ void actor_update_behavior(void)
             } else {
                 obj->unk72.vx = actor_turn_and_move_toward_point((obj->unk8 << 11) + obj->unk24,
                                                                  (obj->unk7 << 11) + obj->unk22,
-                                                                 SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), obj->unk72.vx,
-                                                                 def->unk1[2], def->unk1[3], 5);
+                                                                 SCRIPT_U16(script, 14), SCRIPT_U16(script, 16),
+                                                                 obj->unk72.vx, def->unk1[2], def->unk1[3], 5);
                 if (obj->unk72.vx == -1) {
                     obj->unk70 = 1;
                 }

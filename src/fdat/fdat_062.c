@@ -162,7 +162,10 @@ void area_on_movie_start_copy_cells_and_trade_item(u8 id)
     }
 }
 
-/* Slot 7: event 10 opens object 2 over 16 frames. */
+/*
+ * Slot 7: movie 10: object 2 fades out and is removed (death-fade preset
+ * 0x32, light blend up over 16 frames).
+ */
 ADDRESS(0x801e8730, 0xf8)
 void area_on_movie_end_fade_object(u8 id)
 {

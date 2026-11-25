@@ -187,11 +187,11 @@ typedef struct Data80199154 {
     DISPENV disp[2];                /* +0x10120 */
     u8 *unk10148[4];                /* +0x10148: model data by id (tmd_register) */
     u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
-    u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
-                                     * resident, area banks from 256 + area * 32
-                                     * (map_object_asset_index), the 32 blocks of an area part
-                                     * from 556 + part * 32 (resource_mark_area_models_reclaimable); WIP extent,
-                                     * up to slots */
+    u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay resident,
+                                     * area banks from 256 + area * 32 (map_object_asset_index), the
+                                     * 32 blocks of an area part from 556 + part * 32
+                                     * (resource_mark_area_models_reclaimable); WIP extent, up to
+                                     * slots */
     AnimSlot slots[12];             /* +0x11a10 */
     ScreenVertex screen[1000];      /* +0x11b00: projected vertices of the part being
                                      * drawn (WIP extent) */

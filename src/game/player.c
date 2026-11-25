@@ -1169,7 +1169,8 @@ s32 player_distance_to_point(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 }
 
 /*
- * Unresolved (player_set_primary_magic_shortcut_id, player_set_secondary_magic_shortcut_id): retail reads r->unk2 again after
+ * Unresolved (player_set_primary_magic_shortcut_id,
+ * player_set_secondary_magic_shortcut_id): retail reads r->unk2 again after
  * each 0xff test, so both bodies compile 4 bytes short.
  */
 ADDRESS(0x8002b928, 0x110)

@@ -227,7 +227,10 @@ void area_on_actor_removed_open_gate(Object88 *obj)
     }
 }
 
-/* Slot 3: switches 0 and 1 arm and disarm object 44; switch 10 shows one of two notes. */
+/*
+ * Slot 3: region operands 0 and 1 arm and disarm object 44; region 10 swaps
+ * the warp-arrival cells.
+ */
 ADDRESS(0x801e888c, 0x144)
 void area_region_trigger_lock_door_and_warp_cells(Object44 *obj)
 {
@@ -371,7 +374,10 @@ void area_on_movie_start_unlock_element(u8 id)
     }
 }
 
-/* Slot 7: raises a stat, opens objects 70 and 91 over 16 frames each and arms object 44. */
+/*
+ * Slot 7: raises a stat, arms object 44, and objects 70 and 91 each fade out
+ * and are removed (death-fade preset 0x32, light blend up over 16 frames).
+ */
 ADDRESS(0x801e8c3c, 0x1cc)
 void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {

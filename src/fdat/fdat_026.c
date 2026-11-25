@@ -125,7 +125,7 @@ void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
-/* Slot 19: record 1 moves on once flag 0x30 is set. */
+/* Slot 19: once flag 0x30 is set, actor 1 is disabled (state 8) when removed. */
 ADDRESS(0x801e8780, 0x68)
 void area_on_actor_removed_disable_actor(Object88 *obj)
 {

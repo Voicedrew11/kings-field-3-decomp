@@ -89,7 +89,10 @@ void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
-/* Opens objects a and b over 16 frames (unk10 up to 0xfff), then frees them. */
+/*
+ * Objects a and b fade out and are removed (death-fade preset 0x32, light
+ * blend unk10 up to 0xfff over 16 frames).
+ */
 ADDRESS(0x801e85b8, 0x120)
 void area_fade_out_object_pair(s32 a, s32 b)
 {

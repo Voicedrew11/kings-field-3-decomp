@@ -1,8 +1,9 @@
 /*
  * Slot 17 (shared fragment, FDAT_077.BIN's claim): script record 0x85 of the
- * current object record. It rises (phase 0), moves toward the player while
- * further than the record's range (phase 1) and sinks again (phase 2); the
- * including module defines FDAT_801E87A0_STEP, the rise and sink per frame.
+ * current actor. Its light blend (+0x16) is raised to 0xfff (phase 0), it
+ * moves toward the player while further than the record's range (phase 1)
+ * and the blend is lowered again (phase 2); the including module defines
+ * FADE_APPROACH_BLEND_STEP, the blend change per frame.
  */
 ADDRESS(0x801e87a0, 0x350)
 void area_update_actor_target_fade_approach(void)
@@ -56,7 +57,7 @@ void area_update_actor_target_fade_approach(void)
     range = ((u16 *)script)[10] * ((u16 *)script)[10];
     switch (obj->unk70) {
     case 0:
-        obj->unk16 = obj->unk16 < 4095 ? obj->unk16 + FDAT_801E87A0_STEP : 0xfff;
+        obj->unk16 = obj->unk16 < 4095 ? obj->unk16 + FADE_APPROACH_BLEND_STEP : 0xfff;
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         if (dist > 0x19000000) {
             obj->unk70 = 1;
@@ -83,7 +84,7 @@ void area_update_actor_target_fade_approach(void)
         break;
     case 2:
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
-        obj->unk16 -= FDAT_801E87A0_STEP;
+        obj->unk16 -= FADE_APPROACH_BLEND_STEP;
         if (obj->unk18 >= 4095 && obj->unk16 <= 1024) {
             obj->unk14 = 0x37;
             obj->unk13 = 0;
