@@ -9,8 +9,8 @@ GAME extern decls	0
 source-local extern decls	0
 # Modern checking requires explicit casts at the SDK/libc void-pointer
 # boundaries (AddPrim, SetSemiTrans, memcpy, memset, free, read, write,
-# CdGetSector, InitHeap), as on SLPS-00017. The five void * views are
-# GAME's malloc/free wrappers and the raw arena it formats.
-void* views	5
+# CdGetSector, InitHeap), as on SLPS-00017. Five void * views are GAME's
+# malloc/free wrappers and the raw arena; the rest are those casts.
+void* views	177
 .c-local aggregates	0
 unresolved func_ identities	1000
