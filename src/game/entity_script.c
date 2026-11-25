@@ -205,7 +205,7 @@ void func_8004c1f0(void)
         if (dist != -1) {
             return;
         }
-        func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
+        map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
         obj->unk9 = 0;
         func_8004b560(obj);
         return;
@@ -354,9 +354,9 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
     }
     if (obj->unk1a != 0 && (kind & 0x40)) {
         if (mode & 0x20) {
-            func_8002a10c(rec);
+            player_increment_magic_training(rec);
         } else if ((mode & 0x10) && a10 >= 2500) {
-            func_8002a074();
+            player_increment_physical_power_training();
         }
     }
     if (mode & 0x10) {
@@ -378,7 +378,7 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
     if ((kind & 0x40) && (mode & 0x10)) {
         switch (DAT_801b24e4.unkcb) {
         case 0x1f:
-            func_80030c4c((rand() * 9 >> 15) + 1);
+            player_adjust_hp_on_weapon_hit((rand() * 9 >> 15) + 1);
             break;
         case 0x20:
             if (obj->unk1 == 59 || obj->unk1 == 60 || obj->unk1 == 61 || obj->unk1 == 63 || obj->unk1 == 66 ||
@@ -394,7 +394,7 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
     scripts = def->scripts;
     if (hp <= 0) {
         if (obj->unk1a != 0 && kind == 0x40) {
-            func_8002a310(def->unk1e);
+            player_add_experience(def->unk1e);
         }
         if (obj->unk1 < 43) {
             if (DAT_801ba984.unk7d == 0) {

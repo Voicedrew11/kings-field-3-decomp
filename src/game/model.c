@@ -1642,7 +1642,7 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
     light = &DAT_80199154.unk15da8[layer->unk4 & 0x3f];
     gte_SetLightMatrix(&light->unk0[turn]);
     gte_SetColorMatrix(&light->unk50);
-    func_80035358(light->unk68, light->unk6a);
+    fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
     gte_SetRotMatrix(&DAT_80199154.unk159f8);
     gte_SetTransMatrix(&DAT_80199154.unk159f8);

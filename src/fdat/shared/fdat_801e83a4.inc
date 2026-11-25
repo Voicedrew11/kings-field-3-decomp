@@ -1,6 +1,6 @@
 /*
  * Blends two light records into out by t (4.12), as GAME.EXE's
- * func_800344dc blends its working copy (shared fragment, FDAT_014.BIN's
+ * light_interpolate_records blends its working copy (shared fragment, FDAT_014.BIN's
  * claim; the module's first function, before its empty default handler).
  */
 ADDRESS(0x801e83a4, 0xe4)

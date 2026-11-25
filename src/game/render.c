@@ -159,7 +159,7 @@ void func_8003c35c(void)
         m.t[1] = rec->pos.vy;
         m.t[2] = rec->pos.vz;
         RotMatrix(&rec->angle, &m);
-        func_80035358(light->unk68, light->unk6a);
+        fog_set_range(light->unk68, light->unk6a);
         gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         gte_SetColorMatrix(&light->unk50);
         gte_MulMatrix0(&light->unk0[0], &m, &lm);
@@ -587,7 +587,7 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
             g += 3;
             b += 3;
         }
-        func_80035630();
+        display_begin_frame();
         p = (POLY_FT4 *)DAT_80199154.pool->next;
         DAT_80199154.pool->next += sizeof(POLY_FT4);
         if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
@@ -651,7 +651,7 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
         addPrim(DAT_80199154.ot, p);
         count--;
         DrawSync(0);
-        func_80035700();
+        display_present_frame();
         x += step * 4;
         y += step * 3;
     }
@@ -692,7 +692,7 @@ void func_8003df50(void)
                                                 DAT_801b24e4.unk160))->unk4 & 0x3f];
     gte_SetColorMatrix(&light->unk50);
     gte_SetLightMatrix(&light->unk0[0]);
-    func_80035358(light->unk68, light->unk6a);
+    fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
     m.t[0] = (s16)DAT_801b24e4.unkb0->unk34;
     m.t[1] = (s16)DAT_801b24e4.unkb0->unk36;
@@ -845,10 +845,10 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(fixed_lerp_q12(light->unk68, other->unk68, t),
+            fog_set_range(fixed_lerp_q12(light->unk68, other->unk68, t),
                           fixed_lerp_q12(light->unk6a, other->unk6a, t));
         } else {
-            func_80035358(light->unk68, light->unk6a);
+            fog_set_range(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
             gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
@@ -859,7 +859,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
         }
     } else {
         gte_SetColorMatrix(&light->unk50);
-        func_80035358(light->unk68, light->unk6a);
+        fog_set_range(light->unk68, light->unk6a);
         gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         gte_MulMatrix0(&light->unk0[0], mat, &lm);
     }
@@ -1113,10 +1113,10 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(fixed_lerp_q12(light->unk68, other->unk68, t),
+            fog_set_range(fixed_lerp_q12(light->unk68, other->unk68, t),
                           fixed_lerp_q12(light->unk6a, other->unk6a, t));
         } else {
-            func_80035358(light->unk68, light->unk6a);
+            fog_set_range(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
             gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
@@ -1127,7 +1127,7 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
         }
     } else {
         gte_SetColorMatrix(&light->unk50);
-        func_80035358(light->unk68, light->unk6a);
+        fog_set_range(light->unk68, light->unk6a);
         gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         gte_MulMatrix0(&light->unk0[0], mat, &lm);
     }
@@ -1958,11 +1958,11 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
     s32 i;
 
     DAT_8009c2e0.b = DAT_8009c2e0.g = DAT_8009c2e0.r = DAT_801b24e4.unkfd;
-    func_800357e8(pos, angle);
-    func_800351fc();
+    display_set_view_transform(pos, angle);
+    vram_scroll_update();
     func_80041f9c();
-    func_80034bf4();
-    func_80035630();
+    view_build_visibility_grid();
+    display_begin_frame();
     func_80043858();
     func_8003df50();
     DAT_800819b4[13].visible = DAT_800819b4[14].visible = 0;
@@ -2025,7 +2025,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
     func_8003d568();
     func_8003d64c();
     func_8003d79c();
-    func_80035700();
+    display_present_frame();
     cd_wait_four_vsyncs();
     func_80043940();
 }
@@ -2056,7 +2056,7 @@ void func_8004290c(void)
     SCRATCH->part = ((ModelData *)model)->parts;
     offset = SCRATCH->part->vertices + 12;
     SCRATCH->vertices = (u8 *)(offset + (s32)model);
-    func_80035358(20000, 24000);
+    fog_set_range(20000, 24000);
     SCRATCH->ot = DAT_80199154.ot;
     SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
     SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
@@ -2596,7 +2596,8 @@ void func_80043a08(EffectSpawn *spawn)
             effect->unk4 = spawn->unk3;
             effect->pos.vx = (spawn->cell_x << 11) + spawn->dx;
             effect->pos.vz = (spawn->cell_z << 11) + spawn->dz;
-            effect->pos.vy = func_80033b8c(effect->unk2, effect->pos.vx, effect->pos.vz, 0, 0)
+            effect->pos.vy = collision_sample_map_layer_height(effect->unk2, effect->pos.vx, effect->pos.vz,
+                                                               0, 0)
                 + spawn->dy;
             effect->unk5 = (rand() * effect->unk3) >> 15;
         } else {
@@ -2640,7 +2641,7 @@ s32 func_80043bb8(s32 level, s32 step)
 
     result = -1;
     for (;;) {
-        func_80035630();
+        display_begin_frame();
         p = (POLY_FT4 *)DAT_80199154.pool->next;
         DAT_80199154.pool->next += sizeof(POLY_FT4);
         dim = 128 - (level >> 1);
@@ -2698,7 +2699,7 @@ s32 func_80043bb8(s32 level, s32 step)
         addPrim(DAT_80199154.ot, p);
         level += step;
         DrawSync(0);
-        func_80035700();
+        display_present_frame();
         if (level <= 0 || level >= 120) {
             break;
         }

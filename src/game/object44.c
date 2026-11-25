@@ -293,16 +293,16 @@ void func_80044d9c(Object44Place *place)
         radius = def->unk4;
         if (radius != 0) {
             if (obj->unk3 & 0x10) {
-                func_80033c4c(obj->pos.vx, obj->pos.vz, radius * obj->arg.b.unk38 >> 7, 1);
+                map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, radius * obj->arg.b.unk38 >> 7, 1);
             } else {
-                func_80033c4c(obj->pos.vx, obj->pos.vz, radius, 1);
+                map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, radius, 1);
             }
         } else if (obj->unk3 & 4) {
             radius = def->arg.h.unk10;
             if (def->arg.h.unke > radius) {
                 radius = def->arg.h.unke;
             }
-            func_80033c4c(obj->pos.vx, obj->pos.vz, radius, 1);
+            map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, radius, 1);
         }
         switch (def->unk0) {
         case 1:
@@ -313,7 +313,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
             obj->arg.h.unk42 = obj->angle.vy;
-            func_80033c4c(obj->pos.vx, obj->pos.vz, 1500, 1);
+            map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 1500, 1);
             break;
         case 27:
             func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
@@ -322,7 +322,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
             obj->arg.h.unk42 = obj->angle.vy;
-            func_80033c4c(obj->pos.vx, obj->pos.vz, 3000, 1);
+            map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 3000, 1);
             break;
         case 0:
             func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
@@ -331,7 +331,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
             obj->arg.h.unk42 = obj->angle.vy;
-            func_80033c4c(obj->pos.vx, obj->pos.vz, 3000, 1);
+            map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 3000, 1);
             break;
         case 3:
             obj->unk4 = 3;
@@ -366,7 +366,7 @@ void func_80044d9c(Object44Place *place)
             func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2, obj->arg.b.unk3c,
                           obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                           obj->angle.vy, 45);
-            func_80033c4c(obj->pos.vx, obj->pos.vz, 4400, 1);
+            map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 4400, 1);
             break;
         case 23:
             obj->unk4 = 0x17;

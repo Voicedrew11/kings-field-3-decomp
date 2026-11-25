@@ -37,7 +37,8 @@ void func_8004b560(Object88 *obj)
 {
     obj->pos.vx = (obj->unk8 << 11) + obj->unk24;
     obj->pos.vz = (obj->unk7 << 11) + obj->unk22;
-    obj->pos.vy = func_80033b8c(obj->unk6, obj->pos.vx, obj->pos.vz, obj->unk1c, obj->unk1e);
+    obj->pos.vy = collision_sample_map_layer_height(obj->unk6, obj->pos.vx, obj->pos.vz, obj->unk1c,
+                                                    obj->unk1e);
     if (obj->pos.vy >= 0) {
         obj->pos.vy = 0;
     }
@@ -91,7 +92,7 @@ void func_8004b698(Object88 *obj)
     } else {
         obj->unk13 = 0;
     }
-    func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
+    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
 }
 
 ADDRESS(0x8004b770, 0x24)

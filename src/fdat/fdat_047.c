@@ -93,7 +93,7 @@ void func_801e85b8(s32 a, s32 b)
         cd_request_wait_idle();
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
     first->unk6 = 0xff;

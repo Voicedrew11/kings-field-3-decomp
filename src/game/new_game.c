@@ -80,7 +80,7 @@ void func_8005eb20(void)
         DAT_801e7edc.unk372 = -1;
         DAT_801e7edc.unk370 = 0;
         DAT_801e7edc.unk384 = 0xff;
-        func_8003078c();
+        player_reset_reaction_state();
         SsSetMVol(127, 127);
         resource_request_transition(0xff, 0xff, 0xff, 9, 11, 0x7f, 0x7f, 0x7f);
         MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,

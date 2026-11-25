@@ -131,7 +131,7 @@ void func_801e85e4(Object44 *obj)
         }
         /* fall through */
     case 0x63:
-        func_8002ab18(0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0);
+        player_apply_damage(0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0);
         break;
     }
 }

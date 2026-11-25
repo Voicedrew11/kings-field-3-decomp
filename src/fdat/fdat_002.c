@@ -242,7 +242,7 @@ void func_801e8a34(Object88 *record, s32 event)
             func_8005d7f8(0x84);
             func_8005d7f8(2);
             if (DAT_801b24e4.unkcb == 2) {
-                func_8002bdc0(0xff);
+                player_equip_weapon(0xff);
             }
         }
         break;

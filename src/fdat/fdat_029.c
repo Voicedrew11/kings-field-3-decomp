@@ -165,8 +165,8 @@ void func_801e8714(Object44 *obj)
             if (DAT_801b24e4.unk101 == 0x10) {
                 audio_play_spatial_default_range(0x28, &obj->pos, 0x78, 0);
             }
-            func_8002b114(&obj->pos, 0, 0x1000, 0x8000, 0x1000, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
-                          0x40, 0x40, 0x40, 0x400, 10);
+            player_apply_radial_damage(&obj->pos, 0, 0x1000, 0x8000, 0x1000, 0x40, 0x40, 0x40, 0x40, 0x40,
+                                       0x40, 0x40, 0x40, 0x40, 0x400, 10);
         } else if (DAT_801ba984.unk32[7] == 1) {
             other = &DAT_8018fb3c.objects[58];
             other->unk0 = 2;
@@ -181,7 +181,7 @@ void func_801e8714(Object44 *obj)
                 cd_request_wait_idle();
                 cd_request_service_vab();
                 cd_request_service_stream();
-                func_8002b330(&pos, &angle);
+                player_get_camera_pose(&pos, &angle);
                 func_800422b8(&pos, &angle);
             }
             other->unk6 = 0xff;

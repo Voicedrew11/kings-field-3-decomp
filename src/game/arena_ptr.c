@@ -321,7 +321,7 @@ void func_8005f444(s32 area)
             rec->pos.vz = z << 2;
             rec->pos.vy = y;
             rec->unk8 = 99;
-            func_800324f0(rec->pos.vx, rec->pos.vy, rec->pos.vz);
+            collision_sample_map_cell_layer(rec->pos.vx, rec->pos.vy, rec->pos.vz);
             rec->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
             rec->arg.b.unk38 = 0xff;
             break;

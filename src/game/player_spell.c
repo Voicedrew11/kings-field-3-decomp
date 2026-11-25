@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: starting a spell and the wall-sliding mover (same WIP module as
- * src/game/player.c, after the unreconstructed func_8002d2a0; contiguous
+ * src/game/player.c, after the unreconstructed player_update_weapon_attack; contiguous
  * with src/game/player_action.c).
  */
 #include <kf/lib/address.h>
@@ -17,10 +17,10 @@ RODATA(0x80011920, 0x154)
 /*
  * Starts spell id (Record18): checks and pays its unk1c cost, then sets the
  * repeat count unk106, the interval unk107 and the direction unk14c that
- * func_8002fe1c casts it with.
+ * player_update_actions_and_charge casts it with.
  */
 ADDRESS(0x8002deec, 0x50c)
-void func_8002deec(s32 id)
+void player_select_magic_action(s32 id)
 {
     SVECTOR unused;
     Record18 *r;
@@ -89,7 +89,7 @@ void func_8002deec(s32 id)
         }
         DAT_801b24e4.unk8e = 900;
         DAT_801b24e4.unk1c -= cost;
-        func_8002a10c(r);
+        player_increment_magic_training(r);
         return;
     case 30:
         if (DAT_801b24e4.hp == DAT_801b24e4.hp_max && DAT_801b24e4.unk7a == 0 && DAT_801b24e4.unk7e == 0
@@ -110,7 +110,7 @@ void func_8002deec(s32 id)
     case 27:
     case 28:
     case 30:
-        func_8002a10c(r);
+        player_increment_magic_training(r);
         break;
     }
     DAT_801b24e4.unk14c.vx = -200;
@@ -227,13 +227,13 @@ void func_8002deec(s32 id)
 
 /*
  * Moves the player speed units along angle (4096ths of a turn), retrying
- * around what func_80033f38 hit: the push of the last test, up to six turns
+ * around what collision_query_world hit: the push of the last test, up to six turns
  * along a pushing Object44 (unk3 bit 2), around a wall point, shorter steps,
  * one axis at a time, and along the slope of the hit record. Returns 1 when
  * the player moved freely; unk11c keeps the last step tried.
  */
 ADDRESS(0x8002e3f8, 0x8c4)
-s32 func_8002e3f8(s32 angle, s32 speed)
+s32 player_move_horizontal(s32 angle, s32 speed)
 {
     VECTOR p;
     Object44 *obj;
@@ -268,7 +268,7 @@ s32 func_8002e3f8(s32 angle, s32 speed)
 retry:
     p.vx = dx + DAT_801b24e4.pos.vx;
     p.vz = dz + DAT_801b24e4.pos.vz;
-    hit = func_80033f38(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31);
+    hit = collision_query_world(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31);
     if (hit == 0) {
     free:
         if (DAT_801d4464.unk12034 >= 64) {
@@ -376,7 +376,7 @@ retry:
         if (++walled == 2) {
             goto done;
         }
-        func_80033d84();
+        collision_cache_load_hit_bounds();
         wx = DAT_801d4464.unk1203c.vx - DAT_801b24e4.pos.vx;
         wz = DAT_801d4464.unk1203c.vz - DAT_801b24e4.pos.vz;
         a = ratan2(dz - wz, dx - wx);
@@ -393,7 +393,7 @@ retry:
         for (step = speed - 22; step >= 0; step -= 22) {
             p.vx = DAT_801b24e4.pos.vx + rcos(angle) * step / 4096;
             p.vz = DAT_801b24e4.pos.vz + rsin(angle) * step / 4096;
-            if (func_80033f38(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31) == 0) {
+            if (collision_query_world(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31) == 0) {
                 DAT_801b24e4.pos.vx = p.vx;
                 DAT_801b24e4.pos.vz = p.vz;
                 break;

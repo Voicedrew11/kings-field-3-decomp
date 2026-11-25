@@ -20,7 +20,7 @@
 
 /* World position of vertex of the weapon model (no callers). */
 ADDRESS(0x8002cea8, 0x138)
-void func_8002cea8(s32 vertex, VECTOR *out)
+void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
 {
     SVECTOR v;
     SVECTOR rot;
@@ -46,7 +46,7 @@ void func_8002cea8(s32 vertex, VECTOR *out)
  * unk40 and every unk42 at 50 or more.
  */
 ADDRESS(0x8002cfe0, 0x150)
-s32 func_8002cfe0(s32 hand)
+s32 player_meets_weapon_magic_requirement(s32 hand)
 {
     s32 n = 5;
     s32 low;
@@ -81,7 +81,7 @@ s32 func_8002cfe0(s32 hand)
 
 /* Casts spell id (Record18) along dir when unk1c covers its cost; pay takes the cost. */
 ADDRESS(0x8002d130, 0x170)
-void func_8002d130(s32 id, s32 pay, s32 dir)
+void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 {
     VECTOR unused;
     Record18 *r = &DAT_801b77ec.unk0[id];
@@ -104,20 +104,20 @@ void func_8002d130(s32 id, s32 pay, s32 dir)
         DAT_801b24e4.unk14c.vx = rcos(dir) >> 3;
         DAT_801b24e4.unk14c.vy = rsin(dir) >> 3;
         DAT_801b24e4.unk14c.vz = 600;
-        func_8002c30c(id);
+        player_dispatch_magic_effect(id);
         break;
     case 0x47:
         audio_play_sound(0x61, 0x6e);
         DAT_801b24e4.unk14c.vx = 0;
         DAT_801b24e4.unk14c.vy = dir * 300 - 300;
         DAT_801b24e4.unk14c.vz = 400;
-        func_8002c30c(id);
+        player_dispatch_magic_effect(id);
         break;
     default:
         DAT_801b24e4.unk14c.vx = 200;
         DAT_801b24e4.unk14c.vy = 200;
         DAT_801b24e4.unk14c.vz = 400;
-        func_8002c30c(id);
+        player_dispatch_magic_effect(id);
         break;
     }
 }
@@ -129,7 +129,7 @@ void func_8002d130(s32 id, s32 pay, s32 dir)
  * play the swing sound and probe for an Object88 along the swing.
  */
 ADDRESS(0x8002d2a0, 0xc4c)
-void func_8002d2a0(void)
+void player_update_weapon_attack(void)
 {
     SVECTOR v;
     SVECTOR rot;
@@ -189,7 +189,7 @@ void func_8002d2a0(void)
                         d = (rand() * 5 >> 15) + 3;
                         if (d >= DAT_801b24e4.hp) {
                             DAT_801b24e4.hp = 0;
-                            func_80030a6c(NULL);
+                            player_death_begin(NULL);
                         } else {
                             DAT_801b24e4.hp -= d;
                         }
@@ -276,11 +276,12 @@ void func_8002d2a0(void)
                 add = w->unk32;
             }
             DAT_801b24e4.unkc0 += speed;
-            if (DAT_801b24e4.unkca == 0 && w->unk0[3] != 0xff && DAT_801b24e4.unkcf != 0 && func_8002cfe0(0)
+            if (DAT_801b24e4.unkca == 0 && w->unk0[3] != 0xff && DAT_801b24e4.unkcf != 0 && player_meets_weapon_magic_requirement(0)
                 && (DAT_801b24e4.unk178 & DAT_80081868[6])) {
                 if (DAT_801b24e4.unkc0 >= w->unk20 && DAT_801b24e4.unkc0 <= w->unk22) {
                     if (DAT_801b24e4.unkce != 0) {
-                        func_8002d130(w->unk0[3], DAT_801b24e4.unkce == w->unk5, DAT_801b24e4.unkce);
+                        player_dispatch_weapon_magic(w->unk0[3], DAT_801b24e4.unkce == w->unk5,
+                                                     DAT_801b24e4.unkce);
                         DAT_801b24e4.unkce--;
                     }
                 } else {
@@ -302,7 +303,7 @@ void func_8002d2a0(void)
                     DAT_801b24e4.unk14c.vx = -200;
                     DAT_801b24e4.unk14c.vy = 200;
                     DAT_801b24e4.unk14c.vz = 400;
-                    func_8002c164(900, &probe, &dir, &dist);
+                    player_probe_view_target_and_vectors(900, &probe, &dir, &dist);
                     func_80053c84(10, 0x42, 0, &probe, &dir);
                 }
                 DAT_801b24e4.unkd0 = 0;
@@ -312,7 +313,8 @@ void func_8002d2a0(void)
                         DAT_801b24e4.unkc0 -= speed;
                         break;
                     }
-                    func_8002d130(w->unk4, DAT_801b24e4.unkc0 >= hit, (DAT_801b24e4.unkc0 - w->unk26) / div);
+                    player_dispatch_weapon_magic(w->unk4, DAT_801b24e4.unkc0 >= hit,
+                                                 (DAT_801b24e4.unkc0 - w->unk26) / div);
                 }
                 if (DAT_801b24e4.unkc0 >= hit) {
                     target = &from;
@@ -379,7 +381,7 @@ void func_8002d2a0(void)
                 if (DAT_801b24e4.unkf3 == 0x46) {
                     weight >>= 1;
                 }
-                DAT_801b24e4.unk1e += func_80029390(DAT_801b24e4.unk40, weight) * 2;
+                DAT_801b24e4.unk1e += player_charge_gain_for_rank(DAT_801b24e4.unk40, weight) * 2;
                 if (DAT_801b24e4.unk1e > 5000) {
                     DAT_801b24e4.unk1e = 5000;
                 }

@@ -574,7 +574,7 @@ void func_80046c00(int mode, s32 phase, s32 last, s32 step)
         func_8003d624(mode, v, v, v);
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
         if (level == end) {
             break;
@@ -725,7 +725,7 @@ void func_80047010(void)
                 }
                 break;
             case 20:
-                if (func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
+                if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
                                   0xff);
                     obj->unk8 = 21;
@@ -769,7 +769,7 @@ void func_80047010(void)
                 }
                 break;
             case 20:
-                if (func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
+                if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
                                   0xff);
                     obj->unk8 = 21;
@@ -813,7 +813,7 @@ void func_80047010(void)
                 }
                 break;
             case 20:
-                if (func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
+                if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c, 0,
                                   0xff);
                     obj->unk8 = 21;
@@ -866,7 +866,7 @@ void func_80047010(void)
                 if (obj->arg.b.unk38 >= 150 && obj->arg.b.unk38 <= 198 && (obj->arg.b.unk38 & 1)) {
                     break;
                 }
-                if (func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
+                if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
                     obj->unk8 = 21;
                     func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd, obj->arg.b.unk3c,
                                   obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
@@ -994,7 +994,8 @@ void func_80047010(void)
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (func_80033f38(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc, 0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc,
+                                                      0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
@@ -1127,7 +1128,8 @@ void func_80047010(void)
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (func_80033f38(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc, 0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc,
+                                                      0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
@@ -1225,7 +1227,8 @@ void func_80047010(void)
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (func_80033f38(out.vx, obj->pos.vy, out.vz, 1500, obj->unkc, 0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 1500, obj->unkc,
+                                                      0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
@@ -1705,10 +1708,11 @@ void func_80047010(void)
                         func_8004482c(obj, def->arg.b.unk16 + 496);
                     }
                     func_80046760(obj, def->arg.b.unkc, &p);
-                    hit = func_80033f38(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                    hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
                     if (hit == 0) {
                         func_80046760(obj, def->arg.b.unkd, &p);
-                        hit = func_80033f38(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                        hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                    0x90);
                     }
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
@@ -1733,10 +1737,12 @@ void func_80047010(void)
                             }
                         }
                         func_80046760(obj, def->arg.b.unkc, &q);
-                        hit = func_80033f38(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                        hit = collision_query_world(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                    0x90);
                         if (hit == 0) {
                             func_80046760(obj, def->arg.b.unkd, &q);
-                            hit = func_80033f38(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                            hit = collision_query_world(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                        0x90);
                         }
                         if (hit != 0) {
                             if (obj->arg.b.unk40 == 0) {
@@ -1759,10 +1765,12 @@ void func_80047010(void)
                             obj->unka = 0;
                         }
                         func_80046760(obj, def->arg.b.unkc, &r);
-                        hit = func_80033f38(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                        hit = collision_query_world(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                    0x90);
                         if (hit == 0) {
                             func_80046760(obj, def->arg.b.unkd, &r);
-                            hit = func_80033f38(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                            hit = collision_query_world(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                        0x90);
                         }
                         if (hit != 0) {
                             if (obj->arg.b.unk40 == 0) {
@@ -1843,7 +1851,7 @@ void func_80047010(void)
                 }
                 break;
             case 1:
-                if (func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
+                if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
                     obj->unk8 = 2;
                     func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
                                   obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
@@ -1920,7 +1928,7 @@ void func_80047010(void)
                         obj->unka &= 0xfff;
                     }
                     func_80046760(obj, def->arg.h.unkc, &p);
-                    hit = func_80033f38(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                    hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             obj->arg.b.unk40 = 1;
@@ -1992,7 +2000,8 @@ void func_80047010(void)
                         obj->unka &= 0xfff;
                     }
                     func_80046760(obj, def->arg.h.unkc, &p);
-                    hit = func_80033f38(p.vx, p.vy + 2048, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
+                    hit = collision_query_world(p.vx, p.vy + 2048, p.vz, def->arg.h.unke, def->arg.h.unk10,
+                                                0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
@@ -2150,12 +2159,12 @@ void func_80047010(void)
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
+                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
                     DAT_801b24e4.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
                     DAT_801b24e4.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
                     DAT_801b24e4.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
                     DAT_801b24e4.unk12c.vy = -(obj->arg.b.unk3f << 4);
-                    func_8002b760();
+                    player_sync_position_to_map();
                     DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
                                              DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
                     func_80046c00(0x82, 0x1000, 0x1000, 0);
@@ -2255,9 +2264,9 @@ void func_80047010(void)
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
+                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
                     func_80046cb0(obj->arg.sb.unk3c << 11, 0, obj->arg.sb.unk3d << 11);
-                    func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
+                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
                 }
             } else {
                 obj->arg.b.unk40 = 0;
@@ -2278,12 +2287,12 @@ void func_80047010(void)
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
+                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
                     DAT_801b24e4.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
                     DAT_801b24e4.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
                     DAT_801b24e4.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
                     DAT_801b24e4.unk12c.vy = -(obj->arg.b.unk3f << 4);
-                    func_8002b760();
+                    player_sync_position_to_map();
                     DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
                                              DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
                     func_8003daec(&c.r, 320, 240, -1);
@@ -2602,7 +2611,8 @@ void func_80047010(void)
                 {
                     s32 floor;
 
-                    floor = func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4, def->unk8);
+                    floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
+                                                         def->unk8);
                     obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
                     obj->pos.vy += obj->arg.sh.unk3e;
                     obj->arg.sh.unk3e += 20;
@@ -2627,7 +2637,8 @@ void func_80047010(void)
             if (obj->unk8 == 0) {
                 s32 floor;
 
-                floor = func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4, def->unk8);
+                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
+                                                     def->unk8);
                 obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
                 obj->pos.vy += 20;
                 obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
@@ -2642,7 +2653,8 @@ void func_80047010(void)
                 s32 floor;
                 s32 ang;
 
-                floor = func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4, def->unk8);
+                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
+                                                     def->unk8);
                 obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
                 obj->pos.vy += obj->arg.sh.unk3e;
                 func_80056268(&obj->pos, 0x1000, 6000, 300);

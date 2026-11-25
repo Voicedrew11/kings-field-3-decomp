@@ -90,7 +90,7 @@ void game_main_loop(void)
     repeat_store_word((u32 *)DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
     repeat_store_word((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
     cd_initialize();
-    func_80035394();
+    display_initialize();
     func_8003c9dc();
     audio_initialize_runtime();
     func_8004485c();
@@ -103,14 +103,14 @@ void game_main_loop(void)
     ExitCriticalSection();
     func_8005ea64();
     func_80060800();
-    func_80027f2c();
-    func_800341e8();
-    func_80034180();
-    func_80034300();
-    func_80030e14();
+    memory_card_initialize();
+    light_reset_records();
+    render_reset_color_overlays();
+    light_refresh_record_rotations();
+    player_update_status_visuals();
     SsSetMVol(127, 127);
     if (menu_card_browser() != -1) {
-        func_80028f90();
+        player_restore_equipment_effects();
     } else {
         continued = 1;
     }
@@ -118,8 +118,8 @@ void game_main_loop(void)
     if (continued && DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqPause(DAT_801b09fc.seq_id);
     }
-    func_8002b760();
-    func_800350fc(&rect, 0, 1, 1);
+    player_sync_position_to_map();
+    vram_scroll_start(&rect, 0, 1, 1);
     memory_arena_initialize_blocks((void *)DAT_800c8954, sizeof(DAT_800c8954));
     if (continued == 1) {
         DAT_801e7edc.unk384 = 3;
@@ -139,19 +139,19 @@ void game_main_loop(void)
     func_80046c00(0x82, 0x1000, 0, -128);
     DAT_8009c3f8 = 0;
     for (;;) {
-        func_800341e8();
-        func_80034180();
+        light_reset_records();
+        render_reset_color_overlays();
         func_80047010();
-        func_80030fcc();
+        player_update_frame();
         func_80052e5c();
         func_8005bc50();
         DAT_801b24e4.unke = 0;
         func_8005eb20();
         resource_advance_transition();
         func_80061940();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         audio_update_listener(&pos, &angle);
-        func_80034300();
+        light_refresh_record_rotations();
         cd_request_service_stream();
         cd_request_service_vab();
         func_800422b8(&pos, &angle);

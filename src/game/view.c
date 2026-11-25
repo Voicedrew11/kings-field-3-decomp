@@ -18,7 +18,7 @@
 
 /* Turns the screen tint off and empties both colour sums. */
 ADDRESS(0x80034180, 0x68)
-void func_80034180(void)
+void render_reset_color_overlays(void)
 {
     DAT_80199154.sum[0].mode = 1;
     DAT_80199154.sum[1].mode = 1;
@@ -31,7 +31,7 @@ void func_80034180(void)
 
 /* Copies the area's light records into the working set. */
 ADDRESS(0x800341e8, 0x118)
-void func_800341e8(void)
+void light_reset_records(void)
 {
     Record30 *src;
     Record6c *dst;
@@ -53,7 +53,7 @@ void func_800341e8(void)
 
 /* Rebuilds the quarter turns of every working light record when asked to. */
 ADDRESS(0x80034300, 0x94)
-void func_80034300(void)
+void light_refresh_record_rotations(void)
 {
     Record6c *light;
     s32 i;
@@ -72,7 +72,7 @@ void func_80034300(void)
 
 /* Blends the parts of dst that flags selects toward src by t (4.12). */
 ADDRESS(0x80034394, 0x148)
-void func_80034394(s32 flags, Record30 *src, Record6c *dst, s32 t)
+void light_interpolate_record_fields(s32 flags, Record30 *src, Record6c *dst, s32 t)
 {
     if (flags & 2) {
         fixed_lerp_nine_halfwords_q12((MATRIX *)&dst->unk50, (MATRIX *)&src->unk14, (MATRIX *)&dst->unk50, t);
@@ -102,14 +102,14 @@ void func_80034394(s32 flags, Record30 *src, Record6c *dst, s32 t)
 
 /* Blends the first 48 working light records toward src. */
 ADDRESS(0x800344dc, 0x90)
-void func_800344dc(s32 flags, Record30 *src, s32 t)
+void light_interpolate_records(s32 flags, Record30 *src, s32 t)
 {
     Record6c *light;
     s32 i;
 
     light = DAT_80199154.unk15da8;
     for (i = 0; i < 48; i++) {
-        func_80034394(flags, src, light, t);
+        light_interpolate_record_fields(flags, src, light, t);
         light++;
     }
     if (flags & 1) {
@@ -119,7 +119,7 @@ void func_800344dc(s32 flags, Record30 *src, s32 t)
 
 /* Blends the colour (unless any part is 0xff) and the distances (unless 0xffff). */
 ADDRESS(0x8003456c, 0x88)
-void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t)
+void light_interpolate_color_and_fog(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t)
 {
     Record30 target;
     s32 flags;
@@ -139,7 +139,7 @@ void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t)
         target.unk2e = far;
         flags |= 0x10;
     }
-    func_800344dc(flags, &target, t);
+    light_interpolate_records(flags, &target, t);
 }
 
 /*
@@ -149,7 +149,7 @@ void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t)
  * offset in allocation priority ($s6 / $s5).
  */
 ADDRESS(0x800345f4, 0x300)
-void func_800345f4(void)
+void view_grid_occlude_walls_ascending(void)
 {
     u8 *start;
     u8 *end;
@@ -236,7 +236,7 @@ void func_800345f4(void)
 
 /* The same walk with grid rows and columns descending (views facing -z). */
 ADDRESS(0x800348f4, 0x300)
-void func_800348f4(void)
+void view_grid_occlude_walls_descending(void)
 {
     u8 *start;
     u8 *end;
@@ -329,7 +329,7 @@ void func_800348f4(void)
  * and the spilled point coordinates differ (first attempt only).
  */
 ADDRESS(0x80034bf4, 0x4cc)
-void func_80034bf4(void)
+void view_build_visibility_grid(void)
 {
     s32 half;
     s32 yaw;
@@ -452,9 +452,9 @@ void func_80034bf4(void)
     SCRATCH->u.view.x = DAT_80199154.unk15b20;
     SCRATCH->u.view.z = DAT_80199154.unk15b24;
     if ((yaw & 0xfff) < 2048) {
-        func_800345f4();
+        view_grid_occlude_walls_ascending();
     } else {
-        func_800348f4();
+        view_grid_occlude_walls_descending();
     }
     resource_copy_words((u32 *)DAT_80199154.grid, (u32 *)SCRATCH->u.view.grid,
                         sizeof(DAT_80199154.grid) / 4);
@@ -462,7 +462,7 @@ void func_80034bf4(void)
 
 /* A free VRAM scroll record, or NULL. */
 ADDRESS(0x800350c0, 0x3c)
-ScrollRec *func_800350c0(void)
+ScrollRec *vram_scroll_find_free(void)
 {
     ScrollRec *scroll;
     s32 i;
@@ -480,11 +480,11 @@ ScrollRec *func_800350c0(void)
 
 /* Starts a VRAM scroll of rect: copied to its place, the source 32 pixels left. */
 ADDRESS(0x800350fc, 0x100)
-void func_800350fc(RECT *rect, s32 delay, s32 step, s32 mode)
+void vram_scroll_start(RECT *rect, s32 delay, s32 step, s32 mode)
 {
     ScrollRec *scroll;
 
-    scroll = func_800350c0();
+    scroll = vram_scroll_find_free();
     if (scroll != NULL) {
         scroll->mode = mode;
         scroll->unk4 = 0;
@@ -509,7 +509,7 @@ void func_800350fc(RECT *rect, s32 delay, s32 step, s32 mode)
  * before the first MoveImage (unattributed allocation residue).
  */
 ADDRESS(0x800351fc, 0x15c)
-void func_800351fc(void)
+void vram_scroll_update(void)
 {
     ScrollRec *scroll;
     RECT rect;
@@ -549,7 +549,7 @@ void func_800351fc(void)
 
 /* Sets the fog distances; equal distances turn the fog off. */
 ADDRESS(0x80035358, 0x3c)
-void func_80035358(s32 near, s32 far)
+void fog_set_range(s32 near, s32 far)
 {
     DAT_80199154.unk15b28 = near;
     DAT_80199154.unk15b2c = far;
@@ -561,7 +561,7 @@ void func_80035358(s32 near, s32 far)
 
 /* Sets up the display, the GTE, the two buffers, the packet pools and the screen state. */
 ADDRESS(0x80035394, 0x29c)
-void func_80035394(void)
+void display_initialize(void)
 {
     u8 *heap;
     s32 i;
@@ -592,7 +592,7 @@ void func_80035394(void)
     gte_SetGeomScreen(200);
     gte_SetBackColor(80, 80, 80);
     gte_SetFarColor(5, 5, 5);
-    func_80035358(20000, 24000);
+    fog_set_range(20000, 24000);
     DAT_80199154.frame = 0xff;
     DAT_80199154.buffer = DAT_80116954;
     DAT_80199154.pools[0].base = DAT_80116954;
@@ -620,7 +620,7 @@ void func_80035394(void)
 
 /* Starts a frame: flips the buffers and clears both ordering tables. */
 ADDRESS(0x80035630, 0xd0)
-void func_80035630(void)
+void display_begin_frame(void)
 {
     DAT_80199154.frame = !DAT_80199154.frame;
     DAT_80199154.pool = &DAT_80199154.pools[DAT_80199154.frame];
@@ -634,7 +634,7 @@ void func_80035630(void)
 
 /* Ends a frame: shows the finished buffer and draws ot2 then ot. */
 ADDRESS(0x80035700, 0xe8)
-void func_80035700(void)
+void display_present_frame(void)
 {
     DrawSync(0);
     VSync(0);
@@ -646,7 +646,7 @@ void func_80035700(void)
 
 /* Sets the viewer (either may be NULL to keep it) and rebuilds the view matrices. */
 ADDRESS(0x800357e8, 0x134)
-void func_800357e8(VECTOR *pos, SVECTOR *angle)
+void display_set_view_transform(VECTOR *pos, SVECTOR *angle)
 {
     SVECTOR rotation;
     VECTOR unused;

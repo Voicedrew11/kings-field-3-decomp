@@ -209,7 +209,7 @@ void func_801e8b10(Object44 *obj)
         if (func_8005d7bc(0x38) > 0) {
             func_8005d948(0x200, 0, 0, 0, 100, 100, 100);
             if (DAT_801b24e4.unkf2 == 0x38) {
-                func_8002bb84(0x39, 4);
+                player_set_equipment_slot(0x39, 4);
             }
             func_8005d7f8(0x38);
             func_8005d898(0x39);
@@ -218,17 +218,17 @@ void func_801e8b10(Object44 *obj)
         break;
     case 0x61:
         if (DAT_801ba984.unk32[0x20] == 0) {
-            func_8002ab18(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
+            player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
         if (DAT_801ba984.unk32[0x21] == 0) {
-            func_8002ab18(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
+            player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
         if (DAT_801ba984.unk32[0x22] == 0) {
-            func_8002ab18(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
+            player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
         break;
     case 0x63:
-        func_8002ab18(0, 0, 0, 0x43, 0, 0, 0, 0, 0, 0, 0, &DAT_801b24e4.pos);
+        player_apply_damage(0, 0, 0, 0x43, 0, 0, 0, 0, 0, 0, 0, &DAT_801b24e4.pos);
         break;
     }
 }
@@ -297,15 +297,15 @@ void func_801e8e08(Object88 *record, s32 event)
         if (DAT_801ba984.unk32[0x24] != 1) {
             DAT_801ba984.unk32[0x24] = 1;
             func_8005db30(NULL, 0x29);
-            func_8002bb84(0x29, 0);
+            player_set_equipment_slot(0x29, 0);
             func_8005db30(NULL, 0x31);
-            func_8002bb84(0x31, 1);
+            player_set_equipment_slot(0x31, 1);
             func_8005db30(NULL, 0x46);
-            func_8002bb84(0x46, 2);
+            player_set_equipment_slot(0x46, 2);
             func_8005db30(NULL, 0x4f);
-            func_8002bb84(0x4f, 3);
+            player_set_equipment_slot(0x4f, 3);
             func_8005db30(NULL, 0x3c);
-            func_8002bb84(0x3c, 4);
+            player_set_equipment_slot(0x3c, 4);
             DAT_8018fb3c.objects[63].unk0 = 2;
             DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
         }
@@ -316,8 +316,8 @@ void func_801e8e08(Object88 *record, s32 event)
             func_8005d948(0x200, 0, 0, 0, 200, 200, 200);
             func_8005d948(0x200, 200, 200, 200, 0, 0, 0);
             DAT_801b24e4.unk34[4] += 30;
-            func_80029f1c(4);
-            func_80029500();
+            player_learn_element_magic(4);
+            player_recalculate_combat_stats();
             DAT_80185da8.objects[56].unk0 = 8;
             DAT_80185da8.objects[56].unk3 = 0;
         }

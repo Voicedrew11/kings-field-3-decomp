@@ -80,19 +80,19 @@ typedef struct SaveHeader {
     u8 unk204[0x7c];
 } SaveHeader;
 
-void func_80027f2c(void);
-void func_80027fe4(void);
-void func_80028034(void);
-void func_80028090(void);
-s32 func_800280d4(void);
-s32 func_800281c4(struct DIRENTRY *dir, s32 *count);
-s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number);
-s32 func_800285dc(void);
-s32 func_8002860c(s32 number);
-s32 func_80028750(s32 number);
-void func_80028b70(SaveHeader *header, s32 number);
-u32 func_80028c74(u8 *data);
-s32 func_80028c98(void);
-void func_80028d0c(void);
+void memory_card_initialize(void);
+void memory_card_shutdown_events(void);
+void memory_card_start(void);
+void memory_card_stop(void);
+s32 memory_card_probe_temporary_file(void);
+s32 memory_card_scan_save_entries(struct DIRENTRY *dir, s32 *count);
+s32 memory_card_read_slot_summary(char *name, s32 *experience, s32 *level, s32 *number);
+s32 memory_card_format(void);
+s32 memory_card_read_slot(s32 number);
+s32 memory_card_write_slot(s32 number);
+void memory_card_write_title_stats(SaveHeader *header, s32 number);
+u32 memory_card_payload_byte_sum(u8 *data);
+s32 memory_card_wait_event(void);
+void memory_card_clear_events(void);
 
 #endif

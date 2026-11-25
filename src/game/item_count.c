@@ -75,21 +75,21 @@ void func_8005d948(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, s32 b1)
 
     t = 0;
     do {
-        func_800341e8();
-        func_80034180();
-        func_80034300();
+        light_reset_records();
+        render_reset_color_overlays();
+        light_refresh_record_rotations();
         r = fixed_lerp_q12(r0, r1, t);
         g = fixed_lerp_q12(g0, g1, t);
         func_8003d8ec(r, g, fixed_lerp_q12(b0, b1, t), 0x800, 1);
         t += step;
-        func_80030e14();
+        player_update_status_visuals();
         func_800422b8(NULL, NULL);
     } while (t < 4096);
-    func_800341e8();
-    func_80034180();
-    func_80034300();
+    light_reset_records();
+    render_reset_color_overlays();
+    light_refresh_record_rotations();
     func_8003d8ec(r1, g1, b1, 0x800, 1);
-    func_80030e14();
+    player_update_status_visuals();
     func_800422b8(NULL, NULL);
 }
 
@@ -111,7 +111,7 @@ void func_8005da94(void)
         func_8003d624(0x82, v, v, v);
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
         if (i >= 4096) {
             break;
@@ -280,7 +280,7 @@ pressed:
         }
         if (id != -1) {
             obj->unk6 = 0xff;
-            func_8002b6f0();
+            player_clear_motion();
             return;
         }
     }
@@ -306,7 +306,7 @@ back:
     if (pad) {
         obj->unk6 = 0xff;
     }
-    func_8002b6f0();
+    player_clear_motion();
 }
 
 /*
@@ -499,9 +499,9 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (DAT_801b24e4.unk1a < DAT_801b24e4.unk1c) {
                 DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
             }
-            func_8002aa54(7);
+            player_cap_status_components(7);
             func_8005d948(512, 128, 200, 255, 0, 0, 0);
-            func_8002b6f0();
+            player_clear_motion();
             break;
         case 0x16:
             if (!angle_within_tolerance(angle->vy, vector_xz_to_angle(obj->pos.vx - p.vx, obj->pos.vz - p.vz),
@@ -517,7 +517,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                 DAT_801b24e4.hp = DAT_801b24e4.hp_max;
             }
             func_8005d948(512, 128, 128, 200, 0, 0, 0);
-            func_8002b6f0();
+            player_clear_motion();
             break;
         case 0xe:
             if ((s16)DAT_8018fad4.loading != 1) {
@@ -525,7 +525,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                 map_reveal_visited_rects();
                 repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                 func_8005efd4(DAT_8018fad4.area[0]);
-                func_80030568();
+                player_render_frame_and_release_pool();
                 menu_card_save_browser();
             }
             break;

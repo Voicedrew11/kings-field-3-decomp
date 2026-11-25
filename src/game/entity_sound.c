@@ -343,7 +343,7 @@ void func_800500a8(void)
     } else {
         DAT_80185da8.unk9d04 = 0x93;
     }
-    func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
+    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
     if (script[4] != 0xff) {
         s32 n;
         s32 slot;
@@ -603,8 +603,9 @@ void func_800500a8(void)
             obj->unk72.vz = 0;
             obj->unk72.vy = 0;
             obj->unk72.vx = 0;
-            obj->unk72.pad = func_80033b8c(obj->unk6, (obj->unk8 << 11) + obj->unk24, (obj->unk7 << 11) + obj->unk22,
-                                           obj->unk1c, obj->unk1e) +
+            obj->unk72.pad = collision_sample_map_layer_height(obj->unk6, (obj->unk8 << 11) + obj->unk24,
+                                                               (obj->unk7 << 11) + obj->unk22, obj->unk1c,
+                                                               obj->unk1e) +
                              obj->unk26;
             func_8004c184(script[1]);
             flags = 3;
@@ -902,8 +903,8 @@ void func_800500a8(void)
                 at.vx += obj->pos.vx;
                 at.vy += (script[15] << 4) + obj->pos.vy;
                 at.vz += obj->pos.vz;
-                func_8002ab18(SCRIPT_U16(script, 18), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17], 0, 0,
-                              0, 0, 0, 0x1000, 10, &at);
+                player_apply_damage(SCRIPT_U16(script, 18), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
+                                    script[17], 0, 0, 0, 0, 0, 0x1000, 10, &at);
                 obj->unk18 = time;
                 break;
             }
@@ -1018,8 +1019,8 @@ void func_800500a8(void)
             hit = func_8004e094(&obj->vel);
             if (hit != 0) {
                 if (hit & 0x80) {
-                    func_8002ab18(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18), script[13], 0,
-                                  0, 0, 0, 0, 0x1000, 10, &obj->pos);
+                    player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18), script[13], 0,
+                                        0, 0, 0, 0, 0x1000, 10, &obj->pos);
                 }
                 obj->unk70 = 2;
             }
@@ -1468,10 +1469,10 @@ void func_800500a8(void)
         hit = func_8004e094(&obj->vel);
         if (hit != 0) {
             if (hit & 0x80) {
-                func_8002ab18(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
-                              SCRIPT_U16(script, 12), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
-                              SCRIPT_U16(script, 24), SCRIPT_U16(script, 26), SCRIPT_U16(script, 28), 0x1000, 10,
-                              &obj->pos);
+                player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
+                                    SCRIPT_U16(script, 12), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
+                                    SCRIPT_U16(script, 24), SCRIPT_U16(script, 26), SCRIPT_U16(script, 28),
+                                    0x1000, 10, &obj->pos);
             }
             func_8004c0b0(obj, 3);
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
@@ -1491,17 +1492,18 @@ void func_800500a8(void)
         next.vx = obj->vel.vx + obj->pos.vx;
         next.vy = obj->vel.vy + obj->pos.vy;
         next.vz = obj->vel.vz + obj->pos.vz;
-        hit = func_80033f38(next.vx, next.vy, next.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
+        hit = collision_query_world(next.vx, next.vy, next.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                    DAT_80185da8.unk9d04);
         if (hit == 0) {
         move:
             obj->pos.vx = next.vx;
             obj->pos.vy = next.vy;
             obj->pos.vz = next.vz;
         } else if (hit & 0x80) {
-            func_8002ab18(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
-                          SCRIPT_U16(script, 12), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
-                          SCRIPT_U16(script, 24), SCRIPT_U16(script, 26), SCRIPT_U16(script, 28), 0x1000, 10,
-                          &obj->pos);
+            player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
+                                SCRIPT_U16(script, 12), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
+                                SCRIPT_U16(script, 24), SCRIPT_U16(script, 26), SCRIPT_U16(script, 28),
+                                0x1000, 10, &obj->pos);
             goto move;
         } else {
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
@@ -1580,7 +1582,8 @@ void func_800500a8(void)
             obj->unk3 = target->unk3;
             if (target->unk9 != 1) {
                 obj->unk28 = (obj->unk28 & ~0x10) | 0x100;
-                hit = func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, obj->unk1e, 0x81);
+                hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, obj->unk1e,
+                                            0x81);
                 if (hit & 0x80) {
                     obj->pos.vx += 800 + obj->unk1c;
                 }
@@ -1611,6 +1614,6 @@ void func_800500a8(void)
     }
 done:
     if (obj->unk9 == 1) {
-        func_80033c4c(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
+        map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
     }
 }

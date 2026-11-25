@@ -26,13 +26,13 @@
 
 RODATA(0x80011760, 0x1bc)
 
-/* Pad bit per action (WIP); func_8002b6f0 keeps four of them held. */
+/* Pad bit per action (WIP); player_clear_motion keeps four of them held. */
 DATA(0x80081868, 0x1c, ".data")
 u16 DAT_80081868[14] = {
     0x1000, 0x4000, 0x8000, 0x2000, 0x10, 0x40, 0x80, 0x20, 4, 1, 8, 2, 0x100, 0x800,
 };
 
-/* Per magic element: the levels at which func_80029f1c teaches spells. */
+/* Per magic element: the levels at which player_learn_element_magic teaches spells. */
 DATA(0x80081884, 0x3c, ".data")
 s16 DAT_80081884[5][6] = {
     { 20, 35, 50, 65, 80, 0 },
@@ -52,14 +52,14 @@ u8 DAT_800818c0[5][7] = {
     { 0x1d, 0x1e, 0x13, 0x14, 0x15, 0xff, 0x00 },
 };
 
-/* Offsets (unk14c) of the five shots of spells 72..74 (func_8002c30c). */
+/* Offsets (unk14c) of the five shots of spells 72..74 (player_dispatch_magic_effect). */
 DATA(0x800818e4, 0x28, ".data")
 static SVECTOR DAT_800818e4[5] = {
     { 0, 0, 100, 0 }, { -1500, 0, 0, 0 }, { -3000, 0, -2000, 0 }, { 1500, 0, 0, 0 }, { 3000, 0, -2000, 0 }
 };
 
 ADDRESS(0x80028d54, 0xf4)
-void func_80028d54(void)
+void player_update_collision_bounds(void)
 {
     s32 height0 = DAT_801d4464.unk12018[0] + 1600;
     s32 height1;
@@ -67,28 +67,28 @@ void func_80028d54(void)
 
     if ((DAT_801b24e4.unk154 = height0 - (DAT_801b24e4.unk16c + DAT_801b24e4.pos.vy + DAT_801b24e4.unk170))
         < -1000) {
-        func_80030a6c(0);
+        player_death_begin(0);
     }
     height1 = DAT_801d4464.unk12018[1] + 1600;
     if ((DAT_801b24e4.unk158 = height1 - (DAT_801b24e4.unk16c + DAT_801b24e4.pos.vy + DAT_801b24e4.unk170))
         <= 0) {
-        func_80030a6c(0);
+        player_death_begin(0);
     }
     height2 = DAT_801d4464.unk12018[2] + 1600;
     if ((DAT_801b24e4.unk15c = height2 - (DAT_801b24e4.unk16c + DAT_801b24e4.pos.vy + DAT_801b24e4.unk170))
         <= 0) {
-        func_80030a6c(0);
+        player_death_begin(0);
     }
 }
 
 ADDRESS(0x80028e48, 0x54)
-s32 func_80028e48(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
+s32 player_distance_to_point_with_margin(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
     return vector_distance_to_point(&DAT_801b24e4.pos, x, y, z, radius + 800, 1700, reach_up);
 }
 
 ADDRESS(0x80028e9c, 0xf4)
-void func_80028e9c(void)
+void player_reset_view(void)
 {
     DAT_801b24e4.unk16c = 0;
     DAT_801b24e4.unk16e = 0;
@@ -116,13 +116,13 @@ void func_80028e9c(void)
 }
 
 ADDRESS(0x80028f90, 0x148)
-void func_80028f90(void)
+void player_restore_equipment_effects(void)
 {
-    func_8002bb84(0xff, 0xff);
-    func_8002bdc0(DAT_801b24e4.unkcb);
-    func_8002b928(DAT_801b24e4.unkc7);
-    func_8002ba38(DAT_801b24e4.unkc8);
-    func_80028e9c();
+    player_set_equipment_slot(0xff, 0xff);
+    player_equip_weapon(DAT_801b24e4.unkcb);
+    player_set_primary_magic_shortcut_id(DAT_801b24e4.unkc7);
+    player_set_secondary_magic_shortcut_id(DAT_801b24e4.unkc8);
+    player_reset_view();
     if (DAT_801b24e4.unk86 != 0) {
         func_80053c84(10, 64, 26, &DAT_801b24e4.pos, 0, 0);
         func_80053c84(10, 64, 26, &DAT_801b24e4.pos, 0, 1);
@@ -134,7 +134,7 @@ void func_80028f90(void)
         func_80053c84(10, 64, 28, &DAT_801b24e4.pos, 0, 0);
         func_80053c84(10, 64, 28, &DAT_801b24e4.pos, 0, 1);
     }
-    func_80029500();
+    player_recalculate_combat_stats();
     menu_apply_button_config();
 }
 
@@ -143,7 +143,7 @@ void func_80028f90(void)
  * int with no return value: a void return changes the loop's delay slot.
  */
 ADDRESS(0x800290d8, 0xb0)
-int func_800290d8(int part_in)
+int resource_mark_area_models_reclaimable(int part_in)
 {
     u8 part = part_in;
     u16 i;
@@ -158,14 +158,14 @@ int func_800290d8(int part_in)
 }
 
 ADDRESS(0x80029188, 0x208)
-void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 part)
+void player_reload_map_resources(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 part)
 {
     cd_request_wait_idle();
     do {
         cd_request_yield();
         resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
-    func_800290d8(DAT_8018fad4.area[0]);
+    resource_mark_area_models_reclaimable(DAT_8018fad4.area[0]);
     DAT_8018fad4.area[0] = 99;
     DAT_8018fad4.area[1] = 99;
     DAT_8018fad4.area[2] = 99;
@@ -187,11 +187,11 @@ void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 pa
         cd_request_wait_idle();
         VSync(2);
     }
-    func_8002b760();
-    func_800341e8();
-    func_80034180();
-    func_80034300();
-    func_80030e14();
+    player_sync_position_to_map();
+    light_reset_records();
+    render_reset_color_overlays();
+    light_refresh_record_rotations();
+    player_update_status_visuals();
     func_80046c00(0x82, 0x1000, 0x1000, 0);
     cd_request_wait_idle();
     func_80046c00(0x82, 0x1000, 0, -128);
@@ -199,7 +199,7 @@ void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 pa
 }
 
 ADDRESS(0x80029390, 0x54)
-s32 func_80029390(s32 magic, s32 weight)
+s32 player_charge_gain_for_rank(s32 magic, s32 weight)
 {
     magic = (magic << 6) / (weight + 1) + 1;
     if (magic > 4999) {
@@ -209,7 +209,7 @@ s32 func_80029390(s32 magic, s32 weight)
 }
 
 ADDRESS(0x800293e4, 0x11c)
-void func_800293e4(s32 id)
+void player_add_equipment_bonuses(s32 id)
 {
     Record20 *r;
 
@@ -229,7 +229,7 @@ void func_800293e4(s32 id)
 }
 
 ADDRESS(0x80029500, 0xa1c)
-void func_80029500(void)
+void player_recalculate_combat_stats(void)
 {
     s32 i;
     s32 v;
@@ -278,13 +278,13 @@ void func_80029500(void)
         DAT_801b24e4.unk54[6] += w->unk6[6];
         DAT_801b24e4.unk62 += w->unk6[7];
     }
-    func_800293e4(DAT_801b24e4.unkf0);
-    func_800293e4(DAT_801b24e4.unkf1);
-    func_800293e4(DAT_801b24e4.unkf2);
-    func_800293e4(DAT_801b24e4.unkf3);
-    func_800293e4(DAT_801b24e4.unkf4);
-    func_800293e4(DAT_801b24e4.unkf5);
-    func_800293e4(DAT_801b24e4.unkf6);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf0);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf1);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf2);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf3);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf4);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf5);
+    player_add_equipment_bonuses(DAT_801b24e4.unkf6);
     if (DAT_801b24e4.unk86 != 0) {
         DAT_801b24e4.unk6e += 50;
     }
@@ -440,7 +440,7 @@ void func_80029500(void)
 
 /* Teaches the next spells of magic element once its level reaches them. */
 ADDRESS(0x80029f1c, 0x158)
-void func_80029f1c(u32 element)
+void player_learn_element_magic(u32 element)
 {
     s16 *threshold;
     u16 *magic;
@@ -491,7 +491,7 @@ check:
 }
 
 ADDRESS(0x8002a074, 0x98)
-void func_8002a074(void)
+void player_increment_physical_power_training(void)
 {
     DAT_801b24e4.unk24++;
     if (DAT_801b24e4.unk24 >= 100) {
@@ -502,12 +502,12 @@ void func_8002a074(void)
         } else {
             func_80041eec(1);
         }
-        func_80029500();
+        player_recalculate_combat_stats();
     }
 }
 
 ADDRESS(0x8002a10c, 0x104)
-void func_8002a10c(Record18 *spell)
+void player_increment_magic_training(Record18 *spell)
 {
     s32 mask = 0x10;
     s32 elements = 0;
@@ -527,22 +527,22 @@ void func_8002a10c(Record18 *spell)
                 } else {
                     func_80041eec(i + 18);
                 }
-                func_80029f1c(i);
-                func_80029500();
+                player_learn_element_magic(i);
+                player_recalculate_combat_stats();
             }
         }
     }
 }
 
 ADDRESS(0x8002a210, 0x100)
-void func_8002a210(void)
+void player_grow_weapon_with_experience(void)
 {
     if (func_8005d7bc(0) > 0 || func_8005d7bc(1) > 0) {
         if (DAT_801b24e4.unk8 == -1) {
             DAT_801b24e4.unk8 = DAT_801b24e4.experience;
         } else if (DAT_801b24e4.unk8 + 13000 < DAT_801b24e4.experience) {
             if (DAT_801b24e4.unkcb < 2) {
-                func_8002bdc0(DAT_801b24e4.unkcb + 1);
+                player_equip_weapon(DAT_801b24e4.unkcb + 1);
             }
             if (func_8005d7bc(1) > 0) {
                 func_8005d7f8(1);
@@ -561,7 +561,7 @@ void func_8002a210(void)
 }
 
 ADDRESS(0x8002a310, 0x2e8)
-void func_8002a310(int amount_in)
+void player_add_experience(int amount_in)
 {
     s16 amount = amount_in;
     Record0c *r;
@@ -570,7 +570,7 @@ void func_8002a310(int amount_in)
     u8 level;
 
     DAT_801b24e4.experience += amount;
-    func_8002a210();
+    player_grow_weapon_with_experience();
     if (DAT_801b24e4.experience > 999999) {
         DAT_801b24e4.experience = 999999;
     }
@@ -615,17 +615,17 @@ void func_8002a310(int amount_in)
             DAT_801b24e4.unk32 = 999;
         }
         for (i = 4; i != -1; i--) {
-            func_80029f1c(i);
+            player_learn_element_magic(i);
             if (DAT_801b24e4.unk34[i] >= 1000) {
                 DAT_801b24e4.unk34[i] = 999;
             }
         }
-        func_80029500();
+        player_recalculate_combat_stats();
     }
 }
 
 ADDRESS(0x8002a5f8, 0xa8)
-s32 func_8002a5f8(s32 power, s32 defense, s32 attack)
+s32 player_calculate_damage_component(s32 power, s32 defense, s32 attack)
 {
     s32 resisted;
     s32 left;
@@ -648,13 +648,13 @@ s32 func_8002a5f8(s32 power, s32 defense, s32 attack)
 }
 
 ADDRESS(0x8002a6a0, 0x54)
-void func_8002a6a0(s32 amount)
+void player_adjust_hp_unclamped(s32 amount)
 {
     s32 hp = DAT_801b24e4.hp + amount;
 
     if (hp <= 0) {
         hp = 0;
-        func_80030a6c(0);
+        player_death_begin(0);
     }
     DAT_801b24e4.hp = hp;
 }
@@ -664,7 +664,7 @@ void func_8002a6a0(s32 amount)
  * the share of hp_max it took; 0 left is death.
  */
 ADDRESS(0x8002a6f4, 0x360)
-void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
+void player_apply_damage_reaction(VECTOR *from, s32 damage, s32 flags)
 {
     SVECTOR push;
     SVECTOR dir;
@@ -722,7 +722,7 @@ void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
         lift = 70;
     }
     if (hp == 0) {
-        func_80030a6c(&dir);
+        player_death_begin(&dir);
         DAT_801b24e4.unk174 = 3500;
         DAT_801b24e4.unk176 = lift;
     } else if (from == NULL) {
@@ -746,7 +746,7 @@ void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
                 push.vz = -ratio;
             }
             push.vy = 0;
-            func_800309c8(&dir, &push, lift);
+            player_begin_rotation_only_damage_reaction(&dir, &push, lift);
         } else {
             switch ((push.vy - DAT_801b24e4.unk124.vy + 256) >> 9 & 7) {
             case 0:
@@ -783,13 +783,13 @@ void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
                 break;
             }
             push.vy = 0;
-            func_80030908(&dir, &push, lift);
+            player_begin_moving_damage_reaction(&dir, &push, lift);
         }
     }
 }
 
 ADDRESS(0x8002aa54, 0xc4)
-void func_8002aa54(s32 flags)
+void player_cap_status_components(s32 flags)
 {
     if (flags & 1) {
         if (DAT_801b24e4.unk7a > 64) {
@@ -818,8 +818,8 @@ void func_8002aa54(s32 flags)
 
 /* Damage to the player: three physical and five elemental attack values. */
 ADDRESS(0x8002ab18, 0x5fc)
-void func_8002ab18(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
-                   u16 element3, u16 element4, u16 scale, u16 knockback, VECTOR *from)
+void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
+                         u16 element3, u16 element4, u16 scale, u16 knockback, VECTOR *from)
 {
     s32 time2;
     s32 time3;
@@ -925,7 +925,7 @@ void func_8002ab18(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 el
     case 1:
         DAT_801b24e4.unk7c = time2;
         DAT_801b24e4.unk7a = 1;
-        func_80029500();
+        player_recalculate_combat_stats();
         break;
     case 2:
         DAT_801b24e4.unk80 = time3;
@@ -954,22 +954,22 @@ void func_8002ab18(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 el
         }
         break;
     }
-    damage = func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk66, slash);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk68, blow);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk6a, stab);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk6c, element0);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk6e, element1);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk70, element2);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk72, element3);
-    damage += func_8002a5f8(DAT_801b24e4.unk40, DAT_801b24e4.unk74, element4);
+    damage = player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk66, slash);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk68, blow);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk6a, stab);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk6c, element0);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk6e, element1);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk70, element2);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk72, element3);
+    damage += player_calculate_damage_component(DAT_801b24e4.unk40, DAT_801b24e4.unk74, element4);
     damage = scale * damage + 0x8000 >> 16;
-    func_8002a6f4(from, knockback * damage / 10, type);
+    player_apply_damage_reaction(from, knockback * damage / 10, type);
 }
 
 ADDRESS(0x8002b114, 0x21c)
-void func_8002b114(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u16 slash, u16 blow,
-                   u16 stab, u16 type, u16 element0, u16 element1, u16 element2, u16 element3,
-                   u16 element4, s32 flags, u16 knockback)
+void player_apply_radial_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u16 slash,
+                                u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
+                                u16 element3, u16 element4, s32 flags, u16 knockback)
 {
     VECTOR *from = pos;
     u32 strength;
@@ -990,7 +990,7 @@ void func_8002b114(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u1
             hit = vector_distance_between_with_reach(pos, radius, &DAT_801b24e4.pos, 800, 1700);
         }
     } else {
-        hit = func_8002b8d8(pos->vx, pos->vy, pos->vz, radius, mode);
+        hit = player_distance_to_point(pos->vx, pos->vy, pos->vz, radius, mode);
         if (hit == -1) {
             hit = -9999999;
         }
@@ -1004,13 +1004,13 @@ void func_8002b114(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u1
     } else {
         scale = strength;
     }
-    func_8002ab18(slash, blow, stab, type, element0, element1, element2, element3, element4,
-                  scale, knockback, from);
+    player_apply_damage(slash, blow, stab, type, element0, element1, element2, element3, element4,
+                        scale, knockback, from);
 }
 
 /* The eye position and view angles the renderer takes. */
 ADDRESS(0x8002b330, 0x78)
-void func_8002b330(VECTOR *pos, SVECTOR *angle)
+void player_get_camera_pose(VECTOR *pos, SVECTOR *angle)
 {
     pos->vx = DAT_801b24e4.pos.vx;
     pos->vz = DAT_801b24e4.pos.vz;
@@ -1021,7 +1021,7 @@ void func_8002b330(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x8002b3a8, 0xc0)
-void func_8002b3a8(void)
+void player_reset_status(void)
 {
     DAT_801b24e4.unk94 = 0;
     DAT_801b24e4.unk92 = 0;
@@ -1041,11 +1041,11 @@ void func_8002b3a8(void)
     DAT_801b24e4.unk109 = 0;
     DAT_801b24e4.hp = DAT_801b24e4.hp_max;
     DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
-    func_80028e9c();
+    player_reset_view();
 }
 
 ADDRESS(0x8002b468, 0x1e4)
-void func_8002b468(void)
+void player_initialize_state(void)
 {
     Record18 *r;
     s32 i;
@@ -1074,13 +1074,13 @@ void func_8002b468(void)
     DAT_801b24e4.unkf6 = 0xff;
     DAT_801b24e4.unk4 = DAT_8009f114[0].unk8;
     DAT_801b24e4.unk34[4] += 10;
-    func_8002bb84(0xff, 0xff);
+    player_set_equipment_slot(0xff, 0xff);
     DAT_801b24e4.unkac = 0;
-    func_8002b928(0xff);
-    func_8002bdc0(0);
-    func_8002bb84(0x2a, 1);
-    func_8002ba38(0xff);
-    func_8002bb5c(0xff);
+    player_set_primary_magic_shortcut_id(0xff);
+    player_equip_weapon(0);
+    player_set_equipment_slot(0x2a, 1);
+    player_set_secondary_magic_shortcut_id(0xff);
+    player_set_secondary_item_shortcut_id(0xff);
     DAT_801b24e4.pos.vy = -15360;
     DAT_801b24e4.pos.vz = 0x4000;
     DAT_801b24e4.unk12c.vx = 0;
@@ -1094,14 +1094,14 @@ void func_8002b468(void)
         r++;
     }
     DAT_801b77ec.unk0[29].unk0 = 1;
-    func_8002b3a8();
+    player_reset_status();
 }
 
 ADDRESS(0x8002b64c, 0xa4)
-void func_8002b64c(void)
+void game_initialize_session(void)
 {
     DAT_801b24e4.unkb4 = DAT_8009f5c4;
-    func_8002b468();
+    player_initialize_state();
     DAT_801b24e4.se_volume = 0x80;
     DAT_801b24e4.bgm_volume = 0x50;
     DAT_801b24e4.unkf9 = 2;
@@ -1117,7 +1117,7 @@ void func_8002b64c(void)
 }
 
 ADDRESS(0x8002b6f0, 0x70)
-void func_8002b6f0(void)
+void player_clear_motion(void)
 {
     DAT_801b24e4.unk168 = 0;
     DAT_801b24e4.unk16a = 0;
@@ -1128,24 +1128,25 @@ void func_8002b6f0(void)
 }
 
 ADDRESS(0x8002b760, 0xac)
-void func_8002b760(void)
+void player_sync_position_to_map(void)
 {
     DAT_801b24e4.unk9c = 0;
-    DAT_801b24e4.pos.vy = func_80033b8c(DAT_801b24e4.unk160 == 0 ? 1 : 2, DAT_801b24e4.pos.vx,
-                                        DAT_801b24e4.pos.vz, 800, 1700);
-    func_80028d54();
+    DAT_801b24e4.pos.vy = collision_sample_map_layer_height(DAT_801b24e4.unk160 == 0 ? 1 : 2,
+                                                            DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800,
+                                                            1700);
+    player_update_collision_bounds();
     DAT_801b24e4.unke = 1;
     DAT_801b24e4.unk104 = 0;
     DAT_801b24e4.unk172 = 0;
     DAT_801b24e4.unk101 = 0;
-    func_8002b6f0();
-    func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
+    player_clear_motion();
+    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
 }
 
 ADDRESS(0x8002b80c, 0xcc)
-s32 func_8002b80c(VECTOR *pos, s32 angle, s32 radius, s32 range)
+s32 player_distance_to_point_in_cone(VECTOR *pos, s32 angle, s32 radius, s32 range)
 {
-    s32 hit = func_8002b8d8(pos->vx, 0xffff, pos->vz, radius, 0);
+    s32 hit = player_distance_to_point(pos->vx, 0xffff, pos->vz, radius, 0);
     s16 d;
 
     if (hit != -1) {
@@ -1162,17 +1163,17 @@ s32 func_8002b80c(VECTOR *pos, s32 angle, s32 radius, s32 range)
 }
 
 ADDRESS(0x8002b8d8, 0x50)
-s32 func_8002b8d8(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
+s32 player_distance_to_point(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
     return vector_distance_to_point(&DAT_801b24e4.pos, x, y, z, radius, 1700, reach_up);
 }
 
 /*
- * Unresolved (func_8002b928, func_8002ba38): retail reads r->unk2 again after
+ * Unresolved (player_set_primary_magic_shortcut_id, player_set_secondary_magic_shortcut_id): retail reads r->unk2 again after
  * each 0xff test, so both bodies compile 4 bytes short.
  */
 ADDRESS(0x8002b928, 0x110)
-void func_8002b928(u8 id)
+void player_set_primary_magic_shortcut_id(u8 id)
 {
     SoundBank *bank = NULL;
     Record18 *r;
@@ -1205,7 +1206,7 @@ void func_8002b928(u8 id)
 }
 
 ADDRESS(0x8002ba38, 0x124)
-void func_8002ba38(u8 id)
+void player_set_secondary_magic_shortcut_id(u8 id)
 {
     SoundBank *bank = NULL;
     Record18 *r;
@@ -1239,7 +1240,7 @@ void func_8002ba38(u8 id)
 }
 
 ADDRESS(0x8002bb5c, 0x28)
-void func_8002bb5c(u8 id)
+void player_set_secondary_item_shortcut_id(u8 id)
 {
     DAT_801b24e4.unkc9 = id;
     if (id != 0xff) {
@@ -1248,7 +1249,7 @@ void func_8002bb5c(u8 id)
 }
 
 ADDRESS(0x8002bb84, 0x23c)
-void func_8002bb84(u8 id, u8 slot)
+void player_set_equipment_slot(u8 id, u8 slot)
 {
     switch (slot) {
     case 0:
@@ -1308,11 +1309,11 @@ void func_8002bb84(u8 id, u8 slot)
     } else {
         DAT_801b24e4.unkec = NULL;
     }
-    func_80029500();
+    player_recalculate_combat_stats();
 }
 
 ADDRESS(0x8002bdc0, 0x280)
-void func_8002bdc0(u8 id)
+void player_equip_weapon(u8 id)
 {
     u8 effect[34] = {
         0xff, 0xff, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x04, 0xff, 0xff,
@@ -1358,11 +1359,11 @@ void func_8002bdc0(u8 id)
         DAT_801b77ec.unk0[74].unk0 = 1;
         DAT_801b77ec.unk0[75].unk0 = 1;
     }
-    func_80029500();
+    player_recalculate_combat_stats();
 }
 
 ADDRESS(0x8002c040, 0x124)
-void func_8002c040(s32 hand)
+void player_begin_weapon_attack(s32 hand)
 {
     if (DAT_801b24e4.unkc0 != -1) {
         return;
@@ -1394,7 +1395,7 @@ void func_8002c040(s32 hand)
 }
 
 ADDRESS(0x8002c164, 0x1a8)
-Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
+Object88 *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
 {
     SVECTOR rot;
     Object88 *object;
@@ -1430,13 +1431,13 @@ Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
 
 /*
  * Casts spell id (77 kinds, Record18 indices): aims along unk14c with
- * func_8002c164 and spawns the spell's Object4c records with func_80053c84;
+ * player_probe_view_target_and_vectors and spawns the spell's Object4c records with func_80053c84;
  * spells 68, 69, 72 and 73/74 spawn under the ids 120..124. Declared with an
  * ellipsis: the prologue spills all four argument registers and va_start
  * keeps id in its stack slot (read back as a byte for the spawns).
  */
 ADDRESS(0x8002c30c, 0xb9c)
-void func_8002c30c(s32 id, ...)
+void player_dispatch_magic_effect(s32 id, ...)
 {
     VECTOR off;
     SVECTOR dir;
@@ -1457,50 +1458,50 @@ void func_8002c30c(s32 id, ...)
     va_start(args, id);
     switch (id) {
     case 0:
-        func_8002c164(900, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(900, &off, &dir, &dist);
     spawn:
         func_80053c84(10, 0x42, (u8)id, &off, &dir);
         break;
     case 6:
-        func_8002c164(500, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(500, &off, &dir, &dist);
         goto spawn;
     case 62:
-        func_8002c164(750, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(750, &off, &dir, &dist);
         func_80053c84(10, 0x42, (u8)id, &off, &dir);
         break;
     case 54:
         for (i = 0; i < 4; i++) {
             k = 3 - i;
             DAT_801b24e4.unk14c.vz = k * 800;
-            func_8002c164(500, &off, &dir, &dist);
+            player_probe_view_target_and_vectors(500, &off, &dir, &dist);
             func_80053c84(10, 0x42, (u8)id, &off, &dir, k);
         }
         break;
     case 55:
-        func_8002c164(500, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(500, &off, &dir, &dist);
         goto spawn;
     case 70:
-        func_8002c164(500, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(500, &off, &dir, &dist);
         func_80053c84(10, 0x42, (u8)id, &off, &dir, 0);
         break;
     case 64:
-        func_8002c164(440, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(440, &off, &dir, &dist);
         goto spawn;
     case 76:
-        func_8002c164(450, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(450, &off, &dir, &dist);
         goto spawn;
     case 60:
-        func_8002c164(320, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(320, &off, &dir, &dist);
         goto spawn;
     case 58:
-        func_8002c164(550, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(550, &off, &dir, &dist);
         goto spawn;
     case 75:
-        func_8002c164(720, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(720, &off, &dir, &dist);
         func_80053c84(10, 0x42, 75, &off, &dir);
         break;
     case 15:
-        func_8002c164(300, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(300, &off, &dir, &dist);
         off.vy += 1344;
         dir.vy = 0;
         func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 0);
@@ -1510,7 +1511,7 @@ void func_8002c30c(s32 id, ...)
         func_80053c84(10, 0x43, (u8)id, &DAT_801b24e4.pos, 0, 0x1000, 0x100, 0x1000, 1);
         break;
     case 8:
-        obj = func_8002c164(7000, &off, &dir, &dist);
+        obj = player_probe_view_target_and_vectors(7000, &off, &dir, &dist);
         if (obj == NULL) {
             off.vx += dir.vx;
             off.vz += dir.vz;
@@ -1519,7 +1520,7 @@ void func_8002c30c(s32 id, ...)
             off.vx = (obj->vel.vx << 14) / 650 + obj->pos.vx;
             off.vy = (obj->vel.vy << 14) / 650 + obj->pos.vy;
             off.vz = (obj->vel.vz << 14) / 650 + obj->pos.vz;
-            if (func_80033d08(off.vx, off.vy, off.vz, 10, 10)) {
+            if (collision_query_shapes_with_layer_sample(off.vx, off.vy, off.vz, 10, 10)) {
                 off.vx = obj->pos.vx;
                 off.vy = obj->pos.vy;
                 off.vz = obj->pos.vz;
@@ -1528,7 +1529,7 @@ void func_8002c30c(s32 id, ...)
         func_80053c84(10, 0x43, 0x5f, &off, 0);
         break;
     case 12:
-        obj = func_8002c164(7000, &off, &dir, &dist);
+        obj = player_probe_view_target_and_vectors(7000, &off, &dir, &dist);
         if (obj == NULL) {
             off.vx += dir.vx;
             off.vz += dir.vz;
@@ -1542,26 +1543,26 @@ void func_8002c30c(s32 id, ...)
         break;
     case 56:
     case 57:
-        func_8002c164(700, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(700, &off, &dir, &dist);
         func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 13:
-        func_8002c164(700, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(700, &off, &dir, &dist);
     spawn2:
         func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 11:
-        func_8002c164(260, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(260, &off, &dir, &dist);
         dir.vx += (rand() >> 10) - 16;
         dir.vy += (rand() >> 10) - 16;
         func_80053c84(10, 0x42, (u8)id, &off, &dir, 14 - DAT_801b24e4.unk106);
         break;
     case 21:
-        func_8002c164(260, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(260, &off, &dir, &dist);
         func_80053c84(10, 0x42, (u8)id, &off, &dir);
         break;
     case 19:
-        func_8002c164(600, &off, &dir, &range);
+        player_probe_view_target_and_vectors(600, &off, &dir, &range);
         if (range != -1) {
             range = range / 600 - 8;
             if (range < 2) {
@@ -1574,7 +1575,7 @@ void func_8002c30c(s32 id, ...)
         func_80053c84(10, 0x42, 0x71, &off, &dir, range);
         break;
     case 2:
-        obj = func_8002c164(500, &off, &dir, &dist);
+        obj = player_probe_view_target_and_vectors(500, &off, &dir, &dist);
         if (obj == NULL) {
             target = 0xff;
         } else {
@@ -1583,20 +1584,20 @@ void func_8002c30c(s32 id, ...)
         func_80053c84(10, 0x42, (u8)id, &off, &dir, target, DAT_801b24e4.unk106);
         break;
     case 1:
-        func_8002c164(570, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(570, &off, &dir, &dist);
         func_80053c84(10, 0x42, 1, &off, &dir, &DAT_801b24e4.unk124);
         DAT_801b24e4.unk14c.vx += 1000;
         break;
     case 4:
     case 9:
     case 17:
-        func_8002c164(250, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(250, &off, &dir, &dist);
         goto spawn2;
     case 16:
-        func_8002c164(250, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(250, &off, &dir, &dist);
         goto spawn2;
     case 5:
-        func_8002c164(250, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(250, &off, &dir, &dist);
         goto spawn2;
     case 20:
     case 71: {
@@ -1604,7 +1605,7 @@ void func_8002c30c(s32 id, ...)
 
         yaw = DAT_801b24e4.unk124.vy;
         DAT_801b24e4.unk124.vy = yaw - (DAT_801b24e4.unk14c.vx << 1);
-        func_8002c164(170, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(170, &off, &dir, &dist);
         DAT_801b24e4.unk14c.vx += 100;
         DAT_801b24e4.unk124.vy = yaw;
         func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 600, 60, 128, 140, 160);
@@ -1615,14 +1616,14 @@ void func_8002c30c(s32 id, ...)
         id = 0x7a;
         row = DAT_800818e4;
         DAT_801b24e4.unk14c = *row;
-        func_8002c164(600, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(600, &off, &dir, &dist);
         made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         if (made != NULL) {
             index = made - DAT_801b77ec.objects;
             row++;
             for (n = 3; n != -1; n--) {
                 DAT_801b24e4.unk14c = *row;
-                func_8002c164(600, &off, &dir, &dist);
+                player_probe_view_target_and_vectors(600, &off, &dir, &dist);
                 func_80053c84(10, 0x42, 0x5d, &off, &dir, index);
                 row++;
             }
@@ -1632,47 +1633,47 @@ void func_8002c30c(s32 id, ...)
         id = 0x78;
         row = DAT_800818e4;
         DAT_801b24e4.unk14c = *row;
-        func_8002c164(600, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(600, &off, &dir, &dist);
         made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         if (made != NULL) {
             index = made - DAT_801b77ec.objects;
             row++;
             for (n = 3; n != -1; n--) {
                 DAT_801b24e4.unk14c = *row;
-                func_8002c164(600, &off, &dir, &dist);
+                player_probe_view_target_and_vectors(600, &off, &dir, &dist);
                 func_80053c84(10, 0x42, 0x5c, &off, &dir, index);
                 row++;
             }
         }
         break;
     case 68:
-        func_8002c164(1000, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(1000, &off, &dir, &dist);
         id = 0x7c;
         goto spawn;
     case 69:
-        func_8002c164(1000, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(1000, &off, &dir, &dist);
         id = 0x7b;
         goto spawn2;
     case 66:
-        func_8002c164(900, &off, &dir, &dist);
+        player_probe_view_target_and_vectors(900, &off, &dir, &dist);
         func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 26:
         func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 0);
         func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 1);
         DAT_801b24e4.unk86 = 1800;
-        func_80029500();
+        player_recalculate_combat_stats();
         break;
     case 28:
         func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 0);
         func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 1);
         DAT_801b24e4.unk8a = 1800;
-        func_80029500();
+        player_recalculate_combat_stats();
         break;
     case 27:
         func_80053c84(10, 0x40, 0x1b, &DAT_801b24e4.pos, &dir);
         DAT_801b24e4.unk88 = 200;
-        func_80029500();
+        player_recalculate_combat_stats();
         break;
     case 25:
         func_80053c84(10, 0x40, 0x19, &DAT_801b24e4.pos, &dir);

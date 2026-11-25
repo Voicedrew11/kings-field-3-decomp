@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: the collision shape interpreter func_8003260c and its front ends
+ * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records and its front ends
  * (WIP module after src/game/floor_select.c). They pick the map cell, run the
  * interpreter and the record searches, and leave their results in
  * DAT_801d4464 (+0x12000..+0x12050).
@@ -27,7 +27,7 @@ RODATA(0x80011b0c, 0xc4)
  * walls).
  */
 ADDRESS(0x8003260c, 0x1504)
-s32 func_8003260c(s32 x, s32 y, s32 z, s32 radius, s32 shape)
+s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
     s32 hits;
     s32 locked;
@@ -672,16 +672,16 @@ again:
 
 /* Tests a shape at (x, y, z) after locating the point 1280 above it; returns the floor. */
 ADDRESS(0x80033b10, 0x7c)
-s32 func_80033b10(s32 x, s32 y, s32 z, s32 radius, s32 shape)
+s32 collision_probe_floor_height(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
-    func_800324f0(x, y - 1280, z);
-    func_8003260c(x, y, z, radius, shape);
+    collision_sample_map_cell_layer(x, y - 1280, z);
+    collision_evaluate_shape_records(x, y, z, radius, shape);
     return DAT_801d4464.unk12010;
 }
 
 /* Floor height at (x, z) on the map cell's layer for area (2 the upper one). */
 ADDRESS(0x80033b8c, 0xc0)
-s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height)
+s32 collision_sample_map_layer_height(u8 area, s32 x, s32 z, s32 radius, s32 height)
 {
     MapCell *cell;
 
@@ -694,13 +694,13 @@ s32 func_80033b8c(u8 area, s32 x, s32 z, s32 radius, s32 height)
         DAT_801d4464.unk1200c = -cell->layer[0].unk1 << 7;
     }
     DAT_801d4464.unk12000 = cell;
-    func_8003260c(x, DAT_801d4464.unk1200c, z, radius, height);
+    collision_evaluate_shape_records(x, DAT_801d4464.unk1200c, z, radius, height);
     return DAT_801d4464.unk12010;
 }
 
 /* Adds count to the occupant count of every map cell a circle at (x, z) touches. */
 ADDRESS(0x80033c4c, 0xbc)
-void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
+void map_cell_add_layer_occupancy(s32 x, s32 z, s32 radius, s32 count)
 {
     s32 x0;
     s32 z0;
@@ -739,15 +739,15 @@ void func_80033c4c(s32 x, s32 z, s32 radius, s32 count)
 
 /* Tests a shape at (x, y, z) after locating the point half its height above it. */
 ADDRESS(0x80033d08, 0x7c)
-s32 func_80033d08(s32 x, s32 y, s32 z, s32 radius, s32 shape)
+s32 collision_query_shapes_with_layer_sample(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
-    func_800324f0(x, y - (shape & 0xfffffff) / 2, z);
-    return func_8003260c(x, y, z, radius, shape);
+    collision_sample_map_cell_layer(x, y - (shape & 0xfffffff) / 2, z);
+    return collision_evaluate_shape_records(x, y, z, radius, shape);
 }
 
-/* Copies the position and size of what the last func_80033f38 test hit. */
+/* Copies the position and size of what the last collision_query_world test hit. */
 ADDRESS(0x80033d84, 0x1b4)
-void func_80033d84(void)
+void collision_cache_load_hit_bounds(void)
 {
     Object88 *obj;
     Object44 *carrier;
@@ -785,13 +785,13 @@ void func_80033d84(void)
  * DAT_80185da8.unk9d04 (a word) with lhu.
  */
 ADDRESS(0x80033f38, 0x248)
-s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
+s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
 {
     s32 hits;
 
     hits = 0;
     if (mask & 1) {
-        hits = func_80033d08(x, y, z, radius, shape);
+        hits = collision_query_shapes_with_layer_sample(x, y, z, radius, shape);
         if ((mask & 2) && (DAT_801d4464.unk12004[4] & 0x40)) {
             DAT_801d4464.unk12010 = -100000;
             hits |= 1;
@@ -824,7 +824,7 @@ s32 func_80033f38(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
             DAT_801d4464.unk1202c = -1;
         }
         if (mask & 0x80) {
-            if (func_80028e48(x, y, z, radius, shape) != -1) {
+            if (player_distance_to_point_with_margin(x, y, z, radius, shape) != -1) {
                 hits |= 0x80;
             }
         }

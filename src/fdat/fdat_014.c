@@ -180,16 +180,16 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
             cd_request_wait_idle();
             cd_request_service_vab();
             cd_request_service_stream();
-            func_8002b330(&at, &facing);
+            player_get_camera_pose(&at, &facing);
             func_800422b8(&at, &facing);
         }
         obj->unk5 = 0x32;
         obj->unk2 = 5;
         for (j = 15; j != -1; j--) {
             func_801e8488(16 - j);
-            func_800341e8();
-            func_80034300();
-            func_80030e14();
+            light_reset_records();
+            light_refresh_record_rotations();
+            player_update_status_visuals();
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {
                 obj->unk10 = 0xfff;
@@ -197,7 +197,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
             cd_request_wait_idle();
             cd_request_service_vab();
             cd_request_service_stream();
-            func_8002b330(&at, &facing);
+            player_get_camera_pose(&at, &facing);
             func_800422b8(&at, &facing);
         }
         obj->unk6 = 0xff;
@@ -294,8 +294,8 @@ void func_801e8b30(u8 id)
     s32 i;
 
     DAT_801b24e4.unk34[0] += 20;
-    func_80029f1c(0);
-    func_80029500();
+    player_learn_element_magic(0);
+    player_recalculate_combat_stats();
     obj = &DAT_8018fb3c.objects[55];
     DAT_8018fb3c.objects[55].unk5 = 0x32;
     DAT_8018fb3c.objects[55].unk2 = 5;
@@ -307,7 +307,7 @@ void func_801e8b30(u8 id)
         cd_request_wait_idle();
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
     obj->unk6 = 0xff;
@@ -322,7 +322,7 @@ void func_801e8b30(u8 id)
         cd_request_wait_idle();
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
     obj->unk6 = 0xff;

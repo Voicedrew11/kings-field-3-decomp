@@ -79,7 +79,7 @@ void func_801e85e4(Object88 *obj)
     func_8005d7f8(0x10);
     func_8005d898(0x11);
     if (DAT_801b24e4.unkcb == 0x10) {
-        func_8002bdc0(0x11);
+        player_equip_weapon(0x11);
     }
 }
 

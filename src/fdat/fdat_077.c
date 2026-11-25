@@ -74,10 +74,10 @@ void func_801e85e4(Object88 *obj)
     }
     DAT_801ba984.unk32[0x39] = 1;
     DAT_801b24e4.unkc0 = -1;
-    func_800341e8();
-    func_80034180();
-    func_80034300();
-    func_80030e14();
+    light_reset_records();
+    render_reset_color_overlays();
+    light_refresh_record_rotations();
+    player_update_status_visuals();
     volume = 0x7f;
     for (i = 0x3f; i != -1; i--) {
         volume -= 2;

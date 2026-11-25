@@ -32,7 +32,7 @@ SDATA(0x8009c2c4, 0xb)
 DATA(0x80081818, 0xd, ".data")
 static char DAT_80081818[] = "BASLUS-00255";
 
-/* The save title, before func_80028b70 writes the digits into it. */
+/* The save title, before memory_card_write_title_stats writes the digits into it. */
 DATA(0x80081828, 0x3f, ".data")
 static char DAT_80081828[] = "\x82\x6a\x82\x68\x82\x6d\x82\x66\x81\x66\x82\x72\x81\x40\x82\x65"
                       "\x82\x68\x82\x64\x82\x6b\x82\x63\x81\x40\x82\x51\x81\x7c\x81\x40"
@@ -61,12 +61,12 @@ DATA(0x8009c3c0, 0x4, ".sbss")
 static long DAT_8009c3c0;
 DATA(0x8009c3c4, 0x4, ".sbss")
 static long DAT_8009c3c4;
-/* The 0x6000-byte file buffer func_80028034 allocates. */
+/* The 0x6000-byte file buffer memory_card_start allocates. */
 DATA(0x8009c3c8, 0x4, ".sbss")
 static u8 *DAT_8009c3c8;
 
 ADDRESS(0x80027f2c, 0xb8)
-void func_80027f2c(void)
+void memory_card_initialize(void)
 {
     DAT_8009c3a8 = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, 0);
     DAT_8009c3ac = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, 0);
@@ -79,7 +79,7 @@ void func_80027f2c(void)
 }
 
 ADDRESS(0x80027fe4, 0x50)
-void func_80027fe4(void)
+void memory_card_shutdown_events(void)
 {
     CloseEvent(DAT_8009c3a8);
     CloseEvent(DAT_8009c3ac);
@@ -89,7 +89,7 @@ void func_80027fe4(void)
 }
 
 ADDRESS(0x80028034, 0x5c)
-void func_80028034(void)
+void memory_card_start(void)
 {
     EnterCriticalSection();
     StartCARD();
@@ -103,7 +103,7 @@ void func_80028034(void)
 }
 
 ADDRESS(0x80028090, 0x44)
-void func_80028090(void)
+void memory_card_stop(void)
 {
     memory_free((void *)DAT_8009c3c8);
     EnterCriticalSection();
@@ -117,15 +117,15 @@ void func_80028090(void)
  * else the failing event (1 timeout, 3 error).
  */
 ADDRESS(0x800280d4, 0xf0)
-s32 func_800280d4(void)
+s32 memory_card_probe_temporary_file(void)
 {
     char name[] = "bu00:BASLUS-00255TEMP    ";
     long fd;
     s32 event;
 
-    func_80028d0c();
+    memory_card_clear_events();
     _card_info(0);
-    event = func_80028c98();
+    event = memory_card_wait_event();
     if (event != 2 && event != 0)
         return event;
     fd = open(name, O_CREAT);
@@ -140,7 +140,7 @@ s32 func_800280d4(void)
  * more than 12 blocks.
  */
 ADDRESS(0x800281c4, 0x1d4)
-s32 func_800281c4(struct DIRENTRY *dir, s32 *count)
+s32 memory_card_scan_save_entries(struct DIRENTRY *dir, s32 *count)
 {
     struct DIRENTRY sorted[SAVE_SLOTS];
     long used = 0;
@@ -178,7 +178,7 @@ s32 func_800281c4(struct DIRENTRY *dir, s32 *count)
  * save file name; 1 when it is not a save or cannot be read.
  */
 ADDRESS(0x80028398, 0x244)
-s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number)
+s32 memory_card_read_slot_summary(char *name, s32 *experience, s32 *level, s32 *number)
 {
     SaveHeader header;
     char path[40] = "bu00:";
@@ -220,7 +220,7 @@ s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number)
 
 /* 1 when formatting the card in slot 1 fails. */
 ADDRESS(0x800285dc, 0x30)
-s32 func_800285dc(void)
+s32 memory_card_format(void)
 {
     return format("bu00:") != 1;
 }
@@ -230,7 +230,7 @@ s32 func_800285dc(void)
  * file cannot be read, 2 when its checksum is wrong.
  */
 ADDRESS(0x8002860c, 0x144)
-s32 func_8002860c(s32 number)
+s32 memory_card_read_slot(s32 number)
 {
     char path[40] = "bu00:";
     s32 tries = 0;
@@ -252,7 +252,7 @@ retry:
     } else {
         close(fd);
         buffer = DAT_8009c3c8;
-        if (((SaveHeader *)buffer)->checksum != func_80028c74(buffer + CARD_DATA)) {
+        if (((SaveHeader *)buffer)->checksum != memory_card_payload_byte_sum(buffer + CARD_DATA)) {
             result = 2;
         } else {
             func_8005ffd0(DAT_8009c3c8 + CARD_DATA);
@@ -273,7 +273,7 @@ retry:
  * 1 when it cannot be written, 2 when the card is full.
  */
 ADDRESS(0x80028750, 0x420)
-s32 func_80028750(s32 number)
+s32 memory_card_write_slot(s32 number)
 {
     struct DIRENTRY dir[SAVE_SLOTS];
     SaveHeader header;
@@ -292,7 +292,7 @@ s32 func_80028750(s32 number)
 
     memset((u_char *)used, 0, sizeof(used));
     memset((u_char *)dir, 0, sizeof(dir));
-    full = func_800281c4(dir, &count);
+    full = memory_card_scan_save_entries(dir, &count);
     found = 0;
     for (i = 0; i < SAVE_SLOTS; i++) {
         if (strncmp(dir[i].name, DAT_80081818, 12) == 0) {
@@ -322,7 +322,7 @@ retry:
     path[18] = '\0';
     header.blocks = 3;
     strcpy(header.title, DAT_80081828);
-    func_80028b70(&header, number);
+    memory_card_write_title_stats(&header, number);
     rect.x = 80;
     rect.y = number + 492;
     rect.w = 16;
@@ -339,7 +339,7 @@ retry:
     StoreImage(&rect, (u_long *)header.icon[2]);
     memset(DAT_8009c3c8, 0, CARD_FILE_SIZE);
     func_8005f7bc(DAT_8009c3c8 + CARD_DATA);
-    sum = header.checksum = func_80028c74(DAT_8009c3c8 + CARD_DATA);
+    sum = header.checksum = memory_card_payload_byte_sum(DAT_8009c3c8 + CARD_DATA);
     memcpy((void *)DAT_8009c3c8, (const void *)&header, sizeof(header));
     if (!found) {
         fd = open(path, O_CREAT | (3 << 16));
@@ -356,7 +356,7 @@ retry:
             if (fd != -1) {
                 if (read(fd, (void *)DAT_8009c3c8, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
                     close(fd);
-                    if (sum == func_80028c74(DAT_8009c3c8 + CARD_DATA)) {
+                    if (sum == memory_card_payload_byte_sum(DAT_8009c3c8 + CARD_DATA)) {
                         DAT_8009c2c0 = number;
                         return 0;
                     }
@@ -373,7 +373,7 @@ retry:
 
 /* Writes the save number, experience and level into the title as digits. */
 ADDRESS(0x80028b70, 0x104)
-void func_80028b70(SaveHeader *header, s32 number)
+void memory_card_write_title_stats(SaveHeader *header, s32 number)
 {
     s32 i;
     s32 d;
@@ -402,7 +402,7 @@ void func_80028b70(SaveHeader *header, s32 number)
 }
 
 ADDRESS(0x80028c74, 0x24)
-u32 func_80028c74(u8 *data)
+u32 memory_card_payload_byte_sum(u8 *data)
 {
     u32 sum = 0;
     s32 i;
@@ -416,7 +416,7 @@ u32 func_80028c74(u8 *data)
 }
 
 ADDRESS(0x80028c98, 0x74)
-s32 func_80028c98(void)
+s32 memory_card_wait_event(void)
 {
     for (;;) {
         if (TestEvent(DAT_8009c3a8) == 1)
@@ -431,7 +431,7 @@ s32 func_80028c98(void)
 }
 
 ADDRESS(0x80028d0c, 0x48)
-void func_80028d0c(void)
+void memory_card_clear_events(void)
 {
     TestEvent(DAT_8009c3a8);
     TestEvent(DAT_8009c3ac);

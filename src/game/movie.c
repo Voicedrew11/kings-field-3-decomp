@@ -51,7 +51,7 @@ void func_80060d20(void)
     s32 n;
 
     cd_request_wait_idle();
-    func_8002b6f0();
+    player_clear_motion();
     for (i = 127, j = 128; i != -1; i--, j++) {
         if ((p = DAT_80199154.models[j]) != NULL) {
             while (memory_block_kind(p) == 3)
@@ -353,7 +353,7 @@ void func_80061940(void)
             }
         }
         DAT_801e7edc.unk370 = 2;
-        func_80030810(id);
+        player_begin_movie_approach(id);
         break;
     case 2:
         if (DAT_801e7edc.unk372 == 1) {
@@ -369,14 +369,14 @@ void func_80061940(void)
             DAT_801e7edc.unk372 = 1;
             DAT_801e7edc.unk370 = 0;
             DAT_801e7edc.unk384 = 0xff;
-            func_8003078c();
+            player_reset_reaction_state();
             MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
             func_8005c864(12);
         }
         DAT_801e7edc.unk370 = 8;
-        func_80030864(id);
+        player_begin_movie_return(id);
         break;
     case 8:
         if (DAT_801e7edc.unk372 == 1) {

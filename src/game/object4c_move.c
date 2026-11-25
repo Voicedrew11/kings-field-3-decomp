@@ -98,7 +98,7 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
             obj->angle.vy = angle_approach(obj->angle.vy, dir.vy, turn);
         }
     } else {
-        dist = func_8002b80c(&obj->pos, obj->angle.vy, 24000, 0x1000);
+        dist = player_distance_to_point_in_cone(&obj->pos, obj->angle.vy, 24000, 0x1000);
         if (dist != -1) {
             target.vx = DAT_801b24e4.pos.vx;
             target.vy = DAT_801b24e4.pos.vy - 1600;
@@ -830,7 +830,7 @@ void func_800568bc(void)
         break;
     case 12:
         if (obj->arg.s.unk44 == 0) {
-            func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x400, obj->scale.vx, 0x30);
+            collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x400, obj->scale.vx, 0x30);
             if (DAT_801d4464.unk12024 == 0x10) {
                 func_800536f8(0x10010, 5000, NULL);
             }
@@ -1047,8 +1047,9 @@ void func_800568bc(void)
             link = &DAT_801b77ec.objects[obj->arg.c.unk45];
             switch (obj->arg.c.unk44) {
             case 0:
-                func_800537e8(func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy, 0x30));
-                func_80033b10(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
+                func_800537e8(collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy,
+                                                    0x30));
+                collision_probe_floor_height(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
                 obj->pos.vy = DAT_801d4464.unk12010;
                 d = DAT_801d4464.unk12010 - DAT_801d4464.unk12014;
                 obj->scale.vy = d > 0x7fff ? 0x4000 : d >> 1;
@@ -1081,8 +1082,8 @@ void func_800568bc(void)
             obj->pos.vx += obj->vel.vx;
             obj->pos.vy += obj->vel.vy;
             obj->pos.vz += obj->vel.vz;
-            if (func_80033d08(mid.vx, mid.vy, mid.vz, 5, 10) != 0 ||
-                func_80033d08(obj->pos.vx, obj->pos.vy, obj->pos.vz, 5, 10) != 0) {
+            if (collision_query_shapes_with_layer_sample(mid.vx, mid.vy, mid.vz, 5, 10) != 0 ||
+                collision_query_shapes_with_layer_sample(obj->pos.vx, obj->pos.vy, obj->pos.vz, 5, 10) != 0) {
                 obj->unk0 = OBJECT4C_FREE;
             }
             if (obj->unk0 & 0x40) {
@@ -1109,7 +1110,7 @@ void func_800568bc(void)
                 func_800532d4(obj, 0x27);
                 func_80053c84(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
             } else {
-                func_80033f38(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
+                collision_query_world(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
                 if (DAT_801d4464.unk12024 == 0x80) {
                     VECTOR q;
 
@@ -1263,7 +1264,7 @@ void func_800568bc(void)
                         obj->vel.vx = obj->vel.vz = 0;
                     } else {
                         func_80056800();
-                        func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, 50, 0);
+                        collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, 50, 0);
                         if (DAT_801d4464.unk12010 < DAT_801d4464.unk12018[0]) {
                             at.vy = DAT_801d4464.unk12010;
                         } else {
@@ -1349,7 +1350,7 @@ void func_800568bc(void)
                                          DAT_801b24e4.pos.vz - obj->pos.vz);
                 if (d <= 32000) {
                     d = ((rsin(obj->unk7 << 8) >> 1) + 1024) * (32000 - d) / 32000;
-                    func_8003456c(200, 180, 160, 0, 32000, d);
+                    light_interpolate_color_and_fog(200, 180, 160, 0, 32000, d);
                 }
             }
             obj->unk7++;
@@ -2116,7 +2117,7 @@ void func_800568bc(void)
                 DAT_801b24e4.hp = DAT_801b24e4.hp_max;
             }
         }
-        func_8003456c(230, 200, 160, 0, 23000, rsin(obj->unk10 << 8));
+        light_interpolate_color_and_fog(230, 200, 160, 0, 23000, rsin(obj->unk10 << 8));
         break;
     case 25:
         {
@@ -2136,7 +2137,7 @@ void func_800568bc(void)
             made = func_80053c84(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 2);
             made->unka = 1;
             made->unk8 = 14;
-            func_8003456c(160, 180, 220, 0, 18000, rsin(obj->unk10 << 7));
+            light_interpolate_color_and_fog(160, 180, 220, 0, 18000, rsin(obj->unk10 << 7));
             break;
     case 30:
         {
@@ -2149,7 +2150,7 @@ void func_800568bc(void)
                 if (DAT_801b24e4.hp > DAT_801b24e4.hp_max) {
                     DAT_801b24e4.hp = DAT_801b24e4.hp_max;
                 }
-                func_8002aa54(7);
+                player_cap_status_components(7);
             }
             v.vz = 0;
             v.vx = 0;
@@ -2162,7 +2163,7 @@ void func_800568bc(void)
                 made->unka = 1;
                 made->unk8 = 14;
             }
-            func_8003456c(240, 240, 160, 0, 18000, rsin(obj->unk10 << 7));
+            light_interpolate_color_and_fog(240, 240, 160, 0, 18000, rsin(obj->unk10 << 7));
             break;
     case 8:
         func_800532d4(obj, 0x23);
@@ -2178,9 +2179,9 @@ void func_800568bc(void)
             obj->pos.vy += obj->vel.vy;
             obj->pos.vz += obj->vel.vz;
             obj->angle.vy += 256;
-            hit = func_80033f38(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, 10, 0xb0);
+            hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, 10, 0xb0);
             if (hit == 0) {
-                func_80033b10(obj->pos.vx, obj->arg.w.unk48, obj->pos.vz, 0, 0);
+                collision_probe_floor_height(obj->pos.vx, obj->arg.w.unk48, obj->pos.vz, 0, 0);
                 if (obj->pos.vy < DAT_801d4464.unk12010) {
                     goto fly95;
                 }

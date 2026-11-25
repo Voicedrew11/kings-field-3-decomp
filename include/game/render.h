@@ -154,7 +154,7 @@ typedef struct Record6c {
     u16 unk6a;
 } Record6c;
 
-/* A VRAM area copied from unk10 to unk8 every unk1 + 1 frames (func_800351fc). */
+/* A VRAM area copied from unk10 to unk8 every unk1 + 1 frames (vram_scroll_update). */
 typedef struct ScrollRec {
     u8 mode;            /* 0xff free; 1 scrolls the source by unk3 rows */
     u8 unk1;            /* frames between steps */
@@ -176,12 +176,12 @@ typedef struct ScreenVertex {
 typedef struct Data80199154 {
     u8 *buffer;                     /* +0x00000: 2D quads per frame; CD load buffer */
     PrimPool pools[2];              /* +0x00004: one per frame, carved from the heap
-                                     * (func_80035394); the wipe effect copies the
+                                     * (display_initialize); the wipe effect copies the
                                      * screen to pools[1].end */
     PrimPool *pool;                 /* +0x0001c: the pool draw functions allocate from */
     u32 ot_buffer[2][0x2000];       /* +0x00020: OT_LENGTH entries each */
     u32 *ot;                        /* +0x10020 */
-    u32 ot2_buffer[2][8];           /* +0x10024: drawn ahead of ot (func_80035700) */
+    u32 ot2_buffer[2][8];           /* +0x10024: drawn ahead of ot (display_present_frame) */
     u32 *ot2;                       /* +0x10064 */
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
@@ -190,7 +190,7 @@ typedef struct Data80199154 {
     u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
                                      * resident, area banks from 256 + area * 32
                                      * (func_80040568), the 32 blocks of an area part
-                                     * from 556 + part * 32 (func_800290d8); WIP extent,
+                                     * from 556 + part * 32 (resource_mark_area_models_reclaimable); WIP extent,
                                      * up to slots */
     AnimSlot slots[12];             /* +0x11a10 */
     ScreenVertex screen[1000];      /* +0x11b00: projected vertices of the part being
@@ -229,7 +229,7 @@ typedef struct Data80199154 {
     s32 grid_z;                     /* +0x15b1c: map cell z of grid row 0, negated */
     s32 unk15b20;                   /* +0x15b20: map cell x of grid column 0 */
     s32 unk15b24;                   /* +0x15b24: map cell z of grid row 0 */
-    s32 unk15b28;                   /* +0x15b28: fog near (func_80035358) */
+    s32 unk15b28;                   /* +0x15b28: fog near (fog_set_range) */
     s32 unk15b2c;                   /* +0x15b2c: fog far */
     u8 grid[25][25];                /* +0x15b30: map cells around the viewer */
     u8 unk15da1[3];
@@ -259,7 +259,7 @@ typedef struct ScratchLoad {
     u8 sounds[96];      /* +0x270: sound bank flags from 51 (Object88) or 147 (Object44) */
 } ScratchLoad;
 
-/* Scratchpad words from +0x100 while a frame is built (func_80034bf4). */
+/* Scratchpad words from +0x100 while a frame is built (view_build_visibility_grid). */
 typedef struct ScratchView {
     u8 unk100[0x18];
     s32 x;              /* +0x118: map cell x of grid column 0 */
@@ -507,24 +507,24 @@ void func_80043a08(EffectSpawn *spawn);
 s32 func_80043bb8(s32 level, s32 step);
 void func_800441d4(u16 file, u16 entry);
 
-void func_80034180(void);
-void func_800341e8(void);
-void func_80034300(void);
-void func_80034394(s32 flags, Record30 *src, Record6c *dst, s32 t);
-void func_800344dc(s32 flags, Record30 *src, s32 t);
-void func_8003456c(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t);
-void func_800345f4(void);
-void func_800348f4(void);
-void func_80034bf4(void);
-ScrollRec *func_800350c0(void);
-void func_800350fc(RECT *rect, s32 delay, s32 step, s32 mode);
-void func_800351fc(void);
-void func_80035358(s32 near, s32 far);
+void render_reset_color_overlays(void);
+void light_reset_records(void);
+void light_refresh_record_rotations(void);
+void light_interpolate_record_fields(s32 flags, Record30 *src, Record6c *dst, s32 t);
+void light_interpolate_records(s32 flags, Record30 *src, s32 t);
+void light_interpolate_color_and_fog(u8 r, u8 g, u8 b, s32 near, s32 far, s16 t);
+void view_grid_occlude_walls_ascending(void);
+void view_grid_occlude_walls_descending(void);
+void view_build_visibility_grid(void);
+ScrollRec *vram_scroll_find_free(void);
+void vram_scroll_start(RECT *rect, s32 delay, s32 step, s32 mode);
+void vram_scroll_update(void);
+void fog_set_range(s32 near, s32 far);
 
-void func_80035394(void);
-void func_80035630(void);
-void func_80035700(void);
-void func_800357e8(VECTOR *pos, SVECTOR *angle);
+void display_initialize(void);
+void display_begin_frame(void);
+void display_present_frame(void);
+void display_set_view_transform(VECTOR *pos, SVECTOR *angle);
 void func_8003591c(u8 *data);
 void func_80035c44(u16 id, u8 *data);
 void func_80035c84(u16 id, u8 *data);

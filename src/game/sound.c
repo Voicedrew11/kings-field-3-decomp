@@ -193,7 +193,7 @@ void audio_update_listener(VECTOR *listener, SVECTOR *angle)
 {
     if (listener != 0) {
         DAT_801b09fc.listener = *listener;
-        func_800324f0(listener->vx, listener->vy, listener->vz);
+        collision_sample_map_cell_layer(listener->vx, listener->vy, listener->vz);
         DAT_801b09fc.unk24 = DAT_801d4464.unk1200a;
     }
     if (angle != 0) {

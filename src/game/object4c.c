@@ -62,7 +62,7 @@ s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
         default:
             return KF_VALUELESS;
         }
-        return func_80033f38(pos->vx, y, pos->vz, radius, height, mask);
+        return collision_query_world(pos->vx, y, pos->vz, radius, height, mask);
     }
     obj->unkb--;
     return 0;
@@ -98,7 +98,7 @@ void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int
     mode = flags & 0xf0000;
     flags &= 0xfff0ffff;
     if (flags == 0x80) {
-        func_8002ab18(a6, a7, a8, a9, a10, a11, a12, a13, a14, a3, a5, target);
+        player_apply_damage(a6, a7, a8, a9, a10, a11, a12, a13, a14, a3, a5, target);
     } else if (flags == 0x10) {
         obj = &DAT_80185da8.objects[DAT_801d4464.unk12028];
         def = &DAT_80185da8.defs[obj->unk2];
@@ -197,9 +197,9 @@ void func_80053850(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s3
     obj = DAT_801b77ec.unk2f04;
     rec = DAT_801b77ec.unk2f00;
     if (obj->unk0 & 1) {
-        func_8002b114(pos, reach, radius, mode, falloff, rec->unk6, rec->unk8, rec->unka, rec->unk4,
-                      rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14, (u16)flags,
-                      obj->unk6);
+        player_apply_radial_damage(pos, reach, radius, mode, falloff, rec->unk6, rec->unk8, rec->unka,
+                                   rec->unk4, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
+                                   (u16)flags, obj->unk6);
     }
     if (obj->unk0 & 2) {
         func_8004ceac(pos, reach, radius, mode, falloff, func_80053624(obj), rec->unk6, rec->unk8,
@@ -1228,7 +1228,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.w.unk48 = obj->pos.vy;
         p.vx = obj->pos.vx + ((rand() * 2600 >> 15) - 1300);
         p.vz = obj->pos.vz + ((rand() * 2600 >> 15) - 1300);
-        if (func_80033d08(p.vx, obj->pos.vy, p.vz, 10, 10) != 0) {
+        if (collision_query_shapes_with_layer_sample(p.vx, obj->pos.vy, p.vz, 10, 10) != 0) {
             p.vx = obj->pos.vx;
             p.vz = obj->pos.vz;
         }

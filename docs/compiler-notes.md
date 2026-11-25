@@ -374,7 +374,7 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - Jumps that cross-jumping creates to new labels are not merged again
   (`max_uid` guard). Retail's separate identical `li a0,N; j shared` blocks
   are cases that call the shared function themselves and `goto` past it
-  (`case 6: func_8002c164(500, ...); goto spawn;`, `0x8002c30c`).
+  (`case 6: player_probe_view_target_and_vectors(500, ...); goto spawn;`, `0x8002c30c`).
 - **The later copy survives.** Where retail keeps the earlier one, the source
   has an explicit `goto` into it (`0x800500a8` case 30, `0x800324f0`,
   `0x8005c1e8`, `0x80055db0`, `0x80053c84`'s jumps into a later case just past

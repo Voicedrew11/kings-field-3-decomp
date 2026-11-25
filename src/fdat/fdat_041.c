@@ -140,8 +140,8 @@ void func_801e86d8(u8 id)
 
     if (id == 13) {
         DAT_801b24e4.unk34[1] += 20;
-        func_80029f1c(1);
-        func_80029500();
+        player_learn_element_magic(1);
+        player_recalculate_combat_stats();
         obj = &DAT_8018fb3c.objects[15];
         DAT_8018fb3c.objects[15].unk5 = 0x32;
         DAT_8018fb3c.objects[15].unk2 = 5;
@@ -153,7 +153,7 @@ void func_801e86d8(u8 id)
             cd_request_wait_idle();
             cd_request_service_vab();
             cd_request_service_stream();
-            func_8002b330(&pos, &angle);
+            player_get_camera_pose(&pos, &angle);
             func_800422b8(&pos, &angle);
         }
         obj->unk6 = 0xff;
@@ -168,7 +168,7 @@ void func_801e86d8(u8 id)
             cd_request_wait_idle();
             cd_request_service_vab();
             cd_request_service_stream();
-            func_8002b330(&pos, &angle);
+            player_get_camera_pose(&pos, &angle);
             func_800422b8(&pos, &angle);
         }
         obj->unk6 = 0xff;

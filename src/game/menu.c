@@ -219,7 +219,7 @@ s32 menu_run_root_controller(void)
         menu_exit_display_state(0);
     }
     if (result != -1 && result != -2 && result != -3 && (result & 0x1000)) {
-        func_8002deec(result & 0xfff);
+        player_select_magic_action(result & 0xfff);
         result = -1;
     }
     return result;
@@ -1120,28 +1120,28 @@ void menu_equipment_category_controller(s32 slot)
     if (result != -1) {
         switch (slot) {
         case 0:
-            func_8002bdc0(result);
+            player_equip_weapon(result);
             break;
         case 2:
-            func_8002bb84(result, 4);
+            player_set_equipment_slot(result, 4);
             break;
         case 3:
-            func_8002bb84(result, 0);
+            player_set_equipment_slot(result, 0);
             break;
         case 4:
-            func_8002bb84(result, 1);
+            player_set_equipment_slot(result, 1);
             break;
         case 5:
-            func_8002bb84(result, 2);
+            player_set_equipment_slot(result, 2);
             break;
         case 6:
-            func_8002bb84(result, 3);
+            player_set_equipment_slot(result, 3);
             break;
         case 7:
-            func_8002bb84(result, 5);
+            player_set_equipment_slot(result, 5);
             break;
         case 8:
-            func_8002bb84(result, 6);
+            player_set_equipment_slot(result, 6);
             break;
         }
     }
@@ -1214,7 +1214,7 @@ void menu_choose_primary_magic_shortcut(void)
     }
     menu_cd_restore_data_ready_handler();
     if (result != -1) {
-        func_8002b928(result);
+        player_set_primary_magic_shortcut_id(result);
     }
 }
 
@@ -1310,8 +1310,8 @@ void menu_item_magic_controller(void)
     }
     menu_cd_restore_data_ready_handler();
     if (result != -1) {
-        func_8002ba38(spells[result]);
-        func_8002bb5c(ids[result]);
+        player_set_secondary_magic_shortcut_id(spells[result]);
+        player_set_secondary_item_shortcut_id(ids[result]);
     }
 }
 
@@ -1796,9 +1796,9 @@ s32 menu_card_load_browser(void)
     cd_request_wait_idle();
     menu_prepare_card_browser_rows(text);
     menu_show_dialog_panel(6, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-    func_80028034();
+    memory_card_start();
     for (i = 4; i != -1; i--) {
-        func_800281c4(dir, &status);
+        memory_card_scan_save_entries(dir, &status);
         if (status != 0) {
             break;
         }
@@ -1839,7 +1839,7 @@ s32 menu_card_load_browser(void)
     if (result != -1) {
         menu_prepare_card_read_row(text);
         menu_show_dialog_panel(6, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-        error = func_8002860c(result);
+        error = memory_card_read_slot(result);
         if (error != 0) {
             menu_prepare_card_read_failure_rows(text, error);
             menu_show_dialog_panel(6, text, 2, 0x46, 0x57, 0xb2, 0x42, 1);
@@ -1851,7 +1851,7 @@ s32 menu_card_load_browser(void)
             result = 0;
         }
     }
-    func_80028090();
+    memory_card_stop();
     if (DAT_8009c384 != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqReplay(DAT_801b09fc.seq_id);
     }
@@ -1868,7 +1868,7 @@ s32 menu_card_build_slot_rows(struct DIRENTRY *dir, u8 *p, u32 *experience, u8 *
     s32 number;
 
     for (; i < 15; i++) {
-        if (func_80028398(dir->name, &points, &level, &number) == 0) {
+        if (memory_card_read_slot_summary(dir->name, &points, &level, &number) == 0) {
             *p++ = 3;
             *p++ = 0;
             *p++ = 0x13;
@@ -2357,9 +2357,9 @@ s32 menu_card_browser(void)
     menu_prepare_card_browser_rows(text);
     menu_show_dialog_panel(9, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
     cd_request_wait_idle();
-    func_80028034();
+    memory_card_start();
     for (i = 9; i != -1; i--) {
-        found = func_800280d4();
+        found = memory_card_probe_temporary_file();
         if (found == 0) {
             break;
         }
@@ -2368,9 +2368,9 @@ s32 menu_card_browser(void)
         menu_build_card_probe_error_rows(text);
         menu_show_dialog_panel(9, text, 2, 0x3c, 0x57, 0xc6, 0x42, 1);
     } else {
-        found = func_800281c4(dir, &status);
+        found = memory_card_scan_save_entries(dir, &status);
         if (found == 1 && status == 0) {
-            found = func_800281c4(dir, &status);
+            found = memory_card_scan_save_entries(dir, &status);
         }
         if (status != 0) {
             goto loaded;
@@ -2385,7 +2385,7 @@ s32 menu_card_browser(void)
     input_wait_press();
     input_wait_release();
 done:
-    func_80028090();
+    memory_card_stop();
     menu_exit_display_state(0);
     return -1;
 loaded:
@@ -2394,7 +2394,7 @@ loaded:
         input_wait_release();
         result = menu_card_load_slot_browser(dir);
     }
-    func_80028090();
+    memory_card_stop();
     menu_exit_display_state(0);
     return result;
 }
@@ -2452,7 +2452,7 @@ s32 menu_card_load_slot_browser(struct DIRENTRY *dir)
     if (result != -1) {
         menu_prepare_card_read_row(text);
         menu_show_dialog_panel(9, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-        error = func_8002860c(result);
+        error = memory_card_read_slot(result);
         if (error != 0) {
             menu_prepare_card_read_failure_rows(text, error);
             menu_show_dialog_panel(9, text, 2, 0x46, 0x57, 0xb2, 0x42, 1);
@@ -2514,15 +2514,15 @@ void menu_card_save_browser(void)
     cd_request_wait_idle();
     menu_prepare_card_browser_rows(text);
     menu_draw_card_dialog_rows(text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-    func_80028034();
+    memory_card_start();
     for (i = 9; i != -1; i--) {
-        if (func_800280d4() == 0) {
+        if (memory_card_probe_temporary_file() == 0) {
             break;
         }
     }
-    found = func_800281c4(dir, &status);
+    found = memory_card_scan_save_entries(dir, &status);
     if (found == 1 && status == 0) {
-        found = func_800281c4(dir, &status);
+        found = memory_card_scan_save_entries(dir, &status);
     }
     n = menu_card_build_slot_rows(dir, entries->text, experience, levels, numbers);
     if (found == 0 || status == 0) {
@@ -2572,7 +2572,7 @@ void menu_card_save_browser(void)
     if (result != -1) {
         menu_card_save_slot(numbers[result]);
     }
-    func_80028090();
+    memory_card_stop();
     menu_exit_display_state(0);
     if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqReplay(DAT_801b09fc.seq_id);
@@ -2585,7 +2585,7 @@ void menu_card_save_slot(s32 number)
     MenuText text[4];
     s32 status;
 
-    status = func_800280d4();
+    status = memory_card_probe_temporary_file();
     if (status != 0) {
         if (status != 2) {
             if (status == 1) {
@@ -2607,11 +2607,11 @@ void menu_card_save_slot(s32 number)
             input_wait_release();
             return;
         }
-        func_800285dc();
+        memory_card_format();
     }
     menu_prepare_card_write_rows(text);
     menu_draw_card_dialog_rows(text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-    status = func_80028750(number);
+    status = memory_card_write_slot(number);
     if (status == 0) {
         return;
     }

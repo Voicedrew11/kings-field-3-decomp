@@ -79,7 +79,7 @@ void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 
     }
 }
 
-/* Fires (func_8002ab18) at the player when the player is within reach and the cone. */
+/* Fires (player_apply_damage) at the player when the player is within reach and the cone. */
 ADDRESS(0x8004d254, 0x170)
 s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
 {
@@ -108,7 +108,7 @@ s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16
         return 0;
     }
 
-    func_8002ab18(a4, a5, a6, a7, 0, 0, 0, 0, 0, 0x1000, 10, &pos);
+    player_apply_damage(a4, a5, a6, a7, 0, 0, 0, 0, 0, 0x1000, 10, &pos);
     return 1;
 }
 
@@ -368,7 +368,8 @@ s32 func_8004dbc8(SVECTOR *vel, s32 mode)
 retry:
     p.vx = obj->pos.vx + dx;
     p.vz = obj->pos.vz + dz;
-    hit = func_80033f38(p.vx, obj->pos.vy, p.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
+    hit = collision_query_world(p.vx, obj->pos.vy, p.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                DAT_80185da8.unk9d04);
     if (hit == 0) {
     clear:
         if (obj->unkd == 0 && (mode & 0x24)) {
@@ -390,11 +391,13 @@ retry:
             } else {
                 step_z = -obj->unk1c * 2;
             }
-            func_80033d08(obj->pos.vx, obj->pos.vy, obj->pos.vz + step_z, obj->unk1c, OBJECT88_SHAPE(obj));
+            collision_query_shapes_with_layer_sample(obj->pos.vx, obj->pos.vy, obj->pos.vz + step_z,
+                                                     obj->unk1c, OBJECT88_SHAPE(obj));
             if (floor < DAT_801d4464.unk12010) {
                 floor = DAT_801d4464.unk12010;
             }
-            func_80033d08(obj->pos.vx + step_x, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
+            collision_query_shapes_with_layer_sample(obj->pos.vx + step_x, obj->pos.vy, obj->pos.vz,
+                                                     obj->unk1c, OBJECT88_SHAPE(obj));
             if (floor < DAT_801d4464.unk12010) {
                 floor = DAT_801d4464.unk12010;
             }
@@ -423,7 +426,7 @@ retry:
         if (turns == 2) {
             goto finish;
         }
-        func_80033d84();
+        collision_cache_load_hit_bounds();
         angle = vector_xz_to_angle(DAT_801d4464.unk1203c.vx - obj->pos.vx,
                                    DAT_801d4464.unk1203c.vz - obj->pos.vz);
         heading = vector_xz_to_angle(dx, dz);

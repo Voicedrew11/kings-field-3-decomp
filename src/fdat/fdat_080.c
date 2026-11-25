@@ -127,9 +127,9 @@ void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
             return;
         }
         func_801e86c4();
-        func_800341e8();
-        func_80034300();
-        func_80030e14();
+        light_reset_records();
+        light_refresh_record_rotations();
+        player_update_status_visuals();
     }
     if ((*(u32 *)&DAT_801ba984.unk32[0x32] & 0xffff0000) == 0x0fff0000) {
         if (DAT_801ba984.unk32[0x36] == 0) {
@@ -158,13 +158,13 @@ void func_801e8858(Object44 *obj)
     case 1:
         if (DAT_801ba984.unk32[0x33] != 1) {
             DAT_801ba984.unk32[0x33] = 1;
-            func_80029500();
+            player_recalculate_combat_stats();
         }
         break;
     case 2:
         if (DAT_801ba984.unk32[0x33] != 0) {
             DAT_801ba984.unk32[0x33] = 0;
-            func_80029500();
+            player_recalculate_combat_stats();
         }
         break;
     }
@@ -214,8 +214,8 @@ void func_801e8958(u8 id)
     s32 i;
 
     DAT_801b24e4.unk34[3] += 20;
-    func_80029f1c(3);
-    func_80029500();
+    player_learn_element_magic(3);
+    player_recalculate_combat_stats();
     obj = &DAT_8018fb3c.objects[6];
     DAT_8018fb3c.objects[6].unk5 = 0x32;
     DAT_8018fb3c.objects[6].unk2 = 5;
@@ -227,7 +227,7 @@ void func_801e8958(u8 id)
         cd_request_wait_idle();
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
     obj->unk6 = 0xff;
@@ -242,7 +242,7 @@ void func_801e8958(u8 id)
         cd_request_wait_idle();
         cd_request_service_vab();
         cd_request_service_stream();
-        func_8002b330(&pos, &angle);
+        player_get_camera_pose(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
     obj->unk6 = 0xff;

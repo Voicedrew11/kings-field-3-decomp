@@ -26,19 +26,20 @@ s32 func_8004e094(SVECTOR *vel)
     pos.vx = vel->vx + obj->pos.vx;
     pos.vy = vel->vy + obj->pos.vy;
     pos.vz = vel->vz + obj->pos.vz;
-    hit = func_80033f38(pos.vx, pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
+    hit = collision_query_world(pos.vx, pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                DAT_80185da8.unk9d04);
     if (hit == 0) {
         obj->pos.vx = pos.vx;
         obj->pos.vy = pos.vy;
         obj->pos.vz = pos.vz;
-    } else if (func_80033f38(pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                             DAT_80185da8.unk9d04)) {
+    } else if (collision_query_world(pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                     DAT_80185da8.unk9d04)) {
         vel->vx = -vel->vx;
-    } else if (func_80033f38(obj->pos.vx, pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                             DAT_80185da8.unk9d04)) {
+    } else if (collision_query_world(obj->pos.vx, pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                     DAT_80185da8.unk9d04)) {
         vel->vy = -vel->vy;
-    } else if (func_80033f38(obj->pos.vx, obj->pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                             DAT_80185da8.unk9d04)) {
+    } else if (collision_query_world(obj->pos.vx, obj->pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                     DAT_80185da8.unk9d04)) {
         vel->vz = -vel->vz;
     }
     return hit;
@@ -77,7 +78,7 @@ void func_8004e330(void)
     Object78 *def = DAT_80185da8.def;
     u16 *wet = &DAT_801d4464.unk1200a;
 
-    func_80033b10(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
+    collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
     obj->unk3 = *wet == 0 ? 1 : 2;
     if (obj->unk28 & 0x400) {
         DAT_801d4464.unk12010 = DAT_801d4464.unk1200c;
@@ -101,7 +102,8 @@ void func_8004e330(void)
         s32 hit;
 
         y = obj->pos.vy + obj->vel.vy;
-        hit = func_80033f38(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04);
+        hit = collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                    DAT_80185da8.unk9d04);
         if (hit == 0) {
         fall:
             obj->pos.vy = y;
@@ -109,7 +111,7 @@ void func_8004e330(void)
             return;
         }
         if (hit == 0x80 && obj->vel.vy > 40) {
-            func_8002ab18(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
+            player_apply_damage(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
         if (hit & 4) {
             if (obj->unk28 & 0x400) {
@@ -145,8 +147,8 @@ void func_8004e330(void)
         s32 jump_hit;
 
         jump_y = obj->unk3c - obj->unk6a * obj->vel.vy + ((obj->unk6c * obj->vel.vy * obj->vel.vy) >> 1);
-        jump_hit = func_80033f38(obj->pos.vx, jump_y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                 DAT_80185da8.unk9d04);
+        jump_hit = collision_query_world(obj->pos.vx, jump_y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                                         DAT_80185da8.unk9d04);
         if (jump_hit == 0) {
             obj->pos.vy = jump_y;
             obj->vel.vy++;
@@ -154,7 +156,7 @@ void func_8004e330(void)
             return;
         }
         if (jump_hit == 0x80) {
-            func_8002ab18(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
+            player_apply_damage(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
         obj->unkd = 0x10;
         obj->vel.vy = 0;
@@ -309,7 +311,8 @@ s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
     obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
     r = func_8004dbc8(&obj->vel, mode) != 0;
     y = obj->vel.vy + obj->pos.vy;
-    if (func_80033f38(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04) == 0) {
+    if (collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
+                              DAT_80185da8.unk9d04) == 0) {
         obj->pos.vy = y;
     } else {
         r |= 2;

@@ -30,7 +30,7 @@ s32 func_8005bd78(VECTOR *pos, SVECTOR *angle)
     s32 x;
 
     x = pos->vx - (rsin(angle->vy) * 800 >> 12);
-    func_80033b10(x, pos->vy, (rcos(angle->vy) * 800 >> 12) + pos->vz, 800, 0x6a4);
+    collision_probe_floor_height(x, pos->vy, (rcos(angle->vy) * 800 >> 12) + pos->vz, 800, 0x6a4);
     return 0;
 }
 

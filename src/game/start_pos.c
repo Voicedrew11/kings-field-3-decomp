@@ -133,16 +133,16 @@ void func_8005c308(Object88 *obj)
 end:
     switch (script[18] & 0xf0) {
     case 0x00:
-        func_80030568();
+        player_render_frame_and_release_pool();
         menu_item_buy_sell_controller(script[18] & 0xf);
         break;
     case 0x10:
     case 0x20:
-        func_80030568();
+        player_render_frame_and_release_pool();
         break;
     case 0x30:
         if (DAT_801b24e4.unk4c == 4) {
-            func_80030568();
+            player_render_frame_and_release_pool();
             n = menu_intellectual_choose_item();
             if (n != -1) {
                 func_800422b8(NULL, NULL);
@@ -151,7 +151,7 @@ end:
         }
         break;
     case 0x40:
-        func_80030568();
+        player_render_frame_and_release_pool();
         if (menu_prompt_stay(script[18] & 0xf) != -1) {
             DAT_801e7edc.unk370 = 1;
             DAT_801e7edc.unk384 = script[18] & 3;
@@ -163,7 +163,7 @@ end:
         func_8005c0d4(obj, script[17], 0, 0xfff, *(u16 *)(script + 14));
         obj->unkc = anim;
     }
-    func_8002b6f0();
+    player_clear_motion();
     DAT_801ba984.unk0 = 1;
 }
 
@@ -251,7 +251,7 @@ void func_8005c864(s32 n)
     if (n < 12) {
         DAT_801b24e4.unk10a = 1;
         DAT_801ba984.unk0 = 1;
-        func_80029500();
+        player_recalculate_combat_stats();
     }
     DAT_801b24e4.unk134 = DAT_801b24e4.unk136 = DAT_801b24e4.unk138 = 0;
 }
@@ -300,8 +300,8 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             if (DAT_801b24e4.unk34[element] >= 1000) {
                 DAT_801b24e4.unk34[element] = 999;
             } else {
-                func_80029f1c(element);
-                func_80029500();
+                player_learn_element_magic(element);
+                player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
                     func_80041eec(element + 18);
@@ -316,8 +316,8 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             if (DAT_801b24e4.unk34[i] >= 1000) {
                 DAT_801b24e4.unk34[i] = 999;
             } else {
-                func_80029f1c(i);
-                func_80029500();
+                player_learn_element_magic(i);
+                player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
                     func_80041eec(13);
@@ -331,7 +331,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             if (DAT_801b24e4.unk32 >= 1000) {
                 DAT_801b24e4.unk32 = 999;
             } else {
-                func_80029500();
+                player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
                     func_80041eec(1);
@@ -345,7 +345,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             DAT_801b24e4.unk4c = 4;
             break;
         }
-        func_80029500();
+        player_recalculate_combat_stats();
         if (DAT_801ba984.unk0 == 0) {
             DAT_801ba984.unk0 = 1;
             func_80041eec(2);
@@ -450,7 +450,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             func_8005d7f8(id);
             DAT_801b24e4.unk94 = 900;
             DAT_801ba984.unk0 = 1;
-            func_80029500();
+            player_recalculate_combat_stats();
         }
         break;
     case 135:
@@ -639,5 +639,5 @@ done:
     if (DAT_801ba984.unk0 == 0) {
         func_80041eec(10);
     }
-    func_8002b6f0();
+    player_clear_motion();
 }

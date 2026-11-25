@@ -99,7 +99,7 @@ void resource_initialize_game_assets(void)
     func_80042ba8(0, (u8 *)DAT_80116154);
     resource_copy_words(DAT_800aedc4, p + 1, *p >> 2);
     func_80042ba8(0x28, (u8 *)DAT_800aedc4);
-    func_8002b64c();
+    game_initialize_session();
 }
 
 ADDRESS(0x8001796c, 0x138)
@@ -461,7 +461,7 @@ void resource_advance_transition(void)
                     cell->layer[1].unk2 &= 3;
                     cell++;
                 }
-                func_80033c4c(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
+                map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
             }
             resource_copy_words((u32 *)DAT_80185da8.defs, part + 1, 0xcb0);
             func_80053084();

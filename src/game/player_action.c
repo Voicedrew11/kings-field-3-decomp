@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: player state, continued (same WIP module as src/game/player.c;
- * split from it at the unreconstructed func_8002c30c): the unk101 modes and
+ * split from it at the unreconstructed player_dispatch_magic_effect): the unk101 modes and
  * their parameters, hp/unk1c changes and the per-frame effect timers.
  */
 #include <kf/lib/address.h>
@@ -21,23 +21,23 @@
 
 RODATA(0x80011a78, 0x44)
 
-/* The pad bits of the sequence func_8002fe1c follows, 0xffff ended (rebuilt every frame). */
+/* The pad bits of the sequence player_update_actions_and_charge follows, 0xffff ended (rebuilt every frame). */
 DATA(0x8009c3cc, 0x8, ".sbss")
 static u16 DAT_8009c3cc[4];
 
 /* A fall from 20480 above the floor at speed 400 or more is death. */
 ADDRESS(0x8002ecbc, 0x60)
-void func_8002ecbc(void)
+void player_check_fall_death(void)
 {
     if (DAT_801b24e4.unk172 >= 400 && DAT_801d4464.unk12010 - DAT_801b24e4.pos.vy > 20480) {
-        func_80030a6c(NULL);
+        player_death_begin(NULL);
         DAT_801b24e4.unk109 = 1;
     }
 }
 
 /* The landing sound, louder with the fall speed. */
 ADDRESS(0x8002ed1c, 0x44)
-void func_8002ed1c(s32 speed)
+void player_play_landing_sound(s32 speed)
 {
     if (speed >= 320) {
         speed -= 320;
@@ -50,7 +50,7 @@ void func_8002ed1c(s32 speed)
 
 /* Vertical movement per unk104 fall state: steps up and down, falls, jumps and landings. */
 ADDRESS(0x8002ed60, 0x5c0)
-void func_8002ed60(void)
+void player_update_vertical_motion(void)
 {
     s32 y;
     s32 hit;
@@ -59,11 +59,11 @@ void func_8002ed60(void)
     s32 speed;
     s32 bob;
 
-    func_80033b10(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, 800, 1700);
+    collision_probe_floor_height(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, 800, 1700);
     DAT_801b24e4.unk11c.vy = 0;
     switch (DAT_801b24e4.unk104) {
     case 0x10:
-        func_8002ecbc();
+        player_check_fall_death();
         DAT_801b24e4.pos.vy += DAT_801b24e4.unk172;
         DAT_801b24e4.unk11c.vy = DAT_801b24e4.unk172;
         DAT_801b24e4.unk172 += 80;
@@ -73,7 +73,7 @@ void func_8002ed60(void)
         }
         break;
     case 0x20:
-        func_8002ecbc();
+        player_check_fall_death();
         DAT_801b24e4.pos.vy += DAT_801b24e4.unk172;
         if (DAT_801b24e4.pos.vy <= DAT_801d4464.unk12010 || DAT_801b24e4.unk172 >= 0) {
             if (DAT_801b24e4.pos.vy - DAT_801b24e4.unk172 > DAT_801d4464.unk12010) {
@@ -85,9 +85,9 @@ void func_8002ed60(void)
         DAT_801b24e4.unk172 += 10;
         break;
     case 0x40:
-        func_8002ecbc();
+        player_check_fall_death();
         y = DAT_801b24e4.unk172 + DAT_801b24e4.pos.vy;
-        hit = func_80033f38(DAT_801b24e4.pos.vx, y, DAT_801b24e4.pos.vz, 800, 1700, 0x31);
+        hit = collision_query_world(DAT_801b24e4.pos.vx, y, DAT_801b24e4.pos.vz, 800, 1700, 0x31);
         if (hit == 0) {
             DAT_801b24e4.pos.vy = y;
             DAT_801b24e4.unk11c.vy = DAT_801b24e4.unk172;
@@ -99,10 +99,10 @@ void func_8002ed60(void)
             DAT_801b24e4.unk172 = 0;
             break;
         }
-        func_8002ed1c(DAT_801b24e4.unk172);
+        player_play_landing_sound(DAT_801b24e4.unk172);
         if (DAT_801b24e4.unk172 >= 480) {
             v = DAT_801b24e4.unk172 * DAT_801b24e4.unk172 >> 12;
-            func_8002a6f4(NULL, v * v * v / 118000, 0);
+            player_apply_damage_reaction(NULL, v * v * v / 118000, 0);
         }
         if (hit & 4) {
             DAT_801b24e4.pos.vy = DAT_801d4464.unk12010;
@@ -110,9 +110,9 @@ void func_8002ed60(void)
                 DAT_801b24e4.pos.vy = DAT_801d4464.unk12010 - (DAT_801b24e4.unk172 >> 1);
             }
         } else {
-            func_80033d84();
+            collision_cache_load_hit_bounds();
             y = DAT_801d4464.unk1203c.vy - DAT_801d4464.unk1204e - 1;
-            hit = func_80033f38(DAT_801b24e4.pos.vx, y, DAT_801b24e4.pos.vz, 800, 1700, 0x31);
+            hit = collision_query_world(DAT_801b24e4.pos.vx, y, DAT_801b24e4.pos.vz, 800, 1700, 0x31);
             if (hit == 0) {
                 DAT_801b24e4.pos.vy = y;
             }
@@ -165,8 +165,8 @@ void func_8002ed60(void)
             if (d <= 0) {
                 break;
             }
-            hit = func_80033f38(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy + 1, DAT_801b24e4.pos.vz, 800, 1700,
-                                0x31);
+            hit = collision_query_world(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy + 1, DAT_801b24e4.pos.vz,
+                                        800, 1700, 0x31);
             if (hit != 0) {
                 break;
             }
@@ -201,12 +201,12 @@ void func_8002ed60(void)
             DAT_801b24e4.unk16c = 0;
         }
     }
-    func_80028d54();
+    player_update_collision_bounds();
 }
 
 /* Mode 0x10 flight: moves the player along unk188.knock.dir, sliding on walls; 1 when it lands. */
 ADDRESS(0x8002f320, 0x2a0)
-s32 func_8002f320(void)
+s32 player_move_reaction_with_collision(void)
 {
     VECTOR p;
     s32 hit;
@@ -216,10 +216,10 @@ s32 func_8002f320(void)
     p.vx = DAT_801b24e4.pos.vx + DAT_801b24e4.unk188.knock.dir.vx;
     p.vy = DAT_801b24e4.pos.vy + DAT_801b24e4.unk188.knock.dir.vy;
     p.vz = DAT_801b24e4.pos.vz + DAT_801b24e4.unk188.knock.dir.vz;
-    if (func_80033f38(p.vx, p.vy, p.vz, 800, 1700, 0x31) == 0) {
+    if (collision_query_world(p.vx, p.vy, p.vz, 800, 1700, 0x31) == 0) {
     moved:
         if (DAT_801b24e4.unk188.knock.dir.vy >= 300 && DAT_801d4464.unk12010 - DAT_801b24e4.pos.vy > 20480) {
-            func_80030a6c(NULL);
+            player_death_begin(NULL);
             DAT_801b24e4.unk109 = 1;
         }
         DAT_801b24e4.pos.vx = p.vx;
@@ -228,10 +228,10 @@ s32 func_8002f320(void)
         DAT_801b24e4.unk188.knock.dir.vy += 32;
     } else {
         p.vy = DAT_801b24e4.pos.vy;
-        hit = func_80033f38(p.vx, p.vy, p.vz, 800, 1700, 0x31);
+        hit = collision_query_world(p.vx, p.vy, p.vz, 800, 1700, 0x31);
         if (hit == 0) {
             DAT_801b24e4.unk188.knock.dir.vy = 1;
-            hit = func_80033f38(p.vx, p.vy, p.vz, 800, 1700, 0x31);
+            hit = collision_query_world(p.vx, p.vy, p.vz, 800, 1700, 0x31);
             if (hit == 0) {
                 friction = 0x20;
             slide:
@@ -255,13 +255,13 @@ s32 func_8002f320(void)
     stop:
         return 1;
     }
-    func_80028d54();
+    player_update_collision_bounds();
     return 0;
 }
 
 /* Turning (unk168 into the yaw unk12c.vy) and looking up and down (unk16a into the pitch). */
 ADDRESS(0x8002f5c0, 0x3fc)
-void func_8002f5c0(void)
+void player_update_camera_rotation(void)
 {
     s16 pitch;
     s32 limit;
@@ -346,7 +346,7 @@ void func_8002f5c0(void)
 
 /* Walking (unk164) and strafing (unk162), then the move along the yaw. */
 ADDRESS(0x8002f9bc, 0x420)
-void func_8002f9bc(void)
+void player_update_horizontal_motion(void)
 {
     s16 side;
     s16 ahead;
@@ -423,12 +423,12 @@ void func_8002f9bc(void)
         }
     }
     DAT_801b24e4.unk166 = SquareRoot0(side * side + ahead * ahead);
-    func_8002e3f8((DAT_801b24e4.unk12c.vy + 1024) & 0xfff, ahead);
-    func_8002e3f8(DAT_801b24e4.unk12c.vy & 0xfff, side);
+    player_move_horizontal((DAT_801b24e4.unk12c.vy + 1024) & 0xfff, ahead);
+    player_move_horizontal(DAT_801b24e4.unk12c.vy & 0xfff, side);
 }
 
 ADDRESS(0x8002fddc, 0x40)
-s32 func_8002fddc(s32 id)
+s32 item_id_is_consumable(s32 id)
 {
     switch (id) {
     case 104:
@@ -447,7 +447,7 @@ s32 func_8002fddc(s32 id)
 }
 
 ADDRESS(0x8002fe1c, 0x660)
-void func_8002fe1c(void)
+void player_update_actions_and_charge(void)
 {
     s32 id;
     s32 sum;
@@ -463,15 +463,15 @@ void func_8002fe1c(void)
     DAT_8009c3cc[2] = DAT_80081868[6];
     if (DAT_801b24e4.unkce == 0 && (DAT_801b24e4.unk178 & DAT_80081868[6])
         && !(DAT_801b24e4.unk17a & DAT_80081868[6]) && DAT_801b24e4.unkc6 == 0) {
-        func_8002deec(DAT_801b24e4.unkc7);
+        player_select_magic_action(DAT_801b24e4.unkc7);
     }
     if ((DAT_801b24e4.unk178 & DAT_80081868[12]) && !(DAT_801b24e4.unk17a & DAT_80081868[12])) {
         if (DAT_801b24e4.unkc8 != 0xff) {
-            func_8002deec(DAT_801b24e4.unkc8);
+            player_select_magic_action(DAT_801b24e4.unkc8);
         }
         if (DAT_801b24e4.unkc9 != 0xff) {
             if (DAT_800c85e8[0][DAT_801b24e4.unkc9] != 0) {
-                if (func_8002fddc(DAT_801b24e4.unkc9)) {
+                if (item_id_is_consumable(DAT_801b24e4.unkc9)) {
                     menu_apply_item_effect(DAT_801b24e4.unkc9);
                 }
                 func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, DAT_801b24e4.unkc9);
@@ -481,7 +481,7 @@ void func_8002fe1c(void)
         }
     }
     if (DAT_801b24e4.unk105 != 0xff && --DAT_801b24e4.unk108 == 0) {
-        func_8002c30c(DAT_801b24e4.unk105);
+        player_dispatch_magic_effect(DAT_801b24e4.unk105);
         if (--DAT_801b24e4.unk106 == 0) {
             DAT_801b24e4.unk105 = 0xff;
         } else {
@@ -538,7 +538,7 @@ void func_8002fe1c(void)
                 weight <<= 1;
             }
         }
-        DAT_801b24e4.unk22 += func_80029390(sum, weight);
+        DAT_801b24e4.unk22 += player_charge_gain_for_rank(sum, weight);
     } else {
         DAT_801b24e4.unk10--;
     }
@@ -557,14 +557,14 @@ void func_8002fe1c(void)
     }
     mask = DAT_80081868[7] | DAT_80081868[4] | DAT_80081868[6];
     if ((DAT_801b24e4.unk178 & mask) && !(DAT_801b24e4.unk17a & mask)) {
-        if (DAT_801b24e4.unkb0->unk24 != 0 && func_8002cfe0(1) && DAT_801b24e4.unkb0->unk4 != 0xff
+        if (DAT_801b24e4.unkb0->unk24 != 0 && player_meets_weapon_magic_requirement(1) && DAT_801b24e4.unkb0->unk4 != 0xff
             && (DAT_801b24e4.unk178 & *DAT_801b24e4.unka8)
             && (DAT_801b24e4.unka8 != DAT_8009c3cc
                 || (DAT_801b24e4.unk1e == 5000 && DAT_801b24e4.unk22 == DAT_801b24e4.unk1e))) {
             next = DAT_801b24e4.unka8;
             DAT_801b24e4.unka8 = next + 1;
             if (next[1] == 0xffff) {
-                func_8002c040(1);
+                player_begin_weapon_attack(1);
                 return;
             }
             DAT_801b24e4.unkc6 = 20;
@@ -574,12 +574,12 @@ void func_8002fe1c(void)
     }
     if (DAT_801b24e4.unkf == 0 && DAT_801b24e4.unkc6 == 0 && (DAT_801b24e4.unk178 & DAT_80081868[4])
         && !(DAT_801b24e4.unk17a & DAT_80081868[4])) {
-        func_8002c040(0);
+        player_begin_weapon_attack(0);
     }
 }
 
 ADDRESS(0x8003047c, 0xec)
-void func_8003047c(void)
+void player_update_reaction_rotation_offsets(void)
 {
     DAT_801b24e4.unk188.knock.push.vx =
         angle_velocity_step(0, DAT_801b24e4.unk134, DAT_801b24e4.unk188.knock.push.vx, 8, 4);
@@ -593,7 +593,7 @@ void func_8003047c(void)
 }
 
 ADDRESS(0x80030568, 0x70)
-void func_80030568(void)
+void player_render_frame_and_release_pool(void)
 {
     u8 f9 = DAT_801b24e4.unkf9;
     u8 fa = DAT_801b24e4.unkfa;
@@ -607,7 +607,7 @@ void func_80030568(void)
 }
 
 ADDRESS(0x800305d8, 0x1b4)
-void func_800305d8(void)
+void player_handle_interaction_and_menu(void)
 {
     s32 result;
 
@@ -619,13 +619,13 @@ void func_800305d8(void)
     }
     if ((DAT_801b24e4.unk178 & DAT_80081868[5]) && !(DAT_801b24e4.unk17a & DAT_80081868[5])
         && DAT_801b24e4.unkc0 == -1) {
-        func_80030568();
+        player_render_frame_and_release_pool();
         do {
             cd_request_yield();
             resource_advance_transition();
         } while ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 0);
         map_reveal_visited_rects();
-        func_800290d8(DAT_8018fad4.area[0]);
+        resource_mark_area_models_reclaimable(DAT_8018fad4.area[0]);
         result = menu_run_root_controller();
         if (result >= 0) {
             func_800422b8(NULL, NULL);
@@ -633,16 +633,16 @@ void func_800305d8(void)
         } else if (result == -2) {
             DAT_8009c3f8 = 2;
         } else if (result == -3) {
-            func_80028f90();
-            func_80029188(DAT_8018fad4.area[0], DAT_8018fad4.area[0], DAT_8018fad4.area[0],
-                          DAT_8018fad4.area[3], DAT_8018fad4.area[4], 0xff);
+            player_restore_equipment_effects();
+            player_reload_map_resources(DAT_8018fad4.area[0], DAT_8018fad4.area[0], DAT_8018fad4.area[0],
+                                        DAT_8018fad4.area[3], DAT_8018fad4.area[4], 0xff);
         }
-        func_8002b6f0();
+        player_clear_motion();
     }
 }
 
 ADDRESS(0x8003078c, 0x68)
-void func_8003078c(void)
+void player_reset_reaction_state(void)
 {
     DAT_801b24e4.unk101 = 0;
     DAT_801b24e4.unk164 = 0;
@@ -659,14 +659,14 @@ void func_8003078c(void)
 }
 
 ADDRESS(0x800307f4, 0x1c)
-void func_800307f4(u8 id)
+void player_begin_movie_playback(u8 id)
 {
     DAT_801b24e4.unk101 = 8;
     DAT_801b24e4.unk188.turn.id = id;
 }
 
 ADDRESS(0x80030810, 0x54)
-void func_80030810(u8 id)
+void player_begin_movie_approach(u8 id)
 {
     DAT_801b24e4.unk101 = 7;
     DAT_801b24e4.unk188.turn.id = id;
@@ -675,7 +675,7 @@ void func_80030810(u8 id)
 }
 
 ADDRESS(0x80030864, 0x54)
-void func_80030864(u8 id)
+void player_begin_movie_return(u8 id)
 {
     DAT_801b24e4.unk101 = 9;
     DAT_801b24e4.unk188.turn.id = id;
@@ -684,7 +684,7 @@ void func_80030864(u8 id)
 }
 
 ADDRESS(0x800308b8, 0x3c)
-void func_800308b8(SVECTOR *dir)
+void player_begin_rotation_reaction(SVECTOR *dir)
 {
     DAT_801b24e4.unk101 = 3;
     DAT_801b24e4.unk188.knock.dir = *dir;
@@ -697,7 +697,7 @@ void func_800308f4(void)
 }
 
 ADDRESS(0x80030908, 0xc0)
-void func_80030908(SVECTOR *dir, SVECTOR *push, s16 lift)
+void player_begin_moving_damage_reaction(SVECTOR *dir, SVECTOR *push, s16 lift)
 {
     if (DAT_801b24e4.unk101 == 7 || DAT_801b24e4.unk101 == 8 || DAT_801b24e4.unk101 == 9) {
         return;
@@ -712,7 +712,7 @@ void func_80030908(SVECTOR *dir, SVECTOR *push, s16 lift)
 }
 
 ADDRESS(0x800309c8, 0xa4)
-void func_800309c8(SVECTOR *dir, SVECTOR *push, s16 lift)
+void player_begin_rotation_only_damage_reaction(SVECTOR *dir, SVECTOR *push, s16 lift)
 {
     if (DAT_801b24e4.unk101 == 7 || DAT_801b24e4.unk101 == 8 || DAT_801b24e4.unk101 == 9) {
         return;
@@ -726,7 +726,7 @@ void func_800309c8(SVECTOR *dir, SVECTOR *push, s16 lift)
 
 /* Death: mode 0x11, knocked along dir (NULL: in place). */
 ADDRESS(0x80030a6c, 0x8c)
-void func_80030a6c(SVECTOR *dir)
+void player_death_begin(SVECTOR *dir)
 {
     if (DAT_801b24e4.unk101 == 0x11) {
         return;
@@ -741,7 +741,7 @@ void func_80030a6c(SVECTOR *dir)
 }
 
 ADDRESS(0x80030af8, 0x2c)
-void func_80030af8(void)
+void player_begin_actor_overlap_bob(void)
 {
     if (DAT_801b24e4.unk101 == 0) {
         DAT_801b24e4.unk101 = 5;
@@ -755,7 +755,7 @@ void func_80030af8(void)
  * both are 0.
  */
 ADDRESS(0x80030b24, 0xbc)
-s16 func_80030b24(s16 *count, s16 *timer, s32 range, s32 scale)
+s16 status_phase_step_scaled(s16 *count, s16 *timer, s32 range, s32 scale)
 {
     s16 v;
     s16 n = *count;
@@ -786,14 +786,14 @@ s16 func_80030b24(s16 *count, s16 *timer, s32 range, s32 scale)
 }
 
 ADDRESS(0x80030be0, 0x6c)
-void func_80030be0(s32 amount)
+void player_adjust_hp(s32 amount)
 {
     s32 hp = DAT_801b24e4.hp;
 
     hp += amount;
     if (hp <= 0) {
         DAT_801b24e4.hp = 0;
-        func_80030a6c(NULL);
+        player_death_begin(NULL);
     } else if (hp > DAT_801b24e4.hp_max) {
         DAT_801b24e4.hp = DAT_801b24e4.hp_max;
     } else {
@@ -802,13 +802,13 @@ void func_80030be0(s32 amount)
 }
 
 ADDRESS(0x80030c4c, 0x20)
-void func_80030c4c(s32 amount)
+void player_adjust_hp_on_weapon_hit(s32 amount)
 {
-    func_80030be0(amount);
+    player_adjust_hp(amount);
 }
 
 ADDRESS(0x80030c6c, 0x50)
-void func_80030c6c(s32 amount)
+void player_adjust_mp(s32 amount)
 {
     s32 v = DAT_801b24e4.unk1c;
 
@@ -823,41 +823,41 @@ void func_80030c6c(s32 amount)
 }
 
 ADDRESS(0x80030cbc, 0xac)
-void func_80030cbc(Record20 *r)
+void player_apply_equipment_hp_tick(Record20 *r)
 {
     if (r->unk14 != 0 && DAT_801b24e4.unk9c % r->unk14 == 0) {
-        func_80030be0(1);
+        player_adjust_hp(1);
     }
     if (r->unk16 != 0 && DAT_801b24e4.unk9c % r->unk16 == 0) {
-        func_80030be0(-1);
+        player_adjust_hp(-1);
     }
 }
 
 ADDRESS(0x80030d68, 0xac)
-void func_80030d68(Record20 *r)
+void player_apply_equipment_mp_tick(Record20 *r)
 {
     if (r->unk18 != 0 && DAT_801b24e4.unk9c % r->unk18 == 0) {
-        func_80030c6c(1);
+        player_adjust_mp(1);
     }
     if (r->unk1a != 0 && DAT_801b24e4.unk9c % r->unk1a == 0) {
-        func_80030c6c(-1);
+        player_adjust_mp(-1);
     }
 }
 
 ADDRESS(0x80030e14, 0x1b8)
-void func_80030e14(void)
+void player_update_status_visuals(void)
 {
     s16 v;
     s16 t;
 
-    v = func_80030b24(&DAT_801b24e4.unk7e, &DAT_801b24e4.unk80, 0x40, 0xc00);
+    v = status_phase_step_scaled(&DAT_801b24e4.unk7e, &DAT_801b24e4.unk80, 0x40, 0xc00);
     if (v != -1) {
-        func_8003456c(10, 10, 10, 5000, 6000, v);
+        light_interpolate_color_and_fog(10, 10, 10, 5000, 6000, v);
         func_8003da10(0x80, 0x80, 0x80, v >> 2, 2);
     }
-    v = func_80030b24(&DAT_801b24e4.unk8c, &DAT_801b24e4.unk8e, 0x40, 0xe10);
+    v = status_phase_step_scaled(&DAT_801b24e4.unk8c, &DAT_801b24e4.unk8e, 0x40, 0xe10);
     if (v != -1) {
-        func_8003456c(0xdc, 0xdc, 0xa0, 0xffff, 18000, v);
+        light_interpolate_color_and_fog(0xdc, 0xdc, 0xa0, 0xffff, 18000, v);
     }
     if (DAT_801b24e4.unk174 != 0) {
         DAT_801b24e4.unk174 -= DAT_801b24e4.unk176;
@@ -871,10 +871,10 @@ void func_80030e14(void)
         }
         func_8003d8ec(0x3c, 0, 0, t, 1);
     }
-    v = func_80030b24(&DAT_801b24e4.unk7a, &DAT_801b24e4.unk7c, 0x40, 0xc00);
+    v = status_phase_step_scaled(&DAT_801b24e4.unk7a, &DAT_801b24e4.unk7c, 0x40, 0xc00);
     if (v != -1) {
         if (DAT_801b24e4.unk7a == 0) {
-            func_80029500();
+            player_recalculate_combat_stats();
         }
         func_8003d8ec(0x1e, 0x1e, 10, v, 1);
     }
