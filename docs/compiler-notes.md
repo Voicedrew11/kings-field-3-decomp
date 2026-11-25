@@ -436,8 +436,9 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - **Delay slots (reorg).** An assignment written after an if-block can fill
   the branch's slot from its target (`0x8001eb3c`); `speed = 0` inside the
   first arm, not before the `if`, lands in that branch's slot (`0x800500a8`).
-  An implicit-`int` K&R function keeps `v0` live at the return, so no `v0`
-  write fills the last slot (`0x800290d8`). The first-declared initialised
+  An `int` function with no return value (retail's implicit `int`) keeps
+  `v0` live at the return, so no `v0` write fills the last slot; declaring
+  it `void` changes that slot (`0x800290d8`). The first-declared initialised
   scalar's `move sN,zero` fills the first slot (OPEN `main`).
 
 ## Stack frames
@@ -488,10 +489,12 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   wide parameters first (`0x80053c84`: `move s4,a3` before `move s5,a0`).
 - **`int x_in` plus a narrowing local** (`void f(int a_in) { s16 a = a_in;`)
   is code-identical to the K&R form in most functions and replaces it
-  wherever it compiles the same (`0x80045c7c`, `0x80019f14`, `0x8002a310`).
-  Exceptions keep K&R (`0x80019e48` swaps registers) or use an `int`
-  parameter with `(s16)` at the calls where retail re-narrows per use
-  (`0x8004e928`).
+  wherever it compiles the same (`0x80045c7c`, `0x80019f14`, `0x8002a310`,
+  and the variadic `0x80053c84`). Where it swaps registers, a prototyped
+  narrow parameter takes the K&R path when the callers already pass that
+  type (`0x80019e48`: `u16 file, u16 entry`); where retail re-narrows per
+  use, an `int` parameter with `(s16)` at the calls (`0x8004e928`). No K&R
+  definition is left.
 - **Callers decide.** "Callee narrows, callers do not" is a K&R definition
   with an `int` prototype, or a prototyped `u16` whose callers pass a word
   (`0x80033f38`). Where one image narrows and another does not, the images saw
