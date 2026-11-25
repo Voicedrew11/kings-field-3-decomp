@@ -652,7 +652,8 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
             obj->arg.w.unk40 = frames + 30;
             break;
         default:
-            ((void (*)(MapObject *, MapObjectDef *))asset_status.handlers[8])(obj, def);
+            ((void (*)(MapObject *, MapObjectDef *))
+                 asset_status.handlers[FDAT_SLOT_INIT_MAP_OBJECT])(obj, def);
             break;
         case 33:
         case 255:

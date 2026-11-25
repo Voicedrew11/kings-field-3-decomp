@@ -126,7 +126,7 @@ void resource_run_initial_transition(void)
     } while (asset_status.loading != 0);
     tmd_set_slot(0, resource_tmd_arc_work);
     movie_state_reset();
-    asset_status.handlers[5]();
+    asset_status.handlers[FDAT_SLOT_ON_LOAD]();
 }
 
 ADDRESS(0x80017aa4, 0x1d4)
@@ -489,7 +489,7 @@ void resource_advance_transition(void)
                 }
             }
             movie_state_reset();
-            asset_status.handlers[5]();
+            asset_status.handlers[FDAT_SLOT_ON_LOAD]();
             cur_avatar_status.force_actor_lifecycle_refresh = 1;
             asset_status.area_records_loaded = 1;
         }

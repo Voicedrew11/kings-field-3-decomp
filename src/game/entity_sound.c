@@ -551,7 +551,7 @@ void actor_update_behavior(void)
                         obj->lighting_blend = 0x1000;
                     }
                 } else {
-                    ((void (*)(Actor *))asset_status.handlers[19])(obj);
+                    ((void (*)(Actor *))asset_status.handlers[FDAT_SLOT_ON_ACTOR_REMOVED])(obj);
                     if (obj->slot_state == 1) {
                         actor_set_lifecycle_and_home_position(obj);
                     } else if (obj->slot_state == 2) {
@@ -1585,7 +1585,7 @@ void actor_update_behavior(void)
         actor_suspend_vertical_motion();
         break;
     default:
-        asset_status.handlers[17]();
+        asset_status.handlers[FDAT_SLOT_UPDATE_ACTOR_TARGET]();
         break;
     }
     if (obj->flags & 0x10) {

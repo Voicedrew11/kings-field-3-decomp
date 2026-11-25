@@ -82,7 +82,7 @@ void event_target_stream_execute(Actor *obj)
         case 0xf4:
             script[16]++;
             p++;
-            ((void (*)(Actor *, u8))asset_status.handlers[4])(obj, *p);
+            ((void (*)(Actor *, u8))asset_status.handlers[FDAT_SLOT_TALK_EVENT])(obj, *p);
             break;
         case 0xf5:
             script[16]++;
@@ -637,7 +637,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         break;
     }
 done:
-    ((void (*)(VECTOR *, SVECTOR *, s32))asset_status.handlers[2])(pos, angle, id);
+    ((void (*)(VECTOR *, SVECTOR *, s32))asset_status.handlers[FDAT_SLOT_USE_ITEM])(pos, angle, id);
     if (cur_evt_state.interaction_handled == 0) {
         notify_enqueue(10);
     }

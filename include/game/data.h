@@ -794,6 +794,27 @@ typedef struct WeaponRecord {
 typedef s32 (*FdatHandler)();
 
 /*
+ * Slots of that table (FdatHeader.handlers, asset_status.handlers) GAME.EXE calls; the
+ * slots not listed are empty in every module.
+ */
+#define FDAT_SLOT_INTERACT                  0
+#define FDAT_SLOT_UPDATE                    1
+#define FDAT_SLOT_USE_ITEM                  2
+#define FDAT_SLOT_REGION_TRIGGER            3
+#define FDAT_SLOT_TALK_EVENT                4
+#define FDAT_SLOT_ON_LOAD                   5
+#define FDAT_SLOT_ON_ITEM_ADDED             6
+#define FDAT_SLOT_ON_MOVIE_END              7
+#define FDAT_SLOT_INIT_MAP_OBJECT           8
+#define FDAT_SLOT_UPDATE_MAP_OBJECT         9
+#define FDAT_SLOT_ON_MOVIE_START            10
+#define FDAT_SLOT_ON_ITEM_REMOVED           11
+#define FDAT_SLOT_ACTOR_TARGET_CHECK        16
+#define FDAT_SLOT_UPDATE_ACTOR_TARGET       17
+#define FDAT_SLOT_ADJUST_ACTOR_MAGIC_DAMAGE 18
+#define FDAT_SLOT_ON_ACTOR_REMOVED          19
+
+/*
  * Area state resource_initialize_game_assets and resource_run_initial_transition set up (WIP). Only the scene
  * module, the render module (render_scene_and_update_resources reads step lhu + sll) and the
  * player frame (player_update_frame reloads it for each of five compares) see the

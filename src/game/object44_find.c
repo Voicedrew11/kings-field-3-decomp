@@ -2360,7 +2360,7 @@ void map_object_update_actions(void)
                     }
                     switch (obj->arg.b.unk3a.bytes[0] & 0xf) {
                     case 0:
-                        ((void (*)(MapObject *))asset_status.handlers[3])(obj);
+                        ((void (*)(MapObject *))asset_status.handlers[FDAT_SLOT_REGION_TRIGGER])(obj);
                         break;
                     case 1:
                         map_object_apply_marker_signal(obj->arg.b.unk3a.bytes[1]);
@@ -2720,7 +2720,7 @@ void map_object_update_actions(void)
             }
             break;
         default:
-            asset_status.handlers[9]();
+            asset_status.handlers[FDAT_SLOT_UPDATE_MAP_OBJECT]();
             break;
         case 229:
         case 233:

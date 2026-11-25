@@ -350,7 +350,8 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
     }
     dmg = (dmg * a10 / 5000 + 128) >> 4;
     ((void (*)(Actor *, s32 *, u16, u16, u16, u16, u16, u16, u16, u16))
-         asset_status.handlers[18])(obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
+         asset_status.handlers[FDAT_SLOT_ADJUST_ACTOR_MAGIC_DAMAGE])(obj, &dmg, a2, a3, a4, a5, a6, a7,
+                                                                     a8, a9);
     if (dmg == 0) {
         return;
     }
