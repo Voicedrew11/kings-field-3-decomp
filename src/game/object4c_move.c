@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: Object4c movement (WIP module): steering and speed limits of
  * the current record, spawning further records from it, its step and
- * collision test, and func_800568bc, the per-frame update of the current
+ * collision test, and effect_update_dispatch, the per-frame update of the current
  * record by its id (Object4c.unk1).
  */
 #include <kf/lib/address.h>
@@ -20,13 +20,13 @@
 
 RODATA(0x80012ebc, 0x234)
 
-/* Zero velocity for the records func_800561d8 spawns. */
+/* Zero velocity for the records effect_spawn_zero_direction spawns. */
 DATA(0x8009c33c, 0x8, ".sdata")
 SVECTOR DAT_8009c33c = {0, 0, 0, 0};
 
 /* dir's x and z scaled by scale and turned by yaw into out. */
 ADDRESS(0x80055b4c, 0x8c)
-void func_80055b4c(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale)
+void effect_rotate_scale_offset_y(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale)
 {
     SVECTOR v;
     SVECTOR rotation;
@@ -44,7 +44,7 @@ void func_80055b4c(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale)
 
 /* Accelerates the current record by accel (scaled), limits its speed to max, moves it and tests it. */
 ADDRESS(0x80055bd8, 0x1d8)
-s32 func_80055bd8(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel)
+s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel)
 {
     Object4c *obj;
     s32 speed;
@@ -66,16 +66,16 @@ s32 func_80055bd8(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel)
     if (height == -1) {
         return 0;
     }
-    if (func_80053310(&obj->pos, radius, height) != 0) {
+    if (effect_probe_collision_by_type(&obj->pos, radius, height) != 0) {
         return -1;
     }
     return 0;
 }
 
-/* Homing: turns the current record toward an Object88 record (unk0 bit 6) or the player, then func_80055bd8. */
+/* Homing: turns the current record toward an Object88 record (unk0 bit 6) or the player, then effect_move_probe. */
 ADDRESS(0x80055db0, 0x1c4)
-s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
-                  s32 cone)
+s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
+                        s32 cone)
 {
     Object4c *obj;
     VECTOR target;
@@ -86,7 +86,7 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
 
     obj = DAT_801b77ec.unk2f04;
     if (obj->unk0 & 0x40) {
-        found = func_8004d3c4(&obj->pos, obj->angle.vy, obj->angle.vx, 24000, cone, cone, &dist, 0);
+        found = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 24000, cone, cone, &dist, 0);
         if (found != NULL) {
             target.vx = found->pos.vx;
             target.vy = found->pos.vy - (found->unk1e >> 1);
@@ -110,12 +110,12 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
     if (dist >= 0 && dist <= range) {
         scale = near_scale;
     }
-    return func_80055bd8(scale, max, radius, height, &accel);
+    return effect_move_probe(scale, max, radius, height, &accel);
 }
 
 /* Steers the current record straight at target; -2 once within near, braking within slow. */
 ADDRESS(0x80055f74, 0x1c0)
-s32 func_80055f74(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near, s32 radius, s32 height)
+s32 effect_target_motion(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near, s32 radius, s32 height)
 {
     Object4c *obj;
     VECTOR d;
@@ -138,12 +138,12 @@ s32 func_80055f74(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near, s32 ra
     accel.vx = (d.vx << 12) / dist;
     accel.vy = (d.vy << 12) / dist;
     accel.vz = (d.vz << 12) / dist;
-    return func_80055bd8(scale, max, radius, height, &accel);
+    return effect_move_probe(scale, max, radius, height, &accel);
 }
 
 /* Grows the current record by grow, hits around it, frees it at limit. */
 ADDRESS(0x80056134, 0xa4)
-void func_80056134(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
+void effect_scale_step(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
 {
     Object4c *obj;
     s32 r;
@@ -151,7 +151,7 @@ void func_80056134(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
     obj = DAT_801b77ec.unk2f04;
     obj->scale.vy = obj->scale.vz = obj->scale.vx += grow;
     r = rate * obj->scale.vx >> 12;
-    func_80053850(&obj->pos, r - (rate * grow >> 12), r - 1, mode, falloff, 0x1000);
+    effect_apply_radial_magic_damage(&obj->pos, r - (rate * grow >> 12), r - 1, mode, falloff, 0x1000);
     if (obj->scale.vx >= limit) {
         obj->unk0 = OBJECT4C_FREE;
     }
@@ -159,17 +159,17 @@ void func_80056134(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
 
 /* Spawns record 0x6e at vertex of obj, yaw jittered. */
 ADDRESS(0x800561d8, 0x90)
-void func_800561d8(Object4c *obj, s32 vertex)
+void effect_spawn_zero_direction(Object4c *obj, s32 vertex)
 {
     VECTOR pos;
     SVECTOR angle;
     Object4c *made;
 
-    func_80053af4(obj, vertex, &pos, &obj->scale);
+    effect_sample_world_vertex(obj, vertex, &pos, &obj->scale);
     angle.vx = obj->angle.vx;
     angle.vy = obj->angle.vy + (rand() >> 7) - 128;
     angle.vz = obj->angle.vz;
-    made = func_80053c84(10, obj->unk0, 0x6e, &pos, &DAT_8009c33c, &angle);
+    made = effect_construct_record(10, obj->unk0, 0x6e, &pos, &DAT_8009c33c, &angle);
     if (made != NULL) {
         made->unk7 = 2;
     }
@@ -177,7 +177,7 @@ void func_800561d8(Object4c *obj, s32 vertex)
 
 /* Spawns record 0x70 on the floor below pos if pos is no more than height above it. */
 ADDRESS(0x80056268, 0x88)
-s32 func_80056268(VECTOR *pos, s32 a1, s32 a2, s32 height)
+s32 effect_spawn_at_lower_bound(VECTOR *pos, s32 a1, s32 a2, s32 height)
 {
     VECTOR p;
     SVECTOR v;
@@ -193,7 +193,7 @@ s32 func_80056268(VECTOR *pos, s32 a1, s32 a2, s32 height)
     p.vx = pos->vx;
     p.vz = pos->vz;
     p.vy = floor;
-    func_80053c84(10, 0, 0x70, &p, &v, a1, a2);
+    effect_construct_record(10, 0, 0x70, &p, &v, a1, a2);
     return 1;
 }
 
@@ -204,7 +204,7 @@ s32 func_80056268(VECTOR *pos, s32 a1, s32 a2, s32 height)
  * values are a speed backwards along the record's angle.
  */
 ADDRESS(0x800562f0, 0x290)
-void func_800562f0(Object4c *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+void effect_spawn_motion(Object4c *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
     s32 *args;
     SVECTOR dir;
@@ -215,11 +215,11 @@ void func_800562f0(Object4c *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, 
     if (vertex == -1) {
         off.vx = off.vy = off.vz = 0;
     } else {
-        func_80053a0c(obj, vertex, &off, &obj->scale);
+        effect_sample_rotated_vertex(obj, vertex, &off, &obj->scale);
     }
     switch (mode) {
     case -1:
-        func_80053a0c(obj, args[2], &p, (SVECTOR *)args[3]);
+        effect_sample_rotated_vertex(obj, args[2], &p, (SVECTOR *)args[3]);
         dir.vx = p.vx;
         dir.vy = p.vy;
         dir.vz = p.vz;
@@ -249,12 +249,12 @@ spawn:
     off.vx += obj->pos.vx;
     off.vy += obj->pos.vy;
     off.vz += obj->pos.vz;
-    func_80053c84(10, 0, 0x6f, &off, &dir, a3, a4, a5, a6, a7, 1, 0);
+    effect_construct_record(10, 0, 0x6f, &off, &dir, a3, a4, a5, a6, a7, 1, 0);
 }
 
 /* Spawns count records 0x70 on the floor around pos, scattered by spread. */
 ADDRESS(0x80056580, 0x154)
-s32 func_80056580(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
+s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
 {
     VECTOR p;
     SVECTOR v;
@@ -272,7 +272,7 @@ s32 func_80056580(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
             p.vz = dz + pos->vz;
             p.vy = DAT_801d4464.unk12018[0];
             r = random_centered_triangular_scaled(range) + 4096;
-            func_80053c84(10, 0, 0x70, &p, &v, a3 * r >> 12, a4 * r >> 12);
+            effect_construct_record(10, 0, 0x70, &p, &v, a3 * r >> 12, a4 * r >> 12);
             dx = (rand() * spread >> 14) - spread;
             dz = (rand() * spread >> 14) - spread;
         }
@@ -283,7 +283,7 @@ s32 func_80056580(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
 
 /* Moves the current record one step, tests it (also half a step back when unkd), spins it. */
 ADDRESS(0x800566d4, 0x12c)
-s32 func_800566d4(s32 radius, s32 height, s32 spin)
+s32 effect_collision_step(s32 radius, s32 height, s32 spin)
 {
     Object4c *obj;
     VECTOR p;
@@ -293,12 +293,12 @@ s32 func_800566d4(s32 radius, s32 height, s32 spin)
     obj->pos.vx += obj->vel.vx;
     obj->pos.vy += obj->vel.vy;
     obj->pos.vz += obj->vel.vz;
-    hit = func_80053310(&obj->pos, radius, height);
+    hit = effect_probe_collision_by_type(&obj->pos, radius, height);
     if (obj->unkd != 0 && hit == 0) {
         p.vx = obj->pos.vx - (obj->vel.vx >> 1);
         p.vy = obj->pos.vy - (obj->vel.vy >> 1);
         p.vz = obj->pos.vz - (obj->vel.vz >> 1);
-        hit = func_80053310(&p, radius, height);
+        hit = effect_probe_collision_by_type(&p, radius, height);
     }
     obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
     obj->angle.vz = (obj->angle.vz - spin) & 0xfff;
@@ -307,7 +307,7 @@ s32 func_800566d4(s32 radius, s32 height, s32 spin)
 
 /* Moves the current record one step back. */
 ADDRESS(0x80056800, 0x40)
-void func_80056800(void)
+void effect_collision_backtrack(void)
 {
     Object4c *obj;
 
@@ -319,7 +319,7 @@ void func_80056800(void)
 
 /* Moves the current record half a step back. */
 ADDRESS(0x80056840, 0x7c)
-void func_80056840(void)
+void effect_collision_backtrack_half(void)
 {
     Object4c *obj;
 
@@ -333,7 +333,7 @@ void func_80056840(void)
  * Per-frame update of the current Object4c record (DAT_801b77ec.unk2f04),
  * switched on its id; obj->unk7 is the phase of the multi-step ids. Most
  * ids move the record, test it for hits and leave a particle trail through
- * func_80053c84; a record is freed by setting unk0 to OBJECT4C_FREE.
+ * effect_construct_record; a record is freed by setting unk0 to OBJECT4C_FREE.
  *
  * Stack frame: a case block opened at a case label stays open to the end
  * of the switch (the closing braces at the bottom), so its locals keep
@@ -343,7 +343,7 @@ void func_80056840(void)
  * never referenced; they keep the retail slot layout.
  */
 ADDRESS(0x800568bc, 0x5338)
-void func_800568bc(void)
+void effect_update_dispatch(void)
 {
     Object4c *obj;
     s32 id;
@@ -362,14 +362,14 @@ void func_800568bc(void)
     case 62:
     case0:
         if (phase == 0) {
-            hit = func_800566d4(180, 0x80000000, -300);
+            hit = effect_collision_step(180, 0x80000000, -300);
             if (hit == 0) {
                 break;
             }
-            func_80056580(&obj->pos, 3, 400, 0x2000, 0x2000, 0x400);
+            effect_scatter_lower_bound(&obj->pos, 3, 400, 0x2000, 0x2000, 0x400);
             /* XOR, not a square: the retail code takes the root of dx ^ 2. */
             if (SquareRoot0((obj->pos.vx - DAT_801b24e4.pos.vx) ^ 2) < 1024U) {
-                func_80056840();
+                effect_collision_backtrack_half();
                 goto hit86b;
             }
             goto hit86;
@@ -397,9 +397,9 @@ void func_800568bc(void)
             obj->vel.vy += 13;
         }
         obj->angle.vx += 200;
-        hit = func_800566d4(500, 500, 250);
+        hit = effect_collision_step(500, 500, 250);
         if (hit != 0) {
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
             if (obj->arg.b.unk44 == 1) {
                 obj->arg.b.unk44 = 2;
                 obj->unk9 = 5;
@@ -407,28 +407,28 @@ void func_800568bc(void)
                 obj->unk12 = 0x400;
                 break;
             }
-            func_80056800();
+            effect_collision_backtrack();
             obj->arg.b.unk44 = 1;
             obj->vel.vz = 0;
             obj->vel.vx = 0;
             obj->vel.vy = -100;
         }
-        func_80056268(&obj->pos, 0x4000, 0x4000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x4000, 0x4000, 500);
         break;
     case 15:
         {
             SVECTOR v;
             VECTOR at;
 
-            hit = func_800566d4(180, 0, 0);
+            hit = effect_collision_step(180, 0, 0);
             if (hit != 0) {
                 if (hit & 3) {
-                    func_80056800();
+                    effect_collision_backtrack();
                     obj->unk0 = OBJECT4C_FREE;
                 }
                 if (obj->arg.b.unk44 == 0) {
                     obj->arg.b.unk44 = 1;
-                    func_800537e8(hit);
+                    effect_apply_current_magic_backstep(hit);
                 }
             } else {
                 obj->arg.b.unk44 = 0;
@@ -436,39 +436,40 @@ void func_800568bc(void)
             at.vx = v.vx + obj->pos.vx;
             at.vy = v.vy + obj->pos.vy;
             at.vz = v.vz + obj->pos.vz;
-            func_80053850(&at, 0, obj->scale.vx * 512 >> 12, obj->scale.vy * 2048 >> 12, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&at, 0, obj->scale.vx * 512 >> 12, obj->scale.vy * 2048 >> 12,
+                                             0x400, 0x1000);
             v.vx = rand() * 512 / 32767 - 256;
             v.vy = rand() * -256 / 32767;
             v.vz = rand() * 512 / 32767 - 256;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 9999, -128, 5, 22, 0, 1, 1);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 9999, -128, 5, 22, 0, 1, 1);
             obj->angle.vy += 350;
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
     case 75:
         {
             obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
             obj->angle.vz += 200;
-            hit = func_800566d4(180, 0, 0);
+            hit = effect_collision_step(180, 0, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
                     obj->unk0 = OBJECT4C_FREE;
                 } else {
-                    func_800537e8(hit);
+                    effect_apply_current_magic_backstep(hit);
                     obj->unk0 = OBJECT4C_FREE;
                 }
-                func_800532d4(obj, 0x27);
-                func_80053c84(10, 3, 0x58, &obj->pos, NULL, 0, 2);
-                func_80053c84(10, 3, 0x58, &obj->pos, NULL, 0x40, 2);
-                func_80053c84(10, 3, 0x58, &obj->pos, NULL, 0x80, 2);
+                effect_play_spatial_sound(obj, 0x27);
+                effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0, 2);
+                effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0x40, 2);
+                effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0x80, 2);
             }
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             {
                 SVECTOR v;
 
                 v.vx = v.vy = v.vz = 0;
                 if (obj->unk10 % 3 == 0) {
-                    func_80053c84(10, 0, 3, &obj->pos, &v);
+                    effect_construct_record(10, 0, 3, &obj->pos, &v);
                 }
             }
             break;
@@ -488,9 +489,9 @@ void func_800568bc(void)
             obj->pos.vy += 85;
         }
         obj->unk0 = 0x81;
-        func_80053850(&obj->pos, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
+        effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
         obj->unk0 = 0x84;
-        if (func_800566d4(100, 200, 0) != 0) {
+        if (effect_collision_step(100, 200, 0) != 0) {
             obj->unk0 = OBJECT4C_FREE;
         }
         break;
@@ -515,25 +516,25 @@ void func_800568bc(void)
             p.vy = obj->arg.s.unk44 + obj->vel.vy * t + (t * g * t >> 1);
             p.vx = obj->vel.vx + obj->pos.vx;
             p.vz = obj->vel.vz + obj->pos.vz;
-            hit = func_80053310(&p, 20, 20);
+            hit = effect_probe_collision_by_type(&p, 20, 20);
             if (hit == 0) {
                 q.vx = (obj->vel.vx >> 1) + obj->pos.vx;
                 q.vy = obj->pos.vy;
                 q.vz = (obj->vel.vz >> 1) + obj->pos.vz;
-                hit = func_80053310(&q, 20, 20);
+                hit = effect_probe_collision_by_type(&q, 20, 20);
                 if (hit == 0) {
                     q.vx = (obj->vel.vx >> 2) + obj->pos.vx;
                     q.vy = obj->pos.vy;
                     q.vz = (obj->vel.vz >> 2) + obj->pos.vz;
-                    hit = func_80053310(&q, 20, 20);
+                    hit = effect_probe_collision_by_type(&q, 20, 20);
                 }
             }
             obj->pos.vx = p.vx;
             obj->pos.vy = p.vy;
             obj->pos.vz = p.vz;
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             if (hit != 0) {
-                func_800537e8(hit | 0x20000);
+                effect_apply_current_magic_backstep(hit | 0x20000);
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
@@ -553,7 +554,7 @@ void func_800568bc(void)
                 break;
             }
             if (obj->vel.vx > 0 || obj->vel.vz > 0) {
-                func_80055db0(300, 10, 0x100, 20, 360, 0x2000, 0x30, 0x800);
+                effect_aim_and_move(300, 10, 0x100, 20, 360, 0x2000, 0x30, 0x800);
             }
             if (obj->arg.s.unk46 == 0) {
                 audio_play_spatial_range(4, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
@@ -563,19 +564,19 @@ void func_800568bc(void)
             np.vy = obj->vel.vy + y + g * (t >> 1);
             np.vx = obj->vel.vx + obj->pos.vx;
             np.vz = obj->vel.vz + obj->pos.vz;
-            hit = func_80053310(&np, 20, 20);
+            hit = effect_probe_collision_by_type(&np, 20, 20);
             if (hit == 0) {
                 q.vx = (np.vx + obj->pos.vx) >> 1;
                 q.vy = (np.vy + obj->pos.vy) >> 1;
                 q.vz = (np.vz + obj->pos.vz) >> 1;
-                hit = func_80053310(&q, 20, 20);
+                hit = effect_probe_collision_by_type(&q, 20, 20);
             }
             obj->pos.vx = np.vx;
             obj->pos.vy = np.vy;
             obj->pos.vz = np.vz;
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             if (hit != 0) {
-                func_800537e8(hit | 0x20000);
+                effect_apply_current_magic_backstep(hit | 0x20000);
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
@@ -584,15 +585,15 @@ void func_800568bc(void)
             break;
     case 86:
         if (phase == 0) {
-            hit = func_800566d4(180, 0, -300);
+            hit = effect_collision_step(180, 0, -300);
             if (hit == 0) {
-                func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+                effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
                 break;
             }
         hit86:
-            func_80056800();
+            effect_collision_backtrack();
         hit86b:
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
             obj->unk7 = 1;
         } else if (phase >= 3) {
             obj->unk0 = OBJECT4C_FREE;
@@ -622,8 +623,8 @@ void func_800568bc(void)
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            func_8004ede0(o, obj->arg.s.unk46, &a);
-            b = func_8004eee0(o, &c);
+            actor_sample_rotated_animation_vertex(o, obj->arg.s.unk46, &a);
+            b = actor_resolve_group_position(o, &c);
             pos = &obj->pos;
             old = *pos;
             pos->vx = a.vx + b->vx;
@@ -637,44 +638,44 @@ void func_800568bc(void)
             obj->vel.vx = obj->pos.vx - old.vx;
             obj->vel.vy = obj->pos.vy - old.vy;
             obj->vel.vz = obj->pos.vz - old.vz;
-            func_800562f0(obj, -1, -700, obj->scale.vx, -300, 3, phase, 0);
+            effect_spawn_motion(obj, -1, -700, obj->scale.vx, -300, 3, phase, 0);
             if (o->unk18 < obj->arg.h.unk48) {
                 break;
             }
-            func_800532d4(obj, 0x33);
-            func_8004f1d0(o, &DAT_801b24e4.pos, 650, pos, &obj->vel, -1, 0x400, 5);
+            effect_play_spatial_sound(obj, 0x33);
+            actor_compute_target_direction(o, &DAT_801b24e4.pos, 650, pos, &obj->vel, -1, 0x400, 5);
             obj->unk7 = 0;
             obj->unk10 = 50;
             break;
         }
-        func_800562f0(obj, -1, 0x100, obj->scale.vx, -300, 2, 9, 0);
+        effect_spawn_motion(obj, -1, 0x100, obj->scale.vx, -300, 2, 9, 0);
         goto case0;
     case 13:
     case 56:
-        hit = func_800566d4(180, 0x80000000, 0);
+        hit = effect_collision_step(180, 0x80000000, 0);
         if (hit != 0) {
             if (hit & 0xf) {
                 obj->unk0 = OBJECT4C_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
                 obj->arg.b.unk44 = 1;
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
         } else {
             obj->arg.b.unk44 = 0;
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         obj->angle.vy += 700;
         break;
     case 52:
-        hit = func_800566d4(180, 0x80000000, 0);
+        hit = effect_collision_step(180, 0x80000000, 0);
         if (hit != 0) {
             if (!(hit & 0xf)) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             obj->unk0 = OBJECT4C_FREE;
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         obj->angle.vy += 300;
         break;
     case 76:
@@ -685,25 +686,25 @@ void func_800568bc(void)
             obj->angle.vx += 200;
             obj->vel.vy += 5;
             v.vx = v.vy = v.vz = 0;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0xc00, -256, 8, 0x1c, 0, 1, 2);
-            hit = func_800566d4(180, 0x80000000, 0);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0xc00, -256, 8, 0x1c, 0, 1, 2);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
                 obj->unk0 = OBJECT4C_FREE;
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             break;
     case 64:
-        hit = func_800566d4(180, 0x80000000, -500);
+        hit = effect_collision_step(180, 0x80000000, -500);
         if (hit != 0) {
             SVECTOR v;
 
             obj->unk0 = OBJECT4C_FREE;
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
             for (i = 15; i != -1; i--) {
                 v.vx = (rand() * 500 >> 15) - 250;
                 v.vy = (rand() * 500 >> 15) - 250;
                 v.vz = (rand() * 500 >> 15) - 250;
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1400, -24, 10, 0x26, 0, 1, 2);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1400, -24, 10, 0x26, 0, 1, 2);
             }
         }
         break;
@@ -718,15 +719,15 @@ void func_800568bc(void)
                 v.vx = (-obj->vel.vz + obj->vel.vx + obj->vel.vx) >> 1;
                 v.vz = (obj->vel.vx + obj->vel.vz + obj->vel.vz) >> 1;
                 v.vy = obj->vel.vy;
-                func_80053c84(10, 0x43, 0x46, &obj->pos, &v, 1);
+                effect_construct_record(10, 0x43, 0x46, &obj->pos, &v, 1);
                 v.vx = (obj->vel.vz + obj->vel.vx + obj->vel.vx) >> 1;
                 v.vz = (-obj->vel.vx + obj->vel.vz + obj->vel.vz) >> 1;
                 v.vy = obj->vel.vy;
-                func_80053c84(10, 0x43, 0x46, &obj->pos, &v, 1);
+                effect_construct_record(10, 0x43, 0x46, &obj->pos, &v, 1);
             }
-            hit = func_800566d4(180, 0x80000000, 0);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
                 obj->unk1 = 0x58;
                 obj->unk8 = 1;
                 obj->unk9 = 5;
@@ -743,14 +744,14 @@ void func_800568bc(void)
                 obj->angle.vy = 0;
                 obj->angle.vz = 0;
                 obj->unke = 0x40;
-                func_800532d4(obj, 0x28);
-                func_80053c84(10, 3, 0x58, &obj->pos, NULL, 0x80, 1);
+                effect_play_spatial_sound(obj, 0x28);
+                effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0x80, 1);
                 break;
             }
             v.vx = (rand() * 20 >> 15) - 10;
             v.vy = (rand() * 20 >> 15) - 10;
             v.vz = (rand() * 20 >> 15) - 10;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, -640, 5, 12, 0, 1, 0);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, -640, 5, 12, 0, 1, 0);
             break;
     case 44:
         {
@@ -759,15 +760,15 @@ void func_800568bc(void)
             obj->angle.vz += 400;
             obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
-            hit = func_800566d4(180, 0x80000000, 0);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = (rand() * 20 >> 15) - 10;
             v.vy = (rand() * 20 >> 15) - 10;
             v.vz = (rand() * 20 >> 15) - 10;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1400, -256, 4, 0x16, 0, 2, 5);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1400, -256, 4, 0x16, 0, 2, 5);
             break;
     case 49:
     case 54:
@@ -775,30 +776,30 @@ void func_800568bc(void)
         {
             SVECTOR v;
 
-            hit = func_800566d4(180, 0x80000000, 0);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
                     obj->unk0 = OBJECT4C_FREE;
                 }
                 if (obj->arg.b.unk44 == 0) {
                     obj->arg.b.unk44 = 1;
-                    func_800537e8(hit);
+                    effect_apply_current_magic_backstep(hit);
                     for (i = 6; i != -1; i--) {
                         v.vx = (rand() * 240 >> 15) - 120;
                         v.vy = (rand() * 240 >> 15) - 120;
                         v.vz = (rand() * 240 >> 15) - 120;
-                        func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1400, 0, 7, 12, 0, 1, 1);
+                        effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1400, 0, 7, 12, 0, 1, 1);
                     }
                 }
             } else {
                 obj->arg.b.unk44 = 0;
             }
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
     case 60:
         switch (obj->arg.s.unk44) {
         case 0:
-            if (func_800566d4(180, 0x80000000, 0) != 0) {
+            if (effect_collision_step(180, 0x80000000, 0) != 0) {
                 obj->arg.s.unk44++;
             }
             obj->vel.vy += 5;
@@ -821,8 +822,8 @@ void func_800568bc(void)
             p.vx = obj->pos.vx;
             p.vy = obj->pos.vy + 1000;
             p.vz = obj->pos.vz;
-            func_80053850(&p, (obj->scale.vx - obj->arg.s.unk46) * 4, obj->scale.vx * 4 - 1, 2000, 0x1000,
-                          obj->arg.s.unk48);
+            effect_apply_radial_magic_damage(&p, (obj->scale.vx - obj->arg.s.unk46) * 4,
+                                             obj->scale.vx * 4 - 1, 2000, 0x1000, obj->arg.s.unk48);
         }
         if (obj->scale.vx > obj->arg.s.unk44) {
             obj->unk0 = OBJECT4C_FREE;
@@ -832,10 +833,10 @@ void func_800568bc(void)
         if (obj->arg.s.unk44 == 0) {
             collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x400, obj->scale.vx, 0x30);
             if (DAT_801d4464.unk12024 == 0x10) {
-                func_800536f8(0x10010, 5000, NULL);
+                effect_apply_current_magic(0x10010, 5000, NULL);
             }
             obj->arg.s.unk44++;
-            func_80053c84(10, 0, 0x65, &obj->pos, NULL, DAT_801d4464.unk12028);
+            effect_construct_record(10, 0, 0x65, &obj->pos, NULL, DAT_801d4464.unk12028);
             obj->arg.s.unk48 = 0;
             obj->arg.s.unk4a = 0;
         }
@@ -861,16 +862,16 @@ void func_800568bc(void)
                 v.vx = rand() * 512 / 32767 - 256;
                 v.vy = rand() * -256 / 32767;
                 v.vz = rand() * 512 / 32767 - 256;
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, -128, 5, 12, 0, 1, 0);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, -128, 5, 12, 0, 1, 0);
             }
             obj->angle.vy -= 400;
             obj->arg.s.unk44++;
             break;
     case 102:
-        hit = func_800566d4(180, 0, -600);
+        hit = effect_collision_step(180, 0, -600);
         if (hit != 0) {
             if (!(hit & 0xf)) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             obj->unk0 = OBJECT4C_FREE;
         }
@@ -879,22 +880,22 @@ void func_800568bc(void)
         obj->scale.vx += 32;
         obj->scale.vy += 32;
         obj->scale.vz += 32;
-        hit = func_800566d4(180, 0, -300);
+        hit = effect_collision_step(180, 0, -300);
         if (hit != 0) {
             if (!(hit & 0xf)) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             obj->unk0 = OBJECT4C_FREE;
         }
         break;
     case 58:
         obj->unke = (obj->unke + 64) & 0x40;
-        hit = func_800566d4(180, 0, -600);
+        hit = effect_collision_step(180, 0, -600);
         if (hit != 0) {
             if (hit & 0xf) {
                 obj->unk0 = OBJECT4C_FREE;
             }
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
             obj->unk0 = OBJECT4C_FREE;
         }
         break;
@@ -906,8 +907,8 @@ void func_800568bc(void)
             v.vx = (rand() * 32 >> 15) - 16;
             v.vy = (rand() * 32 >> 15) - 16;
             v.vz = (rand() * 32 >> 15) - 16;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1a90, -1000, 4, 0x25, 0, 1, 1);
-            hit = func_800566d4(180, 0, 0);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1a90, -1000, 4, 0x25, 0, 1, 1);
+            hit = effect_collision_step(180, 0, 0);
             if (hit == 0) {
                 break;
             }
@@ -917,9 +918,9 @@ void func_800568bc(void)
             if (!(hit & 0x10)) {
                 break;
             }
-            func_80053c84(10, 0x43, 0x58, &obj->pos, NULL, 0, 1);
-            func_80053c84(10, 0x43, 0x58, &obj->pos, NULL, 0x80, 1);
-            func_800532d4(obj, 0x25);
+            effect_construct_record(10, 0x43, 0x58, &obj->pos, NULL, 0, 1);
+            effect_construct_record(10, 0x43, 0x58, &obj->pos, NULL, 0x80, 1);
+            effect_play_spatial_sound(obj, 0x25);
             for (i = 0; i < 4096; i += 256) {
                 v.vx = rsin(i) * 360 >> 12;
                 v.vz = rcos(i) * 360 >> 12;
@@ -927,17 +928,17 @@ void func_800568bc(void)
                 ring.vx = obj->pos.vx;
                 ring.vy = obj->pos.vy + 1200;
                 ring.vz = obj->pos.vz;
-                func_80053c84(10, 0, 0x5b, &ring, &v);
+                effect_construct_record(10, 0, 0x5b, &ring, &v);
             }
             break;
     case 11:
-        hit = func_800566d4(180, 0, 0);
+        hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             if (hit & 0xf) {
                 obj->unk0 = OBJECT4C_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
                 obj->arg.b.unk44 = 1;
             }
         } else {
@@ -945,12 +946,12 @@ void func_800568bc(void)
         }
         break;
     case 9:
-        hit = func_800566d4(250, 0x80000000, 0);
+        hit = effect_collision_step(250, 0x80000000, 0);
         if (hit != 0 && (hit & 0xf)) {
             obj->unk0 = OBJECT4C_FREE;
         }
         if (obj->arg.s.unk44 >= 11 && obj->arg.s.unk44 % 6 == 0) {
-            func_80053c84(10, 0x42, 0x5e, &obj->pos, NULL, obj->arg.s.unk46);
+            effect_construct_record(10, 0x42, 0x5e, &obj->pos, NULL, obj->arg.s.unk46);
         }
         obj->unk14 = (obj->unk14 + 128) & 0xfff;
         obj->arg.s.unk44++;
@@ -959,18 +960,18 @@ void func_800568bc(void)
         {
             SVECTOR v;
 
-            hit = func_800566d4(250, 0x80000000, 0);
+            hit = effect_collision_step(250, 0x80000000, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
                     obj->unk0 = OBJECT4C_FREE;
                 }
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             if (obj->arg.s.unk44 >= 16 && obj->arg.s.unk44 % 10 == 0) {
                 v.vy = 84;
                 v.vx = 0;
                 v.vz = 0;
-                func_80053c84(10, 0x42, 0x59, &obj->pos, &v);
+                effect_construct_record(10, 0x42, 0x59, &obj->pos, &v);
             }
             obj->unk14 = (obj->unk14 + 128) & 0xfff;
             obj->arg.s.unk44++;
@@ -979,10 +980,10 @@ void func_800568bc(void)
         obj->angle.vy += 320;
         switch (obj->arg.s.unk44) {
         case 0:
-            hit = func_800566d4(180, 0x80000000, 0);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0 && (hit & 0xf)) {
                 obj->arg.s.unk44++;
-                func_800532d4(obj, 0x27);
+                effect_play_spatial_sound(obj, 0x27);
             }
             break;
         case 1:
@@ -1001,39 +1002,40 @@ void func_800568bc(void)
                 p.vx = obj->pos.vx;
                 p.vy = obj->pos.vy + 1000;
                 p.vz = obj->pos.vz;
-                func_80053850(&p, obj->scale.vx * 29 >> 5, obj->scale.vx * 35 >> 5, 0x800, 0x400, 0x1000);
+                effect_apply_radial_magic_damage(&p, obj->scale.vx * 29 >> 5, obj->scale.vx * 35 >> 5, 0x800,
+                                                 0x400, 0x1000);
             }
             break;
         }
         break;
     case 72:
         if (obj->arg.c.unk44 == 0) {
-            func_80056134(0x3800, 504, 70, 0x800, 0x8000);
+            effect_scale_step(0x3800, 504, 70, 0x800, 0x8000);
         } else {
             obj->arg.c.unk44--;
         }
         break;
     case 122:
-        if (func_80055db0(600, 40, 36, 180, 360, 0x1000, 0x104, 0x800) != -1 && obj->unk10 >= 2) {
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        if (effect_aim_and_move(600, 40, 36, 180, 360, 0x1000, 0x104, 0x800) != -1 && obj->unk10 >= 2) {
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
         }
-        func_80056800();
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
-        func_800532d4(obj, 0x27);
+        effect_collision_backtrack();
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
+        effect_play_spatial_sound(obj, 0x27);
         obj->unk0 = OBJECT4C_FREE;
         break;
     case 120:
-        if (func_800566d4(180, 360, 0) == 0 && obj->unk10 >= 2) {
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        if (effect_collision_step(180, 360, 0) == 0 && obj->unk10 >= 2) {
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
         }
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
-        func_80053c84(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
-        func_800532d4(obj, 0x27);
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
+        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
+        effect_play_spatial_sound(obj, 0x27);
         obj->unk0 = OBJECT4C_FREE;
         break;
     case 92:
@@ -1047,8 +1049,8 @@ void func_800568bc(void)
             link = &DAT_801b77ec.objects[obj->arg.c.unk45];
             switch (obj->arg.c.unk44) {
             case 0:
-                func_800537e8(collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy,
-                                                    0x30));
+                effect_apply_current_magic_backstep(collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy,
+                                                                          0x30));
                 collision_probe_floor_height(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
                 obj->pos.vy = DAT_801d4464.unk12010;
                 d = DAT_801d4464.unk12010 - DAT_801d4464.unk12014;
@@ -1070,7 +1072,7 @@ void func_800568bc(void)
             break;
     case 68:
     case 69:
-        func_80056134(0x4000, obj->arg.s.unk44, 70, 0x800, 0x8000);
+        effect_scale_step(0x4000, obj->arg.s.unk44, 70, 0x800, 0x8000);
         break;
     case 123:
         {
@@ -1087,9 +1089,9 @@ void func_800568bc(void)
                 obj->unk0 = OBJECT4C_FREE;
             }
             if (obj->unk0 & 0x40) {
-                func_80053c84(10, obj->unk0, 0x45, &obj->pos, NULL, 420);
+                effect_construct_record(10, obj->unk0, 0x45, &obj->pos, NULL, 420);
             } else {
-                func_80053c84(obj->unk6, obj->unk0, 0x45, &obj->pos, NULL, 420);
+                effect_construct_record(obj->unk6, obj->unk0, 0x45, &obj->pos, NULL, 420);
             }
             break;
     case 124:
@@ -1104,11 +1106,11 @@ void func_800568bc(void)
             p.vx = obj->pos.vx;
             p.vy = obj->pos.vy + 5000;
             p.vz = obj->pos.vz;
-            n = func_8004d644(p.vx, p.vy, p.vz, 100, 10000);
+            n = actor_find_overlap_excluding_target_type3(p.vx, p.vy, p.vz, 100, 10000);
             if (n != -1) {
                 o = &DAT_80185da8.objects[n];
-                func_800532d4(obj, 0x27);
-                func_80053c84(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
+                effect_play_spatial_sound(obj, 0x27);
+                effect_construct_record(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
             } else {
                 collision_query_world(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
                 if (DAT_801d4464.unk12024 == 0x80) {
@@ -1116,19 +1118,19 @@ void func_800568bc(void)
 
                     q = DAT_801b24e4.pos;
                     q.vy -= 1700;
-                    func_800532d4(obj, 0x27);
-                    func_80053c84(obj->unk6, obj->unk0, 0x44, &DAT_801b24e4.pos, NULL, 1260);
+                    effect_play_spatial_sound(obj, 0x27);
+                    effect_construct_record(obj->unk6, obj->unk0, 0x44, &DAT_801b24e4.pos, NULL, 1260);
                 }
             }
-            func_80056268(&p, 0x2000, 0x7fff, 10000);
+            effect_spawn_at_lower_bound(&p, 0x2000, 0x7fff, 10000);
             break;
     case 66:
-        hit = func_800566d4(100, 200, 0);
+        hit = effect_collision_step(100, 200, 0);
         if (hit == 0) {
-            func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+            effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
         }
-        func_800537e8(hit);
+        effect_apply_current_magic_backstep(hit);
         obj->unk0 = OBJECT4C_FREE;
         break;
     case 31:
@@ -1148,47 +1150,47 @@ void func_800568bc(void)
             if (obj->arg.s.unk46 >= 70 && obj->arg.s.unk44 == 1) {
                 obj->arg.s.unk44 = 0;
             }
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x84;
-            if (func_800566d4(100, 200, 0) != 0) {
+            if (effect_collision_step(100, 200, 0) != 0) {
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 2, 5);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 2, 5);
             break;
     case 34:
         {
             SVECTOR v;
 
             obj->unk0 = 0x81;
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x84;
-            if (func_800566d4(100, 200, 0) != 0) {
-                func_80056800();
+            if (effect_collision_step(100, 200, 0) != 0) {
+                effect_collision_backtrack();
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 4);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 4);
             break;
     case 32:
         {
             SVECTOR v;
 
             obj->unk0 = 0x81;
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x84;
-            if (func_800566d4(100, 200, 0) != 0) {
-                func_80056800();
+            if (effect_collision_step(100, 200, 0) != 0) {
+                effect_collision_backtrack();
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 5);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 5);
             obj->angle.vz += 300;
             break;
     case 37:
@@ -1196,16 +1198,16 @@ void func_800568bc(void)
             SVECTOR v;
 
             obj->unk0 = 0x81;
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x84;
-            if (func_800566d4(100, 200, 0) != 0) {
-                func_80056800();
+            if (effect_collision_step(100, 200, 0) != 0) {
+                effect_collision_backtrack();
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 7);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 7);
             obj->angle.vz += 300;
             break;
     case 35:
@@ -1214,32 +1216,32 @@ void func_800568bc(void)
             SVECTOR v;
 
             obj->unk0 = 0x81;
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x81;
-            if (func_800566d4(100, 200, 0) != 0) {
-                func_80056800();
+            if (effect_collision_step(100, 200, 0) != 0) {
+                effect_collision_backtrack();
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 3);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 3);
             break;
     case 33:
         {
             SVECTOR v;
 
             obj->unk0 = 0x81;
-            func_80053850(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
             obj->unk0 = 0x81;
-            if (func_800566d4(100, 200, 0) != 0) {
-                func_80056800();
+            if (effect_collision_step(100, 200, 0) != 0) {
+                effect_collision_backtrack();
                 obj->unk0 = OBJECT4C_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
             v.vz = obj->vel.vz * 2 / 5;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 8);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 5, 22, 0, 1, 8);
             break;
     case 113:
     case 125:
@@ -1256,14 +1258,14 @@ void func_800568bc(void)
                 }
                 break;
             }
-            hit = func_800566d4(50, 0x80000000, -300);
+            hit = effect_collision_step(50, 0x80000000, -300);
             if (hit != 0) {
                 if (hit & 0xf) {
                     if (phase == 0) {
-                        func_80056800();
+                        effect_collision_backtrack();
                         obj->vel.vx = obj->vel.vz = 0;
                     } else {
-                        func_80056800();
+                        effect_collision_backtrack();
                         collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, 50, 0);
                         if (DAT_801d4464.unk12010 < DAT_801d4464.unk12018[0]) {
                             at.vy = DAT_801d4464.unk12010;
@@ -1293,19 +1295,19 @@ void func_800568bc(void)
                     at.vz = obj->pos.vz;
                     switch (id) {
                     case 113:
-                        func_80053c84(10, obj->unk0 | 3, 0x72, &at, &v, d);
-                        func_80053c84(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 1);
+                        effect_construct_record(10, obj->unk0 | 3, 0x72, &at, &v, d);
+                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 1);
                         break;
                     case 125:
-                        func_80053c84(10, obj->unk0 | 3, 0x7e, &at, &v, d);
-                        func_80053c84(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 3);
+                        effect_construct_record(10, obj->unk0 | 3, 0x7e, &at, &v, d);
+                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 3);
                         break;
                     case 129:
-                        func_80053c84(10, obj->unk0 | 3, 0x80, &at, &v, d);
-                        func_80053c84(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 0);
+                        effect_construct_record(10, obj->unk0 | 3, 0x80, &at, &v, d);
+                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 0);
                         break;
                     }
-                    func_800532d4(obj, 0x27);
+                    effect_play_spatial_sound(obj, 0x27);
                 }
             } else if (phase == 0) {
                 if (obj->arg.s.unk44-- <= 0) {
@@ -1316,7 +1318,7 @@ void func_800568bc(void)
                 v.vx = (rand() >> 7) - 128;
                 v.vy = (rand() >> 7) - 128;
                 v.vz = (rand() >> 7) - 128;
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x800, -128, 5, 12, 0, 1, 1);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x800, -128, 5, 12, 0, 1, 1);
             }
             break;
     case 114:
@@ -1334,13 +1336,13 @@ void func_800568bc(void)
                 r = SquareRoot12(SquareRoot12(r * (r * r >> 12))) >> 3;
                 switch (id) {
                 case 114:
-                    func_80053c84(10, obj->unk0 | 3, 0x13, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->unk0 | 3, 0x13, &obj->pos, &v, r);
                     break;
                 case 126:
-                    func_80053c84(10, obj->unk0 | 3, 0x29, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->unk0 | 3, 0x29, &obj->pos, &v, r);
                     break;
                 case 128:
-                    func_80053c84(10, obj->unk0 | 3, 0x2d, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->unk0 | 3, 0x2d, &obj->pos, &v, r);
                     break;
                 }
             }
@@ -1361,27 +1363,27 @@ void func_800568bc(void)
         {
             SVECTOR v;
 
-            func_80056134(0x3800, obj->arg.s.unk44, 0x80, 0x400, 0x8000);
+            effect_scale_step(0x3800, obj->arg.s.unk44, 0x80, 0x400, 0x8000);
             v.vx = (rand() >> 6) - 256;
             v.vz = (rand() >> 6) - 256;
             v.vy = -(rand() >> 7) - 128;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x2000, -128, 15, 12, 10, 1, 1);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x2000, -128, 15, 12, 10, 1, 1);
             obj->angle.vy += 64;
             break;
     case 42:
-        hit = func_800566d4(180, 0, 0);
+        hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             if (hit & 0xf) {
                 obj->unk0 = OBJECT4C_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
                 obj->arg.b.unk44 = 1;
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
         } else {
             obj->arg.b.unk44 = 0;
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         break;
     case 48:
     case 53:
@@ -1389,21 +1391,21 @@ void func_800568bc(void)
         obj->scale.vy += 32;
         obj->scale.vz += 32;
         obj->angle.vz += 200;
-        hit = func_800566d4(180, 0, 0);
+        hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             if (!(hit & 0xf)) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             obj->unk0 = OBJECT4C_FREE;
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         break;
     case 46:
         obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
-        hit = func_800566d4(180, 0, 0);
+        hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
             obj->unk1 = 0x58;
             obj->unk8 = 1;
             obj->unk9 = 5;
@@ -1419,7 +1421,7 @@ void func_800568bc(void)
             obj->unke = 0x40;
             break;
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         if ((obj->unk0 & 0x40) && obj->vel.vy < 800) {
             obj->vel.vy += 10;
         }
@@ -1433,7 +1435,7 @@ void func_800568bc(void)
         case 1:
             if (obj->arg.s.unk46 & 1) {
                 obj->vel.vx = obj->vel.vx + (rand() >> 6) - 256;
-                func_80053c84(10, 0x81, 0x2e, &obj->pos, &obj->vel);
+                effect_construct_record(10, 0x81, 0x2e, &obj->pos, &obj->vel);
             }
             if (++obj->arg.s.unk46 >= 7) {
                 obj->unk0 = OBJECT4C_FREE;
@@ -1442,15 +1444,15 @@ void func_800568bc(void)
         }
         break;
     case 47:
-        hit = func_800566d4(180, 0x80000000, 0);
+        hit = effect_collision_step(180, 0x80000000, 0);
         if (hit != 0) {
             if (hit & 0xf) {
                 obj->unk0 = OBJECT4C_FREE;
             } else {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
         }
-        func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+        effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         if (++obj->arg.s.unk44 >= 6) {
             obj->arg.s.unk44 = 0;
         }
@@ -1465,8 +1467,8 @@ void func_800568bc(void)
             p.vx = obj->pos.vx;
             p.vy = obj->pos.vy + 1000;
             p.vz = obj->pos.vz;
-            func_80053850(&p, (obj->scale.vx - obj->arg.s.unk46) * 4, obj->scale.vx * 4 - 1, 2000, 0x1000,
-                          obj->arg.s.unk48);
+            effect_apply_radial_magic_damage(&p, (obj->scale.vx - obj->arg.s.unk46) * 4,
+                                             obj->scale.vx * 4 - 1, 2000, 0x1000, obj->arg.s.unk48);
         }
         if (obj->scale.vx > obj->arg.s.unk44) {
             obj->unk0 = OBJECT4C_FREE;
@@ -1483,14 +1485,15 @@ void func_800568bc(void)
             p.vy = obj->pos.vy + 1000;
             p.vz = obj->pos.vz;
             p.pad = obj->angle.vy;
-            func_80053850(&p, obj->scale.vx * 15 >> 4, obj->scale.vx * 9 >> 3, 0x8002, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&p, obj->scale.vx * 15 >> 4, obj->scale.vx * 9 >> 3, 0x8002,
+                                             0x400, 0x1000);
         }
         if (obj->scale.vx > 3200) {
             obj->unk0 = OBJECT4C_FREE;
         }
         break;
     case 88:
-        func_80056134(0x4000, 0x600, 0x80, 0x400, 0x8000);
+        effect_scale_step(0x4000, 0x600, 0x80, 0x400, 0x8000);
         obj->angle.vy += 64;
         break;
     case 18:
@@ -1509,7 +1512,7 @@ void func_800568bc(void)
             if (id == 18) {
                 obj->unke = 0;
             }
-            func_80056134(0x2000, 799, 70, 0xc00, 0x8000);
+            effect_scale_step(0x2000, 799, 70, 0xc00, 0x8000);
             obj->angle.vy += 64;
         break;
         default:
@@ -1517,12 +1520,12 @@ void func_800568bc(void)
                 audio_play_spatial_range(0x2c, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
             }
             obj->unk7++;
-            if (func_80055db0(obj->arg.s.unk44, obj->arg.s.unk46, obj->arg.s.unk48, 160, 0, 6000,
-                              obj->arg.s.unk4a, 0x800) == -1) {
+            if (effect_aim_and_move(obj->arg.s.unk44, obj->arg.s.unk46, obj->arg.s.unk48, 160, 0, 6000,
+                                    obj->arg.s.unk4a, 0x800) == -1) {
                 Object4c *made;
 
             spawn18:
-                made = func_80053c84(10, obj->unk0 | 3, id, &obj->pos, NULL, &obj->angle);
+                made = effect_construct_record(10, obj->unk0 | 3, id, &obj->pos, NULL, &obj->angle);
                 made->unk7 = 101;
             become18:
                 obj->unk3 = 0x15;
@@ -1530,18 +1533,18 @@ void func_800568bc(void)
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 obj->unke = 0x40;
                 obj->unk0 |= 3;
-                func_800532d4(obj, 0x28);
+                effect_play_spatial_sound(obj, 0x28);
                 goto shrink18;
             } else {
                 SVECTOR v;
 
-                func_80056268(&obj->pos, 0x2000, 0x2000, 500);
+                effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
                 obj->angle.vz += 128;
                 v.vx = v.vy = v.vz = 0;
                 if (id == 18) {
-                    func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 3, 0x25, 0, 1, 0);
+                    effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 3, 0x25, 0, 1, 0);
                 } else {
-                    func_80053c84(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 3, 0x25, 0, 1, 1);
+                    effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 3600, -128, 3, 0x25, 0, 1, 1);
                 }
             }
             break;
@@ -1557,7 +1560,7 @@ void func_800568bc(void)
                 p.vx = DAT_801b24e4.pos.vx;
                 p.vy = DAT_801b24e4.pos.vy - 1600;
                 p.vz = DAT_801b24e4.pos.vz;
-                hit = func_80055f74(&p, 500, 60, 3000, 0, 10, 0x80000000);
+                hit = effect_target_motion(&p, 500, 60, 3000, 0, 10, 0x80000000);
             } else if (obj->arg.b.unk44 == 0xff) {
                 goto fall2;
             } else {
@@ -1565,27 +1568,27 @@ void func_800568bc(void)
                 p.vx = o->pos.vx;
                 p.vy = o->pos.vy - (o->unk1e >> 1);
                 p.vz = o->pos.vz;
-                hit = func_80055f74(&p, 450, 60, 100, 0, 10, 0x80000000);
+                hit = effect_target_motion(&p, 450, 60, 100, 0, 10, 0x80000000);
             }
             if (hit != -1) {
                 goto trail2;
             }
             {
             boom2:
-                func_800537e8(DAT_801d4464.unk12024);
+                effect_apply_current_magic_backstep(DAT_801d4464.unk12024);
                 for (i = 5; i != -1; i--) {
                     v.vx = (rand() * 400 >> 15) - 200;
                     v.vz = (rand() * 400 >> 15) - 200;
                     v.vy = (rand() * 400 >> 15) - 200;
-                    func_80053c84(10, 0, 0x6f, &obj->pos, &v, 7500, -750, 8, 22, 10, 1, 2);
+                    effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 7500, -750, 8, 22, 10, 1, 2);
                 }
-                func_80056580(&obj->pos, 5, 0x400, 0x2000, 0x4000, 0x1000);
+                effect_scatter_lower_bound(&obj->pos, 5, 0x400, 0x2000, 0x4000, 0x1000);
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
         fall2:
             obj->vel.vy += 10;
-            if (func_800566d4(10, 0x80000000, 0) != 0) {
+            if (effect_collision_step(10, 0x80000000, 0) != 0) {
                 goto boom2;
             }
         trail2:
@@ -1593,7 +1596,7 @@ void func_800568bc(void)
                 v.vx = (rand() * 60 >> 15) - 30;
                 v.vy = (rand() * 60 >> 15) - 30;
                 v.vz = (rand() * 60 >> 15) - 30;
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, -256, 13, 0x1c, 10, 1, 2);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, -256, 13, 0x1c, 10, 1, 2);
             }
         }
         break;
@@ -1602,14 +1605,14 @@ void func_800568bc(void)
             SVECTOR v;
             VECTOR p;
 
-            hit = func_800566d4(180, 0x80000000, 0);
+            hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0 && (hit & 0x10)) {
-                func_800537e8(hit);
+                effect_apply_current_magic_backstep(hit);
             }
             p.vx = v.vx + obj->pos.vx;
             p.vy = v.vy + obj->pos.vy;
             p.vz = v.vz + obj->pos.vz;
-            func_80053850(&p, 0, obj->scale.vx * 1024 >> 12, obj->scale.vy, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&p, 0, obj->scale.vx * 1024 >> 12, obj->scale.vy, 0x400, 0x1000);
             switch (obj->arg.s.unk44) {
             case 0:
                 obj->scale.vx += 560;
@@ -1641,12 +1644,12 @@ void func_800568bc(void)
             v.vx = 0;
             v.vy = -(rand() * 100 >> 15) - 100;
             v.vz = 0;
-            func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 8, 0x1c, 2, 1, 2);
+            effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 8, 0x1c, 2, 1, 2);
             break;
     case 108:
-        hit = func_800566d4(180, 0, 0);
+        hit = effect_collision_step(180, 0, 0);
         if (hit != 0 && (hit & 0x10)) {
-            func_800537e8(hit);
+            effect_apply_current_magic_backstep(hit);
         }
         switch (obj->arg.s.unk44) {
         case 0:
@@ -1678,13 +1681,13 @@ void func_800568bc(void)
     case 4:
         switch (phase) {
         case 0:
-            if (func_800566d4(250, 0x80000000, 0) != 0 || obj->unk10 < 2) {
+            if (effect_collision_step(250, 0x80000000, 0) != 0 || obj->unk10 < 2) {
                 Object4c *made;
 
-                func_80056580(&obj->pos, 8, 400, 0x2000, 0x8000, 0x400);
-                made = func_80053c84(10, obj->unk0 | 3, 4, &obj->pos, NULL, &obj->angle);
+                effect_scatter_lower_bound(&obj->pos, 8, 400, 0x2000, 0x8000, 0x400);
+                made = effect_construct_record(10, obj->unk0 | 3, 4, &obj->pos, NULL, &obj->angle);
                 made->unk7 = 2;
-                func_800532d4(obj, 0x27);
+                effect_play_spatial_sound(obj, 0x27);
             case 5:
                 obj->unk7 = 1;
                 obj->unk3 = 0x15;
@@ -1702,31 +1705,33 @@ void func_800568bc(void)
 
                 obj->unk14 = (obj->unk14 + 128) & 0xfff;
                 if (obj->arg.b.unk45 != 0) {
-                    func_80053af4(obj, 0, &a, &obj->scale);
+                    effect_sample_world_vertex(obj, 0, &a, &obj->scale);
                     o = &DAT_80185da8.objects[obj->arg.b.unk44];
                     t.vx = o->pos.vx;
                     t.vy = o->pos.vy - (o->unk1e >> 1);
                     t.vz = o->pos.vz;
                     vector_direction_scaled(&a, &t, 800, &dir);
-                    func_80053c84(10, obj->unk0, 0, &a, &dir);
+                    effect_construct_record(10, obj->unk0, 0, &a, &dir);
                     obj->arg.b.unk45--;
                 } else if (rand() < 2048) {
-                    o = func_8004d3c4(&obj->pos, obj->angle.vy, obj->angle.vx, 25000, 800, 800, &dist, 0x200);
+                    o = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 25000, 800, 800,
+                                                &dist, 0x200);
                     if (o != NULL) {
                         obj->arg.b.unk44 = o - DAT_80185da8.objects;
                         obj->arg.b.unk45 = 5;
                     }
                 }
                 if (rand() < 1024 &&
-                    func_8004d3c4(&obj->pos, obj->angle.vy, obj->angle.vx, 30000, 800, 800, &dist, 0x200) != NULL) {
-                    func_800561d8(obj, 0x2f);
-                    func_800561d8(obj, 0x32);
+                    actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 30000, 800, 800, &dist,
+                                            0x200) != NULL) {
+                    effect_spawn_zero_direction(obj, 0x2f);
+                    effect_spawn_zero_direction(obj, 0x32);
                 }
             }
             break;
         case 1:
         shrink4:
-            func_80056134(0x4000, 0x800, 0x4b, 0x400, 0x8000);
+            effect_scale_step(0x4000, 0x800, 0x4b, 0x400, 0x8000);
             obj->angle.vy += 64;
             break;
         default:
@@ -1747,7 +1752,7 @@ void func_800568bc(void)
                     Object4c *made;
 
                     for (i = 0; i < 8; i++) {
-                        made = func_80053c84(10, 0, 0x74, &obj->pos, &obj->vel, &obj->angle, i);
+                        made = effect_construct_record(10, 0, 0x74, &obj->pos, &obj->vel, &obj->angle, i);
                         if (i == 0) {
                             made->unk3 = 0x10;
                         }
@@ -1765,12 +1770,12 @@ void func_800568bc(void)
                     obj->arg.b.unk49 = 24;
                     break;
                 }
-                if (func_80055db0(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
+                if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
                     if (DAT_801d4464.unk12024 != 0x10) {
                         goto fail16;
                     }
-                    func_800536f8(0x10010, 5000, NULL);
+                    effect_apply_current_magic(0x10010, 5000, NULL);
                     obj->arg.b.unk4a = DAT_801d4464.unk12028;
                     o = &DAT_80185da8.objects[obj->arg.b.unk4a];
                     if (o->unke != 2 && o->unke != 3) {
@@ -1812,7 +1817,7 @@ void func_800568bc(void)
                     if (++obj->arg.b.unk48 >= 24) {
                         obj->arg.b.unk48 = 0;
                     }
-                    obj->pos = *func_8004eee0(o, &tmp);
+                    obj->pos = *actor_resolve_group_position(o, &tmp);
                     obj->pos.vy -= o->unk1e >> 1;
                     k = obj->arg.b.unk49;
                     if (k >= 17) {
@@ -1853,12 +1858,12 @@ void func_800568bc(void)
 
                     for (i = 23; i != -1; i--) {
                         if (!(i & 7)) {
-                            func_800532d4(obj, 0x27);
+                            effect_play_spatial_sound(obj, 0x27);
                         }
                         v.vx = rand() * 600 / 32767 - 300;
                         v.vy = rand() * -300 / 32767;
                         v.vz = rand() * 600 / 32767 - 300;
-                        func_80053c84(10, 0, 0x6f, &obj->pos, &v, 1500, -128, 9, 0x30, 0, 1, 0);
+                        effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 1500, -128, 9, 0x30, 0, 1, 0);
                     }
                 release16:
                     o = &DAT_80185da8.objects[obj->arg.b.unk4a];
@@ -1882,7 +1887,7 @@ void func_800568bc(void)
                     Object4c *made;
 
                     for (i = 0; i < 8; i++) {
-                        made = func_80053c84(10, 0, 0x67, &obj->pos, &obj->vel, &obj->angle, i);
+                        made = effect_construct_record(10, 0, 0x67, &obj->pos, &obj->vel, &obj->angle, i);
                         if (i == 0) {
                             made->unk3 = 0x10;
                         }
@@ -1900,12 +1905,12 @@ void func_800568bc(void)
                     obj->arg.b.unk49 = 24;
                     break;
                 }
-                if (func_80055db0(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
+                if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
                     if (DAT_801d4464.unk12024 != 0x10) {
                         goto fail5;
                     }
-                    func_800536f8(0x10010, 5000, NULL);
+                    effect_apply_current_magic(0x10010, 5000, NULL);
                     obj->arg.b.unk4a = DAT_801d4464.unk12028;
                     o = &DAT_80185da8.objects[obj->arg.b.unk4a];
                     if (o->unke != 2 && o->unke != 3) {
@@ -1919,7 +1924,7 @@ void func_800568bc(void)
                     obj->angle.vx = 0;
                     obj->angle.pad = -vector_xz_to_angle(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
                     for (i = 0; i < 8; i++) {
-                        func_80053c84(10, 0, 0x6c, &o->pos, NULL, i << 9);
+                        effect_construct_record(10, 0, 0x6c, &o->pos, NULL, i << 9);
                     }
                     goto case5_2;
                 } else {
@@ -1949,12 +1954,12 @@ void func_800568bc(void)
                     v.vx = rand() * 100 / 32767 - 50;
                     v.vy = -(rand() * 160 / 32767) - 200;
                     v.vz = rand() * 100 / 32767 - 50;
-                    func_80053c84(10, 0, 0x6f, &o->pos, &v, 0x1000, 0x200, 6, 0x1c, 2, 1, 2);
+                    effect_construct_record(10, 0, 0x6f, &o->pos, &v, 0x1000, 0x200, 6, 0x1c, 2, 1, 2);
                     n = o->unk1c;
                     if (++obj->arg.b.unk48 >= 24) {
                         obj->arg.b.unk48 = 0;
                     }
-                    obj->pos = *func_8004eee0(o, &tmp);
+                    obj->pos = *actor_resolve_group_position(o, &tmp);
                     obj->pos.vy -= o->unk1e >> 1;
                     k = obj->arg.b.unk49;
                     if (k >= 17) {
@@ -1995,7 +2000,7 @@ void func_800568bc(void)
                         v.vx = rand() * 200 / 32767 - 100;
                         v.vy = -(rand() * 200 / 32767) - 200;
                         v.vz = rand() * 200 / 32767 - 100;
-                        func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 5, 0x1c, 10, 1, 1);
+                        effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 5, 0x1c, 10, 1, 1);
                     }
                 release5:
                     o = &DAT_80185da8.objects[obj->arg.b.unk4a];
@@ -2040,7 +2045,7 @@ void func_800568bc(void)
                 v.vx = (rand() * 100 >> 15) - 50;
                 v.vz = (rand() * 100 >> 15) - 50;
                 v.vy = -120;
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, 0x1000, -256, 4, 0x16, 0, 2, 5);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, -256, 4, 0x16, 0, 2, 5);
             }
             if (phase == 0 && link->unk7 >= 3) {
                 obj->unk7 = 1;
@@ -2083,7 +2088,7 @@ void func_800568bc(void)
             p.vx = obj->vel.vx + obj->pos.vx;
             p.vy = obj->vel.vy + obj->pos.vy;
             p.vz = obj->vel.vz + obj->pos.vz;
-            func_80053850(&p, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
+            effect_apply_radial_magic_damage(&p, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
             break;
     case 112:
         obj->unk7++;
@@ -2134,7 +2139,7 @@ void func_800568bc(void)
             v.vz = 0;
             v.vx = 0;
             v.vy = 0;
-            made = func_80053c84(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 2);
+            made = effect_construct_record(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 2);
             made->unka = 1;
             made->unk8 = 14;
             light_interpolate_color_and_fog(160, 180, 220, 0, 18000, rsin(obj->unk10 << 7));
@@ -2159,15 +2164,15 @@ void func_800568bc(void)
                 p.vx = (rand() >> 5) - 512;
                 p.vy = (rand() >> 8) + 200;
                 p.vz = 0x400;
-                made = func_80053c84(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 1);
+                made = effect_construct_record(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 1);
                 made->unka = 1;
                 made->unk8 = 14;
             }
             light_interpolate_color_and_fog(240, 240, 160, 0, 18000, rsin(obj->unk10 << 7));
             break;
     case 8:
-        func_800532d4(obj, 0x23);
-        func_80056134(0x4000, 480, 80, 0xc00, 0x8000);
+        effect_play_spatial_sound(obj, 0x23);
+        effect_scale_step(0x4000, 480, 80, 0xc00, 0x8000);
         break;
     case 95:
         {
@@ -2191,8 +2196,8 @@ void func_800568bc(void)
             v.vx = 0;
             v.vy = -32;
             v.vz = 0;
-            func_800537e8(hit);
-            func_80053c84(10, obj->unk0, 0x5a, &p, &v, 1600, 100, 0x800);
+            effect_apply_current_magic_backstep(hit);
+            effect_construct_record(10, obj->unk0, 0x5a, &p, &v, 1600, 100, 0x800);
             for (i = 3; i != -1; i--) {
                 v.vx = 0;
                 v.vy = -360;
@@ -2200,7 +2205,7 @@ void func_800568bc(void)
                 p = obj->pos;
                 p.vx += (rand() * 1000 >> 15) - 500;
                 p.vz += (rand() * 1000 >> 15) - 500;
-                func_80053c84(10, 0, 0x6f, &p, &v, 0x4000, -128, 5, 0x1d, 0, 1, 2);
+                effect_construct_record(10, 0, 0x6f, &p, &v, 0x4000, -128, 5, 0x1d, 0, 1, 2);
             }
             obj->unk0 = OBJECT4C_FREE;
             break;
@@ -2210,7 +2215,7 @@ void func_800568bc(void)
                 v.vx = (v.vx >> 3) * (i + 1);
                 v.vy = (v.vy >> 3) * (i + 1);
                 v.vz = (v.vz >> 3) * (i + 1);
-                func_80053c84(10, 0, 0x6f, &obj->pos, &v, i * 350 + 1200, -128, 5, 0x1c, 0, 1, 2);
+                effect_construct_record(10, 0, 0x6f, &obj->pos, &v, i * 350 + 1200, -128, 5, 0x1c, 0, 1, 2);
             }
             break;
     default:

@@ -2,7 +2,7 @@
  * GAME.EXE: the DAT_801ba984 block arena's 32 saved pointers (WIP module):
  * pointers to and from arena offsets, moving the blocks' owner pointers by
  * a delta, and saving and restoring an area's object states in its block
- * (func_8005efd4/func_8005f444). The .rdata is their two jump tables.
+ * (event_world_state_save_slot/event_world_state_restore_slot). The .rdata is their two jump tables.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -20,7 +20,7 @@ RODATA(0x80013298, 0x3e8)
 
 /* out[i] = the arena address of saved offset i, NULL for 0xffff. */
 ADDRESS(0x8005ee58, 0x50)
-void func_8005ee58(u8 **out)
+void event_saved_offsets_decode(u8 **out)
 {
     u16 *off;
     u16 o;
@@ -40,7 +40,7 @@ void func_8005ee58(u8 **out)
 
 /* Adds delta to the owner pointer of every used block. */
 ADDRESS(0x8005eea8, 0x70)
-void func_8005eea8(s32 delta)
+void event_arena_owner_pointers_add_delta(s32 delta)
 {
     HeapBlock *block;
     s32 state;
@@ -57,7 +57,7 @@ void func_8005eea8(s32 delta)
 
 /* Saves in[i] as an arena offset, 0xffff for NULL. */
 ADDRESS(0x8005ef18, 0x4c)
-void func_8005ef18(u8 **in)
+void event_saved_offsets_encode(u8 **in)
 {
     u16 *off;
     u8 *p;
@@ -77,7 +77,7 @@ void func_8005ef18(u8 **in)
 
 /* Subtracts delta from the owner pointer of every used block. */
 ADDRESS(0x8005ef64, 0x70)
-void func_8005ef64(s32 delta)
+void event_arena_owner_pointers_subtract_delta(s32 delta)
 {
     HeapBlock *block;
     s32 state;
@@ -97,7 +97,7 @@ void func_8005ef64(s32 delta)
  * script positions and each Object44 record by its Object44Def type.
  */
 ADDRESS(0x8005efd4, 0x470)
-void func_8005efd4(s32 area)
+void event_world_state_save_slot(s32 area)
 {
     u8 *ptrs[32];
     u8 buf[0xc00];
@@ -242,8 +242,8 @@ void func_8005efd4(s32 area)
         }
         rec++;
     }
-    func_8005ee58(ptrs);
-    func_8005eea8((s32)ptrs);
+    event_saved_offsets_decode(ptrs);
+    event_arena_owner_pointers_add_delta((s32)ptrs);
     block = ptrs[area];
     if (block != NULL) {
         memory_block_release(block);
@@ -252,14 +252,14 @@ void func_8005efd4(s32 area)
     block = memory_arena_allocate_block((HeapBlock *)DAT_801ba984.unk104, size, &ptrs[area]);
     if (block != NULL) {
         resource_copy_words((u32 *)block, (u32 *)buf, size >> 2);
-        func_8005ef18(ptrs);
-        func_8005ef64((s32)ptrs);
+        event_saved_offsets_encode(ptrs);
+        event_arena_owner_pointers_subtract_delta((s32)ptrs);
     }
 }
 
-/* Restores area's state from its saved block (func_8005efd4's format). */
+/* Restores area's state from its saved block (event_world_state_save_slot's format). */
 ADDRESS(0x8005f444, 0x378)
-void func_8005f444(s32 area)
+void event_world_state_restore_slot(s32 area)
 {
     u8 *ptrs[32];
     Object44 *rec;
@@ -270,7 +270,7 @@ void func_8005f444(s32 area)
     s32 z;
     s16 y;
 
-    func_8005ee58(ptrs);
+    event_saved_offsets_decode(ptrs);
     p = ptrs[area];
     if (p == NULL) {
         return;

@@ -26,7 +26,7 @@
 
 /* Non-zero when either count of id is. */
 ADDRESS(0x8005d7bc, 0x3c)
-s32 func_8005d7bc(s32 id)
+s32 game_counter_is_nonzero(s32 id)
 {
     if (DAT_800c85e8[0][id] == 0) {
         return DAT_800c85e8[1][id] != 0;
@@ -36,7 +36,7 @@ s32 func_8005d7bc(s32 id)
 
 /* Takes one of id (first count first); 1 when there is none. */
 ADDRESS(0x8005d7f8, 0xa0)
-s32 func_8005d7f8(s32 id)
+s32 game_counter_decrement(s32 id)
 {
     if (DAT_800c85e8[0][id] != 0) {
         DAT_800c85e8[0][id]--;
@@ -51,7 +51,7 @@ s32 func_8005d7f8(s32 id)
 
 /* Adds one of id (each count holds 99); 1 and message 11 when both are full. */
 ADDRESS(0x8005d898, 0xb0)
-s32 func_8005d898(s32 id)
+s32 game_counter_increment(s32 id)
 {
     if (DAT_800c85e8[0][id] < 99) {
         DAT_800c85e8[0][id]++;
@@ -67,7 +67,7 @@ s32 func_8005d898(s32 id)
 
 /* Fades the screen tint from (r0, g0, b0) to (r1, g1, b1), step per frame out of 4096. */
 ADDRESS(0x8005d948, 0x14c)
-void func_8005d948(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, s32 b1)
+void color_overlay_transition(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, s32 b1)
 {
     s32 t;
     s32 r;
@@ -131,7 +131,7 @@ void func_8005da94(void)
  * the callee narrows them again).
  */
 ADDRESS(0x8005db30, 0x7a0)
-void func_8005db30(Object44 *obj, ...)
+void event_map_object_interact(Object44 *obj, ...)
 {
     va_list args;
     SVECTOR angle_to;
@@ -219,7 +219,8 @@ void func_8005db30(Object44 *obj, ...)
     held = def->arg.sh.unk10;
     angle_from = obj->angle;
     from = obj->pos;
-    func_8005be28(0, 500, 1500, pitch, DAT_801b24e4.unk124.vy, def->arg.sh.unkc, def->arg.sh.unke, &to);
+    scene_position_from_camera_offset(0, 500, 1500, pitch, DAT_801b24e4.unk124.vy, def->arg.sh.unkc,
+                                      def->arg.sh.unke, &to);
     angle_to.vz = 0;
     angle_to.vx = 0;
     angle_to.vy = (DAT_801b24e4.unk124.vy + 2048) & 0xfff;
@@ -237,7 +238,7 @@ void func_8005db30(Object44 *obj, ...)
             goto pressed;
         }
         prev = pad;
-        func_8005bee0(obj, &from, &to, &angle_from, &angle_to, t);
+        scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
         obj->unke = value_approach(spin, held, t >> 4);
         DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         cd_request_service_vab();
@@ -258,7 +259,7 @@ void func_8005db30(Object44 *obj, ...)
     }
 pressed:
     if ((pad & DAT_80081868[7]) || id != -1) {
-        if (func_8005d898(obj->unk6) == 0) {
+        if (game_counter_increment(obj->unk6) == 0) {
             switch (obj->unk6) {
             case 0x93:
                 n = (rand() * 6 >> 15) + 4;
@@ -273,7 +274,7 @@ pressed:
                 break;
             }
             pad = 1;
-            func_8005be28(-500, 500, 0, pitch, DAT_801b24e4.unk124.vy, 0, 0, &from);
+            scene_position_from_camera_offset(-500, 500, 0, pitch, DAT_801b24e4.unk124.vy, 0, 0, &from);
             angle_from = obj->angle;
             spin = 0;
             goto back;
@@ -298,7 +299,7 @@ back:
     pitch = DAT_801b24e4.unk124.vx;
     to = obj->pos;
     for (t = 4096; t >= 0; t -= 512) {
-        func_8005bee0(obj, &from, &to, &angle_from, &angle_to, t);
+        scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
         DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         obj->unke = value_approach(spin, held, t >> 4);
         render_game_frame(NULL, &DAT_801b24e4.unk124);
@@ -311,14 +312,14 @@ back:
 
 /*
  * The action button at pos facing angle: the Object88 within reach in front
- * gets func_8005c308, then each Object44 record map_object_find_interaction_target finds in front
+ * gets event_target_stream_execute, then each Object44 record map_object_find_interaction_target finds in front
  * acts by the type of its def (doors and locks show why they stay shut or
  * open, items are picked up, the healing and save points fade the screen),
  * and the loaded FDAT module's handler 0 gets the point last. The full
  * restore (type 0x12) clamps both values like the heal (type 0x16) does.
  */
 ADDRESS(0x8005e2d0, 0x794)
-void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
+void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
 {
     VECTOR p;
     Object88 *o88;
@@ -331,12 +332,12 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
     p.vy = pos->vy + 500;
     p.vz = pos->vz;
     DAT_801ba984.unk0 = 0;
-    i = func_8004d644(p.vx, p.vy, p.vz, 1400, 3200);
+    i = actor_find_overlap_excluding_target_type3(p.vx, p.vy, p.vz, 1400, 3200);
     if (i != -1) {
         o88 = &DAT_80185da8.objects[i];
         if (angle_within_tolerance(angle->vy, vector_xz_to_angle(o88->pos.vx - p.vx, o88->pos.vz - p.vz),
                                    300)) {
-            func_8005c308(o88);
+            event_target_stream_execute(o88);
         }
     }
     for (i = 0; (i = map_object_find_interaction_target(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
@@ -353,7 +354,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             }
             break;
         case 0x40:
-            func_8005db30(obj);
+            event_map_object_interact(obj);
             if (obj->unk6 == 0xff) {
                 goto done;
             }
@@ -490,7 +491,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (!angle_within_tolerance(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
                 break;
             }
-            func_8005d948(512, 0, 0, 0, 128, 200, 255);
+            color_overlay_transition(512, 0, 0, 0, 128, 200, 255);
             DAT_801b24e4.hp = DAT_801b24e4.hp_max;
             if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
                 DAT_801b24e4.hp = DAT_801b24e4.hp_max;
@@ -500,7 +501,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                 DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
             }
             player_cap_status_components(7);
-            func_8005d948(512, 128, 200, 255, 0, 0, 0);
+            color_overlay_transition(512, 128, 200, 255, 0, 0, 0);
             player_clear_motion();
             break;
         case 0x16:
@@ -511,12 +512,12 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (!angle_within_tolerance(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
                 break;
             }
-            func_8005d948(512, 0, 0, 0, 128, 128, 200);
+            color_overlay_transition(512, 0, 0, 0, 128, 128, 200);
             DAT_801b24e4.hp = DAT_801b24e4.hp_max;
             if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
                 DAT_801b24e4.hp = DAT_801b24e4.hp_max;
             }
-            func_8005d948(512, 128, 128, 200, 0, 0, 0);
+            color_overlay_transition(512, 128, 128, 200, 0, 0, 0);
             player_clear_motion();
             break;
         case 0xe:
@@ -524,7 +525,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                 cd_request_wait_idle();
                 map_reveal_visited_rects();
                 repeat_store_word((u32 *)DAT_801b594c, 0, 200);
-                func_8005efd4(DAT_8018fad4.area[0]);
+                event_world_state_save_slot(DAT_8018fad4.area[0]);
                 player_render_frame_and_release_pool();
                 menu_card_save_browser();
             }

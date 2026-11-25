@@ -94,7 +94,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
@@ -139,11 +139,11 @@ void func_801e8680(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x7f || DAT_801ba984.unke[0] != 0) {
         return;
     }
-    i = func_8004d644(pos->vx, pos->vy, pos->vz, 0x578, 0x6a4);
+    i = actor_find_overlap_excluding_target_type3(pos->vx, pos->vy, pos->vz, 0x578, 0x6a4);
     if (i != -1 && i == 20) {
-        func_8005d7f8(0x7f);
+        game_counter_decrement(0x7f);
         DAT_801ba984.unke[0] = 1;
-        func_8005c308(&DAT_80185da8.objects[20]);
+        event_target_stream_execute(&DAT_80185da8.objects[20]);
         k = 71;
         if (DAT_8018fb3c.objects[k].arg.b.unk38 == 0xc8) {
             DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
@@ -253,10 +253,10 @@ void func_801e88e8(Object88 *record, s32 event)
         }
         break;
     case 1:
-        func_8005db30(NULL, 0x74);
+        event_map_object_interact(NULL, 0x74);
         break;
     case 2:
-        func_8005db30(NULL, 0x72);
+        event_map_object_interact(NULL, 0x72);
         break;
     }
 }

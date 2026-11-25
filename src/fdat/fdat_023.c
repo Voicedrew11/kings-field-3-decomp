@@ -88,8 +88,8 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
             obj->arg.b.unk38 = item;
             obj->unk8 = 0;
             DAT_801ba984.unk0 = 1;
-            func_8005d7f8(0x85);
-            func_8005c7e8(obj, 0x85);
+            game_counter_decrement(0x85);
+            event_spawn_effect_object(obj, 0x85);
         } else if (map_object_check_and_consume_marker(obj, 0x85) == 3) {
             notify_enqueue(7);
             DAT_801ba984.unk0 = 1;

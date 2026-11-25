@@ -125,7 +125,7 @@ void player_update_frame(void)
         break;
     case 8:
         movie = &DAT_801e7edc.movies[DAT_801b24e4.unk188.turn.id];
-        func_80061940();
+        movie_update_state();
         if (movie->unk22 == 0x82) {
             render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
             cd_request_wait_idle();
@@ -310,9 +310,9 @@ void player_update_frame(void)
                     o4c++;
                 }
                 part = 0xff;
-                if (func_8005d7bc(0x6b)) {
-                    func_8004b794();
-                    func_8005d7f8(0x6b);
+                if (game_counter_is_nonzero(0x6b)) {
+                    actor_disable_type3_transition_actors();
+                    game_counter_decrement(0x6b);
                     DAT_801b24e4.unk12c.vy = 0x2d5;
                     DAT_801b24e4.pos.vy = -14976;
                     DAT_801b24e4.pos.vz = 0xc000;
@@ -322,16 +322,16 @@ void player_update_frame(void)
                     DAT_801b24e4.unk160 = 5;
                     map_reveal_visited_rects();
                     repeat_store_word((u32 *)DAT_801b594c, 0, 200);
-                    func_8005efd4(DAT_8018fad4.area[0]);
+                    event_world_state_save_slot(DAT_8018fad4.area[0]);
                     player_reset_status();
                     player_recalculate_combat_stats();
                 } else {
                     player_initialize_state();
                     player_recalculate_combat_stats();
-                    func_80061918();
-                    func_8005ea64();
+                    movie_state_reset();
+                    event_state_initialize();
                     DAT_801ba984.unkd = 1;
-                    func_80060800();
+                    conversation_records_initialize();
                     repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                 }
                 player_reload_map_resources(0, 0, 0, 0, 0, part);
@@ -380,7 +380,8 @@ void player_update_frame(void)
     DAT_801b24e4.unk124.vz = DAT_801b24e4.unk12c.vz + DAT_801b24e4.unk138 + DAT_801b24e4.unk140 + DAT_801b24e4.unk148;
     map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
     DAT_80185da8.unk9d00 = 0;
-    hit = func_8004d644(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, 1, 0x6a4);
+    hit = actor_find_overlap_excluding_target_type3(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy,
+                                                    DAT_801b24e4.pos.vz, 1, 0x6a4);
     if (hit != -1 && (DAT_80185da8.objects[hit].unk28 & 8)) {
         player_begin_actor_overlap_bob();
     }

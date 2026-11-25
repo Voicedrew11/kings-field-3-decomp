@@ -1390,11 +1390,11 @@ void menu_conversation_records_controller(void)
     s32 j;
     u32 pad;
 
-    count = func_80060b0c();
+    count = conversation_records_count_characters();
     i = count;
     j = 0;
     while (--i != -1) {
-        books[j] = func_80060c54(j);
+        books[j] = conversation_records_nth_character(j);
         j++;
     }
     if (count == 0) {
@@ -1475,7 +1475,7 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
     memory_free((void *)buffer);
     n = 0;
     for (i = 0; i < 256; i++) {
-        page = func_80060a10(book, i);
+        page = conversation_record_page_entry(book, i);
         if (page != 0xffff && page != 0xfffe && page != 0xfffd) {
             *out++ = i;
             n++;
@@ -1496,7 +1496,7 @@ void menu_conversation_load_page(s32 book, s32 page)
 
     setRECT(&rect, 0x3c0, 0x100, 0x40, 0xc8);
     ClearImage(&rect, 0, 0, 0);
-    entry = func_80060a10(book, page);
+    entry = conversation_record_page_entry(book, page);
     if (entry <= 0xf000) {
         buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
         cd_archive_read(8, entry, buffer);

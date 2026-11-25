@@ -34,7 +34,7 @@ void fdat_801e87a0(void)
         obj->unk72.vy = 0;
         obj->unk18 = 0;
         obj->unk13 = 7;
-        func_8004c130(script[1]);
+        actor_set_animation(script[1]);
     }
     dx = DAT_801b24e4.pos.vx - obj->pos.vx;
     dz = DAT_801b24e4.pos.vz - obj->pos.vz;
@@ -44,10 +44,10 @@ void fdat_801e87a0(void)
     obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
     mode = 5;
     if (obj->unk72.vy == 0) {
-        turned = func_8004ea7c(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7], def->unk1[2],
-                               def->unk1[3], mode);
+        turned = actor_turn_and_move_along_heading(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7],
+                                                   def->unk1[2], def->unk1[3], mode);
     } else {
-        turned = func_8004e824(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], mode);
+        turned = actor_move_along_heading(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], mode);
     }
     if (turned != 0) {
         obj->unk72.vy = obj->unk72.vy == 0;
@@ -57,7 +57,7 @@ void fdat_801e87a0(void)
     switch (obj->unk70) {
     case 0:
         obj->unk16 = obj->unk16 < 4095 ? obj->unk16 + FDAT_801E87A0_STEP : 0xfff;
-        func_8004db3c(obj, ((u16 *)script)[4]);
+        actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         if (dist > 0x19000000) {
             obj->unk70 = 1;
             obj->unk18 = 0;
@@ -68,7 +68,7 @@ void fdat_801e87a0(void)
         }
         break;
     case 1:
-        func_8004db3c(obj, ((u16 *)script)[4]);
+        actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         obj->pos.vx += step_x;
         obj->pos.vz += step_z;
         obj->unk16 += (rand() >> 6) - 256;
@@ -82,17 +82,17 @@ void fdat_801e87a0(void)
         }
         break;
     case 2:
-        func_8004db3c(obj, ((u16 *)script)[4]);
+        actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         obj->unk16 -= FDAT_801E87A0_STEP;
         if (obj->unk18 >= 4095 && obj->unk16 <= 1024) {
             obj->unk14 = 0x37;
             obj->unk13 = 0;
             obj->unk16 = 0x800;
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     default:
         return;
     }
-    func_8004e6f8(def->unk1[2], 10);
+    actor_damp_horizontal_motion(def->unk1[2], 10);
 }

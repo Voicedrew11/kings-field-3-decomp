@@ -141,7 +141,7 @@ void func_801e853c(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
@@ -225,7 +225,7 @@ void func_801e88fc(void)
 ADDRESS(0x801e8904, 0x30)
 void func_801e8904(void)
 {
-    if (func_8005d7bc(0x83) > 0) {
+    if (game_counter_is_nonzero(0x83) > 0) {
         DAT_801ba984.unke[0x1a] = 1;
     }
 }
@@ -239,18 +239,18 @@ void func_801e8934(Object88 *record, s32 event)
         DAT_801ba984.unke[0x18] = 1;
         break;
     case 1:
-        func_8005db30(NULL, 0x80);
+        event_map_object_interact(NULL, 0x80);
         break;
     case 2:
         DAT_801ba984.unke[0x17] = 1;
         break;
     case 3:
-        func_8005db30(NULL, 0x83);
+        event_map_object_interact(NULL, 0x83);
         DAT_801ba984.unke[0x1a] = 1;
         break;
     case 4:
-        func_8005d948(0x200, 0, 0, 0, 0x80, 0xc8, 0x80);
-        func_8005d948(0x200, 0x80, 0xc8, 0x80, 0, 0, 0);
+        color_overlay_transition(0x200, 0, 0, 0, 0x80, 0xc8, 0x80);
+        color_overlay_transition(0x200, 0x80, 0xc8, 0x80, 0, 0, 0);
         set_accumulated_color_overlay(0, 0, 0, 0, 1);
         DAT_801ba984.unk2b = 1;
         DAT_801b77ec.unk0[56].unk0 = 1;
@@ -261,7 +261,7 @@ void func_801e8934(Object88 *record, s32 event)
         DAT_801b77ec.unk0[76].unk0 = 1;
         break;
     case 5:
-        func_8005db30(NULL, 10);
+        event_map_object_interact(NULL, 10);
         break;
     }
 }

@@ -77,7 +77,7 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (obj->arg.b.unk3d[0] >= 151) {
         return;
     }
-    if (func_8005d7bc(obj->arg.b.unk3d[0]) == 0) {
+    if (game_counter_is_nonzero(obj->arg.b.unk3d[0]) == 0) {
         return;
     }
     if (obj->unka == 0 || obj->unka >= 4095) {
@@ -156,20 +156,20 @@ void func_801e8774(Object88 *record, s32 event)
                 obj->unk4 = 0xff;
             }
         }
-        if (func_8005d7bc(0x66) != 0) {
-            func_8005d7f8(0x66);
+        if (game_counter_is_nonzero(0x66) != 0) {
+            game_counter_decrement(0x66);
         }
-        func_8005db30(NULL, 0x82);
+        event_map_object_interact(NULL, 0x82);
         DAT_801ba984.unke[0x14] = 1;
         break;
     case 1:
         if (DAT_801ba984.unke[0x13] == 0) {
-            func_8005db30(NULL, 0x60);
+            event_map_object_interact(NULL, 0x60);
             DAT_801ba984.unke[0x13] = 1;
         }
         break;
     case 2:
-        func_8005db30(NULL, 0x66);
+        event_map_object_interact(NULL, 0x66);
         break;
     }
 }

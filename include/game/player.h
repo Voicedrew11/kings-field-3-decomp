@@ -96,7 +96,7 @@ void player_apply_equipment_mp_tick(struct Record20 *r);
 void player_update_status_visuals(void);
 
 /* Callees outside the module (no definition reconstructed yet). */
-void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id);
-void func_8005e2d0(VECTOR *pos, SVECTOR *angle);
+void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id);
+void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle);
 
 #endif

@@ -137,7 +137,7 @@ void func_801e86c0(Object88 *obj, s32 event)
 
     switch (event) {
     case 0:
-        if (func_8005d7bc(0x7c) > 0) {
+        if (game_counter_is_nonzero(0x7c) > 0) {
             DAT_801ba984.unk76[5] = 1;
         } else {
             DAT_801ba984.unk76[5] = 0;
@@ -157,7 +157,7 @@ void func_801e86c0(Object88 *obj, s32 event)
         }
         break;
     case 2:
-        func_8005db30(NULL, DAT_801ba984.unk76[0]);
+        event_map_object_interact(NULL, DAT_801ba984.unk76[0]);
         break;
     }
 }

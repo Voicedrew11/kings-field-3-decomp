@@ -18,12 +18,12 @@
  * Hits every active record within reach of pos (mode: 0x8000 sphere, 0x8001
  * sphere above its base, 0x8002 sphere outside the cone either side of the
  * yaw kept in pos->pad, otherwise vector_distance_to_point's own mode) with
- * func_8004c668, its strength falling off to falloff at the edge.
+ * actor_apply_magic_to_actor, its strength falling off to falloff at the edge.
  */
 ADDRESS(0x8004ceac, 0x3a8)
-void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
-                   u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
-                   Record18 *rec)
+void actor_apply_area_magic(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
+                            u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
+                            Record18 *rec)
 {
     Object88 *obj;
     VECTOR *target;
@@ -75,13 +75,13 @@ void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 
         } else {
             scale = flags;
         }
-        func_8004c668(i, a5, a6, a7, a8, a9, a10, a11, a12, a13, scale, a15, rec, target);
+        actor_apply_magic_to_actor(i, a5, a6, a7, a8, a9, a10, a11, a12, a13, scale, a15, rec, target);
     }
 }
 
 /* Fires (player_apply_damage) at the player when the player is within reach and the cone. */
 ADDRESS(0x8004d254, 0x170)
-s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
+s32 actor_try_damage_player_in_cone(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
 {
     s32 offset = height << 5;
     Object88 *obj = DAT_80185da8.current;
@@ -114,8 +114,8 @@ s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16
 
 /* The active record best inside the cone from pos (yaw, pitch); its distance in *dist. */
 ADDRESS(0x8004d3c4, 0x280)
-Object88 *func_8004d3c4(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
-                        s32 *dist, s32 jitter)
+Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
+                                  s32 *dist, s32 jitter)
 {
     Object88 *obj;
     Object88 *best;
@@ -177,7 +177,7 @@ Object88 *func_8004d3c4(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw,
 
 /* The first active record (not current) whose reach holds the point; -1 for none. */
 ADDRESS(0x8004d644, 0x1f4)
-s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
+s32 actor_find_overlap_excluding_target_type3(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
     Object88 *obj;
     Object78 *def;
@@ -210,7 +210,7 @@ s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             }
         } else if (obj->unk28 & 0x400000) {
             def = &DAT_80185da8.defs[obj->unk2];
-            func_8004ede0(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
+            actor_sample_rotated_animation_vertex(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
@@ -225,9 +225,9 @@ s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
     return -1;
 }
 
-/* As func_8004d644, for every active record that is not of kind 0x6e. */
+/* As actor_find_overlap_excluding_target_type3, for every active record that is not of kind 0x6e. */
 ADDRESS(0x8004d838, 0x1f4)
-s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
+s32 actor_find_overlap(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
     Object88 *obj;
     Object78 *def;
@@ -260,7 +260,7 @@ s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             }
         } else if (obj->unk28 & 0x400000) {
             def = &DAT_80185da8.defs[obj->unk2];
-            func_8004ede0(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
+            actor_sample_rotated_animation_vertex(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
@@ -277,7 +277,7 @@ s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 
 /* Makes obj the current record (0 clears the pointers). */
 ADDRESS(0x8004da2c, 0xdc)
-void func_8004da2c(Object88 *obj)
+void actor_bind_current(Object88 *obj)
 {
     if (obj != NULL) {
         DAT_80185da8.current = obj;
@@ -298,7 +298,7 @@ void func_8004da2c(Object88 *obj)
 
 /* Steps the animation time, wrapping. */
 ADDRESS(0x8004db08, 0x34)
-void func_8004db08(Object88 *obj, s16 step)
+void actor_advance_animation_wrapped(Object88 *obj, s16 step)
 {
     if (step < 0) {
         obj->unk66 = -step;
@@ -310,7 +310,7 @@ void func_8004db08(Object88 *obj, s16 step)
 
 /* Steps the animation time, holding at either end. */
 ADDRESS(0x8004db3c, 0x5c)
-void func_8004db3c(Object88 *obj, s16 step)
+void actor_advance_animation_clamped(Object88 *obj, s16 step)
 {
     s16 time;
 
@@ -329,7 +329,7 @@ void func_8004db3c(Object88 *obj, s16 step)
 
 /* Whether the last time step passed time. */
 ADDRESS(0x8004db98, 0x30)
-s32 func_8004db98(Object88 *obj, u16 time)
+s32 actor_animation_crossed_phase(Object88 *obj, u16 time)
 {
     s32 passed;
 
@@ -342,7 +342,7 @@ s32 func_8004db98(Object88 *obj, u16 time)
  * write the final step back, 4 and 5 more wall rules). Returns the hit bits.
  */
 ADDRESS(0x8004dbc8, 0x4cc)
-s32 func_8004dbc8(SVECTOR *vel, s32 mode)
+s32 actor_move_horizontal_with_collision(SVECTOR *vel, s32 mode)
 {
     Object88 *obj = DAT_80185da8.current;
     s32 dx;

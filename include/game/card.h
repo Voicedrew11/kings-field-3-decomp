@@ -17,8 +17,8 @@
 #define CARD_DATA_SIZE 0x5c00
 
 /*
- * The game state at CARD_DATA (WIP field names): func_8005f7bc fills it
- * from the globals each comment names and func_8005ffd0 copies it back.
+ * The game state at CARD_DATA (WIP field names): card_payload_capture_game_state fills it
+ * from the globals each comment names and card_payload_restore_game_state copies it back.
  */
 typedef struct SaveData {
     u8 area[5];             /* +0x0000: DAT_8018fad4.area */

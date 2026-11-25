@@ -125,7 +125,7 @@ void resource_run_initial_transition(void)
         resource_advance_transition();
     } while (DAT_8018fad4.loading != 0);
     tmd_set_slot(0, DAT_8014f164);
-    func_80061918();
+    movie_state_reset();
     DAT_8018fad4.handlers[5]();
 }
 
@@ -265,7 +265,7 @@ start:
     if (DAT_8018fad4.area[0] != AREA_RELOAD && DAT_8018fad4.area[0] != want0) {
         map_reveal_visited_rects();
         repeat_store_word((u32 *)DAT_801b594c, 0, 200);
-        func_8005efd4(DAT_8018fad4.area[0]);
+        event_world_state_save_slot(DAT_8018fad4.area[0]);
     }
     if (DAT_801ba984.unk4[0] < want0) {
         DAT_801ba984.unk4[0] = want0;
@@ -464,9 +464,9 @@ void resource_advance_transition(void)
                 map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
             }
             resource_copy_words((u32 *)DAT_80185da8.defs, part + 1, 0xcb0);
-            func_80053084();
+            actor_fixup_group_targets();
             part = (u32 *)((u8 *)part + (*part + 4));
-            func_800530f8((Object88Place *)(part + 1));
+            actor_load_records((Object88Place *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)&DAT_8018fb3c.defs[300], part + 1, 0xc0);
             part = (u32 *)((u8 *)part + (*part + 4));
@@ -475,7 +475,7 @@ void resource_advance_transition(void)
             map_placed_expand_sources((EffectSpawn *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)DAT_801ba6fc, part + 1, 0xa0);
-            func_8005f444(DAT_8018fad4.previous[0]);
+            event_world_state_restore_slot(DAT_8018fad4.previous[0]);
             repeat_store_word((u32 *)DAT_801b594c, 0, 200);
             if (DAT_8018fad4.area[0] != DAT_8018fad4.previous[0]
                 && DAT_8018fad4.area[0] != AREA_RELOAD) {
@@ -487,7 +487,7 @@ void resource_advance_transition(void)
                     }
                 }
             }
-            func_80061918();
+            movie_state_reset();
             DAT_8018fad4.handlers[5]();
             DAT_801b24e4.unke = 1;
             DAT_8018fad4.unk17 = 1;

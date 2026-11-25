@@ -2,7 +2,7 @@
  * GAME.EXE: the slot tables of DAT_801983a8 (WIP module): building the
  * Record06 records and their runs of slot bytes from the copied Record04
  * table, marking a slot used, and the searches and counts over the runs.
- * func_80060d20 (the in-game movie player) follows.
+ * movie_play_stream (the in-game movie player) follows.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -12,7 +12,7 @@
 
 /* Builds the Record06 records and an empty run of count slots for each, then marks slots 0-3 of id 0x20. */
 ADDRESS(0x80060800, 0xec)
-void func_80060800(void)
+void conversation_records_initialize(void)
 {
     Record04 *src;
     Record06 *dst;
@@ -39,15 +39,15 @@ void func_80060800(void)
         src++;
     }
     dst->id = 0xff;
-    func_800608ec(0x20, 0);
-    func_800608ec(0x20, 1);
-    func_800608ec(0x20, 2);
-    func_800608ec(0x20, 3);
+    conversation_record_mark_page(0x20, 0);
+    conversation_record_mark_page(0x20, 1);
+    conversation_record_mark_page(0x20, 2);
+    conversation_record_mark_page(0x20, 3);
 }
 
 /* Marks slot of id's run used (3) and frees (0) the 0xff slots before it. */
 ADDRESS(0x800608ec, 0x124)
-void func_800608ec(u8 id, u8 slot)
+void conversation_record_mark_page(u8 id, u8 slot)
 {
     Record06 *t;
     u8 *p;
@@ -95,12 +95,12 @@ void func_800608ec(u8 id, u8 slot)
 
 /* Index in the run of the n-th id's slot after slot (0xfffd/0xfffe/0xffff: none). */
 ADDRESS(0x80060a10, 0xfc)
-u16 func_80060a10(u8 n, u8 slot)
+u16 conversation_record_page_entry(u8 n, u8 slot)
 {
     Record06 *t;
     u8 *p;
 
-    t = &DAT_801983a8.unkc0[func_80060cd0(func_80060c54(n))];
+    t = &DAT_801983a8.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id == 0xff) {
         return 0xfffe;
     }
@@ -126,7 +126,7 @@ u16 func_80060a10(u8 n, u8 slot)
 
 /* Number of runs with a used slot. */
 ADDRESS(0x80060b0c, 0x9c)
-u8 func_80060b0c(void)
+u8 conversation_records_count_characters(void)
 {
     Record06 *t;
     u8 *p;
@@ -150,14 +150,14 @@ u8 func_80060b0c(void)
 
 /* Used slots in the n-th id's run. */
 ADDRESS(0x80060ba8, 0xac)
-u8 func_80060ba8(u8 n)
+u8 conversation_record_count_pages(u8 n)
 {
     Record06 *t;
     u8 *p;
     u8 count;
 
     count = 0;
-    t = &DAT_801983a8.unkc0[func_80060cd0(func_80060c54(n))];
+    t = &DAT_801983a8.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id != 0xff && t->offset != 0xffff) {
         p = DAT_801983a8.unk1e0 + t->offset;
         while (*p++ != 0xff) {
@@ -171,7 +171,7 @@ u8 func_80060ba8(u8 n)
 
 /* Id of the n-th record whose run is in use, 0xff for none. */
 ADDRESS(0x80060c54, 0x7c)
-u8 func_80060c54(u8 n)
+u8 conversation_records_nth_character(u8 n)
 {
     Record06 *t;
     u8 *p;
@@ -194,7 +194,7 @@ u8 func_80060c54(u8 n)
 
 /* Index of id's record, 0xff for none. */
 ADDRESS(0x80060cd0, 0x50)
-u8 func_80060cd0(u8 id)
+u8 conversation_records_find_character(u8 id)
 {
     Record06 *t;
     u8 i;

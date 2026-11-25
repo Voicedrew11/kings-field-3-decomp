@@ -94,15 +94,15 @@ void game_main_loop(void)
     loading_screen_show();
     audio_initialize_runtime();
     map_object_pool_reset();
-    func_8004b8fc();
-    func_8005bbf4();
+    actor_pool_clear();
+    effect_pool_reset();
     resource_initialize_game_assets();
-    func_80061918();
+    movie_state_reset();
     EnterCriticalSection();
     DecDCTReset(0);
     ExitCriticalSection();
-    func_8005ea64();
-    func_80060800();
+    event_state_initialize();
+    conversation_records_initialize();
     memory_card_initialize();
     light_reset_records();
     render_reset_color_overlays();
@@ -124,7 +124,7 @@ void game_main_loop(void)
     if (continued == 1) {
         DAT_801e7edc.unk384 = 3;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[3];
-        func_80061bc4();
+        movie_play();
         DAT_801e7edc.unk372 = -1;
         DAT_801e7edc.unk370 = 0;
         DAT_801e7edc.unk384 = 0xff;
@@ -143,12 +143,12 @@ void game_main_loop(void)
         render_reset_color_overlays();
         map_object_update_actions();
         player_update_frame();
-        func_80052e5c();
-        func_8005bc50();
+        actor_update_frame();
+        effect_pool_sweep();
         DAT_801b24e4.unke = 0;
-        func_8005eb20();
+        game_update_ending();
         resource_advance_transition();
-        func_80061940();
+        movie_update_state();
         player_get_camera_pose(&pos, &angle);
         audio_update_listener(&pos, &angle);
         light_refresh_record_rotations();

@@ -13,7 +13,7 @@
 
 /* (x, y + dy, z + dz) turned by (-pitch, yaw, 0), relative to the player's eye. */
 ADDRESS(0x8005be28, 0xb8)
-void func_8005be28(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, s32 dy, s32 dz, VECTOR *out)
+void scene_position_from_camera_offset(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, s32 dy, s32 dz, VECTOR *out)
 {
     SVECTOR v;
     SVECTOR rotation;
@@ -32,7 +32,7 @@ void func_8005be28(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, s32 dy, s32 dz, VECT
 
 /* Moves obj between two positions and two angles by t (either pair may be NULL). */
 ADDRESS(0x8005bee0, 0xe4)
-void func_8005bee0(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
+void scene_pose_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (from != NULL) {
         obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
@@ -47,7 +47,7 @@ void func_8005bee0(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVEC
 }
 
 ADDRESS(0x8005bfc4, 0x88)
-void func_8005bfc4(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
+void scene_position_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
 {
     if (from != NULL) {
         obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
@@ -57,7 +57,7 @@ void func_8005bfc4(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
 }
 
 ADDRESS(0x8005c04c, 0x88)
-void func_8005c04c(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t)
+void scene_angles_interpolate(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (afrom != NULL) {
         obj->angle.vx = angle_lerp_shortest_q12(afrom->vx, ato->vx, t);

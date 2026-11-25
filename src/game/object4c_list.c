@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object4c record list (WIP module, after func_800568bc): clearing
+ * GAME.EXE: Object4c record list (WIP module, after effect_update_dispatch): clearing
  * the records, loading the Record18 table and the per-frame update loop.
  */
 #include <kf/lib/address.h>
@@ -11,7 +11,7 @@
 
 /* Frees every record. */
 ADDRESS(0x8005bbf4, 0x30)
-void func_8005bbf4(void)
+void effect_pool_reset(void)
 {
     Object4c *obj;
     u16 i;
@@ -25,7 +25,7 @@ void func_8005bbf4(void)
 
 /* Copies the 96 Record18 records (0x900 bytes) from src. */
 ADDRESS(0x8005bc24, 0x2c)
-void func_8005bc24(u32 *src)
+void magic_load_records(u32 *src)
 {
     u32 *dst;
     s32 i;
@@ -37,9 +37,9 @@ void func_8005bc24(u32 *src)
     } while (--i != 0);
 }
 
-/* Counts down and updates (func_800568bc) every live record. */
+/* Counts down and updates (effect_update_dispatch) every live record. */
 ADDRESS(0x8005bc50, 0xe4)
-void func_8005bc50(void)
+void effect_pool_sweep(void)
 {
     Object4c *obj;
 
@@ -52,7 +52,7 @@ void func_8005bc50(void)
             if (--obj->unk10 == -1) {
                 obj->unk0 = OBJECT4C_FREE;
             } else {
-                func_800568bc();
+                effect_update_dispatch();
             }
         }
         obj++;

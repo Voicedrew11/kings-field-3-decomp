@@ -172,8 +172,8 @@ void func_801e86d8(u8 id)
             render_game_frame(&pos, &angle);
         }
         obj->unk6 = 0xff;
-        func_800608ec(0xb, 0);
-        func_800608ec(0xb, 1);
+        conversation_record_mark_page(0xb, 0);
+        conversation_record_mark_page(0xb, 1);
     }
     if (id == 4) {
         DAT_801ba984.unk32[0x15] = 1;

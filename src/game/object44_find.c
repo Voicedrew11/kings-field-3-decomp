@@ -1383,7 +1383,7 @@ void map_object_update_actions(void)
                         spark.pos.vz = obj->pos.vz - (rsin(obj->angle.vy - 1024) * -160 >> 12);
                         map_object_compute_aim_vector(obj, &DAT_801b24e4.pos, 400, &spark.pos, &spark.angle,
                                                       -1, 0x400, 1);
-                        func_80053c84(10, 0x83, 0x23, &spark.pos, &spark.angle, &obj->angle);
+                        effect_construct_record(10, 0x83, 0x23, &spark.pos, &spark.angle, &obj->angle);
                     }
                     obj->arg.sh.unk40 = angle_velocity_step(0xa00, obj->angle.vx, obj->arg.sh.unk40, 8, 4);
                     obj->angle.vx = (obj->angle.vx + obj->arg.sh.unk40) & 0xfff;
@@ -1727,9 +1727,10 @@ void map_object_update_actions(void)
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             obj->arg.b.unk40 = 1;
-                            func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
-                                          def->arg.b.unk12[1], def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
-                                          0, 0, 0, &p);
+                            effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
+                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
+                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
+                                                         0, &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -1757,10 +1758,10 @@ void map_object_update_actions(void)
                         if (hit != 0) {
                             if (obj->arg.b.unk40 == 0) {
                                 obj->arg.b.unk40 = 1;
-                                func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
-                                              def->arg.b.unk12[1], def->arg.b.unk12[2], def->arg.b.unk12[3],
-                                              0,
-                                              0, 0, 0, 0, &q);
+                                effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
+                                                             def->arg.b.unk12[0], def->arg.b.unk12[1],
+                                                             def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
+                                                             0, 0, 0, &q);
                             }
                         } else {
                             obj->arg.b.unk40 = 0;
@@ -1785,10 +1786,10 @@ void map_object_update_actions(void)
                         if (hit != 0) {
                             if (obj->arg.b.unk40 == 0) {
                                 obj->arg.b.unk40 = 1;
-                                func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
-                                              def->arg.b.unk12[1], def->arg.b.unk12[2], def->arg.b.unk12[3],
-                                              0,
-                                              0, 0, 0, 0, &r);
+                                effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
+                                                             def->arg.b.unk12[0], def->arg.b.unk12[1],
+                                                             def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
+                                                             0, 0, 0, &r);
                             }
                         } else {
                             obj->arg.b.unk40 = 0;
@@ -1944,9 +1945,10 @@ void map_object_update_actions(void)
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             obj->arg.b.unk40 = 1;
-                            func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
-                                          def->arg.b.unk12[1], def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
-                                          0, 0, 0, &p);
+                            effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
+                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
+                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
+                                                         0, &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -2016,9 +2018,10 @@ void map_object_update_actions(void)
                                                 0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
-                            func_800533e8(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39, def->arg.b.unk12[0],
-                                          def->arg.b.unk12[1], def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
-                                          0, 0, 0, &p);
+                            effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
+                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
+                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
+                                                         0, &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -2218,7 +2221,7 @@ void map_object_update_actions(void)
                         y = obj->arg.b.unk3d[0];
                         yaw = obj->arg.b.unk3d[1];
                         render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
-                        func_8004b794();
+                        actor_disable_type3_transition_actors();
                         area = obj->arg.b.unk38;
                         area3 = obj->arg.b.unk39;
                         area4 = obj->arg.b.unk3a.bytes[0];
@@ -2671,7 +2674,7 @@ void map_object_update_actions(void)
                                                      def->unk8);
                 obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
                 obj->pos.vy += obj->arg.sh.unk3e;
-                func_80056268(&obj->pos, 0x1000, 6000, 300);
+                effect_spawn_at_lower_bound(&obj->pos, 0x1000, 6000, 300);
                 ang = obj->angle.vx;
                 obj->angle.vx = (obj->unk8 == 0 ? ang + 160 : ang - 160) & 0xfff;
                 obj->arg.sh.unk3e += 30;

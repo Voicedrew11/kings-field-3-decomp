@@ -134,7 +134,7 @@ void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if ((*(u32 *)&DAT_801ba984.unk32[0x32] & 0xffff0000) == 0x0fff0000) {
         if (DAT_801ba984.unk32[0x36] == 0) {
             DAT_801ba984.unk32[0x36] = 1;
-            func_8005bd34();
+            audio_play_sound_16();
         }
         map_object_process_marker_all(0xf1);
     }
@@ -246,8 +246,8 @@ void func_801e8958(u8 id)
         render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
-    func_800608ec(9, 0);
-    func_800608ec(9, 1);
+    conversation_record_mark_page(9, 0);
+    conversation_record_mark_page(9, 1);
 }
 
 /* Slot 4: script event 0 of an object record sets flag 0x32 once. */
@@ -258,7 +258,7 @@ void func_801e8af0(Object88 *record, s32 event)
         if (DAT_801ba984.unk32[0x32] == 0) {
             DAT_801ba984.unk32[0x32] = 1;
             map_object_apply_marker_signal(0xf2);
-            func_8005bd34();
+            audio_play_sound_16();
         }
     }
 }

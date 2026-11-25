@@ -194,7 +194,7 @@ void func_801e8978(void)
 ADDRESS(0x801e8980, 0x50)
 void func_801e8980(void)
 {
-    if (func_8005d7bc(0) > 0 && func_8005d7bc(0x85) > 0 && func_8005d7bc(0x64) > 0) {
+    if (game_counter_is_nonzero(0) > 0 && game_counter_is_nonzero(0x85) > 0 && game_counter_is_nonzero(0x64) > 0) {
         DAT_801ba984.unk4[7] = 1;
     }
 }
@@ -225,22 +225,22 @@ void func_801e8a34(Object88 *record, s32 event)
 
     switch (event) {
     case 0:
-        if (func_8005d7bc(2) > 0 && func_8005d7bc(0x82) > 0 && func_8005d7bc(0x83) > 0 &&
-            func_8005d7bc(0x84) > 0) {
+        if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
+            game_counter_is_nonzero(0x84) > 0) {
             DAT_801ba984.unk4[3] = 1;
         } else {
             DAT_801ba984.unk4[3] = 0;
         }
         break;
     case 1:
-        if (func_8005d7bc(0x82) > 0 && func_8005d7bc(0x83) > 0 && func_8005d7bc(0x84) > 0 &&
-            func_8005d7bc(2) > 0) {
+        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0 &&
+            game_counter_is_nonzero(2) > 0) {
             DAT_801ba984.unk4[1] = 1;
             DAT_801ba984.unk0 = 1;
-            func_8005d7f8(0x82);
-            func_8005d7f8(0x83);
-            func_8005d7f8(0x84);
-            func_8005d7f8(2);
+            game_counter_decrement(0x82);
+            game_counter_decrement(0x83);
+            game_counter_decrement(0x84);
+            game_counter_decrement(2);
             if (DAT_801b24e4.unkcb == 2) {
                 player_equip_weapon(0xff);
             }
@@ -264,7 +264,7 @@ void func_801e8a34(Object88 *record, s32 event)
         }
         break;
     case 5:
-        if (func_8005d7bc(0x82) > 0 && func_8005d7bc(0x83) > 0 && func_8005d7bc(0x84) > 0) {
+        if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
             DAT_801ba984.unk4[1] = 1;
         } else {
             DAT_801ba984.unk4[1] = 0;
@@ -435,8 +435,8 @@ void func_801e8d68(void)
         k = 172;
         DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
     }
-    if (func_8005d7bc(2) > 0 && func_8005d7bc(0x82) > 0 && func_8005d7bc(0x83) > 0 &&
-        func_8005d7bc(0x84) > 0) {
+    if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
+        game_counter_is_nonzero(0x84) > 0) {
         DAT_801ba984.unk4[3] = 1;
     } else {
         DAT_801ba984.unk4[3] = 0;

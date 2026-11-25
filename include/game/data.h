@@ -195,7 +195,7 @@ typedef struct Data801b24e4 {
 
 typedef struct Data801ba984 {
     s32 unk0;
-    u8 unk4[9];     /* +0x04: script bytes from here (func_8005c1e8 tests unk4[n]); [0] the
+    u8 unk4[9];     /* +0x04: script bytes from here (event_target_stream_resolve_cursor tests unk4[n]); [0] the
                      * highest area entered (resource_request_transition) */
     u8 unkd;       /* +0x0d: the game loop sets it to 1 on a continued game */
     u8 unke[0x1d];
@@ -203,24 +203,24 @@ typedef struct Data801ba984 {
     u8 unk2c[5];
     u8 unk31;
     u8 unk32[0x2f];
-    u8 unk61;       /* +0x61: 1: the movie ends at start position 12 (func_80061940) */
+    u8 unk61;       /* +0x61: 1: the movie ends at start position 12 (movie_update_state) */
     u8 unk62[3];
     u8 unk65;
     u8 unk66[3];
-    u8 unk69;       /* +0x69: 1 when the ending is due (func_8005eb20 sets 2) */
-    u8 unk6a;       /* +0x6a: picks the ending (func_8005eb20) */
+    u8 unk69;       /* +0x69: 1 when the ending is due (game_update_ending sets 2) */
+    u8 unk6a;       /* +0x6a: picks the ending (game_update_ending) */
     u8 unk6b[6];
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[7];
-    u8 unk7d;       /* +0x7d: set to 1 by the first Object88 kill (func_8004c668) */
-    u8 unk7e;       /* +0x7e: Object88 kills (func_8004c668) */
+    u8 unk7d;       /* +0x7d: set to 1 by the first Object88 kill (actor_apply_magic_to_actor) */
+    u8 unk7e;       /* +0x7e: Object88 kills (actor_apply_magic_to_actor) */
     u8 unk7f[5];    /* +0x7f: per magic element */
     u8 unk84[6];
     u8 unk8a[0x20]; /* +0x8a: per area, 1 once resource_request_transition loaded it */
-    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
+    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script event_target_stream_resolve_cursor entered */
     u8 unkab[0x59];
-    u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by func_8005ea64 */
-    u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (func_8005ef18) */
+    u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by event_state_initialize */
+    u16 unk5104[32]; /* +0x5104: arena offsets of 32 pointers, 0xffff for NULL (event_saved_offsets_encode) */
 } Data801ba984;
 
 /* 0x20-byte records player_add_equipment_bonuses adds to the player's halfwords +0x66..+0x76. */
@@ -278,9 +278,9 @@ typedef struct Data801d4464 {
     s32 unk12014;   /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
                      * player_move_horizontal lets the player through when it is 1700 above unk12010 */
     s32 unk12018[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
-                      * floor the Object4c spawns of func_80056268 must reach */
+                      * floor the Object4c spawns of effect_spawn_at_lower_bound must reach */
     u32 unk12024;   /* +0x12024: hit bits of the last collision_query_world test */
-    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (func_800533e8 reads it) */
+    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
     s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
     u8 unk12030[4];
     s32 unk12034;   /* +0x12034: push of the last collision test (collision_evaluate_shape_records); from 64
@@ -323,12 +323,12 @@ typedef struct Data801e7edc {
     DECENV dec;     /* +0x340: the in-game movie player's decode environment */
     s16 unk370;
     s16 unk372;     /* +0x372: 99 once the stream passed the movie's last frame */
-    u_long *unk374[2]; /* +0x374: VLC buffers func_80061364 hands to dec */
+    u_long *unk374[2]; /* +0x374: VLC buffers strSetDefDecEnv hands to dec */
     u_long *unk37c; /* +0x37c: slice buffer */
     MovieRec *unk380; /* +0x380: the record of movie unk384 */
     u8 unk384;      /* +0x384: movie id, 0xff for none */
     u8 unk385[3];
-    s32 unk388;     /* +0x388: frame number of the last sector (func_800616dc) */
+    s32 unk388;     /* +0x388: frame number of the last sector (strNext) */
 } Data801e7edc;
 
 /*
@@ -351,7 +351,7 @@ typedef union Object44Link {
 typedef struct Object44Bytes {
     u8 unk34[4];
     u8 unk38;       /* +0x38: radius scale, 0x80 = 1 (flag 0x10) */
-    u8 unk39;       /* +0x39: func_8005c7e8 stores the index - 124 of the record it spawns */
+    u8 unk39;       /* +0x39: event_spawn_effect_object stores the index - 124 of the record it spawns */
     Object44Link unk3a; /* +0x3a */
     u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
     u8 unk3d[2];
@@ -469,7 +469,7 @@ typedef struct Object44 {
                      * blend toward light2 (render_world_model) */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
-    SVECTOR angle;  /* +0x24 (func_8005bee0) */
+    SVECTOR angle;  /* +0x24 (scene_pose_interpolate) */
     SVECTOR scale;  /* +0x2c: 0x1000 = 1; FDAT_017 clears vx, vy and vz */
     Object44Arg arg; /* +0x34 */
 } Object44;
@@ -486,7 +486,7 @@ typedef struct Object44DefBytes {
     u8 unke;
     u8 unkf;        /* +0x0f: sound effect when it starts moving (map_object_play_spatial_sound) */
     u8 unk10[2];
-    u8 unk12[4];    /* +0x12: kinds 0x51/0x52/0x55: passed to func_800533e8 on a hit */
+    u8 unk12[4];    /* +0x12: kinds 0x51/0x52/0x55: passed to effect_dispatch_magic_impact on a hit */
     u8 unk16;       /* +0x16: kinds 0x51/0x52/0x55: sound effect (- 496), 0xff for none */
     u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set; kind 0x55: speed / 16 */
 } Object44DefBytes;
@@ -498,9 +498,9 @@ typedef struct Object44DefHalves {
     u8 unk12[6];
 } Object44DefHalves;
 
-/* Signed view of the same halfwords: the pick-up offsets of the item kinds (func_8005db30). */
+/* Signed view of the same halfwords: the pick-up offsets of the item kinds (event_map_object_interact). */
 typedef struct Object44DefSHalves {
-    s16 unkc;       /* +0x0c: items: height offset of the held position (func_8005be28 dy) */
+    s16 unkc;       /* +0x0c: items: height offset of the held position (scene_position_from_camera_offset dy) */
     s16 unke;       /* +0x0e: items: distance of the held position (dz) */
     s16 unk10;      /* +0x10: items: Object44.unke while held */
     u8 unk12[6];
@@ -525,13 +525,13 @@ typedef struct Object44Def {
     Object44DefArg arg; /* +0x0c */
 } Object44Def;
 
-/* One of the 24 positions kinds 5 and 16 record behind them (func_80053c84). */
+/* One of the 24 positions kinds 5 and 16 record behind them (effect_construct_record). */
 typedef struct Object4cTrail {
     VECTOR pos;
     SVECTOR angle;
 } Object4cTrail;
 
-/* Object4c+0x44..+0x4b: func_80053c84 stores bytes, halfwords or words there by id (WIP views). */
+/* Object4c+0x44..+0x4b: effect_construct_record stores bytes, halfwords or words there by id (WIP views). */
 typedef struct Object4cBytes {
     u8 unk44;
     u8 unk45;
@@ -542,7 +542,7 @@ typedef struct Object4cBytes {
     u8 unk4b;
 } Object4cBytes;
 
-/* Signed views of the payload: func_800568bc reads some ids' bytes with lb, halfwords with lh. */
+/* Signed views of the payload: effect_update_dispatch reads some ids' bytes with lb, halfwords with lh. */
 
 typedef struct Object4cChars {
     s8 unk44;
@@ -560,7 +560,7 @@ typedef struct Object4cHalves {
     u16 unk4a;
 } Object4cHalves;
 
-/* Signed halfword view (func_800568bc). */
+/* Signed halfword view (effect_update_dispatch). */
 typedef struct Object4cShorts {
     s16 unk44;
     s16 unk46;
@@ -583,10 +583,10 @@ typedef union Object4cArg {
 
 typedef struct Object4c {
     u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
-                     * 0x40 averages the Record18.unk5 stats (func_80053624) */
+                     * 0x40 averages the Record18.unk5 stats (effect_magic_power) */
     u8 unk1;        /* +0x01: index of its Record18 record */
     u8 unk2;
-    u8 unk3;        /* +0x03: model id - 40 (func_80053a0c) */
+    u8 unk3;        /* +0x03: model id - 40 (effect_sample_rotated_vertex) */
     u8 unk4;        /* +0x04: animation */
     u8 unk5;
     u8 unk6;
@@ -594,7 +594,7 @@ typedef struct Object4c {
     u8 unk8;        /* +0x08: both of bits 2 and 3 set keeps it in place */
     u8 unk9;
     u8 unka;
-    u8 unkb;        /* +0x0b: frames before the collision test (func_80053310) */
+    u8 unkb;        /* +0x0b: frames before the collision test (effect_probe_collision_by_type) */
     u8 unkc;
     u8 unkd;
     u16 unke;
@@ -607,7 +607,7 @@ typedef struct Object4c {
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
     struct AnimSlot *unk40; /* +0x40: pose slot (animation_prepare_asset_vertices) */
-    Object4cArg arg; /* +0x44: per-id payload (func_80053c84) */
+    Object4cArg arg; /* +0x44: per-id payload (effect_construct_record) */
 } Object4c;
 
 typedef struct Object88 {
@@ -665,13 +665,13 @@ typedef struct Object88 {
     u8 unk7a[6];
     s16 unk80;      /* +0x80: phase of script 31 */
     u8 unk82[2];
-    u8 unk84;       /* +0x84: cleared by a hit below the hurt threshold (func_8004c668) */
+    u8 unk84;       /* +0x84: cleared by a hit below the hurt threshold (actor_apply_magic_to_actor) */
     u8 unk85[3];
 } Object88;
 
 /*
  * The record an Object88 is made from (its unk2 indexes DAT_80185da8.defs);
- * player_probe_view_target_and_vectors hands one to func_8004c068.
+ * player_probe_view_target_and_vectors hands one to actor_find_target_of_type.
  */
 typedef struct Object78 {
     u8 unk0;
@@ -688,11 +688,11 @@ typedef struct Object78 {
     u16 unk12;
     u16 unk14;
     s16 unk16;      /* +0x16: yaw range of its front (player_update_weapon_attack) */
-    s16 unk18;      /* +0x18: yaw range (func_800533e8) */
+    s16 unk18;      /* +0x18: yaw range (effect_dispatch_magic_impact) */
     u16 unk1a;
     u16 unk1c;
     s16 unk1e;      /* +0x1e: passed to player_add_experience when the record dies */
-    u16 unk20[8];   /* +0x20: resistances to the eight attack stats (func_8004c668) */
+    u16 unk20[8];   /* +0x20: resistances to the eight attack stats (actor_apply_magic_to_actor) */
     u16 unk30;      /* +0x30: drop id (map_object_spawn_scattered_effect) when script 3 ends */
     u16 unk32;      /* +0x32: scale */
     u32 unk34;      /* +0x34: flags copied to Object88.unk28 */
@@ -741,7 +741,7 @@ typedef struct Data801b77ec {
     Object4c objects[128];  /* +0x900 */
     Record18 *unk2f00;      /* +0x2f00: record of unk2f04 */
     Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
-    s32 unk2f08;            /* +0x2f08: index of unk2f04 (func_8005bc50) */
+    s32 unk2f08;            /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
 } Data801b77ec;
 
 /* 12-byte level records (DAT_8009f114, one per level). */
@@ -863,7 +863,7 @@ typedef struct Record04 {
     u16 unk2;
 } Record04;
 
-/* A record func_80060800 builds from a Record04 (DAT_801983a8.unkc0). */
+/* A record conversation_records_initialize builds from a Record04 (DAT_801983a8.unkc0). */
 typedef struct Record06 {
     u8 id;          /* 0xff ends the table */
     u8 unk1;
@@ -873,7 +873,7 @@ typedef struct Record06 {
 
 /*
  * Slot tables (WIP extent, up to DAT_80199148): the copied records, the
- * records func_80060800 builds from them and their runs of slot bytes
+ * records conversation_records_initialize builds from them and their runs of slot bytes
  * (bits 0-1 set: in use; 0xff: free or the end of a run). The save code
  * copies the 0x3c0 run bytes with word-aligned block moves, so the object
  * is word-aligned; the rest of the extent is unread (WIP words).
@@ -886,7 +886,7 @@ typedef struct Data801983a8 {
 } Data801983a8;
 extern Data801983a8 DAT_801983a8;
 extern Data801ba984 DAT_801ba984;
-/* Two counts per item id (0..149; func_8005d898 caps each at 99), cleared by func_8005ea64. */
+/* Two counts per item id (0..149; game_counter_increment caps each at 99), cleared by event_state_initialize. */
 extern u8 DAT_800c85e8[2][150];
 extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;

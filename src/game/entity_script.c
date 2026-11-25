@@ -16,7 +16,7 @@
 
 /* Starts the best-scoring script record of the current record. */
 ADDRESS(0x8004bf1c, 0x100)
-void func_8004bf1c(s32 dist)
+void actor_select_best_target(s32 dist)
 {
     Object88 *obj;
     Object78 *def;
@@ -40,7 +40,7 @@ void func_8004bf1c(s32 dist)
         if (script == NULL) {
             break;
         }
-        score = func_8004b984(script, dist);
+        score = actor_score_target_candidate(script, dist);
         if (best_score < score) {
             best_score = score;
             best = script;
@@ -50,20 +50,20 @@ void func_8004bf1c(s32 dist)
         return;
     }
     if (best != obj->unk60 || obj->unkf == 0xff) {
-        func_8004b94c(obj, best);
+        actor_set_target(obj, best);
     }
 }
 
 ADDRESS(0x8004c01c, 0x4c)
-void func_8004c01c(void)
+void actor_select_target_for_player_distance(void)
 {
-    func_8004bf1c(fixed_vector2_length(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
-                                       DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
+    actor_select_best_target(fixed_vector2_length(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
+                                                  DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
 }
 
 /* The script record of the given id, or 0. */
 ADDRESS(0x8004c068, 0x48)
-u8 *func_8004c068(Object78 *def, u8 id)
+u8 *actor_find_target_of_type(Object78 *def, u8 id)
 {
     u8 **scripts;
     u8 *script;
@@ -83,20 +83,20 @@ u8 *func_8004c068(Object78 *def, u8 id)
 }
 
 ADDRESS(0x8004c0b0, 0x54)
-void func_8004c0b0(Object88 *obj, u8 id)
+void actor_select_target_type_in_own_group(Object88 *obj, u8 id)
 {
-    func_8004b94c(obj, func_8004c068(&DAT_80185da8.defs[obj->unk2], id));
+    actor_set_target(obj, actor_find_target_of_type(&DAT_80185da8.defs[obj->unk2], id));
 }
 
 ADDRESS(0x8004c104, 0x2c)
-void func_8004c104(void)
+void actor_reset_target_and_reselect(void)
 {
     DAT_80185da8.current->unkf = 0xff;
-    func_8004c01c();
+    actor_select_target_for_player_distance();
 }
 
 ADDRESS(0x8004c130, 0x54)
-void func_8004c130(u8 anim)
+void actor_set_animation(u8 anim)
 {
     Object88 *obj;
 
@@ -112,7 +112,7 @@ void func_8004c130(u8 anim)
 }
 
 ADDRESS(0x8004c184, 0x6c)
-void func_8004c184(u8 anim)
+void actor_set_animation_if_changed(u8 anim)
 {
     Object88 *obj;
 
@@ -132,7 +132,7 @@ void func_8004c184(u8 anim)
 
 /* Wakes, sleeps and retargets the current record by its distance to the player. */
 ADDRESS(0x8004c1f0, 0x33c)
-void func_8004c1f0(void)
+void actor_update_lifecycle_for_player_range(void)
 {
     Object88 *obj = DAT_80185da8.current;
     Object78 *def = DAT_80185da8.def;
@@ -150,8 +150,8 @@ void func_8004c1f0(void)
             if (DAT_80185da8.target->unk9 != 1) {
                 return;
             }
-            func_8004b868(DAT_80185da8.current);
-            func_8004bf1c(dist);
+            actor_prepare_and_initialize(DAT_80185da8.current);
+            actor_select_best_target(dist);
             return;
         }
         if (kind == 2) {
@@ -172,27 +172,28 @@ void func_8004c1f0(void)
                 }
             }
         }
-        if (func_8004d644(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk12, def->unk14) != -1) {
+        if (actor_find_overlap_excluding_target_type3(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk12,
+                                                      def->unk14) != -1) {
             if (kind != 2) {
                 obj->unk9 = 2;
             }
             return;
         }
-        func_8004b868(DAT_80185da8.current);
+        actor_prepare_and_initialize(DAT_80185da8.current);
         {
-            u8 *script = func_8004c068(def, 0x15);
+            u8 *script = actor_find_target_of_type(def, 0x15);
             if (script == NULL) {
-                script = func_8004c068(def, 6);
+                script = actor_find_target_of_type(def, 6);
             }
             if (script == NULL) {
-                script = func_8004c068(def, 0x1a);
+                script = actor_find_target_of_type(def, 0x1a);
             }
             if (script != NULL) {
-                func_8004b94c(obj, script);
+                actor_set_target(obj, script);
                 return;
             }
         }
-        func_8004bf1c(dist);
+        actor_select_best_target(dist);
         return;
     wake:
         if (kind != 2) {
@@ -207,7 +208,7 @@ void func_8004c1f0(void)
         }
         map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
         obj->unk9 = 0;
-        func_8004b560(obj);
+        actor_set_home_position(obj);
         return;
     case 2:
         if (kind == 3 || kind == 4) {
@@ -222,14 +223,14 @@ void func_8004c1f0(void)
             }
         }
         obj->unk9 = 0;
-        func_8004b560(obj);
+        actor_set_home_position(obj);
         return;
     }
 }
 
 /* Restarts or puts back every live record made from record kind. */
 ADDRESS(0x8004c52c, 0xc0)
-void func_8004c52c(u16 kind)
+void actor_retarget_or_disable_group_members(u16 kind)
 {
     Object88 *obj;
     s16 i;
@@ -238,9 +239,9 @@ void func_8004c52c(u16 kind)
     for (i = 199; i != -1; i--) {
         if (obj->unk0 != OBJECT88_FREE && obj->unk2 == kind) {
             if (obj->unk9 == 1) {
-                func_8004c0b0(obj, 3);
+                actor_select_target_type_in_own_group(obj, 3);
             } else {
-                func_8004b770(obj);
+                actor_set_lifecycle_and_home_position(obj);
             }
         }
         obj++;
@@ -248,7 +249,7 @@ void func_8004c52c(u16 kind)
 }
 
 ADDRESS(0x8004c5ec, 0x7c)
-s32 func_8004c5ec(s32 a, s32 b, s32 c)
+s32 actor_magic_component_curve(s32 a, s32 b, s32 c)
 {
     s32 d;
 
@@ -271,14 +272,14 @@ s32 func_8004c5ec(s32 a, s32 b, s32 c)
 
 /*
  * Hits record index: attack stats a2..a9 of power a1 against the record's
- * resistances (func_8004c5ec each), strength a10 and flags a11 (bits 6-7
+ * resistances (actor_magic_component_curve each), strength a10 and flags a11 (bits 6-7
  * the attacker kind, bits 4-5 the hit kind); FDAT slot 18 adjusts the
  * damage. Starts the record's hurt or death script and pushes it away from
  * target (NULL: no push).
  */
 ADDRESS(0x8004c668, 0x844)
-void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
-                   u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target)
+void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
+                                u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target)
 {
     Object88 *obj;
     Object88 *link;
@@ -335,14 +336,14 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
     if (kind == 0x80 && (obj->unk28 & 0x100000)) {
         return;
     }
-    dmg = func_8004c5ec(a1, a2, def->unk20[0]);
-    dmg += func_8004c5ec(a1, a3, def->unk20[1]);
-    dmg += func_8004c5ec(a1, a4, def->unk20[2]);
-    dmg += func_8004c5ec(a1, a5, def->unk20[3]);
-    dmg += func_8004c5ec(a1, a6, def->unk20[4]);
-    dmg += func_8004c5ec(a1, a7, def->unk20[5]);
-    dmg += func_8004c5ec(a1, a8, def->unk20[6]);
-    dmg += func_8004c5ec(a1, a9, def->unk20[7]);
+    dmg = actor_magic_component_curve(a1, a2, def->unk20[0]);
+    dmg += actor_magic_component_curve(a1, a3, def->unk20[1]);
+    dmg += actor_magic_component_curve(a1, a4, def->unk20[2]);
+    dmg += actor_magic_component_curve(a1, a5, def->unk20[3]);
+    dmg += actor_magic_component_curve(a1, a6, def->unk20[4]);
+    dmg += actor_magic_component_curve(a1, a7, def->unk20[5]);
+    dmg += actor_magic_component_curve(a1, a8, def->unk20[6]);
+    dmg += actor_magic_component_curve(a1, a9, def->unk20[7]);
     if (dmg > 0x68db7) {
         dmg = 0x68db7;
     }
@@ -367,11 +368,11 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
         if (obj->unk28 & 0x40000) {
             goto push;
         }
-        dodge = func_8004c068(def, 0x16);
+        dodge = actor_find_target_of_type(def, 0x16);
         if (dodge != NULL &&
             angle_within_tolerance(obj->angle.vy, vector_xz_to_angle(obj->pos.vx - target->vx,
                                                                      obj->pos.vz - target->vz), 0x200)) {
-            func_8004b94c(obj, dodge);
+            actor_set_target(obj, dodge);
             goto push;
         }
     }
@@ -403,7 +404,7 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
             DAT_801ba984.unk7e++;
         }
         hp = 0;
-        func_8004c0b0(obj, 3);
+        actor_select_target_type_in_own_group(obj, 3);
     } else {
         for (i = 15; i != -1; i--) {
             script = *scripts++;
@@ -414,7 +415,7 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
                 if (dmg >= SCRIPT_U16(script, 12)) {
                     chance = script[2];
                     if (chance == 0xff || rand() >> 7 < chance) {
-                        func_8004b94c(obj, script);
+                        actor_set_target(obj, script);
                         break;
                     }
                 } else {
@@ -451,7 +452,7 @@ push:
             link->vel.vy = obj->vel.vy;
             link->vel.vz = obj->vel.vz;
             if (link->unke != 3) {
-                func_8004c0b0(link, 2);
+                actor_select_target_type_in_own_group(link, 2);
             }
         }
     }

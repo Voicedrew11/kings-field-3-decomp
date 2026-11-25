@@ -124,15 +124,15 @@ void player_restore_equipment_effects(void)
     player_set_secondary_magic_shortcut_id(DAT_801b24e4.unkc8);
     player_reset_view();
     if (DAT_801b24e4.unk86 != 0) {
-        func_80053c84(10, 64, 26, &DAT_801b24e4.pos, 0, 0);
-        func_80053c84(10, 64, 26, &DAT_801b24e4.pos, 0, 1);
+        effect_construct_record(10, 64, 26, &DAT_801b24e4.pos, 0, 0);
+        effect_construct_record(10, 64, 26, &DAT_801b24e4.pos, 0, 1);
     }
     if (DAT_801b24e4.unk88 != 0) {
-        func_80053c84(10, 64, 27, &DAT_801b24e4.pos, 0);
+        effect_construct_record(10, 64, 27, &DAT_801b24e4.pos, 0);
     }
     if (DAT_801b24e4.unk8a != 0) {
-        func_80053c84(10, 64, 28, &DAT_801b24e4.pos, 0, 0);
-        func_80053c84(10, 64, 28, &DAT_801b24e4.pos, 0, 1);
+        effect_construct_record(10, 64, 28, &DAT_801b24e4.pos, 0, 0);
+        effect_construct_record(10, 64, 28, &DAT_801b24e4.pos, 0, 1);
     }
     player_recalculate_combat_stats();
     menu_apply_button_config();
@@ -537,20 +537,20 @@ void player_increment_magic_training(Record18 *spell)
 ADDRESS(0x8002a210, 0x100)
 void player_grow_weapon_with_experience(void)
 {
-    if (func_8005d7bc(0) > 0 || func_8005d7bc(1) > 0) {
+    if (game_counter_is_nonzero(0) > 0 || game_counter_is_nonzero(1) > 0) {
         if (DAT_801b24e4.unk8 == -1) {
             DAT_801b24e4.unk8 = DAT_801b24e4.experience;
         } else if (DAT_801b24e4.unk8 + 13000 < DAT_801b24e4.experience) {
             if (DAT_801b24e4.unkcb < 2) {
                 player_equip_weapon(DAT_801b24e4.unkcb + 1);
             }
-            if (func_8005d7bc(1) > 0) {
-                func_8005d7f8(1);
-                func_8005d898(2);
+            if (game_counter_is_nonzero(1) > 0) {
+                game_counter_decrement(1);
+                game_counter_increment(2);
             }
-            if (func_8005d7bc(0) > 0) {
-                func_8005d7f8(0);
-                func_8005d898(1);
+            if (game_counter_is_nonzero(0) > 0) {
+                game_counter_decrement(0);
+                game_counter_increment(1);
             }
             notify_enqueue(4);
             DAT_801b24e4.unk8 = -1;
@@ -1412,12 +1412,12 @@ Object88 *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTO
         offset->vy = y + DAT_801b24e4.pos.vy;
         offset->vz += DAT_801b24e4.pos.vz;
     }
-    object = func_8004d3c4(&DAT_801b24e4.pos, DAT_801b24e4.unk124.vy, DAT_801b24e4.unk124.vx, 0x55f0,
-                           0x200, 0x200, dist, 0);
+    object = actor_find_best_in_cone(&DAT_801b24e4.pos, DAT_801b24e4.unk124.vy, DAT_801b24e4.unk124.vx,
+                                     0x55f0, 0x200, 0x200, dist, 0);
     DAT_80185da8.unk9d28 = object;
-    if (object != NULL && (found = func_8004c068(&DAT_80185da8.defs[object->unk2], 0x82)) != NULL
+    if (object != NULL && (found = actor_find_target_of_type(&DAT_80185da8.defs[object->unk2], 0x82)) != NULL
         && !(object->unk28 & 0x100)) {
-        func_8004b94c(object, found);
+        actor_set_target(object, found);
     }
     if (dir != NULL) {
         rot.vx = DAT_801b24e4.unk124.vx;
@@ -1431,7 +1431,7 @@ Object88 *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTO
 
 /*
  * Casts spell id (77 kinds, Record18 indices): aims along unk14c with
- * player_probe_view_target_and_vectors and spawns the spell's Object4c records with func_80053c84;
+ * player_probe_view_target_and_vectors and spawns the spell's Object4c records with effect_construct_record;
  * spells 68, 69, 72 and 73/74 spawn under the ids 120..124. Declared with an
  * ellipsis: the prologue spills all four argument registers and va_start
  * keeps id in its stack slot (read back as a byte for the spawns).
@@ -1460,21 +1460,21 @@ void player_dispatch_magic_effect(s32 id, ...)
     case 0:
         player_probe_view_target_and_vectors(900, &off, &dir, &dist);
     spawn:
-        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir);
         break;
     case 6:
         player_probe_view_target_and_vectors(500, &off, &dir, &dist);
         goto spawn;
     case 62:
         player_probe_view_target_and_vectors(750, &off, &dir, &dist);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir);
         break;
     case 54:
         for (i = 0; i < 4; i++) {
             k = 3 - i;
             DAT_801b24e4.unk14c.vz = k * 800;
             player_probe_view_target_and_vectors(500, &off, &dir, &dist);
-            func_80053c84(10, 0x42, (u8)id, &off, &dir, k);
+            effect_construct_record(10, 0x42, (u8)id, &off, &dir, k);
         }
         break;
     case 55:
@@ -1482,7 +1482,7 @@ void player_dispatch_magic_effect(s32 id, ...)
         goto spawn;
     case 70:
         player_probe_view_target_and_vectors(500, &off, &dir, &dist);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, 0);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, 0);
         break;
     case 64:
         player_probe_view_target_and_vectors(440, &off, &dir, &dist);
@@ -1498,17 +1498,17 @@ void player_dispatch_magic_effect(s32 id, ...)
         goto spawn;
     case 75:
         player_probe_view_target_and_vectors(720, &off, &dir, &dist);
-        func_80053c84(10, 0x42, 75, &off, &dir);
+        effect_construct_record(10, 0x42, 75, &off, &dir);
         break;
     case 15:
         player_probe_view_target_and_vectors(300, &off, &dir, &dist);
         off.vy += 1344;
         dir.vy = 0;
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 0);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 1);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 0);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 1);
         break;
     case 7:
-        func_80053c84(10, 0x43, (u8)id, &DAT_801b24e4.pos, 0, 0x1000, 0x100, 0x1000, 1);
+        effect_construct_record(10, 0x43, (u8)id, &DAT_801b24e4.pos, 0, 0x1000, 0x100, 0x1000, 1);
         break;
     case 8:
         obj = player_probe_view_target_and_vectors(7000, &off, &dir, &dist);
@@ -1526,7 +1526,7 @@ void player_dispatch_magic_effect(s32 id, ...)
                 off.vz = obj->pos.vz;
             }
         }
-        func_80053c84(10, 0x43, 0x5f, &off, 0);
+        effect_construct_record(10, 0x43, 0x5f, &off, 0);
         break;
     case 12:
         obj = player_probe_view_target_and_vectors(7000, &off, &dir, &dist);
@@ -1539,27 +1539,27 @@ void player_dispatch_magic_effect(s32 id, ...)
             off.vy = obj->pos.vy;
             off.vz = obj->pos.vz;
         }
-        func_80053c84(10, 0x42, 12, &off, 0);
+        effect_construct_record(10, 0x42, 12, &off, 0);
         break;
     case 56:
     case 57:
         player_probe_view_target_and_vectors(700, &off, &dir, &dist);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 13:
         player_probe_view_target_and_vectors(700, &off, &dir, &dist);
     spawn2:
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 11:
         player_probe_view_target_and_vectors(260, &off, &dir, &dist);
         dir.vx += (rand() >> 10) - 16;
         dir.vy += (rand() >> 10) - 16;
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, 14 - DAT_801b24e4.unk106);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, 14 - DAT_801b24e4.unk106);
         break;
     case 21:
         player_probe_view_target_and_vectors(260, &off, &dir, &dist);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir);
         break;
     case 19:
         player_probe_view_target_and_vectors(600, &off, &dir, &range);
@@ -1572,7 +1572,7 @@ void player_dispatch_magic_effect(s32 id, ...)
             range = 10;
         }
         dir.vy = 0;
-        func_80053c84(10, 0x42, 0x71, &off, &dir, range);
+        effect_construct_record(10, 0x42, 0x71, &off, &dir, range);
         break;
     case 2:
         obj = player_probe_view_target_and_vectors(500, &off, &dir, &dist);
@@ -1581,11 +1581,11 @@ void player_dispatch_magic_effect(s32 id, ...)
         } else {
             target = obj - DAT_80185da8.objects;
         }
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, target, DAT_801b24e4.unk106);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, target, DAT_801b24e4.unk106);
         break;
     case 1:
         player_probe_view_target_and_vectors(570, &off, &dir, &dist);
-        func_80053c84(10, 0x42, 1, &off, &dir, &DAT_801b24e4.unk124);
+        effect_construct_record(10, 0x42, 1, &off, &dir, &DAT_801b24e4.unk124);
         DAT_801b24e4.unk14c.vx += 1000;
         break;
     case 4:
@@ -1608,7 +1608,7 @@ void player_dispatch_magic_effect(s32 id, ...)
         player_probe_view_target_and_vectors(170, &off, &dir, &dist);
         DAT_801b24e4.unk14c.vx += 100;
         DAT_801b24e4.unk124.vy = yaw;
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 600, 60, 128, 140, 160);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124, 600, 60, 128, 140, 160);
         break;
     }
     case 73:
@@ -1617,14 +1617,14 @@ void player_dispatch_magic_effect(s32 id, ...)
         row = DAT_800818e4;
         DAT_801b24e4.unk14c = *row;
         player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-        made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         if (made != NULL) {
             index = made - DAT_801b77ec.objects;
             row++;
             for (n = 3; n != -1; n--) {
                 DAT_801b24e4.unk14c = *row;
                 player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-                func_80053c84(10, 0x42, 0x5d, &off, &dir, index);
+                effect_construct_record(10, 0x42, 0x5d, &off, &dir, index);
                 row++;
             }
         }
@@ -1634,14 +1634,14 @@ void player_dispatch_magic_effect(s32 id, ...)
         row = DAT_800818e4;
         DAT_801b24e4.unk14c = *row;
         player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-        made = func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         if (made != NULL) {
             index = made - DAT_801b77ec.objects;
             row++;
             for (n = 3; n != -1; n--) {
                 DAT_801b24e4.unk14c = *row;
                 player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-                func_80053c84(10, 0x42, 0x5c, &off, &dir, index);
+                effect_construct_record(10, 0x42, 0x5c, &off, &dir, index);
                 row++;
             }
         }
@@ -1656,33 +1656,33 @@ void player_dispatch_magic_effect(s32 id, ...)
         goto spawn2;
     case 66:
         player_probe_view_target_and_vectors(900, &off, &dir, &dist);
-        func_80053c84(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &DAT_801b24e4.unk124);
         break;
     case 26:
-        func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 0);
-        func_80053c84(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 1);
+        effect_construct_record(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 0);
+        effect_construct_record(10, 0x40, 0x1a, &DAT_801b24e4.pos, &dir, 1);
         DAT_801b24e4.unk86 = 1800;
         player_recalculate_combat_stats();
         break;
     case 28:
-        func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 0);
-        func_80053c84(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 1);
+        effect_construct_record(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 0);
+        effect_construct_record(10, 0x40, 0x1c, &DAT_801b24e4.pos, &dir, 1);
         DAT_801b24e4.unk8a = 1800;
         player_recalculate_combat_stats();
         break;
     case 27:
-        func_80053c84(10, 0x40, 0x1b, &DAT_801b24e4.pos, &dir);
+        effect_construct_record(10, 0x40, 0x1b, &DAT_801b24e4.pos, &dir);
         DAT_801b24e4.unk88 = 200;
         player_recalculate_combat_stats();
         break;
     case 25:
-        func_80053c84(10, 0x40, 0x19, &DAT_801b24e4.pos, &dir);
+        effect_construct_record(10, 0x40, 0x19, &DAT_801b24e4.pos, &dir);
         break;
     case 23:
-        func_80053c84(10, 0x40, 0x17, &DAT_801b24e4.pos, &dir);
+        effect_construct_record(10, 0x40, 0x17, &DAT_801b24e4.pos, &dir);
         break;
     case 30:
-        func_80053c84(10, 0x40, 0x1e, &DAT_801b24e4.pos, &dir);
+        effect_construct_record(10, 0x40, 0x1e, &DAT_801b24e4.pos, &dir);
         break;
     }
 }

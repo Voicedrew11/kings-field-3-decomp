@@ -180,7 +180,7 @@ void player_update_weapon_attack(void)
                 count = DAT_800c85e8[0][item];
                 if (count != 0) {
                     DAT_800c85e8[0][item] = --count;
-                    arrow = func_80053c84(10, 0x42, id, &DAT_801b24e4.pos, 0, &DAT_801b24e4.unk124);
+                    arrow = effect_construct_record(10, 0x42, id, &DAT_801b24e4.pos, 0, &DAT_801b24e4.unk124);
                     DAT_801b24e4.unkbc = arrow;
                     if (arrow != NULL) {
                         arrow->unk7 = 99;
@@ -304,7 +304,7 @@ void player_update_weapon_attack(void)
                     DAT_801b24e4.unk14c.vy = 200;
                     DAT_801b24e4.unk14c.vz = 400;
                     player_probe_view_target_and_vectors(900, &probe, &dir, &dist);
-                    func_80053c84(10, 0x42, 0, &probe, &dir);
+                    effect_construct_record(10, 0x42, 0, &probe, &dir);
                 }
                 DAT_801b24e4.unkd0 = 0;
                 if (DAT_801b24e4.unkca == 1) {
@@ -348,7 +348,7 @@ void player_update_weapon_attack(void)
                     probe.vx += step.vx;
                     probe.vy += step.vy;
                     probe.vz += step.vz;
-                    found = func_8004d644(probe.vx, probe.vy, probe.vz, 400, 600);
+                    found = actor_find_overlap_excluding_target_type3(probe.vx, probe.vy, probe.vz, 400, 600);
                     if (found != -1) {
                         obj = &DAT_80185da8.objects[found];
                         def = &DAT_80185da8.defs[obj->unk2];
@@ -356,10 +356,11 @@ void player_update_weapon_attack(void)
                                                    obj->pos.vz - DAT_801b24e4.pos.vz);
                         if (angle_within_tolerance(DAT_801b24e4.unk124.vy, angle, def->unk16)
                             && angle_within_tolerance(obj->angle.vy, angle + 2048, def->unk18)) {
-                            func_8004c668(found, DAT_801b24e4.unk40, DAT_801b24e4.unk54[0], DAT_801b24e4.unk54[1],
-                                          DAT_801b24e4.unk54[2], DAT_801b24e4.unk54[3], DAT_801b24e4.unk54[4],
-                                          DAT_801b24e4.unk54[5], DAT_801b24e4.unk54[6], DAT_801b24e4.unk62, scale,
-                                          80, NULL, target);
+                            actor_apply_magic_to_actor(found, DAT_801b24e4.unk40, DAT_801b24e4.unk54[0],
+                                                       DAT_801b24e4.unk54[1], DAT_801b24e4.unk54[2],
+                                                       DAT_801b24e4.unk54[3], DAT_801b24e4.unk54[4],
+                                                       DAT_801b24e4.unk54[5], DAT_801b24e4.unk54[6],
+                                                       DAT_801b24e4.unk62, scale, 80, NULL, target);
                             break;
                         }
                     }

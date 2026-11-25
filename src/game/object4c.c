@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: Object4c records (WIP module): their sound, collision and hit
- * tests, record allocation and func_80053c84, which makes a record of an id
+ * tests, record allocation and effect_construct_record, which makes a record of an id
  * (with its set-up helpers).
  */
 #include <kf/lib/address.h>
@@ -30,14 +30,14 @@ static s32 DAT_8009c3f0;
 
 /* Plays sound effect se at the record. */
 ADDRESS(0x800532d4, 0x3c)
-s32 func_800532d4(Object4c *obj, s32 se)
+s32 effect_play_spatial_sound(Object4c *obj, s32 se)
 {
     return audio_play_spatial_range(se, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
 }
 
 /* Collision test of the current record at pos, once its delay has run out. */
 ADDRESS(0x80053310, 0xd8)
-s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
+s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
 {
     Object4c *obj;
     s32 y;
@@ -70,14 +70,14 @@ s32 func_80053310(VECTOR *pos, s32 radius, s32 height)
 
 /*
  * Hit by the current record: the player (kind 0x80) or the Object88 record
- * of unk12028 (0x10). func_800536f8 passes a3 unmasked, so the narrow
+ * of unk12028 (0x10). effect_apply_current_magic passes a3 unmasked, so the narrow
  * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
  * and reads it back with lhu; this source spills it with sh.
  */
 ADDRESS(0x800533e8, 0x23c)
-void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int a5_in, int a6_in,
-                   int a7_in, int a8_in, int a9_in, int a10_in, int a11_in, int a12_in, int a13_in,
-                   int a14_in, VECTOR *target)
+void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int a5_in,
+                                  int a6_in, int a7_in, int a8_in, int a9_in, int a10_in, int a11_in,
+                                  int a12_in, int a13_in, int a14_in, VECTOR *target)
 {
     u16 a3 = a3_in;
     u16 a4 = a4_in;
@@ -115,8 +115,8 @@ void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int
         } else {
             kind |= 0x20;
         }
-        func_8004c668(DAT_801d4464.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind, rec,
-                      target);
+        actor_apply_magic_to_actor(DAT_801d4464.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind,
+                                   rec, target);
         if (mode & 0x10000) {
             obj->unk28 |= 0x800;
         }
@@ -125,7 +125,7 @@ void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int
 
 /* Mean of the Data801b24e4.unk42 stats the record's Record18.unk5 bits pick (5 without 0x40). */
 ADDRESS(0x80053624, 0xd4)
-u16 func_80053624(Object4c *obj)
+u16 effect_magic_power(Object4c *obj)
 {
     u16 sum;
     s32 bit;
@@ -155,23 +155,23 @@ u16 func_80053624(Object4c *obj)
     return 5;
 }
 
-/* func_800533e8 with the current record and its Record18 record. */
+/* effect_dispatch_magic_impact with the current record and its Record18 record. */
 ADDRESS(0x800536f8, 0xf0)
-void func_800536f8(s32 flags, s32 a1, VECTOR *target)
+void effect_apply_current_magic(s32 flags, s32 a1, VECTOR *target)
 {
     Object4c *obj;
     Record18 *rec;
 
     obj = DAT_801b77ec.unk2f04;
     rec = DAT_801b77ec.unk2f00;
-    func_800533e8(flags, obj->unk0, rec, a1, func_80053624(obj), obj->unk6, rec->unk6, rec->unk8,
-                  rec->unka, rec->unk4, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
-                  target);
+    effect_dispatch_magic_impact(flags, obj->unk0, rec, a1, effect_magic_power(obj), obj->unk6, rec->unk6,
+                                 rec->unk8, rec->unka, rec->unk4, rec->unkc, rec->unke, rec->unk10,
+                                 rec->unk12, rec->unk14, target);
 }
 
-/* func_800536f8 from the current record's position one step back. */
+/* effect_apply_current_magic from the current record's position one step back. */
 ADDRESS(0x800537e8, 0x68)
-void func_800537e8(s32 flags)
+void effect_apply_current_magic_backstep(s32 flags)
 {
     Object4c *obj;
     VECTOR pos;
@@ -180,7 +180,7 @@ void func_800537e8(s32 flags)
     pos.vx = obj->pos.vx - obj->vel.vx * 8;
     pos.vy = obj->pos.vy - obj->vel.vy * 8;
     pos.vz = obj->pos.vz - obj->vel.vz * 8;
-    func_800536f8(flags, 5000, &pos);
+    effect_apply_current_magic(flags, 5000, &pos);
 }
 
 /*
@@ -189,7 +189,7 @@ void func_800537e8(s32 flags)
  * masked to 16 bits (andi) to both.
  */
 ADDRESS(0x80053850, 0x1bc)
-void func_80053850(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s32 flags)
+void effect_apply_radial_magic_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s32 flags)
 {
     Object4c *obj;
     Record18 *rec;
@@ -202,15 +202,15 @@ void func_80053850(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s3
                                    (u16)flags, obj->unk6);
     }
     if (obj->unk0 & 2) {
-        func_8004ceac(pos, reach, radius, mode, falloff, func_80053624(obj), rec->unk6, rec->unk8,
-                      rec->unka, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
-                      (u16)flags, (obj->unk0 & 0xc0) | 0x20, rec);
+        actor_apply_area_magic(pos, reach, radius, mode, falloff, effect_magic_power(obj), rec->unk6,
+                               rec->unk8, rec->unka, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
+                               (u16)flags, (obj->unk0 & 0xc0) | 0x20, rec);
     }
 }
 
 /* Point vertex of the record's model, scaled and rotated (yaw + 2048). */
 ADDRESS(0x80053a0c, 0xe8)
-void func_80053a0c(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
+void effect_sample_rotated_vertex(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
 {
     SVECTOR rotation;
     SVECTOR v;
@@ -225,11 +225,11 @@ void func_80053a0c(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
     vector_rotate_yxz(&rotation, &v, out);
 }
 
-/* func_80053a0c in world coordinates. */
+/* effect_sample_rotated_vertex in world coordinates. */
 ADDRESS(0x80053af4, 0x70)
-void func_80053af4(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
+void effect_sample_world_vertex(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
 {
-    func_80053a0c(obj, vertex, out, scale);
+    effect_sample_rotated_vertex(obj, vertex, out, scale);
     out->vx += obj->pos.vx;
     out->vy += obj->pos.vy;
     out->vz += obj->pos.vz;
@@ -237,7 +237,7 @@ void func_80053af4(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
 
 /* A free record, or NULL. */
 ADDRESS(0x80053b64, 0x44)
-Object4c *func_80053b64(void)
+Object4c *effect_pool_find_free(void)
 {
     Object4c *obj;
     u16 i;
@@ -254,7 +254,7 @@ Object4c *func_80053b64(void)
 }
 
 ADDRESS(0x80053ba8, 0x3c)
-void func_80053ba8(Object4c *obj, s32 a1, s32 scale, s32 a3)
+void effect_pool_initialize_scaled_world(Object4c *obj, s32 a1, s32 scale, s32 a3)
 {
     obj->unk8 = 1;
     obj->unk4 = 0x80;
@@ -267,7 +267,7 @@ void func_80053ba8(Object4c *obj, s32 a1, s32 scale, s32 a3)
 }
 
 ADDRESS(0x80053be4, 0x3c)
-void func_80053be4(Object4c *obj, s32 a1, s32 scale, s32 a3)
+void effect_pool_initialize_scaled(Object4c *obj, s32 a1, s32 scale, s32 a3)
 {
     obj->unk8 = 5;
     obj->unk4 = 0x80;
@@ -280,7 +280,7 @@ void func_80053be4(Object4c *obj, s32 a1, s32 scale, s32 a3)
 }
 
 ADDRESS(0x80053c20, 0x64)
-void func_80053c20(Object4c *obj, s32 a1, s32 a2, s32 y)
+void effect_pool_initialize_fixed(Object4c *obj, s32 a1, s32 a2, s32 y)
 {
     obj->unk8 = 0xe;
     obj->unk4 = 0x80;
@@ -306,7 +306,7 @@ void func_80053c20(Object4c *obj, s32 a1, s32 a2, s32 y)
  * are narrowed at entry.
  */
 ADDRESS(0x80053c84, 0x1ec8)
-Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECTOR *vel, ...)
+Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECTOR *vel, ...)
 {
     u8 kind = kind_in;
     u8 flags = flags_in;
@@ -319,7 +319,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
     s32 n;
 
     args = (s32 *)&vel;
-    obj = func_80053b64();
+    obj = effect_pool_find_free();
     if (obj == NULL) {
         goto end;
     }
@@ -358,23 +358,23 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
     obj->unke = 0;
     switch (obj->unk1) {
     case 86:
-        func_80053be4(obj, 9, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 9, 0x1000, 5);
         obj->unke = 0x80;
         obj->unkb = 3;
         goto common0;
     case 40:
-        func_80053be4(obj, 9, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 9, 0x1000, 5);
         obj->unke = 0x80;
         goto common0;
     case 62:
-        func_80053be4(obj, 0x3b, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 0x3b, 0x1000, 5);
         obj->unke = 0x40;
-        func_800532d4(obj, 0x31);
+        effect_play_spatial_sound(obj, 0x31);
         goto common0;
     case 0:
-        func_80053be4(obj, 9, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 9, 0x1000, 5);
         obj->unke = 0x40;
-        func_800532d4(obj, 0x31);
+        effect_play_spatial_sound(obj, 0x31);
     common0:
         obj->unk10 = 50;
         obj->unkd = 1;
@@ -388,7 +388,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 250;
         break;
     case 47:
-        func_80053ba8(obj, 0x40, 0x1000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x40, 0x1000, 5);
         obj->unk10 = 50;
         obj->unke = 0;
         obj->unkd = 1;
@@ -398,7 +398,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk44 = 0;
         break;
     case 48:
-        func_80053ba8(obj, 0x41, 0x100, 5);
+        effect_pool_initialize_scaled_world(obj, 0x41, 0x100, 5);
         obj->unk10 = 50;
         obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
@@ -424,7 +424,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 120;
         obj->unke = 0;
         obj->unkd = 1;
-        func_800532d4(obj, 0x31);
+        effect_play_spatial_sound(obj, 0x31);
         break;
     case 108:
         obj->unk8 = 1;
@@ -448,7 +448,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->vel.vz = 0;
         break;
     case 2:
-        func_80053be4(obj, 9, 7000, 5);
+        effect_pool_initialize_scaled(obj, 9, 7000, 5);
         obj->vel.vx += (rand() >> 8) - 64;
         obj->vel.vy += (rand() >> 8) - 64;
         obj->vel.vz += (rand() >> 8) - 64;
@@ -457,24 +457,24 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unkb = 3;
         obj->unke = 0x40;
         if (args[2] == 2) {
-            func_800532d4(obj, 0x2d);
+            effect_play_spatial_sound(obj, 0x2d);
         }
         break;
     case 3:
-        func_80053be4(obj, 0x45, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 0x45, 0x1000, 5);
         obj->unk10 = 12;
         obj->scale.vy = 0;
         obj->unke = 0x40;
         break;
     case 75:
-        func_80053ba8(obj, 0x44, 0x1400, 5);
+        effect_pool_initialize_scaled_world(obj, 0x44, 0x1400, 5);
         obj->angle = DAT_801b24e4.unk124;
         obj->unkd = 1;
         obj->unk10 = 100;
         obj->unkb = 5;
         obj->arg.b.unk44 = 0;
         obj->unke = 0;
-        func_800532d4(obj, 0x66);
+        effect_play_spatial_sound(obj, 0x66);
         break;
     case 51:
         obj->unke = 0;
@@ -488,7 +488,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk3 = 15;
         obj->arg.b.unk44 = 0;
         obj->unk10 = 70;
-        func_800532d4(obj, 0x32);
+        effect_play_spatial_sound(obj, 0x32);
         break;
     case 76:
         obj->unk8 = 1;
@@ -497,10 +497,10 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk3 = 15;
         obj->unk10 = 80;
         obj->unke = 0x80;
-        func_800532d4(obj, 0x36);
+        effect_play_spatial_sound(obj, 0x36);
         break;
     case 52:
-        func_80053ba8(obj, 0x3d, 3600, 5);
+        effect_pool_initialize_scaled_world(obj, 0x3d, 3600, 5);
         obj->scale.vx = 0x1400;
         obj->scale.vz = 0x1400;
         obj->unk10 = 70;
@@ -523,11 +523,11 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->scale.vz = n * 2000 + 3200;
         obj->angle.vy = n << 11;
         if (n == 0) {
-            func_800532d4(obj, 0x96);
+            effect_play_spatial_sound(obj, 0x96);
         }
         break;
     case 39:
-        func_80053ba8(obj, 0x24, 0x400, 5);
+        effect_pool_initialize_scaled_world(obj, 0x24, 0x400, 5);
         obj->unke = 0x80;
         obj->unk10 = 50;
         obj->unkd = 1;
@@ -535,7 +535,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->pos.vy -= 200;
         break;
     case 38:
-        func_80053ba8(obj, 0x24, 0x400, 5);
+        effect_pool_initialize_scaled_world(obj, 0x24, 0x400, 5);
         obj->unke = 0x40;
         obj->unk10 = 50;
         obj->unkd = 1;
@@ -543,28 +543,28 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->pos.vy -= 200;
         break;
     case 102:
-        func_80053be4(obj, 10, 0xc00, 5);
+        effect_pool_initialize_scaled(obj, 10, 0xc00, 5);
         obj->unk10 = 50;
         obj->unkd = 1;
-        func_800532d4(obj, 0x31);
+        effect_play_spatial_sound(obj, 0x31);
         break;
     case 58:
-        func_80053be4(obj, 10, 0xc00, 5);
+        effect_pool_initialize_scaled(obj, 10, 0xc00, 5);
         obj->unk10 = 50;
         obj->unkd = 1;
         obj->unke = 0x40;
-        func_800532d4(obj, 100);
+        effect_play_spatial_sound(obj, 100);
         break;
     case 21:
-        func_80053be4(obj, 0x37, 0x1800, 5);
+        effect_pool_initialize_scaled(obj, 0x37, 0x1800, 5);
         obj->unk10 = 120;
         obj->unkd = 1;
         obj->arg.h.unk44 = 0;
         obj->unke = 0x40;
-        func_800532d4(obj, 0x9a);
+        effect_play_spatial_sound(obj, 0x9a);
         break;
     case 50:
-        func_80053be4(obj, 0x42, 0x800, 5);
+        effect_pool_initialize_scaled(obj, 0x42, 0x800, 5);
         obj->unk10 = 70;
         obj->unkb = 3;
         obj->unke = 0;
@@ -574,8 +574,8 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         break;
     case 13:
     case 56:
-        func_800532d4(obj, 0x2b);
-        func_80053ba8(obj, 13, 0x1400, 5);
+        effect_play_spatial_sound(obj, 0x2b);
+        effect_pool_initialize_scaled_world(obj, 13, 0x1400, 5);
         obj->unk10 = 45;
         obj->arg.b.unk44 = 0;
         obj->unkd = 1;
@@ -587,7 +587,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->scale.vz = 0x2000;
         break;
     case 54:
-        func_80053ba8(obj, 0x3d, 0x1000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x3d, 0x1000, 5);
         obj->scale.vx = args[1] * 1024 + 0x1800;
         obj->scale.vz = args[1] * 1024 + 0x1800;
         obj->scale.vy = args[1] * 1024 + 0xc00;
@@ -598,7 +598,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x40;
         break;
     case 55:
-        func_80053ba8(obj, 0x39, 7000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x39, 7000, 5);
         obj->unk10 = 48;
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
@@ -606,10 +606,10 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
-        func_800532d4(obj, 99);
+        effect_play_spatial_sound(obj, 99);
         break;
     case 49:
-        func_80053ba8(obj, 0x39, 6000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x39, 6000, 5);
         obj->unk10 = 48;
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
@@ -619,7 +619,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         break;
     case 70:
-        func_80053ba8(obj, 0x3f, 0x800, 5);
+        effect_pool_initialize_scaled_world(obj, 0x3f, 0x800, 5);
         obj->scale.vz = 0xc00;
         obj->unk10 = 60;
         obj->unkd = 1;
@@ -628,26 +628,26 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk44 = 0;
         obj->arg.h.unk46 = args[1];
         obj->unke = 0x100;
-        func_800532d4(obj, 0x2d);
+        effect_play_spatial_sound(obj, 0x2d);
         break;
     case 44:
-        func_80053ba8(obj, 0x3f, 0x800, 5);
+        effect_pool_initialize_scaled_world(obj, 0x3f, 0x800, 5);
         obj->unk10 = 55;
         obj->unkd = 1;
         obj->arg.h.unk44 = 0;
         obj->unke = 0x40;
-        func_800532d4(obj, 4);
+        effect_play_spatial_sound(obj, 4);
         break;
     case 64:
-        func_80053be4(obj, 0x43, 0x1400, 5);
+        effect_pool_initialize_scaled(obj, 0x43, 0x1400, 5);
         obj->unk10 = 70;
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
         obj->unke = 0;
-        func_800532d4(obj, 0x67);
+        effect_play_spatial_sound(obj, 0x67);
         break;
     case 60:
-        func_80053ba8(obj, 30, 100, 0);
+        effect_pool_initialize_scaled_world(obj, 30, 100, 0);
         obj->scale.vx = 100;
         obj->scale.vy = 0x800;
         obj->scale.vz = 100;
@@ -676,7 +676,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->vel.vy = 0;
         obj->unk10 = 150;
         obj->arg.h.unk44 = 0;
-        func_800532d4(obj, 0x98);
+        effect_play_spatial_sound(obj, 0x98);
         break;
     case 89:
         obj->unk8 = 1;
@@ -694,7 +694,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unkb = 5;
         break;
     case 88:
-        func_80053ba8(obj, 0x15, 0, 5);
+        effect_pool_initialize_scaled_world(obj, 0x15, 0, 5);
         obj->scale.vx = args[1];
         obj->scale.vy = args[1];
         obj->scale.vz = args[1];
@@ -706,12 +706,12 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         break;
     case 66:
         if (obj->unk0 & 0x40) {
-            func_800532d4(obj, 0x62);
+            effect_play_spatial_sound(obj, 0x62);
         } else {
-            func_800532d4(obj, 0x2c);
+            effect_play_spatial_sound(obj, 0x2c);
         }
     case 42:
-        func_80053ba8(obj, 0x2d, 0x1000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x2d, 0x1000, 5);
         obj->scale.vz = 0x1400;
         obj->unk10 = 50;
         obj->arg.b.unk44 = 0;
@@ -722,7 +722,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x40;
         break;
     case 46:
-        func_80053ba8(obj, 0x2d, 0x1000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x2d, 0x1000, 5);
         obj->scale.vz = 0x2000;
         obj->unk10 = 80;
         obj->arg.b.unk44 = 0;
@@ -732,7 +732,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x80;
         break;
     case 53:
-        func_80053ba8(obj, 0x41, 0x100, 5);
+        effect_pool_initialize_scaled_world(obj, 0x41, 0x100, 5);
         obj->unk10 = 50;
         obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
@@ -740,15 +740,15 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x40;
         break;
     case 12:
-        func_80053ba8(obj, 0x1f, 2800, 5);
+        effect_pool_initialize_scaled_world(obj, 0x1f, 2800, 5);
         obj->unk10 = 60;
         obj->scale.vy = 0x1400;
         obj->arg.h.unk44 = obj->arg.h.unk46 = obj->arg.h.unk48 = obj->arg.h.unk4a = 0;
         obj->unke = 0x80;
-        func_800532d4(obj, 0x95);
+        effect_play_spatial_sound(obj, 0x95);
         break;
     case 101:
-        func_80053ba8(obj, 0x20, 7000, 5);
+        effect_pool_initialize_scaled_world(obj, 0x20, 7000, 5);
         obj->unk10 = 60;
         obj->arg.h.unk44 = obj->arg.h.unk48 = obj->arg.h.unk4a = 0;
         obj->arg.h.unk46 = args[1];
@@ -756,11 +756,11 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x40;
         break;
     case 11:
-        func_80053be4(obj, 0x16, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 0x16, 0x1000, 5);
         obj->unk10 = 70;
         obj->unke = 0xc0;
         if ((obj->unk0 & 0x40) && args[1] == 3) {
-            func_800532d4(obj, 0x94);
+            effect_play_spatial_sound(obj, 0x94);
         }
         break;
     case 34:
@@ -790,7 +790,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->angle.vz = 0;
         obj->angle.vy = args[1];
         obj->unke = 0;
-        func_800532d4(obj, 0x26);
+        effect_play_spatial_sound(obj, 0x26);
         break;
     case 35:
         obj->unk8 = 0;
@@ -859,7 +859,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 150;
         obj->arg.b.unk45 = 0;
         obj->unke = 0x80;
-        func_800532d4(obj, 0x90);
+        effect_play_spatial_sound(obj, 0x90);
         break;
     case 9:
         obj->unk8 = 1;
@@ -878,7 +878,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk44 = 0;
         obj->arg.h.unk46 = DAT_801b24e4.unk124.vy;
         obj->unke = 0;
-        func_800532d4(obj, 0x92);
+        effect_play_spatial_sound(obj, 0x92);
         break;
     case 7:
     case 22:
@@ -894,7 +894,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk46 = args[2];
         obj->arg.h.unk48 = args[3];
         obj->unke = args[4] << 6;
-        func_800532d4(obj, 0x23);
+        effect_play_spatial_sound(obj, 0x23);
         break;
     case 16:
         obj->unk4 = 0x80;
@@ -918,7 +918,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.b.unk48 = 0;
         obj->arg.b.unk49 = 0;
         obj->unke = 0x40;
-        func_800532d4(obj, 0x97);
+        effect_play_spatial_sound(obj, 0x97);
         break;
     case 5:
         obj->unk4 = 0x80;
@@ -942,7 +942,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.b.unk49 = 0;
         obj->unk10 = 150;
         obj->unke = 0;
-        func_800532d4(obj, 0x91);
+        effect_play_spatial_sound(obj, 0x91);
         break;
     case 116:
         obj->unk8 = 1;
@@ -970,25 +970,25 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x80;
         break;
     case 125:
-        func_80053be4(obj, 10, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 10, 0x1000, 5);
         obj->unke = 0;
         goto common113;
     case 129:
-        func_80053be4(obj, 10, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 10, 0x1000, 5);
         obj->unke = 0xc0;
         goto common113;
     case 113:
-        func_80053be4(obj, 10, 0x800, 5);
+        effect_pool_initialize_scaled(obj, 10, 0x800, 5);
         obj->unke = 0x40;
     common113:
         obj->unk10 = 100;
         obj->arg.h.unk44 = args[1];
-        func_800532d4(obj, 0x2e);
+        effect_play_spatial_sound(obj, 0x2e);
         break;
     case 114:
     case 126:
     case 128:
-        func_80053be4(obj, 11, 0x1000, 5);
+        effect_pool_initialize_scaled(obj, 11, 0x1000, 5);
         obj->unke = 0x40;
         obj->scale.vy = args[1];
         obj->unk10 = 12;
@@ -1016,7 +1016,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
         obj->angle.vx = obj->angle.vy = obj->angle.vz = 0;
         obj->arg.h.unk44 = args[1] / 4;
-        func_800532d4(obj, 0x26);
+        effect_play_spatial_sound(obj, 0x26);
         break;
     case 90:
         obj->unk8 = 1;
@@ -1031,7 +1031,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk46 = args[2];
         obj->arg.h.unk48 = args[3];
         obj->unke = 0;
-        func_800532d4(obj, 0x23);
+        effect_play_spatial_sound(obj, 0x23);
         break;
     case 18:
         obj->unkb = 3;
@@ -1096,10 +1096,10 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->scale.vy = 0xa00;
         obj->scale.vz = 0xc00;
         obj->unke = 0;
-        func_800532d4(obj, 0x66);
+        effect_play_spatial_sound(obj, 0x66);
         break;
     case 92:
-        func_80053be4(obj, 11, 0x1800, 5);
+        effect_pool_initialize_scaled(obj, 11, 0x1800, 5);
         obj->scale.vy = 0;
         obj->arg.b.unk44 = 0;
         obj->arg.b.unk45 = args[1];
@@ -1107,7 +1107,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unke = 0x40;
         break;
     case 93:
-        func_80053be4(obj, 11, 0x1800, 5);
+        effect_pool_initialize_scaled(obj, 11, 0x1800, 5);
         obj->scale.vy = 0;
         obj->arg.b.unk44 = 0;
         obj->arg.b.unk45 = args[1];
@@ -1145,15 +1145,15 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->vel.vy = 0;
         obj->unke = 0x40;
         obj->pos.vy += 2400;
-        func_800532d4(obj, 0x65);
+        effect_play_spatial_sound(obj, 0x65);
         break;
     case 123:
         obj->unk8 = 0;
         obj->unk10 = 20;
-        func_800532d4(obj, 0x65);
+        effect_play_spatial_sound(obj, 0x65);
         break;
     case 111:
-        func_80053be4(obj, args[4], args[1], args[6] | 4);
+        effect_pool_initialize_scaled(obj, args[4], args[1], args[6] | 4);
         obj->arg.h.unk44 = args[2];
         obj->unk10 = args[3];
         obj->arg.h.unk46 = args[5];
@@ -1191,15 +1191,15 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         }
         break;
     case 26:
-        func_80053c20(obj, 0x18, args[1] << 11, args[1] * 14 - 7);
+        effect_pool_initialize_fixed(obj, 0x18, args[1] << 11, args[1] * 14 - 7);
         obj->unke = 0xc0;
         break;
     case 27:
-        func_80053c20(obj, 0x2f, 0, 0);
+        effect_pool_initialize_fixed(obj, 0x2f, 0, 0);
         obj->unke = 0x80;
         break;
     case 28:
-        func_80053c20(obj, 0x18, args[1] << 11, args[1] * 14 - 7);
+        effect_pool_initialize_fixed(obj, 0x18, args[1] << 11, args[1] * 14 - 7);
         obj->unke = 0x80;
         break;
     case 23:
@@ -1240,7 +1240,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->vel.vz = 100;
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
         obj->unke = 0x80;
-        func_800532d4(obj, 0x2d);
+        effect_play_spatial_sound(obj, 0x2d);
         break;
     case 82:
         obj->unk2 = 6;
@@ -1261,7 +1261,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.h.unk46 = 0;
         break;
     case 85:
-        func_80053be4(obj, 9, 0x400, 5);
+        effect_pool_initialize_scaled(obj, 9, 0x400, 5);
         obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
         obj->unk7 = 9;
         obj->arg.h.unk44 = args[1];

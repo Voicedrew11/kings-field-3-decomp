@@ -15,12 +15,12 @@ s32 menu_card_browser(void);
 void player_update_frame(void);
 s32 collision_sample_map_cell_layer(s32 x, s32 y, s32 z);
 void map_object_update_actions(void);
-void func_8005eb20(void);
-void func_8005efd4(s32 area);
-void func_8005f444(s32 area);
-void func_8005f7bc(u8 *data);
-void func_8005ffd0(u8 *data);
-void func_80061940(void);
+void game_update_ending(void);
+void event_world_state_save_slot(s32 area);
+void event_world_state_restore_slot(s32 area);
+void card_payload_capture_game_state(u8 *data);
+void card_payload_restore_game_state(u8 *data);
+void movie_update_state(void);
 
 /* LIBSND-shaped SDK members: SsVabOpenHeadSticky(addr, vab_id, spu_addr) and
  * SsUtKeyOn(vab, prog, tone, note, fine, voll, volr) by their call shape only. */

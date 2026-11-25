@@ -1,6 +1,6 @@
 /*
  * Handler slot 0 of 17 modules (shared fragment, FDAT_002.BIN's claim):
- * GAME.EXE's func_8005e2d0 calls it with the point it tests (the position
+ * GAME.EXE's event_world_dispatch_interaction calls it with the point it tests (the position
  * raised by 500) and the facing. Each object map_object_find_interaction_target finds in front
  * whose definition kind is 9 or 0x15 and that is armed (unk3c) either
  * triggers its linked object (unk3a) or, with none, shows its message.
@@ -43,7 +43,7 @@ void fdat_801e83b0(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {

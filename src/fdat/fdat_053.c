@@ -114,14 +114,14 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
         to = target->pos;
         to.vy -= 50;
         for (t = 0; t < 4096; t += 64) {
-            func_8005bee0(obj, &from, &to, NULL, NULL, t);
+            scene_pose_interpolate(obj, &from, &to, NULL, NULL, t);
             cd_request_service_vab();
             cd_request_service_stream();
             render_game_frame(NULL, NULL);
         }
         DAT_801ba984.unk32[0x25] = 1;
         DAT_801ba984.unk32[0x26] = 0;
-        func_8005d7f8(item);
+        game_counter_decrement(item);
         DAT_801ba984.unk0 = 1;
     }
 }
@@ -206,14 +206,14 @@ void func_801e8b10(Object44 *obj)
         }
         break;
     case 1:
-        if (func_8005d7bc(0x38) > 0) {
-            func_8005d948(0x200, 0, 0, 0, 100, 100, 100);
+        if (game_counter_is_nonzero(0x38) > 0) {
+            color_overlay_transition(0x200, 0, 0, 0, 100, 100, 100);
             if (DAT_801b24e4.unkf2 == 0x38) {
                 player_set_equipment_slot(0x39, 4);
             }
-            func_8005d7f8(0x38);
-            func_8005d898(0x39);
-            func_8005d948(0x200, 100, 100, 100, 0, 0, 0);
+            game_counter_decrement(0x38);
+            game_counter_increment(0x39);
+            color_overlay_transition(0x200, 100, 100, 100, 0, 0, 0);
         }
         break;
     case 0x61:
@@ -296,15 +296,15 @@ void func_801e8e08(Object88 *record, s32 event)
     case 0:
         if (DAT_801ba984.unk32[0x24] != 1) {
             DAT_801ba984.unk32[0x24] = 1;
-            func_8005db30(NULL, 0x29);
+            event_map_object_interact(NULL, 0x29);
             player_set_equipment_slot(0x29, 0);
-            func_8005db30(NULL, 0x31);
+            event_map_object_interact(NULL, 0x31);
             player_set_equipment_slot(0x31, 1);
-            func_8005db30(NULL, 0x46);
+            event_map_object_interact(NULL, 0x46);
             player_set_equipment_slot(0x46, 2);
-            func_8005db30(NULL, 0x4f);
+            event_map_object_interact(NULL, 0x4f);
             player_set_equipment_slot(0x4f, 3);
-            func_8005db30(NULL, 0x3c);
+            event_map_object_interact(NULL, 0x3c);
             player_set_equipment_slot(0x3c, 4);
             DAT_8018fb3c.objects[63].unk0 = 2;
             DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
@@ -313,8 +313,8 @@ void func_801e8e08(Object88 *record, s32 event)
     case 1:
         if (DAT_801ba984.unk32[0x25] == 1) {
             DAT_801ba984.unk32[0x25] = 2;
-            func_8005d948(0x200, 0, 0, 0, 200, 200, 200);
-            func_8005d948(0x200, 200, 200, 200, 0, 0, 0);
+            color_overlay_transition(0x200, 0, 0, 0, 200, 200, 200);
+            color_overlay_transition(0x200, 200, 200, 200, 0, 0, 0);
             DAT_801b24e4.unk34[4] += 30;
             player_learn_element_magic(4);
             player_recalculate_combat_stats();

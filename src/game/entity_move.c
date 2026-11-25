@@ -16,7 +16,7 @@
 
 /* Moves the current record by vel; on a hit, reverses the blocked components. */
 ADDRESS(0x8004e094, 0x1e8)
-s32 func_8004e094(SVECTOR *vel)
+s32 actor_move_with_collision(SVECTOR *vel)
 {
     Object88 *obj;
     VECTOR pos;
@@ -47,7 +47,7 @@ s32 func_8004e094(SVECTOR *vel)
 
 /* Starts a jump of the current record to (x, y, z); returns its time or -1. */
 ADDRESS(0x8004e27c, 0xa0)
-s32 func_8004e27c(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed)
+s32 actor_start_ballistic_motion(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed)
 {
     Object88 *obj;
     s16 time;
@@ -65,14 +65,14 @@ s32 func_8004e27c(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed)
 }
 
 ADDRESS(0x8004e31c, 0x14)
-void func_8004e31c(void)
+void actor_suspend_vertical_motion(void)
 {
     DAT_80185da8.current->unkd = 0x60;
 }
 
 /* Falls, lands and jumps the current record (unkd 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
 ADDRESS(0x8004e330, 0x3c8)
-void func_8004e330(void)
+void actor_update_vertical_motion(void)
 {
     Object88 *obj = DAT_80185da8.current;
     Object78 *def = DAT_80185da8.def;
@@ -169,7 +169,7 @@ void func_8004e330(void)
 
 /* Scales the current record's horizontal velocity toward speed, then moves it. */
 ADDRESS(0x8004e6f8, 0x12c)
-s32 func_8004e6f8(s32 speed, s32 mode)
+s32 actor_damp_horizontal_motion(s32 speed, s32 mode)
 {
     Object88 *obj;
     s32 length;
@@ -183,12 +183,12 @@ s32 func_8004e6f8(s32 speed, s32 mode)
         obj->vel.vx = value_approach(obj->vel.vx, 0, obj->vel.vx * speed * 2 / length);
         obj->vel.vz = value_approach(obj->vel.vz, 0, obj->vel.vz * speed * 2 / length);
     }
-    return func_8004dbc8(&obj->vel, mode);
+    return actor_move_horizontal_with_collision(&obj->vel, mode);
 }
 
 /* Accelerates the current record along angle, then moves it. */
 ADDRESS(0x8004e824, 0xc8)
-s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
+s32 actor_move_along_heading(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
 {
     Object88 *obj;
     struct {
@@ -202,7 +202,7 @@ s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
     vector2i_scale_shift11(scale_z, step.v);
     obj->vel.vx = value_approach(obj->vel.vx, target.v[0], step.v[0]);
     obj->vel.vz = value_approach(obj->vel.vz, target.v[1], step.v[1]);
-    return func_8004dbc8(&obj->vel, mode);
+    return actor_move_horizontal_with_collision(&obj->vel, mode);
 }
 
 ADDRESS(0x8004e8ec, 0x28)
@@ -226,12 +226,12 @@ s32 func_8004e914(s32 angle, s32 target)
 
 /*
  * Turns obj toward target: the turn rate obj->unk58 grows by accel up to max.
- * target arrives as an int (func_800500a8 passes vector_xz_to_angle's result
+ * target arrives as an int (actor_update_behavior passes vector_xz_to_angle's result
  * and Object88.unk20 unconverted); retail narrows it to 16 bits for each
  * angle helper call.
  */
 ADDRESS(0x8004e928, 0x154)
-void func_8004e928(Object88 *obj, int target, s32 max, s32 accel)
+void actor_turn_toward_angle(Object88 *obj, int target, s32 max, s32 accel)
 {
     s32 yaw;
 
@@ -264,19 +264,20 @@ void func_8004e928(Object88 *obj, int target, s32 max, s32 accel)
 }
 
 ADDRESS(0x8004ea7c, 0x74)
-/* Returns func_8004e824's result (FDAT module slot 17 handlers test it). */
-s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode)
+/* Returns actor_move_along_heading's result (FDAT module slot 17 handlers test it). */
+s32 actor_turn_and_move_along_heading(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode)
 {
     Object88 *obj;
 
     obj = DAT_80185da8.current;
-    func_8004e928(obj, target, max, accel);
-    return func_8004e824(obj->angle.vy, scale_x, scale_z, mode);
+    actor_turn_toward_angle(obj, target, max, accel);
+    return actor_move_along_heading(obj->angle.vy, scale_x, scale_z, mode);
 }
 
 /* Walks the current record toward (x, z); -1 when face is set, it is close and not facing. */
 ADDRESS(0x8004eaf0, 0x118)
-s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel, s32 mode)
+s32 actor_turn_and_move_toward_point(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel,
+                                     s32 mode)
 {
     Object88 *obj = DAT_80185da8.current;
     s32 dx = x - obj->pos.vx;
@@ -287,13 +288,13 @@ s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32
     if (face != -1 && distance <= 600 && !angle_within_tolerance(angle, face, 0x320)) {
         return -1;
     }
-    func_8004ea7c(angle, scale_x, max, scale_z, accel, mode);
+    actor_turn_and_move_along_heading(angle, scale_x, max, scale_z, accel, mode);
     return angle & 0xfff;
 }
 
 /* Accelerates the current record along angle in 3D, then moves it and applies its fall. */
 ADDRESS(0x8004ec08, 0x148)
-s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
+s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
 {
     Object88 *obj;
     SVECTOR target;
@@ -309,7 +310,7 @@ s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
     obj->vel.vx = value_approach(obj->vel.vx, target.vx, step.vx);
     obj->vel.vy = value_approach(obj->vel.vy, target.vy, step.vy);
     obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
-    r = func_8004dbc8(&obj->vel, mode) != 0;
+    r = actor_move_horizontal_with_collision(&obj->vel, mode) != 0;
     y = obj->vel.vy + obj->pos.vy;
     if (collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
                               DAT_80185da8.unk9d04) == 0) {
@@ -320,21 +321,22 @@ s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
     return r;
 }
 
-/* Returns func_8004ec08's result (func_800500a8 tests it). */
+/* Returns actor_move_along_euler_angles's result (actor_update_behavior tests it). */
 ADDRESS(0x8004ed50, 0x90)
-s32 func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, s32 mode)
+s32 actor_turn_and_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel,
+                                           s32 mode)
 {
     Object88 *obj;
 
     obj = DAT_80185da8.current;
-    func_8004e928(obj, angle->vy, max, accel);
+    actor_turn_toward_angle(obj, angle->vy, max, accel);
     obj->angle.vx = angle_approach(obj->angle.vx, angle->vx, 8);
-    return func_8004ec08(&obj->angle, scale_a, scale_b, mode);
+    return actor_move_along_euler_angles(&obj->angle, scale_a, scale_b, mode);
 }
 
 /* A vertex of obj's posed model relative to its position. */
 ADDRESS(0x8004ede0, 0x100)
-s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out)
+s32 actor_sample_rotated_animation_vertex(Object88 *obj, s32 vertex, VECTOR *out)
 {
     SVECTOR rotation;
     SVECTOR v;
@@ -357,7 +359,7 @@ s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out)
 
 /* obj's aim point (Object88.unk28 bits 0-1: position, offset, rotated offset). */
 ADDRESS(0x8004eee0, 0x128)
-VECTOR *func_8004eee0(Object88 *obj, VECTOR *out)
+VECTOR *actor_resolve_group_position(Object88 *obj, VECTOR *out)
 {
     Object78 *def;
 
@@ -385,7 +387,7 @@ VECTOR *func_8004eee0(Object88 *obj, VECTOR *out)
 
 /* Picks the current record's walk animation from its turn rate and climb. */
 ADDRESS(0x8004f008, 0x1c8)
-void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed)
+void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed)
 {
     Object88 *obj;
     s32 anim;
@@ -409,44 +411,44 @@ void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed)
         anim = down;
     }
     if (obj->unkc == idle) {
-        func_8004db08(obj, speed);
-        if (func_8004db98(obj, 0)) {
-            func_8004c184(anim);
+        actor_advance_animation_wrapped(obj, speed);
+        if (actor_animation_crossed_phase(obj, 0)) {
+            actor_set_animation_if_changed(anim);
         }
     } else if (obj->unkc == left) {
         if (obj->unk18 < 2048) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
         } else if (anim != left) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
             if (obj->unk18 >= 4095) {
-                func_8004c130(anim);
+                actor_set_animation(anim);
             }
         }
     } else if (obj->unkc == right) {
         if (obj->unk18 < 2048) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
         } else if (anim != right) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
             if (obj->unk18 >= 4095) {
-                func_8004c130(anim);
+                actor_set_animation(anim);
             }
         }
     } else if (obj->unkc == up) {
         if (obj->unk18 < 2048) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
         } else if (anim != up) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
             if (obj->unk18 >= 4095) {
-                func_8004c130(anim);
+                actor_set_animation(anim);
             }
         }
     } else if (obj->unkc == down) {
         if (obj->unk18 < 2048) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
         } else if (anim != down) {
-            func_8004db3c(obj, speed);
+            actor_advance_animation_clamped(obj, speed);
             if (obj->unk18 >= 4095) {
-                func_8004c130(anim);
+                actor_set_animation(anim);
             }
         }
     }
@@ -454,8 +456,8 @@ void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed)
 
 /* Aims from `from` at target, leading the player's motion over steps refinements. */
 ADDRESS(0x8004f1d0, 0x244)
-s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out, s32 pitch,
-                  s16 turn, s32 steps)
+s32 actor_compute_target_direction(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out,
+                                   s32 pitch, s16 turn, s32 steps)
 {
     VECTOR at;
     SVECTOR angle;

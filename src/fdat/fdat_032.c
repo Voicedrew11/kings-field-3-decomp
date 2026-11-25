@@ -117,7 +117,7 @@ void func_801e86a8(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
-        func_8005db30(NULL, 0x90);
+        event_map_object_interact(NULL, 0x90);
         break;
     case 1:
         if (DAT_801ba984.unk32[0xb] == 0) {

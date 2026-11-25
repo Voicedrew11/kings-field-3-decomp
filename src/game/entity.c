@@ -16,7 +16,7 @@
 
 /* A free record among the last ten. */
 ADDRESS(0x8004b524, 0x3c)
-Object88 *func_8004b524(void)
+Object88 *actor_pool_find_free(void)
 {
     Object88 *obj;
     s32 i;
@@ -33,7 +33,7 @@ Object88 *func_8004b524(void)
 
 /* Places the record in its map cell and on the floor. */
 ADDRESS(0x8004b560, 0xc4)
-void func_8004b560(Object88 *obj)
+void actor_set_home_position(Object88 *obj)
 {
     obj->pos.vx = (obj->unk8 << 11) + obj->unk24;
     obj->pos.vz = (obj->unk7 << 11) + obj->unk22;
@@ -51,7 +51,7 @@ void func_8004b560(Object88 *obj)
 }
 
 ADDRESS(0x8004b624, 0x74)
-void func_8004b624(Object88 *obj)
+void actor_copy_group_defaults(Object88 *obj)
 {
     Object78 *def;
 
@@ -65,9 +65,9 @@ void func_8004b624(Object88 *obj)
 }
 
 ADDRESS(0x8004b698, 0xd8)
-void func_8004b698(Object88 *obj)
+void actor_initialize_from_group(Object88 *obj)
 {
-    func_8004b624(obj);
+    actor_copy_group_defaults(obj);
     obj->unk9 = 1;
     obj->unkc = 0;
     obj->unk18 = 0;
@@ -96,14 +96,14 @@ void func_8004b698(Object88 *obj)
 }
 
 ADDRESS(0x8004b770, 0x24)
-void func_8004b770(Object88 *obj)
+void actor_set_lifecycle_and_home_position(Object88 *obj)
 {
     obj->unk9 = 3;
-    func_8004b560(obj);
+    actor_set_home_position(obj);
 }
 
 ADDRESS(0x8004b794, 0xd4)
-void func_8004b794(void)
+void actor_disable_type3_transition_actors(void)
 {
     Object88 *obj;
     s32 i;
@@ -113,7 +113,7 @@ void func_8004b794(void)
         if (obj->unk0 == 1 && obj->unk9 == 1 && obj->unke == 3 && obj->unkf == 0xf0) {
             if (obj->unk70 != 0 || obj->unk18 > 0x800) {
                 ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
-                func_8004b770(obj);
+                actor_set_lifecycle_and_home_position(obj);
             }
         }
         obj++;
@@ -121,26 +121,26 @@ void func_8004b794(void)
 }
 
 ADDRESS(0x8004b868, 0x5c)
-void func_8004b868(Object88 *obj)
+void actor_prepare_and_initialize(Object88 *obj)
 {
     obj->angle.vx = obj->angle.vz = 0;
     obj->unk3 = obj->unk6;
     obj->angle.vy = obj->unk20;
-    func_8004b560(obj);
-    func_8004b698(obj);
+    actor_set_home_position(obj);
+    actor_initialize_from_group(obj);
     if (obj->unk0 == 3) {
         obj->unk3 = 0;
     }
 }
 
 ADDRESS(0x8004b8c4, 0x38)
-void func_8004b8c4(u16 index)
+void actor_prepare_and_initialize_by_index(u16 index)
 {
-    func_8004b868(&DAT_80185da8.objects[index]);
+    actor_prepare_and_initialize(&DAT_80185da8.objects[index]);
 }
 
 ADDRESS(0x8004b8fc, 0x50)
-void func_8004b8fc(void)
+void actor_pool_clear(void)
 {
     Object88 *obj;
     u16 i;
@@ -160,7 +160,7 @@ void func_8004b8fc(void)
 
 /* Starts a script record (0 stops the script). */
 ADDRESS(0x8004b94c, 0x38)
-void func_8004b94c(Object88 *obj, u8 *script)
+void actor_set_target(Object88 *obj, u8 *script)
 {
     obj->unk10 = obj->unke;
     if (script != NULL) {

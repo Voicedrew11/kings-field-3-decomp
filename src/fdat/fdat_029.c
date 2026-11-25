@@ -64,7 +64,7 @@ void func_801e847c(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     if (DAT_801ba984.unk32[8] == 0) {
-        if (func_8005d7bc(0x7d) > 0 || DAT_801b24e4.level >= 50) {
+        if (game_counter_is_nonzero(0x7d) > 0 || DAT_801b24e4.level >= 50) {
             DAT_801ba984.unk32[8] = 1;
             map_object_process_marker_all(0xf1);
         }
@@ -101,7 +101,7 @@ void func_801e847c(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
@@ -271,7 +271,7 @@ void func_801e8acc(void)
         DAT_801ba984.unk32[7] = 2;
     }
     if (DAT_801ba984.unk32[8] == 0) {
-        if (func_8005d7bc(0x7d) > 0 || DAT_801b24e4.level >= 40) {
+        if (game_counter_is_nonzero(0x7d) > 0 || DAT_801b24e4.level >= 40) {
             DAT_801ba984.unk32[8] = 1;
             map_object_process_marker_all(0xf1);
         }

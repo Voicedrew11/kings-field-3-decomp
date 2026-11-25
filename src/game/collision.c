@@ -802,13 +802,13 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
     shape &= 0xfffffff;
     if (DAT_801d4464.unk12000->layer[0].unk2 & 0xfc) {
         if (mask & 0x10) {
-            DAT_801d4464.unk12028 = func_8004d644(x, y, z, radius, shape);
+            DAT_801d4464.unk12028 = actor_find_overlap_excluding_target_type3(x, y, z, radius, shape);
             if (DAT_801d4464.unk12028 != -1) {
                 hits |= 0x10;
             }
         } else {
             if (mask & 0x40) {
-                DAT_801d4464.unk12028 = func_8004d838(x, y, z, radius, shape);
+                DAT_801d4464.unk12028 = actor_find_overlap(x, y, z, radius, shape);
                 if (DAT_801d4464.unk12028 != -1) {
                     hits |= 0x10;
                 }

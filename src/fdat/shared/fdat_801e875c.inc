@@ -1,5 +1,5 @@
 /*
- * Slot 16 (shared fragment, FDAT_077.BIN's claim): GAME.EXE's func_8004b984
+ * Slot 16 (shared fragment, FDAT_077.BIN's claim): GAME.EXE's actor_score_target_candidate
  * asks whether a script record applies at dist; record 0x85 applies only
  * between its two distances (u16 at +0x12 and +0x10).
  */

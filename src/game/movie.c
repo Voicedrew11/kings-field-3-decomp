@@ -3,9 +3,9 @@
  * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
  * decode environment lives in DAT_801e7edc.dec, the ring buffer is
  * DAT_801c17a4, and the display swaps through DAT_80199154. The decode
- * set-up func_80061364 (not exact) leads; the player func_80060d20 precedes
- * it. func_80061940 steps the movie state; its jump table is this unit's .rdata
- * (after func_80060d20's file names, so the TU starts at or before it).
+ * set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream precedes
+ * it. movie_update_state steps the movie state; its jump table is this unit's .rdata
+ * (after movie_play_stream's file names, so the TU starts at or before it).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -39,7 +39,7 @@ RODATA(0x80013680, 0x64)
  * file numbers from 16) until its last frame, fading the music back in.
  */
 ADDRESS(0x80060d20, 0x644)
-void func_80060d20(void)
+void movie_play_stream(void)
 {
     CdlFILE file;
     u_char param[8];
@@ -127,17 +127,17 @@ void func_80060d20(void)
     SsSetMVol(0, 0);
     SsSeqSetVol(DAT_801b09fc.seq_id, 0, 0);
     SsSetSerialVol(SS_SERIAL_A, DAT_801b24e4.bgm_volume, DAT_801b24e4.bgm_volume);
-    func_80061364();
-    func_800614d4(&file.pos);
-    func_80061650();
+    strSetDefDecEnv();
+    strInit(&file.pos);
+    strNextVlc();
     for (;;) {
-        func_80061878();
+        movie_swap_display_buffer();
         DecDCTin(DAT_801e7edc.dec.vlcbuf[DAT_801e7edc.dec.vlcid], 2);
         DrawSync(0);
         DecDCTout(DAT_801e7edc.dec.imgbuf, DAT_801e7edc.dec.slice.w * DAT_801e7edc.dec.slice.h / 2);
-        func_80061650();
-        func_8006179c(&DAT_801e7edc.dec);
-        func_80061894();
+        strNextVlc();
+        strSync(&DAT_801e7edc.dec);
+        movie_present_frame();
         if (DAT_801e7edc.unk372 == 99) {
             break;
         }
@@ -174,7 +174,7 @@ void func_80060d20(void)
 
 /* Sets up the decode environment for a 320x240 movie drawn into the display buffer not shown. */
 ADDRESS(0x80061364, 0x170)
-void func_80061364(void)
+void strSetDefDecEnv(void)
 {
     u_long **buf = DAT_801e7edc.unk374;
     DECENV *dec = &DAT_801e7edc.dec;
@@ -195,20 +195,20 @@ void func_80061364(void)
 }
 
 ADDRESS(0x800614d4, 0x7c)
-void func_800614d4(CdlLOC *loc)
+void strInit(CdlLOC *loc)
 {
     DAT_801e7edc.unk372 = 0;
     EnterCriticalSection();
-    DecDCToutCallback(func_80061550);
+    DecDCToutCallback(strCallback);
     StSetRing((u_long *)DAT_801c17a4, RING_SIZE);
     StSetStream(0, 1, 0x0fffffff, 0, 0);
     ExitCriticalSection();
-    func_8006182c(loc);
+    strKickCD(loc);
 }
 
 /* MDEC output callback: loads the slice and decodes the next one or flips rect. */
 ADDRESS(0x80061550, 0x100)
-void func_80061550(void)
+void strCallback(void)
 {
     DECENV *dec = &DAT_801e7edc.dec;
     RECT *rect;
@@ -229,13 +229,13 @@ void func_80061550(void)
 }
 
 ADDRESS(0x80061650, 0x8c)
-s32 func_80061650(void)
+s32 strNextVlc(void)
 {
     int cnt = WAIT_TIME;
     DECENV *dec = &DAT_801e7edc.dec;
     u_long *next;
 
-    while ((next = func_800616dc(dec)) == 0) {
+    while ((next = strNext(dec)) == 0) {
         if (--cnt == 0) {
             return -1;
         }
@@ -248,7 +248,7 @@ s32 func_80061650(void)
 
 /* Next movie sector; sets unk372 to 99 past the movie's last frame. */
 ADDRESS(0x800616dc, 0xc0)
-u_long *func_800616dc(DECENV *dec)
+u_long *strNext(DECENV *dec)
 {
     u_long *addr;
     StHEADER *sector;
@@ -271,7 +271,7 @@ u_long *func_800616dc(DECENV *dec)
 }
 
 ADDRESS(0x8006179c, 0x90)
-void func_8006179c(DECENV *dec)
+void strSync(DECENV *dec)
 {
     volatile u_long cnt = WAIT_TIME;
     RECT *rect;
@@ -289,7 +289,7 @@ void func_8006179c(DECENV *dec)
 }
 
 ADDRESS(0x8006182c, 0x4c)
-void func_8006182c(CdlLOC *loc)
+void strKickCD(CdlLOC *loc)
 {
     while (CdControl(CdlSeekL, (u_char *)loc, 0) == 0)
         ;
@@ -299,14 +299,14 @@ void func_8006182c(CdlLOC *loc)
 
 /* Flips the display buffer index. */
 ADDRESS(0x80061878, 0x1c)
-void func_80061878(void)
+void movie_swap_display_buffer(void)
 {
     DAT_80199154.frame = DAT_80199154.frame ? 0 : 1;
 }
 
 /* Shows the current display buffer. */
 ADDRESS(0x80061894, 0x84)
-void func_80061894(void)
+void movie_present_frame(void)
 {
     DrawSync(0);
     VSync(0);
@@ -317,7 +317,7 @@ void func_80061894(void)
 
 /* No movie. */
 ADDRESS(0x80061918, 0x28)
-void func_80061918(void)
+void movie_state_reset(void)
 {
     DAT_801e7edc.unk372 = -1;
     DAT_801e7edc.unk370 = 0;
@@ -326,7 +326,7 @@ void func_80061918(void)
 
 /* Steps the in-game movie state (unk370) of movie unk384. */
 ADDRESS(0x80061940, 0x284)
-void func_80061940(void)
+void movie_update_state(void)
 {
     u8 id;
     u8 flag;
@@ -363,7 +363,7 @@ void func_80061940(void)
         break;
     case 4:
         ((void (*)(u8))DAT_8018fad4.handlers[10])(id);
-        func_80060d20();
+        movie_play_stream();
         if (DAT_801ba984.unk61 == 1) {
             DAT_801ba984.unk61 = 2;
             DAT_801e7edc.unk372 = 1;
@@ -373,7 +373,7 @@ void func_80061940(void)
             MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
-            func_8005c864(12);
+            player_warp_to_destination(12);
         }
         DAT_801e7edc.unk370 = 8;
         player_begin_movie_return(id);

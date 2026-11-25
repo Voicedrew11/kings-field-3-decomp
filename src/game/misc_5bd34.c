@@ -12,20 +12,20 @@
 #include <game/misc.h>
 
 ADDRESS(0x8005bd34, 0x24)
-void func_8005bd34(void)
+void audio_play_sound_16(void)
 {
     audio_play_sound(0x10, 100);
 }
 
 ADDRESS(0x8005bd58, 0x20)
-void func_8005bd58(s32 se)
+void audio_play_sound_at_volume_100(s32 se)
 {
     audio_play_sound(se, 100);
 }
 
 /* Collision test 800 units ahead of pos along angle->vy. */
 ADDRESS(0x8005bd78, 0xa0)
-s32 func_8005bd78(VECTOR *pos, SVECTOR *angle)
+s32 collision_probe_forward_floor(VECTOR *pos, SVECTOR *angle)
 {
     s32 x;
 

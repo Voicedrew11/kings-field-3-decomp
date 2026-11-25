@@ -20,18 +20,18 @@
 RODATA(0x800126e8, 0x5cc)
 
 /* Aims a shot of speed from pos at target. */
-#define AIM(speed) func_8004f1d0(obj, target, speed, &pos, &dir, -1, 0x400, 1)
+#define AIM(speed) actor_compute_target_direction(obj, target, speed, &pos, &dir, -1, 0x400, 1)
 
 /*
  * Fires attack id of the current record from its model vertex (-1: the
  * offset in the next three arguments rotated by its angle; -2: between two
  * vertices, aimed at a point eased toward the player): Object4c records
- * through func_80053c84, aimed at the player. The arguments past vertex
+ * through effect_construct_record, aimed at the player. The arguments past vertex
  * are read through its address: retail homes a2/a3 like a `...` function
  * and stores vertex to its slot.
  */
 ADDRESS(0x8004f414, 0xb8c)
-void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
+void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
 {
     Object88 *obj;
     Object88 *o;
@@ -64,8 +64,8 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         args += 3;
         vector_rotate_yxz(&obj->angle, &rot, &off);
     } else if (vertex == -2) {
-        func_8004ede0(obj, args[1], &from);
-        func_8004ede0(obj, args[2], &off);
+        actor_sample_rotated_animation_vertex(obj, args[1], &from);
+        actor_sample_rotated_animation_vertex(obj, args[2], &off);
         args += 3;
         speed = args[0];
         aim.vx = fixed_lerp_q12(DAT_801b24e4.pos.vx, ((off.vx - from.vx) << 8) + obj->pos.vx, speed);
@@ -73,7 +73,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         aim.vz = fixed_lerp_q12(DAT_801b24e4.pos.vz, ((off.vz - from.vz) << 8) + obj->pos.vz, speed);
         target = &aim;
     } else {
-        func_8004ede0(obj, vertex, &off);
+        actor_sample_rotated_animation_vertex(obj, vertex, &off);
     }
     pos.vx = obj->pos.vx + off.vx;
     pos.vy = obj->pos.vy + off.vy;
@@ -84,23 +84,23 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
     case 0x66:
         audio_play_spatial_default_range(0x31, &pos, 0x6e, 0);
         AIM(500);
-        shot = func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         if (shot != NULL) {
             shot->unkb = 3;
         }
         break;
     case 0xf:
-        func_8004f1d0(obj, target, 0x200, &pos, &dir, 0, 0x400, 1);
-        func_80053c84((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 0);
-        func_80053c84((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 1);
+        actor_compute_target_direction(obj, target, 0x200, &pos, &dir, 0, 0x400, 1);
+        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 0);
+        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 1);
         break;
     case 0x27:
         if (DAT_801b24e4.unk84 != 0) {
             obj->unk28 |= 0x100;
         }
     case 0x26:
-        func_8004f1d0(obj, target, 0, &pos, &dir, -1, 0x400, 1);
-        shot = func_80053c84((u8)kind, 0x81, (u8)id, &pos, &dir);
+        actor_compute_target_direction(obj, target, 0, &pos, &dir, -1, 0x400, 1);
+        shot = effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir);
         if (shot != NULL) {
             shot->unkb = 0;
         }
@@ -122,47 +122,47 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         if (delay < 0) {
             delay = 0;
         }
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, delay);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, delay);
         break;
     case 0xd:
         AIM(0x2a8);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0xb:
         for (i = 0; i < 4; i++) {
             AIM(200);
-            func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, i);
+            effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, i);
         }
         break;
     case 0x32:
         for (i = 0; i < 4; i++) {
             AIM(200);
-            func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+            effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         }
         break;
     case 0x2a:
         AIM(600);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
         break;
     case 0x2c:
         AIM(0x1a4);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0x35:
         AIM(300);
-        func_80053c84((u8)kind, 0x81, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir);
         break;
     case 0x31:
         AIM(600);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0x44:
         AIM(0x226);
-        func_80053c84((u8)kind, 0x83, 0x7c, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, 0x7c, &pos, &dir);
         break;
     case 0x45:
         AIM(700);
-        func_80053c84((u8)kind, 0x83, 0x7b, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, 0x7b, &pos, &dir);
         break;
     case 0x42:
         vector_displacement_to_pitch_yaw(target->vx - pos.vx, -(pos.vy + 1600) + target->vy,
@@ -172,38 +172,38 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         pos.vx += dir.vx;
         pos.vy += dir.vy;
         pos.vz += dir.vz;
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
         break;
     case 2:
     case 0x57:
         AIM(400);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, 0xfe, 2);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0xfe, 2);
         break;
     case 0x2e:
         id = 100;
     case 0x64:
         AIM(0x3c0);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0x2f:
         AIM(0x1a4);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0x30:
         AIM(0x1e0);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 7:
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
         break;
     case 0x55:
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, NULL, DAT_80185da8.unk9d18, vertex,
-                      SCRIPT_U16((u8 *)args[1], 4));
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, DAT_80185da8.unk9d18, vertex,
+                                SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
         pitch_yaw_to_forward_vector(&obj->angle, &dir);
         vector3s_scale_shift12(0x226, &dir);
-        shot = func_80053c84((u8)kind, 0x83, 0x28, &pos, &dir);
+        shot = effect_construct_record((u8)kind, 0x83, 0x28, &pos, &dir);
         if (shot != NULL) {
             shot->unkb = 3;
         }
@@ -212,7 +212,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
     case 0x33:
     case 0x34:
         AIM(300);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         break;
     case 0x1f:
     case 0x20:
@@ -222,7 +222,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
     case 0x24:
     case 0x25:
         AIM(300);
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
         break;
     case 0x12:
     case 0x14:
@@ -234,11 +234,11 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         } else {
             vector3s_scale_shift12(20, &dir);
         }
-        func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
         break;
     case 0x76:
         n = SCRIPT_U16((u8 *)args[1], 4);
-        o = func_8004b524();
+        o = actor_pool_find_free();
         if (o == NULL) {
             break;
         }
@@ -255,10 +255,10 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         o->pos.vx = pos.vx;
         o->pos.vy = pos.vy + 4096;
         o->pos.vz = pos.vz;
-        func_8004b698(o);
+        actor_initialize_from_group(o);
         o->vel = dir;
         o->angle = obj->angle;
-        func_8004c0b0(o, 0x1d);
+        actor_select_target_type_in_own_group(o, 0x1d);
         break;
     case 0x50:
     case 0x53:
@@ -274,10 +274,10 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
             }
             vector_add_scaled_delta(target, &DAT_801b24e4.unk11c, time >> 6, &p);
         }
-        sv.vy = func_8004f1d0(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
+        sv.vy = actor_compute_target_direction(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
         sv.vx = pitch;
         sv.vz = 0;
-        shot = func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
+        shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
         if (shot != NULL) {
             shot->arg.h.unk44 = pos.vy;
             shot->unk10 = 0x32;
@@ -289,7 +289,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
 
 /* Note offset for obj's sound: lower for a larger record, plus a little noise. */
 ADDRESS(0x8004ffa0, 0x70)
-s32 func_8004ffa0(Object88 *obj)
+s32 actor_sound_note_offset(Object88 *obj)
 {
     s32 note = 16 - (s8)(obj->scale.vy >> 8);
 
@@ -303,15 +303,16 @@ s32 func_8004ffa0(Object88 *obj)
 
 /* Plays the sound effect of obj's running script record at obj. */
 ADDRESS(0x80050010, 0x98)
-void func_80050010(Object88 *obj)
+void actor_play_target_sound(Object88 *obj)
 {
     u8 *script;
 
     script = obj->unk60;
     if (obj->unk28 & 0x800000) {
-        audio_play_spatial_range(script[4] + 240, &obj->pos, 0x7f, 0x6000, 0x7800, func_8004ffa0(obj));
+        audio_play_spatial_range(script[4] + 240, &obj->pos, 0x7f, 0x6000, 0x7800,
+                                 actor_sound_note_offset(obj));
     } else {
-        audio_play_spatial_default_range(script[4] + 240, &obj->pos, 0x6e, func_8004ffa0(obj));
+        audio_play_spatial_default_range(script[4] + 240, &obj->pos, 0x6e, actor_sound_note_offset(obj));
     }
 }
 
@@ -320,11 +321,11 @@ void func_80050010(Object88 *obj)
  * and .def): its sound and light fade first, then the record's behaviour by
  * script id (Object88.unke; unkf 0 starts it), FDAT slot 17 for the ids this
  * module does not know, and last the ride on its target record (flag 0x10).
- * The angles passed to func_8004e824 are narrowed to s16 here; the FDAT
+ * The angles passed to actor_move_along_heading are narrowed to s16 here; the FDAT
  * callers pass theirs as int.
  */
 ADDRESS(0x800500a8, 0x2db4)
-void func_800500a8(void)
+void actor_update_behavior(void)
 {
     Object88 *obj;
     Object78 *def;
@@ -352,19 +353,19 @@ void func_800500a8(void)
         if (script[0] != 0x15 || obj->unk70 == 2) {
             switch (SCRIPT_U16(script, 10) & 0xc000) {
             case 0:
-                if (func_8004db98(obj, n)) {
-                    func_80050010(obj);
+                if (actor_animation_crossed_phase(obj, n)) {
+                    actor_play_target_sound(obj);
                 }
                 break;
             case 0x8000:
                 if ((rand() >> 3) < n) {
-                    func_80050010(obj);
+                    actor_play_target_sound(obj);
                 }
                 break;
             case 0x4000:
                 slot = n * DAT_80185da8.unk9d18 / 3 % n;
                 if (DAT_80185da8.unk9d24 % n == slot) {
-                    func_80050010(obj);
+                    actor_play_target_sound(obj);
                 }
                 break;
             }
@@ -373,7 +374,7 @@ void func_800500a8(void)
     if (obj->unk28 & 0x200000) {
         u8 *light;
 
-        light = func_8004c068(def, 2);
+        light = actor_find_target_of_type(def, 2);
         if (light != NULL) {
             switch (obj->unk84) {
             case 0:
@@ -419,11 +420,11 @@ void func_800500a8(void)
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
         phase = obj->unk70;
         if (phase < 2 || !(obj->unk28 & 0x800)) {
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         }
         switch (phase) {
         case 0:
@@ -464,9 +465,9 @@ void func_800500a8(void)
             break;
         }
         if (phase == 3) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(def->unk1[2] * 2, 10);
+        actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
         break;
     case 3: {
         u8 *light;
@@ -474,10 +475,10 @@ void func_800500a8(void)
         phase = obj->unk70;
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->unk28 &= ~0x10000;
             obj->unk70 = 0;
-            light = func_8004c068(def, 2);
+            light = actor_find_target_of_type(def, 2);
             if (light != NULL) {
                 obj->unk14 = 0x3b;
                 obj->unk16 = 0;
@@ -489,8 +490,8 @@ void func_800500a8(void)
             if (obj->unk18 >= 1024 && (obj->unk28 & 0x800)) {
                 break;
             }
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
-            if (func_8004c068(def, 2) != NULL) {
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+            if (actor_find_target_of_type(def, 2) != NULL) {
                 if (obj->unk18 < 2048) {
                     if (obj->unk16 < 4096) {
                         obj->unk16 += 512;
@@ -499,7 +500,7 @@ void func_800500a8(void)
                     obj->unk16 -= 512;
                 }
             }
-            if (func_8004db98(obj, 0x800)) {
+            if (actor_animation_crossed_phase(obj, 0x800)) {
                 u16 drop;
 
                 drop = def->unk30 + random_centered_triangular_scaled(def->unk30);
@@ -518,7 +519,7 @@ void func_800500a8(void)
             }
             if (obj->unk18 >= 4095 || SCRIPT_U16(script, 8) == 0) {
                 obj->unk70 = 15;
-                if (func_8004c068(def, 2) != NULL) {
+                if (actor_find_target_of_type(def, 2) != NULL) {
                     if (obj->unk1 < 50) {
                         obj->unk14 = 0x3e;
                     } else {
@@ -551,47 +552,47 @@ void func_800500a8(void)
                 } else {
                     ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
                     if (obj->unk0 == 1) {
-                        func_8004b770(obj);
+                        actor_set_lifecycle_and_home_position(obj);
                     } else if (obj->unk0 == 2) {
                         obj->unk9 = 0;
-                        func_8004b560(obj);
+                        actor_set_home_position(obj);
                     } else if (obj->unk0 == 5) {
                         obj->unk0 = 0xff;
                         obj->unk9 = 0;
                     } else {
                         obj->unk9 = 2;
-                        func_8004b560(obj);
+                        actor_set_home_position(obj);
                     }
                 }
             }
         }
-        func_8004e6f8(def->unk1[2] * 2, 10);
+        actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
         break;
     }
     case 0:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
-        func_8004e6f8(def->unk1[2], 10);
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+        actor_damp_horizontal_motion(def->unk1[2], 10);
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     case 1:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->unk64 = rand() >> 3;
-        } else if (func_8004ea7c(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2],
-                                 def->unk1[3], 5) ||
+        } else if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2],
+                                                     def->unk1[3], 5) ||
                    (rand() >> 5) < script[20]) {
             obj->unk64 = rand() >> 3;
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     case 12:
@@ -607,12 +608,13 @@ void func_800500a8(void)
                                                                (obj->unk7 << 11) + obj->unk22, obj->unk1c,
                                                                obj->unk1e) +
                              obj->unk26;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
             flags = 3;
-            func_8004e31c();
+            actor_suspend_vertical_motion();
         } else {
-            flags = func_8004ed50(&obj->unk72, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2],
-                                  def->unk1[3], 0x11);
+            flags = actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 12),
+                                                           SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3],
+                                                           0x11);
             if ((rand() >> 5) < script[19]) {
                 flags |= 1;
             }
@@ -632,9 +634,10 @@ void func_800500a8(void)
             obj->unk72.vx = (rand() >> 5) - 512;
         }
         if (obj->unke == 16) {
-            func_8004f008(script[1], script[20], script[21], script[22], script[23], SCRIPT_U16(script, 8));
+            actor_update_motion_animation(script[1], script[20], script[21], script[22], script[23],
+                                          SCRIPT_U16(script, 8));
         } else {
-            func_8004db08(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
         }
         break;
     }
@@ -645,7 +648,7 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             switch (obj->unk10) {
             case 4:
             case 18:
@@ -673,10 +676,11 @@ void func_800500a8(void)
             mode = 5;
         }
         if (OBJECT88_B70(obj) == 0) {
-            r = func_8004ea7c(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3],
-                              mode);
+            r = actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
+                                                  def->unk1[2], def->unk1[3], mode);
         } else {
-            r = func_8004e824((s16)(obj->unk64 + 2048), SCRIPT_U16(script, 12), def->unk1[2], mode);
+            r = actor_move_along_heading((s16)(obj->unk64 + 2048), SCRIPT_U16(script, 12), def->unk1[2],
+                                         mode);
         }
         if (r & 0x100) {
             if (OBJECT88_B71(obj) == 0) {
@@ -692,9 +696,9 @@ void func_800500a8(void)
                 OBJECT88_B70(obj) = OBJECT88_B70(obj) == 0;
             }
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     }
@@ -707,7 +711,7 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
             obj->unk70 = 0;
         }
         dx = DAT_801b24e4.pos.vx - obj->pos.vx;
@@ -728,18 +732,20 @@ void func_800500a8(void)
             obj->unkf = 0xf0;
         }
         if (obj->unk70 == 0) {
-            func_8004ed50(&obj->unk72, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3],
-                          0x11);
+            actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3],
+                                                   0x11);
         } else {
             dir.vx = -512;
             dir.vy = obj->unk72.vy + 2048;
             dir.vz = 0;
-            func_8004ed50(&dir, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 0x11);
+            actor_turn_and_move_along_euler_angles(&dir, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
+                                                   def->unk1[2], def->unk1[3], 0x11);
         }
         if (obj->unke == 17) {
-            func_8004f008(script[1], script[24], script[25], script[26], script[27], SCRIPT_U16(script, 8));
+            actor_update_motion_animation(script[1], script[24], script[25], script[26], script[27],
+                                          SCRIPT_U16(script, 8));
         } else {
-            func_8004db08(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
         }
         break;
     }
@@ -747,12 +753,13 @@ void func_800500a8(void)
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c130(script[20]);
+            actor_set_animation(script[20]);
         }
         switch (obj->unk70) {
         case 0:
-            if (func_8004e824((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 18), def->unk1[2], 5) == 0) {
-                func_8004db08(obj, SCRIPT_U16(script, 8));
+            if (actor_move_along_heading((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 18), def->unk1[2],
+                                         5) == 0) {
+                actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
                 if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx,
                                          DAT_801b24e4.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 14)) {
@@ -760,37 +767,38 @@ void func_800500a8(void)
                 }
             }
             obj->unk70 = 1;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             break;
         case 1:
-            func_8004db3c(obj, script[22]);
+            actor_advance_animation_clamped(obj, script[22]);
             if (obj->unk18 < 4095) {
-                func_8004e6f8(def->unk1[2] * 2, 10);
+                actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
                 break;
             }
-            if ((s16)func_8004e27c(1, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy - 500, DAT_801b24e4.pos.vz, script[23],
-                                   SCRIPT_U16(script, 16)) > 0) {
+            if ((s16)actor_start_ballistic_motion(1, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy - 500,
+                                                  DAT_801b24e4.pos.vz, script[23],
+                                                  SCRIPT_U16(script, 16)) > 0) {
                 obj->unk70 = 2;
-                func_8004e6f8(def->unk1[2] * 2, 10);
+                actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
                 break;
             }
             obj->unk70 = 3;
-            func_8004c130(script[21]);
+            actor_set_animation(script[21]);
             break;
         case 2:
             if (obj->unkd == 0) {
                 obj->unk70 = 3;
-                func_8004c130(script[21]);
+                actor_set_animation(script[21]);
                 break;
             }
-            func_8004ea7c(obj->angle.vy, obj->unk68, 0, obj->unk68, def->unk1[3], 10);
+            actor_turn_and_move_along_heading(obj->angle.vy, obj->unk68, 0, obj->unk68, def->unk1[3], 10);
             break;
         case 3:
-            func_8004db3c(obj, script[22]);
+            actor_advance_animation_clamped(obj, script[22]);
             if (obj->unk18 >= 4095) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
-            func_8004e6f8(obj->unk68 >> 4, 10);
+            actor_damp_horizontal_motion(obj->unk68 >> 4, 10);
             break;
         }
         break;
@@ -799,8 +807,8 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf1;
-            func_8004c184(script[1]);
-            func_8004e31c();
+            actor_set_animation_if_changed(script[1]);
+            actor_suspend_vertical_motion();
         }
         r = rand();
         if (r < 2048) {
@@ -838,10 +846,10 @@ void func_800500a8(void)
                 obj->vel.vy = -SCRIPT_U16(script, 12);
             }
         }
-        func_8004e094(&obj->vel);
-        func_8004db08(obj, SCRIPT_U16(script, 8));
-        func_8004e928(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 14),
-                      def->unk1[3]);
+        actor_move_with_collision(&obj->vel);
+        actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
+        actor_turn_toward_angle(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 14),
+                                def->unk1[3]);
         break;
     }
     case 132: {
@@ -857,9 +865,9 @@ void func_800500a8(void)
             obj->unk70 = SCRIPT_U16(script, 24);
             obj->unk72.vx = 0;
             obj->unk72.vy = 0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         p = (s16 *)(script + 28) + obj->unk72.vx;
         for (;;) {
             c = *p;
@@ -887,7 +895,7 @@ void func_800500a8(void)
                 at.vz = *p++;
                 obj->unk72.vx++;
             } else {
-                func_8004ede0(obj, c, &at);
+                actor_sample_rotated_animation_vertex(obj, c, &at);
             }
             at.vx += obj->pos.vx;
             at.vy += obj->pos.vy;
@@ -899,7 +907,7 @@ void func_800500a8(void)
                 if ((s16)obj->unk18 < 0) {
                     obj->unk18 = 0;
                 }
-                func_8004ede0(obj, c, &at);
+                actor_sample_rotated_animation_vertex(obj, c, &at);
                 at.vx += obj->pos.vx;
                 at.vy += (script[15] << 4) + obj->pos.vy;
                 at.vz += obj->pos.vz;
@@ -913,49 +921,50 @@ void func_800500a8(void)
             }
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(script[13], 10);
+        actor_damp_horizontal_motion(script[13], 10);
         break;
     }
     case 4:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
-        if (func_8004db98(obj, SCRIPT_U16(script, 24))) {
-            func_8004d254(0, script[14], script[15], script[16], SCRIPT_U16(script, 18), SCRIPT_U16(script, 20),
-                          SCRIPT_U16(script, 22), script[17]);
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+        if (actor_animation_crossed_phase(obj, SCRIPT_U16(script, 24))) {
+            actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
+                                            SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(script[13], 10);
+        actor_damp_horizontal_motion(script[13], 10);
         break;
     case 23:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = SCRIPT_U16(script, 24);
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
-        if (func_8004db98(obj, obj->unk70)) {
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+        if (actor_animation_crossed_phase(obj, obj->unk70)) {
             obj->unk70 += SCRIPT_U16(script, 40);
             if (obj->unk70 > SCRIPT_U16(script, 38)) {
                 obj->unk70 = 0;
             }
-            func_8004d254(0, script[14], script[15], script[16], SCRIPT_U16(script, 18), SCRIPT_U16(script, 20),
-                          SCRIPT_U16(script, 22), script[17] | 0x80);
+            actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
+                                            SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
+                                            script[17] | 0x80);
         }
-        if (SCRIPT_U16(script, 42) != 0 && func_8004db98(obj, SCRIPT_U16(script, 42))) {
-            func_8004d254(0, script[28], script[29], script[30], SCRIPT_U16(script, 32), SCRIPT_U16(script, 34),
-                          SCRIPT_U16(script, 36), script[31]);
+        if (SCRIPT_U16(script, 42) != 0 && actor_animation_crossed_phase(obj, SCRIPT_U16(script, 42))) {
+            actor_try_damage_player_in_cone(0, script[28], script[29], script[30], SCRIPT_U16(script, 32),
+                                            SCRIPT_U16(script, 34), SCRIPT_U16(script, 36), script[31]);
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(script[13], 10);
+        actor_damp_horizontal_motion(script[13], 10);
         break;
     case 24: {
         s32 speed;
@@ -963,9 +972,9 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= SCRIPT_U16(script, 34)) {
             speed = 0;
             turn = SCRIPT_S16(script, 38);
@@ -977,13 +986,13 @@ void func_800500a8(void)
             turn = script[13];
         }
         obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
-        func_8004ea7c(obj->unk64, speed, SCRIPT_U16(script, 30), turn, def->unk1[3], 4);
-        if (func_8004db98(obj, SCRIPT_U16(script, 24))) {
-            func_8004d254(0, script[14], script[15], script[16], SCRIPT_U16(script, 18), SCRIPT_U16(script, 20),
-                          SCRIPT_U16(script, 22), script[17]);
+        actor_turn_and_move_along_heading(obj->unk64, speed, SCRIPT_U16(script, 30), turn, def->unk1[3], 4);
+        if (actor_animation_crossed_phase(obj, SCRIPT_U16(script, 24))) {
+            actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
+                                            SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     }
@@ -993,13 +1002,13 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
             obj->unk70 = 0;
-            func_8004e31c();
+            actor_suspend_vertical_motion();
         }
         switch (obj->unk70) {
         case 0:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             if (obj->unk18 >= 4095) {
                 vector_displacement_to_pitch_yaw(DAT_801b24e4.pos.vx - obj->pos.vx,
                                                  DAT_801b24e4.pos.vy - obj->pos.vy,
@@ -1007,7 +1016,7 @@ void func_800500a8(void)
                 pitch_yaw_to_forward_vector(&dir, &obj->unk72);
                 obj->unk70 = 1;
             }
-            func_8004e094(&obj->vel);
+            actor_move_with_collision(&obj->vel);
             break;
         case 1:
             target = step = obj->unk72;
@@ -1016,7 +1025,7 @@ void func_800500a8(void)
             obj->vel.vx = value_approach(obj->vel.vx, target.vx, step.vx);
             obj->vel.vy = value_approach(obj->vel.vy, target.vy, step.vy);
             obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
-            hit = func_8004e094(&obj->vel);
+            hit = actor_move_with_collision(&obj->vel);
             if (hit != 0) {
                 if (hit & 0x80) {
                     player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18), script[13], 0,
@@ -1033,18 +1042,18 @@ void func_800500a8(void)
                 obj->angle.vx = 0;
                 obj->unk70 = 3;
             }
-            func_8004e094(&obj->vel);
+            actor_move_with_collision(&obj->vel);
             break;
         case 3:
-            func_8004db3c(obj, -SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, -SCRIPT_U16(script, 8));
             if (obj->unk18 == 0) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
-            func_8004e094(&obj->vel);
+            actor_move_with_collision(&obj->vel);
             break;
         }
-        func_8004e928(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 22),
-                      def->unk1[3]);
+        actor_turn_toward_angle(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 22),
+                                def->unk1[3]);
         break;
     }
     case 18: {
@@ -1054,21 +1063,22 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
         }
         dx = DAT_801b24e4.pos.vx - obj->pos.vx;
         dy = DAT_801b24e4.pos.vy - obj->pos.vy - 1600;
         dz = DAT_801b24e4.pos.vz - obj->pos.vz;
         fixed_vector3_length(dx, dy, dz);
         vector_displacement_to_pitch_yaw(dx, dy, dz, &obj->unk72);
-        func_8004ed50(&obj->unk72, SCRIPT_U16(script, 28), SCRIPT_U16(script, 30), script[13], def->unk1[3], 6);
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
-        if (func_8004db98(obj, SCRIPT_U16(script, 24))) {
-            func_8004d254(0, script[14], script[15], script[16], SCRIPT_U16(script, 18), SCRIPT_U16(script, 20),
-                          SCRIPT_U16(script, 22), script[17]);
+        actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 28), SCRIPT_U16(script, 30),
+                                               script[13], def->unk1[3], 6);
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+        if (actor_animation_crossed_phase(obj, SCRIPT_U16(script, 24))) {
+            actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
+                                            SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     }
@@ -1083,10 +1093,10 @@ void func_800500a8(void)
         switch (obj->unk70) {
         case 0:
             if (target->unk58 > 0) {
-                func_8004c130(script[13]);
+                actor_set_animation(script[13]);
                 obj->unk70 = 1;
             } else if (target->unk58 < 0) {
-                func_8004c130(script[12]);
+                actor_set_animation(script[12]);
                 obj->unk70 = 2;
             }
             break;
@@ -1116,23 +1126,24 @@ void func_800500a8(void)
     case 15:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
         }
-        func_8004ea7c(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 5);
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
+                                          def->unk1[2], def->unk1[3], 5);
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     case 19:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
         }
         switch (obj->unk70) {
         case 0:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             if (obj->unk18 >= SCRIPT_U16(script, 16)) {
                 obj->unk70 = 16;
             }
@@ -1143,39 +1154,39 @@ void func_800500a8(void)
             }
             break;
         case 32:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             if (obj->unk18 >= 4095) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
             break;
         }
-        func_8004e6f8(def->unk1[2], 10);
+        actor_damp_horizontal_motion(def->unk1[2], 10);
         break;
     case 20:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = SCRIPT_U16(script, 18);
-            func_8004c184(script[1]);
+            actor_set_animation_if_changed(script[1]);
         }
-        if (func_8004e824((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 16), 1000, 5)) {
+        if (actor_move_along_heading((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 16), 1000, 5)) {
             obj->unk70 = 1;
         }
-        func_8004db08(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 0xfff - SCRIPT_U16(script, 8) && --obj->unk70 == 0) {
             obj->unk18 = 0xfff;
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     case 22:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(def->unk1[2], 10);
+        actor_damp_horizontal_motion(def->unk1[2], 10);
         break;
     case 21: {
         s32 mask;
@@ -1183,7 +1194,7 @@ void func_800500a8(void)
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->unk1c = SCRIPT_U16(script, 20);
             obj->unk1e = SCRIPT_U16(script, 22);
         }
@@ -1195,7 +1206,7 @@ void func_800500a8(void)
             }
             break;
         case 2:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 20), def->unk12, obj->unk18);
             obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk14, obj->unk18);
             if (obj->unk18 >= 4095) {
@@ -1203,24 +1214,24 @@ void func_800500a8(void)
                 obj->unk1e = def->unk14;
                 obj->unk70 = 3;
                 obj->unk72.vx = SCRIPT_U16(script, 16);
-                func_8004c130(script[24]);
+                actor_set_animation(script[24]);
             }
             if (obj->unk18 >= SCRIPT_U16(script, 18)) {
                 mask = DAT_80185da8.unk9d04;
                 DAT_80185da8.unk9d04 = mask & ~0x20;
-                func_8004ea7c(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+                actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
                 DAT_80185da8.unk9d04 = mask;
             }
             break;
         case 3:
             mask = DAT_80185da8.unk9d04;
             DAT_80185da8.unk9d04 = mask & ~0x20;
-            func_8004ea7c(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+            actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
             DAT_80185da8.unk9d04 = mask;
-            func_8004db08(obj, script[25]);
+            actor_advance_animation_wrapped(obj, script[25]);
             break;
         }
         break;
@@ -1231,7 +1242,7 @@ void func_800500a8(void)
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->unk1c = SCRIPT_U16(script, 22);
             obj->unk1e = SCRIPT_U16(script, 24);
             if (SCRIPT_U16(script, 14) != 0) {
@@ -1240,22 +1251,23 @@ void func_800500a8(void)
         }
         switch (obj->unk70) {
         case 0:
-            func_8004db08(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
             if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 12) &&
                 obj->unk18 >= 0xfff - SCRIPT_U16(script, 8)) {
                 obj->unk70 = 2;
                 obj->unk18 = 0;
-                func_8004c130(script[26]);
+                actor_set_animation(script[26]);
             }
-            if (func_8004ea7c(obj->unk64, SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), def->unk1[2], def->unk1[3],
-                              5) ||
+            if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), SCRIPT_U16(script, 16),
+                                                  def->unk1[2], def->unk1[3],
+                                                  5) ||
                 (rand() >> 5) < script[28]) {
                 obj->unk64 = rand() >> 3;
             }
             break;
         case 2:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk12, obj->unk18);
             obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 24), def->unk14, obj->unk18);
             if (obj->unk18 >= 4095) {
@@ -1266,19 +1278,19 @@ void func_800500a8(void)
             } else if (obj->unk18 >= SCRIPT_U16(script, 20)) {
                 mask = DAT_80185da8.unk9d04;
                 DAT_80185da8.unk9d04 = mask & ~0x20;
-                func_8004ea7c(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+                actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
                 DAT_80185da8.unk9d04 = mask;
             }
             break;
         case 3:
             mask = DAT_80185da8.unk9d04;
             DAT_80185da8.unk9d04 = mask & ~0x20;
-            func_8004ea7c(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+            actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
             DAT_80185da8.unk9d04 = mask;
-            func_8004db3c(obj, script[27]);
+            actor_advance_animation_clamped(obj, script[27]);
             break;
         }
         break;
@@ -1289,7 +1301,7 @@ void func_800500a8(void)
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
             obj->unk70 = 0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->scale.vz = 0;
             obj->scale.vy = 0;
             obj->scale.vx = 0;
@@ -1311,7 +1323,7 @@ void func_800500a8(void)
             obj->unkd = 0;
             obj->pos.vy -= 256;
             if (--obj->unk72.vx == 0) {
-                func_8004c104();
+                actor_reset_target_and_reselect();
             }
             break;
         }
@@ -1330,7 +1342,7 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
+            actor_set_animation(script[1]);
             obj->unk70 = SCRIPT_U16(script, 14);
             obj->unk72.vx = 0;
             obj->unk72.vy = 0;
@@ -1338,8 +1350,8 @@ void func_800500a8(void)
                 obj->unkd = 0x10;
             }
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
-        if (func_8004db98(obj, obj->unk70)) {
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
+        if (actor_animation_crossed_phase(obj, obj->unk70)) {
             obj->unk70 += SCRIPT_U16(script, 18);
             if (obj->unk70 > SCRIPT_U16(script, 16)) {
                 obj->unk70 = 0;
@@ -1371,15 +1383,16 @@ void func_800500a8(void)
                     obj->unk72.vx++;
                     z = *p++;
                     obj->unk72.vx++;
-                    func_8004f414(script[12], SCRIPT_U16(script, 24), -1, x, y, z, p);
+                    actor_dispatch_group_effect(script[12], SCRIPT_U16(script, 24), -1, x, y, z, p);
                 } else if (c == 0x8004) {
                     a = *p++;
                     b = *p++;
                     d = *p++;
                     obj->unk72.vx += 3;
-                    func_8004f414(script[12], SCRIPT_U16(script, 24), -2, a, b, d);
+                    actor_dispatch_group_effect(script[12], SCRIPT_U16(script, 24), -2, a, b, d);
                 } else {
-                    func_8004f414(script[12], SCRIPT_U16(script, 24), c, p + tries - 1, obj->unk72.vy);
+                    actor_dispatch_group_effect(script[12], SCRIPT_U16(script, 24), c, p + tries - 1,
+                                                obj->unk72.vy);
                 }
                 if (--tries == 0) {
                     break;
@@ -1388,9 +1401,9 @@ void func_800500a8(void)
             obj->unk72.vy++;
         }
         if (obj->unk18 >= 4095) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
-        func_8004e6f8(def->unk1[2], 10);
+        actor_damp_horizontal_motion(def->unk1[2], 10);
         break;
     }
     case 27: {
@@ -1400,41 +1413,42 @@ void func_800500a8(void)
             obj->unkf = 0xf1;
             obj->unk70 = 0;
             obj->unk72.vx = -1;
-            func_8004c130(script[22]);
+            actor_set_animation(script[22]);
         }
         switch (obj->unk70) {
         case 0:
             if (SCRIPT_U16(script, 14) == 0) {
                 obj->unk70 = 1;
             } else {
-                obj->unk72.vx = func_8004eaf0((obj->unk8 << 11) + obj->unk24, (obj->unk7 << 11) + obj->unk22,
-                                              SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), obj->unk72.vx,
-                                              def->unk1[2], def->unk1[3], 5);
+                obj->unk72.vx = actor_turn_and_move_toward_point((obj->unk8 << 11) + obj->unk24,
+                                                                 (obj->unk7 << 11) + obj->unk22,
+                                                                 SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), obj->unk72.vx,
+                                                                 def->unk1[2], def->unk1[3], 5);
                 if (obj->unk72.vx == -1) {
                     obj->unk70 = 1;
                 }
             }
-            func_8004db08(obj, script[23]);
+            actor_advance_animation_wrapped(obj, script[23]);
             break;
         case 1:
-            func_8004e928(obj, obj->unk20, SCRIPT_U16(script, 16), def->unk1[3]);
+            actor_turn_toward_angle(obj, obj->unk20, SCRIPT_U16(script, 16), def->unk1[3]);
             if (obj->angle.vy == obj->unk20) {
-                func_8004c130(script[1]);
+                actor_set_animation(script[1]);
                 obj->unk70 = 2;
             }
             break;
         case 2:
-            func_8004db3c(obj, SCRIPT_U16(script, 8));
+            actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             obj->unk1c = fixed_lerp_q12(def->unk12, SCRIPT_U16(script, 18), obj->unk18);
             obj->unk1e = fixed_lerp_q12(def->unk14, SCRIPT_U16(script, 20), obj->unk18);
             if (obj->unk18 >= 4095) {
                 obj->unk1c = SCRIPT_U16(script, 18);
                 obj->unk1e = SCRIPT_U16(script, 20);
-                next = func_8004c068(def, 0x15);
+                next = actor_find_target_of_type(def, 0x15);
                 if (next != NULL) {
-                    func_8004b94c(obj, next);
+                    actor_set_target(obj, next);
                 } else {
-                    func_8004c104();
+                    actor_reset_target_and_reselect();
                 }
             }
             break;
@@ -1444,15 +1458,15 @@ void func_800500a8(void)
     case 29:
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
-            func_8004e31c();
+            actor_set_animation(script[1]);
+            actor_suspend_vertical_motion();
             obj->unk72.vx = 16;
         }
         obj->angle.vx += 128;
         obj->angle.vy += 64;
         obj->pos.vy -= 256;
         if (--obj->unk72.vx == 0) {
-            func_8004c104();
+            actor_reset_target_and_reselect();
         }
         break;
     case 28: {
@@ -1460,13 +1474,13 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
-            func_8004e31c();
+            actor_set_animation(script[1]);
+            actor_suspend_vertical_motion();
             audio_play_spatial_default_range(0x32, &obj->pos, 0x78, 0);
         }
         obj->angle.vx += 128;
         obj->angle.vy += 64;
-        hit = func_8004e094(&obj->vel);
+        hit = actor_move_with_collision(&obj->vel);
         if (hit != 0) {
             if (hit & 0x80) {
                 player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
@@ -1474,7 +1488,7 @@ void func_800500a8(void)
                                     SCRIPT_U16(script, 24), SCRIPT_U16(script, 26), SCRIPT_U16(script, 28),
                                     0x1000, 10, &obj->pos);
             }
-            func_8004c0b0(obj, 3);
+            actor_select_target_type_in_own_group(obj, 3);
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
             obj->unkd = 0x10;
         }
@@ -1486,8 +1500,8 @@ void func_800500a8(void)
 
         if (obj->unkf == 0) {
             obj->unkf = 0xf0;
-            func_8004c130(script[1]);
-            func_8004e31c();
+            actor_set_animation(script[1]);
+            actor_suspend_vertical_motion();
         }
         next.vx = obj->vel.vx + obj->pos.vx;
         next.vy = obj->vel.vy + obj->pos.vy;
@@ -1508,9 +1522,9 @@ void func_800500a8(void)
         } else {
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
         }
-        func_8004db3c(obj, SCRIPT_U16(script, 8));
+        actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         if (obj->unk18 >= 4095) {
-            func_8004c0b0(obj, 3);
+            actor_select_target_type_in_own_group(obj, 3);
             obj->unkd = 0x10;
         }
         break;
@@ -1520,7 +1534,7 @@ void func_800500a8(void)
         if (phase == 0 && SCRIPT_U16(script, 14) != 0) {
             obj->unk80++;
             obj->angle.vy = DAT_801b24e4.unk124.vy + 2048;
-            func_8004c0b0(obj, 0x19);
+            actor_select_target_type_in_own_group(obj, 0x19);
         } else {
             obj->unk28 &= ~0x1000000;
             obj->unk80++;
@@ -1536,23 +1550,23 @@ void func_800500a8(void)
                         obj->unk16 = 0x1000;
                     }
                 } else if (obj->unk0 == 1) {
-                    func_8004b770(obj);
+                    actor_set_lifecycle_and_home_position(obj);
                 } else if (obj->unk0 == 2) {
                     obj->unk9 = 0;
-                    func_8004b560(obj);
+                    actor_set_home_position(obj);
                 } else if (obj->unk0 == 5) {
                     obj->unk0 = 0xff;
                     obj->unk9 = 0;
                 } else {
                     obj->unk9 = 2;
-                    func_8004b560(obj);
+                    actor_set_home_position(obj);
                 }
             }
         }
-        func_8004e6f8(def->unk1[2] * 2, 10);
+        actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
         break;
     case 240:
-        func_8004e31c();
+        actor_suspend_vertical_motion();
         break;
     default:
         DAT_8018fad4.handlers[17]();
@@ -1591,7 +1605,7 @@ void func_800500a8(void)
                     obj->unk28 |= 0x400;
                 }
                 if (obj->unk28 & 0x200) {
-                    func_8004c0b0(obj, 3);
+                    actor_select_target_type_in_own_group(obj, 3);
                 }
                 obj->vel.vx = target->vel.vx;
                 obj->vel.vy = target->vel.vy;
@@ -1605,12 +1619,12 @@ void func_800500a8(void)
         rot.vy = target->angle.vy;
         rot.vz = target->angle.vz;
         vector_rotate_yxz(&rot, (SVECTOR *)&def->unkc, &from);
-        func_8004ede0(target, obj->unk24, &to);
+        actor_sample_rotated_animation_vertex(target, obj->unk24, &to);
         obj->pos.vx = target->pos.vx + to.vx - from.vx;
         obj->pos.vy = target->pos.vy + to.vy - from.vy;
         obj->pos.vz = target->pos.vz + to.vz - from.vz;
     } else if (!(obj->unk28 & 0x10000)) {
-        func_8004e330();
+        actor_update_vertical_motion();
     }
 done:
     if (obj->unk9 == 1) {

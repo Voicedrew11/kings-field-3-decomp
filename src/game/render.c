@@ -1529,7 +1529,7 @@ void render_scene_and_update_resources(void)
         }
         resource_registry_get(obj->unk1 + 128, &model);
         if (model != NULL) {
-            at = func_8004eee0(obj, &pos);
+            at = actor_resolve_group_position(obj, &pos);
             if (obj->unk28 & 0x20) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
                 render_world_model(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle,

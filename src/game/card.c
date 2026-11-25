@@ -255,7 +255,7 @@ retry:
         if (((SaveHeader *)buffer)->checksum != memory_card_payload_byte_sum(buffer + CARD_DATA)) {
             result = 2;
         } else {
-            func_8005ffd0(DAT_8009c3c8 + CARD_DATA);
+            card_payload_restore_game_state(DAT_8009c3c8 + CARD_DATA);
             DAT_8009c2c0 = number;
             return 0;
         }
@@ -338,7 +338,7 @@ retry:
     rect.x = 812;
     StoreImage(&rect, (u_long *)header.icon[2]);
     memset(DAT_8009c3c8, 0, CARD_FILE_SIZE);
-    func_8005f7bc(DAT_8009c3c8 + CARD_DATA);
+    card_payload_capture_game_state(DAT_8009c3c8 + CARD_DATA);
     sum = header.checksum = memory_card_payload_byte_sum(DAT_8009c3c8 + CARD_DATA);
     memcpy((void *)DAT_8009c3c8, (const void *)&header, sizeof(header));
     if (!found) {

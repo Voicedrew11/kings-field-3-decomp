@@ -91,7 +91,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {

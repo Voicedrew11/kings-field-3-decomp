@@ -19,7 +19,7 @@
 #include <game/misc.h>
 
 ADDRESS(0x8005ea64, 0xbc)
-void func_8005ea64(void)
+void event_state_initialize(void)
 {
     u16 *off;
     s32 i;
@@ -45,7 +45,7 @@ void func_8005ea64(void)
  * plays movie 8 and leaves the game loop (DAT_8009c3f8 = 4).
  */
 ADDRESS(0x8005eb20, 0x338)
-void func_8005eb20(void)
+void game_update_ending(void)
 {
     s32 n;
     s32 volume;
@@ -56,7 +56,7 @@ void func_8005eb20(void)
     }
     DAT_801ba984.unk69 = 2;
     if (DAT_801ba984.unk6a != 0) {
-        func_8005c864(13);
+        player_warp_to_destination(13);
         n = DAT_801b24e4.bgm_volume >> 1;
         volume = DAT_801b24e4.bgm_volume;
         while (--n != -1) {
@@ -76,7 +76,7 @@ void func_8005eb20(void)
         } while ((s16)DAT_8018fad4.loading == 1);
         DAT_801e7edc.unk384 = 7;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[7];
-        func_80061bc4();
+        movie_play();
         DAT_801e7edc.unk372 = -1;
         DAT_801e7edc.unk370 = 0;
         DAT_801e7edc.unk384 = 0xff;
@@ -111,7 +111,7 @@ void func_8005eb20(void)
         render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
         DAT_801e7edc.unk384 = 8;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[8];
-        func_80061bc4();
+        movie_play();
         DAT_801e7edc.unk372 = -1;
         DAT_801e7edc.unk370 = 0;
         DAT_801e7edc.unk384 = 0xff;

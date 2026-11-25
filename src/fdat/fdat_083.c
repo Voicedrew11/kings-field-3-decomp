@@ -72,12 +72,12 @@ void func_801e85e4(Object88 *obj)
         return;
     }
     DAT_801ba984.unk32[0x37] = 1;
-    if (func_8005d7bc(0x10) <= 0) {
+    if (game_counter_is_nonzero(0x10) <= 0) {
         return;
     }
     DAT_801ba984.unk32[0x38] = 1;
-    func_8005d7f8(0x10);
-    func_8005d898(0x11);
+    game_counter_decrement(0x10);
+    game_counter_increment(0x11);
     if (DAT_801b24e4.unkcb == 0x10) {
         player_equip_weapon(0x11);
     }

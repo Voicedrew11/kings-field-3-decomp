@@ -14,7 +14,7 @@
 
 /* Updates every record: wake/sleep, script pick, its script, attachment. */
 ADDRESS(0x80052e5c, 0x228)
-void func_80052e5c(void)
+void actor_update_frame(void)
 {
     Object88 *obj;
     Object44 *carrier;
@@ -24,16 +24,16 @@ void func_80052e5c(void)
     DAT_80185da8.unk9d18 = 0;
     do {
         if (obj->unk0 != OBJECT88_FREE) {
-            func_8004da2c(obj);
+            actor_bind_current(obj);
             if ((DAT_80185da8.unk9d24 & 3) == (DAT_80185da8.unk9d18 & 3) || DAT_801b24e4.unke != 0 ||
                 DAT_801b24e4.unk101 == 1) {
-                func_8004c1f0();
+                actor_update_lifecycle_for_player_range();
             }
             if (obj->unk9 == 1) {
                 if ((DAT_80185da8.unk9d24 & 3) == (DAT_80185da8.unk9d20 & 3)) {
-                    func_8004c01c();
+                    actor_select_target_for_player_distance();
                 }
-                func_800500a8();
+                actor_update_behavior();
                 DAT_80185da8.unk9d20++;
             }
             if (DAT_80185da8.def->unk34 & 0x10000) {
@@ -57,12 +57,12 @@ void func_80052e5c(void)
         obj++;
     } while (++DAT_80185da8.unk9d18 < 200);
     DAT_80185da8.unk9d24++;
-    func_8004da2c(NULL);
+    actor_bind_current(NULL);
 }
 
 /* Turns the loaded Object78 records' script offsets into pointers (-1: none). */
 ADDRESS(0x80053084, 0x74)
-void func_80053084(void)
+void actor_fixup_group_targets(void)
 {
     Object78 *def;
     u8 **scripts;
@@ -87,7 +87,7 @@ void func_80053084(void)
 
 /* Makes the 200 records from an area's placement records. */
 ADDRESS(0x800530f8, 0x1dc)
-void func_800530f8(Object88Place *place)
+void actor_load_records(Object88Place *place)
 {
     Object88 *obj;
     Object78 *def;
@@ -115,8 +115,8 @@ void func_800530f8(Object88Place *place)
             obj->unkf = 0xff;
             obj->unk60 = NULL;
             def = &DAT_80185da8.defs[obj->unk2];
-            func_8004b624(obj);
-            func_8004b560(obj);
+            actor_copy_group_defaults(obj);
+            actor_set_home_position(obj);
             obj->unk15 = def->unk9;
             if (obj->unk28 & 0x10) {
                 if (obj->unk0 == 3) {

@@ -98,7 +98,7 @@ void func_801e83c8(VECTOR *pos, SVECTOR *angle)
                     }
                     link->unk0 = obj->arg.b.unk40;
                     link->arg.b.unk38 = 0xff;
-                    func_8005db30(link);
+                    event_map_object_interact(link);
                     link->unk0 = 0;
                     link->arg.b.unk38 = 0;
                     if (link->unk6 == 0xff) {
@@ -162,7 +162,7 @@ void func_801e86f4(VECTOR *pos, SVECTOR *angle, s32 item)
         if (DAT_801ba984.unke[6] != item) {
             return;
         }
-        i = func_8004d644(pos->vx, pos->vy, pos->vz, 0x578, 0x6a4);
+        i = actor_find_overlap_excluding_target_type3(pos->vx, pos->vy, pos->vz, 0x578, 0x6a4);
         if (i != -1 && i == 4) {
             switch (item) {
             case 0x68:
@@ -178,8 +178,8 @@ void func_801e86f4(VECTOR *pos, SVECTOR *angle, s32 item)
                 DAT_801ba984.unke[6] = 4;
                 break;
             }
-            func_8005d7f8(item);
-            func_8005c308(&DAT_80185da8.objects[i]);
+            game_counter_decrement(item);
+            event_target_stream_execute(&DAT_80185da8.objects[i]);
             map_object_apply_marker_signal(0x9a);
             DAT_801ba984.unk0 = 1;
         }
@@ -333,7 +333,7 @@ void func_801e8be4(void)
 ADDRESS(0x801e8bec, 0x30)
 void func_801e8bec(void)
 {
-    if (func_8005d7bc(0x4b) != 0) {
+    if (game_counter_is_nonzero(0x4b) != 0) {
         DAT_801ba984.unke[7] = 1;
     }
 }
@@ -389,8 +389,8 @@ void func_801e8c3c(u8 id)
         render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
-    func_800608ec(12, 16);
-    func_800608ec(12, 17);
+    conversation_record_mark_page(12, 16);
+    conversation_record_mark_page(12, 17);
     if (DAT_801ba984.unke[8] == 0) {
         DAT_801ba984.unke[8] = 1;
         DAT_80185da8.objects[4].unk0 = 8;
@@ -416,10 +416,10 @@ void func_801e8e08(Object88 *record, s32 event)
         DAT_801ba984.unke[6] = 0x6b;
         break;
     case 4:
-        func_8005db30(NULL, 0x56);
+        event_map_object_interact(NULL, 0x56);
         break;
     case 5:
-        func_8005db30(NULL, 0x52);
+        event_map_object_interact(NULL, 0x52);
         break;
     }
 }

@@ -474,7 +474,7 @@ void player_update_actions_and_charge(void)
                 if (item_id_is_consumable(DAT_801b24e4.unkc9)) {
                     menu_apply_item_effect(DAT_801b24e4.unkc9);
                 }
-                func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, DAT_801b24e4.unkc9);
+                event_scene_command_dispatch(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, DAT_801b24e4.unkc9);
             } else {
                 notify_enqueue(10);
             }
@@ -615,7 +615,7 @@ void player_handle_interaction_and_menu(void)
         return;
     }
     if ((DAT_801b24e4.unk178 & DAT_80081868[7]) && !(DAT_801b24e4.unk17a & DAT_80081868[7])) {
-        func_8005e2d0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c);
+        event_world_dispatch_interaction(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c);
     }
     if ((DAT_801b24e4.unk178 & DAT_80081868[5]) && !(DAT_801b24e4.unk17a & DAT_80081868[5])
         && DAT_801b24e4.unkc0 == -1) {
@@ -629,7 +629,7 @@ void player_handle_interaction_and_menu(void)
         result = menu_run_root_controller();
         if (result >= 0) {
             render_game_frame(NULL, NULL);
-            func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, result);
+            event_scene_command_dispatch(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, result);
         } else if (result == -2) {
             DAT_8009c3f8 = 2;
         } else if (result == -3) {

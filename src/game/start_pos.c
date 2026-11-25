@@ -1,9 +1,9 @@
 /*
- * GAME.EXE: an Object88's talk script (func_8005c308), an Object44 spawn
+ * GAME.EXE: an Object88's talk script (event_target_stream_execute), an Object44 spawn
  * helper, the player's move to one of 14 start positions (areas loaded
- * through resource_request_transition) and the item use dispatcher (func_8005cbe0) (WIP
- * module). The .rdata is func_8005c864's local table initializer, then the
- * jump tables of func_8005c308 and func_8005cbe0: GCC 2.6 emits the
+ * through resource_request_transition) and the item use dispatcher (event_scene_command_dispatch) (WIP
+ * module). The .rdata is player_warp_to_destination's local table initializer, then the
+ * jump tables of event_target_stream_execute and event_scene_command_dispatch: GCC 2.6 emits the
  * initializers of a TU ahead of its jump tables, so the three share a TU.
  */
 #include <kf/lib/address.h>
@@ -28,7 +28,7 @@ RODATA(0x800130f0, 0x1a4)
 
 /* Runs obj's talk script record (id 0x70) from its entry point up to the 0xff end, then its end action. */
 ADDRESS(0x8005c308, 0x4e0)
-void func_8005c308(Object88 *obj)
+void event_target_stream_execute(Object88 *obj)
 {
     Object78 *def;
     u8 *script;
@@ -49,7 +49,7 @@ void func_8005c308(Object88 *obj)
     if (script[16] == 0) {
         DAT_801ba984.unkaa = obj->unk1;
     }
-    p = func_8005c1e8(obj);
+    p = event_target_stream_resolve_cursor(obj);
     if (DAT_801ba984.unkaa != obj->unk1 && script[19] == 1) {
         while (*p++ != 0xf0)
             ;
@@ -68,7 +68,7 @@ void func_8005c308(Object88 *obj)
             continue;
         case 0xf9:
             if (DAT_801ba984.unk4[p[1]] == p[2]) {
-                script[16] = func_8005c18c(script, p[3]);
+                script[16] = event_target_stream_find_marker(script, p[3]);
                 p = script + (script[16] + 20);
             } else {
                 script[16] += 4;
@@ -109,12 +109,12 @@ void func_8005c308(Object88 *obj)
                 anim = obj->unkc;
                 posed = 1;
                 if (obj->unk18 != 0) {
-                    func_8005c0d4(obj, obj->unkc, obj->unk18, 0, obj->unk66);
+                    actor_animation_seek_phase(obj, obj->unkc, obj->unk18, 0, obj->unk66);
                 }
-                func_8005c0d4(obj, script[1], 0, 0xfff, *(u16 *)(script + 8));
+                actor_animation_seek_phase(obj, script[1], 0, 0xfff, *(u16 *)(script + 8));
             }
             if (def->unk0 != 0x2b) {
-                func_800608ec(def->unk0, *p);
+                conversation_record_mark_page(def->unk0, *p);
             }
             render_game_frame(NULL, NULL);
             menu_show_transition_image(7, *(u16 *)(script + 12) + *p);
@@ -160,7 +160,7 @@ end:
     }
     DAT_801ba984.unkaa = obj->unk1;
     if (posed && script[17] != 0xff) {
-        func_8005c0d4(obj, script[17], 0, 0xfff, *(u16 *)(script + 14));
+        actor_animation_seek_phase(obj, script[17], 0, 0xfff, *(u16 *)(script + 14));
         obj->unkc = anim;
     }
     player_clear_motion();
@@ -169,7 +169,7 @@ end:
 
 /* Spawns Object44 0x17c and links obj to it (its index - 124). */
 ADDRESS(0x8005c7e8, 0x7c)
-void func_8005c7e8(Object44 *obj, s32 id)
+void event_spawn_effect_object(Object44 *obj, s32 id)
 {
     Object44 *made;
     s32 i;
@@ -182,7 +182,7 @@ void func_8005c7e8(Object44 *obj, s32 id)
 
 /* Loads start position n's areas and puts the player there (12: none). */
 ADDRESS(0x8005c864, 0x37c)
-void func_8005c864(s32 n)
+void player_warp_to_destination(s32 n)
 {
     Record08 table[14] = {
         {0, 0, 0, 10, 56, 100, 2048},
@@ -210,7 +210,7 @@ void func_8005c864(s32 n)
             return;
         }
         render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
-        func_8004b794();
+        actor_disable_type3_transition_actors();
     }
     do {
         cd_request_yield();
@@ -259,7 +259,7 @@ void func_8005c864(s32 n)
 /* Uses item id at pos/angle (stat raises, objects near the player, start-position moves),
  * then passes it to the loaded FDAT module's handler 2; message 10 when nothing took it. */
 ADDRESS(0x8005cbe0, 0xbdc)
-void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
+void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
 {
     VECTOR unused[2]; /* the frame keeps 32 unused bytes here */
     Object88 *o88;
@@ -294,7 +294,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
     case 117:
         element = 4;
     raise:
-        func_8005d7f8(id);
+        game_counter_decrement(id);
         for (j = 2; j != -1; j--) {
             DAT_801b24e4.unk34[element]++;
             if (DAT_801b24e4.unk34[element] >= 1000) {
@@ -310,7 +310,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
         }
         break;
     case 110:
-        func_8005d7f8(id);
+        game_counter_decrement(id);
         for (i = 4; i != -1; i--) {
             DAT_801b24e4.unk34[i]++;
             if (DAT_801b24e4.unk34[i] >= 1000) {
@@ -361,14 +361,14 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 }
                 if (k == 0x5b) {
                     DAT_801ba984.unk0 = 1;
-                    func_8005d7f8(0x80);
+                    game_counter_decrement(0x80);
                     obj2 = &DAT_8018fb3c.objects[0x5b];
                     i = 16;
                     o88 = &DAT_80185da8.objects[3];
                     o88->unk9 = 0;
                     o88->unk0 = 2;
                     while (o88->unk9 == 0) {
-                        func_80052e5c();
+                        actor_update_frame();
                         cd_request_service_vab();
                         cd_request_service_stream();
                         render_game_frame(NULL, NULL);
@@ -402,15 +402,15 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 }
                 if (k == 0x53) {
                     DAT_801ba984.unk0 = 1;
-                    func_8005d7f8(0x80);
+                    game_counter_decrement(0x80);
                     o88b = &DAT_80185da8.objects[58];
                     o88b->unk9 = 0;
                     o88b->unk0 = 2;
-                    func_8004c0b0(o88b, 0x15);
+                    actor_select_target_type_in_own_group(o88b, 0x15);
                     obj2b = &DAT_8018fb3c.objects[0x53];
                     i = 16;
                     while (o88b->unk9 == 0) {
-                        func_80052e5c();
+                        actor_update_frame();
                         o88b->unk18 = 0;
                         cd_request_service_vab();
                         cd_request_service_stream();
@@ -447,7 +447,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             }
         }
         if (DAT_801ba984.unk0 == 0) {
-            func_8005d7f8(id);
+            game_counter_decrement(id);
             DAT_801b24e4.unk94 = 900;
             DAT_801ba984.unk0 = 1;
             player_recalculate_combat_stats();
@@ -470,7 +470,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             case 0:
                 break;
             case 1:
-                func_8005bd34();
+                audio_play_sound_16();
                 DAT_801ba984.unk0 = 1;
                 goto done;
             case 3:
@@ -495,8 +495,8 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 made->arg.b.unk38 = id;
                 made->unk8 = 0;
                 DAT_801ba984.unk0 = 1;
-                func_8005d7f8(id);
-                func_8005c7e8(made, id);
+                game_counter_decrement(id);
+                event_spawn_effect_object(made, id);
             }
         } else if (map_object_check_and_consume_marker(made, id) == 3) {
             notify_enqueue(7);
@@ -515,7 +515,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 if (obj->arg.b.unk38 == 0x88) {
                     obj->arg.b.unk38 = 0xfe;
                     DAT_801ba984.unk0 = 1;
-                    func_8005d7f8(id);
+                    game_counter_decrement(id);
                 }
             } else if (obj->unk6 == 0x102) {
                 if (obj->arg.b.unk38 == 0xff) {
@@ -524,7 +524,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                     obj->arg.b.unk38 = id;
                     obj->unk8 = 0;
                     DAT_801ba984.unk0 = 1;
-                    func_8005d7f8(id);
+                    game_counter_decrement(id);
                     made = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
                     map_object_reset(made);
                     made->arg.h.unk3c = DAT_8018fb3c.unk885e++;
@@ -545,15 +545,15 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             break;
         }
         if (DAT_8018fb3c.objects[i].unk6 == 0xfe) {
-            if (func_8005d898(0x77) == 0) {
+            if (game_counter_increment(0x77) == 0) {
                 notify_enqueue(12);
-                func_8005d7f8(id);
+                game_counter_decrement(id);
             }
             DAT_801ba984.unk0 = 1;
         } else if (DAT_8018fb3c.objects[i].unk6 == 0xfb) {
-            if (func_8005d898(0x78) == 0) {
+            if (game_counter_increment(0x78) == 0) {
                 notify_enqueue(12);
-                func_8005d7f8(id);
+                game_counter_decrement(id);
             }
             DAT_801ba984.unk0 = 1;
         }
@@ -592,7 +592,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             && (DAT_8018fad4.previous[0] == 25 || DAT_8018fad4.previous[0] == 27)) {
             break;
         }
-        func_8005c864(k);
+        player_warp_to_destination(k);
         break;
     case 104:
     case 105:
@@ -609,7 +609,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
         if (DAT_801b24e4.unk160 == 0) {
             flag = 1;
         }
-        target = func_8004d3c4(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
+        target = actor_find_best_in_cone(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
         if (target != NULL && target->unk3 == flag) {
             menu_show_transition_image(6, target->unk1 + 270);
             DAT_801ba984.unk0 = 1;

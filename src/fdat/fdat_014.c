@@ -130,7 +130,7 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
@@ -167,7 +167,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
         if (i != 0x8d) {
             continue;
         }
-        func_8005d7f8(0x7b);
+        game_counter_decrement(0x7b);
         obj = &DAT_8018fb3c.objects[0x8d];
         DAT_80185da8.objects[7].unk0 = 8;
         DAT_80185da8.objects[26].unk0 = 1;
@@ -326,8 +326,8 @@ void func_801e8b30(u8 id)
         render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
-    func_800608ec(10, 0);
-    func_800608ec(10, 1);
+    conversation_record_mark_page(10, 0);
+    conversation_record_mark_page(10, 1);
 }
 
 /* Slot 4: script events 0..4 of an object record. */
@@ -338,17 +338,17 @@ void func_801e8cc8(Object88 *record, s32 event)
     case 0:
         if (DAT_801ba984.unke[0xd] != 1) {
             DAT_801ba984.unke[0xd] = 1;
-            func_8005db30(NULL, 0x7b);
+            event_map_object_interact(NULL, 0x7b);
         }
         break;
     case 1:
         if (DAT_801ba984.unke[0xe] != 1) {
             DAT_801ba984.unke[0xe] = 1;
-            func_8005db30(NULL, 0x5f);
+            event_map_object_interact(NULL, 0x5f);
         }
         break;
     case 2:
-        if (func_8005d7bc(0x84) > 0) {
+        if (game_counter_is_nonzero(0x84) > 0) {
             DAT_801ba984.unke[0x10] = 1;
         }
         break;

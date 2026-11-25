@@ -66,13 +66,13 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (player_camera_within_map_region(0x26, 0x10, 3, 2, 0x8000) == 0) {
         return;
     }
-    if (func_8005d7bc(0x7d) > 0) {
+    if (game_counter_is_nonzero(0x7d) > 0) {
         if (DAT_801ba984.unk32[0x28] != 0) {
             return;
         }
         DAT_801ba984.unk32[0x28] = 1;
         DAT_801ba984.unk32[0x29] = 0;
-        func_8005d7f8(0x7e);
+        game_counter_decrement(0x7e);
     } else {
         if (DAT_801ba984.unk32[0x28] != 0) {
             return;
@@ -130,9 +130,9 @@ void func_801e8698(u8 id)
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x26, 12, 3, id, 0, 0x2f);
     }
     if (id == 10) {
-        if (func_8005d7bc(0x7d) > 0) {
-            func_8005d7f8(0x7d);
-            func_8005d898(0x10);
+        if (game_counter_is_nonzero(0x7d) > 0) {
+            game_counter_decrement(0x7d);
+            game_counter_increment(0x10);
             DAT_801ba984.unk32[0x2b] = 1;
         }
     }
@@ -185,7 +185,7 @@ void func_801e8830(void)
     } else {
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x26, 12, 3, 5, 0, 0x2f);
     }
-    if (func_8005d7bc(0x7d) > 0) {
+    if (game_counter_is_nonzero(0x7d) > 0) {
         DAT_801ba984.unk32[0x2a] = 0;
     } else {
         DAT_801ba984.unk32[0x2a] = 1;

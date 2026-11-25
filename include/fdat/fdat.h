@@ -46,9 +46,9 @@ extern s32 DAT_8009c21c;
 /*
  * GAME.EXE function the modules call (game.item_count; no GAME header
  * prototype yet). Varargs: with obj NULL it takes the object index from the
- * second argument. func_8005c308 comes from game/misc.h.
+ * second argument. event_target_stream_execute comes from game/misc.h.
  */
-void func_8005db30(Object44 *obj, ...);
+void event_map_object_interact(Object44 *obj, ...);
 
 /* src/fdat/shared/fdat_801e83a4.inc (4 modules) */
 void fdat_801e83a4(Record30 *from, Record30 *to, Record30 *out, s32 t);

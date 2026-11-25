@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: the game state a memory card save holds (WIP module):
- * func_8005f7bc copies it into the save data (SaveData, game/card.h) and
- * func_8005ffd0 copies it back. Every global is reached through lui/low
+ * card_payload_capture_game_state copies it into the save data (SaveData, game/card.h) and
+ * card_payload_restore_game_state copies it back. Every global is reached through lui/low
  * pairs, the menu's .sdata cursors included, so the unit is -G0.
  */
 #include <kf/lib/address.h>
@@ -17,7 +17,7 @@
 
 /* Copies the game state into the save data at data. */
 ADDRESS(0x8005f7bc, 0x814)
-void func_8005f7bc(u8 *data)
+void card_payload_capture_game_state(u8 *data)
 {
     SaveData *save = (SaveData *)data;
     Record18 *r;
@@ -108,7 +108,7 @@ void func_8005f7bc(u8 *data)
 /* Copies the game state back from the save data at data; the area list
  * comes back with parts 1 and 2 set to part 0. */
 ADDRESS(0x8005ffd0, 0x830)
-void func_8005ffd0(u8 *data)
+void card_payload_restore_game_state(u8 *data)
 {
     SaveData *save = (SaveData *)data;
     Record18 *r;

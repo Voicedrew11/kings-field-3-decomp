@@ -90,7 +90,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
                 }
                 link->unk0 = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
-                func_8005db30(link);
+                event_map_object_interact(link);
                 link->unk0 = 0;
                 link->arg.b.unk38 = 0;
                 if (link->unk6 == 0xff) {
@@ -128,8 +128,8 @@ void func_801e85ec(VECTOR *pos, SVECTOR *angle, s32 item)
         obj->arg.b.unk38 = item;
         obj->unk8 = 0;
         DAT_801ba984.unk0 = 1;
-        func_8005d7f8(0x86);
-        func_8005c7e8(obj, 0x86);
+        game_counter_decrement(0x86);
+        event_spawn_effect_object(obj, 0x86);
     } else if (map_object_check_and_consume_marker(obj, 0x86) == 3) {
         notify_enqueue(7);
         DAT_801ba984.unk0 = 1;

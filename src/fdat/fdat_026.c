@@ -86,11 +86,11 @@ void func_801e8644(VECTOR *pos, SVECTOR *angle, s32 item)
     }
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
         if (i == 0x34) {
-            func_8005d948(0x200, 0, 0, 0, 0x80, 0x80, 200);
-            func_8005d948(0x200, 0x80, 0x80, 200, 0, 0, 0);
+            color_overlay_transition(0x200, 0, 0, 0, 0x80, 0x80, 200);
+            color_overlay_transition(0x200, 0x80, 0x80, 200, 0, 0, 0);
             set_accumulated_color_overlay(0, 0, 0, 0, 1);
             DAT_801ba984.unk2c[4] = 1;
-            func_8005d7f8(item);
+            game_counter_decrement(item);
             DAT_801ba984.unk0 = 1;
         }
     }
@@ -149,8 +149,8 @@ void func_801e8818(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
-        func_8005d948(0x200, 0, 0, 0, 0x80, 200, 0x80);
-        func_8005d948(0x200, 0x80, 200, 0x80, 0, 0, 0);
+        color_overlay_transition(0x200, 0, 0, 0, 0x80, 200, 0x80);
+        color_overlay_transition(0x200, 0x80, 200, 0x80, 0, 0, 0);
         DAT_801ba984.unk31 = 1;
         DAT_801b77ec.unk0[54].unk0 = 1;
         DAT_801b77ec.unk0[55].unk0 = 1;
@@ -181,15 +181,15 @@ void func_801e8918(void)
     } else {
         DAT_80185da8.objects[1].unk0 = 8;
     }
-    if (func_8005d7bc(0x85) > 0) {
+    if (game_counter_is_nonzero(0x85) > 0) {
         DAT_801ba984.unk32[1] = 1;
     } else {
         DAT_801ba984.unk32[1] = 0;
     }
-    if (func_8005d7bc(0x10) > 0) {
+    if (game_counter_is_nonzero(0x10) > 0) {
         DAT_801ba984.unk32[2] = 1;
     }
-    if (func_8005d7bc(0x7d) > 0) {
+    if (game_counter_is_nonzero(0x7d) > 0) {
         DAT_801ba984.unk32[3] = 1;
     }
     DAT_801ba984.unk84[5] = 8;

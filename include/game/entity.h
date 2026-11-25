@@ -28,7 +28,7 @@
 /* The shape word the collision tests take for an Object88 record. */
 #define OBJECT88_SHAPE(obj) ((obj)->unk1e | (((obj)->unk28 & 0xc000) << 16))
 
-/* A placement record of an area: one per Object88 record (func_800530f8). */
+/* A placement record of an area: one per Object88 record (actor_load_records). */
 typedef struct Object88Place {
     u8 unk0;        /* Object88.unk0, 0xff for none */
     u8 unk1;        /* Object78 record index */
@@ -47,75 +47,78 @@ typedef struct Object88Place {
 extern Object88 *DAT_80199148;
 extern u8 DAT_80199150;
 
-Object88 *func_8004b524(void);
-void func_8004b560(Object88 *obj);
-void func_8004b624(Object88 *obj);
-void func_8004b698(Object88 *obj);
-void func_8004b770(Object88 *obj);
-void func_8004b794(void);
-void func_8004b868(Object88 *obj);
-void func_8004b8c4(u16 index);
-void func_8004b8fc(void);
-void func_8004b94c(Object88 *obj, u8 *script);
-s32 func_8004b984(u8 *script, s32 dist);
-void func_8004bf1c(s32 dist);
-void func_8004c01c(void);
-u8 *func_8004c068(Object78 *def, u8 id);
-void func_8004c0b0(Object88 *obj, u8 id);
-void func_8004c104(void);
-void func_8004c130(u8 anim);
-void func_8004c184(u8 anim);
-void func_8004c1f0(void);
-void func_8004c52c(u16 kind);
-s32 func_8004c5ec(s32 a, s32 b, s32 c);
-void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
-                   u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target);
-void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
-                   u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
-                   Record18 *rec);
-s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7);
-Object88 *func_8004d3c4(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
-                        s32 *dist, s32 jitter);
-s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
-s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
-void func_8004da2c(Object88 *obj);
-void func_8004db08(Object88 *obj, s16 step);
+Object88 *actor_pool_find_free(void);
+void actor_set_home_position(Object88 *obj);
+void actor_copy_group_defaults(Object88 *obj);
+void actor_initialize_from_group(Object88 *obj);
+void actor_set_lifecycle_and_home_position(Object88 *obj);
+void actor_disable_type3_transition_actors(void);
+void actor_prepare_and_initialize(Object88 *obj);
+void actor_prepare_and_initialize_by_index(u16 index);
+void actor_pool_clear(void);
+void actor_set_target(Object88 *obj, u8 *script);
+s32 actor_score_target_candidate(u8 *script, s32 dist);
+void actor_select_best_target(s32 dist);
+void actor_select_target_for_player_distance(void);
+u8 *actor_find_target_of_type(Object78 *def, u8 id);
+void actor_select_target_type_in_own_group(Object88 *obj, u8 id);
+void actor_reset_target_and_reselect(void);
+void actor_set_animation(u8 anim);
+void actor_set_animation_if_changed(u8 anim);
+void actor_update_lifecycle_for_player_range(void);
+void actor_retarget_or_disable_group_members(u16 kind);
+s32 actor_magic_component_curve(s32 a, s32 b, s32 c);
+void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7, u16 a8,
+                                u16 a9, u16 a10, u16 a11, Record18 *rec, VECTOR *target);
+void actor_apply_area_magic(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
+                            u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
+                            Record18 *rec);
+s32 actor_try_damage_player_in_cone(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6,
+                                    u16 a7);
+Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
+                                  s32 *dist, s32 jitter);
+s32 actor_find_overlap_excluding_target_type3(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
+s32 actor_find_overlap(s32 x, s32 y, s32 z, s32 radius, s32 reach_up);
+void actor_bind_current(Object88 *obj);
+void actor_advance_animation_wrapped(Object88 *obj, s16 step);
 #ifdef FDAT_MODULE
 /*
  * The FDAT modules call it without this prototype: FDAT_077/083 pass a u16
  * script field zero-extended (lhu) where GAME.EXE's callers narrow to s16.
  */
-void func_8004db3c();
+void actor_advance_animation_clamped();
 #else
-void func_8004db3c(Object88 *obj, s16 step);
+void actor_advance_animation_clamped(Object88 *obj, s16 step);
 #endif
-s32 func_8004db98(Object88 *obj, u16 time);
-s32 func_8004dbc8(SVECTOR *vel, s32 mode);
-s32 func_8004e094(SVECTOR *vel);
-s32 func_8004e27c(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed);
-void func_8004e31c(void);
-void func_8004e330(void);
-s32 func_8004e6f8(s32 speed, s32 mode);
-s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode);
+s32 actor_animation_crossed_phase(Object88 *obj, u16 time);
+s32 actor_move_horizontal_with_collision(SVECTOR *vel, s32 mode);
+s32 actor_move_with_collision(SVECTOR *vel);
+s32 actor_start_ballistic_motion(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed);
+void actor_suspend_vertical_motion(void);
+void actor_update_vertical_motion(void);
+s32 actor_damp_horizontal_motion(s32 speed, s32 mode);
+s32 actor_move_along_heading(s32 angle, s32 scale_x, s32 scale_z, s32 mode);
 s32 func_8004e8ec(s32 angle, s32 target);
 s32 func_8004e914(s32 angle, s32 target);
-/* target travels as int (func_800500a8); the callee narrows it to s16 for its angle tests. */
-void func_8004e928(Object88 *obj, int target, s32 max, s32 accel);
-s32 func_8004ea7c(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode);
-s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel, s32 mode);
-s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode);
-s32 func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, s32 mode);
-s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out);
-VECTOR *func_8004eee0(Object88 *obj, VECTOR *out);
-void func_8004f008(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed);
-s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out, s32 pitch,
-                  s16 turn, s32 steps);
-void func_8004f414(s32 id, s32 kind, s32 vertex, ...);
-s32 func_8004ffa0(Object88 *obj);
-void func_80050010(Object88 *obj);
-void func_800500a8(void);
-void func_80052e5c(void);
-void func_80053084(void);
-void func_800530f8(Object88Place *place);
+/* target travels as int (actor_update_behavior); the callee narrows it to s16 for its angle tests. */
+void actor_turn_toward_angle(Object88 *obj, int target, s32 max, s32 accel);
+s32 actor_turn_and_move_along_heading(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode);
+s32 actor_turn_and_move_toward_point(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel,
+                                     s32 mode);
+s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode);
+s32 actor_turn_and_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel,
+                                           s32 mode);
+s32 actor_sample_rotated_animation_vertex(Object88 *obj, s32 vertex, VECTOR *out);
+VECTOR *actor_resolve_group_position(Object88 *obj, VECTOR *out);
+void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed);
+s32 actor_compute_target_direction(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out,
+                                   s32 pitch, s16 turn, s32 steps);
+void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...);
+s32 actor_sound_note_offset(Object88 *obj);
+void actor_play_target_sound(Object88 *obj);
+void actor_update_behavior(void);
+void actor_update_frame(void);
+void actor_fixup_group_targets(void);
+void actor_load_records(Object88Place *place);
 
 #endif
