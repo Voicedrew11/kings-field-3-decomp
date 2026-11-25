@@ -22,8 +22,10 @@
   not be distorted to protect a metric.
 - Exact means objdiff `100%`. `--loose` is display-only and is never a closure
   or banking criterion.
-- `gcc260-o2-g8` (`-O2 -G8`) is proven only for `psx.main`; for every other
-  unit it, and `gcc260-o2-g0`, are probes until that unit matches. Small-data
+- `gcc260-o2-g8` (`-O2 -G8`) and `gcc260-o2-g0` are proven only for the
+  units that match under them (for example `psx.main`, and the FDAT modules
+  at `-G0`); for
+  every other unit they are probes until that unit matches. Small-data
   use is mixed per TU (95 GAME functions are `$gp`-relative). Plain `char` is
   unsigned under this compiler.
 
@@ -64,6 +66,9 @@
   batch, catalogue recurring residues, prove the exact GCC/profile, then read
   the corresponding MIPS optimizer/backend and validate mechanisms with
   controlled probes. MSVC internals and levers do not transfer.
+- Mechanisms already proven this way, with their source forms, are in
+  `docs/compiler-notes.md`; check it before recording a residue, and add new
+  ones there rather than in per-campaign notes.
 - Treat a lower intermediate score as an experiment, not automatic
   falsification, when an independently evidenced source fact moved code toward
   retail. The final kept source must be humane and must not regress a banked

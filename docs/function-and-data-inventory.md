@@ -31,11 +31,12 @@ symbols or pretending that WIP names are original symbols:
 
 These are the denominator. `functions.tsv` also holds the four PS-X EXE
 entry rows (Psy-Q startup objects) and the 1,383 Psy-Q library functions
-(below); all of those have `functions_vendored.tsv` rows. All game
-identities are address-only with candidate signatures from the static MIPS
-live-in heuristic (`kf inventory seed`). The only data identities are
-`PSX.EXE` `main`'s four (`program_paths`, `program_index`, `next_program`,
-`program_header`).
+(below); all of those have `functions_vendored.tsv` rows. Game identities
+were seeded address-only with candidate signatures from the static MIPS
+live-in heuristic (`kf inventory seed`) and are refined as sources land;
+`data_identities.tsv` holds 175 rows across the images, from `PSX.EXE`
+`main`'s four (`program_paths`, `program_index`, `next_program`,
+`program_header`) to the GAME, OPEN, END and FDAT globals the units define.
 
 ### Evidence tiers
 
