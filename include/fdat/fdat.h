@@ -51,7 +51,7 @@ extern s32 light_flicker_step;
 void event_map_object_interact(MapObject *obj, ...);
 
 /* src/fdat/shared/light_blend_records.inc (4 modules) */
-void light_blend_records(Record30 *from, Record30 *to, Record30 *out, s32 t);
+void light_blend_records(LightSourceRecord *from, LightSourceRecord *to, LightSourceRecord *out, s32 t);
 /* src/fdat/shared/area_interact_item_containers.inc (slot 0 in 17 modules) */
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 /* src/fdat/shared/area_use_item_notify_no_target.inc (slot 2 in 2 modules) */

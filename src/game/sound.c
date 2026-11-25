@@ -25,7 +25,7 @@ ADDRESS(0x8001509c, 0x1a4)
 void audio_initialize_runtime(void)
 {
     SoundBank *bank;
-    SoundUnk5c8 *unk;
+    SoundVoiceHandle *unk;
     SoundSlot *slot;
     s32 i;
 
@@ -48,9 +48,9 @@ void audio_initialize_runtime(void)
         bank->slot = 0;
         bank++;
     }
-    unk = sound_status.unk5c8;
+    unk = sound_status.voice_handles;
     for (i = 9; i != -1; i--) {
-        unk->unk0 = -1;
+        unk->voice_id = -1;
         unk++;
     }
     slot = &sound_status.slots[0];
@@ -194,7 +194,7 @@ void audio_update_listener(VECTOR *listener, SVECTOR *angle)
     if (listener != 0) {
         sound_status.listener = *listener;
         collision_sample_map_cell_layer(listener->vx, listener->vy, listener->vz);
-        sound_status.unk24 = map_world.collision_layer_offset;
+        sound_status.listener_layer_offset = map_world.collision_layer_offset;
     }
     if (angle != 0) {
         sound_status.listener_angle = *angle;

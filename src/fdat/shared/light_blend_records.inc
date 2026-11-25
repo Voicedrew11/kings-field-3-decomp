@@ -4,13 +4,15 @@
  * claim; the module's first function, before its empty default handler).
  */
 ADDRESS(0x801e83a4, 0xe4)
-void light_blend_records(Record30 *from, Record30 *to, Record30 *out, s32 t)
+void light_blend_records(LightSourceRecord *from, LightSourceRecord *to, LightSourceRecord *out, s32 t)
 {
-    fixed_lerp_nine_halfwords_q12((MATRIX *)&from->unk14, (MATRIX *)&to->unk14, (MATRIX *)&out->unk14, t);
-    fixed_lerp_nine_halfwords_q12((MATRIX *)&from->unk0, (MATRIX *)&to->unk0, (MATRIX *)&out->unk0, t);
-    out->unk28.r = fixed_lerp_q12(from->unk28.r, to->unk28.r, t);
-    out->unk28.g = fixed_lerp_q12(from->unk28.g, to->unk28.g, t);
-    out->unk28.b = fixed_lerp_q12(from->unk28.b, to->unk28.b, t);
-    out->unk2c = fixed_lerp_q12(from->unk2c, to->unk2c, t);
-    out->unk2e = fixed_lerp_q12(from->unk2e, to->unk2e, t);
+    fixed_lerp_nine_halfwords_q12((MATRIX *)&from->color_matrix, (MATRIX *)&to->color_matrix,
+                                  (MATRIX *)&out->color_matrix, t);
+    fixed_lerp_nine_halfwords_q12((MATRIX *)&from->light_matrix, (MATRIX *)&to->light_matrix,
+                                  (MATRIX *)&out->light_matrix, t);
+    out->back_color.r = fixed_lerp_q12(from->back_color.r, to->back_color.r, t);
+    out->back_color.g = fixed_lerp_q12(from->back_color.g, to->back_color.g, t);
+    out->back_color.b = fixed_lerp_q12(from->back_color.b, to->back_color.b, t);
+    out->fog_near = fixed_lerp_q12(from->fog_near, to->fog_near, t);
+    out->fog_far = fixed_lerp_q12(from->fog_far, to->fog_far, t);
 }

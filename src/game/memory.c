@@ -241,25 +241,25 @@ u8 memory_block_kind(u8 *data)
 ADDRESS(0x80019488, 0x8)
 void memory_block_set_flags(u8 *data, u8 value)
 {
-    ((HeapBlock *)(data - sizeof(HeapBlock)))->unk1 = value;
+    ((HeapBlock *)(data - sizeof(HeapBlock)))->flags = value;
 }
 
 ADDRESS(0x80019490, 0xc)
 u8 memory_block_flags(u8 *data)
 {
-    return ((HeapBlock *)(data - sizeof(HeapBlock)))->unk1;
+    return ((HeapBlock *)(data - sizeof(HeapBlock)))->flags;
 }
 
 ADDRESS(0x8001949c, 0x8)
 void memory_block_set_tag(u8 *data, u16 value)
 {
-    ((HeapBlock *)(data - sizeof(HeapBlock)))->unk2 = value;
+    ((HeapBlock *)(data - sizeof(HeapBlock)))->tag = value;
 }
 
 ADDRESS(0x800194a4, 0xc)
 u16 memory_block_tag(u8 *data)
 {
-    return ((HeapBlock *)(data - sizeof(HeapBlock)))->unk2;
+    return ((HeapBlock *)(data - sizeof(HeapBlock)))->tag;
 }
 
 ADDRESS(0x800194b0, 0x40)

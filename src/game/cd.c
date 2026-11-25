@@ -256,7 +256,7 @@ CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCa
 ADDRESS(0x80019cc4, 0x84)
 s32 cd_archive_entry_extent(s32 file, s32 entry, CdlLOC *pos)
 {
-    CdFile *f = &cdrom_ctl.files[file];
+    CdArchive *f = &cdrom_ctl.archives[file];
     s32 first = f->sectors[entry];
 
     if (pos) {
@@ -322,8 +322,8 @@ s32 cd_archive_entry_size(int file_in, int entry_in)
     u16 entry = entry_in;
     s32 first;
 
-    first = cdrom_ctl.files[file].sectors[entry];
-    return (cdrom_ctl.files[file].sectors[entry + 1] - first) << 11;
+    first = cdrom_ctl.archives[file].sectors[entry];
+    return (cdrom_ctl.archives[file].sectors[entry + 1] - first) << 11;
 }
 
 ADDRESS(0x80019f58, 0x8)
@@ -395,7 +395,7 @@ void cd_archive_read(int file_in, int entry_in, u8 *buffer)
     u16 file = file_in;
     u16 entry = entry_in;
     CdlLOC pos;
-    CdFile *f = &cdrom_ctl.files[file];
+    CdArchive *f = &cdrom_ctl.archives[file];
     s32 first = f->sectors[entry];
     s32 sectors = f->sectors[entry + 1] - first;
 
@@ -455,7 +455,7 @@ void cd_archive_open(int index_in, char *name)
     char unused[64]; /* the frame keeps 64 unused bytes here */
     CdlFILE file;
     char path[64];
-    CdFile *f = &cdrom_ctl.files[index];
+    CdArchive *f = &cdrom_ctl.archives[index];
 
     strcpy(path, "\\CD\\");
     strcat(path, name);

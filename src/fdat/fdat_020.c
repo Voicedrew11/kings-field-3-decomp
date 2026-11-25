@@ -73,7 +73,7 @@ const FdatHeader fdat_header = {
 #include "shared/light_blend_records.inc"
 
 DATA(0x801e8ce8, 0x30, ".data")
-static Record30 area_light_blend_from_42 = {
+static LightSourceRecord area_light_blend_from_42 = {
     {{{2500, -1250, 1250}, {-2500, -1250, -1250}, {0, 2500, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},
@@ -81,7 +81,7 @@ static Record30 area_light_blend_from_42 = {
     18000,
 };
 DATA(0x801e8d18, 0x30, ".data")
-static Record30 area_light_blend_from_43 = {
+static LightSourceRecord area_light_blend_from_43 = {
     {{{2000, -1000, 1000}, {-2000, -1000, -1000}, {0, 2000, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},
@@ -89,7 +89,7 @@ static Record30 area_light_blend_from_43 = {
     18000,
 };
 DATA(0x801e8d48, 0x30, ".data")
-static Record30 area_light_blend_from_44 = {
+static LightSourceRecord area_light_blend_from_44 = {
     {{{1500, -750, 750}, {-1500, -750, -750}, {0, 1500, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},
@@ -97,7 +97,7 @@ static Record30 area_light_blend_from_44 = {
     18000,
 };
 DATA(0x801e8d78, 0x30, ".data")
-static Record30 area_light_blend_to = {
+static LightSourceRecord area_light_blend_to = {
     {{{3000, -1500, 1500}, {-3000, -1500, -1500}, {0, 3000, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},

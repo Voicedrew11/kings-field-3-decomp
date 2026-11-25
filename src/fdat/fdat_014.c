@@ -75,7 +75,7 @@ const FdatHeader fdat_header = {
 #include "shared/light_blend_records.inc"
 
 DATA(0x801e8e74, 0x30, ".data")
-static Record30 area_light_blend_from = {
+static LightSourceRecord area_light_blend_from = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{128, 128, 128}, {128, 128, 128}, {128, 128, 128}}, 0},
     {0x50, 0x50, 0x50, 0},
@@ -83,7 +83,7 @@ static Record30 area_light_blend_from = {
     12000,
 };
 DATA(0x801e8ea4, 0x30, ".data")
-static Record30 area_light_blend_to = {
+static LightSourceRecord area_light_blend_to = {
     {{{3000, -1500, 1500}, {-3000, -1500, -1500}, {0, 3000, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},

@@ -114,7 +114,7 @@ static s32 menu_item_preview_rotation_step;
 ADDRESS(0x8001a634, 0x140)
 void menu_run_pause_screen(void)
 {
-    MenuText text;
+    MenuGlyphString text;
     s32 i;
 
     menu_enter_display_state();
@@ -227,7 +227,7 @@ s32 menu_run_root_controller(void)
 ADDRESS(0x8001a9dc, 0xa8)
 void menu_draw_location_number(void)
 {
-    MenuText text;
+    MenuGlyphString text;
     s32 x = cur_avatar_status.pos.vx >> 11;
     s32 z = cur_avatar_status.pos.vz >> 11;
 
@@ -242,7 +242,7 @@ ADDRESS(0x8001aa84, 0x420)
 s32 menu_item_selection_controller(void)
 {
     MenuList list;
-    MenuEntry entries[60];
+    MenuGlyphRow entries[60];
     u8 counts[64];
     u8 ids[64];
     s32 confirmed;
@@ -343,10 +343,10 @@ s32 menu_item_selection_controller(void)
 }
 
 ADDRESS(0x8001aea4, 0xe4)
-s32 menu_collect_masked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
+s32 menu_collect_masked_item_rows(u8 *bag, MenuGlyphRow *entries, u8 *counts, u8 *ids, s32 first, s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &menu_item_names[first];
+    MenuGlyphRow *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
@@ -363,10 +363,10 @@ s32 menu_collect_masked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *i
 }
 
 ADDRESS(0x8001af88, 0x1c8)
-s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
+s32 menu_collect_available_item_rows(u8 *bag, MenuGlyphRow *entries, u8 *counts, u8 *ids, s32 first, s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &menu_item_names[first];
+    MenuGlyphRow *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
@@ -397,10 +397,11 @@ s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8
 }
 
 ADDRESS(0x8001b150, 0x104)
-s32 menu_collect_guide_locked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
+s32 menu_collect_guide_locked_item_rows(u8 *bag, MenuGlyphRow *entries, u8 *counts, u8 *ids, s32 first,
+                                        s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &menu_item_names[first];
+    MenuGlyphRow *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
@@ -828,7 +829,7 @@ s32 menu_choose_magic_action(void)
 {
     u32 pad = 0;
     MenuList list;
-    MenuEntry entries[20];
+    MenuGlyphRow entries[20];
     u32 values[20];
     u8 ids[24];
     s32 confirmed;
@@ -884,10 +885,10 @@ s32 menu_choose_magic_action(void)
 }
 
 ADDRESS(0x8001c6c0, 0xe8)
-s32 menu_collect_available_magic_rows(MagicRecord *spells, MenuEntry *entries, u32 *values, u8 *ids,
+s32 menu_collect_available_magic_rows(MagicRecord *spells, MenuGlyphRow *entries, u32 *values, u8 *ids,
                                       s32 first, s32 last)
 {
-    MenuEntry *src = &menu_magic_names[first];
+    MenuGlyphRow *src = &menu_magic_names[first];
     MagicRecord *spell = &spells[first];
     s32 n = 0;
     s32 i;
@@ -908,8 +909,8 @@ ADDRESS(0x8001c7a8, 0x218)
 void menu_equipment_list_controller(void)
 {
     MenuList list;
-    MenuEntry labels[10];
-    MenuEntry names[10];
+    MenuGlyphRow labels[10];
+    MenuGlyphRow names[10];
     s32 confirmed;
     s32 result;
     s32 i;
@@ -923,9 +924,9 @@ void menu_equipment_list_controller(void)
     list.rows = 10;
     list.entries = labels;
     list.y = 0x23;
-    list.unk28 = names;
-    list.unk0 = 0;
-    list.unk23 = 0x18;
+    list.second_entries = names;
+    list.title_x = 0;
+    list.glyphs_per_entry = 0x18;
     for (;;) {
         if (confirmed != 0 || result != MENU_NONE) {
             input_wait_release();
@@ -956,7 +957,7 @@ void menu_equipment_list_controller(void)
 }
 
 ADDRESS(0x8001c9c0, 0x1f8)
-void menu_build_equipped_label_rows(MenuEntry *out)
+void menu_build_equipped_label_rows(MenuGlyphRow *out)
 {
     u8 slots[10];
     s32 i;
@@ -998,7 +999,7 @@ void menu_equipment_category_controller(s32 slot)
     u32 pad = 0;
     u8 equipped = 0;
     MenuList list;
-    MenuEntry entries[40];
+    MenuGlyphRow entries[40];
     u8 counts[40];
     u8 ids[40];
     s32 confirmed;
@@ -1155,7 +1156,7 @@ void menu_choose_primary_magic_shortcut(void)
 {
     u32 pad = 0;
     MenuList list;
-    MenuEntry entries[32];
+    MenuGlyphRow entries[32];
     u32 values[32];
     u8 ids[32];
     s32 confirmed;
@@ -1224,7 +1225,7 @@ void menu_item_magic_controller(void)
     u32 pad = 0;
     s32 i = 0;
     MenuList list;
-    MenuEntry entries[88];
+    MenuGlyphRow entries[88];
     u8 counts[88];
     u32 values[88];
     u8 ids[88];
@@ -1552,7 +1553,7 @@ ADDRESS(0x8001dee4, 0x2d0)
 void menu_storage_store_controller(void)
 {
     MenuList list;
-    MenuEntry entries[152];
+    MenuGlyphRow entries[152];
     u8 counts[152];
     u8 ids[152];
     s32 confirmed;
@@ -1622,7 +1623,7 @@ ADDRESS(0x8001e1b4, 0x2d0)
 void menu_storage_take_out_controller(void)
 {
     MenuList list;
-    MenuEntry entries[76];
+    MenuGlyphRow entries[76];
     u8 counts[152];
     u8 ids[152];
     s32 confirmed;
@@ -1691,7 +1692,7 @@ void menu_storage_take_out_controller(void)
 ADDRESS(0x8001e484, 0x28c)
 s32 menu_run_system_choice(void)
 {
-    MenuText text;
+    MenuGlyphString text;
     s32 chosen;
     s32 confirmed;
     s32 result;
@@ -1777,11 +1778,11 @@ s32 menu_card_load_browser(void)
 {
     struct DIRENTRY dir[15];
     MenuList list;
-    MenuEntry entries[8];
+    MenuGlyphRow entries[8];
     u32 experience[8];
     u8 levels[8];
     s32 numbers[8];
-    MenuText text[3];
+    MenuGlyphString text[3];
     s32 status;
     s32 confirmed;
     s32 result;
@@ -1888,11 +1889,12 @@ s32 menu_card_build_slot_rows(struct DIRENTRY *dir, u8 *p, u32 *experience, u8 *
 }
 
 ADDRESS(0x8001eb3c, 0x148)
-void menu_show_dialog_panel(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back)
+void menu_show_dialog_panel(s32 message, MenuGlyphString *lines, s32 count, s32 x, s32 y, s32 w, s32 h,
+                            s32 back)
 {
     s32 i;
     s32 j;
-    MenuText *line;
+    MenuGlyphString *line;
 
     for (i = 0; i < 2; i++) {
         menu_frame_begin();
@@ -2294,7 +2296,7 @@ s32 menu_prompt_quit_game(void)
     s32 choice = 1;
     s32 result = MENU_NONE;
     u8 *mailbox = MAILBOX_BYTE_8;
-    MenuText labels[2];
+    MenuGlyphString labels[2];
     u32 pad;
     s32 i;
 
@@ -2349,7 +2351,7 @@ s32 menu_card_browser(void)
     s32 result = -1;
     u8 *mailbox = MAILBOX_BYTE_A;
     struct DIRENTRY dir[15];
-    MenuText text[4];
+    MenuGlyphString text[4];
     s32 status;
     s32 i;
     s32 found;
@@ -2404,11 +2406,11 @@ ADDRESS(0x8001fc5c, 0x240)
 s32 menu_card_load_slot_browser(struct DIRENTRY *dir)
 {
     MenuList list;
-    MenuEntry entries[8];
+    MenuGlyphRow entries[8];
     u32 experience[8];
     u8 levels[8];
     s32 numbers[8];
-    MenuText text[3];
+    MenuGlyphString text[3];
     s32 confirmed;
     s32 result;
     s32 n;
@@ -2466,27 +2468,27 @@ s32 menu_card_load_slot_browser(struct DIRENTRY *dir)
 }
 
 ADDRESS(0x8001fe9c, 0xf8)
-void menu_build_card_probe_error_rows(MenuText *lines)
+void menu_build_card_probe_error_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[25], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[25], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[26], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[26], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x8001ff94, 0xf8)
-void menu_build_card_full_rows(MenuText *lines)
+void menu_build_card_full_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[28], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[28], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[29], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[29], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x8002008c, 0x33c)
@@ -2494,11 +2496,11 @@ void menu_card_save_browser(void)
 {
     struct DIRENTRY dir[15];
     MenuList list;
-    MenuEntry entries[8];
+    MenuGlyphRow entries[8];
     u32 experience[8];
     u8 levels[8];
     s32 numbers[8];
-    MenuText text[2];
+    MenuGlyphString text[2];
     s32 status;
     s32 confirmed;
     s32 result;
@@ -2583,7 +2585,7 @@ void menu_card_save_browser(void)
 ADDRESS(0x800203c8, 0x198)
 void menu_card_save_slot(s32 number)
 {
-    MenuText text[4];
+    MenuGlyphString text[4];
     s32 status;
 
     status = memory_card_probe_temporary_file();
@@ -2632,8 +2634,8 @@ ADDRESS(0x80020560, 0x3ac)
 s32 menu_confirm_card_format(void)
 {
     s32 selected = 1;
-    MenuText labels[2];
-    MenuText lines[5];
+    MenuGlyphString labels[2];
+    MenuGlyphString lines[5];
     s32 chosen;
     s32 confirmed;
     s32 result;
@@ -2655,13 +2657,13 @@ s32 menu_confirm_card_format(void)
     labels[1].x = menu_window_layouts[11].x;
     labels[1].y = menu_window_layouts[11].y;
     lines[0].y = 0x7a;
-    memcpy((void *)lines[0].text, (const void *)&menu_label_rows[36], sizeof(MenuEntry));
+    memcpy((void *)lines[0].text, (const void *)&menu_label_rows[36], sizeof(MenuGlyphRow));
     lines[1].x = 0x4c;
     lines[1].y = 0x89;
-    memcpy((void *)lines[1].text, (const void *)&menu_label_rows[30], sizeof(MenuEntry));
+    memcpy((void *)lines[1].text, (const void *)&menu_label_rows[30], sizeof(MenuGlyphRow));
     lines[2].x = 0x4c;
     lines[2].y = 0x98;
-    memcpy((void *)lines[2].text, (const void *)&menu_label_rows[31], sizeof(MenuEntry));
+    memcpy((void *)lines[2].text, (const void *)&menu_label_rows[31], sizeof(MenuGlyphRow));
     for (;;) {
         if (chosen != -1 || result != MENU_NONE) {
             input_wait_release();
@@ -2698,99 +2700,99 @@ s32 menu_confirm_card_format(void)
 }
 
 ADDRESS(0x8002090c, 0x80)
-void menu_prepare_card_browser_rows(MenuText *line)
+void menu_prepare_card_browser_rows(MenuGlyphString *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&menu_label_rows[24], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[24], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x8002098c, 0xf8)
-void menu_prepare_card_not_inserted_rows(MenuText *lines)
+void menu_prepare_card_not_inserted_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[36], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[36], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[38], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[38], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020a84, 0xf8)
-void menu_prepare_card_io_error_rows(MenuText *lines)
+void menu_prepare_card_io_error_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[33], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[33], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020b7c, 0xf8)
-void menu_prepare_card_format_declined_rows(MenuText *lines)
+void menu_prepare_card_format_declined_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[32], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[32], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[39], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[39], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020c74, 0xf8)
-void menu_prepare_card_write_full_rows(MenuText *lines)
+void menu_prepare_card_write_full_rows(MenuGlyphString *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[40], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[40], sizeof(MenuGlyphRow));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[41], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[41], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020d6c, 0x80)
-void menu_prepare_card_write_rows(MenuText *line)
+void menu_prepare_card_write_rows(MenuGlyphString *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&menu_label_rows[10], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[10], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020dec, 0x80)
-void menu_prepare_card_read_row(MenuText *line)
+void menu_prepare_card_read_row(MenuGlyphString *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&menu_label_rows[37], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[37], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020e6c, 0x17c)
-void menu_prepare_card_read_failure_rows(MenuText *lines, s32 error)
+void menu_prepare_card_read_failure_rows(MenuGlyphString *lines, s32 error)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
     if (error == 1) {
-        memcpy((void *)lines->text, (const void *)&menu_label_rows[34], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&menu_label_rows[34], sizeof(MenuGlyphRow));
     } else {
-        memcpy((void *)lines->text, (const void *)&menu_label_rows[35], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&menu_label_rows[35], sizeof(MenuGlyphRow));
     }
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuGlyphRow));
 }
 
 ADDRESS(0x80020fe8, 0x12c)
-void menu_draw_card_dialog_rows(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back)
+void menu_draw_card_dialog_rows(MenuGlyphString *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back)
 {
     s32 i;
     s32 j;
-    MenuText *line;
+    MenuGlyphString *line;
 
     for (i = 0; i < 2; i++) {
         menu_frame_begin();
@@ -2862,7 +2864,7 @@ void menu_item_buy_controller(s32 shop)
 {
     u32 pad = 0;
     MenuList list;
-    MenuEntry entries[152];
+    MenuGlyphRow entries[152];
     u8 counts[152];
     u32 prices[152];
     u8 ids[152];
@@ -2961,7 +2963,7 @@ void menu_item_sell_controller(s32 shop)
 {
     static u8 cursor = 0;
     MenuList list;
-    MenuEntry entries[152];
+    MenuGlyphRow entries[152];
     u8 counts[152];
     u32 prices[152];
     u8 ids[152];
@@ -3047,7 +3049,7 @@ ADDRESS(0x80021aac, 0x2e8)
 s32 menu_intellectual_choose_item(void)
 {
     MenuList list;
-    MenuEntry entries[60];
+    MenuGlyphRow entries[60];
     u8 counts[64];
     u8 ids[64];
     s32 confirmed;
@@ -3174,7 +3176,7 @@ ADDRESS(0x80021d94, 0x278)
 s32 menu_blacksmith_make_item(void)
 {
     MenuList list;
-    MenuEntry entries[20];
+    MenuGlyphRow entries[20];
     u8 counts[24];
     u8 ids[24];
     s32 confirmed;
@@ -3479,8 +3481,8 @@ debug:
 ADDRESS(0x800227ec, 0xb14)
 void menu_draw_player_status(void)
 {
-    MenuText label;
-    MenuText number;
+    MenuGlyphString label;
+    MenuGlyphString number;
     s32 dy;
 
     label.x = 0xa3;
@@ -3649,8 +3651,8 @@ void menu_draw_player_status(void)
 ADDRESS(0x80023300, 0x9e8)
 void menu_draw_combat_attributes(void)
 {
-    MenuText label;
-    MenuText number;
+    MenuGlyphString label;
+    MenuGlyphString number;
 
     label.x = 0x1e;
     label.y = 0x22;
@@ -4068,16 +4070,16 @@ void menu_draw_button_config(u8 style, u8 layout, s32 row)
     }
     primitive_buffer_begin_poly_ft4();
     setRGB0(current_poly_ft4, bright, bright, blue);
-    current_poly_ft4->tpage = menu_sprite_defs[11].unk0;
-    current_poly_ft4->clut = menu_sprite_defs[11].unk2;
+    current_poly_ft4->tpage = menu_sprite_defs[11].tpage;
+    current_poly_ft4->clut = menu_sprite_defs[11].clut;
     if (row == 0) {
-        primitive_set_poly_ft4_rect(0x37, 0x3c, 0x35, 0xf, menu_sprite_defs[11].unk4,
-                                    menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
-                                    menu_sprite_defs[11].unka);
+        primitive_set_poly_ft4_rect(0x37, 0x3c, 0x35, 0xf, menu_sprite_defs[11].u,
+                                    menu_sprite_defs[11].v, menu_sprite_defs[11].width,
+                                    menu_sprite_defs[11].height);
     } else {
-        primitive_set_poly_ft4_rect(0x37, 0x7a, 0x35, 0xf, menu_sprite_defs[11].unk4,
-                                    menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
-                                    menu_sprite_defs[11].unka);
+        primitive_set_poly_ft4_rect(0x37, 0x7a, 0x35, 0xf, menu_sprite_defs[11].u,
+                                    menu_sprite_defs[11].v, menu_sprite_defs[11].width,
+                                    menu_sprite_defs[11].height);
     }
     SetSemiTrans((void *)current_poly_ft4, 1);
     primitive_buffer_commit_poly_ft4(0x31);
@@ -4091,7 +4093,7 @@ void menu_draw_button_config(u8 style, u8 layout, s32 row)
 ADDRESS(0x800246bc, 0x3bc)
 void menu_draw_options_rows(u8 *options)
 {
-    MenuText t[3];
+    MenuGlyphString t[3];
     s32 i;
 
     t[0].x = 0xab;
@@ -4198,30 +4200,30 @@ void menu_draw_volume_brightness_sliders(u8 *levels)
     s32 i;
     s32 k;
 
-    primitive_buffer_add_draw_mode(0x32, menu_sprite_defs[10].unk0);
+    primitive_buffer_add_draw_mode(0x32, menu_sprite_defs[10].tpage);
     for (i = 0; i < 3; i++) {
         primitive_buffer_begin_sprt();
         setRGB0(current_sprt, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
         k = 10;
-        current_sprt->clut = menu_sprite_defs[k].unk2;
+        current_sprt->clut = menu_sprite_defs[k].clut;
         current_sprt->x0 = 0xa5;
         current_sprt->y0 = i * 26 + 0x34;
-        current_sprt->w = menu_sprite_defs[k].unk8;
-        current_sprt->h = menu_sprite_defs[k].unka;
-        current_sprt->u0 = menu_sprite_defs[k].unk4;
-        current_sprt->v0 = menu_sprite_defs[k].unk6;
+        current_sprt->w = menu_sprite_defs[k].width;
+        current_sprt->h = menu_sprite_defs[k].height;
+        current_sprt->u0 = menu_sprite_defs[k].u;
+        current_sprt->v0 = menu_sprite_defs[k].v;
         SetSemiTrans((void *)current_sprt, cur_avatar_status.panel_translucent);
         primitive_buffer_commit_sprt(0x32);
         primitive_buffer_begin_sprt();
         setRGB0(current_sprt, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
         k = 9;
-        current_sprt->clut = menu_sprite_defs[k].unk2;
+        current_sprt->clut = menu_sprite_defs[k].clut;
         current_sprt->x0 = *levels * 96 / 128 + 172;
         current_sprt->y0 = i * 26 + 0x3c;
-        current_sprt->w = menu_sprite_defs[k].unk8;
-        current_sprt->h = menu_sprite_defs[k].unka;
-        current_sprt->u0 = menu_sprite_defs[k].unk4 + cur_avatar_status.panel_translucent * 16;
-        current_sprt->v0 = menu_sprite_defs[k].unk6;
+        current_sprt->w = menu_sprite_defs[k].width;
+        current_sprt->h = menu_sprite_defs[k].height;
+        current_sprt->u0 = menu_sprite_defs[k].u + cur_avatar_status.panel_translucent * 16;
+        current_sprt->v0 = menu_sprite_defs[k].v;
         primitive_buffer_commit_sprt(0x31);
         levels++;
     }
@@ -4230,7 +4232,7 @@ void menu_draw_volume_brightness_sliders(u8 *levels)
 ADDRESS(0x80024c70, 0x318)
 s32 menu_preview_choice(MenuList *list, s32 kind, s32 flags, u8 item)
 {
-    MenuText labels[2];
+    MenuGlyphString labels[2];
     s32 choice;
     s32 result;
     s32 pad;
@@ -4387,9 +4389,9 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
         }
         for (i = 0; i < 2; i++) {
             menu_frame_begin();
-            if (list->unk0 != 0) {
-                menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuText *)list);
-                menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuText *)list);
+            if (list->title_x != 0) {
+                menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuGlyphString *)list);
+                menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuGlyphString *)list);
             }
             if (mode != 1) {
                 menu_update_item_preview(item);
@@ -4416,8 +4418,8 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
 ADDRESS(0x800252f4, 0x174)
 void menu_draw_window(s32 page, s32 count, s32 selected, s32 flags)
 {
-    MenuText *title;
-    MenuText *line;
+    MenuGlyphString *title;
+    MenuGlyphString *line;
     s32 i;
 
     title = &menu_window_layouts[page * 9];
@@ -4450,7 +4452,7 @@ void menu_draw_window(s32 page, s32 count, s32 selected, s32 flags)
 ADDRESS(0x80025468, 0x6bc)
 void menu_render_list(MenuList *list, s32 flags)
 {
-    MenuText text;
+    MenuGlyphString text;
     u8 *names;
     u8 *second;
     u32 *values;
@@ -4464,15 +4466,15 @@ void menu_render_list(MenuList *list, s32 flags)
 
     hide = flags & 0x8000;
     names = (u8 *)list->entries;
-    second = (u8 *)list->unk28;
+    second = (u8 *)list->second_entries;
     values = list->values;
     counts = list->counts;
     flags &= 0xfff;
-    if (list->unk0 != 0) {
-        menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuText *)list);
-        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuText *)list);
+    if (list->title_x != 0) {
+        menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuGlyphString *)list);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuGlyphString *)list);
     }
-    names += list->first * list->unk23;
+    names += list->first * list->glyphs_per_entry;
     second += list->first * 24;
     values += list->first;
     counts += list->first;
@@ -4483,7 +4485,7 @@ void menu_render_list(MenuList *list, s32 flags)
         }
         text.x = list->x + 13;
         text.y = list->y + 8 + i * 16;
-        for (j = 0; j < list->unk23; j++) {
+        for (j = 0; j < list->glyphs_per_entry; j++) {
             text.text[j] = *names++;
         }
         menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
@@ -4551,12 +4553,12 @@ void menu_render_list(MenuList *list, s32 flags)
             }
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, bright, bright, blue);
-            current_poly_ft4->tpage = menu_sprite_defs[11].unk0;
-            current_poly_ft4->clut = menu_sprite_defs[11].unk2;
-            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, menu_sprite_defs[11].unk8,
-                                        menu_sprite_defs[11].unka, menu_sprite_defs[11].unk4,
-                                        menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
-                                        menu_sprite_defs[11].unka);
+            current_poly_ft4->tpage = menu_sprite_defs[11].tpage;
+            current_poly_ft4->clut = menu_sprite_defs[11].clut;
+            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, menu_sprite_defs[11].width,
+                                        menu_sprite_defs[11].height, menu_sprite_defs[11].u,
+                                        menu_sprite_defs[11].v, menu_sprite_defs[11].width,
+                                        menu_sprite_defs[11].height);
             SetSemiTrans((void *)current_poly_ft4, 1);
             primitive_buffer_commit_poly_ft4(0x31);
         }
@@ -4586,7 +4588,7 @@ void menu_render_list(MenuList *list, s32 flags)
 }
 
 ADDRESS(0x80025b24, 0xc4)
-void menu_draw_two_option(MenuText *yes, MenuText *no, s32 choice)
+void menu_draw_two_option(MenuGlyphString *yes, MenuGlyphString *no, s32 choice)
 {
     if (choice == 0) {
         menu_blit_panel_sprite_pulsing(&menu_sprite_defs[4], yes, menu_cursor_animation_frame);
@@ -4666,8 +4668,8 @@ void menu_update_item_preview(u8 item)
 ADDRESS(0x80025db8, 0xc8)
 void menu_draw_quantity(s32 big)
 {
-    MenuText label;
-    MenuText number;
+    MenuGlyphString label;
+    MenuGlyphString number;
 
     if (big) {
         menu_draw_gold();
@@ -4693,8 +4695,8 @@ void menu_draw_quantity(s32 big)
 ADDRESS(0x80025e80, 0xb8)
 void menu_draw_gold(void)
 {
-    MenuText label;
-    MenuText number;
+    MenuGlyphString label;
+    MenuGlyphString number;
 
     label.x = 0xb7;
     label.y = 0x2e;
@@ -4712,20 +4714,20 @@ void menu_draw_gold(void)
 }
 
 ADDRESS(0x80025f38, 0xe8)
-void menu_blit_panel_sprite(MenuFont *frame, MenuText *text)
+void menu_blit_panel_sprite(MenuSpriteDef *frame, MenuGlyphString *text)
 {
     primitive_buffer_begin_poly_ft4();
     setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
-    current_poly_ft4->tpage = frame->unk0;
-    current_poly_ft4->clut = frame->unk2;
-    primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
-                                frame->unk8, frame->unka);
+    current_poly_ft4->tpage = frame->tpage;
+    current_poly_ft4->clut = frame->clut;
+    primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->width, frame->height, frame->u, frame->v,
+                                frame->width, frame->height);
     SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
 ADDRESS(0x80026020, 0x138)
-void menu_blit_panel_sprite_pulsing(MenuFont *frame, MenuText *text, s32 shade)
+void menu_blit_panel_sprite_pulsing(MenuSpriteDef *frame, MenuGlyphString *text, s32 shade)
 {
     s32 bright;
     s32 blue;
@@ -4739,16 +4741,16 @@ void menu_blit_panel_sprite_pulsing(MenuFont *frame, MenuText *text, s32 shade)
     }
     primitive_buffer_begin_poly_ft4();
     setRGB0(current_poly_ft4, bright, bright, blue);
-    current_poly_ft4->tpage = frame->unk0;
-    current_poly_ft4->clut = frame->unk2;
-    primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
-                                frame->unk8, frame->unka);
+    current_poly_ft4->tpage = frame->tpage;
+    current_poly_ft4->clut = frame->clut;
+    primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->width, frame->height, frame->u, frame->v,
+                                frame->width, frame->height);
     SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
 ADDRESS(0x80026158, 0x84)
-void menu_draw_string_dimmed(MenuFont *font, MenuText *text)
+void menu_draw_string_dimmed(MenuSpriteDef *font, MenuGlyphString *text)
 {
     s32 r;
     s32 g;
@@ -4772,7 +4774,7 @@ void menu_draw_string_dimmed(MenuFont *font, MenuText *text)
 }
 
 ADDRESS(0x800261dc, 0x190)
-void menu_draw_string(MenuFont *font, MenuText *text)
+void menu_draw_string(MenuSpriteDef *font, MenuGlyphString *text)
 {
     u8 *c;
     s32 dx;
@@ -4780,7 +4782,7 @@ void menu_draw_string(MenuFont *font, MenuText *text)
     s32 v;
     s32 ch;
 
-    primitive_buffer_add_draw_mode(3, font->unk0);
+    primitive_buffer_add_draw_mode(3, font->tpage);
     c = text->text;
     if (*c == 0xff) {
         return;
@@ -4788,11 +4790,11 @@ void menu_draw_string(MenuFont *font, MenuText *text)
     dx = 0;
     do {
         primitive_buffer_begin_sprt();
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         current_sprt->x0 = text->x + dx - 1;
         current_sprt->y0 = text->y - 1;
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
         ch = *c;
         u = (ch & 0xf) * 8;
         v = (ch >> 4) * 15;
@@ -4802,11 +4804,11 @@ void menu_draw_string(MenuFont *font, MenuText *text)
         c++;
         primitive_buffer_begin_sprt();
         setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         current_sprt->x0 = text->x + dx;
         current_sprt->y0 = text->y;
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
         current_sprt->u0 = u;
         current_sprt->v0 = v;
         primitive_buffer_commit_sprt(3);
@@ -4815,12 +4817,12 @@ void menu_draw_string(MenuFont *font, MenuText *text)
 }
 
 ADDRESS(0x8002636c, 0x204)
-void menu_draw_number(MenuFont *font, MenuText *text)
+void menu_draw_number(MenuSpriteDef *font, MenuGlyphString *text)
 {
     u8 *c;
     s32 dx;
 
-    primitive_buffer_add_draw_mode(3, font->unk0);
+    primitive_buffer_add_draw_mode(3, font->tpage);
     c = text->text;
     if (*c == 0xff) {
         return;
@@ -4828,31 +4830,31 @@ void menu_draw_number(MenuFont *font, MenuText *text)
     dx = 0;
     do {
         primitive_buffer_begin_sprt();
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         current_sprt->x0 = text->x + dx - 1;
         current_sprt->y0 = text->y - 1;
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
         if (*c < 11) {
-            current_sprt->u0 = font->unk4;
+            current_sprt->u0 = font->u;
             current_sprt->v0 = *c * 15;
         } else {
-            current_sprt->u0 = font->unk4 + 7;
+            current_sprt->u0 = font->u + 7;
             current_sprt->v0 = (*c - 11) * 15;
         }
         primitive_buffer_commit_sprt(2);
         primitive_buffer_begin_sprt();
         setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         current_sprt->x0 = text->x + dx;
         current_sprt->y0 = text->y;
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
         if (*c < 11) {
-            current_sprt->u0 = font->unk4;
+            current_sprt->u0 = font->u;
             current_sprt->v0 = *c * 15;
         } else {
-            current_sprt->u0 = font->unk4 + 7;
+            current_sprt->u0 = font->u + 7;
             current_sprt->v0 = (*c - 11) * 15;
         }
         primitive_buffer_commit_sprt(3);
@@ -4868,7 +4870,7 @@ void menu_draw_number(MenuFont *font, MenuText *text)
 ADDRESS(0x80026570, 0x224)
 void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
 {
-    MenuFont *font;
+    MenuSpriteDef *font;
     s32 level;
     s32 shade;
     s32 v;
@@ -4876,7 +4878,7 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
     font = &menu_sprite_defs[2];
     v = row != 0 ? 16 : 0;
     level = 0;
-    primitive_buffer_add_draw_mode(6, font->unk0);
+    primitive_buffer_add_draw_mode(6, font->tpage);
     if (cur_avatar_status.brightness > 128) {
         level = (cur_avatar_status.brightness - 128) / 2;
     }
@@ -4889,7 +4891,7 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
         if (shadow == 0) {
             setRGB0(current_sprt, shade, shade, shade);
         }
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         if (shadow == 0) {
             current_sprt->x0 = x;
             current_sprt->y0 = y;
@@ -4897,21 +4899,21 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
             current_sprt->x0 = x - 1;
             current_sprt->y0 = y - 1;
         }
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
-        current_sprt->u0 = font->unk4 + (*text - 'a') * font->unk8;
-        current_sprt->v0 = font->unk6 + v;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
+        current_sprt->u0 = font->u + (*text - 'a') * font->width;
+        current_sprt->v0 = font->v + v;
         primitive_buffer_commit_sprt(5);
         if (shadow != 0) {
             primitive_buffer_begin_sprt();
             setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
-            current_sprt->clut = font->unk2;
+            current_sprt->clut = font->clut;
             current_sprt->x0 = x;
             current_sprt->y0 = y;
-            current_sprt->w = font->unk8;
-            current_sprt->h = font->unka;
-            current_sprt->u0 = font->unk4 + (*text - 'a') * font->unk8;
-            current_sprt->v0 = font->unk6 + v;
+            current_sprt->w = font->width;
+            current_sprt->h = font->height;
+            current_sprt->u0 = font->u + (*text - 'a') * font->width;
+            current_sprt->v0 = font->v + v;
             primitive_buffer_commit_sprt(6);
         }
         text++;
@@ -4921,9 +4923,9 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
 
 /* As menu_draw_ascii_string: level is cleared before the font call ($s2, shared with dx). */
 ADDRESS(0x80026794, 0x22c)
-void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
+void menu_draw_small_glyph_string(MenuGlyphString *text, s32 shadow)
 {
-    MenuFont *font;
+    MenuSpriteDef *font;
     u8 *c;
     s32 level;
     s32 dx;
@@ -4931,7 +4933,7 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
 
     font = &menu_sprite_defs[2];
     level = 0;
-    primitive_buffer_add_draw_mode(6, font->unk0);
+    primitive_buffer_add_draw_mode(6, font->tpage);
     if (cur_avatar_status.brightness > 128) {
         level = (cur_avatar_status.brightness - 128) / 2;
     }
@@ -4946,7 +4948,7 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
         if (shadow == 0) {
             setRGB0(current_sprt, shade, shade, shade);
         }
-        current_sprt->clut = font->unk2;
+        current_sprt->clut = font->clut;
         if (shadow == 0) {
             current_sprt->x0 = text->x + dx;
             current_sprt->y0 = text->y;
@@ -4954,21 +4956,21 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
             current_sprt->x0 = text->x + dx - 1;
             current_sprt->y0 = text->y - 1;
         }
-        current_sprt->w = font->unk8;
-        current_sprt->h = font->unka;
-        current_sprt->u0 = font->unk4 + *c * 8;
-        current_sprt->v0 = font->unk6 + 8;
+        current_sprt->w = font->width;
+        current_sprt->h = font->height;
+        current_sprt->u0 = font->u + *c * 8;
+        current_sprt->v0 = font->v + 8;
         primitive_buffer_commit_sprt(5);
         if (shadow != 0) {
             primitive_buffer_begin_sprt();
             setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
-            current_sprt->clut = font->unk2;
+            current_sprt->clut = font->clut;
             current_sprt->x0 = text->x + dx;
             current_sprt->y0 = text->y;
-            current_sprt->w = font->unk8;
-            current_sprt->h = font->unka;
-            current_sprt->u0 = font->unk4 + *c * 8;
-            current_sprt->v0 = font->unk6 + 8;
+            current_sprt->w = font->width;
+            current_sprt->h = font->height;
+            current_sprt->u0 = font->u + *c * 8;
+            current_sprt->v0 = font->v + 8;
             primitive_buffer_commit_sprt(6);
         }
         c++;
@@ -4981,27 +4983,27 @@ void menu_draw_button_icon(s32 x, s32 y, s32 value)
 {
     s32 shade;
 
-    primitive_buffer_add_draw_mode(6, menu_sprite_defs[6].unk0);
+    primitive_buffer_add_draw_mode(6, menu_sprite_defs[6].tpage);
     shade = 0;
     primitive_buffer_begin_sprt();
     if (cur_avatar_status.brightness > 128) {
         shade = (cur_avatar_status.brightness - 128) / 2;
     }
     setRGB0(current_sprt, shade + 112, shade + 112, shade + 112);
-    current_sprt->clut = menu_sprite_defs[6].unk2;
+    current_sprt->clut = menu_sprite_defs[6].clut;
     current_sprt->x0 = x;
     current_sprt->y0 = y;
-    current_sprt->w = menu_sprite_defs[6].unk8;
-    current_sprt->h = menu_sprite_defs[6].unka;
-    current_sprt->u0 = menu_sprite_defs[6].unk4 + value * 16;
-    current_sprt->v0 = menu_sprite_defs[6].unk6;
+    current_sprt->w = menu_sprite_defs[6].width;
+    current_sprt->h = menu_sprite_defs[6].height;
+    current_sprt->u0 = menu_sprite_defs[6].u + value * 16;
+    current_sprt->v0 = menu_sprite_defs[6].v;
     primitive_buffer_commit_sprt(6);
 }
 
 ADDRESS(0x80026acc, 0x380)
 void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
 {
-    MenuFont *f;
+    MenuSpriteDef *f;
     s32 x;
     s32 y;
     s32 i;
@@ -5033,19 +5035,19 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
         f = &menu_sprite_defs[k + 3];
         if (i >= 3 && hrem < 0) {
             hh = h - 33;
-            v = f->unk6 + 66 - h;
+            v = f->v + 66 - h;
         } else {
-            hh = f->unka;
-            v = f->unk6;
+            hh = f->height;
+            v = f->v;
         }
-        ww = f->unk8;
+        ww = f->width;
         for (;;) {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
             SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
-            current_poly_ft4->tpage = f->unk0;
-            current_poly_ft4->clut = f->unk2;
-            primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, v, ww, hh);
+            current_poly_ft4->tpage = f->tpage;
+            current_poly_ft4->clut = f->clut;
+            primitive_set_poly_ft4_rect(x, y, ww, hh, f->u, v, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
             if (i == 1 || i == 4) {
@@ -5067,8 +5069,8 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     while (!done) {
         i++;
         f = &menu_sprite_defs[i + 3];
-        hh = f->unka;
-        ww = f->unk8;
+        hh = f->height;
+        ww = f->width;
         end = 0;
         if (hrem < hh) {
             hh = hrem;
@@ -5078,9 +5080,9 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
             SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
-            current_poly_ft4->tpage = f->unk0;
-            current_poly_ft4->clut = f->unk2;
-            primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, f->unk6, ww, hh);
+            current_poly_ft4->tpage = f->tpage;
+            current_poly_ft4->clut = f->clut;
+            primitive_set_poly_ft4_rect(x, y, ww, hh, f->u, f->v, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
             if (i != 13) {
@@ -5280,8 +5282,8 @@ void menu_list_init(MenuList *list, s32 page, s32 button)
 
     dst = list->title;
     src = (&menu_window_layouts[page * 9])[button + 1].text;
-    list->unk0 = 0x1f;
-    list->unk2 = 0x20;
+    list->title_x = 0x1f;
+    list->title_y = 0x20;
     for (i = 0; i < 16; i++) {
         *dst++ = *src++;
     }
@@ -5292,7 +5294,7 @@ void menu_list_init(MenuList *list, s32 page, s32 button)
     list->first = 0;
     list->cursor = 0;
     list->row = 0;
-    list->unk23 = 0x18;
+    list->glyphs_per_entry = 0x18;
     menu_item_quantity = 1;
 }
 
@@ -5466,7 +5468,7 @@ ADDRESS(0x80027b5c, 0x58)
 void menu_release_item_model(void)
 {
     if (menu_item_model_registered == 1) {
-        memory_free((void *)scene_display_sys.unk10148[3]);
+        memory_free((void *)scene_display_sys.tmd_slots[3]);
     } else if (menu_cd_read_state != 0) {
         memory_free((void *)menu_cd_read_buffer);
     }
@@ -5520,10 +5522,10 @@ s32 cd_archive_start_async_read(u16 file, u16 entry)
     CdlLOC pos;
     u8 result[8];
     u8 param[8];
-    CdFile *f;
+    CdArchive *f;
     s32 size;
 
-    f = &cdrom_ctl.files[file];
+    f = &cdrom_ctl.archives[file];
     size = f->sectors[entry + 1] - f->sectors[entry];
     cd_location_add(&f->extent.pos, f->sectors[entry], &pos);
     CdControl(CdlPause, 0, 0);

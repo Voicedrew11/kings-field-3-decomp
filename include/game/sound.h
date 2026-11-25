@@ -35,10 +35,10 @@ typedef struct SoundEffect {
     s16 unk8;
 } SoundEffect;
 
-typedef struct SoundUnk5c8 {
-    s16 unk0;
+typedef struct SoundVoiceHandle {
+    s16 voice_id;
     s16 unk2;
-} SoundUnk5c8;
+} SoundVoiceHandle;
 
 typedef struct SoundState {
     u8 bank_select;         /* +0x000: picks slot 0 or 1 for banks 3..50 */
@@ -47,10 +47,10 @@ typedef struct SoundState {
     s16 seq_id;             /* +0x00c */
     s32 seq_ready;          /* +0x010 */
     VECTOR listener;        /* +0x014 */
-    s16 unk24;              /* +0x024 */
+    s16 listener_layer_offset; /* +0x024 */
     SVECTOR listener_angle; /* +0x026 */
     SoundBank banks[0xb3];  /* +0x030 */
-    SoundUnk5c8 unk5c8[10]; /* +0x5c8 */
+    SoundVoiceHandle voice_handles[10]; /* +0x5c8 */
     SoundEffect effects[528]; /* +0x5f0 */
     SoundSlot slots[11];    /* +0x1a90 */
 } SoundState;

@@ -168,8 +168,8 @@ void event_map_object_interact(MapObject *obj, ...)
         obj->angle.vx = 0;
         obj->arg.b.unk38 = 0xff;
         obj->pos = cur_avatar_status.pos;
-        obj->pos.vx += rcos(scene_display_sys.unk15b08.vy - 3072) * 1024 >> 12;
-        obj->pos.vz += rsin(scene_display_sys.unk15b08.vy - 3072) * 1024 >> 12;
+        obj->pos.vx += rcos(scene_display_sys.view_rotation.vy - 3072) * 1024 >> 12;
+        obj->pos.vz += rsin(scene_display_sys.view_rotation.vy - 3072) * 1024 >> 12;
         obj->pos.vy -= 1024;
     }
     def = &map_objects_slots.defs[obj->object_id];

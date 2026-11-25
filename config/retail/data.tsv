@@ -80,11 +80,11 @@ GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007e4c4	0x6dcc4	0x20	defined	supported	render_world_identity_matrix	MATRIX	asm;src/game/render.c game.render	.data; identity MATRIX (0x1000 diagonal, zero translation); the view matrix of the placed-model and effect draws
 GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	callback_default_table	FdatHandler[32]	asm;game-big relocs (resource_advance_transition)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
-GAME.EXE	0x8007e564	0x6dd64	0xfc	defined	supported	menu_sprite_defs	MenuFont[21]	asm;src/game/menu.c game.menu	.data; 12-byte sprite rows (tpage, clut, u, v, w, h): the menu glyph sets and frame sprites
-GAME.EXE	0x8007e660	0x6de60	0xbd0	defined	supported	menu_window_layouts	MenuText[108]	asm;src/game/menu.c game.menu	.data; 0x1c-byte rows (x, y, 24 glyphs): 9 rows per button page; yes/no at [10]/[11]; message titles from [28]
-GAME.EXE	0x8007f230	0x6ea30	0x3f0	defined	supported	menu_label_rows	MenuEntry[42]	asm;src/game/menu.c game.menu	.data; 24-glyph label rows: equipment list labels [0..9], the none-option row [11], status and card message rows up to [41]; the header still declares [10]
-GAME.EXE	0x8007f620	0x6ee20	0xe10	defined	supported	menu_item_names	MenuEntry[150]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per item id
-GAME.EXE	0x80080430	0x6fc30	0x2e8	defined	supported	menu_magic_names	MenuEntry[31]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per magic id
+GAME.EXE	0x8007e564	0x6dd64	0xfc	defined	supported	menu_sprite_defs	MenuSpriteDef[21]	asm;src/game/menu.c game.menu	.data; 12-byte sprite rows (tpage, clut, u, v, w, h): the menu glyph sets and frame sprites
+GAME.EXE	0x8007e660	0x6de60	0xbd0	defined	supported	menu_window_layouts	MenuGlyphString[108]	asm;src/game/menu.c game.menu	.data; 0x1c-byte rows (x, y, 24 glyphs): 9 rows per button page; yes/no at [10]/[11]; message titles from [28]
+GAME.EXE	0x8007f230	0x6ea30	0x3f0	defined	supported	menu_label_rows	MenuGlyphRow[42]	asm;src/game/menu.c game.menu	.data; 24-glyph label rows: equipment list labels [0..9], the none-option row [11], status and card message rows up to [41]; the header still declares [10]
+GAME.EXE	0x8007f620	0x6ee20	0xe10	defined	supported	menu_item_names	MenuGlyphRow[150]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per item id
+GAME.EXE	0x80080430	0x6fc30	0x2e8	defined	supported	menu_magic_names	MenuGlyphRow[31]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per magic id
 GAME.EXE	0x80080718	0x6ff18	0x384	defined	supported	menu_shop_stock_pages	u8[6][150]	asm;src/game/menu.c game.menu;src/game/save_data.c game.save_data	.data; per shop page and item id: [0] the first shop's live stock (saved with the game), [5] the blacksmith list; also masks for menu_collect_masked_item_rows
 GAME.EXE	0x80080a9c	0x7029c	0x708	defined	supported	menu_shop_buy_prices	u16[6][150]	asm;src/game/menu.c game.menu	.data; buy price per shop and item id
 GAME.EXE	0x800811a4	0x709a4	0x5dc	defined	supported	menu_shop_sell_prices	u16[5][150]	asm;src/game/menu.c game.menu	.data; sell price per shop and item id
@@ -103,8 +103,8 @@ GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	collision_default_cell	MapCell
 GAME.EXE	0x80081916	0x71116	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	notification_quads	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	hud_sprites	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; render_game_frame rewrites their positions and texture cells every frame; visible 0xff ends the list
-GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	render_model_rows	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); render_game_frame shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
-GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	light_default_records	Record30[64]	asm;band C/H relocs;FDAT_080 area_refresh_lamp_effects_and_light	light records (render.h); resource_initialize_game_assets copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
+GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	render_model_rows	RenderModelRow[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); render_game_frame shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	light_default_records	LightSourceRecord[64]	asm;band C/H relocs;FDAT_080 area_refresh_lamp_effects_and_light	light records (render.h); resource_initialize_game_assets copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
 GAME.EXE	0x8008288c	0x7208c	0x50	defined	supported	map_object_cell_patterns	MapCellPattern[2][4]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): side 0/1 per MapObjectDef +0xe byte (map_object_initialize_from_placements type 84)
 GAME.EXE	0x800828dc	0x720dc	0x1e	defined	supported	map_object_door_shape_pattern	MapCellPattern[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements types 3 and 4
 GAME.EXE	0x800828fa	0x720fa	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -291,16 +291,16 @@ FDAT_008.BIN	0x801e8fc4	0xcbc	0x344	unclassified	coverage-gap			payload-compleme
 FDAT_011.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e87e0	0x4d8	0x328	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_014.BIN	0x801e8308	0x0	0x9c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_014.BIN	0x801e8e74	0xb6c	0x30	defined	supported	area_light_blend_from	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends from
-FDAT_014.BIN	0x801e8ea4	0xb9c	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends to
+FDAT_014.BIN	0x801e8e74	0xb6c	0x30	defined	supported	area_light_blend_from	LightSourceRecord	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends from
+FDAT_014.BIN	0x801e8ea4	0xb9c	0x30	defined	supported	area_light_blend_to	LightSourceRecord	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends to
 FDAT_014.BIN	0x801e8ed4	0xbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_020.BIN	0x801e8ce8	0x9e0	0x30	defined	supported	area_light_blend_from_42	Record30	asm;src/fdat/fdat_020.c	.data; light record 42 blends from it
-FDAT_020.BIN	0x801e8d18	0xa10	0x30	defined	supported	area_light_blend_from_43	Record30	asm;src/fdat/fdat_020.c	.data; light record 43 blends from it
-FDAT_020.BIN	0x801e8d48	0xa40	0x30	defined	supported	area_light_blend_from_44	Record30	asm;src/fdat/fdat_020.c	.data; light record 44 blends from it
-FDAT_020.BIN	0x801e8d78	0xa70	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_020.c	.data; light record 42..44 blend to
+FDAT_020.BIN	0x801e8ce8	0x9e0	0x30	defined	supported	area_light_blend_from_42	LightSourceRecord	asm;src/fdat/fdat_020.c	.data; light record 42 blends from it
+FDAT_020.BIN	0x801e8d18	0xa10	0x30	defined	supported	area_light_blend_from_43	LightSourceRecord	asm;src/fdat/fdat_020.c	.data; light record 43 blends from it
+FDAT_020.BIN	0x801e8d48	0xa40	0x30	defined	supported	area_light_blend_from_44	LightSourceRecord	asm;src/fdat/fdat_020.c	.data; light record 44 blends from it
+FDAT_020.BIN	0x801e8d78	0xa70	0x30	defined	supported	area_light_blend_to	LightSourceRecord	asm;src/fdat/fdat_020.c	.data; light record 42..44 blend to
 FDAT_020.BIN	0x801e8da8	0xaa0	0x560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	area_socket_motion_start_offset	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
@@ -343,8 +343,8 @@ FDAT_074.BIN	0x801e8670	0x368	0x498	unclassified	coverage-gap			payload-compleme
 FDAT_077.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_077.BIN	0x801e8b14	0x80c	0x7f4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_080.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_080.BIN	0x801e8bb8	0x8b0	0x30	defined	supported	area_light_blend_from	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends from
-FDAT_080.BIN	0x801e8be8	0x8e0	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends to
+FDAT_080.BIN	0x801e8bb8	0x8b0	0x30	defined	supported	area_light_blend_from	LightSourceRecord	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends from
+FDAT_080.BIN	0x801e8be8	0x8e0	0x30	defined	supported	area_light_blend_to	LightSourceRecord	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends to
 FDAT_080.BIN	0x801e8c18	0x910	0x6f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8a80	0x778	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

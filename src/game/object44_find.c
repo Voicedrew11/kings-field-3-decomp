@@ -940,7 +940,7 @@ void map_object_update_actions(void)
                 if (obj->action_state == 1) {
                     obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
-                    map_object_door1b_view_yaw = scene_display_sys.unk15b08.vy;
+                    map_object_door1b_view_yaw = scene_display_sys.view_rotation.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
@@ -1077,7 +1077,7 @@ void map_object_update_actions(void)
                 if (obj->action_state == 1) {
                     obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
-                    map_object_door0_view_yaw = scene_display_sys.unk15b08.vy;
+                    map_object_door0_view_yaw = scene_display_sys.view_rotation.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
@@ -1193,7 +1193,7 @@ void map_object_update_actions(void)
                 if (obj->action_state == 1) {
                     obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
-                    map_object_door1_view_yaw = scene_display_sys.unk15b08.vy;
+                    map_object_door1_view_yaw = scene_display_sys.view_rotation.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
@@ -2377,7 +2377,7 @@ void map_object_update_actions(void)
         case 227:
             if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                 obj->arg.b.unk39, 0x8000) != 0) {
-                scene_display_sys.unk15995 = obj->arg.b.unk3a.bytes[0];
+                scene_display_sys.view_range = obj->arg.b.unk3a.bytes[0];
                 scene_display_sys.unk15996 = obj->arg.b.unk3a.bytes[1];
             }
             break;

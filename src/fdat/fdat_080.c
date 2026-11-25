@@ -98,7 +98,7 @@ void area_use_item_noop(void)
 }
 
 DATA(0x801e8bb8, 0x30, ".data")
-static Record30 area_light_blend_from = {
+static LightSourceRecord area_light_blend_from = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{128, 128, 128}, {128, 128, 128}, {128, 128, 128}}, 0},
     {0x50, 0x50, 0x50, 0},
@@ -106,7 +106,7 @@ static Record30 area_light_blend_from = {
     12000,
 };
 DATA(0x801e8be8, 0x30, ".data")
-static Record30 area_light_blend_to = {
+static LightSourceRecord area_light_blend_to = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{2662, 2662, 2662}, {2662, 2662, 2662}, {2662, 2662, 2662}}, 0},
     {0x78, 0x78, 0x78, 0},

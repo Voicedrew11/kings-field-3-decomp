@@ -525,7 +525,7 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
             obj->action = 0xe3;
             if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                 obj->arg.b.unk39, 0x8000) != 0) {
-                scene_display_sys.unk15995 = obj->arg.b.unk3a.bytes[0];
+                scene_display_sys.view_range = obj->arg.b.unk3a.bytes[0];
                 scene_display_sys.unk15996 = obj->arg.b.unk3a.bytes[1];
             }
             break;

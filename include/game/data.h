@@ -7,7 +7,7 @@
  * is the word count main passes to repeat_store_word; whether a block is one
  * object or a run of several is not yet known, so the names stay
  * address-derived and only the fields the matched code touches are named.
- * The block at 0x80199154 is Data80199154 and the effect records at
+ * The block at 0x80199154 is GraphicsRuntime and the effect records at
  * 0x80182968 are MapPlacedEntry, both in game/render.h; the word at 0x801c12f0 is
  * CdState.unkc (game/cd.h).
  */

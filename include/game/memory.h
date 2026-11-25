@@ -19,8 +19,8 @@
 
 typedef struct HeapBlock {
     u8 state;      /* +0x0: HEAP_* */
-    u8 unk1;       /* +0x1 */
-    u16 unk2;      /* +0x2 */
+    u8 flags;      /* +0x1 */
+    u16 tag;       /* +0x2 */
     u32 size;      /* +0x4: data bytes after the header */
     u8 **owner;    /* +0x8: where the owner keeps the data pointer, or 0 */
 } HeapBlock;

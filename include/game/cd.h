@@ -81,10 +81,10 @@ typedef struct CdExtent {
     u32 size;
 } CdExtent;
 
-typedef struct CdFile {
+typedef struct CdArchive {
     u16 *sectors;           /* +0x0: first sector of each entry, plus the end */
     CdExtent extent;        /* +0x4 */
-} CdFile;
+} CdArchive;
 
 typedef struct CdState {
     s32 vsync_event;            /* +0x000: root counter 3 interrupt */
@@ -99,7 +99,7 @@ typedef struct CdState {
     CdRequest requests[24];     /* +0x020 */
     CdRequest *write;           /* +0x440: next request to fill */
     CdRequest *read;            /* +0x444: request being read */
-    CdFile files[10];           /* +0x448 */
+    CdArchive archives[10];     /* +0x448 */
 } CdState;
 
 extern CdState cdrom_ctl;

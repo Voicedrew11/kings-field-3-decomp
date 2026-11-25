@@ -55,7 +55,7 @@ s32 render_model_yaw_smoothing_accumulator = 0;
 
 /*
  * Draws the map layers of the 25 x 25 cell grid around the viewer
- * (Data80199154.grid, flags per cell as render_map_cell_layers takes them).
+ * (GraphicsRuntime.grid, flags per cell as render_map_cell_layers takes them).
  */
 ADDRESS(0x8003bfd0, 0x38c)
 void render_map_cell_window(void)
@@ -70,27 +70,27 @@ void render_map_cell_window(void)
     s32 i;
     s32 j;
 
-    pos = &SCRATCH->u.layer.unk100;
-    origin = &SCRATCH->u.layer.unk108;
-    SCRATCH->model = scene_display_sys.unk10148[0];
+    pos = &SCRATCH->u.layer.pos;
+    origin = &SCRATCH->u.layer.origin;
+    SCRATCH->model = scene_display_sys.tmd_slots[0];
     SCRATCH->ot = scene_display_sys.ot + 240;
     *(u32 *)&SCRATCH->w.map.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->next = scene_display_sys.pool->next;
     SCRATCH->end = scene_display_sys.pool->end;
     SCRATCH->w.map.clip = 100;
     SCRATCH->screen = scene_display_sys.screen;
-    SCRATCH->u.layer.unk108.vx = scene_display_sys.unk15af8.vx;
-    SCRATCH->u.layer.unk108.vy = scene_display_sys.unk15af8.vy;
-    SCRATCH->u.layer.unk108.vz = scene_display_sys.unk15af8.vz;
-    SCRATCH->u.layer.unk108.pad = scene_display_sys.unk15af8.pad;
-    SCRATCH->w.map.count = scene_display_sys.unk159bc;
+    SCRATCH->u.layer.origin.vx = scene_display_sys.view_position.vx;
+    SCRATCH->u.layer.origin.vy = scene_display_sys.view_position.vy;
+    SCRATCH->u.layer.origin.vz = scene_display_sys.view_position.vz;
+    SCRATCH->u.layer.origin.pad = scene_display_sys.view_position.pad;
+    SCRATCH->w.map.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->w.map.ot_count = scene_display_sys.ot_count;
     SCRATCH->w.map.prim_count = scene_display_sys.prim_count;
     resource_copy_words((u32 *)SCRATCH->u.view.grid, (u32 *)scene_display_sys.grid, 0x9c);
     grid = &SCRATCH->u.view.grid[0][0];
-    SCRATCH->u.view.x = scene_display_sys.unk15b20;
-    SCRATCH->u.view.z = scene_display_sys.unk15b24;
-    z = scene_display_sys.unk15b24;
+    SCRATCH->u.view.x = scene_display_sys.map_scan_start_x;
+    SCRATCH->u.view.z = scene_display_sys.map_scan_start_z;
+    z = scene_display_sys.map_scan_start_z;
     for (i = 25; i != 0; z++, i--) {
         if (z >= 0 && z < 80) {
             x = SCRATCH->u.view.x;
@@ -123,7 +123,7 @@ void render_map_cell_window(void)
             grid += 25;
         }
     }
-    scene_display_sys.unk159bc = SCRATCH->w.map.count;
+    scene_display_sys.tmd_prim_count = SCRATCH->w.map.tmd_prim_count;
     scene_display_sys.ot_count = SCRATCH->w.map.ot_count;
     scene_display_sys.pool->next = SCRATCH->next;
 }
@@ -142,9 +142,9 @@ void render_active_model_rows(void)
     MATRIX m;
     VECTOR scale;
     MATRIX lm;
-    Data80081c20 *rec;
+    RenderModelRow *rec;
     ScratchPad *scratch;
-    Record6c *light;
+    LightRecord *light;
     u8 *file;
     u8 *model;
     s32 i;
@@ -155,15 +155,15 @@ void render_active_model_rows(void)
         if (rec->visible != 1) {
             continue;
         }
-        light = &scene_display_sys.unk15da8[rec->light];
+        light = &scene_display_sys.lights[rec->lighting_index];
         m.t[0] = rec->pos.vx;
         m.t[1] = rec->pos.vy;
         m.t[2] = rec->pos.vz;
         RotMatrix(&rec->angle, &m);
-        fog_set_range(light->unk68, light->unk6a);
-        gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-        gte_SetColorMatrix(&light->unk50);
-        gte_MulMatrix0(&light->unk0[0], &m, &lm);
+        fog_set_range(light->fog_near, light->fog_far);
+        gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+        gte_SetColorMatrix(&light->color_matrix);
+        gte_MulMatrix0(&light->light_matrices[0], &m, &lm);
         gte_SetLightMatrix(&lm);
         scale.vx = rec->scale.vx;
         scale.vy = rec->scale.vy;
@@ -172,10 +172,10 @@ void render_active_model_rows(void)
         gte_SetRotMatrix(&m);
         gte_SetTransMatrix(&m);
         file = scene_display_sys.models[rec->model];
-        model = file + ((ModelFile *)file)->vertices;
+        model = file + ((ModelFile *)file)->tmd;
         scratch->ot = scene_display_sys.ot;
         *(u32 *)&scratch->w.model.rgb = *(u32 *)&map_textured_primitive_color;
-        scratch->draw.count.unk4 = scene_display_sys.unk159bc;
+        scratch->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
         scratch->draw.count.ot_count = scene_display_sys.ot_count;
         scratch->draw.count.prim_count = scene_display_sys.prim_count;
         scratch->model = model;
@@ -183,8 +183,9 @@ void render_active_model_rows(void)
         scratch->end = scene_display_sys.pool->end;
         scratch->screen = scene_display_sys.screen;
         scratch->draw.count.clut = 0;
-        if (animation_prepare_asset_vertices(&rec->slot, rec->model, rec->anim, rec->time,
-                                             ((ModelData *)model)->parts[0].unk4) != 0) {
+        if (animation_prepare_asset_vertices(&rec->animation_cache, rec->model, rec->animation_id,
+                                             rec->animation_phase,
+                                             ((ModelData *)model)->parts[0].vertex_count) != 0) {
             u8 *vertex;
             ScreenVertex *screen;
 
@@ -192,15 +193,15 @@ void render_active_model_rows(void)
             offset = scratch->part->vertices + 12;
             vertex = scratch->vertices = (u8 *)(offset + (u32)scratch->model);
             screen = scratch->screen;
-            i = ((ModelData *)model)->parts[0].unk4;
+            i = ((ModelData *)model)->parts[0].vertex_count;
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(&scratch->w.model.unk54);
-                screen->sxy.vx = scratch->w.model.unk54.vx;
-                screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->fog = scratch->w.model.unk54.vz;
-                screen->z = scratch->w.model.unk54.vz >> 2;
+                gte_stlvnl(&scratch->w.model.transformed);
+                screen->sxy.vx = scratch->w.model.transformed.vx;
+                screen->sxy.vy = scratch->w.model.transformed.vy;
+                screen->fog = scratch->w.model.transformed.vz;
+                screen->z = scratch->w.model.transformed.vz >> 2;
                 screen++;
                 vertex += 8;
             }
@@ -208,24 +209,24 @@ void render_active_model_rows(void)
             u8 *vertex;
             ScreenVertex *screen;
 
-            i = ((ModelData *)model)->parts[0].unk4;
+            i = ((ModelData *)model)->parts[0].vertex_count;
             screen = scratch->screen;
             vertex = scratch->vertices;
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(&scratch->w.model.unk54);
-                screen->sxy.vx = scratch->w.model.unk54.vx;
-                screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->fog = scratch->w.model.unk54.vz;
-                screen->z = scratch->w.model.unk54.vz >> 2;
+                gte_stlvnl(&scratch->w.model.transformed);
+                screen->sxy.vx = scratch->w.model.transformed.vx;
+                screen->sxy.vy = scratch->w.model.transformed.vy;
+                screen->fog = scratch->w.model.transformed.vz;
+                screen->z = scratch->w.model.transformed.vz >> 2;
                 screen++;
                 vertex += 8;
             }
         }
         render_enqueue_textured_tmd(0, 0);
         scene_display_sys.pool->next = scratch->next;
-        scene_display_sys.unk159bc = scratch->draw.count.unk4;
+        scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
         scene_display_sys.ot_count = scratch->draw.count.ot_count;
     }
 }
@@ -682,7 +683,7 @@ void render_player_weapon(void)
 {
     MATRIX m;
     ScratchPad *scratch;
-    Record6c *light;
+    LightRecord *light;
     u8 *file;
     u8 *model;
     u8 *vertex;
@@ -693,13 +694,13 @@ void render_player_weapon(void)
         return;
     }
     scratch = SCRATCH;
-    light = &scene_display_sys.unk15da8[((MapLayer *)((u8 *)&map_world.cells[cur_avatar_status.pos.vz >> 11]
+    light = &scene_display_sys.lights[((MapLayer *)((u8 *)&map_world.cells[cur_avatar_status.pos.vz >> 11]
                                                          [cur_avatar_status.pos.vx >> 11] +
                                                 cur_avatar_status.map_layer_offset))->lighting_index & 0x3f];
-    gte_SetColorMatrix(&light->unk50);
-    gte_SetLightMatrix(&light->unk0[0]);
-    fog_set_range(light->unk68, light->unk6a);
-    gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+    gte_SetColorMatrix(&light->color_matrix);
+    gte_SetLightMatrix(&light->light_matrices[0]);
+    fog_set_range(light->fog_near, light->fog_far);
+    gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
     m.t[0] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_x;
     m.t[1] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_y;
     m.t[2] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_z;
@@ -707,16 +708,16 @@ void render_player_weapon(void)
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     file = scene_display_sys.models[32];
-    model = file + ((ModelFile *)file)->vertices;
+    model = file + ((ModelFile *)file)->tmd;
     SCRATCH->model = model;
     if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.weapon_animation_cache, 32,
                                          cur_avatar_status.weapon_attack_mode,
                                          cur_avatar_status.weapon_attack_phase,
-                                         ((ModelData *)model)->parts[0].unk4) == 0) {
+                                         ((ModelData *)model)->parts[0].vertex_count) == 0) {
         return;
     }
     SCRATCH->ot = scene_display_sys.ot;
-    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
@@ -726,15 +727,15 @@ void render_player_weapon(void)
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     vertex = SCRATCH->vertices;
     screen = scene_display_sys.screen;
-    i = ((ModelData *)model)->parts[0].unk4;
+    i = ((ModelData *)model)->parts[0].vertex_count;
     while (--i != -1) {
         gte_ldv0(vertex);
         gte_rtps();
         gte_stsxy(&screen->sxy);
         gte_stszotz(&screen->z);
-        if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
-            screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
-                          (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
+        if (scene_display_sys.fog_near != scene_display_sys.fog_far) {
+            screen->fog = ((screen->z - (scene_display_sys.fog_near >> 2)) << 14) /
+                          (scene_display_sys.fog_far - scene_display_sys.fog_near);
         } else {
             screen->fog = 0;
         }
@@ -749,7 +750,7 @@ void render_player_weapon(void)
     }
     render_enqueue_textured_tmd(0, 24);
     scene_display_sys.pool->next = scratch->next;
-    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
@@ -778,8 +779,8 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     long flag;
     MATRIX *mat;
     ScratchPad *scratch;
-    Record6c *light;
-    Record6c *other;
+    LightRecord *light;
+    LightRecord *other;
     MapLayer *layer;
     ModelPart *part;
     u8 *file;
@@ -791,8 +792,8 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     scratch = SCRATCH;
     SCRATCH->draw.count.clip = 100;
     SCRATCH->screen = scene_display_sys.screen;
-    SCRATCH->unk48 = scene_display_sys.screen;
-    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->screen_cursor = scene_display_sys.screen;
+    SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
@@ -802,15 +803,15 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     if (SCRATCH->end - 30720 < SCRATCH->next) {
         mode &= 0xbf;
     }
-    gte_SetRotMatrix(&scene_display_sys.unk159f8);
-    gte_SetTransMatrix(&scene_display_sys.unk159f8);
+    gte_SetRotMatrix(&scene_display_sys.view_matrix);
+    gte_SetTransMatrix(&scene_display_sys.view_matrix);
     if (view != NULL) {
-        delta.vx = pos->vx - scene_display_sys.unk15af8.vx;
-        delta.vy = pos->vy - scene_display_sys.unk15af8.vy;
-        delta.vz = pos->vz - scene_display_sys.unk15af8.vz;
-        rel.vx = pos->vx - scene_display_sys.unk15af8.vx;
-        rel.vy = pos->vy - scene_display_sys.unk15af8.vy;
-        rel.vz = pos->vz - scene_display_sys.unk15af8.vz;
+        delta.vx = pos->vx - scene_display_sys.view_position.vx;
+        delta.vy = pos->vy - scene_display_sys.view_position.vy;
+        delta.vz = pos->vz - scene_display_sys.view_position.vz;
+        rel.vx = pos->vx - scene_display_sys.view_position.vx;
+        rel.vy = pos->vy - scene_display_sys.view_position.vy;
+        rel.vz = pos->vz - scene_display_sys.view_position.vz;
         gte_ldv0(&rel);
         gte_rt();
         gte_stlvnl(mat->t);
@@ -823,14 +824,14 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
         if (area != 1) {
             layer++;
         }
-        light = &scene_display_sys.unk15da8[layer->lighting_index & 0x3f];
+        light = &scene_display_sys.lights[layer->lighting_index & 0x3f];
     } else {
         mat->t[0] = pos->vx;
         mat->t[1] = pos->vy;
         mat->t[2] = pos->vz;
-        light = &scene_display_sys.unk15da8
-            [((MapLayer *)((u8 *)&map_world.cells[scene_display_sys.unk15af8.vz >> 11]
-                                                      [scene_display_sys.unk15af8.vx >> 11] +
+        light = &scene_display_sys.lights
+            [((MapLayer *)((u8 *)&map_world.cells[scene_display_sys.view_position.vz >> 11]
+                                                      [scene_display_sys.view_position.vx >> 11] +
                            cur_avatar_status.map_layer_offset))->lighting_index & 0x3f];
     }
     if (mode & 0x80) {
@@ -840,36 +841,37 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     }
     matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
-        other = &scene_display_sys.unk15da8[light2];
-        if (other->unk50.m[0][0] != -1) {
-            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
+        other = &scene_display_sys.lights[light2];
+        if (other->color_matrix.m[0][0] != -1) {
+            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->color_matrix, (MATRIX *)&other->color_matrix,
+                                          &blend, t);
             gte_SetColorMatrix(&blend);
         } else {
-            gte_SetColorMatrix(&light->unk50);
+            gte_SetColorMatrix(&light->color_matrix);
         }
-        if (other->unk0[0].m[0][0] != -1) {
-            gte_MulMatrix0(&other->unk0[0], mat, &lm);
+        if (other->light_matrices[0].m[0][0] != -1) {
+            gte_MulMatrix0(&other->light_matrices[0], mat, &lm);
         } else {
-            gte_MulMatrix0(&light->unk0[0], mat, &lm);
+            gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
         }
-        if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            fog_set_range(fixed_lerp_q12(light->unk68, other->unk68, t),
-                          fixed_lerp_q12(light->unk6a, other->unk6a, t));
+        if (other->fog_near != 0xffff && other->fog_far != 0xffff) {
+            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, t),
+                          fixed_lerp_q12(light->fog_far, other->fog_far, t));
         } else {
-            fog_set_range(light->unk68, light->unk6a);
+            fog_set_range(light->fog_near, light->fog_far);
         }
-        if (other->unk64.r != 0xff) {
-            gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
-                             fixed_lerp_q12(light->unk64.g, other->unk64.g, t),
-                             fixed_lerp_q12(light->unk64.b, other->unk64.b, t));
+        if (other->back_color.r != 0xff) {
+            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, t),
+                             fixed_lerp_q12(light->back_color.g, other->back_color.g, t),
+                             fixed_lerp_q12(light->back_color.b, other->back_color.b, t));
         } else {
-            gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+            gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
         }
     } else {
-        gte_SetColorMatrix(&light->unk50);
-        fog_set_range(light->unk68, light->unk6a);
-        gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-        gte_MulMatrix0(&light->unk0[0], mat, &lm);
+        gte_SetColorMatrix(&light->color_matrix);
+        fog_set_range(light->fog_near, light->fog_far);
+        gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+        gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
     }
     gte_SetLightMatrix(&lm);
     if (scale != NULL) {
@@ -884,13 +886,13 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     gte_SetRotMatrix(mat);
     gte_SetTransMatrix(mat);
     file = scene_display_sys.models[id];
-    model = file + ((ModelFile *)file)->vertices;
+    model = file + ((ModelFile *)file)->tmd;
     scratch->model = model;
     if (anim < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
         if (animation_prepare_asset_vertices(owner, id, anim, time,
-                                             ((ModelData *)model)->parts[0].unk4) != 0) {
+                                             ((ModelData *)model)->parts[0].vertex_count) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
@@ -908,17 +910,17 @@ draw:
             goto done;
         }
         {
-            s32 i = part->unk4;
+            s32 i = part->vertex_count;
             ScreenVertex *screen = scratch->screen;
             u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(&scratch->w.model.unk54);
-                screen->sxy.vx = scratch->w.model.unk54.vx;
-                screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->fog = scratch->w.model.unk54.vz;
+                gte_stlvnl(&scratch->w.model.transformed);
+                screen->sxy.vx = scratch->w.model.transformed.vx;
+                screen->sxy.vy = scratch->w.model.transformed.vy;
+                screen->fog = scratch->w.model.transformed.vz;
                 screen->z = depth;
                 screen++;
                 vertex += 8;
@@ -927,7 +929,7 @@ draw:
         render_enqueue_textured_tmd(n, depth);
     } else if (mode & 4) {
         if (view != NULL) {
-            s32 i = part->unk4;
+            s32 i = part->vertex_count;
             ScreenVertex *screen = scratch->screen;
             u8 *vertex = scratch->vertices;
 
@@ -936,9 +938,9 @@ draw:
                 gte_rtps();
                 gte_stsxy(&screen->sxy);
                 gte_stszotz(&screen->z);
-                if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
-                    screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
-                                  (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
+                if (scene_display_sys.fog_near != scene_display_sys.fog_far) {
+                    screen->fog = ((screen->z - (scene_display_sys.fog_near >> 2)) << 14) /
+                                  (scene_display_sys.fog_far - scene_display_sys.fog_near);
                 } else {
                     screen->fog = 0;
                 }
@@ -952,17 +954,17 @@ draw:
                 vertex += 8;
             }
         } else {
-            s32 i = part->unk4;
+            s32 i = part->vertex_count;
             ScreenVertex *screen = scratch->screen;
             u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(&scratch->w.model.unk54);
-                screen->sxy.vx = scratch->w.model.unk54.vx;
-                screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->fog = scratch->w.model.unk54.vz;
+                gte_stlvnl(&scratch->w.model.transformed);
+                screen->sxy.vx = scratch->w.model.transformed.vx;
+                screen->sxy.vy = scratch->w.model.transformed.vy;
+                screen->fog = scratch->w.model.transformed.vz;
                 screen->z = depth;
                 screen++;
                 vertex += 8;
@@ -971,7 +973,7 @@ draw:
         render_enqueue_blended_tmd(n, depth, mode & 3);
     } else {
         if (view != NULL) {
-            s32 i = part->unk4;
+            s32 i = part->vertex_count;
             ScreenVertex *screen = scratch->screen;
             u8 *vertex = scratch->vertices;
 
@@ -980,9 +982,9 @@ draw:
                 gte_rtps();
                 gte_stsxy(&screen->sxy);
                 gte_stszotz(&screen->z);
-                if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
-                    screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
-                                  (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
+                if (scene_display_sys.fog_near != scene_display_sys.fog_far) {
+                    screen->fog = ((screen->z - (scene_display_sys.fog_near >> 2)) << 14) /
+                                  (scene_display_sys.fog_far - scene_display_sys.fog_near);
                 } else {
                     screen->fog = 0;
                 }
@@ -996,17 +998,17 @@ draw:
                 vertex += 8;
             }
         } else {
-            s32 i = part->unk4;
+            s32 i = part->vertex_count;
             ScreenVertex *screen = scratch->screen;
             u8 *vertex = scratch->vertices;
 
             while (--i != -1) {
                 gte_ldv0(vertex);
                 gte_rt();
-                gte_stlvnl(&scratch->w.model.unk54);
-                screen->sxy.vx = scratch->w.model.unk54.vx;
-                screen->sxy.vy = scratch->w.model.unk54.vy;
-                screen->fog = scratch->w.model.unk54.vz;
+                gte_stlvnl(&scratch->w.model.transformed);
+                screen->sxy.vx = scratch->w.model.transformed.vx;
+                screen->sxy.vy = scratch->w.model.transformed.vy;
+                screen->fog = scratch->w.model.transformed.vz;
                 screen->z = depth;
                 screen++;
                 vertex += 8;
@@ -1016,7 +1018,7 @@ draw:
     }
 done:
     scene_display_sys.pool->next = scratch->next;
-    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
@@ -1044,8 +1046,8 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     long flag;
     MATRIX *mat;
     ScratchPad *scratch;
-    Record6c *light;
-    Record6c *other;
+    LightRecord *light;
+    LightRecord *other;
     ModelPart *part;
     u8 *file;
     u8 *model;
@@ -1059,20 +1061,20 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     scratch = SCRATCH;
     SCRATCH->draw.count.clip = 100;
     SCRATCH->screen = scene_display_sys.screen;
-    SCRATCH->unk48 = scene_display_sys.screen;
-    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->screen_cursor = scene_display_sys.screen;
+    SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->end = scene_display_sys.pool->end;
-    gte_SetRotMatrix(&scene_display_sys.unk159f8);
-    gte_SetTransMatrix(&scene_display_sys.unk159f8);
-    light = scene_display_sys.unk15da8;
+    gte_SetRotMatrix(&scene_display_sys.view_matrix);
+    gte_SetTransMatrix(&scene_display_sys.view_matrix);
+    light = scene_display_sys.lights;
     if (view != NULL) {
-        delta.vx = pos->vx - scene_display_sys.unk15af8.vx;
-        delta.vy = pos->vy - scene_display_sys.unk15af8.vy;
-        delta.vz = pos->vz - scene_display_sys.unk15af8.vz;
+        delta.vx = pos->vx - scene_display_sys.view_position.vx;
+        delta.vy = pos->vy - scene_display_sys.view_position.vy;
+        delta.vz = pos->vz - scene_display_sys.view_position.vz;
         turn = ratan2(delta.vz, delta.vx) - 1024;
         angle = (cur_avatar_status.camera_rotation.vy - turn) & 0xfff;
         if ((u32)(angle - 2048) < 1536 || (u32)(angle - 513) < 1536) {
@@ -1098,7 +1100,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
             mat->t[1] >>= 1;
             mat->t[2] >>= 1;
         }
-        light = scene_display_sys.unk15da8;
+        light = scene_display_sys.lights;
     } else {
         m.t[0] = pos->vx;
         m.t[1] = pos->vy;
@@ -1109,36 +1111,37 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     }
     matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
-        other = &scene_display_sys.unk15da8[light2];
-        if (other->unk50.m[0][0] != -1) {
-            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
+        other = &scene_display_sys.lights[light2];
+        if (other->color_matrix.m[0][0] != -1) {
+            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->color_matrix, (MATRIX *)&other->color_matrix,
+                                          &blend, t);
             gte_SetColorMatrix(&blend);
         } else {
-            gte_SetColorMatrix(&light->unk50);
+            gte_SetColorMatrix(&light->color_matrix);
         }
-        if (other->unk0[0].m[0][0] != -1) {
-            gte_MulMatrix0(&other->unk0[0], mat, &lm);
+        if (other->light_matrices[0].m[0][0] != -1) {
+            gte_MulMatrix0(&other->light_matrices[0], mat, &lm);
         } else {
-            gte_MulMatrix0(&light->unk0[0], mat, &lm);
+            gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
         }
-        if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            fog_set_range(fixed_lerp_q12(light->unk68, other->unk68, t),
-                          fixed_lerp_q12(light->unk6a, other->unk6a, t));
+        if (other->fog_near != 0xffff && other->fog_far != 0xffff) {
+            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, t),
+                          fixed_lerp_q12(light->fog_far, other->fog_far, t));
         } else {
-            fog_set_range(light->unk68, light->unk6a);
+            fog_set_range(light->fog_near, light->fog_far);
         }
-        if (other->unk64.r != 0xff) {
-            gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
-                             fixed_lerp_q12(light->unk64.g, other->unk64.g, t),
-                             fixed_lerp_q12(light->unk64.b, other->unk64.b, t));
+        if (other->back_color.r != 0xff) {
+            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, t),
+                             fixed_lerp_q12(light->back_color.g, other->back_color.g, t),
+                             fixed_lerp_q12(light->back_color.b, other->back_color.b, t));
         } else {
-            gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
+            gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
         }
     } else {
-        gte_SetColorMatrix(&light->unk50);
-        fog_set_range(light->unk68, light->unk6a);
-        gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-        gte_MulMatrix0(&light->unk0[0], mat, &lm);
+        gte_SetColorMatrix(&light->color_matrix);
+        fog_set_range(light->fog_near, light->fog_far);
+        gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+        gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
     }
     gte_SetLightMatrix(&lm);
     if (scale != NULL) {
@@ -1163,13 +1166,13 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     gte_SetRotMatrix(mat);
     gte_SetTransMatrix(mat);
     file = scene_display_sys.models[id];
-    model = file + ((ModelFile *)file)->vertices;
+    model = file + ((ModelFile *)file)->tmd;
     scratch->model = model;
     if (anim < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
         if (animation_prepare_asset_vertices(owner, id, anim, time,
-                                             ((ModelData *)model)->parts[0].unk4) != 0) {
+                                             ((ModelData *)model)->parts[0].vertex_count) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
@@ -1183,7 +1186,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
 draw:
     dist = SquareRoot0(mat->t[0] * mat->t[0] + mat->t[1] * mat->t[1] + mat->t[2] * mat->t[2]);
     if (view != NULL) {
-        s32 i = part->unk4;
+        s32 i = part->vertex_count;
         ScreenVertex *screen = scratch->screen;
         u8 *vertex = scratch->vertices;
 
@@ -1197,17 +1200,17 @@ draw:
             vertex += 8;
         }
     } else {
-        s32 i = part->unk4;
+        s32 i = part->vertex_count;
         ScreenVertex *screen = scratch->screen;
         u8 *vertex = scratch->vertices;
 
         while (--i != -1) {
             gte_ldv0(vertex);
             gte_rt();
-            gte_stlvnl(&scratch->w.model.unk54);
-            screen->sxy.vx = scratch->w.model.unk54.vx;
-            screen->sxy.vy = scratch->w.model.unk54.vy;
-            screen->fog = scratch->w.model.unk54.vz;
+            gte_stlvnl(&scratch->w.model.transformed);
+            screen->sxy.vx = scratch->w.model.transformed.vx;
+            screen->sxy.vy = scratch->w.model.transformed.vy;
+            screen->fog = scratch->w.model.transformed.vz;
             screen->z = depth;
             screen++;
             vertex += 8;
@@ -1215,7 +1218,7 @@ draw:
     }
     render_enqueue_distant_tmd(n, depth, shift, dist);
     scene_display_sys.pool->next = scratch->next;
-    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
@@ -1234,7 +1237,7 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
     u16 depth = depth_in;
     MATRIX m;
     ScratchPad *scratch;
-    Record6c *light;
+    LightRecord *light;
     u8 *file;
     u8 *model;
     s32 i;
@@ -1245,17 +1248,17 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
     m.t[2] = 0;
     matrix_set_rotation_yxz(rotation, &m);
     scratch = SCRATCH;
-    gte_MulMatrix0(&scene_display_sys.unk159f8, &m, &m);
+    gte_MulMatrix0(&scene_display_sys.view_matrix, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
-    light = &scene_display_sys.unk15da8[light_id & 0x7f];
-    gte_SetColorMatrix(&light->unk50);
-    gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    gte_SetLightMatrix(&light->unk0[0]);
+    light = &scene_display_sys.lights[light_id & 0x7f];
+    gte_SetColorMatrix(&light->color_matrix);
+    gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+    gte_SetLightMatrix(&light->light_matrices[0]);
     file = scene_display_sys.models[id];
-    model = file + ((ModelFile *)file)->vertices;
+    model = file + ((ModelFile *)file)->tmd;
     SCRATCH->ot = scene_display_sys.ot;
-    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->model = model;
@@ -1264,7 +1267,8 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
     SCRATCH->screen = scene_display_sys.screen;
     SCRATCH->draw.count.clut = 0;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
-    if (animation_prepare_asset_vertices(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) == 0) {
+    if (animation_prepare_asset_vertices(owner, id, anim, time,
+                                         ((ModelData *)model)->parts[0].vertex_count) == 0) {
         u8 *vertex;
         ScreenVertex *screen;
 
@@ -1272,7 +1276,7 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
         offset = SCRATCH->part->vertices + 12;
         vertex = SCRATCH->vertices = (u8 *)(offset + (u32)SCRATCH->model);
         screen = SCRATCH->screen;
-        i = ((ModelData *)model)->parts[0].unk4;
+        i = ((ModelData *)model)->parts[0].vertex_count;
         while (--i != -1) {
             gte_ldv0(vertex);
             gte_rtps();
@@ -1286,7 +1290,7 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
         u8 *vertex;
         ScreenVertex *screen;
 
-        i = ((ModelData *)model)->parts[0].unk4;
+        i = ((ModelData *)model)->parts[0].vertex_count;
         screen = SCRATCH->screen;
         vertex = SCRATCH->vertices;
         while (--i != -1) {
@@ -1301,7 +1305,7 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
     }
     render_enqueue_tmd_fixed_depth(0, depth, shade);
     scene_display_sys.pool->next = scratch->next;
-    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
@@ -1399,9 +1403,9 @@ s32 map_cell_visible(VECTOR *pos, s32 range_x, s32 range_z)
     s32 z = pos->vz >> 11;
     s32 x;
 
-    if (z - range_z <= scene_display_sys.unk15b14 && scene_display_sys.unk15b14 <= z + range_z) {
+    if (z - range_z <= scene_display_sys.view_cell_z && scene_display_sys.view_cell_z <= z + range_z) {
         x = pos->vx >> 11;
-        if (x - range_x <= scene_display_sys.unk15b10 && scene_display_sys.unk15b10 <= x + range_x) {
+        if (x - range_x <= scene_display_sys.view_cell_x && scene_display_sys.view_cell_x <= x + range_x) {
             return 1;
         }
     }
@@ -1550,7 +1554,7 @@ void render_scene_and_update_resources(void)
                 scratch->u.load.angle.vy = obj->angle.vy + 2048;
                 scratch->u.load.angle.vz = obj->angle.vz;
                 render_world_model(obj->layer_mask, obj->definition_id + 128, at, &scratch->u.load.angle,
-                                   &obj->scale, &obj->animation_cache, &scene_display_sys.unk159f8,
+                                   &obj->scale, &obj->animation_cache, &scene_display_sys.view_matrix,
                                    obj->animation_id, obj->animation_phase, obj->lighting_override_index,
                                    obj->lighting_blend, obj->render_mode, obj->render_depth_offset);
             }
@@ -1596,7 +1600,7 @@ void render_scene_and_update_resources(void)
             pos.vz = ((rec->arg.m.cell_offset_z << 11) + rec->pos.vz) >> 1;
             pos.vy = (rec->pos.vy - (rec->arg.m.cell_height << 11)) >> 1;
             render_distant_world_model(rec->layer_mask, id, &pos, &scratch->u.load.angle, &rec->scale,
-                                       &rec->arg.m.animation_cache, &scene_display_sys.unk159f8,
+                                       &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                        rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                        rec->lighting_blend, rec->render_mode, rec->render_depth_offset);
             rec->flags |= 0x80;
@@ -1702,18 +1706,18 @@ void render_scene_and_update_resources(void)
             if (rec->flags & 0x40) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
                 render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                                   &rec->arg.m.animation_cache, &scene_display_sys.unk15ab8,
+                                   &rec->arg.m.animation_cache, &scene_display_sys.pitch_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             } else if (rec->flags & 8) {
                 render_distant_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle,
                                            &rec->scale, &rec->arg.m.animation_cache,
-                                           &scene_display_sys.unk159f8, rec->animation_id,
+                                           &scene_display_sys.view_matrix, rec->animation_id,
                                            rec->animation_phase, rec->lighting_override_index,
                                            rec->lighting_blend, flags, rec->render_depth_offset);
             } else {
                 render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                                   &rec->arg.m.animation_cache, &scene_display_sys.unk159f8,
+                                   &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             }
@@ -1761,7 +1765,7 @@ void render_scene_and_update_resources(void)
             scratch->u.load.angle.vz = effect->angle.vz;
             render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos,
                                &scratch->u.load.angle, &effect->scale, &effect->animation_cache,
-                               &scene_display_sys.unk159f8, effect->animation_id, effect->animation_phase,
+                               &scene_display_sys.view_matrix, effect->animation_id, effect->animation_phase,
                                effect->lighting_override_index, effect->lighting_blend, effect->render_mode,
                                -60);
             break;
@@ -1773,7 +1777,7 @@ void render_scene_and_update_resources(void)
             break;
         case 8:
             render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos, &effect->angle,
-                               &effect->scale, &effect->animation_cache, &scene_display_sys.unk15ab8,
+                               &effect->scale, &effect->animation_cache, &scene_display_sys.pitch_matrix,
                                effect->animation_id, effect->animation_phase, effect->lighting_override_index,
                                effect->lighting_blend, effect->render_mode, -60);
             break;
@@ -1798,7 +1802,7 @@ void render_scene_and_update_resources(void)
                                        placed->frame_index + 128, 0, 0x3c, 0x1000, 7, 0);
         } else if (map_cell_layer_mask(&placed->pos) & placed->layer_mask) {
             render_world_model(placed->layer_mask, placed->model_index + 40, &placed->pos,
-                               &scratch->u.load.angle, NULL, NULL, &scene_display_sys.unk15ab8,
+                               &scratch->u.load.angle, NULL, NULL, &scene_display_sys.pitch_matrix,
                                placed->frame_index + 128, 0, 0x36, 0x1000, 5, 0);
         }
         if (placed->frame_period != 0 && map_placed_frame_counter % placed->frame_period == 0) {
@@ -2009,7 +2013,7 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
                         hud_sprites[29].visible = (cur_avatar_status.vitals_display & 2) >> 1;
     i = cur_avatar_status.compass_display - 1;
     if (i >= 0) {
-        render_model_yaw_smoothing_accumulator += angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.unk15b08.vy);
+        render_model_yaw_smoothing_accumulator += angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.view_rotation.vy);
         if (render_model_yaw_smoothing_accumulator > 0) {
             render_model_yaw_smoothing_accumulator -= (render_model_yaw_smoothing_accumulator + 7) >> 3;
         } else if (render_model_yaw_smoothing_accumulator < 0) {
@@ -2017,13 +2021,13 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
         }
         render_model_rows[i == 0].angle.vy = render_model_rows[i].angle.vy =
             render_model_rows[i].angle.vy + (render_model_yaw_smoothing_accumulator >> 6);
-        render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx = scene_display_sys.unk15b08.vx;
+        render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx = scene_display_sys.view_rotation.vx;
     }
     if (cur_avatar_status.vitals_display == 1) {
-        hud_sprites[4].unka = hud_sprites[4].w = cur_avatar_status.hp * 48 / cur_avatar_status.hp_max;
-        hud_sprites[5].unka = hud_sprites[5].w = cur_avatar_status.attack_charge_current * 48 / 5000;
-        hud_sprites[6].unka = hud_sprites[6].w = cur_avatar_status.mp * 48 / cur_avatar_status.mp_max;
-        hud_sprites[7].unka = hud_sprites[7].w = cur_avatar_status.magic_charge * 48 / 5000;
+        hud_sprites[4].width = hud_sprites[4].w = cur_avatar_status.hp * 48 / cur_avatar_status.hp_max;
+        hud_sprites[5].width = hud_sprites[5].w = cur_avatar_status.attack_charge_current * 48 / 5000;
+        hud_sprites[6].width = hud_sprites[6].w = cur_avatar_status.mp * 48 / cur_avatar_status.mp_max;
+        hud_sprites[7].width = hud_sprites[7].w = cur_avatar_status.magic_charge * 48 / 5000;
     } else if (cur_avatar_status.vitals_display == 2) {
         u16 hp;
         u16 mp;
@@ -2039,8 +2043,8 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
         hud_sprites[22].u = n / 100 * 12 + 0x80;
         hud_sprites[23].u = n % 100 / 10 * 12 + 0x80;
         hud_sprites[24].u = n % 10 * 12 + 0x80;
-        hud_sprites[25].unka = hud_sprites[25].w = cur_avatar_status.attack_charge_current * 64 / 5000;
-        hud_sprites[26].unka = hud_sprites[26].w = cur_avatar_status.magic_charge * 64 / 5000;
+        hud_sprites[25].width = hud_sprites[25].w = cur_avatar_status.attack_charge_current * 64 / 5000;
+        hud_sprites[26].width = hud_sprites[26].w = cur_avatar_status.magic_charge * 64 / 5000;
     }
     render_active_model_rows();
     render_hud_sprites();
@@ -2060,7 +2064,7 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
 
 /*
  * Draws model 3 (the menu's item model) with the matrices the caller set:
- * projects its vertices into Data80199154.screen with a depth-cue value from
+ * projects its vertices into GraphicsRuntime.screen with a depth-cue value from
  * the fog range, then draws part 0 at depth offset 100.
  * Not exact: retail stores the CLUT offset between SCRATCH->screen and
  * SCRATCH->end; every statement order tried schedules it earlier.
@@ -2079,14 +2083,14 @@ void menu_render_item_model(void)
     scratch = SCRATCH;
     gte_SetBackColor(60, 60, 60);
     SetGeomScreen(200);
-    model = scene_display_sys.unk10148[3];
+    model = scene_display_sys.tmd_slots[3];
     SCRATCH->model = model;
     SCRATCH->part = ((ModelData *)model)->parts;
     offset = SCRATCH->part->vertices + 12;
     SCRATCH->vertices = (u8 *)(offset + (s32)model);
     fog_set_range(20000, 24000);
     SCRATCH->ot = scene_display_sys.ot;
-    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
@@ -2094,7 +2098,7 @@ void menu_render_item_model(void)
     SCRATCH->end = scene_display_sys.pool->end;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->screen = scene_display_sys.screen;
-    i = ((ModelData *)SCRATCH->model)->parts[0].unk4;
+    i = ((ModelData *)SCRATCH->model)->parts[0].vertex_count;
     vertex = SCRATCH->vertices;
     screen = scene_display_sys.screen;
     while (--i != -1) {
@@ -2102,9 +2106,9 @@ void menu_render_item_model(void)
         gte_rtps();
         gte_stsxy(&screen->sxy);
         gte_stszotz(&screen->z);
-        if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
-            screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
-                          (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
+        if (scene_display_sys.fog_near != scene_display_sys.fog_far) {
+            screen->fog = ((screen->z - (scene_display_sys.fog_near >> 2)) << 14) /
+                          (scene_display_sys.fog_far - scene_display_sys.fog_near);
         } else {
             screen->fog = 0;
         }
@@ -2119,7 +2123,7 @@ void menu_render_item_model(void)
     }
     render_enqueue_textured_tmd(0, 100);
     scene_display_sys.pool->next = scratch->next;
-    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
@@ -2129,7 +2133,7 @@ void asset_registry_select(u16 id)
     u8 *file;
 
     file = scene_display_sys.models[id];
-    scene_display_sys.vertices = file + ((ModelFile *)file)->vertices;
+    scene_display_sys.current_tmd = file + ((ModelFile *)file)->tmd;
 }
 
 ADDRESS(0x80042ba8, 0xbc)
@@ -2145,7 +2149,7 @@ void asset_registry_load_tmd_archive(u16 id, u8 *file)
         if (size >= 5) {
             scene_display_sys.models[id] = file;
             asset_registry_select(id);
-            tmd_prepare_primitive_indices(scene_display_sys.vertices);
+            tmd_prepare_primitive_indices(scene_display_sys.current_tmd);
         }
         file += size;
         id++;
@@ -2157,7 +2161,7 @@ void asset_registry_set(u16 id, u8 *file)
 {
     scene_display_sys.models[id] = file;
     asset_registry_select(id);
-    tmd_prepare_primitive_indices(scene_display_sys.vertices);
+    tmd_prepare_primitive_indices(scene_display_sys.current_tmd);
 }
 
 ADDRESS(0x80042cac, 0xc4)
@@ -2364,14 +2368,14 @@ s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 tim
     s32 index;
     s32 frac;
 
-    if (model->unk4 == 0) {
+    if (model->animated == 0) {
         u8 *data;
 
         if (slot != NULL) {
             pool_record_release(slot);
         }
         data = scene_display_sys.models[id];
-        data += ((ModelFile *)data)->vertices;
+        data += ((ModelFile *)data)->tmd;
         scratch->model = data;
         scratch->part = ((ModelData *)scratch->model)->parts;
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
@@ -2461,12 +2465,12 @@ s32 animation_sample_vertex(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out
         out->vx = out->vy = out->vz = 0;
         return 1;
     }
-    data = (u8 *)file + file->vertices;
+    data = (u8 *)file + file->tmd;
     if (anim >= 128) {
     single:
         vertices = (SVECTOR *)(data + ((((ModelData *)data)->parts + (anim & 0x7f))->vertices + 12));
         *out = vertices[vertex];
-    } else if (file->unk4 == 0) {
+    } else if (file->animated == 0) {
         anim = 0;
         goto single;
     } else {
@@ -2514,8 +2518,8 @@ s32 asset_vertex_count(s32 id, s32 part)
     if (file == NULL) {
         return 0;
     }
-    data = (ModelData *)(file + ((ModelFile *)file)->vertices);
-    return part < 128 ? data->parts[0].unk4 : (data->parts + (part & 0x7f))->unk4;
+    data = (ModelData *)(file + ((ModelFile *)file)->tmd);
+    return part < 128 ? data->parts[0].vertex_count : (data->parts + (part & 0x7f))->vertex_count;
 }
 
 ADDRESS(0x80043828, 0x30)

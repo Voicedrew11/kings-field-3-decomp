@@ -15,7 +15,7 @@
 ADDRESS(0x80035c44, 0x40)
 void tmd_register(u16 id, u8 *data)
 {
-    scene_display_sys.vertices = scene_display_sys.unk10148[id] = data;
+    scene_display_sys.current_tmd = scene_display_sys.tmd_slots[id] = data;
     tmd_prepare_primitive_indices(data);
 }
 
@@ -23,7 +23,7 @@ void tmd_register(u16 id, u8 *data)
 ADDRESS(0x80035c84, 0x20)
 void tmd_set_slot(u16 id, u8 *data)
 {
-    scene_display_sys.unk10148[id] = data;
+    scene_display_sys.tmd_slots[id] = data;
 }
 
 /*
@@ -50,7 +50,7 @@ void render_enqueue_textured_tmd(u16 id, s32 depth)
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
     n = SCRATCH->part->prim_count;
-    SCRATCH->draw.count.unk4 += n;
+    SCRATCH->draw.count.tmd_prim_count += n;
     while (n-- != 0) {
         opz = &SCRATCH->w.model.opz;
         rgb = &SCRATCH->w.model.rgb;
@@ -215,7 +215,7 @@ void render_enqueue_textured_tmd(u16 id, s32 depth)
 
 /*
  * Draws part id of the model in SCRATCH->model near the eye: projects its
- * vertices with a fog value from Data80199154's fog range, then hands each
+ * vertices with a fog value from GraphicsRuntime's fog range, then hands each
  * front face to the LIBGTE subdivision (RCpolyFT3/FT4/GT3/GT4), more finely
  * the nearer it is. Faces with every vertex nearer than draw.count.clip are
  * dropped.
@@ -232,36 +232,36 @@ void render_enqueue_tmd_subdivided(u16 id)
     } div;
 
     scratch = SCRATCH;
-    SCRATCH->unk48 = SCRATCH->screen;
+    SCRATCH->screen_cursor = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.model.near = scene_display_sys.unk15b28;
-    SCRATCH->w.model.far = scene_display_sys.unk15b2c;
+    SCRATCH->w.model.near = scene_display_sys.fog_near;
+    SCRATCH->w.model.far = scene_display_sys.fog_far;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
-    n = SCRATCH->part->unk4;
+    n = SCRATCH->part->vertex_count;
     while (n-- != 0) {
         gte_ldv0(scratch->vertex);
         gte_rtps();
-        gte_stsxy(&scratch->unk48->sxy);
-        gte_stszotz(&scratch->unk48->z);
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
         if (scratch->w.model.near < 32000) {
-            scratch->unk48->fog = ((scratch->unk48->z - (scratch->w.model.near >> 2)) << 14) /
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.model.near >> 2)) << 14) /
                                   (scratch->w.model.far - scratch->w.model.near);
         } else {
-            scratch->unk48->fog = 0;
+            scratch->screen_cursor->fog = 0;
         }
-        if (scratch->unk48->fog >= 8192) {
-            scratch->unk48->fog = 0x1fff;
+        if (scratch->screen_cursor->fog >= 8192) {
+            scratch->screen_cursor->fog = 0x1fff;
         }
-        if (scratch->unk48->fog < 0) {
-            scratch->unk48->fog = 0;
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
         }
-        scratch->unk48++;
+        scratch->screen_cursor++;
         scratch->vertex += 8;
     }
     scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
     n = scratch->part->prim_count;
-    scratch->draw.count.unk4 += n;
+    scratch->draw.count.tmd_prim_count += n;
     while (n-- != 0) {
         rgb = &scratch->w.model.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
@@ -559,7 +559,7 @@ void render_enqueue_blended_tmd(u16 id, s32 depth, s32 mode)
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
     n = SCRATCH->part->prim_count;
-    SCRATCH->draw.count.unk4 += n;
+    SCRATCH->draw.count.tmd_prim_count += n;
     while (n-- != 0) {
         opz = &SCRATCH->w.model.opz;
         rgb = &SCRATCH->w.model.rgb;
@@ -763,7 +763,7 @@ void render_enqueue_distant_tmd(u16 id, s32 depth, s32 shift, s32 dist)
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
     n = SCRATCH->part->prim_count;
-    SCRATCH->draw.count.unk4 += n;
+    SCRATCH->draw.count.tmd_prim_count += n;
     while (n-- != 0) {
         opz = &SCRATCH->w.model.opz;
         rgb = &SCRATCH->w.model.rgb;
@@ -963,7 +963,7 @@ void render_enqueue_tmd_fixed_depth(u16 id, s16 depth, s32 shade)
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
     n = SCRATCH->part->prim_count;
-    SCRATCH->draw.count.unk4 += n;
+    SCRATCH->draw.count.tmd_prim_count += n;
     shade <<= 5;
     while (n-- != 0) {
         opz = &SCRATCH->w.model.opz;
@@ -1118,7 +1118,7 @@ void render_enqueue_tmd_fixed_depth(u16 id, s16 depth, s32 shade)
 /*
  * Draws part id of the map layer model in SCRATCH->model (the far ground
  * renderer of render_map_cell_object): projects its vertices with a fog value from
- * Data80199154's fog range, then draws its faces as Gouraud-textured packets
+ * GraphicsRuntime's fog range, then draws its faces as Gouraud-textured packets
  * lit from one normal and depth-cued per vertex. Faces behind (gte_nclip) or
  * with every vertex nearer than w.map.clip are dropped; flat-textured records
  * become GT3/GT4 packets.
@@ -1132,36 +1132,36 @@ void render_enqueue_map(u16 id)
     CVECTOR *lit;
 
     scratch = SCRATCH;
-    SCRATCH->unk48 = SCRATCH->screen;
+    SCRATCH->screen_cursor = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.map.near = scene_display_sys.unk15b28;
-    SCRATCH->w.map.far = scene_display_sys.unk15b2c;
+    SCRATCH->w.map.near = scene_display_sys.fog_near;
+    SCRATCH->w.map.far = scene_display_sys.fog_far;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
-    n = SCRATCH->part->unk4;
+    n = SCRATCH->part->vertex_count;
     while (n-- != 0) {
         gte_ldv0(scratch->vertex);
         gte_rtps();
-        gte_stsxy(&scratch->unk48->sxy);
-        gte_stszotz(&scratch->unk48->z);
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
         if (scratch->w.map.near < 32000) {
-            scratch->unk48->fog = ((scratch->unk48->z - (scratch->w.map.near >> 2)) << 14) /
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.map.near >> 2)) << 14) /
                                   (scratch->w.map.far - scratch->w.map.near);
         } else {
-            scratch->unk48->fog = 0;
+            scratch->screen_cursor->fog = 0;
         }
-        if (scratch->unk48->fog >= 7952) {
-            scratch->unk48->fog = 0x1f0f;
+        if (scratch->screen_cursor->fog >= 7952) {
+            scratch->screen_cursor->fog = 0x1f0f;
         }
-        if (scratch->unk48->fog < 0) {
-            scratch->unk48->fog = 0;
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
         }
-        scratch->unk48++;
+        scratch->screen_cursor++;
         scratch->vertex += 8;
     }
     scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
     n = scratch->part->prim_count;
-    scratch->w.map.count += n;
+    scratch->w.map.tmd_prim_count += n;
     while (n-- != 0) {
         rgb = &scratch->w.map.rgb;
         lit = &scratch->lit;
@@ -1386,36 +1386,36 @@ void render_enqueue_map_subdivided(u16 id)
     } div;
 
     scratch = SCRATCH;
-    SCRATCH->unk48 = SCRATCH->screen;
+    SCRATCH->screen_cursor = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.map.near = scene_display_sys.unk15b28;
-    SCRATCH->w.map.far = scene_display_sys.unk15b2c;
+    SCRATCH->w.map.near = scene_display_sys.fog_near;
+    SCRATCH->w.map.far = scene_display_sys.fog_far;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
-    n = SCRATCH->part->unk4;
+    n = SCRATCH->part->vertex_count;
     while (n-- != 0) {
         gte_ldv0(scratch->vertex);
         gte_rtps();
-        gte_stsxy(&scratch->unk48->sxy);
-        gte_stszotz(&scratch->unk48->z);
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
         if (scratch->w.map.near < 32000) {
-            scratch->unk48->fog = ((scratch->unk48->z - (scratch->w.map.near >> 2)) << 14) /
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.map.near >> 2)) << 14) /
                                   (scratch->w.map.far - scratch->w.map.near);
         } else {
-            scratch->unk48->fog = 0;
+            scratch->screen_cursor->fog = 0;
         }
-        if (scratch->unk48->fog >= 7952) {
-            scratch->unk48->fog = 0x1f0f;
+        if (scratch->screen_cursor->fog >= 7952) {
+            scratch->screen_cursor->fog = 0x1f0f;
         }
-        if (scratch->unk48->fog < 0) {
-            scratch->unk48->fog = 0;
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
         }
-        scratch->unk48++;
+        scratch->screen_cursor++;
         scratch->vertex += 8;
     }
     scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
     n = scratch->part->prim_count;
-    scratch->w.map.count += n;
+    scratch->w.map.tmd_prim_count += n;
     while (n-- != 0) {
         rgb = &scratch->w.map.rgb;
         *(u32 *)&scratch->tag = *scratch->prim;
@@ -1629,7 +1629,7 @@ void render_enqueue_map_subdivided(u16 id)
 ADDRESS(0x8003bb04, 0x330)
 void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 {
-    Record6c *light;
+    LightRecord *light;
     s32 turn;
     long flag;
     u16 part;
@@ -1639,18 +1639,18 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
     transform = &SCRATCH->draw.transform;
     scratch = SCRATCH;
     turn = layer->quarter_turns & 3;
-    light = &scene_display_sys.unk15da8[layer->lighting_index & 0x3f];
-    gte_SetLightMatrix(&light->unk0[turn]);
-    gte_SetColorMatrix(&light->unk50);
-    fog_set_range(light->unk68, light->unk6a);
-    gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    gte_SetRotMatrix(&scene_display_sys.unk159f8);
-    gte_SetTransMatrix(&scene_display_sys.unk159f8);
+    light = &scene_display_sys.lights[layer->lighting_index & 0x3f];
+    gte_SetLightMatrix(&light->light_matrices[turn]);
+    gte_SetColorMatrix(&light->color_matrix);
+    fog_set_range(light->fog_near, light->fog_far);
+    gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+    gte_SetRotMatrix(&scene_display_sys.view_matrix);
+    gte_SetTransMatrix(&scene_display_sys.view_matrix);
     gte_ldv0(pos);
     gte_rt();
     gte_stlvnl(SCRATCH->draw.transform.t);
     gte_stflg(&flag);
-    gte_SetRotMatrix(&scene_display_sys.unk15a38[turn]);
+    gte_SetRotMatrix(&scene_display_sys.view_matrix_turns[turn]);
     gte_SetTransMatrix(transform);
     part = layer->object_index;
     if ((s16)asset_status.loading == 1 && asset_status.tmd_object_limit_active != 0 &&
@@ -1684,19 +1684,19 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
     MapCell *cell;
     s32 kind;
 
-    pos = &SCRATCH->u.layer.unk100;
-    origin = &SCRATCH->u.layer.unk108;
+    pos = &SCRATCH->u.layer.pos;
+    origin = &SCRATCH->u.layer.origin;
     cell = &map_world.cells[z][x];
     kind = cell->layer[0].object_index;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;
         pos->vz = (z << 11) - origin->vz + 1024;
         pos->vy = (-cell->layer[0].elevation << 7) - origin->vy;
-        render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.unk100, flags);
+        render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.pos, flags);
         kind = cell->layer[1].object_index;
         if (kind < 240) {
             pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
-            render_map_cell_object(&cell->layer[1], &SCRATCH->u.layer.unk100, flags);
+            render_map_cell_object(&cell->layer[1], &SCRATCH->u.layer.pos, flags);
         }
     } else {
         kind = cell->layer[1].object_index;
