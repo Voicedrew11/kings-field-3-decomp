@@ -4,7 +4,7 @@
 /*
  * Sony's movie-sample decode environment, with one slice buffer: OPEN.EXE's
  * and END.EXE's players (through kf/overlay.h) and GAME.EXE's (inside
- * DAT_801e7edc). Include after the LIBGPU header.
+ * movie_state). Include after the LIBGPU header.
  */
 typedef struct {
     u_long *vlcbuf[2]; /* VLC (run-level) buffers */
