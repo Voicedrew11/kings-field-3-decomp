@@ -64,6 +64,9 @@
   batch, catalogue recurring residues, prove the exact GCC/profile, then read
   the corresponding MIPS optimizer/backend and validate mechanisms with
   controlled probes. MSVC internals and levers do not transfer.
+- Mechanisms already proven this way, with their source forms, are in
+  `docs/compiler-notes.md`; check it before recording a residue, and add new
+  ones there rather than in per-campaign notes.
 - Treat a lower intermediate score as an experiment, not automatic
   falsification, when an independently evidenced source fact moved code toward
   retail. The final kept source must be humane and must not regress a banked

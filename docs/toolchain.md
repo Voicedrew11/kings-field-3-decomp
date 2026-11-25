@@ -5,7 +5,9 @@ the assembler, linker, converter, GTE post-processor, libraries and headers of
 Sony's Runtime Library 3.3 CD. It rebuilds `PSX.EXE` byte-identically. Each
 statement below says whether it is **proven** (a byte-identical rebuild or an
 exact object match against retail), or a **probe** (the closest available
-choice, not yet reproduced).
+choice, not yet reproduced). How this chain turns C into retail's
+instructions, and the source forms behind them, is in
+[compiler-notes.md](compiler-notes.md).
 
 | Part | Pinned file | Source | Status |
 | --- | --- | --- | --- |
