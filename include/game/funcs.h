@@ -14,7 +14,7 @@
 s32 menu_card_browser(void);
 void player_update_frame(void);
 s32 collision_sample_map_cell_layer(s32 x, s32 y, s32 z);
-void func_80047010(void);
+void map_object_update_actions(void);
 void func_8005eb20(void);
 void func_8005efd4(s32 area);
 void func_8005f444(s32 area);

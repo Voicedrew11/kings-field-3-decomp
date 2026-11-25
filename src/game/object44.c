@@ -21,14 +21,14 @@ RODATA(0x80011c54, 0x400)
 
 /* Plays sound effect se at the record. */
 ADDRESS(0x8004482c, 0x30)
-void func_8004482c(Object44 *obj, s32 se)
+void map_object_play_spatial_sound(Object44 *obj, s32 se)
 {
     audio_play_spatial_default_range(se, &obj->pos, 0x78, 0);
 }
 
 /* Frees every record. */
 ADDRESS(0x8004485c, 0x5c)
-void func_8004485c(void)
+void map_object_pool_reset(void)
 {
     Object44 *obj;
     u16 i;
@@ -45,7 +45,7 @@ void func_8004485c(void)
 
 /* Resets a record's state, angle and scale. */
 ADDRESS(0x800448b8, 0x48)
-void func_800448b8(Object44 *obj)
+void map_object_reset(Object44 *obj)
 {
     obj->unk1 = 0x80;
     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
@@ -65,7 +65,7 @@ void func_800448b8(Object44 *obj)
  * halfword argument.
  */
 ADDRESS(0x80044900, 0x240)
-void func_80044900(s32 id, s32 mode, ...)
+void map_object_set_property(s32 id, s32 mode, ...)
 {
     va_list args;
     Object44 *obj;
@@ -155,7 +155,7 @@ void func_80044900(s32 id, s32 mode, ...)
  * when mode is 0 and Data801b24e4.unk90 is clear, else 0xfc with full scale.
  */
 ADDRESS(0x80044b40, 0xf4)
-void func_80044b40(Object44 *obj, s32 mode, u8 value)
+void map_object_set_cell_marker(Object44 *obj, s32 mode, u8 value)
 {
     MapCell *cell;
     MapLayer *layer;
@@ -189,7 +189,7 @@ void func_80044b40(Object44 *obj, s32 mode, u8 value)
 
 /* Brings the map cell bytes of kinds 7, 0x51 and 0x52 in line with mode. */
 ADDRESS(0x80044c34, 0x168)
-void func_80044c34(s32 mode)
+void map_object_refresh_cell_markers(s32 mode)
 {
     Object44 *obj;
     Object44Def *def;
@@ -201,21 +201,21 @@ void func_80044c34(s32 mode)
         case 0x51:
             if (obj->arg.b.unk3a.bytes[1] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
-                func_80044b40(obj, mode, def->arg.b.unk17);
+                map_object_set_cell_marker(obj, mode, def->arg.b.unk17);
             }
             break;
         case 0x52:
             if (obj->arg.b.unk3d[0] != 0xff) {
                 def = &DAT_8018fb3c.defs[obj->unk6];
-                func_80044b40(obj, mode, def->arg.b.unk17);
+                map_object_set_cell_marker(obj, mode, def->arg.b.unk17);
             }
             break;
         case 7:
             if (obj->arg.b.unk38 != 0xfe) {
-                func_80044900(obj->arg.h.unk3a, mode, obj->unk0);
+                map_object_set_property(obj->arg.h.unk3a, mode, obj->unk0);
                 def = &DAT_8018fb3c.defs[obj->unk6];
                 if (def->arg.b.unkc != 0xff) {
-                    func_80044b40(obj, mode, def->arg.b.unkc);
+                    map_object_set_cell_marker(obj, mode, def->arg.b.unkc);
                 }
             }
             break;
@@ -231,10 +231,10 @@ void func_80044c34(s32 mode)
  * without a case go to FDAT handler 8.
  * Not exact: retail adds the cell row (base + z * 800) before the column
  * (+ x * 10) where GCC here forms z * 800 + (x * 10 + base) (as in
- * func_80044b40), and loads def->arg.h.unke before def->arg.h.unk10 for the larger radius.
+ * map_object_set_cell_marker), and loads def->arg.h.unke before def->arg.h.unk10 for the larger radius.
  */
 ADDRESS(0x80044d9c, 0xd2c)
-void func_80044d9c(Object44Place *place)
+void map_object_initialize_from_placements(Object44Place *place)
 {
     Object44 *obj;
     Object44Def *def;
@@ -306,9 +306,9 @@ void func_80044d9c(Object44Place *place)
         }
         switch (def->unk0) {
         case 1:
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 1, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
-                          obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 1, obj->arg.b.unk3c,
+                                         obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
+                                         def->arg.b.unke, obj->angle.vy, 45);
             obj->unk4 = 1;
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
@@ -316,8 +316,9 @@ void func_80044d9c(Object44Place *place)
             map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 1500, 1);
             break;
         case 27:
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2, obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
+                                         obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2, obj->angle.vy,
+                                         45);
             obj->unk4 = 0x1b;
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
@@ -325,8 +326,9 @@ void func_80044d9c(Object44Place *place)
             map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 3000, 1);
             break;
         case 0:
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2, obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
+                                         obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2, obj->angle.vy,
+                                         45);
             obj->unk4 = 0;
             obj->unk8 = 2;
             obj->arg.h.unk40 = 999;
@@ -336,36 +338,36 @@ void func_80044d9c(Object44Place *place)
         case 3:
             obj->unk4 = 3;
             obj->unk1 = 0;
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
-                          0xff);
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828fc, 0,
-                          0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc,
+                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828fc,
+                                           0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 4:
             obj->unk4 = 4;
             obj->unk1 = 0;
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
-                          0xff);
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008291c, 0,
-                          0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc,
+                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008291c,
+                                           0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 5:
             obj->unk4 = 5;
             obj->unk1 = 0;
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c, 0,
-                          0xff);
-            func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008295c, 0,
-                          0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c,
+                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008295c,
+                                           0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 2:
             obj->unk4 = 2;
             obj->unk1 = 0;
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2, obj->arg.b.unk3c,
-                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
-                          obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2,
+                                         obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                         def->arg.b.unkd, def->arg.b.unke, obj->angle.vy, 45);
             map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, 4400, 1);
             break;
         case 23:
@@ -378,7 +380,7 @@ void func_80044d9c(Object44Place *place)
             obj->unk4 = 7;
             obj->unk1 = 0;
             if (def->arg.b.unkc != 0xff) {
-                func_80044b40(obj, 0, def->arg.b.unkc);
+                map_object_set_cell_marker(obj, 0, def->arg.b.unkc);
             }
             break;
         case 8:
@@ -403,8 +405,9 @@ void func_80044d9c(Object44Place *place)
             obj->arg.b.unk40 = obj->unk0;
             obj->unk0 = 2;
             obj->unk4 = 0x54;
-            func_800443c8(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                          DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
+            map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0,
+                                           0);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 95:
@@ -417,32 +420,32 @@ void func_80044d9c(Object44Place *place)
             obj->unk4 = 0x51;
             obj->arg.b.unk40 = 0;
             if (obj->arg.b.unk3a.bytes[1] != 0xff) {
-                func_80044b40(obj, 0, def->arg.b.unk17);
+                map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
             }
             break;
         case 87:
             obj->unk1 = 0;
             obj->unk0 = 2;
             obj->unk4 = 0x57;
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
-                          obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                          obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
+                                         obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                         obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 90:
             obj->unk1 = 0;
             obj->unk0 = 2;
             obj->unk4 = 0x5a;
-            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
-                          obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                          obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
+            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
+                                         obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                         obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
             break;
         case 82:
             obj->unk1 = 0;
             obj->unk4 = 0x52;
             obj->arg.b.unk40 = 0;
             if (obj->arg.b.unk3d[0] != 0xff) {
-                func_80044b40(obj, 0, def->arg.b.unk17);
+                map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
             }
             break;
         case 85:
@@ -520,8 +523,8 @@ void func_80044d9c(Object44Place *place)
         case 227:
             obj->unk0 = 0;
             obj->unk4 = 0xe3;
-            if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
-                              obj->arg.b.unk39, 0x8000) != 0) {
+            if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                obj->arg.b.unk39, 0x8000) != 0) {
                 DAT_80199154.unk15995 = obj->arg.b.unk3a.bytes[0];
                 DAT_80199154.unk15996 = obj->arg.b.unk3a.bytes[1];
             }

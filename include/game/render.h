@@ -5,7 +5,7 @@
  * GAME.EXE render work area (WIP). The game loop clears 0x5e2a words from
  * 0x80199154 as one block; the members below are the ones the render and
  * screen-effect code reaches. GCC CSEs one base for addresses inside it
- * (func_8003cbc8 indexes draw[] and disp[] from the address of fade_hold),
+ * (loading_screen_update_fade indexes draw[] and disp[] from the address of fade_hold),
  * so it is one object. Field names are WIP.
  */
 #include <kf/lib/types.h>
@@ -68,7 +68,7 @@ typedef struct ModelPart {
 /* The data block a ModelFile's vertices offset points at. */
 typedef struct ModelData {
     u32 unk0;
-    u32 unk4;       /* +0x04: func_8003bb04 draws only parts below unk4 / 2 while loading */
+    u32 unk4;       /* +0x04: render_map_cell_object draws only parts below unk4 / 2 while loading */
     s32 count;      /* +0x08: parts */
     ModelPart parts[1];
 } ModelData;
@@ -185,11 +185,11 @@ typedef struct Data80199154 {
     u32 *ot2;                       /* +0x10064 */
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
-    u8 *unk10148[4];                /* +0x10148: model data by id (func_80035c44) */
+    u8 *unk10148[4];                /* +0x10148: model data by id (tmd_register) */
     u8 *vertices;                   /* +0x10158: vertex data of the last model registered */
     u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay
                                      * resident, area banks from 256 + area * 32
-                                     * (func_80040568), the 32 blocks of an area part
+                                     * (map_object_asset_index), the 32 blocks of an area part
                                      * from 556 + part * 32 (resource_mark_area_models_reclaimable); WIP extent,
                                      * up to slots */
     AnimSlot slots[12];             /* +0x11a10 */
@@ -239,16 +239,16 @@ typedef struct Data80199154 {
 
 extern Data80199154 DAT_80199154;
 
-/* Scratchpad words from +0x100 while the map layers are drawn (func_8003be34). */
+/* Scratchpad words from +0x100 while the map layers are drawn (render_map_cell_layers). */
 typedef struct ScratchLayer {
-    SVECTOR unk100;     /* +0x100: map layer position func_8003be34 hands func_8003bb04 */
+    SVECTOR unk100;     /* +0x100: map layer position render_map_cell_layers hands render_map_cell_object */
     VECTOR unk108;      /* +0x108: origin of the map layer positions */
 } ScratchLayer;
 
 /*
- * Scratchpad words from +0x100 while the objects are drawn (func_80040ae4):
+ * Scratchpad words from +0x100 while the objects are drawn (render_scene_and_update_resources):
  * each pass flags the model ids and sound banks its objects use, and
- * func_800409c8/func_800408d0 keep those loaded through the wanted pointers.
+ * resource_tmd_update_range/resource_vab_update_range keep those loaded through the wanted pointers.
  */
 typedef struct ScratchLoad {
     u8 unk100[0x14];
@@ -284,14 +284,14 @@ typedef struct PrimTag {
 
 /* Scratchpad words from +0x54 while a model part is drawn. */
 typedef struct ScratchModelWork {
-    VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (func_8003c35c) */
+    VECTOR unk54;       /* +0x54: gte_stlvnl result of the overlay vertex loop (render_active_model_rows) */
     CVECTOR rgb;        /* +0x64: colour the models are lit with */
-    s32 near;           /* +0x68: Data80199154.unk15b28 (fog near, func_800366a8) */
+    s32 near;           /* +0x68: Data80199154.unk15b28 (fog near, render_enqueue_tmd_subdivided) */
     s32 far;            /* +0x6c: Data80199154.unk15b2c (fog far) */
     s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
 } ScratchModelWork;
 
-/* Scratchpad words from +0x54 while a map layer part is drawn (func_80039d50). */
+/* Scratchpad words from +0x54 while a map layer part is drawn (render_enqueue_map). */
 typedef struct ScratchMapWork {
     CVECTOR rgb;        /* +0x54: colour the ground is lit with */
     s32 near;           /* +0x58: Data80199154.unk15b28 (fog near) */
@@ -310,11 +310,11 @@ typedef union ScratchWork {
 } ScratchWork;
 
 /* Scratchpad words from +0x74 while a model is drawn: the frame counters,
- * copied in and back by the model front ends (func_8004290c). */
+ * copied in and back by the model front ends (menu_render_item_model). */
 typedef struct ScratchCount {
-    s16 z;              /* +0x74: ordering table depth of the face (func_800366a8) */
+    s16 z;              /* +0x74: ordering table depth of the face (render_enqueue_tmd_subdivided) */
     s16 clip;           /* +0x76: faces with every vertex nearer than this are dropped
-                         * (func_800366a8); func_8003e34c sets 100 */
+                         * (render_enqueue_tmd_subdivided); render_world_model sets 100 */
     s32 unk4;           /* +0x78: Data80199154.unk159bc; the renderers add each part's
                          * primitive count */
     s32 ot_count;       /* +0x7c */
@@ -324,7 +324,7 @@ typedef struct ScratchCount {
 } ScratchCount;
 
 typedef union ScratchDraw {
-    MATRIX transform;   /* map layer transform (func_8003bb04) */
+    MATRIX transform;   /* map layer transform (render_map_cell_object) */
     ScratchCount count;
 } ScratchDraw;
 
@@ -333,22 +333,22 @@ typedef union ScratchDraw {
  * hardware address). The game keeps per-frame working pointers there.
  */
 typedef struct ScratchPad {
-    s32 nclip[2];       /* +0x00: gte_nclip results of a quad's two halves (func_8003ab04) */
+    s32 nclip[2];       /* +0x00: gte_nclip results of a quad's two halves (render_enqueue_map_subdivided) */
     u32 *ot;            /* +0x08: Data80199154.ot while a model is drawn */
-    u32 *ot2;           /* +0x0c: Data80199154.ot2 (func_80040ae4) */
+    u32 *ot2;           /* +0x0c: Data80199154.ot2 (render_scene_and_update_resources) */
     u8 *model;          /* +0x10: data of the model being drawn */
     u8 *next;           /* +0x14: Data80199154.pool->next while a model is drawn;
-                         * func_8003bb04 drops flag 4 within 10240 of end */
+                         * render_map_cell_object drops flag 4 within 10240 of end */
     u8 *end;            /* +0x18: pool->end */
     PrimTag tag;        /* +0x1c: head word of the primitive record being drawn */
     u32 *prim;          /* +0x20: the primitive record after its head word */
     ModelPart *part;    /* +0x24: the part being drawn */
     u8 *normals;        /* +0x28: the part's normals (records index them by byte offset) */
-    u8 *poly;           /* +0x2c: the packet being filled (func_80037bec) */
-    ScreenVertex *vert[4]; /* +0x30: its projected vertices (func_80037bec) */
+    u8 *poly;           /* +0x2c: the packet being filled (render_enqueue_blended_tmd) */
+    ScreenVertex *vert[4]; /* +0x30: its projected vertices (render_enqueue_blended_tmd) */
     CVECTOR lit;        /* +0x40: map layers: a face's lit colour before depth cueing */
     ScreenVertex *screen; /* +0x44: the part's projected vertices */
-    ScreenVertex *unk48;  /* +0x48: func_8003e34c sets it to screen too; the map layer
+    ScreenVertex *unk48;  /* +0x48: render_world_model sets it to screen too; the map layer
                            * renderers' vertex loop cursor */
     u8 *vertices;       /* +0x4c: vertices of the model being drawn */
     u8 *vertex;         /* +0x50: map layers: vertex loop cursor */
@@ -362,8 +362,8 @@ typedef struct ScratchPad {
 
 /* A 2D overlay sprite record; lists end with visible == 0xff. */
 typedef struct SpriteRec {
-    u8 visible;     /* 0 hidden; bits 0-2 pick the passes func_80041d9c draws */
-    u8 mode;        /* blend rate for func_80041ad4, 0xff opaque */
+    u8 visible;     /* 0 hidden; bits 0-2 pick the passes notification_draw draws */
+    u8 mode;        /* blend rate for render_sprite_record, 0xff opaque */
     u8 u;
     u8 v;
     u8 w;
@@ -383,7 +383,7 @@ extern SpriteRec DAT_800819b4[31];
 
 /* A 3D overlay record (compass needles); the list ends with visible == 0xff. */
 typedef struct Data80081c20 {
-    u8 visible;     /* 1 drawn (func_8003c35c) */
+    u8 visible;     /* 1 drawn (render_active_model_rows) */
     u8 anim;        /* +0x01 */
     u8 light;       /* +0x02: light record (Data80199154.unk15da8) */
     u8 unk3;
@@ -398,7 +398,7 @@ typedef struct Data80081c20 {
 extern Data80081c20 DAT_80081c20[3];
 
 /*
- * View matrix func_80040ae4 hands the model front ends for the objects drawn
+ * View matrix render_scene_and_update_resources hands the model front ends for the objects drawn
  * without the view rotation (load-image .data; owner unit unknown).
  */
 extern MATRIX DAT_8007e4c4;
@@ -442,70 +442,70 @@ extern s32 DAT_8009c2ec;
         }                                                           \
     }
 
-void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
-                   u16 tpage, u16 clut, u8 r, u8 g, u8 b);
-void func_8003c968(u8 level, u8 inset);
-void func_8003c9dc(void);
-void func_8003cbc8(void);
-void func_8003ccfc(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
-                   u16 tpage, u16 clut, u8 r, u8 g, u8 b, s32 z);
-void func_8003cec4(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32 *rgb1, u32 *rgb2,
-                   u32 *rgb3, s32 z);
-void func_8003d03c(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16 clut, u8 r,
+void render_textured_quad_immediate(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
+                                    u16 tpage, u16 clut, u8 r, u8 g, u8 b);
+void loading_screen_draw_quad(u8 level, u8 inset);
+void loading_screen_show(void);
+void loading_screen_update_fade(void);
+void render_textured_quad(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
+                          u16 tpage, u16 clut, u8 r, u8 g, u8 b, s32 z);
+void render_gouraud_quad(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32 *rgb1, u32 *rgb2,
+                         u32 *rgb3, s32 z);
+void render_sprite(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16 clut, u8 r,
                    u8 g, u8 b, s32 z);
-void func_8003d280(void);
-void func_8003d38c(void);
-void func_8003d41c(void);
+void render_sliding_panel_primary(void);
+void render_sliding_panel_secondary(void);
+void render_sliding_panel_tertiary(void);
 void func_8003d4ac(void);
-void func_8003d568(void);
-void func_8003d624(u8 mode, u8 r, u8 g, u8 b);
-void func_8003d64c(void);
-void func_8003d79c(void);
-void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which);
-void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which);
-void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step);
+void render_color_overlay(void);
+void render_set_color_overlay(u8 mode, u8 r, u8 g, u8 b);
+void render_accumulated_color_overlay_additive(void);
+void render_accumulated_color_overlay_subtractive(void);
+void accumulate_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which);
+void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which);
+void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step);
 
-void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
-                   s32 light_id, int depth);
-u16 func_80040568(u16 id);
-void func_800405e8(u16 id, u8 **out);
-void func_80040658(u8 *file);
-u8 func_80040694(VECTOR *pos);
-u8 func_80040708(VECTOR *pos, s32 radius);
-s32 func_800407cc(VECTOR *pos, s32 range_x, s32 range_z);
-void func_80040830(s32 file, s32 entry, s32 id);
-void func_800408d0(s32 file, s32 entry, s32 bank, s32 count);
-void func_800409c8(s32 file, s32 entry, s32 id, s32 count);
+void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
+                            s32 light_id, int depth);
+u16 map_object_asset_index(u16 id);
+void resource_registry_get(u16 id, u8 **out);
+void resource_tmd_read_complete(u8 *file);
+u8 map_cell_layer_mask(VECTOR *pos);
+u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius);
+s32 map_cell_visible(VECTOR *pos, s32 range_x, s32 range_z);
+void resource_tmd_queue_read(s32 file, s32 entry, s32 id);
+void resource_vab_update_range(s32 file, s32 entry, s32 bank, s32 count);
+void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count);
 
-void func_80041ad4(SpriteRec *sprite, u16 mode, u8 *rgb);
-void func_80041d9c(void);
-void func_80041e68(void);
-void func_80041eec(s32 message, ...);
-void func_80041f8c(SpriteRec *sprite, u8 digit);
-void func_80041f9c(void);
-void func_800422b8(VECTOR *pos, SVECTOR *angle);
-void func_8004290c(void);
+void render_sprite_record(SpriteRec *sprite, u16 mode, u8 *rgb);
+void notification_draw(void);
+void render_hud_sprites(void);
+void notify_enqueue(s32 message, ...);
+void notification_digit_set_u(SpriteRec *sprite, u8 digit);
+void notification_update(void);
+void render_game_frame(VECTOR *pos, SVECTOR *angle);
+void menu_render_item_model(void);
 
-void func_80042b70(u16 id);
-void func_80042ba8(u16 id, u8 *file);
-void func_80042c64(u16 id, u8 *file);
-AnimKey *func_80042cac(ModelFile *model, s32 anim, s32 time, s32 *index, s32 *frac);
-void func_80042d70(SVECTOR *pose, SVECTOR *base, s16 *deltas);
-void func_80042e34(SVECTOR *pose, s16 *deltas);
-void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t);
-s16 *func_8004316c(s16 *deltas, s32 index);
-s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count);
-s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out);
-s32 func_800437c8(s32 id, s32 part);
-void func_80043828(void);
-void func_80043858(void);
-void func_80043894(AnimSlot *slot);
-void func_800438e0(void);
-void func_80043940(void);
-void func_800439b0(AnimSlot **out);
-void func_80043a08(EffectSpawn *spawn);
-s32 func_80043bb8(s32 level, s32 step);
-void func_800441d4(u16 file, u16 entry);
+void asset_registry_select(u16 id);
+void asset_registry_load_tmd_archive(u16 id, u8 *file);
+void asset_registry_set(u16 id, u8 *file);
+AnimKey *animation_select_keyframe(ModelFile *model, s32 anim, s32 time, s32 *index, s32 *frac);
+void animation_expand_sparse_vertices(SVECTOR *pose, SVECTOR *base, s16 *deltas);
+void animation_decode_sparse_vertices(SVECTOR *pose, s16 *deltas);
+void animation_apply_sparse_morph(SVECTOR *pose, s16 *deltas, s32 t);
+s16 *animation_find_sparse_vertex(s16 *deltas, s32 index);
+s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count);
+s32 animation_sample_vertex(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out);
+s32 asset_vertex_count(s32 id, s32 part);
+void pool_reset(void);
+void pool_mark_allocated(void);
+void pool_record_release(AnimSlot *slot);
+void pool_release_all(void);
+void pool_release_stale(void);
+void pool_allocate(AnimSlot **out);
+void map_placed_expand_sources(EffectSpawn *spawn);
+s32 menu_fade_transition(s32 level, s32 step);
+void menu_show_transition_image(u16 file, u16 entry);
 
 void render_reset_color_overlays(void);
 void light_reset_records(void);
@@ -525,33 +525,33 @@ void display_initialize(void);
 void display_begin_frame(void);
 void display_present_frame(void);
 void display_set_view_transform(VECTOR *pos, SVECTOR *angle);
-void func_8003591c(u8 *data);
-void func_80035c44(u16 id, u8 *data);
-void func_80035c84(u16 id, u8 *data);
-void func_80035ca4(u16 part, s32 depth);
+void tmd_prepare_primitive_indices(u8 *data);
+void tmd_register(u16 id, u8 *data);
+void tmd_set_slot(u16 id, u8 *data);
+void render_enqueue_textured_tmd(u16 part, s32 depth);
 
-void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags);
-void func_8003be34(s32 x, s32 z, s32 flags);
+void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags);
+void render_map_cell_layers(s32 x, s32 z, s32 flags);
 
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
-void func_800366a8(u16 part);
-void func_80037bec(u16 part, s32 depth, s32 mode);
-void func_80038844(u16 part, s32 depth, s32 shift, s32 dist);
-void func_80039428(u16 part, s16 depth, s32 shade);
-void func_80039d50(u16 id);
-void func_8003ab04(u16 id);
-void func_8003bfd0(void);
-void func_8003c35c(void);
-void func_8003df50(void);
-void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                   s32 flags, s32 depth);
-void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                   u8 flags, s32 depth);
-void func_80040ae4(void);
+void render_enqueue_tmd_subdivided(u16 part);
+void render_enqueue_blended_tmd(u16 part, s32 depth, s32 mode);
+void render_enqueue_distant_tmd(u16 part, s32 depth, s32 shift, s32 dist);
+void render_enqueue_tmd_fixed_depth(u16 part, s16 depth, s32 shade);
+void render_enqueue_map(u16 id);
+void render_enqueue_map_subdivided(u16 id);
+void render_map_cell_window(void);
+void render_active_model_rows(void);
+void render_player_weapon(void);
+void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                        AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
+                        s32 flags, s32 depth);
+void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                                AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
+                                u8 flags, s32 depth);
+void render_scene_and_update_resources(void);
 void menu_format_number(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
-void func_80043b38(u8 *file);
+void tim_upload_images(u8 *file);
 
 #endif

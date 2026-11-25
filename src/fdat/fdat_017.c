@@ -66,7 +66,7 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x66) {
         return;
     }
-    i = func_80045c7c(0, pos, 800, 0x6a4, angle->vy, 0x200);
+    i = map_object_find_interaction_target(0, pos, 800, 0x6a4, angle->vy, 0x200);
     if (i == -1) {
         return;
     }
@@ -103,13 +103,13 @@ void func_801e868c(Object44 *obj)
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
-    if (func_80046884(0x1c, 0x1e, 3, 4, 0x8000) != 0) {
+    if (player_camera_within_map_region(0x1c, 0x1e, 3, 4, 0x8000) != 0) {
         if (DAT_801b24e4.unk10a != 0) {
-            func_800445b8(2, 0x4a, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4a, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
         }
     } else {
         DAT_801b24e4.unk10a = 0;
-        func_800445b8(2, 0x4d, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4d, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
     }
 }
 

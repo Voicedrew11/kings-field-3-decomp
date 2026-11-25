@@ -476,7 +476,7 @@ void player_update_actions_and_charge(void)
                 }
                 func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, DAT_801b24e4.unkc9);
             } else {
-                func_80041eec(10);
+                notify_enqueue(10);
             }
         }
     }
@@ -600,10 +600,10 @@ void player_render_frame_and_release_pool(void)
 
     DAT_801b24e4.unkf9 = 0;
     DAT_801b24e4.unkfa = 0;
-    func_800422b8(NULL, NULL);
+    render_game_frame(NULL, NULL);
     DAT_801b24e4.unkf9 = f9;
     DAT_801b24e4.unkfa = fa;
-    func_800438e0();
+    pool_release_all();
 }
 
 ADDRESS(0x800305d8, 0x1b4)
@@ -628,7 +628,7 @@ void player_handle_interaction_and_menu(void)
         resource_mark_area_models_reclaimable(DAT_8018fad4.area[0]);
         result = menu_run_root_controller();
         if (result >= 0) {
-            func_800422b8(NULL, NULL);
+            render_game_frame(NULL, NULL);
             func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, result);
         } else if (result == -2) {
             DAT_8009c3f8 = 2;
@@ -853,7 +853,7 @@ void player_update_status_visuals(void)
     v = status_phase_step_scaled(&DAT_801b24e4.unk7e, &DAT_801b24e4.unk80, 0x40, 0xc00);
     if (v != -1) {
         light_interpolate_color_and_fog(10, 10, 10, 5000, 6000, v);
-        func_8003da10(0x80, 0x80, 0x80, v >> 2, 2);
+        set_accumulated_color_overlay(0x80, 0x80, 0x80, v >> 2, 2);
     }
     v = status_phase_step_scaled(&DAT_801b24e4.unk8c, &DAT_801b24e4.unk8e, 0x40, 0xe10);
     if (v != -1) {
@@ -869,13 +869,13 @@ void player_update_status_visuals(void)
         } else {
             t = DAT_801b24e4.unk174;
         }
-        func_8003d8ec(0x3c, 0, 0, t, 1);
+        accumulate_color_overlay(0x3c, 0, 0, t, 1);
     }
     v = status_phase_step_scaled(&DAT_801b24e4.unk7a, &DAT_801b24e4.unk7c, 0x40, 0xc00);
     if (v != -1) {
         if (DAT_801b24e4.unk7a == 0) {
             player_recalculate_combat_stats();
         }
-        func_8003d8ec(0x1e, 0x1e, 10, v, 1);
+        accumulate_color_overlay(0x1e, 0x1e, 10, v, 1);
     }
 }

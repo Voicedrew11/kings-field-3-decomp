@@ -4,11 +4,11 @@
  * full-screen 2D effects and the loading screen, object model files, the map
  * cell grid and the per-frame object drawer, the 2D overlay sprites and
  * messages, the animated model poses and the picture fade. One TU:
- * func_8003bfd0/func_8003c35c/func_8003df50/func_800400ac read DAT_8009c2e0
- * and func_800441d4 reads DAT_8009c2d0 $gp-relative, which ASPSX emits only
+ * render_map_cell_window/render_active_model_rows/render_player_weapon/render_animated_object read DAT_8009c2e0
+ * and menu_show_transition_image reads DAT_8009c2d0 $gp-relative, which ASPSX emits only
  * for .sdata defined in the same file.
  */
-/* func_80040ae4 reads Data8018fad4.step as volatile (see game/data.h). */
+/* render_scene_and_update_resources reads Data8018fad4.step as volatile (see game/data.h). */
 #define GAME_RENDER_MODULE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -54,10 +54,10 @@ s32 DAT_8009c2ec = 0;
 
 /*
  * Draws the map layers of the 25 x 25 cell grid around the viewer
- * (Data80199154.grid, flags per cell as func_8003be34 takes them).
+ * (Data80199154.grid, flags per cell as render_map_cell_layers takes them).
  */
 ADDRESS(0x8003bfd0, 0x38c)
-void func_8003bfd0(void)
+void render_map_cell_window(void)
 {
     SVECTOR *pos;
     VECTOR *origin;
@@ -101,11 +101,11 @@ void func_8003bfd0(void)
                         pos->vx = (x << 11) - origin->vx + 1024;
                         pos->vy = (-cell->layer[0].unk1 << 7) - origin->vy;
                         pos->vz = (z << 11) - origin->vz + 1024;
-                        func_8003bb04(&cell->layer[0], pos, *grid);
+                        render_map_cell_object(&cell->layer[0], pos, *grid);
                         kind = cell->layer[1].unk0;
                         if ((*grid & 2) && kind < 240) {
                             pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
-                            func_8003bb04(&cell->layer[1], pos, *grid);
+                            render_map_cell_object(&cell->layer[1], pos, *grid);
                         }
                     } else {
                         kind = cell->layer[1].unk0;
@@ -113,7 +113,7 @@ void func_8003bfd0(void)
                             pos->vx = (x << 11) - origin->vx + 1024;
                             pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
                             pos->vz = (z << 11) - origin->vz + 1024;
-                            func_8003bb04(&cell->layer[1], pos, *grid);
+                            render_map_cell_object(&cell->layer[1], pos, *grid);
                         }
                     }
                 }
@@ -130,13 +130,13 @@ void func_8003bfd0(void)
 /*
  * Draws the 3D overlays (the compass needles of DAT_80081c20, visible == 1)
  * in view space: each lit by its light record turned by its rotation, scaled,
- * posed by func_800431e8 (the base pose is rebuilt when it returns nonzero,
- * unlike func_800400ac), and projected flat (screen x/y = view x/y, depth =
- * view z / 4) before func_80035ca4.
+ * posed by animation_prepare_asset_vertices (the base pose is rebuilt when it returns nonzero,
+ * unlike render_animated_object), and projected flat (screen x/y = view x/y, depth =
+ * view z / 4) before render_enqueue_textured_tmd.
  */
 
 ADDRESS(0x8003c35c, 0x50c)
-void func_8003c35c(void)
+void render_active_model_rows(void)
 {
     MATRIX m;
     VECTOR scale;
@@ -182,8 +182,8 @@ void func_8003c35c(void)
         scratch->end = DAT_80199154.pool->end;
         scratch->screen = DAT_80199154.screen;
         scratch->draw.count.clut = 0;
-        if (func_800431e8(&rec->slot, rec->model, rec->anim, rec->time,
-                          ((ModelData *)model)->parts[0].unk4) != 0) {
+        if (animation_prepare_asset_vertices(&rec->slot, rec->model, rec->anim, rec->time,
+                                             ((ModelData *)model)->parts[0].unk4) != 0) {
             u8 *vertex;
             ScreenVertex *screen;
 
@@ -222,7 +222,7 @@ void func_8003c35c(void)
                 vertex += 8;
             }
         }
-        func_80035ca4(0, 0);
+        render_enqueue_textured_tmd(0, 0);
         DAT_80199154.pool->next = scratch->next;
         DAT_80199154.unk159bc = scratch->draw.count.unk4;
         DAT_80199154.ot_count = scratch->draw.count.ot_count;
@@ -230,8 +230,8 @@ void func_8003c35c(void)
 }
 
 ADDRESS(0x8003c868, 0x100)
-void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
-                   u16 tpage, u16 clut, u8 r, u8 g, u8 b)
+void render_textured_quad_immediate(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
+                                    u16 tpage, u16 clut, u8 r, u8 g, u8 b)
 {
     POLY_FT4 *p;
 
@@ -252,14 +252,14 @@ void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 
 }
 
 ADDRESS(0x8003c968, 0x74)
-void func_8003c968(u8 level, u8 inset)
+void loading_screen_draw_quad(u8 level, u8 inset)
 {
-    func_8003c868(inset + 60, inset + 20, 260 - inset, 220 - inset, 0, 0, 200, 200, 0xff, 0x1f,
-                  0x723c, level, level, level);
+    render_textured_quad_immediate(inset + 60, inset + 20, 260 - inset, 220 - inset, 0, 0, 200, 200, 0xff,
+                                   0x1f, 0x723c, level, level, level);
 }
 
 ADDRESS(0x8003c9dc, 0x1ec)
-void func_8003c9dc(void)
+void loading_screen_show(void)
 {
     char name[64];
     CdlFILE file;
@@ -284,9 +284,9 @@ void func_8003c9dc(void)
             i = 100;
         }
     }
-    func_80043b38(DAT_80199154.buffer);
-    func_8003c868(100, 30, 220, 150, 0, 0, 120, 120, 0xff, 0x1f, 0x723c, 0x58, 0x58, 0x58);
-    func_8003c868(96, 160, 224, 184, 0, 120, 128, 24, 0xff, 0x1f, 0x727c, 0x58, 0x58, 0x58);
+    tim_upload_images(DAT_80199154.buffer);
+    render_textured_quad_immediate(100, 30, 220, 150, 0, 0, 120, 120, 0xff, 0x1f, 0x723c, 0x58, 0x58, 0x58);
+    render_textured_quad_immediate(96, 160, 224, 184, 0, 120, 128, 24, 0xff, 0x1f, 0x727c, 0x58, 0x58, 0x58);
     DrawSync(0);
     VSync(0);
     PutDispEnv(&DAT_80199154.disp[1]);
@@ -297,7 +297,7 @@ void func_8003c9dc(void)
 }
 
 ADDRESS(0x8003cbc8, 0x134)
-void func_8003cbc8(void)
+void loading_screen_update_fade(void)
 {
     u8 level;
 
@@ -313,8 +313,8 @@ void func_8003cbc8(void)
         DAT_80199154.frame = DAT_80199154.frame == 0;
         PutDispEnv(&DAT_80199154.disp[DAT_80199154.frame]);
         PutDrawEnv(&DAT_80199154.draw[DAT_80199154.frame]);
-        func_8003c968(level, level >> 1);
-        func_8003c968(level >> 1, level >> 2);
+        loading_screen_draw_quad(level, level >> 1);
+        loading_screen_draw_quad(level >> 1, level >> 2);
         DrawSync(0);
         VSync(0);
         DAT_80199154.fade_level--;
@@ -322,8 +322,8 @@ void func_8003cbc8(void)
 }
 
 ADDRESS(0x8003ccfc, 0x1c8)
-void func_8003ccfc(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
-                   u16 tpage, u16 clut, u8 r, u8 g, u8 b, s32 z)
+void render_textured_quad(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 semi,
+                          u16 tpage, u16 clut, u8 r, u8 g, u8 b, s32 z)
 {
     POLY_FT4 *p;
 
@@ -349,8 +349,8 @@ void func_8003ccfc(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 
 }
 
 ADDRESS(0x8003cec4, 0x178)
-void func_8003cec4(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32 *rgb1, u32 *rgb2,
-                   u32 *rgb3, s32 z)
+void render_gouraud_quad(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32 *rgb1, u32 *rgb2,
+                         u32 *rgb3, s32 z)
 {
     POLY_G4 *p;
 
@@ -376,7 +376,7 @@ void func_8003cec4(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32 *rgb1
 }
 
 ADDRESS(0x8003d03c, 0x244)
-void func_8003d03c(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16 clut, u8 r,
+void render_sprite(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16 clut, u8 r,
                    u8 g, u8 b, s32 z)
 {
     DR_MODE *mode;
@@ -414,7 +414,7 @@ void func_8003d03c(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16
 }
 
 ADDRESS(0x8003d280, 0x10c)
-void func_8003d280(void)
+void render_sliding_panel_primary(void)
 {
     s32 y;
 
@@ -423,13 +423,13 @@ void func_8003d280(void)
         if (y < 0) {
             y = 0;
         }
-        func_8003ccfc(0, 0, 320, 240, 0, 0xa0, 15, 15, 0xff, 0x6c, 0x7a8d, 0x3c, 0x3c, 0x80, 0x1fff);
-        func_8003ccfc(0, y, 320, 240, 0, 0xb0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x80, 0x40);
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 0xff, 0x6c, 0x7a8d, 0x3c, 0x3c, 0x80, 0x1fff);
+        render_textured_quad(0, y, 320, 240, 0, 0xb0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x80, 0x40);
     }
 }
 
 ADDRESS(0x8003d38c, 0x90)
-void func_8003d38c(void)
+void render_sliding_panel_secondary(void)
 {
     s32 y;
 
@@ -438,12 +438,12 @@ void func_8003d38c(void)
         if (y < 0) {
             y = 0;
         }
-        func_8003ccfc(0, y, 320, 240, 0x10, 0xa0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x3c, 0x40);
+        render_textured_quad(0, y, 320, 240, 0x10, 0xa0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x3c, 0x40);
     }
 }
 
 ADDRESS(0x8003d41c, 0x90)
-void func_8003d41c(void)
+void render_sliding_panel_tertiary(void)
 {
     s32 y;
 
@@ -452,34 +452,34 @@ void func_8003d41c(void)
         if (y < 0) {
             y = 0;
         }
-        func_8003ccfc(0, y, 320, 240, 0x10, 0xb0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x3c, 0x40);
+        render_textured_quad(0, y, 320, 240, 0x10, 0xb0, 15, 15, 1, 0x2c, 0x7a8d, 0x3c, 0x3c, 0x3c, 0x40);
     }
 }
 
-/* Same body as func_8003d568; retail keeps both. */
+/* Same body as render_color_overlay; retail keeps both. */
 
 ADDRESS(0x8003d4ac, 0xbc)
 void func_8003d4ac(void)
 {
     if (DAT_80199154.tint.mode != 0xff) {
-        func_8003ccfc(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
-                      0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
-                      (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
+                             0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
+                             (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
     }
 }
 
 ADDRESS(0x8003d568, 0xbc)
-void func_8003d568(void)
+void render_color_overlay(void)
 {
     if (DAT_80199154.tint.mode != 0xff) {
-        func_8003ccfc(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
-                      0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
-                      (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
+                             0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
+                             (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
     }
 }
 
 ADDRESS(0x8003d624, 0x28)
-void func_8003d624(u8 mode, u8 r, u8 g, u8 b)
+void render_set_color_overlay(u8 mode, u8 r, u8 g, u8 b)
 {
     DAT_80199154.tint.mode = mode;
     DAT_80199154.tint.r = r;
@@ -488,29 +488,29 @@ void func_8003d624(u8 mode, u8 r, u8 g, u8 b)
 }
 
 ADDRESS(0x8003d64c, 0x150)
-void func_8003d64c(void)
+void render_accumulated_color_overlay_additive(void)
 {
     if (DAT_80199154.sum[0].count != 0) {
-        func_8003ccfc(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[0].mode & 3) << 5) | 12,
-                      0x7a8d, DAT_80199154.sum[0].r / DAT_80199154.sum[0].count,
-                      DAT_80199154.sum[0].g / DAT_80199154.sum[0].count,
-                      DAT_80199154.sum[0].b / DAT_80199154.sum[0].count, 0x30);
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[0].mode & 3) << 5) | 12,
+                             0x7a8d, DAT_80199154.sum[0].r / DAT_80199154.sum[0].count,
+                             DAT_80199154.sum[0].g / DAT_80199154.sum[0].count,
+                             DAT_80199154.sum[0].b / DAT_80199154.sum[0].count, 0x30);
     }
 }
 
 ADDRESS(0x8003d79c, 0x150)
-void func_8003d79c(void)
+void render_accumulated_color_overlay_subtractive(void)
 {
     if (DAT_80199154.sum[1].count != 0) {
-        func_8003ccfc(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[1].mode & 3) << 5) | 12,
-                      0x7a8d, DAT_80199154.sum[1].r / DAT_80199154.sum[1].count,
-                      DAT_80199154.sum[1].g / DAT_80199154.sum[1].count,
-                      DAT_80199154.sum[1].b / DAT_80199154.sum[1].count, 0x30);
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[1].mode & 3) << 5) | 12,
+                             0x7a8d, DAT_80199154.sum[1].r / DAT_80199154.sum[1].count,
+                             DAT_80199154.sum[1].g / DAT_80199154.sum[1].count,
+                             DAT_80199154.sum[1].b / DAT_80199154.sum[1].count, 0x30);
     }
 }
 
 ADDRESS(0x8003d8ec, 0x124)
-void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which)
+void accumulate_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
@@ -531,7 +531,7 @@ void func_8003d8ec(s32 r, s32 g, s32 b, s32 scale, s32 which)
 }
 
 ADDRESS(0x8003da10, 0xdc)
-void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which)
+void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
@@ -552,7 +552,7 @@ void func_8003da10(s32 r, s32 g, s32 b, s32 scale, s32 which)
 }
 
 ADDRESS(0x8003daec, 0x464)
-void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
+void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
 {
     s32 count;
     u8 r;
@@ -667,12 +667,12 @@ void func_8003daec(u8 *rgb, s32 x, s32 y, s32 step)
 /*
  * Draws the weapon model (resident model 32) while the player attacks
  * (unkc0 is the attack time, -1 for none): lit by the light record of the map
- * layer under the player, posed by func_800431e8 and placed by the weapon
+ * layer under the player, posed by animation_prepare_asset_vertices and placed by the weapon
  * record's offset and angle; drawn at depth offset 24.
  */
 
 ADDRESS(0x8003df50, 0x3fc)
-void func_8003df50(void)
+void render_player_weapon(void)
 {
     MATRIX m;
     ScratchPad *scratch;
@@ -703,8 +703,8 @@ void func_8003df50(void)
     file = DAT_80199154.models[32];
     model = file + ((ModelFile *)file)->vertices;
     SCRATCH->model = model;
-    if (func_800431e8((AnimSlot **)&DAT_801b24e4.unkb8, 32, DAT_801b24e4.unkca,
-                      DAT_801b24e4.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
+    if (animation_prepare_asset_vertices((AnimSlot **)&DAT_801b24e4.unkb8, 32, DAT_801b24e4.unkca,
+                                         DAT_801b24e4.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
         return;
     }
     SCRATCH->ot = DAT_80199154.ot;
@@ -739,7 +739,7 @@ void func_8003df50(void)
         screen++;
         vertex += 8;
     }
-    func_80035ca4(0, 24);
+    render_enqueue_textured_tmd(0, 24);
     DAT_80199154.pool->next = scratch->next;
     DAT_80199154.unk159bc = scratch->draw.count.unk4;
     DAT_80199154.ot_count = scratch->draw.count.ot_count;
@@ -749,16 +749,16 @@ void func_8003df50(void)
  * Draws model file id (a monster or object model) at pos turned by rotation:
  * lit by the light record of the map layer under it (area 1 or 2), blended by
  * t toward light record light2 (0xff for none), scaled by scale and turned by
- * view when given, posed by func_800431e8 for anim < 128 (part anim & 0x7f
- * otherwise). flags: 0x40 func_800366a8 / flat, 4 func_80037bec (flags & 3),
- * else func_80035ca4; 0x80 keeps the depth offset for models below the eye.
+ * view when given, posed by animation_prepare_asset_vertices for anim < 128 (part anim & 0x7f
+ * otherwise). flags: 0x40 render_enqueue_tmd_subdivided / flat, 4 render_enqueue_blended_tmd (flags & 3),
+ * else render_enqueue_textured_tmd; 0x80 keeps the depth offset for models below the eye.
  * With view == NULL the vertices are transformed flat (x/y kept, z = depth).
  */
 
 ADDRESS(0x8003e34c, 0xfb8)
-void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                   s32 flags, s32 depth)
+void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                        AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
+                        s32 flags, s32 depth)
 {
     SVECTOR rel;
     VECTOR delta;
@@ -881,7 +881,8 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     if (anim < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
-        if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) != 0) {
+        if (animation_prepare_asset_vertices(owner, id, anim, time,
+                                             ((ModelData *)model)->parts[0].unk4) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
@@ -895,7 +896,7 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
 draw:
     if (mode & 0x40) {
         if (view != NULL) {
-            func_800366a8(n);
+            render_enqueue_tmd_subdivided(n);
             goto done;
         }
         {
@@ -915,7 +916,7 @@ draw:
                 vertex += 8;
             }
         }
-        func_80035ca4(n, depth);
+        render_enqueue_textured_tmd(n, depth);
     } else if (mode & 4) {
         if (view != NULL) {
             s32 i = part->unk4;
@@ -959,7 +960,7 @@ draw:
                 vertex += 8;
             }
         }
-        func_80037bec(n, depth, mode & 3);
+        render_enqueue_blended_tmd(n, depth, mode & 3);
     } else {
         if (view != NULL) {
             s32 i = part->unk4;
@@ -1003,7 +1004,7 @@ draw:
                 vertex += 8;
             }
         }
-        func_80035ca4(n, depth);
+        render_enqueue_textured_tmd(n, depth);
     }
 done:
     DAT_80199154.pool->next = scratch->next;
@@ -1012,18 +1013,18 @@ done:
 }
 
 /*
- * func_8003e34c's variant for large models (func_80038844): lit by light
+ * render_world_model's variant for large models (render_enqueue_distant_tmd): lit by light
  * record 0 (blended by t toward light2). With a view matrix the model is
  * skipped outside a 1536-unit wide angle around the player's heading, and the
  * translation is kept below 0x8000 by halving it shift times (the view matrix
- * rows are scaled down to match); func_80038844 gets shift and the distance.
+ * rows are scaled down to match); render_enqueue_distant_tmd gets shift and the distance.
  * area is unused.
  */
 
 ADDRESS(0x8003f304, 0xda8)
-void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                   AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                   u8 flags, s32 depth)
+void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                                AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
+                                u8 flags, s32 depth)
 {
     SVECTOR rel;
     VECTOR delta;
@@ -1159,7 +1160,8 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     if (anim < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
-        if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) != 0) {
+        if (animation_prepare_asset_vertices(owner, id, anim, time,
+                                             ((ModelData *)model)->parts[0].unk4) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
@@ -1203,7 +1205,7 @@ draw:
             vertex += 8;
         }
     }
-    func_80038844(n, depth, shift, dist);
+    render_enqueue_distant_tmd(n, depth, shift, dist);
     DAT_80199154.pool->next = scratch->next;
     DAT_80199154.unk159bc = scratch->draw.count.unk4;
     DAT_80199154.ot_count = scratch->draw.count.ot_count;
@@ -1212,14 +1214,14 @@ draw:
 /*
  * Draws model file id (an object's model) turned by rotation and placed 100
  * units down in view space: lit by light record light_id, posed by
- * func_800431e8 (the base pose when no slot is free) and drawn by
- * func_80039428 at depth offset depth.
- * depth arrives as int (the calls in func_80040ae4) and is narrowed to u16.
+ * animation_prepare_asset_vertices (the base pose when no slot is free) and drawn by
+ * render_enqueue_tmd_fixed_depth at depth offset depth.
+ * depth arrives as int (the calls in render_scene_and_update_resources) and is narrowed to u16.
  */
 
 ADDRESS(0x800400ac, 0x4bc)
-void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
-                   s32 light_id, int depth_in)
+void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
+                            s32 light_id, int depth_in)
 {
     u16 depth = depth_in;
     MATRIX m;
@@ -1254,7 +1256,7 @@ void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 ti
     SCRATCH->screen = DAT_80199154.screen;
     SCRATCH->draw.count.clut = 0;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
-    if (func_800431e8(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) == 0) {
+    if (animation_prepare_asset_vertices(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) == 0) {
         u8 *vertex;
         ScreenVertex *screen;
 
@@ -1289,14 +1291,14 @@ void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 ti
             vertex += 8;
         }
     }
-    func_80039428(0, depth, shade);
+    render_enqueue_tmd_fixed_depth(0, depth, shade);
     DAT_80199154.pool->next = scratch->next;
     DAT_80199154.unk159bc = scratch->draw.count.unk4;
     DAT_80199154.ot_count = scratch->draw.count.ot_count;
 }
 
 ADDRESS(0x80040568, 0x80)
-u16 func_80040568(u16 id)
+u16 map_object_asset_index(u16 id)
 {
     if (id < 300) {
         return id + 256;
@@ -1308,7 +1310,7 @@ u16 func_80040568(u16 id)
 }
 
 ADDRESS(0x800405e8, 0x70)
-void func_800405e8(u16 id, u8 **out)
+void resource_registry_get(u16 id, u8 **out)
 {
     u8 *model;
     u8 state;
@@ -1330,14 +1332,14 @@ void func_800405e8(u16 id, u8 **out)
 /* Load-complete callback for a streamed model file. */
 
 ADDRESS(0x80040658, 0x3c)
-void func_80040658(u8 *file)
+void resource_tmd_read_complete(u8 *file)
 {
-    func_8003591c(file + *(s32 *)(file + 8));
+    tmd_prepare_primitive_indices(file + *(s32 *)(file + 8));
     memory_block_set_kind(file, 2);
 }
 
 ADDRESS(0x80040694, 0x74)
-u8 func_80040694(VECTOR *pos)
+u8 map_cell_layer_mask(VECTOR *pos)
 {
     s32 row;
     s32 col;
@@ -1354,7 +1356,7 @@ u8 func_80040694(VECTOR *pos)
 }
 
 ADDRESS(0x80040708, 0xc4)
-u8 func_80040708(VECTOR *pos, s32 radius)
+u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
 {
     u8 cells = 0;
     s32 row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
@@ -1384,7 +1386,7 @@ u8 func_80040708(VECTOR *pos, s32 radius)
 }
 
 ADDRESS(0x800407cc, 0x64)
-s32 func_800407cc(VECTOR *pos, s32 range_x, s32 range_z)
+s32 map_cell_visible(VECTOR *pos, s32 range_x, s32 range_z)
 {
     s32 z = pos->vz >> 11;
     s32 x;
@@ -1399,7 +1401,7 @@ s32 func_800407cc(VECTOR *pos, s32 range_x, s32 range_z)
 }
 
 ADDRESS(0x80040830, 0xa0)
-void func_80040830(s32 file, s32 entry, s32 id)
+void resource_tmd_queue_read(s32 file, s32 entry, s32 id)
 {
     u8 *model;
 
@@ -1408,12 +1410,12 @@ void func_80040830(s32 file, s32 entry, s32 id)
     if (model != NULL) {
         memory_block_set_kind(model, 3);
         memory_block_set_tag(model, id);
-        cd_archive_queue_read(file, entry, model, (CdCallback)func_80040658);
+        cd_archive_queue_read(file, entry, model, (CdCallback)resource_tmd_read_complete);
     }
 }
 
 ADDRESS(0x800408d0, 0xf8)
-void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
+void resource_vab_update_range(s32 file, s32 entry, s32 bank, s32 count)
 {
     u8 *wanted;
     s32 end;
@@ -1437,7 +1439,7 @@ void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
 }
 
 ADDRESS(0x800409c8, 0x11c)
-void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
+void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
 {
     u8 *wanted;
     s32 end;
@@ -1449,7 +1451,7 @@ void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
         if (*wanted++ != 0) {
             model = DAT_80199154.models[id];
             if (model == NULL) {
-                func_80040830(file, i, id);
+                resource_tmd_queue_read(file, i, id);
                 continue;
             }
             if (memory_block_kind(model) == 1) {
@@ -1470,11 +1472,11 @@ void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
  * records (models from 256 and the area bank, sound banks from 147; kind
  * 0x1f plays its sound by the player's distance), the Object4c records and
  * the placed effects. The passes flag the model ids and sound banks in use
- * and func_800409c8/func_800408d0 load the missing ones and release the rest.
+ * and resource_tmd_update_range/resource_vab_update_range load the missing ones and release the rest.
  */
 
 ADDRESS(0x80040ae4, 0xff0)
-void func_80040ae4(void)
+void render_scene_and_update_resources(void)
 {
     VECTOR pos;
     u8 *model;
@@ -1517,29 +1519,29 @@ void func_80040ae4(void)
             mask = obj->unk3;
         }
         if (!(obj->unk28 & 0x80000)) {
-            if (!(func_80040694(&obj->pos) & mask)) {
+            if (!(map_cell_layer_mask(&obj->pos) & mask)) {
                 continue;
             }
         } else {
-            if (!(func_80040708(&obj->pos, 3) & obj->unk3)) {
+            if (!(map_cell_layer_mask_radius(&obj->pos, 3) & obj->unk3)) {
                 continue;
             }
         }
-        func_800405e8(obj->unk1 + 128, &model);
+        resource_registry_get(obj->unk1 + 128, &model);
         if (model != NULL) {
             at = func_8004eee0(obj, &pos);
             if (obj->unk28 & 0x20) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                func_8003e34c(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle,
-                              &obj->scale, &obj->unk5c, &DAT_8007e4c4, obj->unkc, obj->unk18,
-                              obj->unk14, obj->unk16, obj->unk13, obj->unk15);
+                render_world_model(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle,
+                                   &obj->scale, &obj->unk5c, &DAT_8007e4c4, obj->unkc, obj->unk18,
+                                   obj->unk14, obj->unk16, obj->unk13, obj->unk15);
             } else {
                 scratch->u.load.angle.vx = obj->angle.vx;
                 scratch->u.load.angle.vy = obj->angle.vy + 2048;
                 scratch->u.load.angle.vz = obj->angle.vz;
-                func_8003e34c(obj->unk3, obj->unk1 + 128, at, &scratch->u.load.angle,
-                              &obj->scale, &obj->unk5c, &DAT_80199154.unk159f8, obj->unkc,
-                              obj->unk18, obj->unk14, obj->unk16, obj->unk13, obj->unk15);
+                render_world_model(obj->unk3, obj->unk1 + 128, at, &scratch->u.load.angle,
+                                   &obj->scale, &obj->unk5c, &DAT_80199154.unk159f8, obj->unkc,
+                                   obj->unk18, obj->unk14, obj->unk16, obj->unk13, obj->unk15);
             }
         }
         def = &DAT_80185da8.defs[obj->unk2];
@@ -1547,8 +1549,8 @@ void func_80040ae4(void)
         scratch->u.load.sounds[def->unk7[1]] = 1;
         scratch->u.load.models[obj->unk1] = 1;
     }
-    func_800409c8(0, 0, 0x80, 0x80);
-    func_800408d0(2, 0x91, 0x33, 0x60);
+    resource_tmd_update_range(0, 0, 0x80, 0x80);
+    resource_vab_update_range(2, 0x91, 0x33, 0x60);
     now = DAT_801c12e4.frames;
     repeat_store_word((u32 *)scratch->u.load.models, 0, 0x53);
     repeat_store_word((u32 *)scratch->u.load.sounds, 0, 8);
@@ -1567,12 +1569,12 @@ void func_80040ae4(void)
         case 0xe9:
             break;
         case 0xf2:
-            if (func_800407cc(&rec->pos, rec->arg.m.unk38, rec->arg.m.unk39) == 0) {
+            if (map_cell_visible(&rec->pos, rec->arg.m.unk38, rec->arg.m.unk39) == 0) {
                 break;
             }
             scratch->u.load.models[rec->unk6] = 1;
-            id = func_80040568(rec->unk6);
-            func_800405e8(id, &model);
+            id = map_object_asset_index(rec->unk6);
+            resource_registry_get(id, &model);
             if (model == NULL) {
                 break;
             }
@@ -1582,31 +1584,31 @@ void func_80040ae4(void)
             pos.vx = ((rec->arg.m.unk3a << 11) + rec->pos.vx) >> 1;
             pos.vz = ((rec->arg.m.unk3c << 11) + rec->pos.vz) >> 1;
             pos.vy = (rec->pos.vy - (rec->arg.m.unk3e << 11)) >> 1;
-            func_8003f304(rec->unk0, id, &pos, &scratch->u.load.angle, &rec->scale,
-                          &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
-                          rec->unk5, rec->unk10, rec->unk2, rec->unke);
+            render_distant_world_model(rec->unk0, id, &pos, &scratch->u.load.angle, &rec->scale,
+                                       &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
+                                       rec->unk5, rec->unk10, rec->unk2, rec->unke);
             rec->unk3 |= 0x80;
             break;
         case 0xf0:
             if (DAT_80199154.unk15996 == 0) {
                 break;
             }
-            if (func_800407cc(&rec->pos, rec->arg.v.unk38, rec->arg.v.unk39) == 0) {
+            if (map_cell_visible(&rec->pos, rec->arg.v.unk38, rec->arg.v.unk39) == 0) {
                 break;
             }
             id = rec->unk6 - 221;
-            func_800405e8(id, &model);
+            resource_registry_get(id, &model);
             if (model != NULL) {
-                func_800400ac(id, &rec->angle, &rec->arg.v.unk34, rec->unk1, rec->unka,
-                              rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
+                render_animated_object(id, &rec->angle, &rec->arg.v.unk34, rec->unk1, rec->unka,
+                                       rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
                 rec->unk3 |= 0x80;
             }
             DAT_8018fad4.unk24 = *rec;
             DAT_8018fad4.unk20 = &DAT_8018fad4.unk24;
             break;
         case 0x1f:
-            if (func_80046884(rec->pos.vx >> 11, rec->pos.vz >> 11, rec->arg.s.unk38,
-                              rec->arg.s.unk39, 0x8000) != 0) {
+            if (player_camera_within_map_region(rec->pos.vx >> 11, rec->pos.vz >> 11, rec->arg.s.unk38,
+                                                rec->arg.s.unk39, 0x8000) != 0) {
                 sound = &DAT_801b09fc.effects[rec->arg.s.unk3a + 496];
                 if (sound->bank >= 147 && sound->bank < 179) {
                     scratch->u.load.sounds[sound->bank - 147] = 1;
@@ -1654,22 +1656,22 @@ void func_80040ae4(void)
             break;
         default:
             if (!(rec->unk3 & 2) || (rec->unk3 & 8)) {
-                cells = func_80040694(&rec->pos);
+                cells = map_cell_layer_mask(&rec->pos);
                 if (!(cells & rec->unk0) && !(rec->unk3 & 8)) {
                     break;
                 }
                 rec_def = &DAT_8018fb3c.defs[rec->unk6];
             } else {
                 rec_def = &DAT_8018fb3c.defs[rec->unk6];
-                cells = func_80040708(&rec->pos, rec_def->arg.b.unkc);
+                cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
                 if (!(cells & rec->unk0) && !(rec->unk3 & 8)) {
                     break;
                 }
             }
             scratch->u.load.models[rec->unk6] = 1;
             scratch->u.load.sounds[rec_def->unk2] = 1;
-            id = func_80040568(rec->unk6);
-            func_800405e8(id, &model);
+            id = map_object_asset_index(rec->unk6);
+            resource_registry_get(id, &model);
             if (model == NULL) {
                 break;
             }
@@ -1686,17 +1688,17 @@ void func_80040ae4(void)
             }
             if (rec->unk3 & 0x40) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                func_8003e34c(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                              &rec->arg.m.unk34, &DAT_80199154.unk15ab8, rec->unk1, rec->unka,
-                              rec->unk5, rec->unk10, flags, rec->unke);
+                render_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                                   &rec->arg.m.unk34, &DAT_80199154.unk15ab8, rec->unk1, rec->unka,
+                                   rec->unk5, rec->unk10, flags, rec->unke);
             } else if (rec->unk3 & 8) {
-                func_8003f304(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                              &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
-                              rec->unk5, rec->unk10, flags, rec->unke);
+                render_distant_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                                           &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
+                                           rec->unk5, rec->unk10, flags, rec->unke);
             } else {
-                func_8003e34c(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                              &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
-                              rec->unk5, rec->unk10, flags, rec->unke);
+                render_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                                   &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
+                                   rec->unk5, rec->unk10, flags, rec->unke);
             }
             rec->unk3 |= 0x80;
             break;
@@ -1704,20 +1706,20 @@ void func_80040ae4(void)
     }
     scratch->u.load.models[265] = 0;
     scratch->u.load.models[264] = 0;
-    func_800409c8(0, 0x80, 0x100, 0x118);
+    resource_tmd_update_range(0, 0x80, 0x100, 0x118);
     scratch->u.load.model_wanted = &scratch->u.load.models[300];
     if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 1
         && DAT_8018fad4.previous[0] != 0xff) {
-        func_800409c8(1, DAT_8018fad4.previous[0] * 32, DAT_8018fad4.previous[0] * 32 + 556, 32);
+        resource_tmd_update_range(1, DAT_8018fad4.previous[0] * 32, DAT_8018fad4.previous[0] * 32 + 556, 32);
     } else {
-        func_800409c8(1, DAT_8018fad4.area[0] * 32, DAT_8018fad4.area[0] * 32 + 556, 32);
+        resource_tmd_update_range(1, DAT_8018fad4.area[0] * 32, DAT_8018fad4.area[0] * 32 + 556, 32);
     }
-    func_800408d0(2, 0xf1, 0x93, 0x20);
+    resource_vab_update_range(2, 0xf1, 0x93, 0x20);
     if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.step > 0
         && (rec = DAT_8018fad4.unk20) != NULL) {
         id = rec->unk6 - 221;
-        func_800400ac(id, &rec->angle, &rec->arg.v.unk34, rec->unk1, rec->unka,
-                      rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
+        render_animated_object(id, &rec->angle, &rec->arg.v.unk34, rec->unk1, rec->unka,
+                               rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
         rec->unk3 |= 0x80;
     }
     obj4c = DAT_801b77ec.objects;
@@ -1728,7 +1730,7 @@ void func_80040ae4(void)
         if ((obj4c->unk8 & 3) == 0) {
             continue;
         }
-        if ((obj4c->unk8 & 3) != 2 && !(func_80040694(&obj4c->pos) & obj4c->unka)) {
+        if ((obj4c->unk8 & 3) != 2 && !(map_cell_layer_mask(&obj4c->pos) & obj4c->unka)) {
             continue;
         }
         scratch->draw.count.clut = obj4c->unke;
@@ -1737,24 +1739,24 @@ void func_80040ae4(void)
             scratch->u.load.angle.vx = obj4c->angle.vx;
             scratch->u.load.angle.vy = obj4c->angle.vy + 2048;
             scratch->u.load.angle.vz = obj4c->angle.vz;
-            func_8003e34c(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &scratch->u.load.angle,
-                          &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk159f8, obj4c->unk4,
-                          obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &scratch->u.load.angle,
+                               &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk159f8, obj4c->unk4,
+                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 4:
-            func_8003e34c(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                          &obj4c->scale, &obj4c->unk40, &DAT_8007e4c4, obj4c->unk4,
-                          obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
+                               &obj4c->scale, &obj4c->unk40, &DAT_8007e4c4, obj4c->unk4,
+                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 8:
-            func_8003e34c(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                          &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk15ab8, obj4c->unk4,
-                          obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
+                               &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk15ab8, obj4c->unk4,
+                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 0xc:
-            func_8003e34c(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                          &obj4c->scale, &obj4c->unk40, NULL, obj4c->unk4, obj4c->unk14,
-                          obj4c->unkc, obj4c->unk12, obj4c->unk9, 20);
+            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
+                               &obj4c->scale, &obj4c->unk40, NULL, obj4c->unk4, obj4c->unk14,
+                               obj4c->unkc, obj4c->unk12, obj4c->unk9, 20);
             break;
         }
     }
@@ -1766,13 +1768,13 @@ void func_80040ae4(void)
             continue;
         }
         if (effect->id & 0x8000) {
-            func_8003f304(effect->unk2, (effect->id & 0x7fff) + 40, &effect->pos,
-                          &scratch->u.load.angle, NULL, NULL, &DAT_8007e4c4, effect->unk5 + 128, 0,
-                          0x3c, 0x1000, 7, 0);
-        } else if (func_80040694(&effect->pos) & effect->unk2) {
-            func_8003e34c(effect->unk2, effect->id + 40, &effect->pos, &scratch->u.load.angle,
-                          NULL, NULL, &DAT_80199154.unk15ab8, effect->unk5 + 128, 0, 0x36, 0x1000,
-                          5, 0);
+            render_distant_world_model(effect->unk2, (effect->id & 0x7fff) + 40, &effect->pos,
+                                       &scratch->u.load.angle, NULL, NULL, &DAT_8007e4c4, effect->unk5 + 128,
+                                       0, 0x3c, 0x1000, 7, 0);
+        } else if (map_cell_layer_mask(&effect->pos) & effect->unk2) {
+            render_world_model(effect->unk2, effect->id + 40, &effect->pos, &scratch->u.load.angle,
+                               NULL, NULL, &DAT_80199154.unk15ab8, effect->unk5 + 128, 0, 0x36, 0x1000,
+                               5, 0);
         }
         if (effect->unk4 != 0 && DAT_80182964 % effect->unk4 == 0) {
             effect->unk5++;
@@ -1785,7 +1787,7 @@ void func_80040ae4(void)
 }
 
 ADDRESS(0x80041ad4, 0x2c8)
-void func_80041ad4(SpriteRec *sprite, u16 mode, u8 *rgb)
+void render_sprite_record(SpriteRec *sprite, u16 mode, u8 *rgb)
 {
     DR_MODE *dr;
     SPRT *p;
@@ -1825,7 +1827,7 @@ void func_80041ad4(SpriteRec *sprite, u16 mode, u8 *rgb)
 }
 
 ADDRESS(0x80041d9c, 0xcc)
-void func_80041d9c(void)
+void notification_draw(void)
 {
     SpriteRec *sprite;
     u8 bright[4];
@@ -1836,19 +1838,19 @@ void func_80041d9c(void)
     dim[0] = dim[2] = dim[1] = DAT_80199154.message_level >> 2;
     for (; sprite->visible != 0xff; sprite++) {
         if (sprite->visible & 1) {
-            func_80041ad4(sprite, 1, bright);
+            render_sprite_record(sprite, 1, bright);
         }
         if (sprite->visible & 2) {
-            func_80041ad4(sprite, 2, bright);
+            render_sprite_record(sprite, 2, bright);
         }
         if (sprite->visible & 4) {
-            func_80041ad4(sprite, 2, dim);
+            render_sprite_record(sprite, 2, dim);
         }
     }
 }
 
 ADDRESS(0x80041e68, 0x84)
-void func_80041e68(void)
+void render_hud_sprites(void)
 {
     SpriteRec *sprite;
     u8 rgb[4];
@@ -1857,13 +1859,13 @@ void func_80041e68(void)
     rgb[0] = rgb[1] = rgb[2] = DAT_801b24e4.unkfd;
     for (; sprite->visible != 0xff; sprite++) {
         if (sprite->visible != 0) {
-            func_80041ad4(sprite, sprite->mode, rgb);
+            render_sprite_record(sprite, sprite->mode, rgb);
         }
     }
 }
 
 ADDRESS(0x80041eec, 0xa0)
-void func_80041eec(s32 message, ...)
+void notify_enqueue(s32 message, ...)
 {
     va_list args;
 
@@ -1881,13 +1883,13 @@ void func_80041eec(s32 message, ...)
 }
 
 ADDRESS(0x80041f8c, 0x10)
-void func_80041f8c(SpriteRec *sprite, u8 digit)
+void notification_digit_set_u(SpriteRec *sprite, u8 digit)
 {
     sprite->u = digit * 8;
 }
 
 ADDRESS(0x80041f9c, 0x31c)
-void func_80041f9c(void)
+void notification_update(void)
 {
     u32 message;
     u8 digits[20];
@@ -1908,13 +1910,13 @@ void func_80041f9c(void)
             DAT_80081928[1].v = 0x62;
             menu_format_number(DAT_80199154.message_arg[DAT_80199154.message_tail], 4, 0, 0, digits);
             DAT_80081928[2].visible = 3;
-            func_80041f8c(&DAT_80081928[2], digits[3]);
+            notification_digit_set_u(&DAT_80081928[2], digits[3]);
             DAT_80081928[3].visible = 3;
-            func_80041f8c(&DAT_80081928[3], digits[2]);
+            notification_digit_set_u(&DAT_80081928[3], digits[2]);
             DAT_80081928[4].visible = 3;
-            func_80041f8c(&DAT_80081928[4], digits[1]);
+            notification_digit_set_u(&DAT_80081928[4], digits[1]);
             DAT_80081928[5].visible = 3;
-            func_80041f8c(&DAT_80081928[5], digits[0]);
+            notification_digit_set_u(&DAT_80081928[5], digits[0]);
         } else {
             DAT_80081928[0].visible = 3;
             DAT_80081928[1].visible = DAT_80081928[2].visible = DAT_80081928[3].visible =
@@ -1953,18 +1955,18 @@ void func_80041f9c(void)
 }
 
 ADDRESS(0x800422b8, 0x654)
-void func_800422b8(VECTOR *pos, SVECTOR *angle)
+void render_game_frame(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
 
     DAT_8009c2e0.b = DAT_8009c2e0.g = DAT_8009c2e0.r = DAT_801b24e4.unkfd;
     display_set_view_transform(pos, angle);
     vram_scroll_update();
-    func_80041f9c();
+    notification_update();
     view_build_visibility_grid();
     display_begin_frame();
-    func_80043858();
-    func_8003df50();
+    pool_mark_allocated();
+    render_player_weapon();
     DAT_800819b4[13].visible = DAT_800819b4[14].visible = 0;
     DAT_80081c20[0].visible = DAT_801b24e4.unkfa & 1;
     DAT_80081c20[1].visible = (DAT_801b24e4.unkfa & 2) >> 1;
@@ -2014,20 +2016,20 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
         DAT_800819b4[25].unka = DAT_800819b4[25].w = DAT_801b24e4.unk1e * 64 / 5000;
         DAT_800819b4[26].unka = DAT_800819b4[26].w = DAT_801b24e4.unk22 * 64 / 5000;
     }
-    func_8003c35c();
-    func_80041e68();
-    func_80041d9c();
-    func_8003bfd0();
-    func_80040ae4();
-    func_8003d280();
-    func_8003d38c();
-    func_8003d41c();
-    func_8003d568();
-    func_8003d64c();
-    func_8003d79c();
+    render_active_model_rows();
+    render_hud_sprites();
+    notification_draw();
+    render_map_cell_window();
+    render_scene_and_update_resources();
+    render_sliding_panel_primary();
+    render_sliding_panel_secondary();
+    render_sliding_panel_tertiary();
+    render_color_overlay();
+    render_accumulated_color_overlay_additive();
+    render_accumulated_color_overlay_subtractive();
     display_present_frame();
     cd_wait_four_vsyncs();
-    func_80043940();
+    pool_release_stale();
 }
 
 /*
@@ -2039,7 +2041,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
  */
 
 ADDRESS(0x8004290c, 0x264)
-void func_8004290c(void)
+void menu_render_item_model(void)
 {
     ScratchPad *scratch;
     u8 *model;
@@ -2089,14 +2091,14 @@ void func_8004290c(void)
         screen++;
         vertex += 8;
     }
-    func_80035ca4(0, 100);
+    render_enqueue_textured_tmd(0, 100);
     DAT_80199154.pool->next = scratch->next;
     DAT_80199154.unk159bc = scratch->draw.count.unk4;
     DAT_80199154.ot_count = scratch->draw.count.ot_count;
 }
 
 ADDRESS(0x80042b70, 0x38)
-void func_80042b70(u16 id)
+void asset_registry_select(u16 id)
 {
     u8 *file;
 
@@ -2105,7 +2107,7 @@ void func_80042b70(u16 id)
 }
 
 ADDRESS(0x80042ba8, 0xbc)
-void func_80042ba8(u16 id, u8 *file)
+void asset_registry_load_tmd_archive(u16 id, u8 *file)
 {
     u16 count;
     u32 size;
@@ -2116,8 +2118,8 @@ void func_80042ba8(u16 id, u8 *file)
         size = *(u32 *)file;
         if (size >= 5) {
             DAT_80199154.models[id] = file;
-            func_80042b70(id);
-            func_8003591c(DAT_80199154.vertices);
+            asset_registry_select(id);
+            tmd_prepare_primitive_indices(DAT_80199154.vertices);
         }
         file += size;
         id++;
@@ -2125,15 +2127,15 @@ void func_80042ba8(u16 id, u8 *file)
 }
 
 ADDRESS(0x80042c64, 0x48)
-void func_80042c64(u16 id, u8 *file)
+void asset_registry_set(u16 id, u8 *file)
 {
     DAT_80199154.models[id] = file;
-    func_80042b70(id);
-    func_8003591c(DAT_80199154.vertices);
+    asset_registry_select(id);
+    tmd_prepare_primitive_indices(DAT_80199154.vertices);
 }
 
 ADDRESS(0x80042cac, 0xc4)
-AnimKey *func_80042cac(ModelFile *model, s32 anim, s32 time, s32 *index, s32 *frac)
+AnimKey *animation_select_keyframe(ModelFile *model, s32 anim, s32 time, s32 *index, s32 *frac)
 {
     s32 key;
     s32 end;
@@ -2174,7 +2176,7 @@ done:
 }
 
 ADDRESS(0x80042d70, 0xc4)
-void func_80042d70(SVECTOR *pose, SVECTOR *base, s16 *deltas)
+void animation_expand_sparse_vertices(SVECTOR *pose, SVECTOR *base, s16 *deltas)
 {
     s32 i;
     s32 j;
@@ -2203,7 +2205,7 @@ void func_80042d70(SVECTOR *pose, SVECTOR *base, s16 *deltas)
 }
 
 ADDRESS(0x80042e34, 0x7c)
-void func_80042e34(SVECTOR *pose, s16 *deltas)
+void animation_decode_sparse_vertices(SVECTOR *pose, s16 *deltas)
 {
     s32 i;
     s16 v;
@@ -2223,7 +2225,7 @@ void func_80042e34(SVECTOR *pose, s16 *deltas)
 }
 
 ADDRESS(0x80042eb0, 0x2bc)
-void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t)
+void animation_apply_sparse_morph(SVECTOR *pose, s16 *deltas, s32 t)
 {
     MATRIX m;
     VECTOR scale;
@@ -2293,7 +2295,7 @@ void func_80042eb0(SVECTOR *pose, s16 *deltas, s32 t)
 }
 
 ADDRESS(0x8004316c, 0x7c)
-s16 *func_8004316c(s16 *deltas, s32 index)
+s16 *animation_find_sparse_vertex(s16 *deltas, s32 index)
 {
     s32 k;
     s32 i;
@@ -2324,7 +2326,7 @@ s16 *func_8004316c(s16 *deltas, s32 index)
  * weighted by loop depth and `count` would outrank `scratch` ($s7/$s8).
  */
 ADDRESS(0x800431e8, 0x344)
-s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
+s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
 {
     ModelFile *model = (ModelFile *)DAT_80199154.models[id];
     AnimSlot *slot = *owner;
@@ -2340,7 +2342,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         u8 *data;
 
         if (slot != NULL) {
-            func_80043894(slot);
+            pool_record_release(slot);
         }
         data = DAT_80199154.models[id];
         data += ((ModelFile *)data)->vertices;
@@ -2351,7 +2353,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
     }
 
     if (slot == NULL) {
-        func_800439b0(&slot);
+        pool_allocate(&slot);
         if (slot == NULL) {
             return 0;
         }
@@ -2360,17 +2362,17 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         slot->owner = owner;
     retry:
         if ((slot->pose = (SVECTOR *)memory_malloc_checked(count * 8)) == NULL) {
-            func_800438e0();
+            pool_release_all();
             goto retry;
         }
         *owner = slot;
     } else if (slot->model != id) {
-        func_80043894(slot);
+        pool_record_release(slot);
         slot->anim = 0xff;
         goto init;
     }
 
-    key = func_80042cac(model, anim, time, &index, &frac);
+    key = animation_select_keyframe(model, anim, time, &index, &frac);
     if (slot->anim != anim || slot->key != index) {
         scratch->part = ((ModelData *)scratch->model)->parts;
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
@@ -2378,10 +2380,10 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         n = key->count;
         if (n != 0) {
             ids = key->ids;
-            func_80042d70(slot->pose, (SVECTOR *)scratch->vertices,
-                          (s16 *)((u8 *)model + deltas[key->first]));
+            animation_expand_sparse_vertices(slot->pose, (SVECTOR *)scratch->vertices,
+                                             (s16 *)((u8 *)model + deltas[key->first]));
             for (--n; n != 0; --n) {
-                func_80042e34(slot->pose, (s16 *)((u8 *)model + deltas[*ids++]));
+                animation_decode_sparse_vertices(slot->pose, (s16 *)((u8 *)model + deltas[*ids++]));
             }
         } else {
             u16 c = count;
@@ -2408,26 +2410,26 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
             *dst++ = *src++;
         } while (--c != 0);
     }
-    func_80042eb0(DAT_80199154.pose, (s16 *)((u8 *)model + slot->base), frac);
+    animation_apply_sparse_morph(DAT_80199154.pose, (s16 *)((u8 *)model + slot->base), frac);
     scratch->vertices = (u8 *)DAT_80199154.pose;
     slot->state = 2;
     return (s32)slot;
 }
 
 /*
- * id is a full int (narrowed only for func_800405e8): a narrow first
+ * id is a full int (narrowed only for resource_registry_get): a narrow first
  * parameter would emit an entry conversion, and GCC then drops the stack
  * equivalence of `out`, which changes its allocation priority ($s6/$s7).
  */
 ADDRESS(0x8004352c, 0x29c)
-s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
+s32 animation_sample_vertex(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
 {
     u8 *loaded;
     ModelFile *file;
     u8 *data;
     SVECTOR *vertices;
 
-    func_800405e8(id, &loaded);
+    resource_registry_get(id, &loaded);
     file = (ModelFile *)loaded;
     if (file == NULL) {
         out->vx = out->vy = out->vz = 0;
@@ -2452,20 +2454,20 @@ s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
         s16 *d;
 
         vertices = (SVECTOR *)(data + (((ModelData *)data)->parts[0].vertices + 12));
-        key = func_80042cac(file, anim, time, &index, &frac);
+        key = animation_select_keyframe(file, anim, time, &index, &frac);
         v = vertices[vertex];
         deltas = (s32 *)((u8 *)file + file->deltas);
         ids = &key->first;
         n = key->count;
         while (--n != -1) {
-            d = func_8004316c((s16 *)((u8 *)file + deltas[*ids++]), vertex);
+            d = animation_find_sparse_vertex((s16 *)((u8 *)file + deltas[*ids++]), vertex);
             if (d != NULL) {
                 v.vx = *d++;
                 v.vy = *d++;
                 v.vz = *d;
             }
         }
-        d = func_8004316c((s16 *)((u8 *)file + deltas[key->base]), vertex);
+        d = animation_find_sparse_vertex((s16 *)((u8 *)file + deltas[key->base]), vertex);
         if (d != NULL) {
             v.vx = (((*d++ - v.vx) * frac) >> 12) + v.vx;
             v.vy = (((*d++ - v.vy) * frac) >> 12) + v.vy;
@@ -2477,7 +2479,7 @@ s32 func_8004352c(s32 id, s32 anim, s32 time, s32 vertex, SVECTOR *out)
 }
 
 ADDRESS(0x800437c8, 0x60)
-s32 func_800437c8(s32 id, s32 part)
+s32 asset_vertex_count(s32 id, s32 part)
 {
     u8 *file;
     ModelData *data;
@@ -2491,7 +2493,7 @@ s32 func_800437c8(s32 id, s32 part)
 }
 
 ADDRESS(0x80043828, 0x30)
-void func_80043828(void)
+void pool_reset(void)
 {
     AnimSlot *slot;
     u16 n;
@@ -2506,7 +2508,7 @@ void func_80043828(void)
 }
 
 ADDRESS(0x80043858, 0x3c)
-void func_80043858(void)
+void pool_mark_allocated(void)
 {
     AnimSlot *slot;
     u16 n;
@@ -2522,7 +2524,7 @@ void func_80043858(void)
 }
 
 ADDRESS(0x80043894, 0x4c)
-void func_80043894(AnimSlot *slot)
+void pool_record_release(AnimSlot *slot)
 {
     slot->state = 0;
     *slot->owner = NULL;
@@ -2533,7 +2535,7 @@ void func_80043894(AnimSlot *slot)
 }
 
 ADDRESS(0x800438e0, 0x60)
-void func_800438e0(void)
+void pool_release_all(void)
 {
     AnimSlot *slot;
     s16 n;
@@ -2542,14 +2544,14 @@ void func_800438e0(void)
     n = 12;
     do {
         if (slot->state != 0) {
-            func_80043894(slot);
+            pool_record_release(slot);
         }
         slot++;
     } while (--n != 0);
 }
 
 ADDRESS(0x80043940, 0x70)
-void func_80043940(void)
+void pool_release_stale(void)
 {
     AnimSlot *slot;
     u16 n;
@@ -2558,14 +2560,14 @@ void func_80043940(void)
     n = 12;
     do {
         if (slot->state == 1) {
-            func_80043894(slot);
+            pool_record_release(slot);
         }
         slot++;
     } while (--n != 0);
 }
 
 ADDRESS(0x800439b0, 0x58)
-void func_800439b0(AnimSlot **out)
+void pool_allocate(AnimSlot **out)
 {
     u16 n;
 
@@ -2582,7 +2584,7 @@ void func_800439b0(AnimSlot **out)
 }
 
 ADDRESS(0x80043a08, 0x130)
-void func_80043a08(EffectSpawn *spawn)
+void map_placed_expand_sources(EffectSpawn *spawn)
 {
     Effect *effect;
     s32 i;
@@ -2609,7 +2611,7 @@ void func_80043a08(EffectSpawn *spawn)
 }
 
 ADDRESS(0x80043b38, 0x80)
-void func_80043b38(u8 *file)
+void tim_upload_images(u8 *file)
 {
     TIM_IMAGE tim;
     u_long unused[128];
@@ -2632,7 +2634,7 @@ void func_80043b38(u8 *file)
  * released, -1 when one was held throughout, -2 when the fade ended first. */
 
 ADDRESS(0x80043bb8, 0x61c)
-s32 func_80043bb8(s32 level, s32 step)
+s32 menu_fade_transition(s32 level, s32 step)
 {
     POLY_FT4 *p;
     s32 result;
@@ -2731,7 +2733,7 @@ s32 func_80043bb8(s32 level, s32 step)
  * the saved screen; a button press cuts the wait short. */
 
 ADDRESS(0x800441d4, 0x1f4)
-void func_800441d4(u16 file, u16 entry)
+void menu_show_transition_image(u16 file, u16 entry)
 {
     s32 level;
     u32 pad;
@@ -2740,7 +2742,7 @@ void func_800441d4(u16 file, u16 entry)
     cd_archive_read(file, entry, DAT_80199154.buffer);
     ClearImage(&DAT_8009c2d8, 0, 0, 0);
     DrawSync(0);
-    func_80043b38(DAT_80199154.buffer);
+    tim_upload_images(DAT_80199154.buffer);
     DrawSync(0);
     DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
     DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
@@ -2749,7 +2751,7 @@ void func_800441d4(u16 file, u16 entry)
     DrawSync(0);
     MoveImage(&DAT_80199154.draw[DAT_80199154.frame].clip, DAT_8009c2d0.x, DAT_8009c2d0.y);
     DrawSync(0);
-    level = func_80043bb8(0, 12);
+    level = menu_fade_transition(0, 12);
     if (level < 0) {
         for (;;) {
             pad = PadRead(1);
@@ -2768,7 +2770,7 @@ void func_800441d4(u16 file, u16 entry)
         }
         level = 80;
     }
-    func_80043bb8(level, -12);
+    menu_fade_transition(level, -12);
     LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
     DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
     DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;

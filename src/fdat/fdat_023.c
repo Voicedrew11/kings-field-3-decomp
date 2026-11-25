@@ -75,7 +75,7 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x85) {
         return;
     }
-    i = func_80045c7c(0, pos, 800, 0x6a4, angle->vy, 0x200);
+    i = map_object_find_interaction_target(0, pos, 800, 0x6a4, angle->vy, 0x200);
     if (i != -1) {
         obj = &DAT_8018fb3c.objects[i];
         if (obj->unk6 == 0x140) {
@@ -90,13 +90,13 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
             DAT_801ba984.unk0 = 1;
             func_8005d7f8(0x85);
             func_8005c7e8(obj, 0x85);
-        } else if (func_80046608(obj, 0x85) == 3) {
-            func_80041eec(7);
+        } else if (map_object_check_and_consume_marker(obj, 0x85) == 3) {
+            notify_enqueue(7);
             DAT_801ba984.unk0 = 1;
         }
     } else {
         DAT_801ba984.unk0 = 1;
-        func_80041eec(0x23);
+        notify_enqueue(0x23);
     }
 }
 
@@ -117,13 +117,13 @@ void func_801e86f4(Object44 *obj)
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
-    if (func_80046884(0x12, 0x1c, 3, 3, 0x8000) != 0) {
+    if (player_camera_within_map_region(0x12, 0x1c, 3, 3, 0x8000) != 0) {
         if (DAT_801b24e4.unk10a != 0) {
-            func_800445b8(2, 0x15, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x15, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
         }
     } else {
         DAT_801b24e4.unk10a = 0;
-        func_800445b8(2, 0x18, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x18, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
     }
 }
 
@@ -152,8 +152,8 @@ void func_801e87d0(void)
     if (obj->unk4 != 0xa7) {
         return;
     }
-    if (func_80046914(obj, &DAT_8018fb3c.objects[380 + obj->arg.b.unk39], &DAT_801e8908, &DAT_801e8910,
-                      0, 20) == 0) {
+    if (map_object_step_offset_motion(obj, &DAT_8018fb3c.objects[380 + obj->arg.b.unk39], &DAT_801e8908,
+                                      &DAT_801e8910, 0, 20) == 0) {
         return;
     }
     other = DAT_8018fb3c.objects;

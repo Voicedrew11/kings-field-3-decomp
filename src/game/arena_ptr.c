@@ -305,7 +305,7 @@ void func_8005f444(s32 area)
             rec->arg.b.unk39 = *p++;
             break;
         case 0xf0:
-            func_800448b8(rec);
+            map_object_reset(rec);
             rec->unk4 = 0x60;
             rec->unk6 = *p++;
             x = *p++;
@@ -326,7 +326,7 @@ void func_8005f444(s32 area)
             rec->arg.b.unk38 = 0xff;
             break;
         case 0xf1:
-            func_800448b8(rec);
+            map_object_reset(rec);
             rec->unk4 = 0x61;
             rec->unk6 = *p++;
             x = *p++;
@@ -337,7 +337,7 @@ void func_8005f444(s32 area)
             y |= *p++ << 8;
             goto place;
         case 0xf2:
-            func_800448b8(rec);
+            map_object_reset(rec);
             rec->unk4 = 0x62;
             rec->unk6 = *p++;
             x = *p++;
@@ -352,7 +352,7 @@ void func_8005f444(s32 area)
             }
             goto place;
         case 0xf3:
-            func_800448b8(rec);
+            map_object_reset(rec);
             rec->unk4 = 0x70;
             rec->unk6 = *p++;
         case 0xfd:

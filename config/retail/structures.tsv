@@ -1,8 +1,8 @@
 # MANUALLY MANAGED - target C layouts used by semantic function/data identities.
 # A supported layout proves current size/offset modeling, not an original typedef spelling.
 name	size	layout_confidence	evidence	note
-AnimKey	0xc	supported	asm;func_80042cac/func_800431e8/func_8004352c	WIP field names; untouched ranges opaque
-AnimSlot	0x14	supported	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	WIP field names; untouched ranges opaque
+AnimKey	0xc	supported	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field names; untouched ranges opaque
+AnimSlot	0x14	supported	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field names; untouched ranges opaque
 CdExtent	0x8	supported	asm;cd_extent_read_into reads pos and size like a CdlFILE	WIP (game-c)
 CdFile	0xc	supported	asm;cd_archive_entry_extent/cd_archive_open 12-byte stride from +0x448	WIP (game-c)
 CdImageRequest	0xc	supported	asm;cd_request_service_stream/cd_archive_read_chunked RECT at CdRequest+0x4, sector counts at +0xc/+0xe	WIP (game-c)
@@ -10,10 +10,10 @@ CdRequest	0x2c	supported	asm;cd_request_advance 0x2c stride;CD event handlers an
 CdRequestUnion	0xc	supported	asm;sound and image requests share CdRequest+0x4..0xf	WIP (game-c)
 CdSoundRequest	0xc	supported	asm;band A sound accesses at CdRequest+0x4..0xf	WIP (game-c)
 CdState	0x4c0	supported	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
-ColorSum	0x8	supported	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	WIP field names; untouched ranges opaque
-Data80081c20	0x24	supported	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20	WIP field names; untouched ranges opaque
+ColorSum	0x8	supported	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field names; untouched ranges opaque
+Data80081c20	0x24	supported	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20	WIP field names; untouched ranges opaque
 Data80185da8	0x9d2c	supported	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
-Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
 Data8018fb3c	0x8868	supported	asm;game loop word-count clear;translate_active_world_positions records at +0x1f20;collision_cache_load_hit_bounds 24-byte records at +0 indexed by Object44.unk6	WIP (game-c)
 Data801983a8	0xda0	supported	asm;func_80060800 relates the three parts to one base (+0xc0, +0x1e0); func_8005f7bc/func_8005ffd0 copy 0x3c0 bytes from +0x1e0 with word-aligned block moves; WIP extent up to DAT_80199148	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
@@ -23,40 +23,40 @@ Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;player_learn_elemen
 Data801ba984	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
 Data801d4464	0x12054	supported	asm;game loop word-count clear;player_add_equipment_bonuses/player_set_equipment_slot 0x20-byte records at +0x11c14;player_update_collision_bounds heights +0x12018;band F collision results +0x12004..+0x1204c	WIP (game-d, game-f)
 Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
-Effect	0x18	supported	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field names; untouched ranges opaque
-EffectSpawn	0x10	supported	asm;func_80043a08 16-byte stride	WIP field names; untouched ranges opaque
+Effect	0x18	supported	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field names; untouched ranges opaque
+EffectSpawn	0x10	supported	asm;map_placed_expand_sources 16-byte stride	WIP field names; untouched ranges opaque
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
-MapCell	0xa	supported	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (collision_sample_map_layer_height, map_cell_add_layer_occupancy, func_8003be34)	WIP (game-h)
-MapLayer	0x5	supported	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses	WIP (game-h)
-MapPatch	0xa	supported	asm;func_800443c8 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends	WIP (game-k)
+MapCell	0xa	supported	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (collision_sample_map_layer_height, map_cell_add_layer_occupancy, render_map_cell_layers)	WIP (game-h)
+MapLayer	0x5	supported	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses	WIP (game-h)
+MapPatch	0xa	supported	asm;map_cell_apply_rotated_pattern 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends	WIP (game-k)
 MapRect	0x4	supported	asm;menu_draw_revealed_map_rects/map_reveal_visited_rects 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
 Matrix3x3	0x14	supported	asm;light_reset_records 20-byte lwl/lwr struct copies;light_refresh_record_rotations 20-byte stride passed to matrix_rotate_quarter_turns	WIP (game-h)
 MenuEntry	0x18	supported	asm;menu_collect_masked_item_rows 24-byte unaligned (lwl/lwr) record copies from DAT_8007f230	WIP (game-e)
 MenuFont	0xc	supported	asm;menu_blit_panel_sprite reads six s16 at +0..+10;menu_show_dialog_panel derives [1] from [5] - 48	WIP (game-e)
 MenuList	0x38	supported	asm;menu_list_init/menu_list_set_cursor field stores;0x38-byte locals of the list pages	WIP (game-e)
 MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
-ModelData	0x28	supported	asm;func_800431e8, func_8004352c, func_800437c8	WIP field names; untouched ranges opaque
-ModelFile	0x14	supported	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	WIP field names; untouched ranges opaque
-ModelPart	0x1c	supported	asm;func_80035ca4/func_80039428 28-byte parts at model data + 12: +0x04 vertex count (func_8004290c), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
+ModelData	0x28	supported	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count	WIP field names; untouched ranges opaque
+ModelFile	0x14	supported	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field names; untouched ranges opaque
+ModelPart	0x1c	supported	asm;render_enqueue_textured_tmd/render_enqueue_tmd_fixed_depth 28-byte parts at model data + 12: +0x04 vertex count (menu_render_item_model), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
 MovieRec	0x34	supported	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame;player_update_frame modes 7/8/9 fields +0x4..+0x2c	WIP (game-top)
 Object44	0x44	supported	asm;translate_active_world_positions 68-byte stride, 0x18c records	WIP (game-c)
-Object44Arg	0x10	supported	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0)	WIP (game-k)
-Object44Bytes	0x10	supported	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind	WIP (game-k)
+Object44Arg	0x10	supported	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0)	WIP (game-k)
+Object44Bytes	0x10	supported	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind	WIP (game-k)
 Object44Def	0x18	supported	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads	WIP (game-h)
-Object44DefArg	0xc	supported	asm;func_80047010 reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
-Object44DefBytes	0xc	supported	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefHalves	0xc	supported	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); func_80045ac8/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
+Object44DefArg	0xc	supported	asm;map_object_update_actions reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
+Object44DefBytes	0xc	supported	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefHalves	0xc	supported	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
 Object44DefSHalves	0xc	supported	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
-Object44Halves	0x10	supported	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40	WIP (game-k)
+Object44Halves	0x10	supported	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40	WIP (game-k)
 Object44Link	0x2	supported	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules)	WIP (fdat)
-Object44Model	0x10	supported	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e	WIP (render-tu)
-Object44Place	0x18	supported	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38	WIP (game-big)
-Object44SBytes	0x10	supported	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SHalves	0x10	supported	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44Sound	0x10	supported	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40	WIP (render-tu)
-Object44View	0x10	supported	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c	WIP (render-tu)
-Object44Words	0x10	supported	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40	WIP (game-k)
+Object44Model	0x10	supported	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e	WIP (render-tu)
+Object44Place	0x18	supported	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38	WIP (game-big)
+Object44SBytes	0x10	supported	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SHalves	0x10	supported	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44Sound	0x10	supported	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40	WIP (render-tu)
+Object44View	0x10	supported	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c	WIP (render-tu)
+Object44Words	0x10	supported	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40	WIP (game-k)
 Object4c	0x4c	supported	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
 Object4cArg	0x8	supported	asm;func_80053c84 stores Object4c+0x44..+0x4b as bytes, halfwords and words by id	WIP (game-sw)
 Object4cBytes	0x8	supported	asm;func_80053c84 sb to Object4c+0x44/+0x45/+0x48/+0x49 by id	WIP (game-sw)
@@ -69,7 +69,7 @@ Object78	0x78	supported	asm;DAT_80185da8+0x6a40 120-byte stride, 40 records (fun
 Object88	0x88	supported	asm;translate_active_world_positions 136-byte stride, 200 records;band F src/game/entity*.c field accesses;player_probe_view_target_and_vectors reads +0x2 and +0x28 of func_8004d3c4's result	WIP (game-c)
 Object88Place	0x10	supported	asm;func_800530f8 16-byte placement records	WIP (game-f)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
-PrimTag	0x4	supported	asm;func_80035ca4 copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code)	WIP (game-gte)
+PrimTag	0x4	supported	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code)	WIP (game-gte)
 Record04	0x4	supported	asm;func_80060800 4-byte stride at DAT_801983a8	WIP (game-i)
 Record06	0x6	supported	asm;func_80060800/func_800608ec 6-byte stride at DAT_801983a8+0xc0	WIP (game-i)
 Record08	0x8	supported	asm;func_8005c864 local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
@@ -80,25 +80,25 @@ Record18	0x18	supported	asm;player_learn_element_magic/player_set_primary_magic_
 Record20	0x20	supported	asm;player_add_equipment_bonuses/player_set_equipment_slot 32-byte stride at DAT_801d4464+0x11c14	WIP (game-d)
 Record30	0x30	supported	asm;light_reset_records 48-byte stride source records at DAT_80081c8c;light_interpolate_color_and_fog builds one on the stack	WIP (game-h)
 Record44	0x44	supported	asm;player_recalculate_combat_stats/player_equip_weapon/player_begin_weapon_attack 68-byte stride at DAT_801d37a4;player_update_frame +0x16/+0x18 periods	WIP (game-d)
-Record6c	0x6c	supported	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads	WIP (game-h)
+Record6c	0x6c	supported	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads	WIP (game-h)
 SaveData	0x5c00	supported	asm;func_8005f7bc/func_8005ffd0 copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it	WIP (game-top2)
 SaveHeader	0x280	supported	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
-ScratchCount	0x20	supported	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084	WIP (game-gte)
-ScratchDraw	0x20	supported	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (func_8003bb04) or the model counters (func_8004290c)	WIP (game-gte)
-ScratchLayer	0x18	supported	asm;func_8003be34 SVECTOR at 0x1f800100 handed to func_8003bb04 and the VECTOR origin at 0x1f800108	WIP (render-tu)
-ScratchLoad	0x1d0	supported	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers	WIP (game-h)
-ScratchMapWork	0x20	supported	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70	WIP (game-gte2)
+ScratchCount	0x20	supported	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084	WIP (game-gte)
+ScratchDraw	0x20	supported	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (render_map_cell_object) or the model counters (menu_render_item_model)	WIP (game-gte)
+ScratchLayer	0x18	supported	asm;render_map_cell_layers SVECTOR at 0x1f800100 handed to render_map_cell_object and the VECTOR origin at 0x1f800108	WIP (render-tu)
+ScratchLoad	0x1d0	supported	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers	WIP (game-h)
+ScratchMapWork	0x20	supported	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70	WIP (game-gte2)
 ScratchModelWork	0x20	supported	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054	WIP (game-gte2)
 ScratchPad	0x394	supported	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code	R3000 scratchpad at the fixed address 0x1f800000; WIP
-ScratchPhase	0x294	supported	asm;scratchpad 0x1f800100.. holds the map layer position/origin (func_8003be34), the object-draw state (func_80040ae4) or ScratchView while a frame is built	WIP (game-h)
+ScratchPhase	0x294	supported	asm;scratchpad 0x1f800100.. holds the map layer position/origin (render_map_cell_layers), the object-draw state (render_scene_and_update_resources) or ScratchView while a frame is built	WIP (game-h)
 ScratchView	0x294	supported	asm;view_build_visibility_grid/view_grid_occlude_walls_ascending/view_grid_occlude_walls_descending scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120	WIP (game-h)
 ScratchWork	0x20	supported	asm;scratchpad 0x1f800054..0x1f800074: model part view vs map layer view	WIP (game-gte2)
-ScreenTint	0x4	supported	asm;func_8003d4ac/func_8003d624	WIP field names; untouched ranges opaque
-ScreenVertex	0x8	supported	asm;func_8004290c/func_8003df50 gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;func_80035ca4 reads them by byte offset	WIP (game-gte)
+ScreenTint	0x4	supported	asm;func_8003d4ac/render_set_color_overlay	WIP field names; untouched ranges opaque
+ScreenVertex	0x8	supported	asm;menu_render_item_model/render_player_weapon gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;render_enqueue_textured_tmd reads them by byte offset	WIP (game-gte)
 ScrollRec	0x18	supported	asm;vram_scroll_find_free/vram_scroll_start/vram_scroll_update 24-byte stride at Data80199154+0x159c8	WIP (game-h)
 SoundBank	0x8	supported	asm;sound init/close loops (8-byte stride, 0xb3 entries)	WIP extent; fields band A does not touch are opaque
 SoundEffect	0xa	supported	asm;audio_key_on indexes se*10	WIP extent; fields band A does not touch are opaque
 SoundSlot	0x8	supported	asm;sound init and audio_acquire_vab_stream_slot (8-byte stride, 11 entries)	WIP extent; fields band A does not touch are opaque
 SoundState	0x1ae8	supported	asm;band A field accesses;game loop clears 0x6ba words	WIP field names
 SoundUnk5c8	0x4	supported	asm;sound init loop (4-byte stride, 10 entries)	WIP extent; fields band A does not touch are opaque
-SpriteRec	0x14	supported	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	WIP field names; untouched ranges opaque
+SpriteRec	0x14	supported	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field names; untouched ranges opaque

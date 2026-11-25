@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: model data registration, the model part renderers and the map
  * layer front ends with their ground renderers (WIP slice of the render
- * module; the primitive fix-up func_8003591c before it is not claimed yet).
+ * module; the primitive fix-up tmd_prepare_primitive_indices before it is not claimed yet).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -13,15 +13,15 @@
 
 /* Registers model data id (0..3) and fixes up its primitives. */
 ADDRESS(0x80035c44, 0x40)
-void func_80035c44(u16 id, u8 *data)
+void tmd_register(u16 id, u8 *data)
 {
     DAT_80199154.vertices = DAT_80199154.unk10148[id] = data;
-    func_8003591c(data);
+    tmd_prepare_primitive_indices(data);
 }
 
 /* Registers model data id without the fix-up. */
 ADDRESS(0x80035c84, 0x20)
-void func_80035c84(u16 id, u8 *data)
+void tmd_set_slot(u16 id, u8 *data)
 {
     DAT_80199154.unk10148[id] = data;
 }
@@ -33,7 +33,7 @@ void func_80035c84(u16 id, u8 *data)
  * its average depth plus depth. Returns early when the packet pool is full.
  */
 ADDRESS(0x80035ca4, 0xa04)
-void func_80035ca4(u16 id, s32 depth)
+void render_enqueue_textured_tmd(u16 id, s32 depth)
 {
     s32 n;
     ScreenVertex *v0;
@@ -221,7 +221,7 @@ void func_80035ca4(u16 id, s32 depth)
  * dropped.
  */
 ADDRESS(0x800366a8, 0x1544)
-void func_800366a8(u16 id)
+void render_enqueue_tmd_subdivided(u16 id)
 {
     s32 n;
     ScratchPad *scratch;
@@ -541,12 +541,12 @@ void func_800366a8(u16 id)
 }
 
 /*
- * Draws part id of the model in SCRATCH->model like func_80035ca4 with every
+ * Draws part id of the model in SCRATCH->model like render_enqueue_textured_tmd with every
  * face semi-transparent at blend rate mode (tpage bits 5-6); the packet and
  * its vertices are kept in the scratchpad while a face is filled.
  */
 ADDRESS(0x80037bec, 0xc58)
-void func_80037bec(u16 id, s32 depth, s32 mode)
+void render_enqueue_blended_tmd(u16 id, s32 depth, s32 mode)
 {
     s32 n;
     ScratchPad *scratch;
@@ -740,13 +740,13 @@ void func_80037bec(u16 id, s32 depth, s32 mode)
 }
 
 /*
- * Draws part id of the model in SCRATCH->model like func_80035ca4 for the
- * large models of func_8003f304: the depth-cue values are scaled down by
+ * Draws part id of the model in SCRATCH->model like render_enqueue_textured_tmd for the
+ * large models of render_distant_world_model: the depth-cue values are scaled down by
  * 3 - shift, and with shift set the faces go into the eight SCRATCH->ot2
  * entries by depth / 2048 instead of SCRATCH->ot. dist is unused.
  */
 ADDRESS(0x80038844, 0xbe4)
-void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
+void render_enqueue_distant_tmd(u16 id, s32 depth, s32 shift, s32 dist)
 {
     s32 n;
     ScreenVertex *v0;
@@ -946,7 +946,7 @@ void func_80038844(u16 id, s32 depth, s32 shift, s32 dist)
  * SCRATCH->ot2 at depth.
  */
 ADDRESS(0x80039428, 0x928)
-void func_80039428(u16 id, s16 depth, s32 shade)
+void render_enqueue_tmd_fixed_depth(u16 id, s16 depth, s32 shade)
 {
     s32 n;
     ScreenVertex *v0;
@@ -1117,14 +1117,14 @@ void func_80039428(u16 id, s16 depth, s32 shade)
 
 /*
  * Draws part id of the map layer model in SCRATCH->model (the far ground
- * renderer of func_8003bb04): projects its vertices with a fog value from
+ * renderer of render_map_cell_object): projects its vertices with a fog value from
  * Data80199154's fog range, then draws its faces as Gouraud-textured packets
  * lit from one normal and depth-cued per vertex. Faces behind (gte_nclip) or
  * with every vertex nearer than w.map.clip are dropped; flat-textured records
  * become GT3/GT4 packets.
  */
 ADDRESS(0x80039d50, 0xdb4)
-void func_80039d50(u16 id)
+void render_enqueue_map(u16 id)
 {
     s32 n;
     ScratchPad *scratch;
@@ -1370,12 +1370,12 @@ void func_80039d50(u16 id)
 
 /*
  * Draws part id of the map layer model in SCRATCH->model near the eye (the
- * near ground renderer of func_8003bb04): projects the vertices like
- * func_80039d50, then hands each front face to the LIBGTE subdivision
+ * near ground renderer of render_map_cell_object): projects the vertices like
+ * render_enqueue_map, then hands each front face to the LIBGTE subdivision
  * (RCpolyFT3/FT4/GT3), more finely the nearer it is.
  */
 ADDRESS(0x8003ab04, 0x1000)
-void func_8003ab04(u16 id)
+void render_enqueue_map_subdivided(u16 id)
 {
     s32 n;
     ScratchPad *scratch;
@@ -1627,7 +1627,7 @@ void func_8003ab04(u16 id)
  * layer->unk0.
  */
 ADDRESS(0x8003bb04, 0x330)
-void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
+void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 {
     Record6c *light;
     s32 turn;
@@ -1663,11 +1663,11 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
     if (flags & 4) {
         scratch->part = &((ModelData *)scratch->model)->parts[part];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
-        func_8003ab04(part);
+        render_enqueue_map_subdivided(part);
     } else {
         scratch->part = &((ModelData *)scratch->model)->parts[part];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
-        func_80039d50(part);
+        render_enqueue_map(part);
     }
 }
 
@@ -1677,7 +1677,7 @@ void func_8003bb04(MapLayer *layer, SVECTOR *pos, u8 flags)
  * $a3 and x/z to $t0/$t1 at entry (unattributed allocation residue).
  */
 ADDRESS(0x8003be34, 0x19c)
-void func_8003be34(s32 x, s32 z, s32 flags)
+void render_map_cell_layers(s32 x, s32 z, s32 flags)
 {
     SVECTOR *pos;
     VECTOR *origin;
@@ -1692,11 +1692,11 @@ void func_8003be34(s32 x, s32 z, s32 flags)
         pos->vx = (x << 11) - origin->vx + 1024;
         pos->vz = (z << 11) - origin->vz + 1024;
         pos->vy = (-cell->layer[0].unk1 << 7) - origin->vy;
-        func_8003bb04(&cell->layer[0], &SCRATCH->u.layer.unk100, flags);
+        render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.unk100, flags);
         kind = cell->layer[1].unk0;
         if (kind < 240) {
             pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
-            func_8003bb04(&cell->layer[1], &SCRATCH->u.layer.unk100, flags);
+            render_map_cell_object(&cell->layer[1], &SCRATCH->u.layer.unk100, flags);
         }
     } else {
         kind = cell->layer[1].unk0;
@@ -1704,7 +1704,7 @@ void func_8003be34(s32 x, s32 z, s32 flags)
             pos->vx = (x << 11) - origin->vx + 1024;
             pos->vz = (z << 11) - origin->vz + 1024;
             pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
-            func_8003bb04(&cell->layer[1], pos, flags);
+            render_map_cell_object(&cell->layer[1], pos, flags);
         }
     }
 }

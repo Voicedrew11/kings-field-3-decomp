@@ -91,9 +91,9 @@ void game_main_loop(void)
     repeat_store_word((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
     cd_initialize();
     display_initialize();
-    func_8003c9dc();
+    loading_screen_show();
     audio_initialize_runtime();
-    func_8004485c();
+    map_object_pool_reset();
     func_8004b8fc();
     func_8005bbf4();
     resource_initialize_game_assets();
@@ -134,14 +134,14 @@ void game_main_loop(void)
             SsSeqReplay(DAT_801b09fc.seq_id);
         }
     }
-    func_80046c00(0x82, 0x1000, 0x1000, 0);
+    render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
     cd_request_wait_idle();
-    func_80046c00(0x82, 0x1000, 0, -128);
+    render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
     DAT_8009c3f8 = 0;
     for (;;) {
         light_reset_records();
         render_reset_color_overlays();
-        func_80047010();
+        map_object_update_actions();
         player_update_frame();
         func_80052e5c();
         func_8005bc50();
@@ -154,7 +154,7 @@ void game_main_loop(void)
         light_refresh_record_rotations();
         cd_request_service_stream();
         cd_request_service_vab();
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
         exit = DAT_8009c3f8;
         if (exit == 0) {
             continue;

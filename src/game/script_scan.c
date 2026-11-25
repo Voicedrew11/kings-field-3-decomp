@@ -31,10 +31,10 @@ void func_8005c0d4(Object88 *obj, u8 anim, u16 time, s32 target, u16 step)
         obj->unk18 = time;
         while (!angle_within_tolerance(obj->unk18, low, half)) {
             obj->unk18 = (s + obj->unk18) & 0xfff;
-            func_800422b8(NULL, NULL);
+            render_game_frame(NULL, NULL);
         }
         obj->unk18 = low & 0xfff;
-        func_800422b8(NULL, NULL);
+        render_game_frame(NULL, NULL);
     }
 }
 

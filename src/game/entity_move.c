@@ -339,7 +339,7 @@ s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out)
     SVECTOR rotation;
     SVECTOR v;
 
-    if (func_8004352c(obj->unk1 + 128, obj->unkc, obj->unk18, vertex, &v)) {
+    if (animation_sample_vertex(obj->unk1 + 128, obj->unkc, obj->unk18, vertex, &v)) {
         v.vx = 0;
         v.vy = -obj->unk1e >> 1;
         v.vz = -obj->unk1c;

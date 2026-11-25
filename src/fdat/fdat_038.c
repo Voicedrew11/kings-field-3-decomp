@@ -57,7 +57,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
     Object44 *link;
     Object44Def *def;
 
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
@@ -66,22 +66,22 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
-                        func_80041eec(obj->arg.b.unk3f);
+                        notify_enqueue(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
-                        func_80041eec(0x1a);
+                        notify_enqueue(0x1a);
                     } else if (obj->unk6 == 0xb7) {
-                        func_80041eec(0x1e);
+                        notify_enqueue(0x1e);
                     } else if (obj->unk6 == 0x132) {
-                        func_80041eec(0x1f);
+                        notify_enqueue(0x1f);
                     } else if (obj->unk6 == 0x133) {
-                        func_80041eec(0x20);
+                        notify_enqueue(0x20);
                     } else if (obj->unk6 == 0xf5) {
-                        func_80041eec(0xe);
+                        notify_enqueue(0xe);
                     } else if (obj->unk6 == 0xba) {
-                        func_80041eec(0x22);
+                        notify_enqueue(0x22);
                     } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
-                        func_80041eec(8);
+                        notify_enqueue(8);
                     }
                 }
             } else {
@@ -138,19 +138,19 @@ void func_801e866c(Object88 *obj)
     case 50:
         if (DAT_801ba984.unk32[0x10] == 0) {
             DAT_801ba984.unk32[0x10] = 1;
-            func_800463bc(0x64);
+            map_object_apply_marker_signal(0x64);
         }
         break;
     case 51:
         if (DAT_801ba984.unk32[0x11] == 0) {
             DAT_801ba984.unk32[0x11] = 1;
-            func_800463bc(0x65);
+            map_object_apply_marker_signal(0x65);
         }
         break;
     case 52:
         if (DAT_801ba984.unk32[0x12] == 0) {
             DAT_801ba984.unk32[0x12] = 1;
-            func_800463bc(0x66);
+            map_object_apply_marker_signal(0x66);
         }
         break;
     }

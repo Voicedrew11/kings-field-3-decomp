@@ -94,7 +94,7 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
     Object44 *link;
     Object44Def *def;
 
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
@@ -103,24 +103,24 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
-                        func_80041eec(obj->arg.b.unk3f);
+                        notify_enqueue(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
-                        func_80041eec(0x1a);
+                        notify_enqueue(0x1a);
                     } else if (obj->unk6 == 0xb7) {
-                        func_80041eec(0x1e);
+                        notify_enqueue(0x1e);
                     } else if (obj->unk6 == 0x12d) {
-                        func_80041eec(0x1f);
+                        notify_enqueue(0x1f);
                     } else if (obj->unk6 == 0x12e) {
-                        func_80041eec(0x20);
+                        notify_enqueue(0x20);
                     } else if (obj->unk6 == 0xf5) {
-                        func_80041eec(0xe);
+                        notify_enqueue(0xe);
                     } else if (obj->unk6 == 0xba || obj->unk6 == 303 || obj->unk6 == 304) {
-                        func_80041eec(0x22);
+                        notify_enqueue(0x22);
                     } else if (obj->unk6 == 0x131) {
-                        func_80041eec(0x21);
+                        notify_enqueue(0x21);
                     } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
-                        func_80041eec(8);
+                        notify_enqueue(8);
                     }
                 }
             } else {
@@ -163,7 +163,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x7b || DAT_801ba984.unke[0xf] == 1) {
         return;
     }
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
         if (i != 0x8d) {
             continue;
         }
@@ -181,7 +181,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
             cd_request_service_vab();
             cd_request_service_stream();
             player_get_camera_pose(&at, &facing);
-            func_800422b8(&at, &facing);
+            render_game_frame(&at, &facing);
         }
         obj->unk5 = 0x32;
         obj->unk2 = 5;
@@ -198,7 +198,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
             cd_request_service_vab();
             cd_request_service_stream();
             player_get_camera_pose(&at, &facing);
-            func_800422b8(&at, &facing);
+            render_game_frame(&at, &facing);
         }
         obj->unk6 = 0xff;
         obj->unk4 = 0xff;
@@ -207,7 +207,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
         k = 74;
         if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
             DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
-            func_80041eec(0x18);
+            notify_enqueue(0x18);
         }
         DAT_801ba984.unke[0xf] = 1;
         DAT_801ba984.unk0 = 1;
@@ -238,13 +238,13 @@ void func_801e89b4(Object44 *obj)
         DAT_8018fb3c.objects[115].pos.vx = obj->pos.vx + 1023;
         break;
     case 10:
-        if (func_80046884(0x37, 0xc, 3, 3, 0x8000) != 0) {
+        if (player_camera_within_map_region(0x37, 0xc, 3, 3, 0x8000) != 0) {
             if (DAT_801b24e4.unk10a != 0) {
-                func_800445b8(2, 0x4a, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
+                map_cell_copy_rotated_fields(2, 0x4a, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
             }
         } else {
             DAT_801b24e4.unk10a = 0;
-            func_800445b8(2, 0x4d, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4d, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
         }
         break;
     }
@@ -308,7 +308,7 @@ void func_801e8b30(u8 id)
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
     obj = &DAT_8018fb3c.objects[148];
@@ -323,7 +323,7 @@ void func_801e8b30(u8 id)
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
     func_800608ec(10, 0);

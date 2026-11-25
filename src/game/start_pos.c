@@ -116,8 +116,8 @@ void func_8005c308(Object88 *obj)
             if (def->unk0 != 0x2b) {
                 func_800608ec(def->unk0, *p);
             }
-            func_800422b8(NULL, NULL);
-            func_800441d4(7, *(u16 *)(script + 12) + *p);
+            render_game_frame(NULL, NULL);
+            menu_show_transition_image(7, *(u16 *)(script + 12) + *p);
             if ((DAT_801b24e4.unk178 & DAT_80081868[7]) && script[18] == 0xff) {
                 repeat++;
             }
@@ -145,8 +145,8 @@ end:
             player_render_frame_and_release_pool();
             n = menu_intellectual_choose_item();
             if (n != -1) {
-                func_800422b8(NULL, NULL);
-                func_800441d4(6, n + 488);
+                render_game_frame(NULL, NULL);
+                menu_show_transition_image(6, n + 488);
             }
         }
         break;
@@ -174,7 +174,7 @@ void func_8005c7e8(Object44 *obj, s32 id)
     Object44 *made;
     s32 i;
 
-    made = func_80046034(0x17c, 0x10, -1);
+    made = map_object_effect_pool_acquire(0x17c, 0x10, -1);
     obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 124;
     made->unk6 = id;
     made->arg.b.unk38 = 0;
@@ -209,7 +209,7 @@ void func_8005c864(s32 n)
         if (rec->area == 0xff) {
             return;
         }
-        func_80046c00(1, 0, 0x1000, 0x100);
+        render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
         func_8004b794();
     }
     do {
@@ -240,10 +240,10 @@ void func_8005c864(s32 n)
             DAT_801b24e4.unk12c.vz = 0;
         DAT_801b24e4.pos.vz = z + 2000;
     } else {
-        func_80046c00(1, 0x1000, 0x1000, 0);
+        render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
         cd_request_wait_idle();
-        func_80046c00(1, 0x1000, 0, -256);
-        func_8003d624(0xff, 0, 0, 0);
+        render_frames_with_color_overlay(1, 0x1000, 0, -256);
+        render_set_color_overlay(0xff, 0, 0, 0);
     }
     if (n != 13) {
         resource_request_transition(0xff, 0xff, 0xff, rec->area3, rec->area4, 0x7f, 0x7f, 0x7f);
@@ -304,7 +304,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
-                    func_80041eec(element + 18);
+                    notify_enqueue(element + 18);
                 }
             }
         }
@@ -320,7 +320,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
-                    func_80041eec(13);
+                    notify_enqueue(13);
                 }
             }
         }
@@ -334,7 +334,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 player_recalculate_combat_stats();
                 if (DAT_801ba984.unk0 == 0) {
                     DAT_801ba984.unk0 = 1;
-                    func_80041eec(1);
+                    notify_enqueue(1);
                 }
             }
         }
@@ -348,14 +348,14 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
         player_recalculate_combat_stats();
         if (DAT_801ba984.unk0 == 0) {
             DAT_801ba984.unk0 = 1;
-            func_80041eec(2);
+            notify_enqueue(2);
         }
         break;
     case 128:
         if (DAT_8018fad4.area[0] == 6) {
             k = 0;
             for (;;) {
-                k = func_80045c7c(k, pos, 800, 1700, angle->vy, 512);
+                k = map_object_find_interaction_target(k, pos, 800, 1700, angle->vy, 512);
                 if (k == -1) {
                     break;
                 }
@@ -371,7 +371,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         func_80052e5c();
                         cd_request_service_vab();
                         cd_request_service_stream();
-                        func_800422b8(NULL, NULL);
+                        render_game_frame(NULL, NULL);
                     }
                     cd_request_wait_idle();
                     o88->unk15 = -1;
@@ -391,7 +391,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         }
                         cd_request_service_vab();
                         cd_request_service_stream();
-                        func_800422b8(NULL, NULL);
+                        render_game_frame(NULL, NULL);
                     }
                     o88->unk16 = 0x800;
                     o88->unk13 = 0;
@@ -414,7 +414,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         o88b->unk18 = 0;
                         cd_request_service_vab();
                         cd_request_service_stream();
-                        func_800422b8(NULL, NULL);
+                        render_game_frame(NULL, NULL);
                     }
                     cd_request_wait_idle();
                     o88b->unk15 = -1;
@@ -434,7 +434,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         }
                         cd_request_service_vab();
                         cd_request_service_stream();
-                        func_800422b8(NULL, NULL);
+                        render_game_frame(NULL, NULL);
                     }
                     o88b->unk16 = 0x800;
                     o88b->unk13 = 0;
@@ -462,11 +462,11 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
     case 144:
         i = 0;
         for (;;) {
-            i = func_80045c7c(i, pos, 800, 1700, angle->vy, 512);
+            i = map_object_find_interaction_target(i, pos, 800, 1700, angle->vy, 512);
             if (i == -1) {
                 goto done;
             }
-            switch (func_80046608(&DAT_8018fb3c.objects[i], id)) {
+            switch (map_object_check_and_consume_marker(&DAT_8018fb3c.objects[i], id)) {
             case 0:
                 break;
             case 1:
@@ -474,18 +474,18 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 DAT_801ba984.unk0 = 1;
                 goto done;
             case 3:
-                func_80041eec(7);
+                notify_enqueue(7);
                 DAT_801ba984.unk0 = 1;
                 goto done;
             case 4:
-                func_80041eec(7);
+                notify_enqueue(7);
                 DAT_801ba984.unk0 = 1;
                 goto done;
             }
             i++;
         }
     case 141:
-        i = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+        i = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
         if (i == -1) {
             break;
         }
@@ -498,15 +498,15 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                 func_8005d7f8(id);
                 func_8005c7e8(made, id);
             }
-        } else if (func_80046608(made, id) == 3) {
-            func_80041eec(7);
+        } else if (map_object_check_and_consume_marker(made, id) == 3) {
+            notify_enqueue(7);
             DAT_801ba984.unk0 = 1;
         }
         break;
     case 136:
         i = 0;
         for (;;) {
-            i = func_80045c7c(i, pos, 800, 1700, angle->vy, 512);
+            i = map_object_find_interaction_target(i, pos, 800, 1700, angle->vy, 512);
             if (i == -1) {
                 break;
             }
@@ -525,34 +525,34 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                     obj->unk8 = 0;
                     DAT_801ba984.unk0 = 1;
                     func_8005d7f8(id);
-                    made = func_80046034(350, 10, DAT_8018fb3c.unk885e);
-                    func_800448b8(made);
+                    made = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+                    map_object_reset(made);
                     made->arg.h.unk3c = DAT_8018fb3c.unk885e++;
                     made->unk6 = id;
                     made->arg.b.unk38 = 0;
                     obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 94;
                 }
-            } else if (func_80046608(obj, id) == 3) {
-                func_80041eec(7);
+            } else if (map_object_check_and_consume_marker(obj, id) == 3) {
+                notify_enqueue(7);
                 DAT_801ba984.unk0 = 1;
             }
             i++;
         }
         break;
     case 118:
-        i = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+        i = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
         if (i == -1) {
             break;
         }
         if (DAT_8018fb3c.objects[i].unk6 == 0xfe) {
             if (func_8005d898(0x77) == 0) {
-                func_80041eec(12);
+                notify_enqueue(12);
                 func_8005d7f8(id);
             }
             DAT_801ba984.unk0 = 1;
         } else if (DAT_8018fb3c.objects[i].unk6 == 0xfb) {
             if (func_8005d898(0x78) == 0) {
-                func_80041eec(12);
+                notify_enqueue(12);
                 func_8005d7f8(id);
             }
             DAT_801ba984.unk0 = 1;
@@ -611,12 +611,12 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
         }
         target = func_8004d3c4(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
         if (target != NULL && target->unk3 == flag) {
-            func_800441d4(6, target->unk1 + 270);
+            menu_show_transition_image(6, target->unk1 + 270);
             DAT_801ba984.unk0 = 1;
         } else {
-            n = func_80045c7c(0, pos, 800, 1700, angle->vy, 512);
+            n = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
             if (n != -1 && DAT_8018fb3c.objects[n].unk0 != 0 && n == 11 && DAT_8018fad4.area[0] == 17) {
-                func_800441d4(6, 305);
+                menu_show_transition_image(6, 305);
                 DAT_801ba984.unk0 = 1;
             }
         }
@@ -624,9 +624,10 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
             obj = DAT_8018fb3c.objects;
             for (i = 395; i != -1; i--, obj++) {
                 if (DAT_8018fb3c.defs[obj->unk6].unk0 == 0xe2 && obj->arg.b.unk40 == flag
-                    && func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                                     0x8000) != 0) {
-                    func_800441d4(6, obj->arg.h.unk3a + 810);
+                    && player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                       obj->arg.b.unk39,
+                                                       0x8000) != 0) {
+                    menu_show_transition_image(6, obj->arg.h.unk3a + 810);
                     DAT_801ba984.unk0 = 1;
                     break;
                 }
@@ -637,7 +638,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
 done:
     ((void (*)(VECTOR *, SVECTOR *, s32))DAT_8018fad4.handlers[2])(pos, angle, id);
     if (DAT_801ba984.unk0 == 0) {
-        func_80041eec(10);
+        notify_enqueue(10);
     }
     player_clear_motion();
 }

@@ -84,11 +84,11 @@ void func_801e8644(VECTOR *pos, SVECTOR *angle, s32 item)
     if (DAT_801ba984.unk2c[4] != 0) {
         return;
     }
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
         if (i == 0x34) {
             func_8005d948(0x200, 0, 0, 0, 0x80, 0x80, 200);
             func_8005d948(0x200, 0x80, 0x80, 200, 0, 0, 0);
-            func_8003da10(0, 0, 0, 0, 1);
+            set_accumulated_color_overlay(0, 0, 0, 0, 1);
             DAT_801ba984.unk2c[4] = 1;
             func_8005d7f8(item);
             DAT_801ba984.unk0 = 1;

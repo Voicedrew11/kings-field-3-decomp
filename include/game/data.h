@@ -243,7 +243,7 @@ typedef struct Record20 {
 } Record20;
 
 /*
- * One layer of a map cell; func_8003bb04 draws one (field names WIP).
+ * One layer of a map cell; render_map_cell_object draws one (field names WIP).
  */
 typedef struct MapLayer {
     u8 unk0;        /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
@@ -311,7 +311,7 @@ typedef struct MovieRec {
     s16 unk1c;      /* +0x1c..+0x20: view angles after the movie (mode 9), -1 to keep */
     s16 unk1e;
     s16 unk20;
-    s16 unk22;      /* +0x22: func_80046c00 tint mode around the movie */
+    s16 unk22;      /* +0x22: render_frames_with_color_overlay tint mode around the movie */
     s32 unk24;      /* +0x24..+0x2c: position after it, -1 to keep */
     s32 unk28;
     s32 unk2c;
@@ -338,14 +338,14 @@ typedef struct Data801e7edc {
  */
 /* Object44 +0x3a as the FDAT module handlers read it (WIP). */
 typedef union Object44Link {
-    u16 index;      /* slot 0: a linked object, 0xffff for none; kind 7 (func_80044c34) */
-    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value; func_80044900 reads
+    u16 index;      /* slot 0: a linked object, 0xffff for none; kind 7 (map_object_refresh_cell_markers) */
+    u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value; map_object_set_property reads
                      * bytes[0] and bytes[1] as angles */
 } Object44Link;
 
 /*
  * Per-kind state of an Object44 from +0x34 (WIP views, by Object44.unk4): the
- * GAME and FDAT code read it as bytes or halfwords by kind; func_8004485c
+ * GAME and FDAT code read it as bytes or halfwords by kind; map_object_pool_reset
  * clears the first three words.
  */
 typedef struct Object44Bytes {
@@ -356,7 +356,7 @@ typedef struct Object44Bytes {
     u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
     u8 unk3d[2];
     u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
-    u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (func_80046914); FDAT slot 0
+    u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (map_object_step_offset_motion); FDAT slot 0
                      * copies it to the linked object's unk0 */
     u8 unk41[3];
 } Object44Bytes;
@@ -365,10 +365,10 @@ typedef struct Object44Halves {
     u16 unk34[2];
     u16 unk38;
     u16 unk3a;
-    u16 unk3c;      /* +0x3c: age stamp func_80046034 replaces the oldest by */
+    u16 unk3c;      /* +0x3c: age stamp map_object_effect_pool_acquire replaces the oldest by */
     u16 unk3e;      /* +0x3e: kind 0x1f: delay in units of 6 VSyncs; kinds 0/0x1b: the
                      * other wing's index, 0xffff for none */
-    u16 unk40;      /* +0x40: kind 0x70: index of its driver (func_80046914); kinds 0/1/0x1b:
+    u16 unk40;      /* +0x40: kind 0x70: index of its driver (map_object_step_offset_motion); kinds 0/1/0x1b:
                      * frames since the door started opening */
     u16 unk42;      /* +0x42: kinds 0/1/0x1b: yaw when shut */
 } Object44Halves;
@@ -380,7 +380,7 @@ typedef struct Object44SBytes {
     s8 unk39;
     s8 unk3a;
     s8 unk3b;
-    s8 unk3c;       /* +0x3c: kind 0xea: x shift in map cells (func_80046cb0) */
+    s8 unk3c;       /* +0x3c: kind 0xea: x shift in map cells (translate_player_effects_and_actors) */
     s8 unk3d;       /* +0x3d: kind 0xea: z shift */
     s8 unk3e;
     s8 unk3f;
@@ -395,7 +395,7 @@ typedef struct Object44SHalves {
     s16 unk38;
     s16 unk3a;
     s16 unk3c;
-    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (func_800460bc, func_80046294) */
+    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect, map_object_spawn_scattered_effect) */
     s16 unk40;      /* +0x40: kind 6: turn speed (angle_velocity_step) */
     s16 unk42;
 } Object44SHalves;
@@ -407,9 +407,9 @@ typedef struct Object44Words {
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
 } Object44Words;
 
-/* Kinds func_80040ae4 draws with a model (0xf2 and the default kinds): pose slot first. */
+/* Kinds render_scene_and_update_resources draws with a model (0xf2 and the default kinds): pose slot first. */
 typedef struct Object44Model {
-    struct AnimSlot *unk34; /* +0x34: pose slot (func_800431e8) */
+    struct AnimSlot *unk34; /* +0x34: pose slot (animation_prepare_asset_vertices) */
     u8 unk38;       /* +0x38: kind 0xf2: x range in map cells it is drawn from */
     u8 unk39;       /* +0x39: z range */
     s16 unk3a;      /* +0x3a: kind 0xf2: x offset of the drawn position in map cells */
@@ -418,7 +418,7 @@ typedef struct Object44Model {
     u8 unk3f[5];
 } Object44Model;
 
-/* Kind 0xf0, drawn in view space by func_800400ac. */
+/* Kind 0xf0, drawn in view space by render_animated_object. */
 typedef struct Object44View {
     struct AnimSlot *unk34; /* +0x34: pose slot */
     u8 unk38;       /* +0x38: x range in map cells it is drawn from */
@@ -466,7 +466,7 @@ typedef struct Object44 {
     u16 unkc;       /* +0x0c: reach below its position (collision tests) */
     s16 unke;
     u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; light
-                     * blend toward light2 (func_8003e34c) */
+                     * blend toward light2 (render_world_model) */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (func_8005bee0) */
@@ -476,15 +476,15 @@ typedef struct Object44 {
 
 /*
  * Object44Def +0x0c..+0x17 by type (WIP views): most types read bytes; the
- * moving types 0x51, 0x52 and 0x55 (func_80047010) and the collision tests read
+ * moving types 0x51, 0x52 and 0x55 (map_object_update_actions) and the collision tests read
  * +0x0c..+0x11 as halfwords.
  */
 typedef struct Object44DefBytes {
     u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none; kind 0x51: first
-                     * vertex func_80046760 tests */
+                     * vertex map_object_sample_world_vertex tests */
     u8 unkd;        /* +0x0d: kind 0x51: second vertex */
     u8 unke;
-    u8 unkf;        /* +0x0f: sound effect when it starts moving (func_8004482c) */
+    u8 unkf;        /* +0x0f: sound effect when it starts moving (map_object_play_spatial_sound) */
     u8 unk10[2];
     u8 unk12[4];    /* +0x12: kinds 0x51/0x52/0x55: passed to func_800533e8 on a hit */
     u8 unk16;       /* +0x16: kinds 0x51/0x52/0x55: sound effect (- 496), 0xff for none */
@@ -492,7 +492,7 @@ typedef struct Object44DefBytes {
 } Object44DefBytes;
 
 typedef struct Object44DefHalves {
-    u16 unkc;       /* +0x0c: kinds 0x52/0x55: vertex func_80046760 tests */
+    u16 unkc;       /* +0x0c: kinds 0x52/0x55: vertex map_object_sample_world_vertex tests */
     u16 unke;       /* +0x0e: collision radius */
     u16 unk10;      /* +0x10: collision height */
     u8 unk12[6];
@@ -514,12 +514,12 @@ typedef union Object44DefArg {
 
 /* The 0x18-byte records Object44.unk6 indexes (WIP). */
 typedef struct Object44Def {
-    u8 unk0;        /* +0x00: type (func_80044900) */
-    u8 unk1;        /* +0x01: picks the kind func_800460bc gives a spawned record */
+    u8 unk0;        /* +0x00: type (map_object_set_property) */
+    u8 unk1;        /* +0x01: picks the kind map_object_spawn_effect gives a spawned record */
     u8 unk2;
     u8 unk3;        /* +0x03: Object44.unk3 flags at set-up */
     u16 unk4;       /* +0x04: radius */
-    u16 unk6;       /* +0x06: radius of the turned kinds (func_80045c7c) */
+    u16 unk6;       /* +0x06: radius of the turned kinds (map_object_find_interaction_target) */
     u16 unk8;       /* +0x08: height */
     u16 unka;
     Object44DefArg arg; /* +0x0c */
@@ -599,14 +599,14 @@ typedef struct Object4c {
     u8 unkd;
     u16 unke;
     s16 unk10;
-    s16 unk12;      /* +0x12: light blend toward light2 (func_8003e34c); id 6 compares it signed */
+    s16 unk12;      /* +0x12: light blend toward light2 (render_world_model); id 6 compares it signed */
     u16 unk14;      /* +0x14: animation time */
     u8 unk16[2];
     VECTOR pos;     /* +0x18 */
     SVECTOR angle;  /* +0x28 */
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
-    struct AnimSlot *unk40; /* +0x40: pose slot (func_800431e8) */
+    struct AnimSlot *unk40; /* +0x40: pose slot (animation_prepare_asset_vertices) */
     Object4cArg arg; /* +0x44: per-id payload (func_80053c84) */
 } Object4c;
 
@@ -631,8 +631,8 @@ typedef struct Object88 {
     u8 unk11;
     u8 unk12;
     u8 unk13;
-    u8 unk14;       /* +0x14: second light record (func_8003e34c light2) */
-    s8 unk15;       /* +0x15: depth offset (func_8003e34c) */
+    u8 unk14;       /* +0x14: second light record (render_world_model light2) */
+    s8 unk15;       /* +0x15: depth offset (render_world_model) */
     s16 unk16;      /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
     u16 unk18;      /* +0x18: animation time */
     u16 unk1a;
@@ -650,7 +650,7 @@ typedef struct Object88 {
     SVECTOR vel;    /* +0x50 */
     s16 unk58;
     u8 unk5a[2];
-    struct AnimSlot *unk5c; /* +0x5c: pose slot (func_800431e8) */
+    struct AnimSlot *unk5c; /* +0x5c: pose slot (animation_prepare_asset_vertices) */
     u8 *unk60;      /* +0x60: running script record */
     s16 unk64;      /* +0x64: FDAT slot 17 stores the angle to the player */
     s16 unk66;
@@ -693,7 +693,7 @@ typedef struct Object78 {
     u16 unk1c;
     s16 unk1e;      /* +0x1e: passed to player_add_experience when the record dies */
     u16 unk20[8];   /* +0x20: resistances to the eight attack stats (func_8004c668) */
-    u16 unk30;      /* +0x30: drop id (func_80046294) when script 3 ends */
+    u16 unk30;      /* +0x30: drop id (map_object_spawn_scattered_effect) when script 3 ends */
     u16 unk32;      /* +0x32: scale */
     u32 unk34;      /* +0x34: flags copied to Object88.unk28 */
     u8 *scripts[16]; /* +0x38: script records, the first byte their id; 0 ends */
@@ -790,7 +790,7 @@ typedef s32 (*FdatHandler)();
 
 /*
  * Area state resource_initialize_game_assets and resource_run_initial_transition set up (WIP). Only the scene
- * module, the render module (func_80040ae4 reads step lhu + sll) and the
+ * module, the render module (render_scene_and_update_resources reads step lhu + sll) and the
  * player frame (player_update_frame reloads it for each of five compares) see the
  * step the CD callbacks set as volatile: the menu module's accesses to the
  * same object show none of that (a volatile member changes how GCC 2.6
@@ -806,13 +806,13 @@ typedef struct Data8018fad4 {
     u16 loading;    /* +0x00: resource_run_initial_transition steps resource_advance_transition until it clears */
     SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks resource_transition_set_phase_1.. set it */
     u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
-                     * the model id bank (func_80040568) */
+                     * the model id bank (map_object_asset_index) */
     u8 unk9;
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
     u8 unk15;       /* +0x15: set once the loader shifted the origin (resource_advance_transition) */
-    u8 unk16;       /* +0x16: func_8003bb04 limits the parts drawn while loading */
+    u8 unk16;       /* +0x16: render_map_cell_object limits the parts drawn while loading */
     u8 unk17;       /* +0x17 */
     u8 unk18;
     s8 shift[3];    /* +0x19: 0x7f is no shift */
@@ -827,8 +827,8 @@ typedef struct Data8018fb3c {
     Object44Def defs[332];  /* WIP count: fills the space before objects */
     Object44 objects[0x18c];
     u8 unk8850[4];
-    Object44Def *unk8854;   /* +0x8854: the def of unk8858 (func_80047010) */
-    Object44 *unk8858;      /* +0x8858: the record func_80045ac8 does not test; the object
+    Object44Def *unk8854;   /* +0x8854: the def of unk8858 (map_object_update_actions) */
+    Object44 *unk8858;      /* +0x8858: the record map_object_find_collision_at_point does not test; the object
                              * FDAT slot 9 handlers test */
     u8 unk885c[2];
     u16 unk885e;

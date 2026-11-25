@@ -41,7 +41,7 @@ void player_select_magic_action(s32 id)
         cost >>= 1;
     }
     if (DAT_801b24e4.unk1c < cost) {
-        func_80041eec(9);
+        notify_enqueue(9);
         return;
     }
     if (DAT_801b24e4.unkcb == 0x1f) {

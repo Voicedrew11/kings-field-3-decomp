@@ -97,7 +97,7 @@ void func_801e85e4(Object88 *obj)
         DAT_801b09fc.seq_playing = 0;
     }
     DAT_8009c3f8 = 3;
-    func_80046c00(0x82, 0, 0x1000, 0x40);
+    render_frames_with_color_overlay(0x82, 0, 0x1000, 0x40);
 }
 
 ADDRESS(0x801e8744, 0x8)

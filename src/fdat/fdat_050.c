@@ -108,9 +108,9 @@ ADDRESS(0x801e85f8, 0x70)
 void func_801e85f8(void)
 {
     if (DAT_801ba984.unk32[0x24] == 0) {
-        func_800445b8(2, 0x13, 0, 12, 1, 1, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x13, 0, 12, 1, 1, 3, 0, 0x2f);
     } else {
-        func_800445b8(2, 0x14, 0, 12, 1, 1, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x14, 0, 12, 1, 1, 3, 0, 0x2f);
     }
     DAT_801ba984.unk84[5] = 0x10;
 }

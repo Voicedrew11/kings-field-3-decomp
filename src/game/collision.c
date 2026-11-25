@@ -816,7 +816,7 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
             DAT_801d4464.unk12028 = -1;
         }
         if (mask & 0x20) {
-            DAT_801d4464.unk1202c = func_80045ac8(x, y, z, radius, shape);
+            DAT_801d4464.unk1202c = map_object_find_collision_at_point(x, y, z, radius, shape);
             if (DAT_801d4464.unk1202c != -1) {
                 hits |= 0x20;
             }

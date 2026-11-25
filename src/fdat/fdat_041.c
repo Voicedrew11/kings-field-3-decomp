@@ -154,7 +154,7 @@ void func_801e86d8(u8 id)
             cd_request_service_vab();
             cd_request_service_stream();
             player_get_camera_pose(&pos, &angle);
-            func_800422b8(&pos, &angle);
+            render_game_frame(&pos, &angle);
         }
         obj->unk6 = 0xff;
         obj = &DAT_8018fb3c.objects[86];
@@ -169,7 +169,7 @@ void func_801e86d8(u8 id)
             cd_request_service_vab();
             cd_request_service_stream();
             player_get_camera_pose(&pos, &angle);
-            func_800422b8(&pos, &angle);
+            render_game_frame(&pos, &angle);
         }
         obj->unk6 = 0xff;
         func_800608ec(0xb, 0);

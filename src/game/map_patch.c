@@ -2,7 +2,7 @@
  * GAME.EXE: map cell patches (WIP module): records that rewrite the layer
  * bytes of map cells around a point, turned by an angle, and a block copy
  * of cells to a turned destination. Callers: the Object44 set-up
- * func_80044d9c and the big switch func_80047010.
+ * map_object_initialize_from_placements and the big switch map_object_update_actions.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -18,7 +18,7 @@
  * value other than 0xff replaces bits 0-6 of unk4 on both layers.
  */
 ADDRESS(0x800443c8, 0x1f0)
-void func_800443c8(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags)
+void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags)
 {
     s32 c;
     s32 s;
@@ -70,7 +70,8 @@ void func_800443c8(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s
  * (bits 0-1 of unk2 are turned with the block). flags bit 1 enables the copy.
  */
 ADDRESS(0x800445b8, 0x274)
-void func_800445b8(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle, s32 mask)
+void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
+                                  s32 mask)
 {
     s32 turn;
     s32 col;

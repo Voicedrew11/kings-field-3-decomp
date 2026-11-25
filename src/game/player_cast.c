@@ -29,7 +29,7 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
     rot.vx = DAT_801b24e4.unk124.vx - DAT_801b24e4.unkb0->unk3c;
     rot.vy = DAT_801b24e4.unk124.vy - DAT_801b24e4.unkb0->unk3e;
     rot.vz = DAT_801b24e4.unk124.vz + DAT_801b24e4.unkb0->unk40;
-    func_8004352c(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, vertex, &v);
+    animation_sample_vertex(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, vertex, &v);
     v.vx -= DAT_801b24e4.unkb0->unk34;
     v.vy += DAT_801b24e4.unkb0->unk36;
     v.vz -= DAT_801b24e4.unkb0->unk38;
@@ -215,7 +215,7 @@ void player_update_weapon_attack(void)
                 rot.vx = DAT_801b24e4.unk124.vx - w->unk3c;
                 rot.vy = DAT_801b24e4.unk124.vy - w->unk3e;
                 rot.vz = DAT_801b24e4.unk124.vz + w->unk40;
-                func_8004352c(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, w->unk3a, &v);
+                animation_sample_vertex(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, w->unk3a, &v);
                 v.vx -= w->unk34;
                 v.vy += w->unk36;
                 v.vz -= w->unk38;
@@ -223,7 +223,7 @@ void player_update_weapon_attack(void)
                 arrow->pos.vx = DAT_801b24e4.pos.vx + a.vx;
                 arrow->pos.vz = DAT_801b24e4.pos.vz + a.vz;
                 arrow->pos.vy = DAT_801b24e4.pos.vy + a.vy + DAT_801b24e4.unk16c + DAT_801b24e4.unk170 - 1600;
-                func_8004352c(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, w->unk42, &v);
+                animation_sample_vertex(0x20, DAT_801b24e4.unkca, DAT_801b24e4.unkc0, w->unk42, &v);
                 v.vx -= w->unk34;
                 v.vy += w->unk36;
                 v.vz -= w->unk38;

@@ -158,13 +158,13 @@ void func_801e87e0(Object44 *obj)
             }
         }
     case 10:
-        if (func_80046884(9, 0x37, 3, 3, 0x8000) != 0) {
+        if (player_camera_within_map_region(9, 0x37, 3, 3, 0x8000) != 0) {
             if (DAT_801b24e4.unk10a != 0) {
-                func_800445b8(2, 0x4a, 0, 9, 0x37, 3, 1, 0, 0x2f);
+                map_cell_copy_rotated_fields(2, 0x4a, 0, 9, 0x37, 3, 1, 0, 0x2f);
             }
         } else {
             DAT_801b24e4.unk10a = 0;
-            func_800445b8(2, 0x4d, 0, 9, 0x37, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4d, 0, 9, 0x37, 3, 1, 0, 0x2f);
         }
         break;
     }

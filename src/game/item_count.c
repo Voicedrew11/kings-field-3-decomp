@@ -58,7 +58,7 @@ s32 func_8005d898(s32 id)
     } else if (DAT_800c85e8[1][id] < 99) {
         DAT_800c85e8[1][id]++;
     } else {
-        func_80041eec(11);
+        notify_enqueue(11);
         return 1;
     }
     DAT_8018fad4.handlers[6]();
@@ -80,17 +80,17 @@ void func_8005d948(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, s32 b1)
         light_refresh_record_rotations();
         r = fixed_lerp_q12(r0, r1, t);
         g = fixed_lerp_q12(g0, g1, t);
-        func_8003d8ec(r, g, fixed_lerp_q12(b0, b1, t), 0x800, 1);
+        accumulate_color_overlay(r, g, fixed_lerp_q12(b0, b1, t), 0x800, 1);
         t += step;
         player_update_status_visuals();
-        func_800422b8(NULL, NULL);
+        render_game_frame(NULL, NULL);
     } while (t < 4096);
     light_reset_records();
     render_reset_color_overlays();
     light_refresh_record_rotations();
-    func_8003d8ec(r1, g1, b1, 0x800, 1);
+    accumulate_color_overlay(r1, g1, b1, 0x800, 1);
     player_update_status_visuals();
-    func_800422b8(NULL, NULL);
+    render_game_frame(NULL, NULL);
 }
 
 /* Brightens the screen over 33 frames, then sets DAT_8009c3f8 to 1. */
@@ -108,11 +108,11 @@ void func_8005da94(void)
         if (v >= 256) {
             v = 255;
         }
-        func_8003d624(0x82, v, v, v);
+        render_set_color_overlay(0x82, v, v, v);
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
         if (i >= 4096) {
             break;
         }
@@ -158,8 +158,8 @@ void func_8005db30(Object44 *obj, ...)
         va_start(args, obj);
         id = va_arg(args, s32);
         va_end(args);
-        obj = func_80046034(350, 10, DAT_8018fb3c.unk885e);
-        func_800448b8(obj);
+        obj = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+        map_object_reset(obj);
         obj->unk6 = id;
         obj->unk0 = 2;
         obj->unk4 = 0xff;
@@ -178,7 +178,7 @@ void func_8005db30(Object44 *obj, ...)
         return;
     }
     if (def->unk1 == 0x20) {
-        func_80041eec(25, obj->arg.h.unk3a);
+        notify_enqueue(25, obj->arg.h.unk3a);
         obj->unk6 = 0xff;
         DAT_801b24e4.unk50 += obj->arg.h.unk3a;
         return;
@@ -223,13 +223,13 @@ void func_8005db30(Object44 *obj, ...)
     angle_to.vz = 0;
     angle_to.vx = 0;
     angle_to.vy = (DAT_801b24e4.unk124.vy + 2048) & 0xfff;
-    model_id = func_80040568(obj->unk6);
-    func_800405e8(model_id, &model);
+    model_id = map_object_asset_index(obj->unk6);
+    resource_registry_get(model_id, &model);
     while (model == NULL) {
         cd_request_service_vab();
         cd_request_service_stream();
-        func_800422b8(NULL, &DAT_801b24e4.unk124);
-        func_800405e8(model_id, &model);
+        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        resource_registry_get(model_id, &model);
     }
     for (t = 0; t <= 4096; t += 512) {
         pad = PadRead(1);
@@ -242,7 +242,7 @@ void func_8005db30(Object44 *obj, ...)
         DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         cd_request_service_vab();
         cd_request_service_stream();
-        func_800422b8(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &DAT_801b24e4.unk124);
     }
     obj->unke = held;
     for (;;) {
@@ -254,7 +254,7 @@ void func_8005db30(Object44 *obj, ...)
         obj->angle.vy += 64;
         cd_request_service_vab();
         cd_request_service_stream();
-        func_800422b8(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &DAT_801b24e4.unk124);
     }
 pressed:
     if ((pad & DAT_80081868[7]) || id != -1) {
@@ -291,7 +291,7 @@ pressed:
             break;
         }
         obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
-        func_800422b8(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &DAT_801b24e4.unk124);
     }
 back:
     angle_to = obj->angle;
@@ -301,7 +301,7 @@ back:
         func_8005bee0(obj, &from, &to, &angle_from, &angle_to, t);
         DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         obj->unke = value_approach(spin, held, t >> 4);
-        func_800422b8(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &DAT_801b24e4.unk124);
     }
     if (pad) {
         obj->unk6 = 0xff;
@@ -311,7 +311,7 @@ back:
 
 /*
  * The action button at pos facing angle: the Object88 within reach in front
- * gets func_8005c308, then each Object44 record func_80045c7c finds in front
+ * gets func_8005c308, then each Object44 record map_object_find_interaction_target finds in front
  * acts by the type of its def (doors and locks show why they stay shut or
  * open, items are picked up, the healing and save points fade the screen),
  * and the loaded FDAT module's handler 0 gets the point last. The full
@@ -339,7 +339,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             func_8005c308(o88);
         }
     }
-    for (i = 0; (i = func_80045c7c(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
@@ -347,9 +347,9 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
         case 0xa5:
         case 0xff:
             if (obj->unk6 == 0xf8) {
-                func_80041eec(0x1d);
+                notify_enqueue(0x1d);
             } else if (obj->unk6 == 0xf9) {
-                func_80041eec(0x1c);
+                notify_enqueue(0x1c);
             }
             break;
         case 0x40:
@@ -383,7 +383,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (obj->arg.b.unk38 == 0xff) {
                 obj->unk8 = 1;
             } else {
-                func_80041eec(6);
+                notify_enqueue(6);
             }
             break;
         case 0:
@@ -396,15 +396,15 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             switch (obj->arg.b.unk38) {
             case 0x98:
             case 0xf1:
-                func_80041eec(5);
+                notify_enqueue(5);
                 break;
             case 0x96:
             case 0xf0:
-                func_80041eec(0x17);
+                notify_enqueue(0x17);
                 break;
             case 0x9a:
             case 0xf2:
-                func_80041eec(0xf);
+                notify_enqueue(0xf);
                 break;
             case 0xfd:
             case 0xfe:
@@ -412,13 +412,13 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                     obj->unk8 = 1;
                     break;
                 }
-                func_80041eec(6);
+                notify_enqueue(6);
                 break;
             case 0xff:
                 obj->unk8 = 1;
                 break;
             default:
-                func_80041eec(6);
+                notify_enqueue(6);
                 break;
             }
             break;
@@ -448,15 +448,15 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
         case 0x17:
             switch (obj->arg.b.unk38) {
             case 0xf1:
-                func_80041eec(5);
+                notify_enqueue(5);
                 break;
             case 0xf0:
-                func_80041eec(0x17);
+                notify_enqueue(0x17);
                 break;
             case 0xfe:
                 if (obj->arg.h.unk3a == 0xffff) {
                 missing:
-                    func_80041eec(0x1a);
+                    notify_enqueue(0x1a);
                 } else {
                     link = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
                     if (link->unk6 == 0xff) {
@@ -468,7 +468,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
                 obj->arg.b.unk38 = 0xfe;
                 break;
             default:
-                func_80041eec(6);
+                notify_enqueue(6);
                 break;
             }
             break;
@@ -480,7 +480,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (obj->arg.b.unk3d[0] == 0 && !angle_within_tolerance(angle->vy, obj->angle.vy + 2048, 0x155)) {
                 break;
             }
-            func_800441d4(6, obj->arg.h.unk38 + 150);
+            menu_show_transition_image(6, obj->arg.h.unk38 + 150);
             break;
         case 0x12:
             if (!angle_within_tolerance(angle->vy, vector_xz_to_angle(obj->pos.vx - p.vx, obj->pos.vz - p.vz),

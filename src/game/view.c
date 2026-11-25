@@ -613,7 +613,7 @@ void display_initialize(void)
     }
     DAT_80199154.tint.mode = 0xff;
     DAT_80182964 = 0;
-    func_80043828();
+    pool_reset();
     DAT_80199154.unk15995 = 13;
     DAT_80199154.unk15996 = 1;
 }

@@ -91,13 +91,13 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x8f || DAT_801ba984.unk32[0x25] != 0) {
         return;
     }
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
         if (i != 11) {
             continue;
         }
         target = &DAT_8018fb3c.objects[11];
-        obj = func_80046034(0x15e, 10, DAT_8018fb3c.unk885e);
-        func_800448b8(obj);
+        obj = map_object_effect_pool_acquire(0x15e, 10, DAT_8018fb3c.unk885e);
+        map_object_reset(obj);
         id = DAT_8018fb3c.unk885e++;
         obj->unke = -100;
         obj->unk0 = 2;
@@ -117,7 +117,7 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
             func_8005bee0(obj, &from, &to, NULL, NULL, t);
             cd_request_service_vab();
             cd_request_service_stream();
-            func_800422b8(NULL, NULL);
+            render_game_frame(NULL, NULL);
         }
         DAT_801ba984.unk32[0x25] = 1;
         DAT_801ba984.unk32[0x26] = 0;
@@ -273,7 +273,7 @@ void func_801e8d4c(u8 id)
             obj->unk0 = 2;
             obj++;
         }
-        func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk9 = 0;
         DAT_80185da8.objects[56].unk0 = 2;
     }
@@ -368,7 +368,7 @@ void func_801e8f84(void)
             p->unk0 = 0;
             p++;
         }
-        func_800445b8(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 8;
         DAT_80185da8.objects[56].unk3 = 0;
         DAT_8018fb3c.objects[11].unk0 = 2;
@@ -380,12 +380,12 @@ void func_801e8f84(void)
             p->unk0 = 2;
             p++;
         }
-        func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 1;
         DAT_80185da8.objects[56].unk3 = 0;
         DAT_8018fb3c.objects[11].unk0 = 2;
-        obj = func_80046034(0x15e, 10, DAT_8018fb3c.unk885e);
-        func_800448b8(obj);
+        obj = map_object_effect_pool_acquire(0x15e, 10, DAT_8018fb3c.unk885e);
+        map_object_reset(obj);
         id = DAT_8018fb3c.unk885e++;
         obj->unke = -100;
         obj->unk6 = 0x8f;
@@ -407,7 +407,7 @@ void func_801e8f84(void)
             p->unk0 = 2;
             p++;
         }
-        func_800445b8(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         DAT_80185da8.objects[56].unk0 = 8;
         DAT_80185da8.objects[56].unk3 = 0;
         DAT_8018fb3c.objects[11].unk0 = 0;

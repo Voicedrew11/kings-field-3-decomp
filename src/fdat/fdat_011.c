@@ -94,13 +94,13 @@ void func_801e85d8(Object44 *obj)
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
-    if (func_80046884(6, 0x1e, 3, 4, 0x8000) != 0) {
+    if (player_camera_within_map_region(6, 0x1e, 3, 4, 0x8000) != 0) {
         if (DAT_801b24e4.unk10a != 0) {
-            func_800445b8(2, 0x4a, 0, 6, 0x21, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4a, 0, 6, 0x21, 3, 1, 0, 0x2f);
         }
     } else {
         DAT_801b24e4.unk10a = 0;
-        func_800445b8(2, 0x4d, 0, 6, 0x21, 3, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4d, 0, 6, 0x21, 3, 1, 0, 0x2f);
     }
 }
 

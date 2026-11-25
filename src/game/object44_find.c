@@ -28,7 +28,7 @@ SDATA(0x8009c2f4, 0x44)
 
 /* Index of the first record a shape at (x, y, z) hits, -1 for none. */
 ADDRESS(0x80045ac8, 0x1b4)
-s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
+s32 map_object_find_collision_at_point(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
     Object44 *obj;
     Object44Def *def;
@@ -74,7 +74,8 @@ s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
  * yaw.
  */
 ADDRESS(0x80045c7c, 0x398)
-s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in, int range_in)
+s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in,
+                                       int range_in)
 {
     s16 angle = angle_in;
     s16 range = range_in;
@@ -157,7 +158,7 @@ s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in
 
 /* Gives a record without a kind the kind `kind`. */
 ADDRESS(0x80046014, 0x20)
-void func_80046014(Object44 *obj, u8 kind)
+void map_object_start_action_if_idle(Object44 *obj, u8 kind)
 {
     if (obj->unk4 == 0xff) {
         obj->unk4 = kind;
@@ -170,7 +171,7 @@ void func_80046014(Object44 *obj, u8 kind)
  * whose arg.h.unk3c stamp is oldest, else NULL.
  */
 ADDRESS(0x80046034, 0x88)
-Object44 *func_80046034(s32 first, s32 count, s32 stamp)
+Object44 *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
 {
     Object44 *obj;
     Object44 *oldest;
@@ -205,21 +206,21 @@ Object44 *func_80046034(s32 first, s32 count, s32 stamp)
  * oldest when the pool is full.
  */
 ADDRESS(0x800460bc, 0x1d8)
-void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
+void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
 {
     Object44 *obj;
     Object44Def *def;
 
     if (which == 0) {
-        obj = func_80046034(370, 10, DAT_8018fb3c.unk8862);
+        obj = map_object_effect_pool_acquire(370, 10, DAT_8018fb3c.unk8862);
         obj->arg.h.unk3c = DAT_8018fb3c.unk8862++;
         obj->unk6 = def_id;
     } else {
-        obj = func_80046034(360, 10, DAT_8018fb3c.unk8860);
+        obj = map_object_effect_pool_acquire(360, 10, DAT_8018fb3c.unk8860);
         obj->arg.h.unk3c = DAT_8018fb3c.unk8860++;
         obj->unk6 = def_id;
     }
-    func_800448b8(obj);
+    map_object_reset(obj);
     def = &DAT_8018fb3c.defs[obj->unk6];
     if (def->unk3 & 0x10) {
         obj->scale.vx <<= 1;
@@ -234,10 +235,10 @@ void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
     case 16:
     case 19:
     case 22:
-        func_80046014(obj, 0x60);
+        map_object_start_action_if_idle(obj, 0x60);
         break;
     case 23:
-        func_80046014(obj, 0x61);
+        map_object_start_action_if_idle(obj, 0x61);
         break;
     case 17:
     case 18:
@@ -246,7 +247,7 @@ void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
     case 24:
     case 25:
     case 32:
-        func_80046014(obj, 0x62);
+        map_object_start_action_if_idle(obj, 0x62);
         if (def_id == 0x5c || def_id == 0x86 || def_id == 0x88 || def_id == 0x8d || def_id == 0x8f) {
             obj->angle.pad = 0;
         } else {
@@ -263,13 +264,13 @@ void func_800460bc(u8 which, u8 def_id, VECTOR *pos, s32 dy)
  * ten-record pool from 350, at a random point 600 from pos raised by dy.
  */
 ADDRESS(0x80046294, 0x128)
-void func_80046294(u16 target, VECTOR *pos, s32 dy)
+void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
 {
     Object44 *obj;
     u16 angle;
 
-    obj = func_80046034(350, 10, DAT_8018fb3c.unk885e);
-    func_800448b8(obj);
+    obj = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+    map_object_reset(obj);
     obj->arg.h.unk3c = DAT_8018fb3c.unk885e++;
     obj->unk6 = 0x95;
     obj->arg.h.unk3a = target;
@@ -279,13 +280,13 @@ void func_80046294(u16 target, VECTOR *pos, s32 dy)
     obj->pos.vz = (rcos(angle) * 600 >> 12) + pos->vz;
     obj->angle.vy = rand() >> 3;
     obj->arg.b.unk38 = 0xff;
-    func_80046014(obj, 0x62);
+    map_object_start_action_if_idle(obj, 0x62);
     obj->arg.sh.unk3e = -120;
 }
 
 /* Passes the switch event id to every record whose kind listens for it. */
 ADDRESS(0x800463bc, 0x24c)
-void func_800463bc(u8 id)
+void map_object_apply_marker_signal(u8 id)
 {
     Object44 *obj;
     u16 i;
@@ -378,7 +379,7 @@ void func_800463bc(u8 id)
  * 4 a kind that always reacts.
  */
 ADDRESS(0x80046608, 0xe0)
-s32 func_80046608(Object44 *obj, s32 id)
+s32 map_object_check_and_consume_marker(Object44 *obj, s32 id)
 {
     switch (obj->unk4) {
     case 0:
@@ -414,9 +415,9 @@ s32 func_80046608(Object44 *obj, s32 id)
     return 0;
 }
 
-/* func_80046608 for every record. */
+/* map_object_check_and_consume_marker for every record. */
 ADDRESS(0x800466e8, 0x78)
-void func_800466e8(u8 id)
+void map_object_process_marker_all(u8 id)
 {
     Object44 *obj;
     u16 i;
@@ -427,19 +428,19 @@ void func_800466e8(u8 id)
     }
     i = 396;
     while (i--) {
-        func_80046608(obj, id);
+        map_object_check_and_consume_marker(obj, id);
         obj++;
     }
 }
 
 /* World position of vertex of the record's animated model. */
 ADDRESS(0x80046760, 0x124)
-void func_80046760(Object44 *obj, s32 vertex, VECTOR *out)
+void map_object_sample_world_vertex(Object44 *obj, s32 vertex, VECTOR *out)
 {
     SVECTOR rot;
     SVECTOR v;
 
-    func_8004352c(func_80040568(obj->unk6), obj->unk1, obj->unka, vertex, &v);
+    animation_sample_vertex(map_object_asset_index(obj->unk6), obj->unk1, obj->unka, vertex, &v);
     v.vx = v.vx * obj->scale.vx >> 12;
     v.vy = v.vy * obj->scale.vy >> 12;
     v.vz = v.vz * obj->scale.vz >> 12;
@@ -457,7 +458,7 @@ void func_80046760(Object44 *obj, s32 vertex, VECTOR *out)
  * y is 0x8000, between 2048 above and 3200 below y.
  */
 ADDRESS(0x80046884, 0x90)
-s32 func_80046884(s32 x, s32 z, s32 w, s32 h, s32 y)
+s32 player_camera_within_map_region(s32 x, s32 z, s32 w, s32 h, s32 y)
 {
     s32 px;
     s32 pz;
@@ -484,7 +485,8 @@ s32 func_80046884(s32 x, s32 z, s32 w, s32 h, s32 y)
  * Returns 1 on the last step.
  */
 ADDRESS(0x80046914, 0x2ec)
-s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 fade, s32 steps)
+s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 fade,
+                                  s32 steps)
 {
     VECTOR a;
     VECTOR b;
@@ -501,7 +503,7 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
             src->arg.b.unk40 = steps - 1;
         }
         src->unk8 = 1;
-        func_800448b8(dst);
+        map_object_reset(dst);
         dst->unk4 = 0x70;
         dst->unk0 = src->unk0;
         switch (dst->unk6) {
@@ -546,7 +548,7 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
             dst->unka = 0xfff;
         }
         if ((s16)DAT_8018fad4.loading == 0) {
-            func_8004482c(dst, 0x12);
+            map_object_play_spatial_sound(dst, 0x12);
         }
         dst->arg.b.unk38 = 0xff;
         src->unk8 = 0x63;
@@ -557,7 +559,7 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
 
 /* Runs frames while the screen tint (mode) steps its level from phase to last. */
 ADDRESS(0x80046c00, 0xb0)
-void func_80046c00(int mode, s32 phase, s32 last, s32 step)
+void render_frames_with_color_overlay(int mode, s32 phase, s32 last, s32 step)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -571,11 +573,11 @@ void func_80046c00(int mode, s32 phase, s32 last, s32 step)
         if (v >= 256) {
             v = 0xff;
         }
-        func_8003d624(mode, v, v, v);
+        render_set_color_overlay(mode, v, v, v);
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
         if (level == end) {
             break;
         }
@@ -585,7 +587,7 @@ void func_80046c00(int mode, s32 phase, s32 last, s32 step)
 
 /* Moves the player, the Object4c and the Object88 records by (dx, dy, dz). */
 ADDRESS(0x80046cb0, 0x11c)
-void func_80046cb0(s32 dx, s32 dy, s32 dz)
+void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
 {
     Object4c *o4c;
     Object88 *o88;
@@ -622,8 +624,8 @@ void func_80046cb0(s32 dx, s32 dy, s32 dz)
  * out is the view direction scaled by dist. Returns the last yaw.
  */
 ADDRESS(0x80046dcc, 0x244)
-s16 func_80046dcc(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *out, s16 pitch,
-                  s16 rate, s32 count)
+s16 map_object_compute_aim_vector(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *out, s16 pitch,
+                                  s16 rate, s32 count)
 {
     VECTOR pos;
     SVECTOR rot;
@@ -662,7 +664,7 @@ s16 func_80046dcc(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *ou
     return rot.vy;
 }
 
-/* Frame-time reference yaws of the door kinds 0x1b, 0 and 1 while they swing (func_80047010). */
+/* Frame-time reference yaws of the door kinds 0x1b, 0 and 1 while they swing (map_object_update_actions). */
 DATA(0x8009c3d4, 0x2, ".sbss")
 static s16 DAT_8009c3d4;
 DATA(0x8009c3d8, 0x2, ".sbss")
@@ -687,7 +689,7 @@ static s16 DAT_8009c3dc;
  * record and its def in DAT_8018fb3c.unk8858 / unk8854.
  */
 ADDRESS(0x80047010, 0x4514)
-void func_80047010(void)
+void map_object_update_actions(void)
 {
     Object44 *obj;
     Object44Def *def;
@@ -709,15 +711,15 @@ void func_80047010(void)
                 break;
             case 1:
                 if (obj->unka == 0) {
-                    func_8004482c(obj, def->arg.b.unkf);
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828fc, 1,
-                                  0xff);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828fc, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 1,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828dc, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -726,17 +728,17 @@ void func_80047010(void)
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828dc, 0, 0xff);
                     obj->unk8 = 21;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 21:
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828fc, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828fc, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -753,15 +755,15 @@ void func_80047010(void)
                 break;
             case 1:
                 if (obj->unka == 0) {
-                    func_8004482c(obj, def->arg.b.unkf);
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008291c, 1,
-                                  0xff);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008291c, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 1,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828dc, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -770,17 +772,17 @@ void func_80047010(void)
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_800828dc, 0, 0xff);
                     obj->unk8 = 21;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 21:
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008291c, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008291c, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -797,15 +799,15 @@ void func_80047010(void)
                 break;
             case 1:
                 if (obj->unka == 0) {
-                    func_8004482c(obj, def->arg.b.unkf);
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008295c, 1,
-                                  0xff);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008295c, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c, 1,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008293c, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -814,17 +816,17 @@ void func_80047010(void)
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008293c, 0, 0xff);
                     obj->unk8 = 21;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 21:
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
-                    func_800443c8(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008295c, 0,
-                                  0xff);
+                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008295c, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -846,16 +848,17 @@ void func_80047010(void)
             case 1:
                 if (obj->unka == 0) {
                     obj->unk3 &= ~2;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd, obj->arg.b.unk3c,
-                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                  def->arg.b.unke, obj->angle.vy, 45);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
+                                                 obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                 obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
+                                                 obj->angle.vy, 45);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                  def->arg.b.unke, obj->angle.vy, 45);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                 obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
+                                                 def->arg.b.unke, obj->angle.vy, 45);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -868,10 +871,11 @@ void func_80047010(void)
                 }
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
                     obj->unk8 = 21;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd, obj->arg.b.unk3c,
-                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                  def->arg.b.unke, obj->angle.vy, 45);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
+                                                 obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                 obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
+                                                 obj->angle.vy, 45);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 21:
@@ -879,9 +883,10 @@ void func_80047010(void)
                 if ((s16)obj->unka <= 0) {
                     obj->unka = 0;
                     obj->unk8 = 0;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2,
-                                  obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                                  def->arg.b.unkd, def->arg.b.unke, obj->angle.vy, 45);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2,
+                                                 obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                 obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
+                                                 obj->angle.vy, 45);
                 }
                 break;
             default:
@@ -932,7 +937,7 @@ void func_80047010(void)
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
                     DAT_8009c3d4 = DAT_80199154.unk15b08.vy;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
@@ -970,9 +975,9 @@ void func_80047010(void)
                         other->unk1 = 0x81;
                     }
                     if (t == 24) {
-                        func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                      obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                      obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
+                                                     obj->arg.sh.unk42, 45);
                     } else if (t == 31) {
                         obj->unk1 = 0x82;
                         obj->arg.h.unk40 = 280;
@@ -999,10 +1004,11 @@ void func_80047010(void)
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
-                                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                          obj->arg.sh.unk42, 45);
-                            func_8004482c(obj, def->arg.b.unkf);
+                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3,
+                                                         obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                         obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.unk42,
+                                                         45);
+                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
                         }
                         obj->unk1 = 0x81;
                         obj->angle.vy += 32;
@@ -1066,7 +1072,7 @@ void func_80047010(void)
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
                     DAT_8009c3d8 = DAT_80199154.unk15b08.vy;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
@@ -1104,9 +1110,9 @@ void func_80047010(void)
                         other->unk1 = 0x81;
                     }
                     if (t == 24) {
-                        func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                      obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                      obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
+                                                     obj->arg.sh.unk42, 45);
                     } else if (t == 31) {
                         obj->unk1 = 0x82;
                         obj->arg.h.unk40 = 280;
@@ -1133,10 +1139,11 @@ void func_80047010(void)
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3, obj->arg.b.unk3c,
-                                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                          obj->arg.sh.unk42, 45);
-                            func_8004482c(obj, def->arg.b.unkf);
+                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3,
+                                                         obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                         obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.unk42,
+                                                         45);
+                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
                         }
                         obj->unk1 = 0x81;
                         obj->angle.vy -= 32;
@@ -1179,7 +1186,7 @@ void func_80047010(void)
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
                     DAT_8009c3dc = DAT_80199154.unk15b08.vy;
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
@@ -1207,9 +1214,9 @@ void func_80047010(void)
                     obj->unk1 = 0x81;
                     obj->angle.vy += 32;
                     if (t == 24) {
-                        func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                      obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                      def->arg.b.unke, obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                                     def->arg.b.unkd, def->arg.b.unke, obj->arg.sh.unk42, 45);
                     } else if (t == 31) {
                         obj->arg.h.unk40 = 280;
                     }
@@ -1232,10 +1239,11 @@ void func_80047010(void)
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + 2, obj->arg.b.unk3c,
-                                          obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                          def->arg.b.unke, obj->arg.sh.unk42, 45);
-                            func_8004482c(obj, def->arg.b.unkf);
+                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 2,
+                                                         obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                         obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
+                                                         def->arg.b.unke, obj->arg.sh.unk42, 45);
+                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
                         }
                         obj->angle.vy -= 32;
                     } else {
@@ -1266,8 +1274,8 @@ void func_80047010(void)
                         obj->unk0 = 0;
                         obj->unk8 = 8;
                     } else {
-                        func_80044900(obj->arg.h.unk3a, 0);
-                        func_80044900(obj->arg.h.unk3a, 3, 0);
+                        map_object_set_property(obj->arg.h.unk3a, 0);
+                        map_object_set_property(obj->arg.h.unk3a, 3, 0);
                         obj->unk8 = 1;
                     }
                     break;
@@ -1275,7 +1283,7 @@ void func_80047010(void)
                     if (obj->arg.b.unk38 != 0xfe) {
                         break;
                     }
-                    func_80044900(obj->arg.h.unk3a, 1, obj->unk0);
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
                     obj->arg.b.unk40 = 0;
                     o1->pos.vy -= 30000;
                     o1->arg.b.unk38 = 0;
@@ -1293,7 +1301,7 @@ void func_80047010(void)
                     o1->pos.vz = fixed_lerp_q12(a.vz, b.vz, f) + obj->pos.vz;
                     o1->angle.vy += 256;
                     if (obj->arg.b.unk40 >= n) {
-                        func_8004482c(obj, def->arg.b.unkf);
+                        map_object_play_spatial_sound(obj, def->arg.b.unkf);
                         obj->arg.b.unk40 = 0;
                         obj->unk8 = 3;
                     }
@@ -1336,8 +1344,8 @@ void func_80047010(void)
                     obj->unk8 = 7;
                     break;
                 case 7:
-                    func_80044900(obj->arg.h.unk3a, 2);
-                    func_80044900(obj->arg.h.unk3a, 3, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 2);
+                    map_object_set_property(obj->arg.h.unk3a, 3, 0);
                     obj->unk4 = 0xff;
                     obj->unk8 = 8;
                     break;
@@ -1354,8 +1362,8 @@ void func_80047010(void)
                     obj->angle.vx = 0xa00;
                     obj->unk8 = 3;
                 } else {
-                    func_80044900(obj->arg.h.unk3a, 0);
-                    func_80044900(obj->arg.h.unk3a, 3, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 3, 0);
                     obj->unk8 = 1;
                 }
                 break;
@@ -1363,8 +1371,8 @@ void func_80047010(void)
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->arg.sh.unk40 = -16;
                     obj->unk8 = 2;
-                    func_80044900(obj->arg.h.unk3a, 1, obj->unk0);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 2:
@@ -1373,13 +1381,14 @@ void func_80047010(void)
                         spark.pos.vx = obj->pos.vx + (rcos(obj->angle.vy - 1024) * -160 >> 12);
                         spark.pos.vy = obj->pos.vy + 320;
                         spark.pos.vz = obj->pos.vz - (rsin(obj->angle.vy - 1024) * -160 >> 12);
-                        func_80046dcc(obj, &DAT_801b24e4.pos, 400, &spark.pos, &spark.angle, -1, 0x400, 1);
+                        map_object_compute_aim_vector(obj, &DAT_801b24e4.pos, 400, &spark.pos, &spark.angle,
+                                                      -1, 0x400, 1);
                         func_80053c84(10, 0x83, 0x23, &spark.pos, &spark.angle, &obj->angle);
                     }
                     obj->arg.sh.unk40 = angle_velocity_step(0xa00, obj->angle.vx, obj->arg.sh.unk40, 8, 4);
                     obj->angle.vx = (obj->angle.vx + obj->arg.sh.unk40) & 0xfff;
                     if (obj->angle.vx < 3072) {
-                        func_80044900(obj->arg.h.unk3a, 2);
+                        map_object_set_property(obj->arg.h.unk3a, 2);
                     }
                     if (obj->arg.sh.unk40 == 0 && obj->angle.vx == 0xa00) {
                         obj->unk8 = 3;
@@ -1400,23 +1409,23 @@ void func_80047010(void)
                 }
                 if (obj->arg.b.unk38 == 0xfe) {
                     if (def->arg.b.unkc != 0xff) {
-                        func_80044b40(obj, 1, def->arg.b.unkc);
+                        map_object_set_cell_marker(obj, 1, def->arg.b.unkc);
                     }
                     obj->unka = 0xfff;
                     obj->unk8 = 3;
                 } else {
-                    func_80044900(obj->arg.h.unk3a, 0);
-                    func_80044900(obj->arg.h.unk3a, 3, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 3, 0);
                     obj->unk8 = 1;
                 }
                 break;
             case 1:
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->unk8 = 2;
-                    func_80044900(obj->arg.h.unk3a, 1, obj->unk0);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                     if (def->arg.b.unkc != 0xff) {
-                        func_80044b40(obj, 1, def->arg.b.unkc);
+                        map_object_set_cell_marker(obj, 1, def->arg.b.unkc);
                     }
                 }
                 break;
@@ -1424,7 +1433,7 @@ void func_80047010(void)
                 obj->unka += 128;
                 if (obj->unka >= 4095) {
                     obj->unka = 0xfff;
-                    func_80044900(obj->arg.h.unk3a, 2);
+                    map_object_set_property(obj->arg.h.unk3a, 2);
                     obj->unk8 = 3;
                 }
                 break;
@@ -1438,8 +1447,8 @@ void func_80047010(void)
                     OBJ44_ADVANCE(obj, 160);
                     obj->unk8 = 3;
                 } else {
-                    func_80044900(obj->arg.h.unk3a, 0);
-                    func_80044900(obj->arg.h.unk3a, 3, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 0);
+                    map_object_set_property(obj->arg.h.unk3a, 3, 0);
                     obj->unk8 = 1;
                 }
                 break;
@@ -1447,15 +1456,15 @@ void func_80047010(void)
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->arg.h.unk40 = 16;
                     obj->unk8 = 2;
-                    func_80044900(obj->arg.h.unk3a, 1, obj->unk0);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 2:
                 {
                     OBJ44_ADVANCE(obj, 10);
                     if (--obj->arg.h.unk40 == 0) {
-                        func_80044900(obj->arg.h.unk3a, 2);
+                        map_object_set_property(obj->arg.h.unk3a, 2);
                         obj->unk8 = 3;
                     }
                 }
@@ -1497,10 +1506,10 @@ void func_80047010(void)
                 switch (obj->unk8) {
                 case 1:
                     if (se != 15) {
-                        func_8004482c(obj, se);
+                        map_object_play_spatial_sound(obj, se);
                     }
                     if (obj->arg.b.unk3c == 1) {
-                        func_800463bc(obj->arg.b.unk39);
+                        map_object_apply_marker_signal(obj->arg.b.unk39);
                     }
                     switch (obj->arg.b.unk38) {
                     case 0:
@@ -1520,7 +1529,7 @@ void func_80047010(void)
                 case 2:
                     obj->unka += step;
                     if (se == 15 && obj->unka > 1024 && obj->unka <= step + 1024) {
-                        func_8004482c(obj, 15);
+                        map_object_play_spatial_sound(obj, 15);
                     }
                     if (obj->unka < 0x1000) {
                         break;
@@ -1528,11 +1537,11 @@ void func_80047010(void)
                     obj->unka = 0xfff;
                 arrived:
                     if (obj->arg.b.unk3c != 1) {
-                        func_800463bc(obj->arg.b.unk39);
+                        map_object_apply_marker_signal(obj->arg.b.unk39);
                     }
                     switch (obj->arg.b.unk38) {
                     case 1:
-                        func_8004482c(obj, se);
+                        map_object_play_spatial_sound(obj, se);
                         obj->unk8 = 4;
                         break;
                     case 0:
@@ -1546,7 +1555,7 @@ void func_80047010(void)
                     break;
                 case 3:
                     if (se == 15 && obj->unka > 3072 && obj->unka <= step + 3072) {
-                        func_8004482c(obj, 15);
+                        map_object_play_spatial_sound(obj, 15);
                     }
                     obj->unka -= step;
                     if ((s16)obj->unka <= 0) {
@@ -1572,13 +1581,13 @@ void func_80047010(void)
         case 84:
             switch (obj->unk8) {
             case 0:
-                if (func_80046884(obj->arg.b.unk39 - ((obj->arg.b.unk3a.bytes[1] - 1) >> 1),
-                                  obj->arg.b.unk3a.bytes[0] - ((obj->arg.b.unk3c - 1) >> 1),
-                                  obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                  -obj->arg.b.unk3d[0] << 7) != 0 ||
+                if (player_camera_within_map_region(obj->arg.b.unk39 - ((obj->arg.b.unk3a.bytes[1] - 1) >> 1),
+                                                    obj->arg.b.unk3a.bytes[0] - ((obj->arg.b.unk3c - 1) >> 1),
+                                                    obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                    -obj->arg.b.unk3d[0] << 7) != 0 ||
                     obj->arg.b.unk38 == 0xff) {
-                    func_800443c8(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                  DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
+                    map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
                     obj->unk8 = 1;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
@@ -1601,8 +1610,8 @@ void func_80047010(void)
                     obj->unk1 = 0;
                     obj->unka = 0;
                     obj->unk8 = 0;
-                    func_800443c8(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                  DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
+                    map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                                   DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
@@ -1624,15 +1633,15 @@ void func_80047010(void)
                     obj->unk8 = 3;
                     break;
                 }
-                func_800445b8(2, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0], obj->arg.b.unk3c,
-                              obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
-                              obj->arg.b.unk3d[1], obj->angle.vy, 45);
+                map_cell_copy_rotated_fields(2, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
+                                             obj->arg.b.unk3c, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                             obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
                 break;
             case 2:
                 obj->unk8 = 99;
-                func_800445b8(2, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
-                              obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
-                              obj->angle.vy, 45);
+                map_cell_copy_rotated_fields(2, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
+                                             obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
+                                             obj->arg.b.unk3d[1], obj->angle.vy, 45);
                 break;
             case 3:
                 obj->unk8 = 99;
@@ -1663,23 +1672,24 @@ void func_80047010(void)
                         break;
                     }
                     if (obj->arg.b.unk3a.bytes[1] == 0xff ||
-                        func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk3a.bytes[1],
-                                      obj->arg.b.unk3c, obj->pos.vy) != 0) {
+                        player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
+                                                        obj->arg.b.unk3a.bytes[1],
+                                                        obj->arg.b.unk3c, obj->pos.vy) != 0) {
                         obj->unk8 = 1;
                         obj->unk1 = 0;
                         obj->unka = 0;
                         obj->arg.b.unk40 = 0;
                         if (def->arg.b.unk16 != 0xff) {
-                            func_8004482c(obj, def->arg.b.unk16 + 496);
+                            map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
                         } else {
-                            func_8004482c(obj, 30);
+                            map_object_play_spatial_sound(obj, 30);
                         }
                     }
                     break;
                 case 1:
                     if (obj->arg.b.unk3a.bytes[1] != 0xff && obj->unka == 0) {
-                        func_80044b40(obj, 1, def->arg.b.unk17);
-                        func_8004482c(obj, 30);
+                        map_object_set_cell_marker(obj, 1, def->arg.b.unk17);
+                        map_object_play_spatial_sound(obj, 30);
                     }
                     if (obj->arg.b.unk38 == 0 && obj->unka >= 0x1000 - speed) {
                         obj->unk8 = 2;
@@ -1691,26 +1701,26 @@ void func_80047010(void)
                     if (obj->unka >= 4095) {
                         if (obj->arg.b.unk3a.bytes[1] == 0xff) {
                             if (def->arg.b.unk16 != 0xff) {
-                                func_8004482c(obj, def->arg.b.unk16 + 496);
+                                map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
                             } else {
-                                func_8004482c(obj, 30);
+                                map_object_play_spatial_sound(obj, 30);
                             }
                             obj->unka &= 0xfff;
                         } else {
                             obj->unka = 0;
                             obj->unk8 = 0;
-                            func_80044b40(obj, 0, def->arg.b.unk17);
+                            map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
                             break;
                         }
                     }
                     if (obj->unka >= 2048 && obj->unka < speed + 2048 && obj->arg.b.unk3a.bytes[1] == 0xff &&
                         def->arg.b.unk16 != 0xff) {
-                        func_8004482c(obj, def->arg.b.unk16 + 496);
+                        map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
                     }
-                    func_80046760(obj, def->arg.b.unkc, &p);
+                    map_object_sample_world_vertex(obj, def->arg.b.unkc, &p);
                     hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
                     if (hit == 0) {
-                        func_80046760(obj, def->arg.b.unkd, &p);
+                        map_object_sample_world_vertex(obj, def->arg.b.unkd, &p);
                         hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10,
                                                     0x90);
                     }
@@ -1736,11 +1746,11 @@ void func_80047010(void)
                                 obj->unka = 0xfff;
                             }
                         }
-                        func_80046760(obj, def->arg.b.unkc, &q);
+                        map_object_sample_world_vertex(obj, def->arg.b.unkc, &q);
                         hit = collision_query_world(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10,
                                                     0x90);
                         if (hit == 0) {
-                            func_80046760(obj, def->arg.b.unkd, &q);
+                            map_object_sample_world_vertex(obj, def->arg.b.unkd, &q);
                             hit = collision_query_world(q.vx, q.vy, q.vz, def->arg.h.unke, def->arg.h.unk10,
                                                         0x90);
                         }
@@ -1764,11 +1774,11 @@ void func_80047010(void)
                             obj->unk8 = 0;
                             obj->unka = 0;
                         }
-                        func_80046760(obj, def->arg.b.unkc, &r);
+                        map_object_sample_world_vertex(obj, def->arg.b.unkc, &r);
                         hit = collision_query_world(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10,
                                                     0x90);
                         if (hit == 0) {
-                            func_80046760(obj, def->arg.b.unkd, &r);
+                            map_object_sample_world_vertex(obj, def->arg.b.unkd, &r);
                             hit = collision_query_world(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10,
                                                         0x90);
                         }
@@ -1791,12 +1801,12 @@ void func_80047010(void)
         case 87:
             switch (obj->unk8) {
             case 1:
-                func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
-                              obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
-                              obj->angle.vy, 45);
+                map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                             obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
+                                             obj->arg.b.unk3d[1], obj->angle.vy, 45);
                 obj->unk8 = 2;
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
-                func_8004482c(obj, def->arg.b.unkf);
+                map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 break;
             case 2:
                 obj->unka += 256;
@@ -1809,10 +1819,10 @@ void func_80047010(void)
                 if (obj->unka >= 4095) {
                     obj->unka = 0;
                     obj->unk8 = 0;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
-                                  obj->arg.b.unk3c,
-                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
-                                  obj->arg.b.unk3d[1], obj->angle.vy, 45);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
+                                                 obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                 obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
+                                                 obj->arg.b.unk3d[1], obj->angle.vy, 45);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
@@ -1842,21 +1852,22 @@ void func_80047010(void)
                         h = obj->arg.b.unk3d[0];
                         break;
                     }
-                    if (func_80046884(obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], w, h, obj->pos.vy) != 0) {
+                    if (player_camera_within_map_region(obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], w, h,
+                                                        obj->pos.vy) != 0) {
                         obj->arg.b.unk38 = 0;
                         obj->unk8 = 1;
                         obj->unka = 0;
-                        func_8004482c(obj, def->arg.b.unkf);
+                        map_object_play_spatial_sound(obj, def->arg.b.unkf);
                     }
                 }
                 break;
             case 1:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
                     obj->unk8 = 2;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
-                                  obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
-                                  obj->angle.vy, 45);
-                    func_8004482c(obj, def->arg.b.unkf);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                 obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                                 obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
+                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 break;
             case 2:
@@ -1889,13 +1900,14 @@ void func_80047010(void)
                         break;
                     }
                     if (obj->arg.b.unk3a.bytes[1] == 0xff ||
-                        func_80046884(obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk3d[0],
-                                      obj->arg.b.unk3d[1], obj->pos.vy) != 0) {
+                        player_camera_within_map_region(obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                                                        obj->arg.b.unk3d[0],
+                                                        obj->arg.b.unk3d[1], obj->pos.vy) != 0) {
                         obj->unk8 = 1;
                         obj->unk1 = 0;
                         obj->unka = 0;
                         obj->arg.b.unk40 = 0;
-                        func_8004482c(obj, def->arg.b.unk16);
+                        map_object_play_spatial_sound(obj, def->arg.b.unk16);
                     }
                     break;
                 case 1:
@@ -1904,10 +1916,10 @@ void func_80047010(void)
 
                     if (obj->arg.b.unk3d[0] != 0xff) {
                         if (obj->unka == 0) {
-                            func_80044b40(obj, 1, def->arg.b.unk17);
-                            func_8004482c(obj, def->arg.b.unk16);
+                            map_object_set_cell_marker(obj, 1, def->arg.b.unk17);
+                            map_object_play_spatial_sound(obj, def->arg.b.unk16);
                         } else if (obj->unka >= 1500 && obj->unka < speed + 1500) {
-                            func_8004482c(obj, 30);
+                            map_object_play_spatial_sound(obj, 30);
                         }
                     }
                     if (obj->arg.b.unk38 == 0 && obj->unka >= 0x1000 - speed) {
@@ -1921,13 +1933,13 @@ void func_80047010(void)
                         if (obj->arg.b.unk3d[0] != 0xff) {
                             obj->unka = 0;
                             obj->unk8 = 0;
-                            func_80044b40(obj, 0, def->arg.b.unk17);
+                            map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
                             break;
                         }
-                        func_8004482c(obj, def->arg.b.unk16);
+                        map_object_play_spatial_sound(obj, def->arg.b.unk16);
                         obj->unka &= 0xfff;
                     }
-                    func_80046760(obj, def->arg.h.unkc, &p);
+                    map_object_sample_world_vertex(obj, def->arg.h.unkc, &p);
                     hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
@@ -1981,7 +1993,7 @@ void func_80047010(void)
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                     obj->unka = 0;
                     obj->arg.b.unk40 = 0;
-                    func_8004482c(obj, def->arg.b.unk16 + 496);
+                    map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
                     break;
                 case 1:
                     {
@@ -1996,10 +2008,10 @@ void func_80047010(void)
                     }
                     obj->unka += speed;
                     if (obj->unka >= 4095) {
-                        func_8004482c(obj, def->arg.b.unk16 + 496);
+                        map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
                         obj->unka &= 0xfff;
                     }
-                    func_80046760(obj, def->arg.h.unkc, &p);
+                    map_object_sample_world_vertex(obj, def->arg.h.unkc, &p);
                     hit = collision_query_world(p.vx, p.vy + 2048, p.vz, def->arg.h.unke, def->arg.h.unk10,
                                                 0x90);
                     if (hit != 0) {
@@ -2144,15 +2156,15 @@ void func_80047010(void)
             }
             break;
         case 231:
-            if (func_80046884(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                              obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
+            if (player_camera_within_map_region(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                                obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
                 if (obj->arg.b.unk40 == 0) {
                     CVECTOR c = {0x80, 0x80, 0x80, 0};
                     s32 n = 0x18c;
                     Object44 *o;
 
-                    func_80046c00(0x82, 0, 0, 0);
-                    func_80046c00(0x82, 0, 0x1000, 0x80);
+                    render_frames_with_color_overlay(0x82, 0, 0, 0);
+                    render_frames_with_color_overlay(0x82, 0, 0x1000, 0x80);
                     o = DAT_8018fb3c.objects;
                     for (; n != 0; n--, o++) {
                         if (o->unk4 == 0xe7) {
@@ -2167,10 +2179,10 @@ void func_80047010(void)
                     player_sync_position_to_map();
                     DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
                                              DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
-                    func_80046c00(0x82, 0x1000, 0x1000, 0);
+                    render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
                     cd_request_wait_idle();
-                    func_80046c00(0x82, 0x1000, 0, -128);
-                    func_8003d624(0xff, 0, 0, 0);
+                    render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
+                    render_set_color_overlay(0xff, 0, 0, 0);
                 }
             } else {
                 obj->arg.b.unk40 = 0;
@@ -2182,7 +2194,8 @@ void func_80047010(void)
                 break;
             }
             if (obj->arg.b.unk38 != 0xff) {
-                if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, 1, 1, obj->pos.vy) != 0) {
+                if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, 1, 1,
+                                                    obj->pos.vy) != 0) {
                     if (obj->arg.b.unk40 == 0) {
                         Object44 *o;
                         s32 n = 0x18c;
@@ -2204,7 +2217,7 @@ void func_80047010(void)
                         z = obj->arg.b.unk3c;
                         y = obj->arg.b.unk3d[0];
                         yaw = obj->arg.b.unk3d[1];
-                        func_80046c00(1, 0, 0x1000, 0x100);
+                        render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
                         func_8004b794();
                         area = obj->arg.b.unk38;
                         area3 = obj->arg.b.unk39;
@@ -2233,9 +2246,9 @@ void func_80047010(void)
                         DAT_801b24e4.pos.vz = (z << 11) + 1024;
                         DAT_801b24e4.pos.vy = -(y << 7);
                         DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy = -(yaw << 4);
-                        func_80046c00(1, 0x1000, 0x1000, 0);
+                        render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
                         cd_request_wait_idle();
-                        func_80046c00(1, 0x1000, 0, -256);
+                        render_frames_with_color_overlay(1, 0x1000, 0, -256);
                         resource_request_transition(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
                     }
                 } else {
@@ -2252,8 +2265,8 @@ void func_80047010(void)
             }
             break;
         case 234:
-            if (func_80046884(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                              obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
+            if (player_camera_within_map_region(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                                obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
                 if (obj->arg.b.unk40 == 0) {
                     Object44 *o;
                     s32 n = 0x18c;
@@ -2265,7 +2278,7 @@ void func_80047010(void)
                         }
                     }
                     map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
-                    func_80046cb0(obj->arg.sb.unk3c << 11, 0, obj->arg.sb.unk3d << 11);
+                    translate_player_effects_and_actors(obj->arg.sb.unk3c << 11, 0, obj->arg.sb.unk3d << 11);
                     map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
                 }
             } else {
@@ -2273,14 +2286,14 @@ void func_80047010(void)
             }
             break;
         case 232:
-            if (func_80046884(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                              obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
+            if (player_camera_within_map_region(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
+                                                obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
                 if (obj->arg.b.unk40 == 0) {
                     CVECTOR c = {0x80, 0x80, 0x80, 0};
                     s32 n = 0x18c;
                     Object44 *o;
 
-                    func_8003daec(&c.r, 320, 240, 1);
+                    render_zoom_screen_transition(&c.r, 320, 240, 1);
                     o = DAT_8018fb3c.objects;
                     for (; n != 0; n--, o++) {
                         if (o->unk4 == 0xe8) {
@@ -2295,7 +2308,7 @@ void func_80047010(void)
                     player_sync_position_to_map();
                     DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
                                              DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
-                    func_8003daec(&c.r, 320, 240, -1);
+                    render_zoom_screen_transition(&c.r, 320, 240, -1);
                 }
             } else if (obj->arg.b.unk40 != 0xff) {
                 obj->arg.b.unk40 = 0;
@@ -2303,16 +2316,16 @@ void func_80047010(void)
             obj->unka = (obj->unka + 64) & 0xfff;
             break;
         case 224:
-            if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                              obj->pos.vy) != 0) {
+            if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                obj->arg.b.unk39, obj->pos.vy) != 0) {
                 resource_request_transition(obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1],
                                             obj->arg.b.unk3c, obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
                                             obj->arg.sb.unk40, obj->arg.sb.unk41, obj->arg.sb.unk42);
             }
             break;
         case 225:
-            if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                              obj->pos.vy) != 0) {
+            if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                obj->arg.b.unk39, obj->pos.vy) != 0) {
                 if (obj->arg.b.unk40 == 0) {
                     if (!(obj->arg.b.unk3a.bytes[0] & 0x80)) {
                         obj->arg.b.unk40 = 1;
@@ -2322,7 +2335,7 @@ void func_80047010(void)
                         ((void (*)(Object44 *))DAT_8018fad4.handlers[3])(obj);
                         break;
                     case 1:
-                        func_800463bc(obj->arg.b.unk3a.bytes[1]);
+                        map_object_apply_marker_signal(obj->arg.b.unk3a.bytes[1]);
                         break;
                     case 2:
                         DAT_801ba984.unkab[obj->arg.b.unk3a.bytes[1]] = obj->arg.b.unk3c;
@@ -2334,8 +2347,8 @@ void func_80047010(void)
             }
             break;
         case 227:
-            if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                              0x8000) != 0) {
+            if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                obj->arg.b.unk39, 0x8000) != 0) {
                 DAT_80199154.unk15995 = obj->arg.b.unk3a.bytes[0];
                 DAT_80199154.unk15996 = obj->arg.b.unk3a.bytes[1];
             }
@@ -2346,14 +2359,14 @@ void func_80047010(void)
 
                 movie = &DAT_801e7edc.unk384;
                 if (*movie == 0xff) {
-                    if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
-                                      obj->arg.b.unk39, 0x8000) != 0) {
+                    if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
+                                                        obj->arg.b.unk38, obj->arg.b.unk39, 0x8000) != 0) {
                         DAT_801e7edc.unk370 = 1;
                         *movie = obj->arg.b.unk3a.bytes[0];
                     }
                 } else if (*movie == obj->arg.b.unk3a.bytes[0]) {
-                    if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
-                                      obj->arg.b.unk39, 0x8000) == 0) {
+                    if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
+                                                        obj->arg.b.unk38, obj->arg.b.unk39, 0x8000) == 0) {
                         if (DAT_801e7edc.unk370 == 0) {
                             *movie = 0xff;
                         }
@@ -2369,8 +2382,8 @@ void func_80047010(void)
                 Object44 *o;
                 s32 n;
 
-                if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                                  obj->pos.vy) != 0) {
+                if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                                    obj->arg.b.unk39, obj->pos.vy) != 0) {
                     if (obj->arg.b.unk40 == 0) {
                         n = obj->arg.b.unk3c;
                         obj->arg.b.unk40 = 1;
@@ -2401,25 +2414,26 @@ void func_80047010(void)
                 switch (obj->arg.b.unk38) {
                 case 0:
                     obj->unk8 = 2;
-                    func_8004482c(obj, 20);
+                    map_object_play_spatial_sound(obj, 20);
                     break;
                 case 1:
                     obj->unk8 = 3;
-                    func_8004482c(obj, 20);
+                    map_object_play_spatial_sound(obj, 20);
                     break;
                 }
-                func_800445b8(obj->unk0, obj->arg.b.unk3c + obj->arg.b.unk3d[1], obj->arg.b.unk3d[0],
-                              obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3d[1],
-                              obj->arg.b.unk3f, obj->angle.vy, 45);
+                map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3c + obj->arg.b.unk3d[1],
+                                             obj->arg.b.unk3d[0], obj->arg.b.unk3a.bytes[0],
+                                             obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3d[1], obj->arg.b.unk3f,
+                                             obj->angle.vy, 45);
                 break;
             case 2:
                 obj->unka -= 64;
                 if ((s16)obj->unka <= 0) {
                     obj->unk8 = 99;
                     obj->unka = 0;
-                    func_800445b8(obj->unk0, obj->arg.b.unk3c, obj->arg.b.unk3d[0], obj->arg.b.unk3a.bytes[0],
-                                  obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3d[1], obj->arg.b.unk3f,
-                                  obj->angle.vy, 45);
+                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3c, obj->arg.b.unk3d[0],
+                                                 obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1],
+                                                 obj->arg.b.unk3d[1], obj->arg.b.unk3f, obj->angle.vy, 45);
                 }
                 break;
             case 3:
@@ -2501,7 +2515,7 @@ void func_80047010(void)
                     (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 &=
                         ~obj->arg.b.unk3a.bytes[0];
                 }
-                if (func_80046914(obj, o, &from, &to, 0, 20) != 0) {
+                if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
                     (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
                         obj->arg.b.unk3a.bytes[0];
                 }
@@ -2530,7 +2544,7 @@ void func_80047010(void)
                         sw->arg.b.unk38 &= ~obj->arg.b.unk3a.bytes[0];
                     }
                 }
-                if (func_80046914(obj, o, &from, &to, 0, 20) != 0) {
+                if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
                     (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
                         obj->arg.b.unk3a.bytes[0];
                 }
@@ -2544,7 +2558,7 @@ void func_80047010(void)
                 Object44 *sw;
 
                 o = &DAT_8018fb3c.objects[obj->arg.b.unk39 + 350];
-                if (func_80046914(obj, o, &from, &to, 0, 20) != 0) {
+                if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
                     sw = DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1];
                     o->arg.b.unk38 = 0;
                     sw->arg.b.unk38 |= obj->arg.b.unk3a.bytes[0];

@@ -192,9 +192,9 @@ void player_reload_map_resources(s32 area0, s32 area1, s32 area2, s32 area3, s32
     render_reset_color_overlays();
     light_refresh_record_rotations();
     player_update_status_visuals();
-    func_80046c00(0x82, 0x1000, 0x1000, 0);
+    render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
     cd_request_wait_idle();
-    func_80046c00(0x82, 0x1000, 0, -128);
+    render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
     resource_request_transition(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
 }
 
@@ -462,7 +462,7 @@ void player_learn_element_magic(u32 element)
 
 learn:
     r->unk0 = 1;
-    func_80041eec(3);
+    notify_enqueue(3);
     DAT_801ba984.unk0 = 1;
     DAT_801ba984.unk7f[element] = 1;
     goto advance;
@@ -500,7 +500,7 @@ void player_increment_physical_power_training(void)
         if (DAT_801b24e4.unk32 >= 1000) {
             DAT_801b24e4.unk32 = 999;
         } else {
-            func_80041eec(1);
+            notify_enqueue(1);
         }
         player_recalculate_combat_stats();
     }
@@ -525,7 +525,7 @@ void player_increment_magic_training(Record18 *spell)
                 if (DAT_801b24e4.unk34[i] >= 1000) {
                     DAT_801b24e4.unk34[i] = 999;
                 } else {
-                    func_80041eec(i + 18);
+                    notify_enqueue(i + 18);
                 }
                 player_learn_element_magic(i);
                 player_recalculate_combat_stats();
@@ -552,7 +552,7 @@ void player_grow_weapon_with_experience(void)
                 func_8005d7f8(0);
                 func_8005d898(1);
             }
-            func_80041eec(4);
+            notify_enqueue(4);
             DAT_801b24e4.unk8 = -1;
         }
     } else {
@@ -604,7 +604,7 @@ void player_add_experience(int amount_in)
             }
             DAT_801b24e4.unk4 += r->unk8 - prev->unk8;
         }
-        func_80041eec(0);
+        notify_enqueue(0);
         if (DAT_801b24e4.hp_max >= 1000) {
             DAT_801b24e4.hp_max = 999;
         }
@@ -1328,7 +1328,7 @@ void player_equip_weapon(u8 id)
     if (id != 0xff) {
         DAT_801b24e4.unkb0 = &DAT_801d37a4[id];
         cd_archive_read(4, id + 98, DAT_801b24e4.unkb4);
-        func_80042c64(0x20, DAT_801b24e4.unkb4);
+        asset_registry_set(0x20, DAT_801b24e4.unkb4);
         if (effect[DAT_801b24e4.unkcb] != 0xff) {
             audio_queue_vab_stream(2, DAT_801b09fc.effects[effect[DAT_801b24e4.unkcb] + 96].bank + 47, 2);
         }

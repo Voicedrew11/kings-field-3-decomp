@@ -4,6 +4,6 @@ void fdat_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     if (item == 0x85) {
         DAT_801ba984.unk0 = 1;
-        func_80041eec(0x23);
+        notify_enqueue(0x23);
     }
 }

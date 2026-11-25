@@ -41,7 +41,7 @@ FDAT_005.BIN + config/retail/*.tsv -> build/delink/fdat_005 -> build/objdiff/fda
 A module's calls and data references into `GAME.EXE` are cross-image
 references (`retail.referent_image`): an address outside the module's own
 load window belongs to its host. The delinker names such a referent with the
-host's identity (a call to `func_80041eec` stays `func_80041eec`), the
+host's identity (a call to `notify_enqueue` stays `notify_enqueue`), the
 relocation validator accepts a J/JAL whose target is a host function start,
 the target relink resolves the external from the host's address book, and the
 closure audit records the edge as a host reference owned there instead of an

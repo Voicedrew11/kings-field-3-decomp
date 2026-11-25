@@ -96,9 +96,9 @@ void resource_initialize_game_assets(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     resource_copy_words(DAT_80116154, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    func_80042ba8(0, (u8 *)DAT_80116154);
+    asset_registry_load_tmd_archive(0, (u8 *)DAT_80116154);
     resource_copy_words(DAT_800aedc4, p + 1, *p >> 2);
-    func_80042ba8(0x28, (u8 *)DAT_800aedc4);
+    asset_registry_load_tmd_archive(0x28, (u8 *)DAT_800aedc4);
     game_initialize_session();
 }
 
@@ -124,7 +124,7 @@ void resource_run_initial_transition(void)
         cd_request_yield();
         resource_advance_transition();
     } while (DAT_8018fad4.loading != 0);
-    func_80035c84(0, DAT_8014f164);
+    tmd_set_slot(0, DAT_8014f164);
     func_80061918();
     DAT_8018fad4.handlers[5]();
 }
@@ -431,7 +431,7 @@ void resource_advance_transition(void)
             obj88 = DAT_80185da8.objects;
             for (i = 199; i != -1; i--) {
                 if (obj88->unk5c != 0) {
-                    func_80043894(obj88->unk5c);
+                    pool_record_release(obj88->unk5c);
                 }
                 obj88->unk0 = 0xff;
                 obj88++;
@@ -439,7 +439,7 @@ void resource_advance_transition(void)
             obj44 = DAT_8018fb3c.objects;
             for (i = 395; i != -1; i--) {
                 if (obj44->arg.w.unk34 != 0) {
-                    func_80043894((AnimSlot *)obj44->arg.w.unk34);
+                    pool_record_release((AnimSlot *)obj44->arg.w.unk34);
                 }
                 switch (obj44->unk4) {
                 case 0x20:
@@ -470,9 +470,9 @@ void resource_advance_transition(void)
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)&DAT_8018fb3c.defs[300], part + 1, 0xc0);
             part = (u32 *)((u8 *)part + (*part + 4));
-            func_80044d9c((Object44Place *)(part + 1));
+            map_object_initialize_from_placements((Object44Place *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
-            func_80043a08((EffectSpawn *)(part + 1));
+            map_placed_expand_sources((EffectSpawn *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)DAT_801ba6fc, part + 1, 0xa0);
             func_8005f444(DAT_8018fad4.previous[0]);

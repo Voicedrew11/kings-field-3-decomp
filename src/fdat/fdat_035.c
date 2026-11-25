@@ -57,7 +57,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
     Object44 *link;
     Object44Def *def;
 
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
@@ -66,20 +66,20 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
-                        func_80041eec(obj->arg.b.unk3f);
+                        notify_enqueue(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
-                        func_80041eec(0x1a);
+                        notify_enqueue(0x1a);
                     } else if (obj->unk6 == 0xb7) {
-                        func_80041eec(0x1e);
+                        notify_enqueue(0x1e);
                     } else if (obj->unk6 == 0xf5) {
-                        func_80041eec(0xe);
+                        notify_enqueue(0xe);
                     } else if (obj->unk6 == 0xba || obj->unk6 == 0x12d || obj->unk6 == 0x12e) {
-                        func_80041eec(0x22);
+                        notify_enqueue(0x22);
                     } else if (obj->unk6 == 0x12f) {
-                        func_80041eec(0x21);
+                        notify_enqueue(0x21);
                     } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
-                        func_80041eec(8);
+                        notify_enqueue(8);
                     }
                 }
             } else {
@@ -143,13 +143,13 @@ void func_801e8680(Object44 *obj)
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
-    if (func_80046884(0x39, 0x21, 3, 3, 0x8000) != 0) {
+    if (player_camera_within_map_region(0x39, 0x21, 3, 3, 0x8000) != 0) {
         if (DAT_801b24e4.unk10a != 0) {
-            func_800445b8(2, 0x4a, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4a, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
         }
     } else {
         DAT_801b24e4.unk10a = 0;
-        func_800445b8(2, 0x4d, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4d, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
     }
 }
 

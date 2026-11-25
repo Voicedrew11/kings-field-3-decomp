@@ -107,7 +107,7 @@ void player_update_frame(void)
         DAT_801b24e4.unk162 >>= 1;
         DAT_801b24e4.unk164 >>= 1;
         if ((DAT_801b24e4.unk84 & 3) == 3) {
-            func_8003d8ec(0x3c, 0x1e, 0, 0xc00, 1);
+            accumulate_color_overlay(0x3c, 0x1e, 0, 0xc00, 1);
         }
     }
     if (DAT_801b24e4.unkd0 != 0) {
@@ -127,22 +127,22 @@ void player_update_frame(void)
         movie = &DAT_801e7edc.movies[DAT_801b24e4.unk188.turn.id];
         func_80061940();
         if (movie->unk22 == 0x82) {
-            func_80046c00(0x82, 0x1000, 0x1000, 0);
+            render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
             cd_request_wait_idle();
-            func_80046c00(movie->unk22, 0x1000, 0, -256);
-            func_8003d624(0xff, 0, 0, 0);
+            render_frames_with_color_overlay(movie->unk22, 0x1000, 0, -256);
+            render_set_color_overlay(0xff, 0, 0, 0);
         } else if (movie->unk22 == 1) {
             MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
-            func_80046c00(1, 0x1000, 0x1000, 0);
+            render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
             cd_request_wait_idle();
-            func_80046c00(movie->unk22, 0x1000, 0, -256);
+            render_frames_with_color_overlay(movie->unk22, 0x1000, 0, -256);
         } else {
             MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
-            func_80046c00(1, 0, 0, 0);
+            render_frames_with_color_overlay(1, 0, 0, 0);
             cd_request_wait_idle();
         }
         break;
@@ -193,7 +193,7 @@ void player_update_frame(void)
             }
             DAT_801e7edc.unk372 = 1;
             if (rec->unka != 0) {
-                func_80046c00(rec->unk22, 0, 0x1000, 0x100);
+                render_frames_with_color_overlay(rec->unk22, 0, 0x1000, 0x100);
             }
         }
         break;
@@ -302,7 +302,7 @@ void player_update_frame(void)
         if (++DAT_801b24e4.unk13a >= 32) {
             if (DAT_801b24e4.unk13a < 65) {
                 c = fixed_lerp_q12(0, 0xff, (DAT_801b24e4.unk13a - 32) << 7);
-                func_8003d624(0x82, c, c, c);
+                render_set_color_overlay(0x82, c, c, c);
             } else {
                 o4c = DAT_801b77ec.objects;
                 for (i = 128; i != 0; i--) {
@@ -366,13 +366,13 @@ void player_update_frame(void)
     if (DAT_801b24e4.unk92 != 0) {
         DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
         if (--DAT_801b24e4.unk92 == 0) {
-            func_80041eec(0x1b);
+            notify_enqueue(0x1b);
         }
     }
     if (DAT_801b24e4.unk94 != 0) {
         if (--DAT_801b24e4.unk94 == 0) {
             player_recalculate_combat_stats();
-            func_80041eec(0x1b);
+            notify_enqueue(0x1b);
         }
     }
     DAT_801b24e4.unk124.vx = DAT_801b24e4.unk12c.vx + DAT_801b24e4.unk134 + DAT_801b24e4.unk13c + DAT_801b24e4.unk144;

@@ -532,7 +532,7 @@ void menu_show_item_picture(u8 item)
         VSync(2);
     } while (DAT_8009c230 == 1);
     i = 0;
-    func_80043b38(DAT_8009c37c);
+    tim_upload_images(DAT_8009c37c);
     DrawSync(0);
     memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
@@ -627,7 +627,7 @@ void menu_show_area_map(void)
         VSync(2);
     } while (DAT_8009c230 == 1);
     i = 0;
-    func_80043b38(DAT_8009c37c);
+    tim_upload_images(DAT_8009c37c);
     DrawSync(0);
     memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
@@ -745,7 +745,7 @@ s32 menu_choose_warp_destination(void)
     do {
         VSync(2);
     } while (DAT_8009c230 == 1);
-    func_80043b38(DAT_8009c37c);
+    tim_upload_images(DAT_8009c37c);
     DrawSync(0);
     memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
@@ -1470,7 +1470,7 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
 
     buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
     cd_archive_read(8, entry, buffer);
-    func_80043b38(buffer);
+    tim_upload_images(buffer);
     DrawSync(0);
     memory_free((void *)buffer);
     n = 0;
@@ -1500,7 +1500,7 @@ void menu_conversation_load_page(s32 book, s32 page)
     if (entry <= 0xf000) {
         buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
         cd_archive_read(8, entry, buffer);
-        func_80043b38(buffer);
+        tim_upload_images(buffer);
         DrawSync(0);
         memory_free((void *)buffer);
     }
@@ -4367,7 +4367,7 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
     do {
         VSync(2);
     } while (DAT_8009c230 == 1);
-    func_80043b38(buffer);
+    tim_upload_images(buffer);
     DrawSync(0);
     memory_free((void *)buffer);
     DAT_8009c230 = saved;
@@ -4619,7 +4619,7 @@ void menu_update_item_preview(u8 item)
         }
         if (DAT_8009c244 == -1) {
             if (DAT_8009c238 == 0) {
-                func_80035c44(3, DAT_8009c37c);
+                tmd_register(3, DAT_8009c37c);
                 DAT_8009c238 = 1;
             }
             m.t[0] = DAT_8009c394.vx;
@@ -4653,7 +4653,7 @@ void menu_update_item_preview(u8 item)
             SetColorMatrix(&color);
             SetRotMatrix(&m);
             SetTransMatrix(&m);
-            func_8004290c();
+            menu_render_item_model();
         }
     }
 }
@@ -5162,7 +5162,7 @@ void menu_enter_display_state(void)
 {
     RECT rect;
 
-    func_800438e0();
+    pool_release_all();
     DAT_80199154.draw[0].isbg = 0;
     DAT_80199154.draw[0].dfe = 0;
     DAT_80199154.draw[1].isbg = 0;

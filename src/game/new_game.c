@@ -86,7 +86,7 @@ void func_8005eb20(void)
         MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                   DAT_80199154.draw[DAT_80199154.frame].clip.y);
         DrawSync(0);
-        func_80046c00(1, 0, 0, 0);
+        render_frames_with_color_overlay(1, 0, 0, 0);
         cd_request_wait_idle();
     } else {
         n = DAT_801b24e4.bgm_volume >> 1;
@@ -108,7 +108,7 @@ void func_8005eb20(void)
             SsSeqClose(DAT_801b09fc.seq_id);
             DAT_801b09fc.seq_playing = 0;
         }
-        func_80046c00(1, 0, 0x1000, 0x100);
+        render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
         DAT_801e7edc.unk384 = 8;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[8];
         func_80061bc4();

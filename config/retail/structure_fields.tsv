@@ -1,19 +1,19 @@
 # MANUALLY MANAGED - exact target offsets/extents for every field in structures.tsv.
 # opaque means the byte range is modeled for layout but has no supported semantic meaning yet.
 structure	offset	size	name	datatype	meaning_confidence	evidence	note
-AnimKey	0x0	0x2	reverse	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimKey	0x2	0x2	length	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimKey	0x4	0x2	base	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimKey	0x6	0x2	count	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimKey	0x8	0x2	first	u16	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimKey	0xa	0x2	ids	u16[1]	candidate	asm;func_80042cac/func_800431e8/func_8004352c	
-AnimSlot	0x0	0x2	state	s16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0x2	0x2	model	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0x4	0x2	anim	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0x6	0x2	key	u16	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0x8	0x4	base	s32	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0xc	0x4	pose	SVECTOR *	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
-AnimSlot	0x10	0x4	owner	AnimSlot **	candidate	asm;slot loops 20-byte stride, 12 entries (func_80043828..func_800439b0)	
+AnimKey	0x0	0x2	reverse	u16	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimKey	0x2	0x2	length	u16	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimKey	0x4	0x2	base	u16	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimKey	0x6	0x2	count	u16	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimKey	0x8	0x2	first	u16	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimKey	0xa	0x2	ids	u16[1]	candidate	asm;animation_select_keyframe/animation_prepare_asset_vertices/animation_sample_vertex	WIP field name
+AnimSlot	0x0	0x2	state	s16	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0x2	0x2	model	u16	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0x4	0x2	anim	u16	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0x6	0x2	key	u16	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0x8	0x4	base	s32	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0xc	0x4	pose	SVECTOR *	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
+AnimSlot	0x10	0x4	owner	AnimSlot **	candidate	asm;slot loops 20-byte stride, 12 entries (pool_reset..pool_allocate)	WIP field name
 CdExtent	0x0	0x4	pos	CdlLOC	candidate	asm;cd_extent_read_into reads pos and size like a CdlFILE	WIP (game-c)
 CdExtent	0x4	0x4	size	u32	candidate	asm;cd_extent_read_into reads pos and size like a CdlFILE	WIP (game-c)
 CdFile	0x0	0x4	sectors	u16 *	candidate	asm;cd_archive_entry_extent/cd_archive_open 12-byte stride from +0x448	WIP (game-c)
@@ -51,21 +51,21 @@ CdState	0x20	0x420	requests	CdRequest[24]	candidate	asm;src/game/cd.c game.cd (c
 CdState	0x440	0x4	write	CdRequest *	candidate	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
 CdState	0x444	0x4	read	CdRequest *	candidate	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
 CdState	0x448	0x78	files	CdFile[10]	candidate	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
-ColorSum	0x0	0x1	count	u8	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
-ColorSum	0x1	0x1	mode	u8	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
-ColorSum	0x2	0x2	r	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
-ColorSum	0x4	0x2	g	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
-ColorSum	0x6	0x2	b	s16	candidate	asm;func_8003d64c/func_8003d8ec/func_8003da10 (8-byte stride, 2 entries)	
-Data80081c20	0x0	0x1	visible	u8	candidate	asm;func_800422b8 36-byte stride over the .data list (two needles and a 0xff terminator)	
-Data80081c20	0x1	0x1	anim	u8	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x2	0x1	light	u8	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x3	0x1	unk3	u8	opaque	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x4	0x2	model	u16	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x6	0x2	time	u16	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x8	0x8	scale	SVECTOR	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x10	0x8	pos	SVECTOR	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x18	0x8	angle	SVECTOR	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
-Data80081c20	0x20	0x4	slot	AnimSlot *	candidate	asm;func_8003c35c 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+ColorSum	0x0	0x1	count	u8	candidate	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field name
+ColorSum	0x1	0x1	mode	u8	candidate	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field name
+ColorSum	0x2	0x2	r	s16	candidate	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field name
+ColorSum	0x4	0x2	g	s16	candidate	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field name
+ColorSum	0x6	0x2	b	s16	candidate	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field name
+Data80081c20	0x0	0x1	visible	u8	candidate	asm;render_game_frame 36-byte stride over the .data list (two needles and a 0xff terminator)	WIP field name
+Data80081c20	0x1	0x1	anim	u8	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x2	0x1	light	u8	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x3	0x1	unk3	u8	opaque	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x4	0x2	model	u16	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x6	0x2	time	u16	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x8	0x8	scale	SVECTOR	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x10	0x8	pos	SVECTOR	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x18	0x8	angle	SVECTOR	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
+Data80081c20	0x20	0x4	slot	AnimSlot *	candidate	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20;game-gte	WIP (game-gte)
 Data80185da8	0x0	0x6a40	objects	Object88[200]	candidate	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
 Data80185da8	0x6a40	0x12c0	defs	Object78[40]	candidate	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
 Data80185da8	0x7d00	0x2000	unk7d00	u8[8192]	opaque	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
@@ -81,22 +81,22 @@ Data80185da8	0x9d1c	0x4	unk9d1c	s32	opaque	asm;game loop word-count clear;transl
 Data80185da8	0x9d20	0x4	unk9d20	s32	opaque	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
 Data80185da8	0x9d24	0x4	unk9d24	s32	opaque	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
 Data80185da8	0x9d28	0x4	unk9d28	Object88 *	opaque	asm;game loop word-count clear;translate_active_world_positions records at +0;Object78 records at +0x6a40 (func_8004b624, func_80053084, player_probe_view_target_and_vectors);band F globals at +0x9d00 (func_8004da2c derives &defs from &current);player_probe_view_target_and_vectors word +0x9d28	WIP (game-c, game-d, game-f)
-Data8018fad4	0x0	0x2	loading	u16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x2	0x2	step	s16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x4	0x5	area	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x9	0x1	unk9	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0xa	0x2	unka	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0xc	0x4	handlers	FdatHandler *	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x10	0x5	previous	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x15	0x1	unk15	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;band H	WIP (game-h)
-Data8018fad4	0x16	0x1	unk16	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;band H	WIP (game-h)
-Data8018fad4	0x17	0x1	unk17	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x18	0x1	unk18	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x19	0x3	shift	s8[3]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data8018fad4	0x1c	0x2	unk1c	s16	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Data8018fad4	0x1e	0x2	unk1e	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Data8018fad4	0x20	0x4	unk20	Object44 *	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;render-tu	WIP (render-tu)
-Data8018fad4	0x24	0x44	unk24	Object44	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;func_80040568 and func_80041ad4 field accesses;player_reload_map_resources field accesses;render-tu	WIP (render-tu)
+Data8018fad4	0x0	0x2	loading	u16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x2	0x2	step	s16	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x4	0x5	area	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x9	0x1	unk9	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0xa	0x2	unka	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0xc	0x4	handlers	FdatHandler *	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x10	0x5	previous	u8[5]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x15	0x1	unk15	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;band H	WIP (game-h)
+Data8018fad4	0x16	0x1	unk16	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;band H	WIP (game-h)
+Data8018fad4	0x17	0x1	unk17	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x18	0x1	unk18	u8	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x19	0x3	shift	s8[3]	candidate	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+Data8018fad4	0x1c	0x2	unk1c	s16	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Data8018fad4	0x1e	0x2	unk1e	u8[2]	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Data8018fad4	0x20	0x4	unk20	Object44 *	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;render-tu	WIP (render-tu)
+Data8018fad4	0x24	0x44	unk24	Object44	opaque	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses;render-tu	WIP (render-tu)
 Data8018fb3c	0x0	0x1f20	defs	Object44Def[332]	candidate	asm;game loop word-count clear;translate_active_world_positions records at +0x1f20;collision_cache_load_hit_bounds 24-byte records at +0 indexed by Object44.unk6;band H	WIP (game-h)
 Data8018fb3c	0x1f20	0x6930	objects	Object44[396]	candidate	asm;game loop word-count clear;translate_active_world_positions records at +0x1f20	WIP (game-c)
 Data8018fb3c	0x8850	0x4	unk8850	u8[4]	opaque	asm;game loop word-count clear;translate_active_world_positions records at +0x1f20;collision_cache_load_hit_bounds 24-byte records at +0 indexed by Object44.unk6;fdat	WIP (fdat)
@@ -387,23 +387,23 @@ Data801e7edc	0x380	0x4	unk380	MovieRec *	opaque	asm;game loop word-count clear;b
 Data801e7edc	0x384	0x1	unk384	u8	opaque	asm;game loop word-count clear;band A field accesses	WIP (game-a)
 Data801e7edc	0x385	0x3	unk385	u8[3]	opaque	asm;game loop word-count clear;band A field accesses;band I	WIP (game-i)
 Data801e7edc	0x388	0x4	unk388	s32	opaque	asm;game loop word-count clear;band A field accesses;band I	WIP (game-i)
-Effect	0x0	0x2	id	u16	candidate	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x2	0x1	unk2	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x3	0x1	unk3	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x4	0x1	unk4	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x5	0x1	unk5	u8	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x6	0x2	unk6	u8[2]	opaque	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-Effect	0x8	0x10	pos	VECTOR	candidate	asm;func_80043a08 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
-EffectSpawn	0x0	0x2	id	u16	candidate	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x2	0x1	unk2	u8	opaque	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x3	0x1	unk3	u8	opaque	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x4	0x1	unk4	u8	opaque	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x5	0x1	cell_z	u8	candidate	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x6	0x1	cell_x	u8	candidate	asm;func_80043a08 16-byte stride	
-EffectSpawn	0x7	0x3	unk7	u8[3]	opaque	asm;func_80043a08 16-byte stride	
-EffectSpawn	0xa	0x2	dz	s16	candidate	asm;func_80043a08 16-byte stride	
-EffectSpawn	0xc	0x2	dx	s16	candidate	asm;func_80043a08 16-byte stride	
-EffectSpawn	0xe	0x2	dy	s16	candidate	asm;func_80043a08 16-byte stride	
+Effect	0x0	0x2	id	u16	candidate	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x2	0x1	unk2	u8	opaque	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x3	0x1	unk3	u8	opaque	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x4	0x1	unk4	u8	opaque	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x5	0x1	unk5	u8	opaque	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x6	0x2	unk6	u8[2]	opaque	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+Effect	0x8	0x10	pos	VECTOR	candidate	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at DAT_80183568;translate_active_world_positions 24-byte stride, 128 records	WIP field name
+EffectSpawn	0x0	0x2	id	u16	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x2	0x1	unk2	u8	opaque	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x3	0x1	unk3	u8	opaque	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x4	0x1	unk4	u8	opaque	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x5	0x1	cell_z	u8	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x6	0x1	cell_x	u8	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0x7	0x3	unk7	u8[3]	opaque	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0xa	0x2	dz	s16	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0xc	0x2	dx	s16	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
+EffectSpawn	0xe	0x2	dy	s16	candidate	asm;map_placed_expand_sources 16-byte stride	WIP field name
 FdatHeader	0x0	0x4	id	s32	candidate	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically;fdat	WIP (fdat)
 FdatHeader	0x4	0x80	handlers	FdatHandler[32]	candidate	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically;fdat	WIP (fdat)
 FdatHeader	0x84	0x4	unk84	s32	opaque	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically;fdat	WIP (fdat)
@@ -412,15 +412,15 @@ HeapBlock	0x1	0x1	unk1	u8	opaque	asm;src/game/memory.c 12-byte block header (dat
 HeapBlock	0x2	0x2	unk2	u16	opaque	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x4	0x4	size	u32	candidate	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 HeapBlock	0x8	0x4	owner	u8 **	candidate	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
-MapCell	0x0	0xa	layer	MapLayer[2]	candidate	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (collision_sample_map_layer_height, map_cell_add_layer_occupancy, func_8003be34);band H	WIP (game-h)
-MapLayer	0x0	0x1	unk0	u8	opaque	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
-MapLayer	0x1	0x1	unk1	u8	opaque	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
-MapLayer	0x2	0x1	unk2	u8	opaque	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
-MapLayer	0x3	0x1	unk3	u8	opaque	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
-MapLayer	0x4	0x1	unk4	u8	opaque	asm;func_8003be34 passes &cell+0 and &cell+5 to func_8003bb04 (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
-MapPatch	0x0	0x8	bytes	u8[2][4]	candidate	asm;func_800443c8 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
-MapPatch	0x8	0x1	dx	s8	candidate	asm;func_800443c8 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
-MapPatch	0x9	0x1	dz	s8	candidate	asm;func_800443c8 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
+MapCell	0x0	0xa	layer	MapLayer[2]	candidate	asm;DAT_801d4464 cells indexed (z >> 11) * 800 + (x >> 11) * 10 (collision_sample_map_layer_height, map_cell_add_layer_occupancy, render_map_cell_layers);band H	WIP (game-h)
+MapLayer	0x0	0x1	unk0	u8	opaque	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
+MapLayer	0x1	0x1	unk1	u8	opaque	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
+MapLayer	0x2	0x1	unk2	u8	opaque	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
+MapLayer	0x3	0x1	unk3	u8	opaque	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
+MapLayer	0x4	0x1	unk4	u8	opaque	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses;band H	WIP (game-h)
+MapPatch	0x0	0x8	bytes	u8[2][4]	candidate	asm;map_cell_apply_rotated_pattern 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
+MapPatch	0x8	0x1	dx	s8	candidate	asm;map_cell_apply_rotated_pattern 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
+MapPatch	0x9	0x1	dz	s8	candidate	asm;map_cell_apply_rotated_pattern 10-byte records: [index*4 + 0..3] layer bytes, lb +8/+9 cell offsets, 0xff at +0 ends;band K	WIP (game-k)
 MapRect	0x0	0x1	x	u8	candidate	asm;menu_draw_revealed_map_rects/map_reveal_visited_rects 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
 MapRect	0x1	0x1	y	u8	candidate	asm;menu_draw_revealed_map_rects/map_reveal_visited_rects 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
 MapRect	0x2	0x1	w	u8	candidate	asm;menu_draw_revealed_map_rects/map_reveal_visited_rects 4-byte stride from DAT_801ba6fc, u8 x/y/w/h loads	WIP (game-e)
@@ -454,22 +454,22 @@ MenuList	0x34	0x4	unk34	u8[4]	opaque	asm;menu_list_init/menu_list_set_cursor fie
 MenuText	0x0	0x2	x	s16	candidate	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
 MenuText	0x2	0x2	y	s16	candidate	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
 MenuText	0x4	0x18	text	u8[24]	candidate	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and DAT_8007e660 0x1c stride	WIP (game-e)
-ModelData	0x0	0x4	unk0	u32	opaque	asm;func_800431e8, func_8004352c, func_800437c8;band H	WIP (game-h)
-ModelData	0x4	0x4	unk4	u32	opaque	asm;func_800431e8, func_8004352c, func_800437c8;band H	WIP (game-h)
-ModelData	0x8	0x4	count	s32	candidate	asm;func_800431e8, func_8004352c, func_800437c8;band H	WIP (game-h)
-ModelData	0xc	0x1c	parts	ModelPart[1]	candidate	asm;func_800431e8, func_8004352c, func_800437c8	
-ModelFile	0x0	0x4	unk0	u32	opaque	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
-ModelFile	0x4	0x4	unk4	s32	opaque	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
-ModelFile	0x8	0x4	vertices	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
-ModelFile	0xc	0x4	deltas	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
-ModelFile	0x10	0x4	anims	s32	candidate	asm;func_80042b70, func_80042cac, func_800431e8 header offsets	
-ModelPart	0x0	0x4	vertices	s32	candidate	asm;func_8004352c/func_800437c8 28-byte stride	
-ModelPart	0x4	0x4	unk4	s32	opaque	asm;func_8004352c/func_800437c8 28-byte stride	
-ModelPart	0x8	0x4	normals	s32	candidate	asm;func_80035ca4/func_80039428 28-byte parts at model data + 12: +0x04 vertex count (func_8004290c), +0x08 normals, +0x10 prims, +0x14 prim count;game-gte	WIP (game-gte)
-ModelPart	0xc	0x4	unkc	u8[4]	opaque	asm;func_80035ca4/func_80039428 28-byte parts at model data + 12: +0x04 vertex count (func_8004290c), +0x08 normals, +0x10 prims, +0x14 prim count;game-gte	WIP (game-gte)
-ModelPart	0x10	0x4	prims	s32	candidate	asm;func_8004352c/func_800437c8 28-byte stride;band H	WIP (game-h)
-ModelPart	0x14	0x4	prim_count	s32	candidate	asm;func_8004352c/func_800437c8 28-byte stride;band H	WIP (game-h)
-ModelPart	0x18	0x4	unk18	u8[4]	opaque	asm;func_8004352c/func_800437c8 28-byte stride;band H	WIP (game-h)
+ModelData	0x0	0x4	unk0	u32	opaque	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count;band H	WIP (game-h)
+ModelData	0x4	0x4	unk4	u32	opaque	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count;band H	WIP (game-h)
+ModelData	0x8	0x4	count	s32	candidate	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count;band H	WIP (game-h)
+ModelData	0xc	0x1c	parts	ModelPart[1]	candidate	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count	WIP field name
+ModelFile	0x0	0x4	unk0	u32	opaque	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field name
+ModelFile	0x4	0x4	unk4	s32	opaque	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field name
+ModelFile	0x8	0x4	vertices	s32	candidate	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field name
+ModelFile	0xc	0x4	deltas	s32	candidate	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field name
+ModelFile	0x10	0x4	anims	s32	candidate	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field name
+ModelPart	0x0	0x4	vertices	s32	candidate	asm;animation_sample_vertex/asset_vertex_count 28-byte stride	WIP field name
+ModelPart	0x4	0x4	unk4	s32	opaque	asm;animation_sample_vertex/asset_vertex_count 28-byte stride	WIP field name
+ModelPart	0x8	0x4	normals	s32	candidate	asm;render_enqueue_textured_tmd/render_enqueue_tmd_fixed_depth 28-byte parts at model data + 12: +0x04 vertex count (menu_render_item_model), +0x08 normals, +0x10 prims, +0x14 prim count;game-gte	WIP (game-gte)
+ModelPart	0xc	0x4	unkc	u8[4]	opaque	asm;render_enqueue_textured_tmd/render_enqueue_tmd_fixed_depth 28-byte parts at model data + 12: +0x04 vertex count (menu_render_item_model), +0x08 normals, +0x10 prims, +0x14 prim count;game-gte	WIP (game-gte)
+ModelPart	0x10	0x4	prims	s32	candidate	asm;animation_sample_vertex/asset_vertex_count 28-byte stride;band H	WIP (game-h)
+ModelPart	0x14	0x4	prim_count	s32	candidate	asm;animation_sample_vertex/asset_vertex_count 28-byte stride;band H	WIP (game-h)
+ModelPart	0x18	0x4	unk18	u8[4]	opaque	asm;animation_sample_vertex/asset_vertex_count 28-byte stride;band H	WIP (game-h)
 MovieRec	0x0	0x1	file	u8	candidate	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame;game-top	WIP (game-top)
 MovieRec	0x1	0x1	flag	u8	candidate	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame;game-top	WIP (game-top)
 MovieRec	0x2	0x2	last	u16	candidate	asm;func_80061940 52-byte stride from DAT_801e7edc (unk380 = &movies[id]); func_80060d20 file byte; func_800616dc last frame;game-top	WIP (game-top)
@@ -506,23 +506,23 @@ Object44	0x14	0x10	pos	VECTOR	candidate	asm;translate_active_world_positions 68-
 Object44	0x24	0x8	angle	SVECTOR	candidate	asm;translate_active_world_positions 68-byte stride, 0x18c records;band I	WIP (game-i)
 Object44	0x2c	0x8	scale	SVECTOR	candidate	asm;translate_active_world_positions 68-byte stride, 0x18c records;band K	WIP (game-k)
 Object44	0x34	0x10	arg	Object44Arg	candidate	asm;translate_active_world_positions 68-byte stride, 0x18c records;band K	WIP (game-k)
-Object44Arg	0x0	0x10	b	Object44Bytes	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);band K	WIP (game-k)
-Object44Arg	0x0	0x10	h	Object44Halves	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);band K	WIP (game-k)
-Object44Arg	0x0	0x10	w	Object44Words	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);band K	WIP (game-k)
-Object44Arg	0x0	0x10	sb	Object44SBytes	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);band K;game-47010	WIP (game-47010)
-Object44Arg	0x0	0x10	sh	Object44SHalves	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);band K;game-47010	WIP (game-47010)
-Object44Arg	0x0	0x10	m	Object44Model	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);render-tu	WIP (render-tu)
-Object44Arg	0x0	0x10	v	Object44View	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);render-tu	WIP (render-tu)
-Object44Arg	0x0	0x10	s	Object44Sound	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (func_80044900, func_80046034, func_8004485c, FDAT slot 0);render-tu	WIP (render-tu)
-Object44Bytes	0x0	0x4	unk34	u8[4]	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0x4	0x1	unk38	u8	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0x5	0x1	unk39	u8	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0x6	0x2	unk3a	Object44Link	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0x8	0x1	unk3c	u8	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0x9	0x2	unk3d	u8[2]	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0xb	0x1	unk3f	u8	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0xc	0x1	unk40	u8	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
-Object44Bytes	0xd	0x3	unk41	u8[3]	opaque	asm;func_80044900/func_800463bc/func_80046608 byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Arg	0x0	0x10	b	Object44Bytes	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);band K	WIP (game-k)
+Object44Arg	0x0	0x10	h	Object44Halves	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);band K	WIP (game-k)
+Object44Arg	0x0	0x10	w	Object44Words	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);band K	WIP (game-k)
+Object44Arg	0x0	0x10	sb	Object44SBytes	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);band K;game-47010	WIP (game-47010)
+Object44Arg	0x0	0x10	sh	Object44SHalves	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);band K;game-47010	WIP (game-47010)
+Object44Arg	0x0	0x10	m	Object44Model	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);render-tu	WIP (render-tu)
+Object44Arg	0x0	0x10	v	Object44View	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);render-tu	WIP (render-tu)
+Object44Arg	0x0	0x10	s	Object44Sound	candidate	asm;Object44+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0);render-tu	WIP (render-tu)
+Object44Bytes	0x0	0x4	unk34	u8[4]	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0x4	0x1	unk38	u8	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0x5	0x1	unk39	u8	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0x6	0x2	unk3a	Object44Link	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0x8	0x1	unk3c	u8	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0x9	0x2	unk3d	u8[2]	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0xb	0x1	unk3f	u8	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0xc	0x1	unk40	u8	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
+Object44Bytes	0xd	0x3	unk41	u8[3]	opaque	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at Object44+0x38..+0x40 by kind;band K	WIP (game-k)
 Object44Def	0x0	0x1	unk0	u8	opaque	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band K	WIP (game-k)
 Object44Def	0x1	0x1	unk1	u8	opaque	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band K	WIP (game-k)
 Object44Def	0x2	0x1	unk2	u8	opaque	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band K	WIP (game-k)
@@ -532,92 +532,92 @@ Object44Def	0x6	0x2	unk6	u16	opaque	asm;collision_cache_load_hit_bounds &DAT_801
 Object44Def	0x8	0x2	unk8	u16	opaque	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band H	WIP (game-h)
 Object44Def	0xa	0x2	unka	u16	opaque	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band K	WIP (game-k)
 Object44Def	0xc	0xc	arg	Object44DefArg	candidate	asm;collision_cache_load_hit_bounds &DAT_8018fb3c + Object44.unk6 * 24 field reads;band K;game-47010	WIP (game-47010)
-Object44DefArg	0x0	0xc	b	Object44DefBytes	candidate	asm;func_80047010 reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
-Object44DefArg	0x0	0xc	h	Object44DefHalves	candidate	asm;func_80047010 reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
-Object44DefArg	0x0	0xc	sh	Object44DefSHalves	candidate	asm;func_80047010 reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55); func_8005db30 signed halfwords (items)	WIP (game-unclaimed)
-Object44DefBytes	0x0	0x1	unkc	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0x1	0x1	unkd	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0x2	0x1	unke	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0x3	0x1	unkf	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0x4	0x2	unk10	u8[2]	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0x6	0x4	unk12	u8[4]	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0xa	0x1	unk16	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefBytes	0xb	0x1	unk17	u8	opaque	asm;func_80047010 lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
-Object44DefHalves	0x0	0x2	unkc	u16	opaque	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); func_80045ac8/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
-Object44DefHalves	0x2	0x2	unke	u16	opaque	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); func_80045ac8/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
-Object44DefHalves	0x4	0x2	unk10	u16	opaque	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); func_80045ac8/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
-Object44DefHalves	0x6	0x6	unk12	u8[6]	opaque	asm;func_80047010 lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); func_80045ac8/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
+Object44DefArg	0x0	0xc	b	Object44DefBytes	candidate	asm;map_object_update_actions reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
+Object44DefArg	0x0	0xc	h	Object44DefHalves	candidate	asm;map_object_update_actions reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55)	WIP (game-47010)
+Object44DefArg	0x0	0xc	sh	Object44DefSHalves	candidate	asm;map_object_update_actions reads Object44Def+0x0c..+0x17 as bytes (most types) and halfwords (types 0x51/0x52/0x55); func_8005db30 signed halfwords (items)	WIP (game-unclaimed)
+Object44DefBytes	0x0	0x1	unkc	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0x1	0x1	unkd	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0x2	0x1	unke	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0x3	0x1	unkf	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0x4	0x2	unk10	u8[2]	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0x6	0x4	unk12	u8[4]	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0xa	0x1	unk16	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefBytes	0xb	0x1	unk17	u8	opaque	asm;map_object_update_actions lbu def+0x0c..+0x17 by type (sound +0xf, +0x16; layer bytes +0xc, +0x17; func_800533e8 args +0x12..+0x15)	WIP (game-47010)
+Object44DefHalves	0x0	0x2	unkc	u16	opaque	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
+Object44DefHalves	0x2	0x2	unke	u16	opaque	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
+Object44DefHalves	0x4	0x2	unk10	u16	opaque	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
+Object44DefHalves	0x6	0x6	unk12	u8[6]	opaque	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
 Object44DefSHalves	0x0	0x2	unkc	s16	opaque	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
 Object44DefSHalves	0x2	0x2	unke	s16	opaque	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
 Object44DefSHalves	0x4	0x2	unk10	s16	opaque	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
 Object44DefSHalves	0x6	0x6	unk12	u8[6]	opaque	asm;func_8005db30 lh def+0x0c/+0x0e (func_8005be28 dy/dz) and lhu +0x10 into an s16 (Object44.unke while held)	WIP (game-unclaimed)
-Object44Halves	0x0	0x4	unk34	u16[2]	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
-Object44Halves	0x4	0x2	unk38	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
-Object44Halves	0x6	0x2	unk3a	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
-Object44Halves	0x8	0x2	unk3c	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
-Object44Halves	0xa	0x2	unk3e	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Halves	0xc	0x2	unk40	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
-Object44Halves	0xe	0x2	unk42	u16	opaque	asm;func_80044c34 lhu +0x3a, func_80046034 lhu +0x3c, func_80046294 sh -120 to +0x3e, func_80046914 sh +0x40;band K	WIP (game-k)
+Object44Halves	0x0	0x4	unk34	u16[2]	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
+Object44Halves	0x4	0x2	unk38	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
+Object44Halves	0x6	0x2	unk3a	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
+Object44Halves	0x8	0x2	unk3c	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
+Object44Halves	0xa	0x2	unk3e	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Halves	0xc	0x2	unk40	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
+Object44Halves	0xe	0x2	unk42	u16	opaque	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40;band K	WIP (game-k)
 Object44Link	0x0	0x2	index	u16	candidate	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules);fdat	WIP (fdat)
 Object44Link	0x0	0x2	bytes	u8[2]	candidate	asm;FDAT slot 0 lhu/sh Object44+0x3a (fdat_801e83b0);FDAT slot 3 lbu Object44+0x3b (12 modules);fdat	WIP (fdat)
-Object44Model	0x0	0x4	unk34	AnimSlot *	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0x4	0x1	unk38	u8	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0x5	0x1	unk39	u8	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0x6	0x2	unk3a	s16	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0x8	0x2	unk3c	s16	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0xa	0x1	unk3e	u8	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Model	0xb	0x5	unk3f	u8[5]	opaque	asm;func_80040ae4 kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
-Object44Place	0x0	0x1	unk0	u8	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x1	0x1	unk1	u8	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x2	0x1	unk2	u8	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x3	0x1	unk3	u8	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x4	0x2	unk4	u16	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x6	0x2	unk6	u16	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x8	0x2	unk8	s16	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0xa	0x2	unka	s16	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0xc	0x2	unkc	s16	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0xe	0x2	unke	u8[2]	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44Place	0x10	0x8	unk10	u8[8]	opaque	asm;func_80044d9c reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
-Object44SBytes	0x0	0x4	unk34	s8[4]	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x4	0x1	unk38	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x5	0x1	unk39	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x6	0x1	unk3a	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x7	0x1	unk3b	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x8	0x1	unk3c	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0x9	0x1	unk3d	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xa	0x1	unk3e	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xb	0x1	unk3f	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xc	0x1	unk40	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xd	0x1	unk41	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xe	0x1	unk42	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SBytes	0xf	0x1	unk43	s8	opaque	asm;func_80047010 lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-Object44SHalves	0x0	0x4	unk34	s16[2]	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0x4	0x2	unk38	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0x6	0x2	unk3a	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0x8	0x2	unk3c	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0xa	0x2	unk3e	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0xc	0x2	unk40	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44SHalves	0xe	0x2	unk42	s16	opaque	asm;func_80047010 lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); func_800460bc/func_80046294 sh +0x3e	WIP (game-47010)
-Object44Sound	0x0	0x4	unk34	u8[4]	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x4	0x1	unk38	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x5	0x1	unk39	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x6	0x1	unk3a	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x7	0x1	unk3b	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x8	0x1	unk3c	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0x9	0x1	unk3d	u8	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0xa	0x2	unk3e	u16	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44Sound	0xc	0x4	unk40	s32	opaque	asm;func_80040ae4 kind 0x1f: func_80046884 sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
-Object44View	0x0	0x4	unk34	AnimSlot *	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x4	0x1	unk38	u8	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x5	0x1	unk39	u8	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x6	0x1	unk3a	u8	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x7	0x1	unk3b	u8	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x8	0x1	unk3c	u8	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44View	0x9	0x7	unk3d	u8[7]	opaque	asm;func_80040ae4 kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, func_800400ac depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
-Object44Words	0x0	0x4	unk34	s32	opaque	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40;band K	WIP (game-k)
-Object44Words	0x4	0x4	unk38	s32	opaque	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40;band K	WIP (game-k)
-Object44Words	0x8	0x4	unk3c	s32	opaque	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40;band K	WIP (game-k)
-Object44Words	0xc	0x4	unk40	s32	opaque	asm;func_8004485c sw zero to +0x34/+0x38/+0x3c, func_80044900 sw pos.vy to +0x40;band K	WIP (game-k)
+Object44Model	0x0	0x4	unk34	AnimSlot *	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0x4	0x1	unk38	u8	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0x5	0x1	unk39	u8	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0x6	0x2	unk3a	s16	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0x8	0x2	unk3c	s16	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0xa	0x1	unk3e	u8	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Model	0xb	0x5	unk3f	u8[5]	opaque	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at Object44+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e;render-tu	WIP (render-tu)
+Object44Place	0x0	0x1	unk0	u8	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x1	0x1	unk1	u8	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x2	0x1	unk2	u8	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x3	0x1	unk3	u8	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x4	0x2	unk4	u16	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x6	0x2	unk6	u16	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x8	0x2	unk8	s16	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0xa	0x2	unka	s16	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0xc	0x2	unkc	s16	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0xe	0x2	unke	u8[2]	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44Place	0x10	0x8	unk10	u8[8]	opaque	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to Object44+0x38;game-big: resource_request_transition/resource_advance_transition accesses	WIP (game-big)
+Object44SBytes	0x0	0x4	unk34	s8[4]	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x4	0x1	unk38	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x5	0x1	unk39	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x6	0x1	unk3a	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x7	0x1	unk3b	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x8	0x1	unk3c	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0x9	0x1	unk3d	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xa	0x1	unk3e	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xb	0x1	unk3f	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xc	0x1	unk40	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xd	0x1	unk41	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xe	0x1	unk42	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SBytes	0xf	0x1	unk43	s8	opaque	asm;map_object_update_actions lb Object44+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
+Object44SHalves	0x0	0x4	unk34	s16[2]	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0x4	0x2	unk38	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0x6	0x2	unk3a	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0x8	0x2	unk3c	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0xa	0x2	unk3e	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0xc	0x2	unk40	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44SHalves	0xe	0x2	unk42	s16	opaque	asm;map_object_update_actions lh Object44+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+Object44Sound	0x0	0x4	unk34	u8[4]	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x4	0x1	unk38	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x5	0x1	unk39	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x6	0x1	unk3a	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x7	0x1	unk3b	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x8	0x1	unk3c	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0x9	0x1	unk3d	u8	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0xa	0x2	unk3e	u16	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44Sound	0xc	0x4	unk40	s32	opaque	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40;render-tu	WIP (render-tu)
+Object44View	0x0	0x4	unk34	AnimSlot *	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x4	0x1	unk38	u8	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x5	0x1	unk39	u8	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x6	0x1	unk3a	u8	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x7	0x1	unk3b	u8	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x8	0x1	unk3c	u8	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44View	0x9	0x7	unk3d	u8[7]	opaque	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c;render-tu	WIP (render-tu)
+Object44Words	0x0	0x4	unk34	s32	opaque	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40;band K	WIP (game-k)
+Object44Words	0x4	0x4	unk38	s32	opaque	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40;band K	WIP (game-k)
+Object44Words	0x8	0x4	unk3c	s32	opaque	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40;band K	WIP (game-k)
+Object44Words	0xc	0x4	unk40	s32	opaque	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40;band K	WIP (game-k)
 Object4c	0x0	0x1	unk0	u8	opaque	asm;translate_active_world_positions 76-byte stride, 128 records	WIP (game-c)
 Object4c	0x1	0x1	unk1	u8	opaque	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-g)
 Object4c	0x2	0x1	unk2	u8	opaque	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-g)
@@ -765,10 +765,10 @@ Object88Place	0xe	0x2	unke	s16	opaque	asm;func_800530f8 16-byte placement record
 PrimPool	0x0	0x4	base	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
 PrimPool	0x4	0x4	end	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
 PrimPool	0x8	0x4	next	u8 *	candidate	asm;packet allocation in the draw helpers (+4 end, +8 next)	
-PrimTag	0x0	0x1	unk0	u8	opaque	asm;func_80035ca4 copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
-PrimTag	0x1	0x1	len	u8	candidate	asm;func_80035ca4 copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
-PrimTag	0x2	0x1	unk2	u8	opaque	asm;func_80035ca4 copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
-PrimTag	0x3	0x1	code	u8	candidate	asm;func_80035ca4 copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
+PrimTag	0x0	0x1	unk0	u8	opaque	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
+PrimTag	0x1	0x1	len	u8	candidate	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
+PrimTag	0x2	0x1	unk2	u8	opaque	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
+PrimTag	0x3	0x1	code	u8	candidate	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code);game-gte	WIP (game-gte)
 Record04	0x0	0x1	id	u8	candidate	asm;func_80060800 4-byte stride at DAT_801983a8;band I	WIP (game-i)
 Record04	0x1	0x1	count	u8	candidate	asm;func_80060800 4-byte stride at DAT_801983a8;band I	WIP (game-i)
 Record04	0x2	0x2	unk2	u16	opaque	asm;func_80060800 4-byte stride at DAT_801983a8;band I	WIP (game-i)
@@ -855,11 +855,11 @@ Record44	0x3c	0x2	unk3c	u16	opaque	asm;player_recalculate_combat_stats/player_eq
 Record44	0x3e	0x2	unk3e	u16	opaque	asm;player_recalculate_combat_stats/player_equip_weapon/player_begin_weapon_attack 68-byte stride at DAT_801d37a4;band J	WIP (game-j)
 Record44	0x40	0x2	unk40	u16	opaque	asm;player_recalculate_combat_stats/player_equip_weapon/player_begin_weapon_attack 68-byte stride at DAT_801d37a4;band J	WIP (game-j)
 Record44	0x42	0x2	unk42	s16	opaque	asm;player_recalculate_combat_stats/player_equip_weapon/player_begin_weapon_attack 68-byte stride at DAT_801d37a4;band J	WIP (game-j)
-Record6c	0x0	0x50	unk0	Matrix3x3[4]	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads;band H	WIP (game-h)
-Record6c	0x50	0x14	unk50	Matrix3x3	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads;band H	WIP (game-h)
-Record6c	0x64	0x4	unk64	CVECTOR	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads;band H	WIP (game-h)
-Record6c	0x68	0x2	unk68	u16	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads;band H	WIP (game-h)
-Record6c	0x6a	0x2	unk6a	u16	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;func_8003bb04 field reads;band H	WIP (game-h)
+Record6c	0x0	0x50	unk0	Matrix3x3[4]	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads;band H	WIP (game-h)
+Record6c	0x50	0x14	unk50	Matrix3x3	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads;band H	WIP (game-h)
+Record6c	0x64	0x4	unk64	CVECTOR	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads;band H	WIP (game-h)
+Record6c	0x68	0x2	unk68	u16	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads;band H	WIP (game-h)
+Record6c	0x6a	0x2	unk6a	u16	opaque	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads;band H	WIP (game-h)
 SaveData	0x0	0x5	area	u8[5]	candidate	asm;func_8005f7bc/func_8005ffd0 copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it;game-top2	WIP (game-top2)
 SaveData	0x5	0x3	unk5	u8[3]	opaque	asm;func_8005f7bc/func_8005ffd0 copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it;game-top2	WIP (game-top2)
 SaveData	0x8	0x100	unk8	u8[256]	opaque	asm;func_8005f7bc/func_8005ffd0 copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it;game-top2	WIP (game-top2)
@@ -913,32 +913,32 @@ SaveHeader	0x60	0x20	clut	u16[16]	candidate	asm;src/game/card.c game.card (memor
 SaveHeader	0x80	0x180	icon	u8[3][128]	candidate	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 SaveHeader	0x200	0x4	checksum	u32	candidate	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 SaveHeader	0x204	0x7c	unk204	u8[124]	opaque	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
-ScratchCount	0x0	0x2	z	s16	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte2	WIP (game-gte2)
-ScratchCount	0x2	0x2	clip	s16	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte2	WIP (game-gte2)
-ScratchCount	0x4	0x4	unk4	s32	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
-ScratchCount	0x8	0x4	ot_count	s32	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
-ScratchCount	0xc	0x4	prim_count	s32	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
-ScratchCount	0x10	0x2	clut	u16	candidate	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
-ScratchCount	0x12	0xe	unk12	u8[14]	opaque	asm;func_8004290c/func_8003df50/func_800400ac copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;func_80035ca4 counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
-ScratchDraw	0x0	0x20	transform	MATRIX	candidate	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (func_8003bb04) or the model counters (func_8004290c);game-gte	WIP (game-gte)
-ScratchDraw	0x0	0x20	count	ScratchCount	candidate	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (func_8003bb04) or the model counters (func_8004290c);game-gte	WIP (game-gte)
-ScratchLayer	0x0	0x8	unk100	SVECTOR	opaque	asm;func_8003be34 SVECTOR at 0x1f800100 handed to func_8003bb04 and the VECTOR origin at 0x1f800108;render-tu	WIP (render-tu)
-ScratchLayer	0x8	0x10	unk108	VECTOR	opaque	asm;func_8003be34 SVECTOR at 0x1f800100 handed to func_8003bb04 and the VECTOR origin at 0x1f800108;render-tu	WIP (render-tu)
-ScratchLoad	0x0	0x14	unk100	u8[20]	opaque	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchLoad	0x14	0x8	angle	SVECTOR	candidate	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchLoad	0x1c	0x4	model_wanted	u8 *	candidate	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchLoad	0x20	0x4	sound_wanted	u8 *	candidate	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchLoad	0x24	0x14c	models	u8[332]	candidate	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchLoad	0x170	0x60	sounds	u8[96]	candidate	asm;func_80040ae4 sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;func_800408d0/func_800409c8 read the wanted pointers;render-tu	WIP (render-tu)
-ScratchMapWork	0x0	0x4	rgb	CVECTOR	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x4	0x4	near	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x8	0x4	far	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0xc	0x4	opz	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x10	0x2	z	s16	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x12	0x2	clip	s16	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x14	0x4	count	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x18	0x4	ot_count	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
-ScratchMapWork	0x1c	0x4	prim_count	s32	candidate	asm;func_80039d50/func_8003ab04: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchCount	0x0	0x2	z	s16	candidate	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte2	WIP (game-gte2)
+ScratchCount	0x2	0x2	clip	s16	candidate	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte2	WIP (game-gte2)
+ScratchCount	0x4	0x4	unk4	s32	opaque	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0x8	0x4	ot_count	s32	candidate	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0xc	0x4	prim_count	s32	candidate	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0x10	0x2	clut	u16	candidate	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchCount	0x12	0xe	unk12	u8[14]	opaque	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084;game-gte	WIP (game-gte)
+ScratchDraw	0x0	0x20	transform	MATRIX	candidate	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (render_map_cell_object) or the model counters (menu_render_item_model);game-gte	WIP (game-gte)
+ScratchDraw	0x0	0x20	count	ScratchCount	candidate	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (render_map_cell_object) or the model counters (menu_render_item_model);game-gte	WIP (game-gte)
+ScratchLayer	0x0	0x8	unk100	SVECTOR	opaque	asm;render_map_cell_layers SVECTOR at 0x1f800100 handed to render_map_cell_object and the VECTOR origin at 0x1f800108;render-tu	WIP (render-tu)
+ScratchLayer	0x8	0x10	unk108	VECTOR	opaque	asm;render_map_cell_layers SVECTOR at 0x1f800100 handed to render_map_cell_object and the VECTOR origin at 0x1f800108;render-tu	WIP (render-tu)
+ScratchLoad	0x0	0x14	unk100	u8[20]	opaque	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchLoad	0x14	0x8	angle	SVECTOR	candidate	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchLoad	0x1c	0x4	model_wanted	u8 *	candidate	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchLoad	0x20	0x4	sound_wanted	u8 *	candidate	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchLoad	0x24	0x14c	models	u8[332]	candidate	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchLoad	0x170	0x60	sounds	u8[96]	candidate	asm;render_scene_and_update_resources sets 0x1f80011c/120 to the flag arrays at 0x1f800124/0x1f800270 and the angle at 0x1f800114;resource_vab_update_range/resource_tmd_update_range read the wanted pointers;render-tu	WIP (render-tu)
+ScratchMapWork	0x0	0x4	rgb	CVECTOR	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x4	0x4	near	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x8	0x4	far	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0xc	0x4	opz	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x10	0x2	z	s16	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x12	0x2	clip	s16	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x14	0x4	count	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x18	0x4	ot_count	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
+ScratchMapWork	0x1c	0x4	prim_count	s32	candidate	asm;render_enqueue_map/render_enqueue_map_subdivided: colour 0x1f800054, fog near/far 0x1f800058/5c, nclip 0x1f800060, depth/clip lhu 0x1f800064/66, counters 0x1f800068/6c/70;game-gte2	WIP (game-gte2)
 ScratchModelWork	0x0	0x10	unk54	VECTOR	opaque	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
 ScratchModelWork	0x10	0x4	rgb	CVECTOR	candidate	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
 ScratchModelWork	0x14	0x4	near	s32	candidate	asm;model part renderers: nclip result at 0x1f800070, lighting colour at 0x1f800064, gte_stlvnl at 0x1f800054;game-gte2	WIP (game-gte2)
@@ -954,8 +954,8 @@ ScratchPad	0x1c	0x4	tag	PrimTag	candidate	asm;scratchpad words 0x1f800010/24/4c/
 ScratchPad	0x20	0x4	prim	u32 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x24	0x4	part	ModelPart *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x28	0x4	normals	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
-ScratchPad	0x2c	0x4	poly	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;func_80037bec packet pointer at 0x1f80002c	WIP (game-gte2)
-ScratchPad	0x30	0x10	vert	ScreenVertex *[4]	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;func_80037bec vertex pointers at 0x1f800030..3c	WIP (game-gte2)
+ScratchPad	0x2c	0x4	poly	u8 *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;render_enqueue_blended_tmd packet pointer at 0x1f80002c	WIP (game-gte2)
+ScratchPad	0x30	0x10	vert	ScreenVertex *[4]	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;render_enqueue_blended_tmd vertex pointers at 0x1f800030..3c	WIP (game-gte2)
 ScratchPad	0x40	0x4	lit	CVECTOR	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte2	WIP (game-gte2)
 ScratchPad	0x44	0x4	screen	ScreenVertex *	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x48	0x4	unk48	ScreenVertex *	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
@@ -965,22 +965,22 @@ ScratchPad	0x54	0x20	w	ScratchWork	candidate	asm;scratchpad words 0x1f800010/24/
 ScratchPad	0x74	0x20	draw	ScratchDraw	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;game-gte	WIP (game-gte)
 ScratchPad	0x94	0x6c	unk94	u8[108]	opaque	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;band H	WIP (game-h)
 ScratchPad	0x100	0x294	u	ScratchPhase	candidate	asm;scratchpad words 0x1f800010/24/4c/11c/120 read by the draw code;render-tu	WIP (render-tu)
-ScratchPhase	0x0	0x18	layer	ScratchLayer	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (func_8003be34), the object-draw state (func_80040ae4) or ScratchView while a frame is built;render-tu	WIP (render-tu)
-ScratchPhase	0x0	0x1d0	load	ScratchLoad	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (func_8003be34), the object-draw state (func_80040ae4) or ScratchView while a frame is built;render-tu	WIP (render-tu)
-ScratchPhase	0x0	0x294	view	ScratchView	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (func_8003be34), the object-draw state (func_80040ae4) or ScratchView while a frame is built;render-tu	WIP (render-tu)
+ScratchPhase	0x0	0x18	layer	ScratchLayer	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (render_map_cell_layers), the object-draw state (render_scene_and_update_resources) or ScratchView while a frame is built;render-tu	WIP (render-tu)
+ScratchPhase	0x0	0x1d0	load	ScratchLoad	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (render_map_cell_layers), the object-draw state (render_scene_and_update_resources) or ScratchView while a frame is built;render-tu	WIP (render-tu)
+ScratchPhase	0x0	0x294	view	ScratchView	candidate	asm;scratchpad 0x1f800100.. holds the map layer position/origin (render_map_cell_layers), the object-draw state (render_scene_and_update_resources) or ScratchView while a frame is built;render-tu	WIP (render-tu)
 ScratchView	0x0	0x18	unk100	u8[24]	opaque	asm;view_build_visibility_grid/view_grid_occlude_walls_ascending/view_grid_occlude_walls_descending scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120;render-tu	WIP (render-tu)
 ScratchView	0x18	0x4	x	s32	candidate	asm;view_build_visibility_grid/view_grid_occlude_walls_ascending/view_grid_occlude_walls_descending scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120;render-tu	WIP (render-tu)
 ScratchView	0x1c	0x4	z	s32	candidate	asm;view_build_visibility_grid/view_grid_occlude_walls_ascending/view_grid_occlude_walls_descending scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120;render-tu	WIP (render-tu)
 ScratchView	0x20	0x271	grid	u8[25][25]	candidate	asm;view_build_visibility_grid/view_grid_occlude_walls_ascending/view_grid_occlude_walls_descending scratchpad words 0x1f800118/11c and the 25x25 grid at 0x1f800120;render-tu	WIP (render-tu)
 ScratchWork	0x0	0x20	model	ScratchModelWork	candidate	asm;scratchpad 0x1f800054..0x1f800074: model part view vs map layer view;game-gte2	WIP (game-gte2)
 ScratchWork	0x0	0x20	map	ScratchMapWork	candidate	asm;scratchpad 0x1f800054..0x1f800074: model part view vs map layer view;game-gte2	WIP (game-gte2)
-ScreenTint	0x0	0x1	mode	u8	candidate	asm;func_8003d4ac/func_8003d624	
-ScreenTint	0x1	0x1	r	u8	candidate	asm;func_8003d4ac/func_8003d624	
-ScreenTint	0x2	0x1	g	u8	candidate	asm;func_8003d4ac/func_8003d624	
-ScreenTint	0x3	0x1	b	u8	candidate	asm;func_8003d4ac/func_8003d624	
-ScreenVertex	0x0	0x4	sxy	DVECTOR	candidate	asm;func_8004290c/func_8003df50 gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;func_80035ca4 reads them by byte offset;game-gte	WIP (game-gte)
-ScreenVertex	0x4	0x2	z	s16	candidate	asm;func_8004290c/func_8003df50 gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;func_80035ca4 reads them by byte offset;game-gte	WIP (game-gte)
-ScreenVertex	0x6	0x2	fog	s16	candidate	asm;func_8004290c/func_8003df50 gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;func_80035ca4 reads them by byte offset;game-gte	WIP (game-gte)
+ScreenTint	0x0	0x1	mode	u8	candidate	asm;func_8003d4ac/render_set_color_overlay	WIP field name
+ScreenTint	0x1	0x1	r	u8	candidate	asm;func_8003d4ac/render_set_color_overlay	WIP field name
+ScreenTint	0x2	0x1	g	u8	candidate	asm;func_8003d4ac/render_set_color_overlay	WIP field name
+ScreenTint	0x3	0x1	b	u8	candidate	asm;func_8003d4ac/render_set_color_overlay	WIP field name
+ScreenVertex	0x0	0x4	sxy	DVECTOR	candidate	asm;menu_render_item_model/render_player_weapon gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;render_enqueue_textured_tmd reads them by byte offset;game-gte	WIP (game-gte)
+ScreenVertex	0x4	0x2	z	s16	candidate	asm;menu_render_item_model/render_player_weapon gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;render_enqueue_textured_tmd reads them by byte offset;game-gte	WIP (game-gte)
+ScreenVertex	0x6	0x2	fog	s16	candidate	asm;menu_render_item_model/render_player_weapon gte_stsxy/gte_stszotz into 8-byte records at Data80199154+0x11b00, fog halfword at +6;render_enqueue_textured_tmd reads them by byte offset;game-gte	WIP (game-gte)
 ScrollRec	0x0	0x1	mode	u8	candidate	asm;vram_scroll_find_free/vram_scroll_start/vram_scroll_update 24-byte stride at Data80199154+0x159c8;band H	WIP (game-h)
 ScrollRec	0x1	0x1	unk1	u8	opaque	asm;vram_scroll_find_free/vram_scroll_start/vram_scroll_update 24-byte stride at Data80199154+0x159c8;band H	WIP (game-h)
 ScrollRec	0x2	0x1	unk2	u8	opaque	asm;vram_scroll_find_free/vram_scroll_start/vram_scroll_update 24-byte stride at Data80199154+0x159c8;band H	WIP (game-h)
@@ -1014,16 +1014,16 @@ SoundState	0x5f0	0x14a0	effects	SoundEffect[528]	candidate	asm;band A field acce
 SoundState	0x1a90	0x58	slots	SoundSlot[11]	candidate	asm;band A field accesses;game loop clears 0x6ba words	WIP (game-a)
 SoundUnk5c8	0x0	0x2	unk0	s16	opaque	asm;sound init loop (4-byte stride, 10 entries)	WIP (game-a)
 SoundUnk5c8	0x2	0x2	unk2	s16	opaque	asm;sound init loop (4-byte stride, 10 entries)	WIP (game-a)
-SpriteRec	0x0	0x1	visible	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x1	0x1	mode	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x2	0x1	u	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x3	0x1	v	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x4	0x1	w	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x5	0x1	h	u8	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x6	0x2	x	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x8	0x2	y	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0xa	0x2	unka	s16	opaque	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0xc	0x2	unkc	s16	opaque	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0xe	0x2	clut	u16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x10	0x2	tpage	u16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
-SpriteRec	0x12	0x2	z	s16	candidate	asm;func_80041ad4 field accesses;20-byte stride of the .data sprite lists	
+SpriteRec	0x0	0x1	visible	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x1	0x1	mode	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x2	0x1	u	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x3	0x1	v	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x4	0x1	w	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x5	0x1	h	u8	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x6	0x2	x	s16	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x8	0x2	y	s16	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0xa	0x2	unka	s16	opaque	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0xc	0x2	unkc	s16	opaque	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0xe	0x2	clut	u16	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x10	0x2	tpage	u16	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name
+SpriteRec	0x12	0x2	z	s16	candidate	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field name

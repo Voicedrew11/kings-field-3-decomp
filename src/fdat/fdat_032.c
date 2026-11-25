@@ -76,13 +76,13 @@ void func_801e85c0(Object44 *obj)
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
     }
-    if (func_80046884(0x24, 0x32, 3, 3, 0x8000) != 0) {
+    if (player_camera_within_map_region(0x24, 0x32, 3, 3, 0x8000) != 0) {
         if (DAT_801b24e4.unk10a != 0) {
-            func_800445b8(2, 0x4a, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x4a, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
         }
     } else {
         DAT_801b24e4.unk10a = 0;
-        func_800445b8(2, 0x4d, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4d, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
     }
 }
 
@@ -146,7 +146,7 @@ void func_801e8708(void)
         door->unk0 = 0;
         k = 253;
         DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
-        func_800445b8(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
         door = &DAT_8018fb3c.objects[90];
         door->unk0 = 0;
         k = 90;
@@ -166,7 +166,7 @@ void func_801e8708(void)
             }
         }
     } else if (DAT_801ba984.unk84[5] != 10) {
-        func_800445b8(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
         DAT_8018fb3c.objects[90].unk0 = 2;
         DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
         {
@@ -195,7 +195,7 @@ void func_801e8708(void)
             door->unk0 = 0;
             k = 253;
             DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
-            func_800445b8(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
             door = &DAT_8018fb3c.objects[90];
             door->unk0 = 0;
             k = 90;
@@ -215,7 +215,7 @@ void func_801e8708(void)
                 }
             }
         } else {
-            func_800445b8(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
+            map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
             DAT_8018fb3c.objects[90].unk0 = 2;
             DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
             {

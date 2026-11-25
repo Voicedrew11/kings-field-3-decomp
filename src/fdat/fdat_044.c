@@ -56,7 +56,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
     Object44 *link;
     Object44Def *def;
 
-    for (i = 0; (i = func_80045c7c(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
+    for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &DAT_8018fb3c.objects[i];
         def = &DAT_8018fb3c.defs[obj->unk6];
         DAT_801ba984.unk0 = 1;
@@ -65,20 +65,20 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
-                        func_80041eec(obj->arg.b.unk3f);
+                        notify_enqueue(obj->arg.b.unk3f);
                     }
                     if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
-                        func_80041eec(0x1a);
+                        notify_enqueue(0x1a);
                     } else if (obj->unk6 == 0xb7) {
-                        func_80041eec(0x1e);
+                        notify_enqueue(0x1e);
                     } else if (obj->unk6 == 0xf5) {
-                        func_80041eec(0xe);
+                        notify_enqueue(0xe);
                     } else if (obj->unk6 == 0xba) {
-                        func_80041eec(0x22);
+                        notify_enqueue(0x22);
                     } else if (obj->unk6 == 0x12e || obj->unk6 == 0x12f || obj->unk6 == 0x130) {
-                        func_80041eec(0x21);
+                        notify_enqueue(0x21);
                     } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
-                        func_80041eec(8);
+                        notify_enqueue(8);
                     }
                 }
             } else {
@@ -119,14 +119,14 @@ void func_801e85dc(void)
 {
 }
 
-/* Slot 3: objects 0x62 (when func_80046884 hits) and 0x63 hurt the player. */
+/* Slot 3: objects 0x62 (when player_camera_within_map_region hits) and 0x63 hurt the player. */
 ADDRESS(0x801e85e4, 0x9c)
 void func_801e85e4(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0x62:
-        if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
-                          obj->pos.vy + 3200) == 0) {
+        if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
+                                            obj->arg.b.unk39, obj->pos.vy + 3200) == 0) {
             break;
         }
         /* fall through */
@@ -175,12 +175,12 @@ void func_801e86b0(void)
     if (DAT_801ba984.unke[0xa] >= 2) {
         DAT_8018fb3c.objects[7].unk6 = 0xff;
         DAT_8018fb3c.objects[49].unk6 = 0xff;
-        func_800445b8(2, 0x4e, 0, 0x21, 2, 2, 3, 0, 0x2f);
-        func_800445b8(2, 0x4e, 3, 12, 0x48, 2, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4e, 0, 0x21, 2, 2, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4e, 3, 12, 0x48, 2, 3, 0, 0x2f);
         state = 8;
     } else {
-        func_800445b8(2, 0x4c, 0, 0x21, 2, 2, 3, 0, 0x2f);
-        func_800445b8(2, 0x4c, 3, 12, 0x48, 2, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4c, 0, 0x21, 2, 2, 3, 0, 0x2f);
+        map_cell_copy_rotated_fields(2, 0x4c, 3, 12, 0x48, 2, 3, 0, 0x2f);
         state = 1;
     }
     DAT_80185da8.objects[66].unk0 = state;

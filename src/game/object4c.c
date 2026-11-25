@@ -215,7 +215,7 @@ void func_80053a0c(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
     SVECTOR rotation;
     SVECTOR v;
 
-    func_8004352c(obj->unk3 + 40, obj->unk4, obj->unk14, vertex, &v);
+    animation_sample_vertex(obj->unk3 + 40, obj->unk4, obj->unk14, vertex, &v);
     v.vx = v.vx * scale->vx >> 12;
     v.vy = v.vy * scale->vy >> 12;
     v.vz = v.vz * scale->vz >> 12;

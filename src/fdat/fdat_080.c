@@ -136,7 +136,7 @@ void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
             DAT_801ba984.unk32[0x36] = 1;
             func_8005bd34();
         }
-        func_800466e8(0xf1);
+        map_object_process_marker_all(0xf1);
     }
 }
 
@@ -228,7 +228,7 @@ void func_801e8958(u8 id)
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
     obj = &DAT_8018fb3c.objects[87];
@@ -243,7 +243,7 @@ void func_801e8958(u8 id)
         cd_request_service_vab();
         cd_request_service_stream();
         player_get_camera_pose(&pos, &angle);
-        func_800422b8(&pos, &angle);
+        render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
     func_800608ec(9, 0);
@@ -257,7 +257,7 @@ void func_801e8af0(Object88 *record, s32 event)
     if (event == 0) {
         if (DAT_801ba984.unk32[0x32] == 0) {
             DAT_801ba984.unk32[0x32] = 1;
-            func_800463bc(0xf2);
+            map_object_apply_marker_signal(0xf2);
             func_8005bd34();
         }
     }
@@ -268,14 +268,14 @@ ADDRESS(0x801e8b38, 0x80)
 void func_801e8b38(void)
 {
     if (DAT_801ba984.unk32[0x32] != 0) {
-        func_800463bc(0xf2);
+        map_object_apply_marker_signal(0xf2);
     }
     if (DAT_801ba984.unk7f[3] != 0) {
         DAT_8018fb3c.objects[6].unk6 = 0xff;
         DAT_8018fb3c.objects[87].unk6 = 0xff;
     }
     if (DAT_801ba984.unk32[0x36] != 0) {
-        func_800466e8(0xf1);
+        map_object_process_marker_all(0xf1);
     }
     func_801e86c4();
     DAT_801ba984.unk84[5] = 0x1a;

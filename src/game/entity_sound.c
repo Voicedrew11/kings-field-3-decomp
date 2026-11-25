@@ -504,15 +504,15 @@ void func_800500a8(void)
 
                 drop = def->unk30 + random_centered_triangular_scaled(def->unk30);
                 if (drop != 0) {
-                    func_80046294(drop, &obj->pos, -(obj->unk1e >> 1));
+                    map_object_spawn_scattered_effect(drop, &obj->pos, -(obj->unk1e >> 1));
                 }
                 if (obj->unk0 == 0 || obj->unk0 == 4) {
                     if (script[12] != 0xff && (rand() >> 7) < script[13]) {
-                        func_800460bc(1, script[12], &obj->pos, -(obj->unk1e >> 1));
+                        map_object_spawn_effect(1, script[12], &obj->pos, -(obj->unk1e >> 1));
                     }
                 } else if (obj->unk0 == 1) {
                     if (obj->unkb != 0xff) {
-                        func_800460bc(0, obj->unkb, &obj->pos, -(obj->unk1e >> 1));
+                        map_object_spawn_effect(0, obj->unkb, &obj->pos, -(obj->unk1e >> 1));
                     }
                 }
             }
