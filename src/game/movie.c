@@ -50,60 +50,63 @@ void func_80060d20(void)
     s32 vol; /* never initialized: retail ramps whatever s4 held */
     s32 n;
 
-    func_80019ab4();
+    cd_request_wait_idle();
     func_8002b6f0();
     for (i = 127, j = 128; i != -1; i--, j++) {
         if ((p = DAT_80199154.models[j]) != NULL) {
-            while (func_8001947c(p) == 3)
+            while (memory_block_kind(p) == 3)
                 ;
-            func_80019474(p, 1);
+            memory_block_set_kind(p, 1);
         }
     }
     for (i = 299, j = 256; i != -1; i--, j++) {
         if ((p = DAT_80199154.models[j]) != NULL) {
-            while (func_8001947c(p) == 3)
+            while (memory_block_kind(p) == 3)
                 ;
-            func_80019474(p, 1);
+            memory_block_set_kind(p, 1);
         }
     }
     for (i = 31, j = 556 + DAT_8018fad4.area[0] * 32; i != -1; i--, j++) {
         if ((p = DAT_80199154.models[j]) != NULL) {
-            while (func_8001947c(p) == 3)
+            while (memory_block_kind(p) == 3)
                 ;
-            func_80019474(p, 1);
+            memory_block_set_kind(p, 1);
         }
     }
     DrawSync(0);
     DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
     DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x7400;
     if ((p = DAT_80199154.models[0x629]) == NULL) {
-        if ((p = func_8001939c((HeapBlock *)DAT_800c8954, 0x10000, &DAT_80199154.models[0x629])) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x10000,
+                                             &DAT_80199154.models[0x629])) == NULL) {
             return;
         }
-        func_80019474(p, 2);
-        func_8001949c(p, 0x629);
-    } else if (func_8001947c(p) == 1) {
-        func_80019474(p, 2);
+        memory_block_set_kind(p, 2);
+        memory_block_set_tag(p, 0x629);
+    } else if (memory_block_kind(p) == 1) {
+        memory_block_set_kind(p, 2);
     }
     DAT_801e7edc.unk374[0] = (u_long *)p;
     if ((p = DAT_80199154.models[0x62a]) == NULL) {
-        if ((p = func_8001939c((HeapBlock *)DAT_800c8954, 0x10000, &DAT_80199154.models[0x62a])) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x10000,
+                                             &DAT_80199154.models[0x62a])) == NULL) {
             return;
         }
-        func_80019474(p, 2);
-        func_8001949c(p, 0x62a);
-    } else if (func_8001947c(p) == 1) {
-        func_80019474(p, 2);
+        memory_block_set_kind(p, 2);
+        memory_block_set_tag(p, 0x62a);
+    } else if (memory_block_kind(p) == 1) {
+        memory_block_set_kind(p, 2);
     }
     DAT_801e7edc.unk374[1] = (u_long *)p;
     if ((p = DAT_80199154.models[0x62b]) == NULL) {
-        if ((p = func_8001939c((HeapBlock *)DAT_800c8954, 0x3c00, &DAT_80199154.models[0x62b])) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x3c00,
+                                             &DAT_80199154.models[0x62b])) == NULL) {
             return;
         }
-        func_80019474(p, 2);
-        func_8001949c(p, 0x62b);
-    } else if (func_8001947c(p) == 1) {
-        func_80019474(p, 2);
+        memory_block_set_kind(p, 2);
+        memory_block_set_tag(p, 0x62b);
+    } else if (memory_block_kind(p) == 1) {
+        memory_block_set_kind(p, 2);
     }
     DAT_801e7edc.unk37c = (u_long *)p;
     if (DAT_801e7edc.unk380->file < 16) {
@@ -162,9 +165,9 @@ void func_80060d20(void)
     CdReadyCallback(0);
     ExitCriticalSection();
     CdControlB(CdlPause, 0, 0);
-    func_80019474(DAT_80199154.models[0x629], 1);
-    func_80019474(DAT_80199154.models[0x62a], 1);
-    func_80019474(DAT_80199154.models[0x62b], 1);
+    memory_block_set_kind(DAT_80199154.models[0x629], 1);
+    memory_block_set_kind(DAT_80199154.models[0x62a], 1);
+    memory_block_set_kind(DAT_80199154.models[0x62b], 1);
     DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
     DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x1a000;
 }

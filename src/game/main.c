@@ -52,8 +52,8 @@ SDATA(0x8009c214, 0x8)
 DATA(0x8009c3f8, 0x4, ".sbss")
 s32 DAT_8009c3f8;
 
-void func_80014bd4(void);
-void func_80015064(void);
+void game_main_loop(void);
+void game_shutdown(void);
 
 ADDRESS(0x80014b48, 0x8c)
 int main(void)
@@ -65,11 +65,11 @@ int main(void)
     InitCARD(1);
     ChangeClearPAD(0);
     ExitCriticalSection();
-    func_80014bd4();
+    game_main_loop();
 }
 
 ADDRESS(0x80014bd4, 0x490)
-void func_80014bd4(void)
+void game_main_loop(void)
 {
     RECT rect = {1016, 96, 32, 32};
     VECTOR pos;
@@ -77,26 +77,26 @@ void func_80014bd4(void)
     s32 continued = 0;
     s32 exit;
 
-    func_80018fbc((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
-    func_80018fbc((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
-    func_80018fbc((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
-    func_80018fbc((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
-    func_80018fbc((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);
-    func_80018fbc((u32 *)&DAT_8018fb3c, 0, sizeof(DAT_8018fb3c) / 4);
-    func_80018fbc((u32 *)&DAT_80185da8, 0, sizeof(DAT_80185da8) / 4);
-    func_80018fbc((u32 *)&DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
-    func_80018fbc((u32 *)&DAT_801b09fc, 0, sizeof(DAT_801b09fc) / 4);
-    func_80018fbc((u32 *)&DAT_801e7edc, 0, sizeof(DAT_801e7edc) / 4);
-    func_80018fbc((u32 *)DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
-    func_80018fbc((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
-    func_8001a438();
+    repeat_store_word((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
+    repeat_store_word((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
+    repeat_store_word((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
+    repeat_store_word((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
+    repeat_store_word((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);
+    repeat_store_word((u32 *)&DAT_8018fb3c, 0, sizeof(DAT_8018fb3c) / 4);
+    repeat_store_word((u32 *)&DAT_80185da8, 0, sizeof(DAT_80185da8) / 4);
+    repeat_store_word((u32 *)&DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
+    repeat_store_word((u32 *)&DAT_801b09fc, 0, sizeof(DAT_801b09fc) / 4);
+    repeat_store_word((u32 *)&DAT_801e7edc, 0, sizeof(DAT_801e7edc) / 4);
+    repeat_store_word((u32 *)DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
+    repeat_store_word((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
+    cd_initialize();
     func_80035394();
     func_8003c9dc();
-    func_8001509c();
+    audio_initialize_runtime();
     func_8004485c();
     func_8004b8fc();
     func_8005bbf4();
-    func_80017664();
+    resource_initialize_game_assets();
     func_80061918();
     EnterCriticalSection();
     DecDCTReset(0);
@@ -114,13 +114,13 @@ void func_80014bd4(void)
     } else {
         continued = 1;
     }
-    func_8001796c();
+    resource_run_initial_transition();
     if (continued && DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqPause(DAT_801b09fc.seq_id);
     }
     func_8002b760();
     func_800350fc(&rect, 0, 1, 1);
-    func_8001937c((void *)DAT_800c8954, sizeof(DAT_800c8954));
+    memory_arena_initialize_blocks((void *)DAT_800c8954, sizeof(DAT_800c8954));
     if (continued == 1) {
         DAT_801e7edc.unk384 = 3;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[3];
@@ -135,7 +135,7 @@ void func_80014bd4(void)
         }
     }
     func_80046c00(0x82, 0x1000, 0x1000, 0);
-    func_80019ab4();
+    cd_request_wait_idle();
     func_80046c00(0x82, 0x1000, 0, -128);
     DAT_8009c3f8 = 0;
     for (;;) {
@@ -147,13 +147,13 @@ void func_80014bd4(void)
         func_8005bc50();
         DAT_801b24e4.unke = 0;
         func_8005eb20();
-        func_80018358();
+        resource_advance_transition();
         func_80061940();
         func_8002b330(&pos, &angle);
-        func_800156bc(&pos, &angle);
+        audio_update_listener(&pos, &angle);
         func_80034300();
-        func_80018cd0();
-        func_80015a48();
+        cd_request_service_stream();
+        cd_request_service_vab();
         func_800422b8(&pos, &angle);
         exit = DAT_8009c3f8;
         if (exit == 0) {
@@ -161,17 +161,17 @@ void func_80014bd4(void)
         }
         switch (exit) {
         case EXIT_ENDING_A:
-            func_80015064();
+            game_shutdown();
             *NEXT_PROGRAM_BYTE = PROGRAM_END;
             *MAILBOX_BYTE_8 = 2;
             return;
         case EXIT_ENDING_B:
-            func_80015064();
+            game_shutdown();
             *NEXT_PROGRAM_BYTE = PROGRAM_END;
             *MAILBOX_BYTE_8 = 3;
             return;
         case EXIT_TITLE:
-            func_80015064();
+            game_shutdown();
             *NEXT_PROGRAM_BYTE = PROGRAM_OPEN;
             return;
         }
@@ -179,10 +179,10 @@ void func_80014bd4(void)
 }
 
 ADDRESS(0x80015064, 0x38)
-void func_80015064(void)
+void game_shutdown(void)
 {
-    func_80015354();
-    func_8001a5c0();
+    audio_shutdown();
+    cd_close_events();
     PadStop();
     ResetGraph(3);
 }

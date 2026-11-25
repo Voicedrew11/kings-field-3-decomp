@@ -18,14 +18,14 @@
 /* A free remainder smaller than this stays inside the allocated block. */
 #define HEAP_SPLIT_MIN 2060
 
-void func_80019004(HeapBlock *block);
-void func_80019088(HeapBlock *block);
-HeapBlock *func_800190a8(HeapBlock *arena, u32 size);
-void func_800191f8(HeapBlock *arena);
-void func_80019294(HeapBlock *arena);
+void memory_arena_coalesce_free(HeapBlock *block);
+void memory_arena_free(HeapBlock *block);
+HeapBlock *memory_arena_find_block(HeapBlock *arena, u32 size);
+void memory_arena_wait_pending(HeapBlock *arena);
+void memory_arena_compact(HeapBlock *arena);
 
 ADDRESS(0x80018f5c, 0x30)
-u32 *func_80018f5c(u32 *dst, u32 *src, s32 count)
+u32 *resource_copy_words(u32 *dst, u32 *src, s32 count)
 {
     while (count--) {
         *dst++ = *src++;
@@ -34,7 +34,7 @@ u32 *func_80018f5c(u32 *dst, u32 *src, s32 count)
 }
 
 ADDRESS(0x80018f8c, 0x30)
-u16 *func_80018f8c(u16 *dst, u16 *src, s32 count)
+u16 *resource_copy_halfwords(u16 *dst, u16 *src, s32 count)
 {
     while (count--) {
         *dst++ = *src++;
@@ -43,7 +43,7 @@ u16 *func_80018f8c(u16 *dst, u16 *src, s32 count)
 }
 
 ADDRESS(0x80018fbc, 0x24)
-u32 *func_80018fbc(u32 *dst, u32 value, s32 count)
+u32 *repeat_store_word(u32 *dst, u32 value, s32 count)
 {
     while (count--) {
         *dst++ = value;
@@ -52,7 +52,7 @@ u32 *func_80018fbc(u32 *dst, u32 value, s32 count)
 }
 
 ADDRESS(0x80018fe0, 0x24)
-u16 *func_80018fe0(u16 *dst, u16 value, s32 count)
+u16 *repeat_store_halfword(u16 *dst, u16 value, s32 count)
 {
     while (count--) {
         *dst++ = value;
@@ -61,7 +61,7 @@ u16 *func_80018fe0(u16 *dst, u16 value, s32 count)
 }
 
 ADDRESS(0x80019004, 0x84)
-void func_80019004(HeapBlock *block)
+void memory_arena_coalesce_free(HeapBlock *block)
 {
     HeapBlock *next = block;
 
@@ -79,7 +79,7 @@ void func_80019004(HeapBlock *block)
 }
 
 ADDRESS(0x80019088, 0x20)
-void func_80019088(HeapBlock *block)
+void memory_arena_free(HeapBlock *block)
 {
     block->state = HEAP_FREE;
     if (block->owner) {
@@ -89,7 +89,7 @@ void func_80019088(HeapBlock *block)
 }
 
 ADDRESS(0x800190a8, 0x150)
-HeapBlock *func_800190a8(HeapBlock *arena, u32 size)
+HeapBlock *memory_arena_find_block(HeapBlock *arena, u32 size)
 {
     HeapBlock *block = arena;
     HeapBlock *start;
@@ -111,10 +111,10 @@ HeapBlock *func_800190a8(HeapBlock *arena, u32 size)
             if ((u32)((u8 *)block - (u8 *)start - sizeof(HeapBlock)) >= size) {
                 block = start;
                 while (block->state == HEAP_CACHED) {
-                    func_80019088(block);
+                    memory_arena_free(block);
                     block = HEAP_NEXT(block);
                 }
-                func_80019004(start);
+                memory_arena_coalesce_free(start);
                 return start;
             }
         } else {
@@ -125,19 +125,19 @@ HeapBlock *func_800190a8(HeapBlock *arena, u32 size)
 }
 
 ADDRESS(0x800191f8, 0x9c)
-void func_800191f8(HeapBlock *arena)
+void memory_arena_wait_pending(HeapBlock *arena)
 {
     HeapBlock *block;
 
     for (block = arena; block->state != HEAP_END; block = HEAP_NEXT(block)) {
         while (block->state == HEAP_LOADING) {
-            func_80019ab4();
+            cd_request_wait_idle();
         }
     }
 }
 
 ADDRESS(0x80019294, 0xe8)
-void func_80019294(HeapBlock *arena)
+void memory_arena_compact(HeapBlock *arena)
 {
     HeapBlock *block = arena;
     HeapBlock *free = arena;
@@ -146,11 +146,11 @@ void func_80019294(HeapBlock *arena)
     u32 *dst;
     u32 words;
 
-    func_800191f8(arena);
+    memory_arena_wait_pending(arena);
     while (block->state != HEAP_END) {
         next = (HeapBlock *)((u8 *)block + block->size + sizeof(HeapBlock));
         if (block->state == HEAP_CACHED) {
-            func_80019088(block);
+            memory_arena_free(block);
         }
         if (block->state == HEAP_USED) {
             if (block != free) {
@@ -173,7 +173,7 @@ void func_80019294(HeapBlock *arena)
 }
 
 ADDRESS(0x8001937c, 0x20)
-void func_8001937c(void *arena, s32 size)
+void memory_arena_initialize_blocks(void *arena, s32 size)
 {
     HeapBlock *block = (HeapBlock *)arena;
 
@@ -184,7 +184,7 @@ void func_8001937c(void *arena, s32 size)
 }
 
 ADDRESS(0x8001939c, 0xb8)
-u8 *func_8001939c(HeapBlock *arena, u32 size, u8 **owner)
+u8 *memory_arena_allocate_block(HeapBlock *arena, u32 size, u8 **owner)
 {
     HeapBlock *block;
     HeapBlock *rest;
@@ -192,10 +192,10 @@ u8 *func_8001939c(HeapBlock *arena, u32 size, u8 **owner)
     u32 avail;
     u8 *data;
 
-    block = func_800190a8(arena, size);
+    block = memory_arena_find_block(arena, size);
     if (block == 0) {
-        func_80019294(arena);
-        block = func_800190a8(arena, size);
+        memory_arena_compact(arena);
+        block = memory_arena_find_block(arena, size);
         if (block == 0) {
             return 0;
         }
@@ -221,49 +221,49 @@ u8 *func_8001939c(HeapBlock *arena, u32 size, u8 **owner)
 }
 
 ADDRESS(0x80019454, 0x20)
-void func_80019454(u8 *data)
+void memory_block_release(u8 *data)
 {
-    func_80019088((HeapBlock *)(data - sizeof(HeapBlock)));
+    memory_arena_free((HeapBlock *)(data - sizeof(HeapBlock)));
 }
 
 ADDRESS(0x80019474, 0x8)
-void func_80019474(u8 *data, u8 state)
+void memory_block_set_kind(u8 *data, u8 state)
 {
     ((HeapBlock *)(data - sizeof(HeapBlock)))->state = state;
 }
 
 ADDRESS(0x8001947c, 0xc)
-u8 func_8001947c(u8 *data)
+u8 memory_block_kind(u8 *data)
 {
     return ((HeapBlock *)(data - sizeof(HeapBlock)))->state;
 }
 
 ADDRESS(0x80019488, 0x8)
-void func_80019488(u8 *data, u8 value)
+void memory_block_set_flags(u8 *data, u8 value)
 {
     ((HeapBlock *)(data - sizeof(HeapBlock)))->unk1 = value;
 }
 
 ADDRESS(0x80019490, 0xc)
-u8 func_80019490(u8 *data)
+u8 memory_block_flags(u8 *data)
 {
     return ((HeapBlock *)(data - sizeof(HeapBlock)))->unk1;
 }
 
 ADDRESS(0x8001949c, 0x8)
-void func_8001949c(u8 *data, u16 value)
+void memory_block_set_tag(u8 *data, u16 value)
 {
     ((HeapBlock *)(data - sizeof(HeapBlock)))->unk2 = value;
 }
 
 ADDRESS(0x800194a4, 0xc)
-u16 func_800194a4(u8 *data)
+u16 memory_block_tag(u8 *data)
 {
     return ((HeapBlock *)(data - sizeof(HeapBlock)))->unk2;
 }
 
 ADDRESS(0x800194b0, 0x40)
-void *func_800194b0(u32 size)
+void *memory_malloc_checked(u32 size)
 {
     void *p = malloc(size);
 
@@ -271,13 +271,13 @@ void *func_800194b0(u32 size)
 }
 
 ADDRESS(0x800194f0, 0x28)
-void *func_800194f0(u32 size)
+void *memory_allocate(u32 size)
 {
-    return func_800194b0((size + 3) & ~3);
+    return memory_malloc_checked((size + 3) & ~3);
 }
 
 ADDRESS(0x80019518, 0x20)
-void func_80019518(void *data)
+void memory_free(void *data)
 {
     free(data);
 }

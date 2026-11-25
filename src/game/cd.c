@@ -37,26 +37,26 @@ SDATA(0x8009c220, 0xb)
 DATA(0x801c12e4, 0x4c0, ".bss")
 CdState DAT_801c12e4;
 
-void func_80019570(void);
-void func_800196e8(void);
-void func_800198d0(void);
-s32 func_800198d8(u8 bcd);
-s32 func_800198f8(u8 value);
-s32 func_80019934(CdlLOC *pos);
-void func_800199b8(CdlLOC *pos, u32 sector);
-CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback);
+void cd_vsync_handler(void);
+void cd_complete_handler(void);
+void cd_error_handler(void);
+s32 cd_bcd_to_int(u8 bcd);
+s32 cd_int_to_bcd(u8 value);
+s32 cd_location_to_sector(CdlLOC *pos);
+void cd_sector_to_location(CdlLOC *pos, u32 sector);
+CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback);
 
 ADDRESS(0x80019538, 0x38)
-void func_80019538(void)
+void cd_request_yield(void)
 {
-    func_80015a48();
-    func_80018cd0();
+    cd_request_service_vab();
+    cd_request_service_stream();
     VSync(0);
     VSync(0);
 }
 
 ADDRESS(0x80019570, 0xa4)
-void func_80019570(void)
+void cd_vsync_handler(void)
 {
     DAT_801c12e4.frames++;
     DAT_801c12e4.frame_gate++;
@@ -67,7 +67,7 @@ void func_80019570(void)
 }
 
 ADDRESS(0x80019614, 0x68)
-void func_80019614(void)
+void cd_wait_four_vsyncs(void)
 {
     while (DAT_801c12e4.frame_gate < 4) {
         VSync(0);
@@ -76,7 +76,7 @@ void func_80019614(void)
 }
 
 ADDRESS(0x8001967c, 0x6c)
-void func_8001967c(CdRequest *request)
+void cd_request_advance(CdRequest *request)
 {
     request->kind = CD_REQUEST_FREE;
     request->issued = 0;
@@ -93,7 +93,7 @@ void func_8001967c(CdRequest *request)
 }
 
 ADDRESS(0x800196e8, 0x160)
-void func_800196e8(void)
+void cd_complete_handler(void)
 {
     CdRequest *request = DAT_801c12e4.read;
 
@@ -113,14 +113,14 @@ void func_800196e8(void)
             break;
         case 1:
             if (request->kind == CD_REQUEST_READ) {
-                if (func_80019b68(request->buffer, request->count)) {
+                if (cd_sectors_corrupt(request->buffer, request->count)) {
                     request->issued = 0;
                     CdSeekL(&request->retry_pos);
                 } else {
                     if (request->callback) {
                         ((CdBufferCallback)request->callback)(request->buffer);
                     }
-                    func_8001967c(request);
+                    cd_request_advance(request);
                 }
             } else if (request->callback) {
                 ((CdRequestCallback)request->callback)(request);
@@ -138,7 +138,7 @@ void func_800196e8(void)
 }
 
 ADDRESS(0x80019848, 0x88)
-void func_80019848(void)
+void cd_data_ready_handler(void)
 {
     CdRequest *request = DAT_801c12e4.read;
 
@@ -152,73 +152,73 @@ void func_80019848(void)
             ((CdRequestCallback)request->callback)(request);
         }
         if (request->count == 0) {
-            func_8001967c(request);
+            cd_request_advance(request);
         }
         break;
     }
 }
 
 ADDRESS(0x800198d0, 0x8)
-void func_800198d0(void)
+void cd_error_handler(void)
 {
 }
 
 ADDRESS(0x800198d8, 0x20)
-s32 func_800198d8(u8 bcd)
+s32 cd_bcd_to_int(u8 bcd)
 {
     return (bcd >> 4) * 10 + (bcd & 0xf);
 }
 
 ADDRESS(0x800198f8, 0x3c)
-s32 func_800198f8(u8 value)
+s32 cd_int_to_bcd(u8 value)
 {
     return ((u8)(value / 10) << 4) | (u8)(value % 10);
 }
 
 ADDRESS(0x80019934, 0x84)
-s32 func_80019934(CdlLOC *pos)
+s32 cd_location_to_sector(CdlLOC *pos)
 {
-    s32 minute = func_800198d8(pos->minute);
-    s32 second = func_800198d8(pos->second);
-    s32 sector = func_800198d8(pos->sector);
+    s32 minute = cd_bcd_to_int(pos->minute);
+    s32 second = cd_bcd_to_int(pos->second);
+    s32 sector = cd_bcd_to_int(pos->sector);
 
     return minute * 4500 + second * 75 + sector;
 }
 
 ADDRESS(0x800199b8, 0xbc)
-void func_800199b8(CdlLOC *pos, u32 sector)
+void cd_sector_to_location(CdlLOC *pos, u32 sector)
 {
-    pos->minute = func_800198f8(sector / 4500);
+    pos->minute = cd_int_to_bcd(sector / 4500);
     sector %= 4500;
-    pos->second = func_800198f8(sector / 75);
-    pos->sector = func_800198f8(sector % 75);
+    pos->second = cd_int_to_bcd(sector / 75);
+    pos->sector = cd_int_to_bcd(sector % 75);
     pos->track = 0;
 }
 
 ADDRESS(0x80019a74, 0x40)
-void func_80019a74(CdlLOC *pos, s32 offset, CdlLOC *out)
+void cd_location_add(CdlLOC *pos, s32 offset, CdlLOC *out)
 {
-    func_800199b8(out, func_80019934(pos) + offset);
+    cd_sector_to_location(out, cd_location_to_sector(pos) + offset);
 }
 
 ADDRESS(0x80019ab4, 0x68)
-void func_80019ab4(void)
+void cd_request_wait_idle(void)
 {
     while (DAT_801c12e4.read != DAT_801c12e4.write || DAT_801c12e4.read->kind != CD_REQUEST_FREE) {
-        func_80019538();
+        cd_request_yield();
     }
 }
 
 ADDRESS(0x80019b1c, 0x4c)
-void func_80019b1c(CdRequest *request)
+void cd_request_wait_done(CdRequest *request)
 {
     while (request->kind != CD_REQUEST_FREE) {
-        func_80019538();
+        cd_request_yield();
     }
 }
 
 ADDRESS(0x80019b68, 0x54)
-s32 func_80019b68(u8 *buffer, s32 sectors)
+s32 cd_sectors_corrupt(u8 *buffer, s32 sectors)
 {
     u32 sum = CD_CHECKSUM_SEED;
     u32 *word = (u32 *)buffer;
@@ -232,11 +232,11 @@ s32 func_80019b68(u8 *buffer, s32 sectors)
 }
 
 ADDRESS(0x80019bbc, 0x108)
-CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback)
+CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback)
 {
     CdRequest *request = DAT_801c12e4.write;
 
-    func_80019b1c(request);
+    cd_request_wait_done(request);
     request->kind = kind;
     request->issued = 0;
     request->pos = *pos;
@@ -254,69 +254,69 @@ CdRequest *func_80019bbc(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallbac
 }
 
 ADDRESS(0x80019cc4, 0x84)
-s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos)
+s32 cd_archive_entry_extent(s32 file, s32 entry, CdlLOC *pos)
 {
     CdFile *f = &DAT_801c12e4.files[file];
     s32 first = f->sectors[entry];
 
     if (pos) {
-        func_80019a74(&f->extent.pos, first, pos);
+        cd_location_add(&f->extent.pos, first, pos);
     }
     return (f->sectors[entry + 1] - first) << 11;
 }
 
 ADDRESS(0x80019d48, 0x50)
-void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback)
+void cd_archive_queue_read(s32 file, s32 entry, u8 *buffer, CdCallback callback)
 {
     CdlLOC pos;
 
-    func_80019bbc(CD_REQUEST_READ, &pos, func_80019cc4(file, entry, &pos), buffer, callback);
+    cd_request_enqueue(CD_REQUEST_READ, &pos, cd_archive_entry_extent(file, entry, &pos), buffer, callback);
 }
 
 ADDRESS(0x80019d98, 0x58)
-void func_80019d98(int file_in, int entry_in, u8 *buffer, CdCallback callback)
+void cd_archive_queue_sector_callback_read(int file_in, int entry_in, u8 *buffer, CdCallback callback)
 {
     u16 file = file_in;
     u16 entry = entry_in;
     CdlLOC pos;
 
-    func_80019bbc(CD_REQUEST_STREAM, &pos, func_80019cc4(file, entry, &pos), buffer, callback);
+    cd_request_enqueue(CD_REQUEST_STREAM, &pos, cd_archive_entry_extent(file, entry, &pos), buffer, callback);
 }
 
 ADDRESS(0x80019df0, 0x58)
-void func_80019df0(int file_in, int entry_in, u8 *buffer, CdCallback callback)
+void cd_archive_queue_stream_read(int file_in, int entry_in, u8 *buffer, CdCallback callback)
 {
     u16 file = file_in;
     u16 entry = entry_in;
     CdlLOC pos;
 
-    func_80019bbc(CD_REQUEST_SOUND, &pos, func_80019cc4(file, entry, &pos), buffer, callback);
+    cd_request_enqueue(CD_REQUEST_SOUND, &pos, cd_archive_entry_extent(file, entry, &pos), buffer, callback);
 }
 
 ADDRESS(0x80019e48, 0xcc)
-void func_80019e48(u16 file, u16 entry, u8 *buffer, CdCallback callback)
+void cd_archive_read_chunked(u16 file, u16 entry, u8 *buffer, CdCallback callback)
 {
     CdlLOC pos;
     CdRequest *request = DAT_801c12e4.write;
     u32 bytes;
 
-    func_80019b1c(request);
+    cd_request_wait_done(request);
     request->u.image.rect.h = 0;
     request->state = 0;
-    bytes = func_80019cc4(file, entry, &pos);
+    bytes = cd_archive_entry_extent(file, entry, &pos);
     request->u.image.remaining = bytes >> 11;
     request->u.image.sectors = bytes >> 11;
     if (request->u.image.remaining < 17) {
         request->u.image.remaining = 0;
-        func_80019bbc(CD_REQUEST_IMAGE, &pos, bytes, buffer, callback);
+        cd_request_enqueue(CD_REQUEST_IMAGE, &pos, bytes, buffer, callback);
     } else {
         request->u.image.remaining -= 16;
-        func_80019bbc(CD_REQUEST_IMAGE, &pos, 0x8000, buffer, callback);
+        cd_request_enqueue(CD_REQUEST_IMAGE, &pos, 0x8000, buffer, callback);
     }
 }
 
 ADDRESS(0x80019f14, 0x44)
-s32 func_80019f14(int file_in, int entry_in)
+s32 cd_archive_entry_size(int file_in, int entry_in)
 {
     u16 file = file_in;
     u16 entry = entry_in;
@@ -327,19 +327,19 @@ s32 func_80019f14(int file_in, int entry_in)
 }
 
 ADDRESS(0x80019f58, 0x8)
-void func_80019f58(s32 fatal)
+void cd_report_error(s32 fatal)
 {
 }
 
 ADDRESS(0x80019f60, 0x15c)
-void func_80019f60(CdlLOC *pos, u8 *buffer, s32 sectors)
+void cd_read_sectors(CdlLOC *pos, u8 *buffer, s32 sectors)
 {
     u_char result[8];
     s32 failed;
     s32 tries;
     s32 status;
 
-    func_80019ab4();
+    cd_request_wait_idle();
     DisableEvent(DAT_801c12e4.error_event);
     DisableEvent(DAT_801c12e4.complete_event);
     DisableEvent(DAT_801c12e4.ready_event);
@@ -366,31 +366,31 @@ void func_80019f60(CdlLOC *pos, u8 *buffer, s32 sectors)
     EnableEvent(DAT_801c12e4.complete_event);
     EnableEvent(DAT_801c12e4.ready_event);
     if (failed == 1) {
-        func_80019f58(1);
+        cd_report_error(1);
     }
 }
 
 ADDRESS(0x8001a0bc, 0x5c)
-u8 *func_8001a0bc(CdlFILE *file)
+u8 *cd_extent_load(CdlFILE *file)
 {
     s32 bytes = (file->size + 2047) & ~2047;
-    u8 *buffer = (u8 *)func_800194f0(bytes);
+    u8 *buffer = (u8 *)memory_allocate(bytes);
 
-    func_80019f60(&file->pos, buffer, bytes >> 11);
+    cd_read_sectors(&file->pos, buffer, bytes >> 11);
     return buffer;
 }
 
 ADDRESS(0x8001a118, 0x3c)
-void func_8001a118(u8 *buffer, CdExtent *extent, u32 bytes)
+void cd_extent_read_into(u8 *buffer, CdExtent *extent, u32 bytes)
 {
     if (bytes == 0) {
         bytes = extent->size;
     }
-    func_80019f60(&extent->pos, buffer, (bytes + 2047) >> 11);
+    cd_read_sectors(&extent->pos, buffer, (bytes + 2047) >> 11);
 }
 
 ADDRESS(0x8001a154, 0x94)
-void func_8001a154(int file_in, int entry_in, u8 *buffer)
+void cd_archive_read(int file_in, int entry_in, u8 *buffer)
 {
     u16 file = file_in;
     u16 entry = entry_in;
@@ -399,14 +399,14 @@ void func_8001a154(int file_in, int entry_in, u8 *buffer)
     s32 first = f->sectors[entry];
     s32 sectors = f->sectors[entry + 1] - first;
 
-    func_80019a74(&f->extent.pos, first, &pos);
+    cd_location_add(&f->extent.pos, first, &pos);
     do {
-        func_80019f60(&pos, buffer, sectors);
-    } while (func_80019b68(buffer, sectors));
+        cd_read_sectors(&pos, buffer, sectors);
+    } while (cd_sectors_corrupt(buffer, sectors));
 }
 
 ADDRESS(0x8001a1e8, 0xb0)
-u8 *func_8001a1e8(char *name)
+u8 *cd_file_load(char *name)
 {
     char path[64];
     CdlFILE file;
@@ -416,18 +416,18 @@ u8 *func_8001a1e8(char *name)
     strcpy(path, "\\CD\\");
     strcat(path, name);
     strcat(path, ";1");
-    func_80019ab4();
+    cd_request_wait_idle();
     if (CdSearchFile(&file, path) == 0) {
-        func_80019f58(0);
+        cd_report_error(0);
     }
     bytes = (file.size + 2047) & ~2047;
-    buffer = (u8 *)func_800194f0(bytes);
-    func_80019f60(&file.pos, buffer, bytes >> 11);
+    buffer = (u8 *)memory_allocate(bytes);
+    cd_read_sectors(&file.pos, buffer, bytes >> 11);
     return buffer;
 }
 
 ADDRESS(0x8001a298, 0xb4)
-s32 func_8001a298(u8 *buffer, char *name, u32 bytes)
+s32 cd_file_load_into(u8 *buffer, char *name, u32 bytes)
 {
     char path[64];
     CdlFILE file;
@@ -436,19 +436,19 @@ s32 func_8001a298(u8 *buffer, char *name, u32 bytes)
     strcpy(path, "\\CD\\");
     strcat(path, name);
     strcat(path, ";1");
-    func_80019ab4();
+    cd_request_wait_idle();
     if (CdSearchFile(&file, path) == 0) {
-        func_80019f58(0);
+        cd_report_error(0);
     }
     if (bytes == 0) {
         bytes = file.size;
     }
-    func_80019f60(&file.pos, buffer, (bytes + 2047) >> 11);
+    cd_read_sectors(&file.pos, buffer, (bytes + 2047) >> 11);
     return 0;
 }
 
 ADDRESS(0x8001a34c, 0xec)
-void func_8001a34c(int index_in, char *name)
+void cd_archive_open(int index_in, char *name)
 {
     u16 index = index_in;
     u8 buffer[0x800];
@@ -465,19 +465,19 @@ void func_8001a34c(int index_in, char *name)
     }
     f->extent.pos = file.pos;
     f->extent.size = file.size;
-    func_8001a118(buffer, &f->extent, 0x800);
-    f->sectors = (u16 *)func_800194f0((*(u16 *)buffer + 1) * 2);
-    func_80018f8c(f->sectors, (u16 *)buffer + 1, *(u16 *)buffer + 1);
+    cd_extent_read_into(buffer, &f->extent, 0x800);
+    f->sectors = (u16 *)memory_allocate((*(u16 *)buffer + 1) * 2);
+    resource_copy_halfwords(f->sectors, (u16 *)buffer + 1, *(u16 *)buffer + 1);
 }
 
 ADDRESS(0x8001a438, 0x188)
-void func_8001a438(void)
+void cd_initialize(void)
 {
     CdRequest *request;
     s32 i;
 
     EnterCriticalSection();
-    DAT_801c12e4.vsync_event = OpenEvent(RCNT_VSYNC, EvSpINT, EvMdINTR, func_80019570);
+    DAT_801c12e4.vsync_event = OpenEvent(RCNT_VSYNC, EvSpINT, EvMdINTR, cd_vsync_handler);
     EnableEvent(DAT_801c12e4.vsync_event);
     SetRCnt(RCNT_VSYNC, 60000, RCntMdINTR);
     StartRCnt(RCNT_VSYNC);
@@ -492,9 +492,9 @@ void func_8001a438(void)
     }
     DAT_801c12e4.write = DAT_801c12e4.requests;
     DAT_801c12e4.read = DAT_801c12e4.requests;
-    DAT_801c12e4.error_event = OpenEvent(HwCdRom, EvSpERROR, EvMdINTR, func_800198d0);
-    DAT_801c12e4.complete_event = OpenEvent(HwCdRom, EvSpCOMP, EvMdINTR, func_800196e8);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, func_80019848);
+    DAT_801c12e4.error_event = OpenEvent(HwCdRom, EvSpERROR, EvMdINTR, cd_error_handler);
+    DAT_801c12e4.complete_event = OpenEvent(HwCdRom, EvSpCOMP, EvMdINTR, cd_complete_handler);
+    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
     EnableEvent(DAT_801c12e4.error_event);
     EnableEvent(DAT_801c12e4.complete_event);
     EnableEvent(DAT_801c12e4.ready_event);
@@ -502,7 +502,7 @@ void func_8001a438(void)
 }
 
 ADDRESS(0x8001a5c0, 0x6c)
-void func_8001a5c0(void)
+void cd_close_events(void)
 {
     EnterCriticalSection();
     CloseEvent(DAT_801c12e4.vsync_event);

@@ -24,7 +24,7 @@ void func_8005be28(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, s32 dy, s32 dz, VECT
     v.vy = y + dy;
     v.vz = z + dz;
     rotation.vy = yaw;
-    func_800168a8(&rotation, &v, out);
+    vector_rotate_yxz(&rotation, &v, out);
     out->vx += DAT_801b24e4.pos.vx;
     out->vy += DAT_801b24e4.pos.vy + dy - 1600;
     out->vz += DAT_801b24e4.pos.vz;
@@ -35,14 +35,14 @@ ADDRESS(0x8005bee0, 0xe4)
 void func_8005bee0(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (from != NULL) {
-        obj->pos.vx = func_80017158(from->vx, to->vx, t);
-        obj->pos.vy = func_80017158(from->vy, to->vy, t);
-        obj->pos.vz = func_80017158(from->vz, to->vz, t);
+        obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
+        obj->pos.vy = fixed_lerp_q12(from->vy, to->vy, t);
+        obj->pos.vz = fixed_lerp_q12(from->vz, to->vz, t);
     }
     if (afrom != NULL) {
-        obj->angle.vx = func_80017170(afrom->vx, ato->vx, t);
-        obj->angle.vz = func_80017170(afrom->vz, ato->vz, t);
-        obj->angle.vy = func_80017170(afrom->vy, ato->vy, t);
+        obj->angle.vx = angle_lerp_shortest_q12(afrom->vx, ato->vx, t);
+        obj->angle.vz = angle_lerp_shortest_q12(afrom->vz, ato->vz, t);
+        obj->angle.vy = angle_lerp_shortest_q12(afrom->vy, ato->vy, t);
     }
 }
 
@@ -50,9 +50,9 @@ ADDRESS(0x8005bfc4, 0x88)
 void func_8005bfc4(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
 {
     if (from != NULL) {
-        obj->pos.vx = func_80017158(from->vx, to->vx, t);
-        obj->pos.vy = func_80017158(from->vy, to->vy, t);
-        obj->pos.vz = func_80017158(from->vz, to->vz, t);
+        obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
+        obj->pos.vy = fixed_lerp_q12(from->vy, to->vy, t);
+        obj->pos.vz = fixed_lerp_q12(from->vz, to->vz, t);
     }
 }
 
@@ -60,8 +60,8 @@ ADDRESS(0x8005c04c, 0x88)
 void func_8005c04c(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (afrom != NULL) {
-        obj->angle.vx = func_80017170(afrom->vx, ato->vx, t);
-        obj->angle.vz = func_80017170(afrom->vz, ato->vz, t);
-        obj->angle.vy = func_80017170(afrom->vy, ato->vy, t);
+        obj->angle.vx = angle_lerp_shortest_q12(afrom->vx, ato->vx, t);
+        obj->angle.vz = angle_lerp_shortest_q12(afrom->vz, ato->vz, t);
+        obj->angle.vy = angle_lerp_shortest_q12(afrom->vy, ato->vy, t);
     }
 }

@@ -85,7 +85,7 @@ void func_8003bfd0(void)
     SCRATCH->w.map.count = DAT_80199154.unk159bc;
     SCRATCH->w.map.ot_count = DAT_80199154.ot_count;
     SCRATCH->w.map.prim_count = DAT_80199154.prim_count;
-    func_80018f5c((u32 *)SCRATCH->u.view.grid, (u32 *)DAT_80199154.grid, 0x9c);
+    resource_copy_words((u32 *)SCRATCH->u.view.grid, (u32 *)DAT_80199154.grid, 0x9c);
     grid = &SCRATCH->u.view.grid[0][0];
     SCRATCH->u.view.x = DAT_80199154.unk15b20;
     SCRATCH->u.view.z = DAT_80199154.unk15b24;
@@ -830,11 +830,11 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     } else if (rel.vy <= 0) {
         depth += 240;
     }
-    func_800166f4(rotation, mat);
+    matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
         other = &DAT_80199154.unk15da8[light2];
         if (other->unk50.m[0][0] != -1) {
-            func_800171b0((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
+            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
             gte_SetColorMatrix(&blend);
         } else {
             gte_SetColorMatrix(&light->unk50);
@@ -845,15 +845,15 @@ void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(func_80017158(light->unk68, other->unk68, t),
-                          func_80017158(light->unk6a, other->unk6a, t));
+            func_80035358(fixed_lerp_q12(light->unk68, other->unk68, t),
+                          fixed_lerp_q12(light->unk6a, other->unk6a, t));
         } else {
             func_80035358(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
-            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, t),
-                             func_80017158(light->unk64.g, other->unk64.g, t),
-                             func_80017158(light->unk64.b, other->unk64.b, t));
+            gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
+                             fixed_lerp_q12(light->unk64.g, other->unk64.g, t),
+                             fixed_lerp_q12(light->unk64.b, other->unk64.b, t));
         } else {
             gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         }
@@ -1098,11 +1098,11 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
     if (!(flags & 0x80) && rel.vy <= 0) {
         depth += 240;
     }
-    func_800166f4(rotation, mat);
+    matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
         other = &DAT_80199154.unk15da8[light2];
         if (other->unk50.m[0][0] != -1) {
-            func_800171b0((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
+            fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
             gte_SetColorMatrix(&blend);
         } else {
             gte_SetColorMatrix(&light->unk50);
@@ -1113,15 +1113,15 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
             gte_MulMatrix0(&light->unk0[0], mat, &lm);
         }
         if (other->unk68 != 0xffff && other->unk6a != 0xffff) {
-            func_80035358(func_80017158(light->unk68, other->unk68, t),
-                          func_80017158(light->unk6a, other->unk6a, t));
+            func_80035358(fixed_lerp_q12(light->unk68, other->unk68, t),
+                          fixed_lerp_q12(light->unk6a, other->unk6a, t));
         } else {
             func_80035358(light->unk68, light->unk6a);
         }
         if (other->unk64.r != 0xff) {
-            gte_SetBackColor(func_80017158(light->unk64.r, other->unk64.r, t),
-                             func_80017158(light->unk64.g, other->unk64.g, t),
-                             func_80017158(light->unk64.b, other->unk64.b, t));
+            gte_SetBackColor(fixed_lerp_q12(light->unk64.r, other->unk64.r, t),
+                             fixed_lerp_q12(light->unk64.g, other->unk64.g, t),
+                             fixed_lerp_q12(light->unk64.b, other->unk64.b, t));
         } else {
             gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
         }
@@ -1233,7 +1233,7 @@ void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 ti
     m.t[0] = 0;
     m.t[1] = 100;
     m.t[2] = 0;
-    func_800166f4(rotation, &m);
+    matrix_set_rotation_yxz(rotation, &m);
     scratch = SCRATCH;
     gte_MulMatrix0(&DAT_80199154.unk159f8, &m, &m);
     gte_SetRotMatrix(&m);
@@ -1319,7 +1319,7 @@ void func_800405e8(u16 id, u8 **out)
         return;
     }
     if (model != NULL) {
-        state = func_8001947c(model);
+        state = memory_block_kind(model);
         if (state == 1 || state == 2) {
             return;
         }
@@ -1333,7 +1333,7 @@ ADDRESS(0x80040658, 0x3c)
 void func_80040658(u8 *file)
 {
     func_8003591c(file + *(s32 *)(file + 8));
-    func_80019474(file, 2);
+    memory_block_set_kind(file, 2);
 }
 
 ADDRESS(0x80040694, 0x74)
@@ -1403,11 +1403,12 @@ void func_80040830(s32 file, s32 entry, s32 id)
 {
     u8 *model;
 
-    model = func_8001939c((HeapBlock *)DAT_800c8954, func_80019f14(file, entry), &DAT_80199154.models[id]);
+    model = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, cd_archive_entry_size(file, entry),
+                                        &DAT_80199154.models[id]);
     if (model != NULL) {
-        func_80019474(model, 3);
-        func_8001949c(model, id);
-        func_80019d48(file, entry, model, (CdCallback)func_80040658);
+        memory_block_set_kind(model, 3);
+        memory_block_set_tag(model, id);
+        cd_archive_queue_read(file, entry, model, (CdCallback)func_80040658);
     }
 }
 
@@ -1425,7 +1426,7 @@ void func_800408d0(s32 file, s32 entry, s32 bank, s32 count)
 
         if (*wanted++ != 0) {
             if (slot == NULL) {
-                func_80015ce0(file, i, bank);
+                audio_queue_vab_stream(file, i, bank);
             } else if (slot->state == 2) {
                 slot->state = 1;
             }
@@ -1451,13 +1452,13 @@ void func_800409c8(s32 file, s32 entry, s32 id, s32 count)
                 func_80040830(file, i, id);
                 continue;
             }
-            if (func_8001947c(model) == 1) {
-                func_80019474(model, 2);
+            if (memory_block_kind(model) == 1) {
+                memory_block_set_kind(model, 2);
             }
         } else {
             model = DAT_80199154.models[id];
-            if (model != NULL && func_8001947c(model) != 3) {
-                func_80019474(model, 1);
+            if (model != NULL && memory_block_kind(model) != 3) {
+                memory_block_set_kind(model, 1);
             }
         }
     }
@@ -1502,8 +1503,8 @@ void func_80040ae4(void)
     SCRATCH->u.load.sound_wanted = SCRATCH->u.load.sounds;
     SCRATCH->ot = DAT_80199154.ot;
     SCRATCH->ot2 = DAT_80199154.ot2;
-    func_80018fbc((u32 *)SCRATCH->u.load.models, 0, 0x20);
-    func_80018fbc((u32 *)SCRATCH->u.load.sounds, 0, 0x18);
+    repeat_store_word((u32 *)SCRATCH->u.load.models, 0, 0x20);
+    repeat_store_word((u32 *)SCRATCH->u.load.sounds, 0, 0x18);
     SCRATCH->draw.count.clut = 0;
     obj = DAT_80185da8.objects;
     for (i = 199; i != -1; i--, obj++) {
@@ -1549,8 +1550,8 @@ void func_80040ae4(void)
     func_800409c8(0, 0, 0x80, 0x80);
     func_800408d0(2, 0x91, 0x33, 0x60);
     now = DAT_801c12e4.frames;
-    func_80018fbc((u32 *)scratch->u.load.models, 0, 0x53);
-    func_80018fbc((u32 *)scratch->u.load.sounds, 0, 8);
+    repeat_store_word((u32 *)scratch->u.load.models, 0, 0x53);
+    repeat_store_word((u32 *)scratch->u.load.sounds, 0, 8);
     if (DAT_80199154.unk15996 == 0) {
         DAT_8018fad4.unk20 = NULL;
     }
@@ -1644,7 +1645,7 @@ void func_80040ae4(void)
                         volume -= (rec->arg.s.unk3b * dist) >> 13;
                     }
                     if (volume >= 20) {
-                        func_8001576c(rec->arg.s.unk3a + 496, volume);
+                        audio_play_sound(rec->arg.s.unk3a + 496, volume);
                     }
                 }
             } else {
@@ -1980,7 +1981,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
                         DAT_800819b4[29].visible = (DAT_801b24e4.unkf9 & 2) >> 1;
     i = DAT_801b24e4.unkfa - 1;
     if (i >= 0) {
-        DAT_8009c2ec += func_80016a98(DAT_80081c20[i].angle.vy, DAT_80199154.unk15b08.vy);
+        DAT_8009c2ec += angle_shortest_delta(DAT_80081c20[i].angle.vy, DAT_80199154.unk15b08.vy);
         if (DAT_8009c2ec > 0) {
             DAT_8009c2ec -= (DAT_8009c2ec + 7) >> 3;
         } else if (DAT_8009c2ec < 0) {
@@ -2025,7 +2026,7 @@ void func_800422b8(VECTOR *pos, SVECTOR *angle)
     func_8003d64c();
     func_8003d79c();
     func_80035700();
-    func_80019614();
+    cd_wait_four_vsyncs();
     func_80043940();
 }
 
@@ -2358,7 +2359,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         slot->model = id;
         slot->owner = owner;
     retry:
-        if ((slot->pose = (SVECTOR *)func_800194b0(count * 8)) == NULL) {
+        if ((slot->pose = (SVECTOR *)memory_malloc_checked(count * 8)) == NULL) {
             func_800438e0();
             goto retry;
         }
@@ -2735,7 +2736,7 @@ void func_800441d4(u16 file, u16 entry)
     u32 pad;
 
     DrawSync(0);
-    func_8001a154(file, entry, DAT_80199154.buffer);
+    cd_archive_read(file, entry, DAT_80199154.buffer);
     ClearImage(&DAT_8009c2d8, 0, 0, 0);
     DrawSync(0);
     func_80043b38(DAT_80199154.buffer);

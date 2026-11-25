@@ -63,7 +63,7 @@ void func_80030fcc(void)
     func_80030e14();
     DAT_801b24e4.unk178 = PadRead(1);
     if (DAT_801b24e4.unk178 & DAT_80081868[12]) {
-        func_80019f58(3);
+        cd_report_error(3);
     }
     if (DAT_801b24e4.unk178 & DAT_80081868[13]) {
         func_8001a634();
@@ -128,7 +128,7 @@ void func_80030fcc(void)
         func_80061940();
         if (movie->unk22 == 0x82) {
             func_80046c00(0x82, 0x1000, 0x1000, 0);
-            func_80019ab4();
+            cd_request_wait_idle();
             func_80046c00(movie->unk22, 0x1000, 0, -256);
             func_8003d624(0xff, 0, 0, 0);
         } else if (movie->unk22 == 1) {
@@ -136,37 +136,38 @@ void func_80030fcc(void)
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
             func_80046c00(1, 0x1000, 0x1000, 0);
-            func_80019ab4();
+            cd_request_wait_idle();
             func_80046c00(movie->unk22, 0x1000, 0, -256);
         } else {
             MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                       DAT_80199154.draw[DAT_80199154.frame].clip.y);
             DrawSync(0);
             func_80046c00(1, 0, 0, 0);
-            func_80019ab4();
+            cd_request_wait_idle();
         }
         break;
     case 7:
         rec = &DAT_801e7edc.movies[DAT_801b24e4.unk188.turn.id];
         t = DAT_801b24e4.unk188.turn.unk1 << 7;
         if (rec->unkc != -1) {
-            DAT_801b24e4.pos.vx = func_80017158(DAT_801b24e4.pos.vx, rec->unkc, t + 1);
-            DAT_801b24e4.pos.vz = func_80017158(DAT_801b24e4.pos.vz, rec->unk14, t + 1);
+            DAT_801b24e4.pos.vx = fixed_lerp_q12(DAT_801b24e4.pos.vx, rec->unkc, t + 1);
+            DAT_801b24e4.pos.vz = fixed_lerp_q12(DAT_801b24e4.pos.vz, rec->unk14, t + 1);
         }
         if (rec->unk10 != -1) {
-            DAT_801b24e4.pos.vy = func_80017158(DAT_801b24e4.pos.vy, rec->unk10, t + 1);
+            DAT_801b24e4.pos.vy = fixed_lerp_q12(DAT_801b24e4.pos.vy, rec->unk10, t + 1);
         }
         if (rec->unk4 != -1) {
-            DAT_801b24e4.unk13c = func_80017170(0, rec->unk4, t + 1);
-            DAT_801b24e4.unk12c.vx = func_80017170(DAT_801b24e4.unk188.turn.angle.vx, 0, t + 1);
+            DAT_801b24e4.unk13c = angle_lerp_shortest_q12(0, rec->unk4, t + 1);
+            DAT_801b24e4.unk12c.vx = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vx, 0, t + 1);
         }
         if (rec->unk6 != -1) {
             DAT_801b24e4.unk13e = 0;
-            DAT_801b24e4.unk12c.vy = func_80017170(DAT_801b24e4.unk188.turn.angle.vy, rec->unk6, t + 1);
+            DAT_801b24e4.unk12c.vy = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vy, rec->unk6,
+                                                             t + 1);
         }
         if (rec->unk8 != -1) {
-            DAT_801b24e4.unk140 = func_80017170(0, rec->unk8, t + 1);
-            DAT_801b24e4.unk12c.vz = func_80017170(DAT_801b24e4.unk188.turn.angle.vz, 0, t + 1);
+            DAT_801b24e4.unk140 = angle_lerp_shortest_q12(0, rec->unk8, t + 1);
+            DAT_801b24e4.unk12c.vz = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vz, 0, t + 1);
         }
         if (0x7f - DAT_801b24e4.unk188.turn.unk1 * 4 < 0) {
             SsSetMVol(0, 0);
@@ -200,23 +201,24 @@ void func_80030fcc(void)
         rec = &DAT_801e7edc.movies[DAT_801b24e4.unk188.turn.id];
         u = DAT_801b24e4.unk188.turn.unk1 << 7;
         if (rec->unk24 != -1) {
-            DAT_801b24e4.pos.vx = func_80017158(DAT_801b24e4.pos.vx, rec->unk24, u);
-            DAT_801b24e4.pos.vz = func_80017158(DAT_801b24e4.pos.vz, rec->unk2c, u);
+            DAT_801b24e4.pos.vx = fixed_lerp_q12(DAT_801b24e4.pos.vx, rec->unk24, u);
+            DAT_801b24e4.pos.vz = fixed_lerp_q12(DAT_801b24e4.pos.vz, rec->unk2c, u);
         }
         if (rec->unk28 != -1) {
-            DAT_801b24e4.pos.vy = func_80017158(DAT_801b24e4.pos.vy, rec->unk28, u);
+            DAT_801b24e4.pos.vy = fixed_lerp_q12(DAT_801b24e4.pos.vy, rec->unk28, u);
         }
         if (rec->unk1c != -1) {
-            DAT_801b24e4.unk13c = func_80017170(0, rec->unk1c, u);
-            DAT_801b24e4.unk12c.vx = func_80017170(DAT_801b24e4.unk188.turn.angle.vx, 0, u);
+            DAT_801b24e4.unk13c = angle_lerp_shortest_q12(0, rec->unk1c, u);
+            DAT_801b24e4.unk12c.vx = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vx, 0, u);
         }
         if (rec->unk1e != -1) {
             DAT_801b24e4.unk13e = 0;
-            DAT_801b24e4.unk12c.vy = func_80017170(DAT_801b24e4.unk188.turn.angle.vy, rec->unk1e, u);
+            DAT_801b24e4.unk12c.vy = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vy, rec->unk1e,
+                                                             u);
         }
         if (rec->unk20 != -1) {
-            DAT_801b24e4.unk140 = func_80017170(0, rec->unk20, u);
-            DAT_801b24e4.unk12c.vz = func_80017170(DAT_801b24e4.unk188.turn.angle.vz, 0, u);
+            DAT_801b24e4.unk140 = angle_lerp_shortest_q12(0, rec->unk20, u);
+            DAT_801b24e4.unk12c.vz = angle_lerp_shortest_q12(DAT_801b24e4.unk188.turn.angle.vz, 0, u);
         }
         if (DAT_801b24e4.unk188.turn.unk1 == 0 && DAT_801b24e4.bgm_volume != 0
             && DAT_801b09fc.seq_playing == 1) {
@@ -289,7 +291,7 @@ void func_80030fcc(void)
     case 0x11:
         DAT_801b24e4.hp = 0;
         DAT_801b24e4.unk188.knock.push.vx =
-            func_80016168(-1024, DAT_801b24e4.unk134, DAT_801b24e4.unk188.knock.push.vx, 8, 4);
+            angle_velocity_step(-1024, DAT_801b24e4.unk134, DAT_801b24e4.unk188.knock.push.vx, 8, 4);
         DAT_801b24e4.unk134 += DAT_801b24e4.unk188.knock.push.vx * 3 >> 1;
         if (DAT_801b24e4.unk16c < 1500) {
             DAT_801b24e4.unk16c += 500;
@@ -299,7 +301,7 @@ void func_80030fcc(void)
         func_8002f320();
         if (++DAT_801b24e4.unk13a >= 32) {
             if (DAT_801b24e4.unk13a < 65) {
-                c = func_80017158(0, 0xff, (DAT_801b24e4.unk13a - 32) << 7);
+                c = fixed_lerp_q12(0, 0xff, (DAT_801b24e4.unk13a - 32) << 7);
                 func_8003d624(0x82, c, c, c);
             } else {
                 o4c = DAT_801b77ec.objects;
@@ -319,7 +321,7 @@ void func_80030fcc(void)
                     DAT_801b24e4.pos.vx = 0x1c800;
                     DAT_801b24e4.unk160 = 5;
                     func_8001bea8();
-                    func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+                    repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                     func_8005efd4(DAT_8018fad4.area[0]);
                     func_8002b3a8();
                     func_80029500();
@@ -330,7 +332,7 @@ void func_80030fcc(void)
                     func_8005ea64();
                     DAT_801ba984.unkd = 1;
                     func_80060800();
-                    func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+                    repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                 }
                 func_80029188(0, 0, 0, 0, 0, part);
             }

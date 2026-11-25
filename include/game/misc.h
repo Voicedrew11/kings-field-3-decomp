@@ -28,7 +28,7 @@ void func_8005c7e8(Object44 *obj, s32 id);
 
 /* A start position of func_8005c864's table: areas, map cell and height, yaw. */
 typedef struct Record08 {
-    u8 area;        /* func_80017c78's third area (0xff: none) */
+    u8 area;        /* resource_request_transition's third area (0xff: none) */
     u8 area3;
     u8 area4;
     u8 x;           /* map cell x */

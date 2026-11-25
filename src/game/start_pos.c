@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: an Object88's talk script (func_8005c308), an Object44 spawn
  * helper, the player's move to one of 14 start positions (areas loaded
- * through func_80017c78) and the item use dispatcher (func_8005cbe0) (WIP
+ * through resource_request_transition) and the item use dispatcher (func_8005cbe0) (WIP
  * module). The .rdata is func_8005c864's local table initializer, then the
  * jump tables of func_8005c308 and func_8005cbe0: GCC 2.6 emits the
  * initializers of a TU ahead of its jump tables, so the three share a TU.
@@ -213,18 +213,18 @@ void func_8005c864(s32 n)
         func_8004b794();
     }
     do {
-        func_80019538();
-        func_80018358();
+        cd_request_yield();
+        resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
     if (rec->area != DAT_8018fad4.area[0]) {
-        func_80017c78(rec->area, rec->area, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+        resource_request_transition(rec->area, rec->area, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
     } else {
-        func_80017c78(0xff, 0xff, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+        resource_request_transition(0xff, 0xff, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
         DAT_801b24e4.unke = 1;
     }
     do {
-        func_80019538();
-        func_80018358();
+        cd_request_yield();
+        resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
     DAT_801b24e4.unk101 = 0;
     DAT_801b24e4.unk13c = DAT_801b24e4.unk13e = DAT_801b24e4.unk140 = 0;
@@ -241,12 +241,12 @@ void func_8005c864(s32 n)
         DAT_801b24e4.pos.vz = z + 2000;
     } else {
         func_80046c00(1, 0x1000, 0x1000, 0);
-        func_80019ab4();
+        cd_request_wait_idle();
         func_80046c00(1, 0x1000, 0, -256);
         func_8003d624(0xff, 0, 0, 0);
     }
     if (n != 13) {
-        func_80017c78(0xff, 0xff, 0xff, rec->area3, rec->area4, 0x7f, 0x7f, 0x7f);
+        resource_request_transition(0xff, 0xff, 0xff, rec->area3, rec->area4, 0x7f, 0x7f, 0x7f);
     }
     if (n < 12) {
         DAT_801b24e4.unk10a = 1;
@@ -369,11 +369,11 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                     o88->unk0 = 2;
                     while (o88->unk9 == 0) {
                         func_80052e5c();
-                        func_80015a48();
-                        func_80018cd0();
+                        cd_request_service_vab();
+                        cd_request_service_stream();
                         func_800422b8(NULL, NULL);
                     }
-                    func_80019ab4();
+                    cd_request_wait_idle();
                     o88->unk15 = -1;
                     obj2->unk10 = 0x400;
                     obj2->unk2 = 5;
@@ -389,8 +389,8 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         } else {
                             o88->unk15 = 100;
                         }
-                        func_80015a48();
-                        func_80018cd0();
+                        cd_request_service_vab();
+                        cd_request_service_stream();
                         func_800422b8(NULL, NULL);
                     }
                     o88->unk16 = 0x800;
@@ -412,11 +412,11 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                     while (o88b->unk9 == 0) {
                         func_80052e5c();
                         o88b->unk18 = 0;
-                        func_80015a48();
-                        func_80018cd0();
+                        cd_request_service_vab();
+                        cd_request_service_stream();
                         func_800422b8(NULL, NULL);
                     }
-                    func_80019ab4();
+                    cd_request_wait_idle();
                     o88b->unk15 = -1;
                     obj2b->unk10 = 0x400;
                     obj2b->unk2 = 5;
@@ -432,8 +432,8 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
                         } else {
                             o88b->unk15 = 0;
                         }
-                        func_80015a48();
-                        func_80018cd0();
+                        cd_request_service_vab();
+                        cd_request_service_stream();
                         func_800422b8(NULL, NULL);
                     }
                     o88b->unk16 = 0x800;

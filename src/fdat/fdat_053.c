@@ -62,10 +62,10 @@ void func_801e8658(void)
     s32 i = 15;
 
     if (DAT_801ba984.unk32[0x23] == 1 && DAT_80185da8.objects[i].unk9 != 1) {
-        if (func_80016a2c(DAT_801b24e4.unk124.vy,
-                          func_80016ab8(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
-                                        DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
-                          600) == 0) {
+        if (angle_within_tolerance(DAT_801b24e4.unk124.vy,
+                                   vector_xz_to_angle(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
+                                                      DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
+                                   600) == 0) {
             DAT_80185da8.objects[i].unk9 = 0;
             DAT_80185da8.objects[i].unk0 = 2;
         }
@@ -115,8 +115,8 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
         to.vy -= 50;
         for (t = 0; t < 4096; t += 64) {
             func_8005bee0(obj, &from, &to, NULL, NULL, t);
-            func_80015a48();
-            func_80018cd0();
+            cd_request_service_vab();
+            cd_request_service_stream();
             func_800422b8(NULL, NULL);
         }
         DAT_801ba984.unk32[0x25] = 1;

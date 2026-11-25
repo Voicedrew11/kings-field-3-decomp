@@ -23,7 +23,7 @@ RODATA(0x80011c54, 0x400)
 ADDRESS(0x8004482c, 0x30)
 void func_8004482c(Object44 *obj, s32 se)
 {
-    func_80015654(se, &obj->pos, 0x78, 0);
+    audio_play_spatial_default_range(se, &obj->pos, 0x78, 0);
 }
 
 /* Frees every record. */
@@ -288,8 +288,8 @@ void func_80044d9c(Object44Place *place)
             }
             obj->pos.vy = place->unkc - (layer->unk1 << 7);
         }
-        func_80018f5c((u32 *)&obj->arg.b.unk38, (u32 *)place->unk10, 2);
-        func_80018fbc((u32 *)&obj->arg.w.unk40, 0xff, 1);
+        resource_copy_words((u32 *)&obj->arg.b.unk38, (u32 *)place->unk10, 2);
+        repeat_store_word((u32 *)&obj->arg.w.unk40, 0xff, 1);
         radius = def->unk4;
         if (radius != 0) {
             if (obj->unk3 & 0x10) {

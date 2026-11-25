@@ -62,15 +62,15 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         rot.vy = args[2];
         rot.vz = args[3];
         args += 3;
-        func_800168a8(&obj->angle, &rot, &off);
+        vector_rotate_yxz(&obj->angle, &rot, &off);
     } else if (vertex == -2) {
         func_8004ede0(obj, args[1], &from);
         func_8004ede0(obj, args[2], &off);
         args += 3;
         speed = args[0];
-        aim.vx = func_80017158(DAT_801b24e4.pos.vx, ((off.vx - from.vx) << 8) + obj->pos.vx, speed);
-        aim.vy = func_80017158(DAT_801b24e4.pos.vy, ((off.vy - from.vy) << 8) + obj->pos.vy, speed);
-        aim.vz = func_80017158(DAT_801b24e4.pos.vz, ((off.vz - from.vz) << 8) + obj->pos.vz, speed);
+        aim.vx = fixed_lerp_q12(DAT_801b24e4.pos.vx, ((off.vx - from.vx) << 8) + obj->pos.vx, speed);
+        aim.vy = fixed_lerp_q12(DAT_801b24e4.pos.vy, ((off.vy - from.vy) << 8) + obj->pos.vy, speed);
+        aim.vz = fixed_lerp_q12(DAT_801b24e4.pos.vz, ((off.vz - from.vz) << 8) + obj->pos.vz, speed);
         target = &aim;
     } else {
         func_8004ede0(obj, vertex, &off);
@@ -82,7 +82,7 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
     case 0:
     case 0x56:
     case 0x66:
-        func_80015654(0x31, &pos, 0x6e, 0);
+        audio_play_spatial_default_range(0x31, &pos, 0x6e, 0);
         AIM(500);
         shot = func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir);
         if (shot != NULL) {
@@ -117,7 +117,8 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         id = 0x81;
     lob:
         AIM(600);
-        delay = (func_80016c44(pos.vx - target->vx, pos.vy - target->vy, pos.vz - target->vz) - 2000) / 600;
+        delay = (fixed_vector3_length(pos.vx - target->vx, pos.vy - target->vy,
+                                      pos.vz - target->vz) - 2000) / 600;
         if (delay < 0) {
             delay = 0;
         }
@@ -164,9 +165,10 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         func_80053c84((u8)kind, 0x83, 0x7b, &pos, &dir);
         break;
     case 0x42:
-        func_80016c90(target->vx - pos.vx, -(pos.vy + 1600) + target->vy, target->vz - pos.vz, &sv);
-        func_800167cc(&sv, &dir);
-        func_80016928(0x400, &dir);
+        vector_displacement_to_pitch_yaw(target->vx - pos.vx, -(pos.vy + 1600) + target->vy,
+                                         target->vz - pos.vz, &sv);
+        pitch_yaw_to_forward_vector(&sv, &dir);
+        vector3s_scale_shift12(0x400, &dir);
         pos.vx += dir.vx;
         pos.vy += dir.vy;
         pos.vz += dir.vz;
@@ -199,8 +201,8 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
                       SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
-        func_800167cc(&obj->angle, &dir);
-        func_80016928(0x226, &dir);
+        pitch_yaw_to_forward_vector(&obj->angle, &dir);
+        vector3s_scale_shift12(0x226, &dir);
         shot = func_80053c84((u8)kind, 0x83, 0x28, &pos, &dir);
         if (shot != NULL) {
             shot->unkb = 3;
@@ -224,12 +226,13 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         break;
     case 0x12:
     case 0x14:
-        func_80016c90(target->vx - pos.vx, -(pos.vy + 1600) + target->vy, target->vz - pos.vz, &sv);
-        func_800167cc(&sv, &dir);
+        vector_displacement_to_pitch_yaw(target->vx - pos.vx, -(pos.vy + 1600) + target->vy,
+                                         target->vz - pos.vz, &sv);
+        pitch_yaw_to_forward_vector(&sv, &dir);
         if (id == 0x12) {
-            func_80016928(200, &dir);
+            vector3s_scale_shift12(200, &dir);
         } else {
-            func_80016928(20, &dir);
+            vector3s_scale_shift12(20, &dir);
         }
         func_80053c84((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
         break;
@@ -262,14 +265,14 @@ void func_8004f414(s32 id, s32 kind, s32 vertex, ...)
         p = *target;
         i = 6;
         for (;;) {
-            if (func_80017210(0, func_80016c08(p.vx - pos.vx, p.vz - pos.vz), pos.vy + (1400 - p.vy), 10, 800,
-                              &time, &pitch)) {
+            if (trajectory_solve_time_angle(0, fixed_vector2_length(p.vx - pos.vx, p.vz - pos.vz),
+                                            pos.vy + (1400 - p.vy), 10, 800, &time, &pitch)) {
                 pitch = 0x100;
             }
             if (--i == 0) {
                 break;
             }
-            func_800175a8(target, &DAT_801b24e4.unk11c, time >> 6, &p);
+            vector_add_scaled_delta(target, &DAT_801b24e4.unk11c, time >> 6, &p);
         }
         sv.vy = func_8004f1d0(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
         sv.vx = pitch;
@@ -306,9 +309,9 @@ void func_80050010(Object88 *obj)
 
     script = obj->unk60;
     if (obj->unk28 & 0x800000) {
-        func_80015688(script[4] + 240, &obj->pos, 0x7f, 0x6000, 0x7800, func_8004ffa0(obj));
+        audio_play_spatial_range(script[4] + 240, &obj->pos, 0x7f, 0x6000, 0x7800, func_8004ffa0(obj));
     } else {
-        func_80015654(script[4] + 240, &obj->pos, 0x6e, func_8004ffa0(obj));
+        audio_play_spatial_default_range(script[4] + 240, &obj->pos, 0x6e, func_8004ffa0(obj));
     }
 }
 
@@ -499,7 +502,7 @@ void func_800500a8(void)
             if (func_8004db98(obj, 0x800)) {
                 u16 drop;
 
-                drop = def->unk30 + func_80017108(def->unk30);
+                drop = def->unk30 + random_centered_triangular_scaled(def->unk30);
                 if (drop != 0) {
                     func_80046294(drop, &obj->pos, -(obj->unk1e >> 1));
                 }
@@ -656,14 +659,14 @@ void func_800500a8(void)
             OBJECT88_B71(obj) = 0;
         }
         if (rand() < 6000) {
-            dist = func_80016c08(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+            dist = fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
             if (dist >= SCRIPT_U16(script, 22)) {
                 OBJECT88_B70(obj) = 0;
             } else if (dist <= SCRIPT_U16(script, 20)) {
                 OBJECT88_B70(obj) = 1;
             }
         }
-        obj->unk64 = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+        obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
         mode = 0x21;
         if (OBJECT88_B71(obj) == 0) {
             mode = 5;
@@ -709,8 +712,8 @@ void func_800500a8(void)
         dx = DAT_801b24e4.pos.vx - obj->pos.vx;
         dy = DAT_801b24e4.pos.vy - obj->pos.vy - 1600;
         dz = DAT_801b24e4.pos.vz - obj->pos.vz;
-        dist = func_80016c44(dx, dy, dz);
-        func_80016c90(dx, dy, dz, &obj->unk72);
+        dist = fixed_vector3_length(dx, dy, dz);
+        vector_displacement_to_pitch_yaw(dx, dy, dz, &obj->unk72);
         if (obj->unk72.vx > 0xe00) {
             obj->unk72.vx = 0xe00;
         } else if (obj->unk72.vx > 0x200) {
@@ -749,7 +752,8 @@ void func_800500a8(void)
         case 0:
             if (func_8004e824((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 18), def->unk1[2], 5) == 0) {
                 func_8004db08(obj, SCRIPT_U16(script, 8));
-                if (func_80016c08(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
+                if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                         DAT_801b24e4.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 14)) {
                     break;
                 }
@@ -835,7 +839,8 @@ void func_800500a8(void)
         }
         func_8004e094(&obj->vel);
         func_8004db08(obj, SCRIPT_U16(script, 8));
-        func_8004e928(obj, func_80016ab8(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 14), def->unk1[3]);
+        func_8004e928(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 14),
+                      def->unk1[3]);
         break;
     }
     case 132: {
@@ -886,7 +891,8 @@ void func_800500a8(void)
             at.vx += obj->pos.vx;
             at.vy += obj->pos.vy;
             at.vz += obj->pos.vz;
-            if (func_80016ec8(&at, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, script[14], script[15], 0x6a4) != -1) {
+            if (vector_distance_to_point(&at, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz,
+                                         script[14], script[15], 0x6a4) != -1) {
                 time = obj->unk18;
                 obj->unk18 -= obj->unk66 << 2;
                 if ((s16)obj->unk18 < 0) {
@@ -969,7 +975,7 @@ void func_800500a8(void)
             speed = SCRIPT_U16(script, 28);
             turn = script[13];
         }
-        obj->unk64 = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+        obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
         func_8004ea7c(obj->unk64, speed, SCRIPT_U16(script, 30), turn, def->unk1[3], 4);
         if (func_8004db98(obj, SCRIPT_U16(script, 24))) {
             func_8004d254(0, script[14], script[15], script[16], SCRIPT_U16(script, 18), SCRIPT_U16(script, 20),
@@ -994,20 +1000,21 @@ void func_800500a8(void)
         case 0:
             func_8004db3c(obj, SCRIPT_U16(script, 8));
             if (obj->unk18 >= 4095) {
-                func_80016c90(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vy - obj->pos.vy,
-                              DAT_801b24e4.pos.vz - obj->pos.vz, &dir);
-                func_800167cc(&dir, &obj->unk72);
+                vector_displacement_to_pitch_yaw(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                                 DAT_801b24e4.pos.vy - obj->pos.vy,
+                                                 DAT_801b24e4.pos.vz - obj->pos.vz, &dir);
+                pitch_yaw_to_forward_vector(&dir, &obj->unk72);
                 obj->unk70 = 1;
             }
             func_8004e094(&obj->vel);
             break;
         case 1:
             target = step = obj->unk72;
-            func_80016928(SCRIPT_U16(script, 20), &target);
-            func_80016928(SCRIPT_U16(script, 24), &step);
-            obj->vel.vx = func_80015fdc(obj->vel.vx, target.vx, step.vx);
-            obj->vel.vy = func_80015fdc(obj->vel.vy, target.vy, step.vy);
-            obj->vel.vz = func_80015fdc(obj->vel.vz, target.vz, step.vz);
+            vector3s_scale_shift12(SCRIPT_U16(script, 20), &target);
+            vector3s_scale_shift12(SCRIPT_U16(script, 24), &step);
+            obj->vel.vx = value_approach(obj->vel.vx, target.vx, step.vx);
+            obj->vel.vy = value_approach(obj->vel.vy, target.vy, step.vy);
+            obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
             hit = func_8004e094(&obj->vel);
             if (hit != 0) {
                 if (hit & 0x80) {
@@ -1035,7 +1042,8 @@ void func_800500a8(void)
             func_8004e094(&obj->vel);
             break;
         }
-        func_8004e928(obj, func_80016ab8(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 22), def->unk1[3]);
+        func_8004e928(obj, vector_xz_to_angle(obj->vel.vx, obj->vel.vz), SCRIPT_U16(script, 22),
+                      def->unk1[3]);
         break;
     }
     case 18: {
@@ -1050,8 +1058,8 @@ void func_800500a8(void)
         dx = DAT_801b24e4.pos.vx - obj->pos.vx;
         dy = DAT_801b24e4.pos.vy - obj->pos.vy - 1600;
         dz = DAT_801b24e4.pos.vz - obj->pos.vz;
-        func_80016c44(dx, dy, dz);
-        func_80016c90(dx, dy, dz, &obj->unk72);
+        fixed_vector3_length(dx, dy, dz);
+        vector_displacement_to_pitch_yaw(dx, dy, dz, &obj->unk72);
         func_8004ed50(&obj->unk72, SCRIPT_U16(script, 28), SCRIPT_U16(script, 30), script[13], def->unk1[3], 6);
         func_8004db3c(obj, SCRIPT_U16(script, 8));
         if (func_8004db98(obj, SCRIPT_U16(script, 24))) {
@@ -1180,15 +1188,15 @@ void func_800500a8(void)
         }
         switch (obj->unk70) {
         case 0:
-            if (func_80016c08(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
+            if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
                 SCRIPT_U16(script, 12)) {
                 obj->unk70 = 2;
             }
             break;
         case 2:
             func_8004db3c(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = func_80017158(SCRIPT_U16(script, 20), def->unk12, obj->unk18);
-            obj->unk1e = func_80017158(SCRIPT_U16(script, 22), def->unk14, obj->unk18);
+            obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 20), def->unk12, obj->unk18);
+            obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk14, obj->unk18);
             if (obj->unk18 >= 4095) {
                 obj->unk1c = def->unk12;
                 obj->unk1e = def->unk14;
@@ -1232,7 +1240,7 @@ void func_800500a8(void)
         switch (obj->unk70) {
         case 0:
             func_8004db08(obj, SCRIPT_U16(script, 8));
-            if (func_80016c08(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
+            if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 12) &&
                 obj->unk18 >= 0xfff - SCRIPT_U16(script, 8)) {
                 obj->unk70 = 2;
@@ -1247,8 +1255,8 @@ void func_800500a8(void)
             break;
         case 2:
             func_8004db3c(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = func_80017158(SCRIPT_U16(script, 22), def->unk12, obj->unk18);
-            obj->unk1e = func_80017158(SCRIPT_U16(script, 24), def->unk14, obj->unk18);
+            obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk12, obj->unk18);
+            obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 24), def->unk14, obj->unk18);
             if (obj->unk18 >= 4095) {
                 obj->unk1c = def->unk12;
                 obj->unk1e = def->unk14;
@@ -1416,8 +1424,8 @@ void func_800500a8(void)
             break;
         case 2:
             func_8004db3c(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = func_80017158(def->unk12, SCRIPT_U16(script, 18), obj->unk18);
-            obj->unk1e = func_80017158(def->unk14, SCRIPT_U16(script, 20), obj->unk18);
+            obj->unk1c = fixed_lerp_q12(def->unk12, SCRIPT_U16(script, 18), obj->unk18);
+            obj->unk1e = fixed_lerp_q12(def->unk14, SCRIPT_U16(script, 20), obj->unk18);
             if (obj->unk18 >= 4095) {
                 obj->unk1c = SCRIPT_U16(script, 18);
                 obj->unk1e = SCRIPT_U16(script, 20);
@@ -1453,7 +1461,7 @@ void func_800500a8(void)
             obj->unkf = 0xf0;
             func_8004c130(script[1]);
             func_8004e31c();
-            func_80015654(0x32, &obj->pos, 0x78, 0);
+            audio_play_spatial_default_range(0x32, &obj->pos, 0x78, 0);
         }
         obj->angle.vx += 128;
         obj->angle.vy += 64;
@@ -1593,7 +1601,7 @@ void func_800500a8(void)
         rot.vx = target->angle.vx;
         rot.vy = target->angle.vy;
         rot.vz = target->angle.vz;
-        func_800168a8(&rot, (SVECTOR *)&def->unkc, &from);
+        vector_rotate_yxz(&rot, (SVECTOR *)&def->unkc, &from);
         func_8004ede0(target, obj->unk24, &to);
         obj->pos.vx = target->pos.vx + to.vx - from.vx;
         obj->pos.vy = target->pos.vy + to.vy - from.vy;

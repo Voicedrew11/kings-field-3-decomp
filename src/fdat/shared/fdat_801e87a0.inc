@@ -41,7 +41,7 @@ void fdat_801e87a0(void)
     angle = ratan2(dz, dx);
     step_x = ((u16 *)script)[6] * rcos(angle) >> 12;
     step_z = ((u16 *)script)[6] * rsin(angle) >> 12;
-    obj->unk64 = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+    obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
     mode = 5;
     if (obj->unk72.vy == 0) {
         turned = func_8004ea7c(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7], def->unk1[2],

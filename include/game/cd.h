@@ -31,7 +31,7 @@ struct SoundSlot;
 #define CD_REQUEST_READ 0x10   /* checksummed read, then callback(buffer) */
 #define CD_REQUEST_STREAM 0x20 /* CdRead2 stream, callback(request) per sector */
 #define CD_REQUEST_SOUND 0x30  /* sound bank read (src/game/sound.c) */
-#define CD_REQUEST_IMAGE 0x40  /* VRAM image read (func_80018cd0) */
+#define CD_REQUEST_IMAGE 0x40  /* VRAM image read (cd_request_service_stream) */
 
 /* Called with the buffer (CD_REQUEST_READ) or with the request; stored
  * untyped and cast to one of the two below where it is called. */
@@ -75,7 +75,7 @@ typedef struct CdRequest {
     u8 unk28[4];
 } CdRequest;
 
-/* Where an archive file lies; func_8001a118 reads from it like a CdlFILE. */
+/* Where an archive file lies; cd_extent_read_into reads from it like a CdlFILE. */
 typedef struct CdExtent {
     CdlLOC pos;
     u32 size;
@@ -89,7 +89,7 @@ typedef struct CdFile {
 typedef struct CdState {
     s32 vsync_event;            /* +0x000: root counter 3 interrupt */
     u32 frames;                 /* +0x004: VSyncs since start-up */
-    CD_VSYNC_SHARED u32 frame_gate; /* +0x008: VSyncs since the last func_80019614 */
+    CD_VSYNC_SHARED u32 frame_gate; /* +0x008: VSyncs since the last cd_wait_four_vsyncs */
     u32 unkc;                   /* +0x00c: counts VSyncs; func_80029500 stores the
                                  * player's +0xa0 in it; nothing reads it yet */
     s32 error_event;            /* +0x010: HwCdRom EvSpERROR */
@@ -105,34 +105,34 @@ typedef struct CdState {
 extern CdState DAT_801c12e4;
 extern u8 DAT_801c17a4[];
 
-void func_80019538(void);
-void func_80019614(void);
-void func_8001967c(CdRequest *request);
-void func_80019a74(CdlLOC *pos, s32 offset, CdlLOC *out);
-void func_80019ab4(void);
+void cd_request_yield(void);
+void cd_wait_four_vsyncs(void);
+void cd_request_advance(CdRequest *request);
+void cd_location_add(CdlLOC *pos, s32 offset, CdlLOC *out);
+void cd_request_wait_idle(void);
 /* The CdReadyCallback that runs the request queue (the menu puts it back, func_80027c8c). */
-void func_80019848(void);
-void func_80019b1c(CdRequest *request);
+void cd_data_ready_handler(void);
+void cd_request_wait_done(CdRequest *request);
 /* Word checksum of a sector read: nonzero when the last word disagrees. */
-s32 func_80019b68(u8 *buffer, s32 sectors);
-s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos);
-/* 16-bit file and entry numbers: func_80019d98/df0 take ints and narrow them
- * at entry (callers pass ints unconverted); func_80019e48 takes u16 itself,
+s32 cd_sectors_corrupt(u8 *buffer, s32 sectors);
+s32 cd_archive_entry_extent(s32 file, s32 entry, CdlLOC *pos);
+/* 16-bit file and entry numbers: cd_archive_queue_sector_callback_read/df0 take ints and narrow them
+ * at entry (callers pass ints unconverted); cd_archive_read_chunked takes u16 itself,
  * since the int-and-local form swaps its file/entry registers. */
-void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback);
-void func_80019d98(int file, int entry, u8 *buffer, CdCallback callback);
-void func_80019df0(int file, int entry, u8 *buffer, CdCallback callback);
-void func_80019e48(u16 file, u16 entry, u8 *buffer, CdCallback callback);
-s32 func_80019f14(int file, int entry);
-void func_80019f58(s32 fatal);
-void func_80019f60(CdlLOC *pos, u8 *buffer, s32 sectors);
-u8 *func_8001a0bc(CdlFILE *file);
-void func_8001a118(u8 *buffer, CdExtent *extent, u32 bytes);
-void func_8001a154(int file, int entry, u8 *buffer);
-u8 *func_8001a1e8(char *name);
-s32 func_8001a298(u8 *buffer, char *name, u32 bytes);
-void func_8001a34c(int file, char *name);
-void func_8001a438(void);
-void func_8001a5c0(void);
+void cd_archive_queue_read(s32 file, s32 entry, u8 *buffer, CdCallback callback);
+void cd_archive_queue_sector_callback_read(int file, int entry, u8 *buffer, CdCallback callback);
+void cd_archive_queue_stream_read(int file, int entry, u8 *buffer, CdCallback callback);
+void cd_archive_read_chunked(u16 file, u16 entry, u8 *buffer, CdCallback callback);
+s32 cd_archive_entry_size(int file, int entry);
+void cd_report_error(s32 fatal);
+void cd_read_sectors(CdlLOC *pos, u8 *buffer, s32 sectors);
+u8 *cd_extent_load(CdlFILE *file);
+void cd_extent_read_into(u8 *buffer, CdExtent *extent, u32 bytes);
+void cd_archive_read(int file, int entry, u8 *buffer);
+u8 *cd_file_load(char *name);
+s32 cd_file_load_into(u8 *buffer, char *name, u32 bytes);
+void cd_archive_open(int file, char *name);
+void cd_initialize(void);
+void cd_close_events(void);
 
 #endif

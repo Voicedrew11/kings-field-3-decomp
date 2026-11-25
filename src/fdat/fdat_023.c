@@ -79,7 +79,7 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
     if (i != -1) {
         obj = &DAT_8018fb3c.objects[i];
         if (obj->unk6 == 0x140) {
-            if (func_80016a2c(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
+            if (angle_within_tolerance(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
                 return;
             }
             if (obj->arg.b.unk38 != 0xff) {

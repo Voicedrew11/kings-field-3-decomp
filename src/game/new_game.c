@@ -24,14 +24,14 @@ void func_8005ea64(void)
     u16 *off;
     s32 i;
 
-    func_80018fbc((u32 *)DAT_801ba984.unk4, 0, 0x40);
-    func_80018fbc((u32 *)DAT_801ba984.unk104, 0, 0x1400);
-    func_8001937c((void *)DAT_801ba984.unk104, 0x5000);
+    repeat_store_word((u32 *)DAT_801ba984.unk4, 0, 0x40);
+    repeat_store_word((u32 *)DAT_801ba984.unk104, 0, 0x1400);
+    memory_arena_initialize_blocks((void *)DAT_801ba984.unk104, 0x5000);
     off = DAT_801ba984.unk5104;
     for (i = 31; i != -1; i--) {
         *off++ = 0xffff;
     }
-    func_80018fbc((u32 *)DAT_800c85e8, 0, 0x4b);
+    repeat_store_word((u32 *)DAT_800c85e8, 0, 0x4b);
     DAT_800c85e8[0][0] = 1;
     DAT_800c85e8[0][42] = 1;
     DAT_800c85e8[0][104] = 2;
@@ -69,10 +69,10 @@ void func_8005eb20(void)
             DrawSync(0);
             VSync(0);
         }
-        func_80019ab4();
+        cd_request_wait_idle();
         do {
-            func_80019538();
-            func_80018358();
+            cd_request_yield();
+            resource_advance_transition();
         } while ((s16)DAT_8018fad4.loading == 1);
         DAT_801e7edc.unk384 = 7;
         DAT_801e7edc.unk380 = &DAT_801e7edc.movies[7];
@@ -82,12 +82,12 @@ void func_8005eb20(void)
         DAT_801e7edc.unk384 = 0xff;
         func_8003078c();
         SsSetMVol(127, 127);
-        func_80017c78(0xff, 0xff, 0xff, 9, 11, 0x7f, 0x7f, 0x7f);
+        resource_request_transition(0xff, 0xff, 0xff, 9, 11, 0x7f, 0x7f, 0x7f);
         MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
                   DAT_80199154.draw[DAT_80199154.frame].clip.y);
         DrawSync(0);
         func_80046c00(1, 0, 0, 0);
-        func_80019ab4();
+        cd_request_wait_idle();
     } else {
         n = DAT_801b24e4.bgm_volume >> 1;
         volume = DAT_801b24e4.bgm_volume;

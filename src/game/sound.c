@@ -22,7 +22,7 @@ DATA(0x801b09fc, 0x1ae8, ".bss")
 SoundState DAT_801b09fc;
 
 ADDRESS(0x8001509c, 0x1a4)
-void func_8001509c(void)
+void audio_initialize_runtime(void)
 {
     SoundBank *bank;
     SoundUnk5c8 *unk;
@@ -77,7 +77,7 @@ void func_8001509c(void)
 }
 
 ADDRESS(0x80015240, 0xb8)
-void func_80015240(void)
+void audio_start_sequence(void)
 {
     if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_ready != 0
         && DAT_801b09fc.banks[1].vab_id != SOUND_VAB_NONE) {
@@ -90,7 +90,7 @@ void func_80015240(void)
 }
 
 ADDRESS(0x800152f8, 0x5c)
-void func_800152f8(void)
+void audio_stop_sequence(void)
 {
     if (DAT_801b09fc.seq_playing == 1) {
         SsSeqStop(DAT_801b09fc.seq_id);
@@ -100,7 +100,7 @@ void func_800152f8(void)
 }
 
 ADDRESS(0x80015354, 0xbc)
-void func_80015354(void)
+void audio_shutdown(void)
 {
     SoundBank *bank;
     s32 i;
@@ -129,7 +129,7 @@ void func_80015354(void)
  * `volume + 32` temporary.
  */
 ADDRESS(0x80015410, 0x244)
-s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note)
+s32 audio_play_spatial(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note)
 {
     s32 dx = (pos->vx - DAT_801b09fc.listener.vx) >> 3;
     s32 dy = (pos->vy - DAT_801b09fc.listener.vy) >> 3;
@@ -163,7 +163,7 @@ s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 n
             left = 127;
         }
     }
-    angle = func_80016ab8(pos->vx - DAT_801b09fc.listener.vx, pos->vz - DAT_801b09fc.listener.vz)
+    angle = vector_xz_to_angle(pos->vx - DAT_801b09fc.listener.vx, pos->vz - DAT_801b09fc.listener.vz)
          - DAT_801b09fc.listener_angle.vy;
     angle = angle < 0 ? angle + 0x1000 : angle;
     right = left;
@@ -172,24 +172,24 @@ s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 n
     } else {
         right = left + (left * rsin(angle) >> 12) * (127 - volume) / 128;
     }
-    func_80015790(se, right, left, note);
+    audio_key_on(se, right, left, note);
     return 1;
 }
 
 ADDRESS(0x80015654, 0x34)
-s32 func_80015654(s32 se, VECTOR *pos, s16 unused, s32 note)
+s32 audio_play_spatial_default_range(s32 se, VECTOR *pos, s16 unused, s32 note)
 {
-    return func_80015410(se, pos, unused, 0x5000, 0x4800, note);
+    return audio_play_spatial(se, pos, unused, 0x5000, 0x4800, note);
 }
 
 ADDRESS(0x80015688, 0x34)
-s32 func_80015688(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note)
+s32 audio_play_spatial_range(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note)
 {
-    return func_80015410(se, pos, unused, range, falloff, note);
+    return audio_play_spatial(se, pos, unused, range, falloff, note);
 }
 
 ADDRESS(0x800156bc, 0xb0)
-void func_800156bc(VECTOR *listener, SVECTOR *angle)
+void audio_update_listener(VECTOR *listener, SVECTOR *angle)
 {
     if (listener != 0) {
         DAT_801b09fc.listener = *listener;
@@ -202,13 +202,13 @@ void func_800156bc(VECTOR *listener, SVECTOR *angle)
 }
 
 ADDRESS(0x8001576c, 0x24)
-void func_8001576c(s32 se, s32 volume)
+void audio_play_sound(s32 se, s32 volume)
 {
-    func_80015790(se, volume, volume, 0);
+    audio_key_on(se, volume, volume, 0);
 }
 
 ADDRESS(0x80015790, 0x178)
-void func_80015790(s32 se, s32 left, s32 right, s32 note)
+void audio_key_on(s32 se, s32 left, s32 right, s32 note)
 {
     char status[24];
     SoundEffect *effect;
@@ -252,14 +252,14 @@ void func_80015790(s32 se, s32 left, s32 right, s32 note)
 }
 
 ADDRESS(0x80015908, 0x140)
-void func_80015908(CdRequest *request)
+void audio_vab_stream_callback(CdRequest *request)
 {
     SoundBank *bank;
 
     switch (request->state) {
     case 0:
         bank = &DAT_801b09fc.banks[request->u.sound.bank];
-        if (func_80019b68(request->u.sound.slot->buffer, request->count)) {
+        if (cd_sectors_corrupt(request->u.sound.slot->buffer, request->count)) {
             request->issued = 0;
             CdSeekL(&request->retry_pos);
             break;
@@ -270,10 +270,10 @@ void func_80015908(CdRequest *request)
         }
         bank->vab_id = func_80068f7c(request->u.sound.slot->buffer, -1, request->u.sound.spu_addr);
         if (bank->vab_id == SOUND_VAB_NONE) {
-            func_8001967c(request);
+            cd_request_advance(request);
             break;
         }
-        func_80019a74(&request->pos, request->count, &request->pos);
+        cd_location_add(&request->pos, request->count, &request->pos);
         request->state = 1;
         request->buffer = DAT_801c17a4;
         request->issued = 0;
@@ -287,7 +287,7 @@ void func_80015908(CdRequest *request)
 }
 
 ADDRESS(0x80015a48, 0x154)
-void func_80015a48(void)
+void cd_request_service_vab(void)
 {
     s32 id;
     CdRequest *request;
@@ -303,17 +303,17 @@ void func_80015a48(void)
             if (id == -1) {
                 SsVabClose(bank->vab_id);
                 bank->vab_id = SOUND_VAB_NONE;
-                func_8001967c(request);
+                cd_request_advance(request);
             } else if (id == -2) {
                 request->issued = 0;
                 request->state = 1;
-                func_80019a74(&request->pos, request->count, &request->pos);
+                cd_location_add(&request->pos, request->count, &request->pos);
                 CdSeekL(&request->pos);
                 SsVabTransCompleted(SS_WAIT_COMPLETED);
                 return;
             } else {
                 if (id == bank->vab_id) {
-                    func_8001967c(request);
+                    cd_request_advance(request);
                     SsVabTransCompleted(SS_WAIT_COMPLETED);
                     request->u.sound.slot->state = 1;
                     request->count = 0;
@@ -327,8 +327,8 @@ void func_80015a48(void)
 }
 
 ADDRESS(0x80015b9c, 0x144)
-SoundSlot *func_80015b9c(s32 first_bank, s32 bank_count, s32 first_slot, s32 slot_count,
-                         s32 *index)
+SoundSlot *audio_acquire_vab_stream_slot(s32 first_bank, s32 bank_count, s32 first_slot, s32 slot_count,
+                                         s32 *index)
 {
     s32 i = 0;
     SoundSlot *slot = &DAT_801b09fc.slots[first_slot];
@@ -369,11 +369,11 @@ SoundSlot *func_80015b9c(s32 first_bank, s32 bank_count, s32 first_slot, s32 slo
 }
 
 /*
- * Not exact only through func_80015410: the callback's .text offset follows
+ * Not exact only through audio_play_spatial: the callback's .text offset follows
  * that function's size.
  */
 ADDRESS(0x80015ce0, 0x238)
-void func_80015ce0(s32 file, s32 sector, s32 index)
+void audio_queue_vab_stream(s32 file, s32 sector, s32 index)
 {
     SoundBank *bank = &DAT_801b09fc.banks[index];
     SoundBank *other;
@@ -419,10 +419,10 @@ void func_80015ce0(s32 file, s32 sector, s32 index)
                 slot->state = 0;
             }
         } else if (index < 147) {
-            slot = func_80015b9c(51, 96, 2, 4, &found);
+            slot = audio_acquire_vab_stream_slot(51, 96, 2, 4, &found);
             spu_addr = found * 0x9c00 + 0x52000;
         } else if (index < 179) {
-            slot = func_80015b9c(147, 32, 6, 2, &found);
+            slot = audio_acquire_vab_stream_slot(147, 32, 6, 2, &found);
             spu_addr = found * 0x3c00 + 0x4a800;
         }
         if (slot == 0) {
@@ -434,10 +434,10 @@ void func_80015ce0(s32 file, s32 sector, s32 index)
     bank->slot = slot;
     slot->state = 3;
     request = DAT_801c12e4.write;
-    func_80019b1c(request);
+    cd_request_wait_done(request);
     request->state = 0;
     request->u.sound.slot = slot;
     request->u.sound.bank = index;
     request->u.sound.spu_addr = spu_addr;
-    func_80019df0(file, sector * 2, slot->buffer, (CdCallback)func_80015908);
+    cd_archive_queue_stream_read(file, sector * 2, slot->buffer, (CdCallback)audio_vab_stream_callback);
 }

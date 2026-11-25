@@ -94,7 +94,7 @@ typedef struct AnimSlot {
     struct AnimSlot **owner;
 } AnimSlot;
 
-/* A placed effect (128 of them follow a frame counter); func_80017aa4 moves
+/* A placed effect (128 of them follow a frame counter); translate_active_world_positions moves
  * them with the area origin. */
 typedef struct Effect {
     u16 id;         /* 0xffff: unused */
@@ -135,14 +135,14 @@ typedef struct Matrix3x3 {
 
 /* 48-byte light records of the area tables (DAT_80081c8c, WIP names). */
 typedef struct Record30 {
-    Matrix3x3 unk0;     /* func_800171b0 blends it into Record6c.unk0[0] */
+    Matrix3x3 unk0;     /* fixed_lerp_nine_halfwords_q12 blends it into Record6c.unk0[0] */
     Matrix3x3 unk14;    /* into Record6c.unk50 */
     CVECTOR unk28;
     u16 unk2c;          /* kept 4096 below unk2e */
     u16 unk2e;
 } Record30;
 
-/* The area's light records (func_80017664 copies them out of the first FDAT.T entry). */
+/* The area's light records (resource_initialize_game_assets copies them out of the first FDAT.T entry). */
 extern Record30 DAT_80081c8c[64];
 
 /* The working copy of a Record30: unk0[0] and its three quarter turns. */

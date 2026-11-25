@@ -28,21 +28,21 @@ typedef struct HeapBlock {
 /* The block after this one, past its header and data. */
 #define HEAP_NEXT(block) ((HeapBlock *)((u8 *)(block) + ((block)->size + sizeof(HeapBlock))))
 
-u32 *func_80018f5c(u32 *dst, u32 *src, s32 count);
-u16 *func_80018f8c(u16 *dst, u16 *src, s32 count);
-u32 *func_80018fbc(u32 *dst, u32 value, s32 count);
-u16 *func_80018fe0(u16 *dst, u16 value, s32 count);
-void func_8001937c(void *arena, s32 size);
-u8 *func_8001939c(HeapBlock *arena, u32 size, u8 **owner);
-void func_80019454(u8 *data);
-void func_80019474(u8 *data, u8 state);
-u8 func_8001947c(u8 *data);
-void func_80019488(u8 *data, u8 value);
-u8 func_80019490(u8 *data);
-void func_8001949c(u8 *data, u16 value);
-u16 func_800194a4(u8 *data);
-void *func_800194b0(u32 size);
-void *func_800194f0(u32 size);
-void func_80019518(void *data);
+u32 *resource_copy_words(u32 *dst, u32 *src, s32 count);
+u16 *resource_copy_halfwords(u16 *dst, u16 *src, s32 count);
+u32 *repeat_store_word(u32 *dst, u32 value, s32 count);
+u16 *repeat_store_halfword(u16 *dst, u16 value, s32 count);
+void memory_arena_initialize_blocks(void *arena, s32 size);
+u8 *memory_arena_allocate_block(HeapBlock *arena, u32 size, u8 **owner);
+void memory_block_release(u8 *data);
+void memory_block_set_kind(u8 *data, u8 state);
+u8 memory_block_kind(u8 *data);
+void memory_block_set_flags(u8 *data, u8 value);
+u8 memory_block_flags(u8 *data);
+void memory_block_set_tag(u8 *data, u16 value);
+u16 memory_block_tag(u8 *data);
+void *memory_malloc_checked(u32 size);
+void *memory_allocate(u32 size);
+void memory_free(void *data);
 
 #endif

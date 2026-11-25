@@ -246,12 +246,12 @@ void func_8005efd4(s32 area)
     func_8005eea8((s32)ptrs);
     block = ptrs[area];
     if (block != NULL) {
-        func_80019454(block);
+        memory_block_release(block);
     }
     size = (p - buf + 3) & ~3;
-    block = func_8001939c((HeapBlock *)DAT_801ba984.unk104, size, &ptrs[area]);
+    block = memory_arena_allocate_block((HeapBlock *)DAT_801ba984.unk104, size, &ptrs[area]);
     if (block != NULL) {
-        func_80018f5c((u32 *)block, (u32 *)buf, size >> 2);
+        resource_copy_words((u32 *)block, (u32 *)buf, size >> 2);
         func_8005ef18(ptrs);
         func_8005ef64((s32)ptrs);
     }

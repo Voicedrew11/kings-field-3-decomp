@@ -4,7 +4,7 @@
 /*
  * GAME.EXE globals outside the sound, CD and render headers (WIP), mostly
  * the BSS blocks the game loop clears word by word at start-up. Each extent
- * is the word count main passes to func_80018fbc; whether a block is one
+ * is the word count main passes to repeat_store_word; whether a block is one
  * object or a run of several is not yet known, so the names stay
  * address-derived and only the fields the matched code touches are named.
  * The block at 0x80199154 is Data80199154 and the effect records at
@@ -152,7 +152,7 @@ typedef struct Data801b24e4 {
     u8 unk109;
     u8 unk10a;
     u8 unk10b[0x1];
-    VECTOR pos;     /* +0x10c: func_80017aa4 moves it with the objects */
+    VECTOR pos;     /* +0x10c: translate_active_world_positions moves it with the objects */
     SVECTOR unk11c; /* +0x11c */
     SVECTOR unk124; /* +0x124 */
     SVECTOR unk12c; /* +0x12c */
@@ -196,7 +196,7 @@ typedef struct Data801b24e4 {
 typedef struct Data801ba984 {
     s32 unk0;
     u8 unk4[9];     /* +0x04: script bytes from here (func_8005c1e8 tests unk4[n]); [0] the
-                     * highest area entered (func_80017c78) */
+                     * highest area entered (resource_request_transition) */
     u8 unkd;       /* +0x0d: the game loop sets it to 1 on a continued game */
     u8 unke[0x1d];
     u8 unk2b;
@@ -216,7 +216,7 @@ typedef struct Data801ba984 {
     u8 unk7e;       /* +0x7e: Object88 kills (func_8004c668) */
     u8 unk7f[5];    /* +0x7f: per magic element */
     u8 unk84[6];
-    u8 unk8a[0x20]; /* +0x8a: per area, 1 once func_80017c78 loaded it */
+    u8 unk8a[0x20]; /* +0x8a: per area, 1 once resource_request_transition loaded it */
     u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script func_8005c1e8 entered */
     u8 unkab[0x59];
     u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by func_8005ea64 */
@@ -265,7 +265,7 @@ typedef struct MapCell {
 typedef struct Data801d4464 {
     MapCell cells[80][80];
     u8 unkfa00[0x600];
-    u8 unk10000[0x1c14]; /* +0x10000: func_80018358 copies an area file's second table
+    u8 unk10000[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
                           * (0x2000 bytes, through unk11ff4) here */
     Record20 unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
@@ -332,7 +332,7 @@ typedef struct Data801e7edc {
 } Data801e7edc;
 
 /*
- * Object records func_80017aa4 moves when the area origin shifts (WIP: named
+ * Object records translate_active_world_positions moves when the area origin shifts (WIP: named
  * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
  * records it also moves are the placed effects (Effect, game/render.h).
  */
@@ -384,7 +384,7 @@ typedef struct Object44SBytes {
     s8 unk3d;       /* +0x3d: kind 0xea: z shift */
     s8 unk3e;
     s8 unk3f;
-    s8 unk40;       /* +0x40: kind 0xe0: shift passed to func_80017c78 (with unk41, unk42) */
+    s8 unk40;       /* +0x40: kind 0xe0: shift passed to resource_request_transition (with unk41, unk42) */
     s8 unk41;
     s8 unk42;
     s8 unk43;
@@ -396,7 +396,7 @@ typedef struct Object44SHalves {
     s16 unk3a;
     s16 unk3c;
     s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (func_800460bc, func_80046294) */
-    s16 unk40;      /* +0x40: kind 6: turn speed (func_80016168) */
+    s16 unk40;      /* +0x40: kind 6: turn speed (angle_velocity_step) */
     s16 unk42;
 } Object44SHalves;
 
@@ -789,7 +789,7 @@ typedef struct Record44 {
 typedef s32 (*FdatHandler)();
 
 /*
- * Area state func_80017664 and func_8001796c set up (WIP). Only the scene
+ * Area state resource_initialize_game_assets and resource_run_initial_transition set up (WIP). Only the scene
  * module, the render module (func_80040ae4 reads step lhu + sll) and the
  * player frame (func_80030fcc reloads it for each of five compares) see the
  * step the CD callbacks set as volatile: the menu module's accesses to the
@@ -803,15 +803,15 @@ typedef s32 (*FdatHandler)();
 #endif
 
 typedef struct Data8018fad4 {
-    u16 loading;    /* +0x00: func_8001796c steps func_80018358 until it clears */
-    SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks func_800182e0.. set it */
+    u16 loading;    /* +0x00: resource_run_initial_transition steps resource_advance_transition until it clears */
+    SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks resource_transition_set_phase_1.. set it */
     u8 area[5];     /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
                      * the model id bank (func_80040568) */
     u8 unk9;
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 previous[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
-    u8 unk15;       /* +0x15: set once the loader shifted the origin (func_80018358) */
+    u8 unk15;       /* +0x15: set once the loader shifted the origin (resource_advance_transition) */
     u8 unk16;       /* +0x16: func_8003bb04 limits the parts drawn while loading */
     u8 unk17;       /* +0x17 */
     u8 unk18;
@@ -843,7 +843,7 @@ typedef struct Data8018fb3c {
  */
 extern u32 DAT_800136e8[6];
 
-/* Arena func_8001937c formats with a 0x4d800-byte free block. */
+/* Arena memory_arena_initialize_blocks formats with a 0x4d800-byte free block. */
 extern u8 DAT_800c8954[0x4d800];
 
 extern Data80185da8 DAT_80185da8;
@@ -856,7 +856,7 @@ extern u8 DAT_801b56cc[32][20];
 extern u8 DAT_801b594c[80][10];
 extern Data801b77ec DAT_801b77ec;
 
-/* A record of the table func_80017664 copies in (DAT_801983a8.unk0). */
+/* A record of the table resource_initialize_game_assets copies in (DAT_801983a8.unk0). */
 typedef struct Record04 {
     u8 id;          /* 0xff ends the table */
     u8 count;       /* slots in its run of DAT_801983a8.unk1e0 */
@@ -892,7 +892,7 @@ extern Data801d4464 DAT_801d4464;
 extern Data801e7edc DAT_801e7edc;
 
 /*
- * Tables func_80017664 copies out of the first FDAT.T entry: the level
+ * Tables resource_initialize_game_assets copies out of the first FDAT.T entry: the level
  * records (one per level; 100 fill the gap to DAT_8009f5c4), the 0x44-byte
  * records (48 fill the gap to DAT_801d4464), and the rest (WIP extents).
  */

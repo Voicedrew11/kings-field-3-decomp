@@ -71,17 +71,17 @@ extern char DAT_800c8768[SS_SEQ_TABSIZ * 2 * 1];
 /* The sequence the background music plays from. */
 extern u_long DAT_801b268c[];
 
-void func_8001509c(void);
-void func_80015240(void);
-void func_800152f8(void);
-void func_80015354(void);
-s32 func_80015410(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note);
-s32 func_80015654(s32 se, VECTOR *pos, s16 unused, s32 note);
-s32 func_80015688(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note);
-void func_800156bc(VECTOR *listener, SVECTOR *angle);
-void func_8001576c(s32 se, s32 volume);
-void func_80015790(s32 se, s32 left, s32 right, s32 note);
-void func_80015a48(void);
-void func_80015ce0(s32 file, s32 sector, s32 bank);
+void audio_initialize_runtime(void);
+void audio_start_sequence(void);
+void audio_stop_sequence(void);
+void audio_shutdown(void);
+s32 audio_play_spatial(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note);
+s32 audio_play_spatial_default_range(s32 se, VECTOR *pos, s16 unused, s32 note);
+s32 audio_play_spatial_range(s32 se, VECTOR *pos, s16 unused, s32 range, s32 falloff, s32 note);
+void audio_update_listener(VECTOR *listener, SVECTOR *angle);
+void audio_play_sound(s32 se, s32 volume);
+void audio_key_on(s32 se, s32 left, s32 right, s32 note);
+void cd_request_service_vab(void);
+void audio_queue_vab_stream(s32 file, s32 sector, s32 bank);
 
 #endif

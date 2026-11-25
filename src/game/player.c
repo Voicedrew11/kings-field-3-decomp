@@ -84,7 +84,7 @@ void func_80028d54(void)
 ADDRESS(0x80028e48, 0x54)
 s32 func_80028e48(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
-    return func_80016ec8(&DAT_801b24e4.pos, x, y, z, radius + 800, 1700, reach_up);
+    return vector_distance_to_point(&DAT_801b24e4.pos, x, y, z, radius + 800, 1700, reach_up);
 }
 
 ADDRESS(0x80028e9c, 0xf4)
@@ -151,8 +151,8 @@ int func_800290d8(int part_in)
 
     for (i = part * 32 + 556; i < part * 32 + 588; i++) {
         block = DAT_80199154.models[i];
-        if (block != NULL && func_8001947c(block) != 3) {
-            func_80019474(block, 1);
+        if (block != NULL && memory_block_kind(block) != 3) {
+            memory_block_set_kind(block, 1);
         }
     }
 }
@@ -160,10 +160,10 @@ int func_800290d8(int part_in)
 ADDRESS(0x80029188, 0x208)
 void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 part)
 {
-    func_80019ab4();
+    cd_request_wait_idle();
     do {
-        func_80019538();
-        func_80018358();
+        cd_request_yield();
+        resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
     func_800290d8(DAT_8018fad4.area[0]);
     DAT_8018fad4.area[0] = 99;
@@ -171,20 +171,20 @@ void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 pa
     DAT_8018fad4.area[2] = 99;
     DAT_8018fad4.area[3] = 99;
     DAT_8018fad4.area[4] = 99;
-    func_80017c78(area0, area1, area2, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+    resource_request_transition(area0, area1, area2, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
     do {
-        func_80019538();
-        func_80018358();
+        cd_request_yield();
+        resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
-    func_80019ab4();
+    cd_request_wait_idle();
     VSync(2);
     if (part != 0xff) {
-        func_80017c78(0xff, 0xff, part, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+        resource_request_transition(0xff, 0xff, part, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
         do {
-            func_80019538();
-            func_80018358();
+            cd_request_yield();
+            resource_advance_transition();
         } while ((s16)DAT_8018fad4.loading != 0);
-        func_80019ab4();
+        cd_request_wait_idle();
         VSync(2);
     }
     func_8002b760();
@@ -193,9 +193,9 @@ void func_80029188(s32 area0, s32 area1, s32 area2, s32 area3, s32 area4, s32 pa
     func_80034300();
     func_80030e14();
     func_80046c00(0x82, 0x1000, 0x1000, 0);
-    func_80019ab4();
+    cd_request_wait_idle();
     func_80046c00(0x82, 0x1000, 0, -128);
-    func_80017c78(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
+    resource_request_transition(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
 }
 
 ADDRESS(0x80029390, 0x54)
@@ -692,8 +692,8 @@ void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
     force = ratio >> 2;
     if (from != NULL) {
         y = from->vy + 850;
-        func_80016c90(DAT_801b24e4.pos.vx - from->vx, DAT_801b24e4.pos.vy - y,
-                      DAT_801b24e4.pos.vz - from->vz, &push);
+        vector_displacement_to_pitch_yaw(DAT_801b24e4.pos.vx - from->vx, DAT_801b24e4.pos.vy - y,
+                                         DAT_801b24e4.pos.vz - from->vz, &push);
         if (force < 80) {
             force = 80;
         }
@@ -705,8 +705,8 @@ void func_8002a6f4(VECTOR *from, s32 damage, s32 flags)
         } else if (force > 450) {
             force = 450;
         }
-        func_800167cc(&push, &dir);
-        func_80016928(force, &dir);
+        pitch_yaw_to_forward_vector(&push, &dir);
+        vector3s_scale_shift12(force, &dir);
         if (dir.vy > 200) {
             dir.vy = 200;
         } else if (dir.vy < -200) {
@@ -982,12 +982,12 @@ void func_8002b114(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u1
     }
     strength = flags & 0x7fff;
     if (mode == 0x8000) {
-        hit = func_80016fb4(pos, radius, &DAT_801b24e4.pos, 800, 1700);
+        hit = vector_distance_between_with_reach(pos, radius, &DAT_801b24e4.pos, 800, 1700);
     } else if (mode == 0x8001) {
         if (pos->vy < DAT_801b24e4.pos.vy - 1700) {
             hit = -9999999;
         } else {
-            hit = func_80016fb4(pos, radius, &DAT_801b24e4.pos, 800, 1700);
+            hit = vector_distance_between_with_reach(pos, radius, &DAT_801b24e4.pos, 800, 1700);
         }
     } else {
         hit = func_8002b8d8(pos->vx, pos->vy, pos->vz, radius, mode);
@@ -1149,7 +1149,8 @@ s32 func_8002b80c(VECTOR *pos, s32 angle, s32 radius, s32 range)
     s16 d;
 
     if (hit != -1) {
-        d = (func_80016ab8(DAT_801b24e4.pos.vx - pos->vx, DAT_801b24e4.pos.vz - pos->vz) - angle) & 0xfff;
+        d = (vector_xz_to_angle(DAT_801b24e4.pos.vx - pos->vx,
+                                DAT_801b24e4.pos.vz - pos->vz) - angle) & 0xfff;
         if (d > 2048) {
             d = 0x1000 - d;
         }
@@ -1163,7 +1164,7 @@ s32 func_8002b80c(VECTOR *pos, s32 angle, s32 radius, s32 range)
 ADDRESS(0x8002b8d8, 0x50)
 s32 func_8002b8d8(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
-    return func_80016ec8(&DAT_801b24e4.pos, x, y, z, radius, 1700, reach_up);
+    return vector_distance_to_point(&DAT_801b24e4.pos, x, y, z, radius, 1700, reach_up);
 }
 
 /*
@@ -1197,7 +1198,7 @@ void func_8002b928(u8 id)
             se = r->unk2 + 144;
             if (bank != NULL && bank->slot == NULL) {
                 n = DAT_801b09fc.effects[se].bank;
-                func_80015ce0(2, n + 94, n);
+                audio_queue_vab_stream(2, n + 94, n);
             }
         }
     }
@@ -1230,7 +1231,7 @@ void func_8002ba38(u8 id)
             se = r->unk2 + 144;
             if (bank != NULL && bank->slot == NULL) {
                 n = DAT_801b09fc.effects[se].bank;
-                func_80015ce0(2, n + 94, n);
+                audio_queue_vab_stream(2, n + 94, n);
             }
         }
         DAT_801b24e4.unkc9 = 0xff;
@@ -1325,10 +1326,10 @@ void func_8002bdc0(u8 id)
     DAT_801b24e4.unkcb = id;
     if (id != 0xff) {
         DAT_801b24e4.unkb0 = &DAT_801d37a4[id];
-        func_8001a154(4, id + 98, DAT_801b24e4.unkb4);
+        cd_archive_read(4, id + 98, DAT_801b24e4.unkb4);
         func_80042c64(0x20, DAT_801b24e4.unkb4);
         if (effect[DAT_801b24e4.unkcb] != 0xff) {
-            func_80015ce0(2, DAT_801b09fc.effects[effect[DAT_801b24e4.unkcb] + 96].bank + 47, 2);
+            audio_queue_vab_stream(2, DAT_801b09fc.effects[effect[DAT_801b24e4.unkcb] + 96].bank + 47, 2);
         }
     }
     DAT_801b24e4.unkc0 = -1;
@@ -1404,7 +1405,7 @@ Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
         rot.vx = -DAT_801b24e4.unk124.vx;
         rot.vy = DAT_801b24e4.unk124.vy;
         rot.vz = DAT_801b24e4.unk124.vz;
-        func_800168a8(&rot, &DAT_801b24e4.unk14c, offset);
+        vector_rotate_yxz(&rot, &DAT_801b24e4.unk14c, offset);
         offset->vx += DAT_801b24e4.pos.vx;
         y = offset->vy - 1600;
         offset->vy = y + DAT_801b24e4.pos.vy;
@@ -1421,8 +1422,8 @@ Object88 *func_8002c164(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist)
         rot.vx = DAT_801b24e4.unk124.vx;
         rot.vy = DAT_801b24e4.unk124.vy;
         rot.vz = DAT_801b24e4.unk124.vz;
-        func_800167cc(&rot, dir);
-        func_80016928(speed, dir);
+        pitch_yaw_to_forward_vector(&rot, dir);
+        vector3s_scale_shift12(speed, dir);
     }
     return object;
 }

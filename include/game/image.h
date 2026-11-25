@@ -9,7 +9,7 @@
  */
 #include <kf/lib/types.h>
 
-void func_80018c60(int file, int entry);
-void func_80018cd0(void);
+void cd_map_stream_read(int file, int entry);
+void cd_request_service_stream(void);
 
 #endif

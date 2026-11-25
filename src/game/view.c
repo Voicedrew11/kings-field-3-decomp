@@ -61,9 +61,9 @@ void func_80034300(void)
     if (DAT_80199154.unk15da4 != 0) {
         light = DAT_80199154.unk15da8;
         for (i = 63; i != -1; i--) {
-            func_80016290((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[1], 1);
-            func_80016290((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[2], 2);
-            func_80016290((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[3], 3);
+            matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[1], 1);
+            matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[2], 2);
+            matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[3], 3);
             light++;
         }
         DAT_80199154.unk15da4 = 0;
@@ -75,24 +75,25 @@ ADDRESS(0x80034394, 0x148)
 void func_80034394(s32 flags, Record30 *src, Record6c *dst, s32 t)
 {
     if (flags & 2) {
-        func_800171b0((MATRIX *)&dst->unk50, (MATRIX *)&src->unk14, (MATRIX *)&dst->unk50, t);
+        fixed_lerp_nine_halfwords_q12((MATRIX *)&dst->unk50, (MATRIX *)&src->unk14, (MATRIX *)&dst->unk50, t);
     }
     if (flags & 1) {
-        func_800171b0((MATRIX *)&dst->unk0[0], (MATRIX *)&src->unk0, (MATRIX *)&dst->unk0[0], t);
+        fixed_lerp_nine_halfwords_q12((MATRIX *)&dst->unk0[0], (MATRIX *)&src->unk0, (MATRIX *)&dst->unk0[0],
+                                      t);
     }
     if (flags & 4) {
-        dst->unk64.r = func_80017158(dst->unk64.r, src->unk28.r, t);
-        dst->unk64.g = func_80017158(dst->unk64.g, src->unk28.g, t);
-        dst->unk64.b = func_80017158(dst->unk64.b, src->unk28.b, t);
+        dst->unk64.r = fixed_lerp_q12(dst->unk64.r, src->unk28.r, t);
+        dst->unk64.g = fixed_lerp_q12(dst->unk64.g, src->unk28.g, t);
+        dst->unk64.b = fixed_lerp_q12(dst->unk64.b, src->unk28.b, t);
     }
     if (flags & 8) {
-        dst->unk68 = func_80017158(dst->unk68, src->unk2c, t);
+        dst->unk68 = fixed_lerp_q12(dst->unk68, src->unk2c, t);
         if (dst->unk6a - 4096 < dst->unk68) {
             dst->unk6a = dst->unk68 + 4096;
         }
     }
     if (flags & 0x10) {
-        dst->unk6a = func_80017158(dst->unk6a, src->unk2e, t);
+        dst->unk6a = fixed_lerp_q12(dst->unk6a, src->unk2e, t);
         if (dst->unk6a < dst->unk68 + 4096) {
             dst->unk68 = dst->unk6a - 4096;
         }
@@ -175,7 +176,7 @@ void func_800345f4(void)
                     cell = &DAT_801d4464.cells[z][x];
                     if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
                         cell->layer[1].unk0 == 0xfd) {
-                        angle = func_80016ab8(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
+                        angle = vector_xz_to_angle(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
                         q = p;
                         if (angle < 256 || angle >= 3840) {
                             do {
@@ -262,7 +263,7 @@ void func_800348f4(void)
                     cell = &DAT_801d4464.cells[z][x];
                     if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
                         cell->layer[1].unk0 == 0xfd) {
-                        angle = func_80016ab8(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
+                        angle = vector_xz_to_angle(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
                         q = p;
                         if (angle < 256 || angle >= 3840) {
                             do {
@@ -455,8 +456,8 @@ void func_80034bf4(void)
     } else {
         func_800348f4();
     }
-    func_80018f5c((u32 *)DAT_80199154.grid, (u32 *)SCRATCH->u.view.grid,
-                  sizeof(DAT_80199154.grid) / 4);
+    resource_copy_words((u32 *)DAT_80199154.grid, (u32 *)SCRATCH->u.view.grid,
+                        sizeof(DAT_80199154.grid) / 4);
 }
 
 /* A free VRAM scroll record, or NULL. */
@@ -662,9 +663,9 @@ void func_800357e8(VECTOR *pos, SVECTOR *angle)
     rotation.vz = DAT_80199154.unk15b08.vz;
     rotation.vy = DAT_80199154.unk15b08.vy;
     RotMatrix(&rotation, &DAT_80199154.unk159f8);
-    func_80016598(rotation.vx, &DAT_80199154.unk15ab8);
-    func_80016290(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[0], 0);
-    func_80016290(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[1], 1);
-    func_80016290(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[2], 2);
-    func_80016290(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[3], 3);
+    matrix_set_rotation_x(rotation.vx, &DAT_80199154.unk15ab8);
+    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[0], 0);
+    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[1], 1);
+    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[2], 2);
+    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[3], 3);
 }

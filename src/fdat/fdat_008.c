@@ -367,9 +367,9 @@ void func_801e8c3c(u8 id)
         if (obj->unk10 >= 4095) {
             obj->unk10 = 0xfff;
         }
-        func_80019ab4();
-        func_80015a48();
-        func_80018cd0();
+        cd_request_wait_idle();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_8002b330(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
@@ -382,9 +382,9 @@ void func_801e8c3c(u8 id)
         if (obj->unk10 >= 4095) {
             obj->unk10 = 0xfff;
         }
-        func_80019ab4();
-        func_80015a48();
-        func_80018cd0();
+        cd_request_wait_idle();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_8002b330(&pos, &angle);
         func_800422b8(&pos, &angle);
     }

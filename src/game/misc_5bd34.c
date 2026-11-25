@@ -14,13 +14,13 @@
 ADDRESS(0x8005bd34, 0x24)
 void func_8005bd34(void)
 {
-    func_8001576c(0x10, 100);
+    audio_play_sound(0x10, 100);
 }
 
 ADDRESS(0x8005bd58, 0x20)
 void func_8005bd58(s32 se)
 {
-    func_8001576c(se, 100);
+    audio_play_sound(se, 100);
 }
 
 /* Collision test 800 units ahead of pos along angle->vy. */

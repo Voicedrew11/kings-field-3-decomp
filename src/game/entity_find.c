@@ -17,7 +17,7 @@
 /*
  * Hits every active record within reach of pos (mode: 0x8000 sphere, 0x8001
  * sphere above its base, 0x8002 sphere outside the cone either side of the
- * yaw kept in pos->pad, otherwise func_80016ec8's own mode) with
+ * yaw kept in pos->pad, otherwise vector_distance_to_point's own mode) with
  * func_8004c668, its strength falling off to falloff at the edge.
  */
 ADDRESS(0x8004ceac, 0x3a8)
@@ -44,22 +44,22 @@ void func_8004ceac(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 
             continue;
         }
         if (mode == 0x8000) {
-            dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
         } else if (mode == 0x8001) {
             if (pos->vy < obj->pos.vy - obj->unk1e) {
                 dist = -9999999;
             } else {
-                dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+                dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
             }
         } else if (mode == 0x8002) {
-            dist = func_80016fb4(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
             angle = (s16)ratan2(obj->pos.vz - pos->vz, obj->pos.vx - pos->vx);
-            side = func_80016a2c(angle, pos->pad + 1024, 0x40);
-            if (side == 1 && func_80016a2c(angle, pos->pad - 1024, 0x40) == side) {
+            side = angle_within_tolerance(angle, pos->pad + 1024, 0x40);
+            if (side == 1 && angle_within_tolerance(angle, pos->pad - 1024, 0x40) == side) {
                 dist = -9999999;
             }
         } else {
-            dist = func_80016ec8(&obj->pos, pos->vx, pos->vy, pos->vz, reach, obj->unk1e, mode);
+            dist = vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz, reach, obj->unk1e, mode);
             if (dist == -1) {
                 dist = -9999999;
             }
@@ -96,14 +96,15 @@ s32 func_8004d254(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16
     pos.vx = obj->pos.vx;
     pos.vy = obj->pos.vy - offset;
     pos.vz = obj->pos.vz;
-    dist = func_80016ec8(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz, range, 0, 0x6a4);
+    dist = vector_distance_to_point(&pos, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz,
+                                    range, 0, 0x6a4);
     if (dist == -1 || dist < near) {
         return 0;
     }
 
     target = &DAT_801b24e4.pos;
-    angle = func_80016ab8(target->vx - pos.vx, target->vz - pos.vz);
-    if (!func_80016a2c(obj->angle.vy, angle, cone)) {
+    angle = vector_xz_to_angle(target->vx - pos.vx, target->vz - pos.vz);
+    if (!angle_within_tolerance(obj->angle.vy, angle, cone)) {
         return 0;
     }
 
@@ -137,9 +138,10 @@ Object88 *func_8004d3c4(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw,
             if (obj->unk28 & 0x20000) {
                 r <<= 1;
             }
-            d = func_80016ec8(&obj->pos, pos->vx, 0xffff, pos->vz, r, 0, 0);
+            d = vector_distance_to_point(&obj->pos, pos->vx, 0xffff, pos->vz, r, 0, 0);
             if (d != -1) {
-                func_80016c90(obj->pos.vx - pos->vx, obj->pos.vy - pos->vy, obj->pos.vz - pos->vz, &angle);
+                vector_displacement_to_pitch_yaw(obj->pos.vx - pos->vx, obj->pos.vy - pos->vy,
+                                                 obj->pos.vz - pos->vz, &angle);
                 angle.vy = (angle.vy - yaw) & 0xfff;
                 if (angle.vy >= 2048) {
                     angle.vy = 0x1000 - angle.vy;
@@ -203,7 +205,7 @@ s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             pos.vx = obj->pos.vx;
             pos.vz = obj->pos.vz;
             pos.vy = obj->unk26 + obj->pos.vy;
-            if (func_80016ec8(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
                 return i;
             }
         } else if (obj->unk28 & 0x400000) {
@@ -212,10 +214,11 @@ s32 func_8004d644(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
-            if (func_80016ec8(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
                 return i;
             }
-        } else if (func_80016ec8(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e,
+                                            reach_up) != -1) {
             return i;
         }
     }
@@ -252,7 +255,7 @@ s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             pos.vx = obj->pos.vx;
             pos.vz = obj->pos.vz;
             pos.vy = obj->unk26 + obj->pos.vy;
-            if (func_80016ec8(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
                 return i;
             }
         } else if (obj->unk28 & 0x400000) {
@@ -261,10 +264,11 @@ s32 func_8004d838(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
-            if (func_80016ec8(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
                 return i;
             }
-        } else if (func_80016ec8(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e,
+                                            reach_up) != -1) {
             return i;
         }
     }
@@ -420,9 +424,10 @@ retry:
             goto finish;
         }
         func_80033d84();
-        angle = func_80016ab8(DAT_801d4464.unk1203c.vx - obj->pos.vx, DAT_801d4464.unk1203c.vz - obj->pos.vz);
-        heading = func_80016ab8(dx, dz);
-        if (func_80016a68(heading, angle)) {
+        angle = vector_xz_to_angle(DAT_801d4464.unk1203c.vx - obj->pos.vx,
+                                   DAT_801d4464.unk1203c.vz - obj->pos.vz);
+        heading = vector_xz_to_angle(dx, dz);
+        if (angle_mod_delta_le_half_turn(heading, angle)) {
             angle = (angle + 1024) & 0xfff;
         } else {
             angle = (angle - 1024) & 0xfff;

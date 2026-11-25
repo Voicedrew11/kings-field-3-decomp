@@ -1,6 +1,6 @@
 /*
- * GAME.EXE: VRAM image streaming (WIP module). func_80018c60 queues an
- * archive entry as an image request; func_80018cd0 runs once a frame,
+ * GAME.EXE: VRAM image streaming (WIP module). cd_map_stream_read queues an
+ * archive entry as an image request; cd_request_service_stream runs once a frame,
  * uploads what the last 16-sector part holds and asks for the next part,
  * or restarts the read when a part's RECT header is damaged. It sees the CD
  * state without the owning module's volatile counter (game/cd.h).
@@ -21,26 +21,26 @@
 /* RECT.x of the header that ends the image. */
 #define IMAGE_END 0xffff
 
-void func_80018c54(CdRequest *request);
-void func_80018c94(CdRequest *request);
+void cd_stream_mark_complete(CdRequest *request);
+void cd_stream_limit_chunk(CdRequest *request);
 
 ADDRESS(0x80018c54, 0xc)
-void func_80018c54(CdRequest *request)
+void cd_stream_mark_complete(CdRequest *request)
 {
     request->state = 1;
 }
 
 ADDRESS(0x80018c60, 0x34)
-void func_80018c60(int file_in, int entry_in)
+void cd_map_stream_read(int file_in, int entry_in)
 {
     u16 file = file_in;
     u16 entry = entry_in;
 
-    func_80019e48(file, entry, DAT_801c17a4, (CdCallback)func_80018c54);
+    cd_archive_read_chunked(file, entry, DAT_801c17a4, (CdCallback)cd_stream_mark_complete);
 }
 
 ADDRESS(0x80018c94, 0x3c)
-void func_80018c94(CdRequest *request)
+void cd_stream_limit_chunk(CdRequest *request)
 {
     if (request->u.image.remaining > IMAGE_PART_SECTORS) {
         request->count = IMAGE_PART_SECTORS;
@@ -57,7 +57,7 @@ void func_80018c94(CdRequest *request)
  * end of the part is uploaded by whole rows and finished from the next part.
  */
 ADDRESS(0x80018cd0, 0x28c)
-void func_80018cd0(void)
+void cd_request_service_stream(void)
 {
     CdRequest *request;
     u16 *header;
@@ -110,7 +110,7 @@ void func_80018cd0(void)
             request->state = 0;
             request->u.image.remaining = request->u.image.sectors;
             request->pos = request->retry_pos;
-            func_80018c94(request);
+            cd_stream_limit_chunk(request);
             request->issued = 0;
             CdSeekL(&request->pos);
             return;
@@ -119,7 +119,7 @@ void func_80018cd0(void)
         if (header[0] == IMAGE_END) {
             DrawSync(0);
             request->count = 0;
-            func_8001967c(request);
+            cd_request_advance(request);
             return;
         }
         setRECT(&request->u.image.rect, header[0], header[1], header[2], header[3]);
@@ -127,8 +127,8 @@ void func_80018cd0(void)
     }
 
     pos = &request->pos;
-    func_80019a74(pos, request->count, pos);
-    func_80018c94(request);
+    cd_location_add(pos, request->count, pos);
+    cd_stream_limit_chunk(request);
     request->issued = 0;
     DrawSync(0);
     CdSeekL(pos);

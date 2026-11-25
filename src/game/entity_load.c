@@ -42,7 +42,8 @@ void func_80052e5c(void)
                 obj->pos.vy = carrier->pos.vy - 500;
                 obj->pos.vz = carrier->pos.vz;
                 if (obj->unk9 == 1) {
-                    obj->angle.vy = func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+                    obj->angle.vy = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                                       DAT_801b24e4.pos.vz - obj->pos.vz);
                 }
             }
             if (obj->unk1 == 0x6e) {

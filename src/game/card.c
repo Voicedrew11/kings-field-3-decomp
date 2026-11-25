@@ -95,7 +95,7 @@ void func_80028034(void)
     StartCARD();
     ChangeClearPAD(0);
     _bu_init();
-    DAT_8009c3c8 = (u8 *)func_800194f0(CARD_FILE_SIZE);
+    DAT_8009c3c8 = (u8 *)memory_allocate(CARD_FILE_SIZE);
     if (DAT_8009c3c8 == NULL) {
         exit(1);
     }
@@ -105,7 +105,7 @@ void func_80028034(void)
 ADDRESS(0x80028090, 0x44)
 void func_80028090(void)
 {
-    func_80019518((void *)DAT_8009c3c8);
+    memory_free((void *)DAT_8009c3c8);
     EnterCriticalSection();
     StopCARD();
     PadInit(0);
@@ -239,8 +239,8 @@ s32 func_8002860c(s32 number)
     u8 *buffer;
 
     do {
-        func_80019538();
-        func_80018358();
+        cd_request_yield();
+        resource_advance_transition();
     } while ((s16)DAT_8018fad4.loading != 0);
 retry:
     strcat(path, DAT_80081818);

@@ -44,7 +44,7 @@ void func_8002ed1c(s32 speed)
         if (speed > 896) {
             speed = 0x380;
         }
-        func_8001576c(7, (speed >> 3) + 32);
+        audio_play_sound(7, (speed >> 3) + 32);
     }
 }
 
@@ -235,7 +235,7 @@ s32 func_8002f320(void)
             if (hit == 0) {
                 friction = 0x20;
             slide:
-                d = func_80016c08(DAT_801b24e4.unk188.knock.dir.vx, DAT_801b24e4.unk188.knock.dir.vz);
+                d = fixed_vector2_length(DAT_801b24e4.unk188.knock.dir.vx, DAT_801b24e4.unk188.knock.dir.vz);
                 if (d <= friction) {
                     DAT_801b24e4.unk188.knock.dir.vz = 0;
                     DAT_801b24e4.unk188.knock.dir.vx = 0;
@@ -333,12 +333,12 @@ void func_8002f5c0(void)
     }
     if (DAT_801b24e4.unk16a > 0) {
         DAT_801b24e4.unk12c.vx = (DAT_801b24e4.unk12c.vx + DAT_801b24e4.unk16a) & 0xfff;
-        if (func_80016a78(DAT_801b24e4.unk12c.vx, 700)) {
+        if (angle_signed_greater_than(DAT_801b24e4.unk12c.vx, 700)) {
             DAT_801b24e4.unk12c.vx = 700;
         }
     } else if (DAT_801b24e4.unk16a < 0) {
         DAT_801b24e4.unk12c.vx = (DAT_801b24e4.unk12c.vx + DAT_801b24e4.unk16a) & 0xfff;
-        if (func_80016a78(0xd44, DAT_801b24e4.unk12c.vx)) {
+        if (angle_signed_greater_than(0xd44, DAT_801b24e4.unk12c.vx)) {
             DAT_801b24e4.unk12c.vx = 0xd44;
         }
     }
@@ -582,11 +582,11 @@ ADDRESS(0x8003047c, 0xec)
 void func_8003047c(void)
 {
     DAT_801b24e4.unk188.knock.push.vx =
-        func_80016168(0, DAT_801b24e4.unk134, DAT_801b24e4.unk188.knock.push.vx, 8, 4);
+        angle_velocity_step(0, DAT_801b24e4.unk134, DAT_801b24e4.unk188.knock.push.vx, 8, 4);
     DAT_801b24e4.unk188.knock.push.vy =
-        func_80016168(0, DAT_801b24e4.unk136, DAT_801b24e4.unk188.knock.push.vy, 8, 4);
+        angle_velocity_step(0, DAT_801b24e4.unk136, DAT_801b24e4.unk188.knock.push.vy, 8, 4);
     DAT_801b24e4.unk188.knock.push.vz =
-        func_80016168(0, DAT_801b24e4.unk138, DAT_801b24e4.unk188.knock.push.vz, 8, 4);
+        angle_velocity_step(0, DAT_801b24e4.unk138, DAT_801b24e4.unk188.knock.push.vz, 8, 4);
     DAT_801b24e4.unk134 += DAT_801b24e4.unk188.knock.push.vx;
     DAT_801b24e4.unk136 += DAT_801b24e4.unk188.knock.push.vy;
     DAT_801b24e4.unk138 += DAT_801b24e4.unk188.knock.push.vz;
@@ -621,8 +621,8 @@ void func_800305d8(void)
         && DAT_801b24e4.unkc0 == -1) {
         func_80030568();
         do {
-            func_80019538();
-            func_80018358();
+            cd_request_yield();
+            resource_advance_transition();
         } while ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 0);
         func_8001bea8();
         func_800290d8(DAT_8018fad4.area[0]);
@@ -732,7 +732,7 @@ void func_80030a6c(SVECTOR *dir)
         return;
     }
     DAT_801b24e4.unk101 = 0x11;
-    func_8001576c(6, 0x6e);
+    audio_play_sound(6, 0x6e);
     if (dir != NULL) {
         DAT_801b24e4.unk188.knock.dir = *dir;
     }

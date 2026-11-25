@@ -33,7 +33,7 @@ void func_8002cea8(s32 vertex, VECTOR *out)
     v.vx -= DAT_801b24e4.unkb0->unk34;
     v.vy += DAT_801b24e4.unkb0->unk36;
     v.vz -= DAT_801b24e4.unkb0->unk38;
-    func_800168a8(&rot, &v, out);
+    vector_rotate_yxz(&rot, &v, out);
     out->vx += DAT_801b24e4.pos.vx;
     out->vz += DAT_801b24e4.pos.vz;
     y = out->vy - 1600;
@@ -95,7 +95,7 @@ void func_8002d130(s32 id, s32 pay, s32 dir)
         DAT_801b24e4.unk10 = 0;
         DAT_801b24e4.unk1c -= r->unk16;
         if (id == 0x36) {
-            func_8001576c(0x63, 0x6e);
+            audio_play_sound(0x63, 0x6e);
         }
     }
     switch (id) {
@@ -107,7 +107,7 @@ void func_8002d130(s32 id, s32 pay, s32 dir)
         func_8002c30c(id);
         break;
     case 0x47:
-        func_8001576c(0x61, 0x6e);
+        audio_play_sound(0x61, 0x6e);
         DAT_801b24e4.unk14c.vx = 0;
         DAT_801b24e4.unk14c.vy = dir * 300 - 300;
         DAT_801b24e4.unk14c.vz = 400;
@@ -204,7 +204,7 @@ void func_8002d2a0(void)
             }
             if (DAT_801b24e4.unkc0 >= w->unk1e) {
                 if (DAT_801b24e4.unk1e == 0) {
-                    func_8001576c(0x60, 0x6e);
+                    audio_play_sound(0x60, 0x6e);
                 }
                 DAT_801b24e4.unk1e = (DAT_801b24e4.unkc0 - w->unk1e) * 5000 / (0xfff - w->unk1e);
             } else {
@@ -219,7 +219,7 @@ void func_8002d2a0(void)
                 v.vx -= w->unk34;
                 v.vy += w->unk36;
                 v.vz -= w->unk38;
-                func_800168a8(&rot, &v, &a);
+                vector_rotate_yxz(&rot, &v, &a);
                 arrow->pos.vx = DAT_801b24e4.pos.vx + a.vx;
                 arrow->pos.vz = DAT_801b24e4.pos.vz + a.vz;
                 arrow->pos.vy = DAT_801b24e4.pos.vy + a.vy + DAT_801b24e4.unk16c + DAT_801b24e4.unk170 - 1600;
@@ -227,16 +227,16 @@ void func_8002d2a0(void)
                 v.vx -= w->unk34;
                 v.vy += w->unk36;
                 v.vz -= w->unk38;
-                func_800168a8(&rot, &v, &b);
-                func_80016c90(a.vx - b.vx, a.vy - b.vy, a.vz - b.vz, &arrow->angle);
+                vector_rotate_yxz(&rot, &v, &b);
+                vector_displacement_to_pitch_yaw(a.vx - b.vx, a.vy - b.vy, a.vz - b.vz, &arrow->angle);
             }
             if (DAT_801b24e4.unk178 & DAT_80081868[4]) {
                 break;
             }
             if (arrow != NULL) {
                 arrow->unk7 = 0;
-                func_800167cc(&arrow->angle, &arrow->vel);
-                func_80016928(DAT_801b24e4.unk1e * 900 / 5000, &arrow->vel);
+                pitch_yaw_to_forward_vector(&arrow->angle, &arrow->vel);
+                vector3s_scale_shift12(DAT_801b24e4.unk1e * 900 / 5000, &arrow->vel);
                 arrow->unk10 = 50;
                 arrow->arg.h.unk44 = arrow->pos.vy;
             }
@@ -289,7 +289,7 @@ void func_8002d2a0(void)
             }
             if (DAT_801b24e4.unkc0 >= DAT_801b24e4.unkc4 && DAT_801b24e4.unkc0 < DAT_801b24e4.unkc4 + speed) {
                 if (w->unk0[0] != 0xff) {
-                    func_8001576c(w->unk0[0], 0x50);
+                    audio_play_sound(w->unk0[0], 0x50);
                 }
                 if (DAT_801b24e4.unkc4 < limit) {
                     DAT_801b24e4.unkc4 += add;
@@ -334,7 +334,7 @@ void func_8002d2a0(void)
                 rot.vx = -DAT_801b24e4.unk12c.vx;
                 rot.vy = DAT_801b24e4.unk12c.vy;
                 rot.vz = 0;
-                func_800168a8(&rot, &v, &step);
+                vector_rotate_yxz(&rot, &v, &step);
                 step.vy = (3600 - w->unk1a) * step.vy / 1800;
                 step.vx /= 4;
                 step.vy /= 4;
@@ -350,9 +350,10 @@ void func_8002d2a0(void)
                     if (found != -1) {
                         obj = &DAT_80185da8.objects[found];
                         def = &DAT_80185da8.defs[obj->unk2];
-                        angle = func_80016ab8(obj->pos.vx - DAT_801b24e4.pos.vx, obj->pos.vz - DAT_801b24e4.pos.vz);
-                        if (func_80016a2c(DAT_801b24e4.unk124.vy, angle, def->unk16)
-                            && func_80016a2c(obj->angle.vy, angle + 2048, def->unk18)) {
+                        angle = vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
+                                                   obj->pos.vz - DAT_801b24e4.pos.vz);
+                        if (angle_within_tolerance(DAT_801b24e4.unk124.vy, angle, def->unk16)
+                            && angle_within_tolerance(obj->angle.vy, angle + 2048, def->unk18)) {
                             func_8004c668(found, DAT_801b24e4.unk40, DAT_801b24e4.unk54[0], DAT_801b24e4.unk54[1],
                                           DAT_801b24e4.unk54[2], DAT_801b24e4.unk54[3], DAT_801b24e4.unk54[4],
                                           DAT_801b24e4.unk54[5], DAT_801b24e4.unk54[6], DAT_801b24e4.unk62, scale,

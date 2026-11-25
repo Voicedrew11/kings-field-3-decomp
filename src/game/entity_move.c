@@ -52,8 +52,8 @@ s32 func_8004e27c(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed)
     s16 time;
 
     obj = DAT_80185da8.current;
-    if (func_8001749c(high, obj->pos.vx, obj->pos.vy, obj->pos.vz, x, y, z, gravity, speed, &time, &obj->unk68,
-                      &obj->unk6a) != 0) {
+    if (trajectory_solve_motion_between_points(high, obj->pos.vx, obj->pos.vy, obj->pos.vz, x, y, z, gravity,
+                                               speed, &time, &obj->unk68, &obj->unk6a) != 0) {
         return -1;
     }
     obj->unkd = 0x30;
@@ -178,8 +178,8 @@ s32 func_8004e6f8(s32 speed, s32 mode)
         if (length == 0) {
             return 0;
         }
-        obj->vel.vx = func_80015fdc(obj->vel.vx, 0, obj->vel.vx * speed * 2 / length);
-        obj->vel.vz = func_80015fdc(obj->vel.vz, 0, obj->vel.vz * speed * 2 / length);
+        obj->vel.vx = value_approach(obj->vel.vx, 0, obj->vel.vx * speed * 2 / length);
+        obj->vel.vz = value_approach(obj->vel.vz, 0, obj->vel.vz * speed * 2 / length);
     }
     return func_8004dbc8(&obj->vel, mode);
 }
@@ -194,12 +194,12 @@ s32 func_8004e824(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
     } target, step;
 
     obj = DAT_80185da8.current;
-    func_80016240(angle, target.v);
+    angle_to_forward_xz(angle, target.v);
     step = target;
-    func_800168f0(scale_x, target.v);
-    func_800168f0(scale_z, step.v);
-    obj->vel.vx = func_80015fdc(obj->vel.vx, target.v[0], step.v[0]);
-    obj->vel.vz = func_80015fdc(obj->vel.vz, target.v[1], step.v[1]);
+    vector2i_scale_shift11(scale_x, target.v);
+    vector2i_scale_shift11(scale_z, step.v);
+    obj->vel.vx = value_approach(obj->vel.vx, target.v[0], step.v[0]);
+    obj->vel.vz = value_approach(obj->vel.vz, target.v[1], step.v[1]);
     return func_8004dbc8(&obj->vel, mode);
 }
 
@@ -224,7 +224,7 @@ s32 func_8004e914(s32 angle, s32 target)
 
 /*
  * Turns obj toward target: the turn rate obj->unk58 grows by accel up to max.
- * target arrives as an int (func_800500a8 passes func_80016ab8's result
+ * target arrives as an int (func_800500a8 passes vector_xz_to_angle's result
  * and Object88.unk20 unconverted); retail narrows it to 16 bits for each
  * angle helper call.
  */
@@ -233,8 +233,8 @@ void func_8004e928(Object88 *obj, int target, s32 max, s32 accel)
 {
     s32 yaw;
 
-    if (func_80016a98((s16)target, obj->angle.vy) != 0) {
-        if (func_80016a68(target, obj->angle.vy)) {
+    if (angle_shortest_delta((s16)target, obj->angle.vy) != 0) {
+        if (angle_mod_delta_le_half_turn(target, obj->angle.vy)) {
             obj->unk58 += accel;
             if (obj->unk58 > max) {
                 obj->unk58 = max;
@@ -248,11 +248,11 @@ void func_8004e928(Object88 *obj, int target, s32 max, s32 accel)
         yaw = obj->angle.vy;
         obj->angle.vy += obj->unk58;
         if (obj->unk58 > 0) {
-            if (func_80016a78((s16)target, yaw) && !func_80016a78((s16)target, obj->angle.vy)) {
+            if (angle_signed_greater_than((s16)target, yaw) && !angle_signed_greater_than((s16)target, obj->angle.vy)) {
                 obj->angle.vy = target;
             }
         } else {
-            if (func_80016a78(yaw, (s16)target) && !func_80016a78(obj->angle.vy, (s16)target)) {
+            if (angle_signed_greater_than(yaw, (s16)target) && !angle_signed_greater_than(obj->angle.vy, (s16)target)) {
                 obj->angle.vy = target;
             }
         }
@@ -279,10 +279,10 @@ s32 func_8004eaf0(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32
     Object88 *obj = DAT_80185da8.current;
     s32 dx = x - obj->pos.vx;
     s32 dz = z - obj->pos.vz;
-    s32 angle = func_80016ab8(dx, dz);
+    s32 angle = vector_xz_to_angle(dx, dz);
     s32 distance = abs(dx) + abs(dz);
 
-    if (face != -1 && distance <= 600 && !func_80016a2c(angle, face, 0x320)) {
+    if (face != -1 && distance <= 600 && !angle_within_tolerance(angle, face, 0x320)) {
         return -1;
     }
     func_8004ea7c(angle, scale_x, max, scale_z, accel, mode);
@@ -300,13 +300,13 @@ s32 func_8004ec08(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
     s32 y;
 
     obj = DAT_80185da8.current;
-    func_800167cc(angle, &target);
+    pitch_yaw_to_forward_vector(angle, &target);
     step = target;
-    func_80016928(scale_a, &target);
-    func_80016928(scale_b, &step);
-    obj->vel.vx = func_80015fdc(obj->vel.vx, target.vx, step.vx);
-    obj->vel.vy = func_80015fdc(obj->vel.vy, target.vy, step.vy);
-    obj->vel.vz = func_80015fdc(obj->vel.vz, target.vz, step.vz);
+    vector3s_scale_shift12(scale_a, &target);
+    vector3s_scale_shift12(scale_b, &step);
+    obj->vel.vx = value_approach(obj->vel.vx, target.vx, step.vx);
+    obj->vel.vy = value_approach(obj->vel.vy, target.vy, step.vy);
+    obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
     r = func_8004dbc8(&obj->vel, mode) != 0;
     y = obj->vel.vy + obj->pos.vy;
     if (func_80033f38(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj), DAT_80185da8.unk9d04) == 0) {
@@ -325,7 +325,7 @@ s32 func_8004ed50(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel, 
 
     obj = DAT_80185da8.current;
     func_8004e928(obj, angle->vy, max, accel);
-    obj->angle.vx = func_80015f18(obj->angle.vx, angle->vx, 8);
+    obj->angle.vx = angle_approach(obj->angle.vx, angle->vx, 8);
     return func_8004ec08(&obj->angle, scale_a, scale_b, mode);
 }
 
@@ -348,7 +348,7 @@ s32 func_8004ede0(Object88 *obj, s32 vertex, VECTOR *out)
     rotation.vx = obj->angle.vx;
     rotation.vy = obj->angle.vy + 2048;
     rotation.vz = obj->angle.vz;
-    func_800168a8(&rotation, &v, out);
+    vector_rotate_yxz(&rotation, &v, out);
     return 1;
 }
 
@@ -369,7 +369,7 @@ VECTOR *func_8004eee0(Object88 *obj, VECTOR *out)
         return out;
     case 2:
         def = &DAT_80185da8.defs[obj->unk2];
-        func_800168a8(&obj->angle, (SVECTOR *)&def->unkc, out);
+        vector_rotate_yxz(&obj->angle, (SVECTOR *)&def->unkc, out);
         out->vx += obj->pos.vx;
         out->vy += obj->pos.vy;
         out->vz += obj->pos.vz;
@@ -460,7 +460,8 @@ s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTO
 
     at = *from;
     for (;;) {
-        func_80016c90(at.vx - target->vx, -(target->vy + 1600) + at.vy, at.vz - target->vz, &angle);
+        vector_displacement_to_pitch_yaw(at.vx - target->vx, -(target->vy + 1600) + at.vy, at.vz - target->vz,
+                                         &angle);
         d = (angle.vy - obj->angle.vy) & 0xfff;
         if (d >= 2048) {
             d = 0x1000 - d;
@@ -469,23 +470,24 @@ s32 func_8004f1d0(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTO
         if (d > 0x1000) {
             d = 0x1000;
         }
-        angle.vy = func_80017170(angle.vy, obj->angle.vy, d);
+        angle.vy = angle_lerp_shortest_q12(angle.vy, obj->angle.vy, d);
         if ((s16)pitch == -1) {
             d = (angle.vx - obj->angle.vx) & 0xfff;
             if (d >= 2048) {
                 d = 0x1000 - d;
             }
-            angle.vx = func_80017170(angle.vx, obj->angle.vx, d);
+            angle.vx = angle_lerp_shortest_q12(angle.vx, obj->angle.vx, d);
         } else {
             angle.vx = pitch;
         }
-        func_800167cc(&angle, out);
-        func_80016928(speed, out);
+        pitch_yaw_to_forward_vector(&angle, out);
+        vector3s_scale_shift12(speed, out);
         if (--steps == 0) {
             break;
         }
-        func_800175a8(from, &DAT_801b24e4.unk11c,
-                      func_80016c44(target->vx - at.vx, target->vy - at.vy, target->vz - at.vz) / speed, &at);
+        vector_add_scaled_delta(from, &DAT_801b24e4.unk11c,
+                                fixed_vector3_length(target->vx - at.vx, target->vy - at.vy,
+                                                     target->vz - at.vz) / speed, &at);
     }
     return angle.vy;
 }

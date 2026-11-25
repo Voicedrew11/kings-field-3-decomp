@@ -29,7 +29,7 @@ void func_8005c0d4(Object88 *obj, u8 anim, u16 time, s32 target, u16 step)
         low = target - half;
         obj->unkc = anim;
         obj->unk18 = time;
-        while (!func_80016a2c(obj->unk18, low, half)) {
+        while (!angle_within_tolerance(obj->unk18, low, half)) {
             obj->unk18 = (s + obj->unk18) & 0xfff;
             func_800422b8(NULL, NULL);
         }

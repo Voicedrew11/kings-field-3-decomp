@@ -14,19 +14,19 @@ extern u32 DAT_8009c3fc;
 extern u32 DAT_8009c400[];
 
 /* Handler table installed while an FDAT module loads: 32 copies of the empty
- * func_8001765c (.data, owner unit unknown). */
+ * resource_noop_callback (.data, owner unit unknown). */
 extern FdatHandler DAT_8007e4e4[32];
 
-void func_80017664(void);
-void func_8001796c(void);
-void func_80017aa4(s32 dx, s32 dy, s32 dz);
-void func_80017c78(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, s8 shift1,
-                   s8 shift2);
-void func_800182e0(void);
-void func_800182f8(void);
-void func_80018310(void);
-void func_80018328(void);
-void func_80018340(void);
-void func_80018358(void);
+void resource_initialize_game_assets(void);
+void resource_run_initial_transition(void);
+void translate_active_world_positions(s32 dx, s32 dy, s32 dz);
+void resource_request_transition(u8 area0, u8 area1, u8 area2, u8 area3, u8 area4, s8 shift0, s8 shift1,
+                                 s8 shift2);
+void resource_transition_set_phase_1(void);
+void resource_transition_set_phase_2(void);
+void resource_transition_set_phase_3(void);
+void resource_transition_set_phase_4(void);
+void resource_transition_set_phase_6(void);
+void resource_advance_transition(void);
 
 #endif

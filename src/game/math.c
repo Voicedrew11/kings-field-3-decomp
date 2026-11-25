@@ -10,7 +10,7 @@
 #include <game/math.h>
 
 ADDRESS(0x80015f18, 0xc4)
-s16 func_80015f18(s16 angle, s16 target, s16 step)
+s16 angle_approach(s16 angle, s16 target, s16 step)
 {
     angle &= 0xfff;
     target &= 0xfff;
@@ -46,7 +46,7 @@ s16 func_80015f18(s16 angle, s16 target, s16 step)
 }
 
 ADDRESS(0x80015fdc, 0x68)
-s32 func_80015fdc(s32 value, s32 target, s32 step)
+s32 value_approach(s32 value, s32 target, s32 step)
 {
     if (step > 0) {
         if (value < target) {
@@ -77,12 +77,12 @@ s32 func_80015fdc(s32 value, s32 target, s32 step)
 }
 
 ADDRESS(0x80016044, 0x124)
-void func_80016044(VECTOR *from, VECTOR *to, s32 length, SVECTOR *out)
+void vector_direction_scaled(VECTOR *from, VECTOR *to, s32 length, SVECTOR *out)
 {
     s32 dx = to->vx - from->vx;
     s32 dy = to->vy - from->vy;
     s32 dz = to->vz - from->vz;
-    s32 distance = func_80016c44(dx, dy, dz);
+    s32 distance = fixed_vector3_length(dx, dy, dz);
 
     out->vx = dx * length / distance;
     out->vy = dy * length / distance;
@@ -90,13 +90,13 @@ void func_80016044(VECTOR *from, VECTOR *to, s32 length, SVECTOR *out)
 }
 
 ADDRESS(0x80016168, 0xd8)
-s32 func_80016168(s32 angle, s32 target, s32 speed, s32 accel, s32 drag)
+s32 angle_velocity_step(s32 angle, s32 target, s32 speed, s32 accel, s32 drag)
 {
-    if (func_80016a2c(angle, target, accel >> 1) && speed <= accel && speed >= -accel) {
+    if (angle_within_tolerance(angle, target, accel >> 1) && speed <= accel && speed >= -accel) {
         return angle - target;
     }
     if (target != angle) {
-        if (func_80016a68(target, angle)) {
+        if (angle_mod_delta_le_half_turn(target, angle)) {
             speed -= accel;
         } else {
             speed += accel;
@@ -111,14 +111,14 @@ s32 func_80016168(s32 angle, s32 target, s32 speed, s32 accel, s32 drag)
 }
 
 ADDRESS(0x80016240, 0x50)
-void func_80016240(s16 angle, s32 *out)
+void angle_to_forward_xz(s16 angle, s32 *out)
 {
     out[0] = -rsin(angle);
     out[1] = rcos(angle);
 }
 
 ADDRESS(0x80016290, 0x224)
-void func_80016290(MATRIX *src, MATRIX *dst, s32 quarter)
+void matrix_rotate_quarter_turns(MATRIX *src, MATRIX *dst, s32 quarter)
 {
     switch (quarter) {
     case 0:
@@ -169,7 +169,7 @@ void func_80016290(MATRIX *src, MATRIX *dst, s32 quarter)
 }
 
 ADDRESS(0x800164b4, 0xe4)
-void func_800164b4(SVECTOR *src, SVECTOR *dst, s32 quarter)
+void svector_rotate_quarter_turns(SVECTOR *src, SVECTOR *dst, s32 quarter)
 {
     switch (quarter) {
     case 0:
@@ -196,7 +196,7 @@ void func_800164b4(SVECTOR *src, SVECTOR *dst, s32 quarter)
 }
 
 ADDRESS(0x80016598, 0x74)
-void func_80016598(s16 angle, MATRIX *m)
+void matrix_set_rotation_x(s16 angle, MATRIX *m)
 {
     s32 s = rsin(angle);
     s32 c = rcos(angle);
@@ -213,7 +213,7 @@ void func_80016598(s16 angle, MATRIX *m)
 }
 
 ADDRESS(0x8001660c, 0x74)
-void func_8001660c(s16 angle, MATRIX *m)
+void matrix_set_rotation_y(s16 angle, MATRIX *m)
 {
     s32 s = rsin(angle);
     s32 c = rcos(angle);
@@ -230,7 +230,7 @@ void func_8001660c(s16 angle, MATRIX *m)
 }
 
 ADDRESS(0x80016680, 0x74)
-void func_80016680(s16 angle, MATRIX *m)
+void matrix_set_rotation_z(s16 angle, MATRIX *m)
 {
     s32 s = rsin(angle);
     s32 c = rcos(angle);
@@ -247,31 +247,31 @@ void func_80016680(s16 angle, MATRIX *m)
 }
 
 ADDRESS(0x800166f4, 0x6c)
-void func_800166f4(SVECTOR *rotation, MATRIX *m)
+void matrix_set_rotation_yxz(SVECTOR *rotation, MATRIX *m)
 {
     MATRIX work;
 
-    func_80016680(rotation->vz, &work);
-    func_80016598(rotation->vx, m);
+    matrix_set_rotation_z(rotation->vz, &work);
+    matrix_set_rotation_x(rotation->vx, m);
     MulMatrix(m, &work);
-    func_8001660c(rotation->vy, &work);
+    matrix_set_rotation_y(rotation->vy, &work);
     MulMatrix2(&work, m);
 }
 
 ADDRESS(0x80016760, 0x6c)
-void func_80016760(SVECTOR *rotation, MATRIX *m)
+void matrix_set_rotation_xzy(SVECTOR *rotation, MATRIX *m)
 {
     MATRIX work;
 
-    func_8001660c(rotation->vy, &work);
-    func_80016680(rotation->vz, m);
+    matrix_set_rotation_y(rotation->vy, &work);
+    matrix_set_rotation_z(rotation->vz, m);
     MulMatrix(m, &work);
-    func_80016598(rotation->vx, &work);
+    matrix_set_rotation_x(rotation->vx, &work);
     MulMatrix2(&work, m);
 }
 
 ADDRESS(0x800167cc, 0xdc)
-void func_800167cc(SVECTOR *rotation, SVECTOR *out)
+void pitch_yaw_to_forward_vector(SVECTOR *rotation, SVECTOR *out)
 {
     MATRIX pitch;
     MATRIX yaw;
@@ -281,12 +281,12 @@ void func_800167cc(SVECTOR *rotation, SVECTOR *out)
     v.vx = 0;
     v.vy = 0;
     v.vz = 0x1000;
-    func_80016598(-rotation->vx, &pitch);
+    matrix_set_rotation_x(-rotation->vx, &pitch);
     ApplyMatrix(&pitch, &v, &result);
     v.vx = result.vx;
     v.vy = result.vy;
     v.vz = result.vz;
-    func_8001660c(rotation->vy, &yaw);
+    matrix_set_rotation_y(rotation->vy, &yaw);
     ApplyMatrix(&yaw, &v, &result);
     out->vx = result.vx;
     out->vy = result.vy;
@@ -294,23 +294,23 @@ void func_800167cc(SVECTOR *rotation, SVECTOR *out)
 }
 
 ADDRESS(0x800168a8, 0x48)
-void func_800168a8(SVECTOR *rotation, SVECTOR *v, VECTOR *out)
+void vector_rotate_yxz(SVECTOR *rotation, SVECTOR *v, VECTOR *out)
 {
     MATRIX m;
 
-    func_800166f4(rotation, &m);
+    matrix_set_rotation_yxz(rotation, &m);
     ApplyMatrix(&m, v, out);
 }
 
 ADDRESS(0x800168f0, 0x38)
-void func_800168f0(s16 scale, s32 *v)
+void vector2i_scale_shift11(s16 scale, s32 *v)
 {
     v[0] = scale * v[0] >> 11;
     v[1] = scale * v[1] >> 11;
 }
 
 ADDRESS(0x80016928, 0x50)
-void func_80016928(s16 scale, SVECTOR *v)
+void vector3s_scale_shift12(s16 scale, SVECTOR *v)
 {
     v->vx = v->vx * scale >> 12;
     v->vy = v->vy * scale >> 12;
@@ -318,7 +318,7 @@ void func_80016928(s16 scale, SVECTOR *v)
 }
 
 ADDRESS(0x80016978, 0x38)
-void func_80016978(s16 scale, s32 *v)
+void vector2i_scale_shift12(s16 scale, s32 *v)
 {
     v[0] = scale * v[0] >> 12;
     v[1] = scale * v[1] >> 12;
@@ -333,14 +333,14 @@ void func_800169b0(s16 scale, SVECTOR *v)
 }
 
 ADDRESS(0x80016a00, 0x2c)
-void func_80016a00(VECTOR *v, s32 *delta)
+void vector3i_add_xz(VECTOR *v, s32 *delta)
 {
     v->vx += delta[0];
     v->vz += delta[1];
 }
 
 ADDRESS(0x80016a2c, 0x3c)
-s32 func_80016a2c(s16 angle, s16 target, s16 range)
+s32 angle_within_tolerance(s16 angle, s16 target, s16 range)
 {
     s32 within = 0;
     s32 difference = (u16)(angle - target) & 0xfff;
@@ -352,7 +352,7 @@ s32 func_80016a2c(s16 angle, s16 target, s16 range)
 }
 
 ADDRESS(0x80016a68, 0x10)
-s32 func_80016a68(s16 angle, s16 target)
+s32 angle_mod_delta_le_half_turn(s16 angle, s16 target)
 {
     s16 difference = (angle - target) & 0xfff;
 
@@ -360,13 +360,13 @@ s32 func_80016a68(s16 angle, s16 target)
 }
 
 ADDRESS(0x80016a78, 0x20)
-s32 func_80016a78(s32 angle, s32 target)
+s32 angle_signed_greater_than(s32 angle, s32 target)
 {
     return (s16)(((angle + 2048) & 0xfff) - ((target + 2048) & 0xfff)) > 0;
 }
 
 ADDRESS(0x80016a98, 0x20)
-s32 func_80016a98(s32 angle, s32 target)
+s32 angle_shortest_delta(s32 angle, s32 target)
 {
     s32 difference = (target - angle) & 0xfff;
 
@@ -374,7 +374,7 @@ s32 func_80016a98(s32 angle, s32 target)
 }
 
 ADDRESS(0x80016ab8, 0x150)
-s32 func_80016ab8(s32 dx, s32 dz)
+s32 vector_xz_to_angle(s32 dx, s32 dz)
 {
     s32 abs_x = dx < 0 ? -dx : dx;
     s32 abs_z = dz < 0 ? -dz : dz;
@@ -395,7 +395,7 @@ s32 func_80016ab8(s32 dx, s32 dz)
 }
 
 ADDRESS(0x80016c08, 0x3c)
-s32 func_80016c08(s32 dx, s32 dz)
+s32 fixed_vector2_length(s32 dx, s32 dz)
 {
     dx >>= 3;
     dz >>= 3;
@@ -403,7 +403,7 @@ s32 func_80016c08(s32 dx, s32 dz)
 }
 
 ADDRESS(0x80016c44, 0x4c)
-s32 func_80016c44(s32 dx, s32 dy, s32 dz)
+s32 fixed_vector3_length(s32 dx, s32 dy, s32 dz)
 {
     dx >>= 3;
     dy >>= 3;
@@ -412,15 +412,15 @@ s32 func_80016c44(s32 dx, s32 dy, s32 dz)
 }
 
 ADDRESS(0x80016c90, 0x7c)
-void func_80016c90(s32 dx, s32 dy, s32 dz, SVECTOR *out)
+void vector_displacement_to_pitch_yaw(s32 dx, s32 dy, s32 dz, SVECTOR *out)
 {
-    out->vy = func_80016ab8(dx, dz);
-    out->vx = -func_80016ab8(dy, func_80016c08(dx, dz)) & 0xfff;
+    out->vy = vector_xz_to_angle(dx, dz);
+    out->vx = -vector_xz_to_angle(dy, fixed_vector2_length(dx, dz)) & 0xfff;
     out->vz = 0;
 }
 
 ADDRESS(0x80016d0c, 0x30)
-s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
+s32 directed_intervals_overlap(s32 a, s32 b, s32 c, s32 d)
 {
     if (c < a) {
         if (c < a - b) {
@@ -435,13 +435,13 @@ s32 func_80016d0c(s32 a, s32 b, s32 c, s32 d)
 }
 
 ADDRESS(0x80016d3c, 0x18c)
-s32 func_80016d3c(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z, s32 half_width,
-                  s32 half_depth, s32 reach_down, s32 reach_up)
+s32 vector_distance_to_point_in_rotated_box(SVECTOR *rotation, VECTOR *pos, s32 x, s32 y, s32 z,
+                                            s32 half_width, s32 half_depth, s32 reach_down, s32 reach_up)
 {
     s32 dx = (pos->vx - x) >> 3;
     s32 dz = (pos->vz - z) >> 3;
     s32 distance = SquareRoot0(dx * dx + dz * dz) << 3;
-    u16 angle = func_80016ab8(x - pos->vx, z - pos->vz);
+    u16 angle = vector_xz_to_angle(x - pos->vx, z - pos->vz);
 
     dx = rcos(angle - rotation->vy + 1024) * distance >> 12;
     dz = rsin(angle - rotation->vy + 1024) * distance >> 12;
@@ -464,7 +464,7 @@ reject:
 }
 
 ADDRESS(0x80016ec8, 0xec)
-s32 func_80016ec8(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, s32 reach_up)
+s32 vector_distance_to_point(VECTOR *pos, s32 x, s32 y, s32 z, s32 radius, s32 reach_down, s32 reach_up)
 {
     s32 dx;
     s32 dz;
@@ -499,7 +499,7 @@ reject:
 }
 
 ADDRESS(0x80016fb4, 0x10c)
-s32 func_80016fb4(VECTOR *a, s32 radius_a, VECTOR *b, s32 radius_b, s32 height)
+s32 vector_distance_between_with_reach(VECTOR *a, s32 radius_a, VECTOR *b, s32 radius_b, s32 height)
 {
     s32 reach = radius_a + radius_b;
     s32 dx = b->vx - a->vx;
@@ -532,7 +532,7 @@ s32 func_80016fb4(VECTOR *a, s32 radius_a, VECTOR *b, s32 radius_b, s32 height)
 }
 
 ADDRESS(0x800170c0, 0x48)
-s32 func_800170c0(s32 range)
+s32 random_triangular_scaled(s32 range)
 {
     s32 r = rand();
 
@@ -541,7 +541,7 @@ s32 func_800170c0(s32 range)
 }
 
 ADDRESS(0x80017108, 0x50)
-s32 func_80017108(s32 range)
+s32 random_centered_triangular_scaled(s32 range)
 {
     s32 r = rand();
 
@@ -551,13 +551,13 @@ s32 func_80017108(s32 range)
 }
 
 ADDRESS(0x80017158, 0x18)
-s32 func_80017158(s32 from, s32 to, s32 t)
+s32 fixed_lerp_q12(s32 from, s32 to, s32 t)
 {
     return ((to - from) * t >> 12) + from;
 }
 
 ADDRESS(0x80017170, 0x40)
-s32 func_80017170(s32 from, s32 to, s32 t)
+s32 angle_lerp_shortest_q12(s32 from, s32 to, s32 t)
 {
     s32 difference = ((s16)to - (s16)from) & 0xfff;
 
@@ -568,7 +568,7 @@ s32 func_80017170(s32 from, s32 to, s32 t)
 }
 
 ADDRESS(0x800171b0, 0x60)
-void func_800171b0(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
+void fixed_lerp_nine_halfwords_q12(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
 {
     s16 *a = &from->m[0][0];
     s16 *b = &to->m[0][0];
@@ -584,8 +584,8 @@ void func_800171b0(MATRIX *from, MATRIX *to, MATRIX *out, s16 t)
 }
 
 ADDRESS(0x80017210, 0x28c)
-s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s32 *time,
-                  s32 *angle)
+s32 trajectory_solve_time_angle(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s32 *time,
+                                s32 *angle)
 {
     s32 speed2 = speed * speed;
     s32 gravity2 = gravity * gravity;
@@ -625,18 +625,18 @@ s32 func_80017210(s32 high, s32 distance, s32 height, s32 gravity, s32 speed, s3
     across = ((distance << 14) / speed) / sqrt_t;
     up = (((height + ((gravity * t) << 1)) << 12) / (speed >> 1)) / (sqrt_t >> 1);
     *time = sqrt_t;
-    *angle = func_80016ab8(up, across);
+    *angle = vector_xz_to_angle(up, across);
     return 0;
 }
 
 ADDRESS(0x8001749c, 0x10c)
-s32 func_8001749c(s32 high, s32 x0, s32 y0, s32 z0, s32 x1, s32 y1, s32 z1, s32 gravity,
-                  s32 speed, s16 *time, s16 *horizontal, s16 *vertical)
+s32 trajectory_solve_motion_between_points(s32 high, s32 x0, s32 y0, s32 z0, s32 x1, s32 y1, s32 z1,
+                                           s32 gravity, s32 speed, s16 *time, s16 *horizontal, s16 *vertical)
 {
     s32 t;
     s32 angle;
-    s32 result = func_80017210(high, func_80016c08(x1 - x0, z1 - z0), y0 - y1, gravity, speed,
-                               &t, &angle);
+    s32 result = trajectory_solve_time_angle(high, fixed_vector2_length(x1 - x0, z1 - z0), y0 - y1, gravity,
+                                             speed, &t, &angle);
 
     if (result == 0) {
         *horizontal = speed * rcos(angle) >> 12;
@@ -647,7 +647,7 @@ s32 func_8001749c(s32 high, s32 x0, s32 y0, s32 z0, s32 x1, s32 y1, s32 z1, s32 
 }
 
 ADDRESS(0x800175a8, 0x58)
-void func_800175a8(VECTOR *base, SVECTOR *dir, s32 scale, VECTOR *out)
+void vector_add_scaled_delta(VECTOR *base, SVECTOR *dir, s32 scale, VECTOR *out)
 {
     out->vx = dir->vx * scale + base->vx;
     out->vy = dir->vy * scale + base->vy;
@@ -664,6 +664,6 @@ s32 func_80017600(SVECTOR *normal, SVECTOR *point, s32 *d)
 }
 
 ADDRESS(0x8001765c, 0x8)
-void func_8001765c(void)
+void resource_noop_callback(void)
 {
 }

@@ -57,8 +57,8 @@ void func_8004bf1c(s32 dist)
 ADDRESS(0x8004c01c, 0x4c)
 void func_8004c01c(void)
 {
-    func_8004bf1c(func_80016c08(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
-                                DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
+    func_8004bf1c(fixed_vector2_length(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
+                                       DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
 }
 
 /* The script record of the given id, or 0. */
@@ -141,7 +141,8 @@ void func_8004c1f0(void)
 
     switch (obj->unk9) {
     case 0:
-        dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, (def->unka + 1) << 11, 0, 0);
+        dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
+                                        (def->unka + 1) << 11, 0, 0);
         if (dist == -1) {
             return;
         }
@@ -199,7 +200,8 @@ void func_8004c1f0(void)
         }
         return;
     case 1:
-        dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0);
+        dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
+                                        def->unkb << 11, 0, 0);
         if (dist != -1) {
             return;
         }
@@ -213,7 +215,8 @@ void func_8004c1f0(void)
                 return;
             }
         } else {
-            dist = func_80016ec8(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz, def->unkb << 11, 0, 0);
+            dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
+                                            def->unkb << 11, 0, 0);
             if (dist != -1) {
                 return;
             }
@@ -366,7 +369,8 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
         }
         dodge = func_8004c068(def, 0x16);
         if (dodge != NULL &&
-            func_80016a2c(obj->angle.vy, func_80016ab8(obj->pos.vx - target->vx, obj->pos.vz - target->vz), 0x200)) {
+            angle_within_tolerance(obj->angle.vy, vector_xz_to_angle(obj->pos.vx - target->vx,
+                                                                     obj->pos.vz - target->vz), 0x200)) {
             func_8004b94c(obj, dodge);
             goto push;
         }
@@ -429,15 +433,16 @@ push:
         mass = def->unk1[1];
     }
     if (target != NULL && mass < 240) {
-        func_80016c90(obj->pos.vx - target->vx, obj->pos.vy - (obj->unk1e >> 1) - target->vy,
-                      obj->pos.vz - target->vz, &dir);
-        func_800167cc(&dir, &obj->vel);
+        vector_displacement_to_pitch_yaw(obj->pos.vx - target->vx,
+                                         obj->pos.vy - (obj->unk1e >> 1) - target->vy,
+                                         obj->pos.vz - target->vz, &dir);
+        pitch_yaw_to_forward_vector(&dir, &obj->vel);
         dmg = (SquareRoot0(SquareRoot0(dmg << 11)) << 10) / mass;
         dmg = (dmg << 5) / mass;
         if (dmg > 512) {
             dmg = 512;
         }
-        func_80016928(dmg, &obj->vel);
+        vector3s_scale_shift12(dmg, &obj->vel);
         obj->vel.vx >>= 3;
         obj->vel.vz >>= 3;
         obj->vel.vy >>= 6;

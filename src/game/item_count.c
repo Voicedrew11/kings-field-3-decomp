@@ -78,9 +78,9 @@ void func_8005d948(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, s32 b1)
         func_800341e8();
         func_80034180();
         func_80034300();
-        r = func_80017158(r0, r1, t);
-        g = func_80017158(g0, g1, t);
-        func_8003d8ec(r, g, func_80017158(b0, b1, t), 0x800, 1);
+        r = fixed_lerp_q12(r0, r1, t);
+        g = fixed_lerp_q12(g0, g1, t);
+        func_8003d8ec(r, g, fixed_lerp_q12(b0, b1, t), 0x800, 1);
         t += step;
         func_80030e14();
         func_800422b8(NULL, NULL);
@@ -109,8 +109,8 @@ void func_8005da94(void)
             v = 255;
         }
         func_8003d624(0x82, v, v, v);
-        func_80015a48();
-        func_80018cd0();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_8002b330(&pos, &angle);
         func_800422b8(&pos, &angle);
         if (i >= 4096) {
@@ -127,7 +127,7 @@ void func_8005da94(void)
  * a forced id adds it to the item counts, else it turns back and returns to
  * its place. obj NULL spawns a record for the def id given after it.
  * pad doubles as the taken flag after the press. This module passes
- * func_80017170 both angles narrowed to s16 (an s16 prototype in its view;
+ * angle_lerp_shortest_q12 both angles narrowed to s16 (an s16 prototype in its view;
  * the callee narrows them again).
  */
 ADDRESS(0x8005db30, 0x7a0)
@@ -202,7 +202,7 @@ void func_8005db30(Object44 *obj, ...)
             return;
         }
     } else if (obj->unk6 == 0x85 && DAT_8018fad4.area[0] == 7) {
-        if (!func_80016a2c(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 256)) {
+        if (!angle_within_tolerance(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 256)) {
             return;
         }
     }
@@ -226,8 +226,8 @@ void func_8005db30(Object44 *obj, ...)
     model_id = func_80040568(obj->unk6);
     func_800405e8(model_id, &model);
     while (model == NULL) {
-        func_80015a48();
-        func_80018cd0();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_800422b8(NULL, &DAT_801b24e4.unk124);
         func_800405e8(model_id, &model);
     }
@@ -238,10 +238,10 @@ void func_8005db30(Object44 *obj, ...)
         }
         prev = pad;
         func_8005bee0(obj, &from, &to, &angle_from, &angle_to, t);
-        obj->unke = func_80015fdc(spin, held, t >> 4);
-        DAT_801b24e4.unk124.vx = func_80017170((s16)start, (s16)pitch, t);
-        func_80015a48();
-        func_80018cd0();
+        obj->unke = value_approach(spin, held, t >> 4);
+        DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_800422b8(NULL, &DAT_801b24e4.unk124);
     }
     obj->unke = held;
@@ -252,8 +252,8 @@ void func_8005db30(Object44 *obj, ...)
         }
         prev = pad;
         obj->angle.vy += 64;
-        func_80015a48();
-        func_80018cd0();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_800422b8(NULL, &DAT_801b24e4.unk124);
     }
 pressed:
@@ -286,7 +286,7 @@ pressed:
     }
     pad = 0;
     for (;;) {
-        if (func_80016a2c(obj->angle.vy, (DAT_801b24e4.unk124.vy + 2048) & 0xfff, 128)) {
+        if (angle_within_tolerance(obj->angle.vy, (DAT_801b24e4.unk124.vy + 2048) & 0xfff, 128)) {
             obj->angle.vy = (DAT_801b24e4.unk124.vy + 2048) & 0xfff;
             break;
         }
@@ -299,8 +299,8 @@ back:
     to = obj->pos;
     for (t = 4096; t >= 0; t -= 512) {
         func_8005bee0(obj, &from, &to, &angle_from, &angle_to, t);
-        DAT_801b24e4.unk124.vx = func_80017170((s16)start, (s16)pitch, t);
-        obj->unke = func_80015fdc(spin, held, t >> 4);
+        DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        obj->unke = value_approach(spin, held, t >> 4);
         func_800422b8(NULL, &DAT_801b24e4.unk124);
     }
     if (pad) {
@@ -334,7 +334,8 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
     i = func_8004d644(p.vx, p.vy, p.vz, 1400, 3200);
     if (i != -1) {
         o88 = &DAT_80185da8.objects[i];
-        if (func_80016a2c(angle->vy, func_80016ab8(o88->pos.vx - p.vx, o88->pos.vz - p.vz), 300)) {
+        if (angle_within_tolerance(angle->vy, vector_xz_to_angle(o88->pos.vx - p.vx, o88->pos.vz - p.vz),
+                                   300)) {
             func_8005c308(o88);
         }
     }
@@ -439,7 +440,7 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             break;
         case 6:
         case 8:
-            if (!func_80016a2c(angle->vy, obj->angle.vy + 2048, 0x155)) {
+            if (!angle_within_tolerance(angle->vy, obj->angle.vy + 2048, 0x155)) {
                 break;
             }
             /* fall through */
@@ -476,16 +477,17 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             if (obj->arg.b.unk3d[1] == 0) {
                 break;
             }
-            if (obj->arg.b.unk3d[0] == 0 && !func_80016a2c(angle->vy, obj->angle.vy + 2048, 0x155)) {
+            if (obj->arg.b.unk3d[0] == 0 && !angle_within_tolerance(angle->vy, obj->angle.vy + 2048, 0x155)) {
                 break;
             }
             func_800441d4(6, obj->arg.h.unk38 + 150);
             break;
         case 0x12:
-            if (!func_80016a2c(angle->vy, func_80016ab8(obj->pos.vx - p.vx, obj->pos.vz - p.vz), 600)) {
+            if (!angle_within_tolerance(angle->vy, vector_xz_to_angle(obj->pos.vx - p.vx, obj->pos.vz - p.vz),
+                                        600)) {
                 break;
             }
-            if (!func_80016a2c(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
+            if (!angle_within_tolerance(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
                 break;
             }
             func_8005d948(512, 0, 0, 0, 128, 200, 255);
@@ -502,10 +504,11 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             func_8002b6f0();
             break;
         case 0x16:
-            if (!func_80016a2c(angle->vy, func_80016ab8(obj->pos.vx - p.vx, obj->pos.vz - p.vz), 600)) {
+            if (!angle_within_tolerance(angle->vy, vector_xz_to_angle(obj->pos.vx - p.vx, obj->pos.vz - p.vz),
+                                        600)) {
                 break;
             }
-            if (!func_80016a2c(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
+            if (!angle_within_tolerance(angle->vy + 2048, obj->angle.vy + 1024, 1024)) {
                 break;
             }
             func_8005d948(512, 0, 0, 0, 128, 128, 200);
@@ -518,9 +521,9 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
             break;
         case 0xe:
             if ((s16)DAT_8018fad4.loading != 1) {
-                func_80019ab4();
+                cd_request_wait_idle();
                 func_8001bea8();
-                func_80018fbc((u32 *)DAT_801b594c, 0, 200);
+                repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                 func_8005efd4(DAT_8018fad4.area[0]);
                 func_80030568();
                 func_8002008c();

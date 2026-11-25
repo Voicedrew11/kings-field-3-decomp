@@ -50,11 +50,11 @@ s32 func_80055bd8(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel)
     s32 speed;
 
     obj = DAT_801b77ec.unk2f04;
-    func_80016928(scale, accel);
+    vector3s_scale_shift12(scale, accel);
     obj->vel.vx += accel->vx;
     obj->vel.vy += accel->vy;
     obj->vel.vz += accel->vz;
-    speed = func_80016c44(obj->vel.vx, obj->vel.vy, obj->vel.vz);
+    speed = fixed_vector3_length(obj->vel.vx, obj->vel.vy, obj->vel.vz);
     if (max < speed) {
         obj->vel.vx = obj->vel.vx * max / speed;
         obj->vel.vy = obj->vel.vy * max / speed;
@@ -92,10 +92,10 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
             target.vy = found->pos.vy - (found->unk1e >> 1);
             target.vz = found->pos.vz;
         aim:
-            func_80016c90(target.vx - obj->pos.vx, target.vy - obj->pos.vy, target.vz - obj->pos.vz,
-                          &dir);
-            obj->angle.vx = func_80015f18(obj->angle.vx, dir.vx, turn);
-            obj->angle.vy = func_80015f18(obj->angle.vy, dir.vy, turn);
+            vector_displacement_to_pitch_yaw(target.vx - obj->pos.vx, target.vy - obj->pos.vy,
+                                             target.vz - obj->pos.vz, &dir);
+            obj->angle.vx = angle_approach(obj->angle.vx, dir.vx, turn);
+            obj->angle.vy = angle_approach(obj->angle.vy, dir.vy, turn);
         }
     } else {
         dist = func_8002b80c(&obj->pos, obj->angle.vy, 24000, 0x1000);
@@ -106,7 +106,7 @@ s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 rang
             goto aim;
         }
     }
-    func_800167cc(&obj->angle, &accel);
+    pitch_yaw_to_forward_vector(&obj->angle, &accel);
     if (dist >= 0 && dist <= range) {
         scale = near_scale;
     }
@@ -126,14 +126,14 @@ s32 func_80055f74(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near, s32 ra
     d.vx = target->vx - obj->pos.vx;
     d.vy = target->vy - obj->pos.vy;
     d.vz = target->vz - obj->pos.vz;
-    dist = func_80016c44(d.vx, d.vy, d.vz);
+    dist = fixed_vector3_length(d.vx, d.vy, d.vz);
     if (dist <= near) {
         return -2;
     }
     if (dist <= slow) {
-        obj->vel.vx = func_80017158(0, obj->vel.vx, 0xc00);
-        obj->vel.vy = func_80017158(0, obj->vel.vy, 0xc00);
-        obj->vel.vz = func_80017158(0, obj->vel.vz, 0xc00);
+        obj->vel.vx = fixed_lerp_q12(0, obj->vel.vx, 0xc00);
+        obj->vel.vy = fixed_lerp_q12(0, obj->vel.vy, 0xc00);
+        obj->vel.vz = fixed_lerp_q12(0, obj->vel.vz, 0xc00);
     }
     accel.vx = (d.vx << 12) / dist;
     accel.vy = (d.vy << 12) / dist;
@@ -235,8 +235,8 @@ void func_800562f0(Object4c *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, 
         mode = args[1];
         break;
     default:
-        func_800167cc(&obj->angle, &dir);
-        func_80016928(30, &dir);
+        pitch_yaw_to_forward_vector(&obj->angle, &dir);
+        vector3s_scale_shift12(30, &dir);
         dir.vx = -dir.vx;
         dir.vy = -dir.vy;
         dir.vz = -dir.vz;
@@ -271,7 +271,7 @@ s32 func_80056580(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a4, s32 range)
             p.vx = dx + pos->vx;
             p.vz = dz + pos->vz;
             p.vy = DAT_801d4464.unk12018[0];
-            r = func_80017108(range) + 4096;
+            r = random_centered_triangular_scaled(range) + 4096;
             func_80053c84(10, 0, 0x70, &p, &v, a3 * r >> 12, a4 * r >> 12);
             dx = (rand() * spread >> 14) - spread;
             dz = (rand() * spread >> 14) - spread;
@@ -446,7 +446,7 @@ void func_800568bc(void)
             break;
     case 75:
         {
-            obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+            obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
             obj->angle.vz += 200;
             hit = func_800566d4(180, 0, 0);
@@ -508,7 +508,7 @@ void func_800568bc(void)
                 break;
             }
             if (obj->arg.s.unk46 == 0) {
-                func_80015688(4, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
+                audio_play_spatial_range(4, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
             }
             t = ++obj->arg.s.unk46;
             y = obj->pos.vy;
@@ -538,7 +538,7 @@ void func_800568bc(void)
                 break;
             }
             obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
-            func_80016c90(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
+            vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 82:
         {
@@ -556,7 +556,7 @@ void func_800568bc(void)
                 func_80055db0(300, 10, 0x100, 20, 360, 0x2000, 0x30, 0x800);
             }
             if (obj->arg.s.unk46 == 0) {
-                func_80015688(4, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
+                audio_play_spatial_range(4, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
             }
             t = ++obj->arg.s.unk46;
             y = obj->pos.vy;
@@ -580,7 +580,7 @@ void func_800568bc(void)
                 break;
             }
             obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
-            func_80016c90(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
+            vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 86:
         if (phase == 0) {
@@ -712,7 +712,7 @@ void func_800568bc(void)
             SVECTOR v;
 
             obj->angle.vz += 400;
-            obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+            obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
             if (obj->unk10 == 45 && obj->arg.s.unk46 == 0) {
                 v.vx = (-obj->vel.vz + obj->vel.vx + obj->vel.vx) >> 1;
@@ -757,7 +757,7 @@ void func_800568bc(void)
             SVECTOR v;
 
             obj->angle.vz += 400;
-            obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+            obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
             hit = func_800566d4(180, 0x80000000, 0);
             if (hit != 0) {
@@ -1059,7 +1059,7 @@ void func_800568bc(void)
                 }
                 break;
             case 1:
-                obj->scale.vy = func_80017158(obj->scale.pad, 0, obj->arg.s.unk46);
+                obj->scale.vy = fixed_lerp_q12(obj->scale.pad, 0, obj->arg.s.unk46);
                 obj->arg.s.unk46 += 512;
                 if (obj->arg.s.unk46 >= 0x1000) {
                     obj->unk0 = OBJECT4C_FREE;
@@ -1277,8 +1277,8 @@ void func_800568bc(void)
             }
             if (phase == 1) {
                 obj->vel.vy -= 70;
-                obj->vel.vx = func_80017158(0, obj->vel.vx, 3000);
-                obj->vel.vz = func_80017158(0, obj->vel.vz, 3000);
+                obj->vel.vx = fixed_lerp_q12(0, obj->vel.vx, 3000);
+                obj->vel.vz = fixed_lerp_q12(0, obj->vel.vz, 3000);
                 if (DAT_801d4464.unk12010 < DAT_801d4464.unk12018[0]) {
                     at.vy = DAT_801d4464.unk12010;
                 } else {
@@ -1345,8 +1345,8 @@ void func_800568bc(void)
             }
             obj->unk4 = (phase & 1) - 128;
             if (obj->unk7 < 9) {
-                d = func_80016c44(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vy - obj->pos.vy,
-                                  DAT_801b24e4.pos.vz - obj->pos.vz);
+                d = fixed_vector3_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vy - obj->pos.vy,
+                                         DAT_801b24e4.pos.vz - obj->pos.vz);
                 if (d <= 32000) {
                     d = ((rsin(obj->unk7 << 8) >> 1) + 1024) * (32000 - d) / 32000;
                     func_8003456c(200, 180, 160, 0, 32000, d);
@@ -1398,7 +1398,7 @@ void func_800568bc(void)
         func_80056268(&obj->pos, 0x2000, 0x2000, 500);
         break;
     case 46:
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         hit = func_800566d4(180, 0, 0);
         if (hit != 0) {
@@ -1513,7 +1513,7 @@ void func_800568bc(void)
         break;
         default:
             if (obj->unk7 == 0) {
-                func_80015688(0x2c, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
+                audio_play_spatial_range(0x2c, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
             }
             obj->unk7++;
             if (func_80055db0(obj->arg.s.unk44, obj->arg.s.unk46, obj->arg.s.unk48, 160, 0, 6000,
@@ -1706,7 +1706,7 @@ void func_800568bc(void)
                     t.vx = o->pos.vx;
                     t.vy = o->pos.vy - (o->unk1e >> 1);
                     t.vz = o->pos.vz;
-                    func_80016044(&a, &t, 800, &dir);
+                    vector_direction_scaled(&a, &t, 800, &dir);
                     func_80053c84(10, obj->unk0, 0, &a, &dir);
                     obj->arg.b.unk45--;
                 } else if (rand() < 2048) {
@@ -1781,7 +1781,7 @@ void func_800568bc(void)
                     obj->arg.b.unk49 = 0;
                     obj->angle.vz = 0;
                     obj->angle.vx = 0;
-                    obj->angle.pad = -func_80016ab8(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
+                    obj->angle.pad = -vector_xz_to_angle(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
                     goto case16_2;
                 } else {
                     if (++obj->arg.b.unk48 >= 24) {
@@ -1820,8 +1820,8 @@ void func_800568bc(void)
                             break;
                         }
                     } else {
-                        obj->scale.vx = obj->scale.vz = func_80017158(0, n, k << 9);
-                        obj->scale.vy = func_80017158(0, o->unk1e, obj->arg.b.unk49 * 350);
+                        obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
+                        obj->scale.vy = fixed_lerp_q12(0, o->unk1e, obj->arg.b.unk49 * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;
@@ -1916,7 +1916,7 @@ void func_800568bc(void)
                     obj->arg.b.unk49 = 0;
                     obj->angle.vz = 0;
                     obj->angle.vx = 0;
-                    obj->angle.pad = -func_80016ab8(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
+                    obj->angle.pad = -vector_xz_to_angle(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
                     for (i = 0; i < 8; i++) {
                         func_80053c84(10, 0, 0x6c, &o->pos, NULL, i << 9);
                     }
@@ -1962,8 +1962,8 @@ void func_800568bc(void)
                             break;
                         }
                     } else {
-                        obj->scale.vx = obj->scale.vz = func_80017158(0, n, k << 9);
-                        obj->scale.vy = func_80017158(0, o->unk1e, obj->arg.b.unk49 * 350);
+                        obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
+                        obj->scale.vy = fixed_lerp_q12(0, o->unk1e, obj->arg.b.unk49 * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;

@@ -63,10 +63,10 @@ void func_801e85a0(void)
     if (DAT_80185da8.objects[i].unk9 == 1) {
         return;
     }
-    if (func_80016a2c(DAT_801b24e4.unk124.vy,
-                      func_80016ab8(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
-                                    DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
-                      600) == 0) {
+    if (angle_within_tolerance(DAT_801b24e4.unk124.vy,
+                               vector_xz_to_angle(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
+                                                  DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
+                               600) == 0) {
         DAT_80185da8.objects[i].unk9 = 0;
         DAT_80185da8.objects[i].unk0 = 2;
     }

@@ -163,7 +163,7 @@ void func_801e8714(Object44 *obj)
             obj = &DAT_8018fb3c.objects[58];
             obj->unk0 = 2;
             if (DAT_801b24e4.unk101 == 0x10) {
-                func_80015654(0x28, &obj->pos, 0x78, 0);
+                audio_play_spatial_default_range(0x28, &obj->pos, 0x78, 0);
             }
             func_8002b114(&obj->pos, 0, 0x1000, 0x8000, 0x1000, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
                           0x40, 0x40, 0x40, 0x400, 10);
@@ -178,9 +178,9 @@ void func_801e8714(Object44 *obj)
                 if (other->unk10 >= 4095) {
                     other->unk10 = 0xfff;
                 }
-                func_80019ab4();
-                func_80015a48();
-                func_80018cd0();
+                cd_request_wait_idle();
+                cd_request_service_vab();
+                cd_request_service_stream();
                 func_8002b330(&pos, &angle);
                 func_800422b8(&pos, &angle);
             }

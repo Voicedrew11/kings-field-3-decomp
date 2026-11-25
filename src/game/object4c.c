@@ -32,7 +32,7 @@ static s32 DAT_8009c3f0;
 ADDRESS(0x800532d4, 0x3c)
 s32 func_800532d4(Object4c *obj, s32 se)
 {
-    return func_80015688(se, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
+    return audio_play_spatial_range(se, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
 }
 
 /* Collision test of the current record at pos, once its delay has run out. */
@@ -103,9 +103,10 @@ void func_800533e8(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int
         obj = &DAT_80185da8.objects[DAT_801d4464.unk12028];
         def = &DAT_80185da8.defs[obj->unk2];
         if (target != NULL &&
-            !func_80016a2c(obj->angle.vy,
-                           func_80016ab8(obj->pos.vx - target->vx, obj->pos.vz - target->vz) + 2048,
-                           def->unk18)) {
+            !angle_within_tolerance(obj->angle.vy,
+                                    vector_xz_to_angle(obj->pos.vx - target->vx,
+                                                       obj->pos.vz - target->vz) + 2048,
+                                    def->unk18)) {
             return;
         }
         kind &= 0xc0;
@@ -221,7 +222,7 @@ void func_80053a0c(Object4c *obj, s32 vertex, VECTOR *out, SVECTOR *scale)
     rotation.vx = obj->angle.vx;
     rotation.vy = obj->angle.vy + 2048;
     rotation.vz = obj->angle.vz;
-    func_800168a8(&rotation, &v, out);
+    vector_rotate_yxz(&rotation, &v, out);
 }
 
 /* func_80053a0c in world coordinates. */
@@ -391,7 +392,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 50;
         obj->unke = 0;
         obj->unkd = 1;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->angle.vz = 0;
         obj->arg.h.unk44 = 0;
@@ -399,7 +400,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
     case 48:
         func_80053ba8(obj, 0x41, 0x100, 5);
         obj->unk10 = 50;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0x140;
@@ -602,7 +603,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
         obj->unke = 0x40;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         func_800532d4(obj, 99);
@@ -613,7 +614,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
         obj->unke = 0xc0;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         break;
@@ -715,7 +716,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 50;
         obj->arg.b.unk44 = 0;
         obj->unkd = 1;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0x40;
@@ -725,7 +726,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->scale.vz = 0x2000;
         obj->unk10 = 80;
         obj->arg.b.unk44 = 0;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0x80;
@@ -733,7 +734,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
     case 53:
         func_80053ba8(obj, 0x41, 0x100, 5);
         obj->unk10 = 50;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0x40;
@@ -770,7 +771,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk9 = 5;
         obj->unk10 = 70;
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1800;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0;
@@ -824,7 +825,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk9 = 5;
         obj->unk10 = 70;
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1800;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->unke = 0;
@@ -837,7 +838,7 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
         obj->unk10 = 70;
         obj->unk9 = 0;
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1800;
-        obj->angle.vx = ratan2(obj->vel.vy, func_80016c08(obj->vel.vx, obj->vel.vz));
+        obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
         obj->angle.vz = 0;
         obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
         obj->vel.vy = 0;
@@ -1204,18 +1205,18 @@ Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECT
     case 23:
         obj->unk8 = 0;
         obj->unk10 = 8;
-        func_8001576c(9, 120);
+        audio_play_sound(9, 120);
         break;
     case 25:
         obj->unk8 = 0;
         obj->unk10 = 16;
-        func_8001576c(9, 120);
+        audio_play_sound(9, 120);
         obj->unke = 0x80;
         break;
     case 30:
         obj->unk8 = 0;
         obj->unk10 = 16;
-        func_8001576c(9, 120);
+        audio_play_sound(9, 120);
         obj->unke = 0x40;
         break;
     case 95:

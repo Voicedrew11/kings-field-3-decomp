@@ -523,9 +523,9 @@ void func_8001b5c4(u8 item)
     } else {
         n = 0x2f3;
     }
-    bytes = func_80019cc4(6, n, 0);
+    bytes = cd_archive_entry_extent(6, n, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
     func_80027d88(6, n);
     DAT_8009c230 = 1;
     do {
@@ -534,7 +534,7 @@ void func_8001b5c4(u8 item)
     i = 0;
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518((void *)DAT_8009c37c);
+    memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_80027a40();
     do {
@@ -618,9 +618,9 @@ void func_8001babc(void)
     s32 size = 15;
 
     n = DAT_8018fad4.unk9 + 721;
-    bytes = func_80019cc4(6, n, 0);
+    bytes = cd_archive_entry_extent(6, n, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
     func_80027d88(6, n);
     DAT_8009c230 = 1;
     do {
@@ -629,7 +629,7 @@ void func_8001babc(void)
     i = 0;
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518((void *)DAT_8009c37c);
+    memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_8001bea8();
     func_80027a40();
@@ -736,9 +736,9 @@ s32 func_8001c030(void)
     if (DAT_8018fad4.unk9 < 12 && DAT_8018fad4.unk9 != 8) {
         selected = DAT_8018fad4.unk9;
     }
-    bytes = func_80019cc4(6, 0x2f1, 0);
+    bytes = cd_archive_entry_extent(6, 0x2f1, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
     func_80027d88(6, 0x2f1);
     DAT_8009c230 = 1;
     do {
@@ -746,7 +746,7 @@ s32 func_8001c030(void)
     } while (DAT_8009c230 == 1);
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518((void *)DAT_8009c37c);
+    memory_free((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_80027a40();
     for (;;) {
@@ -1465,11 +1465,11 @@ s32 func_8001dbc4(s32 index, s32 book, u8 *out)
     s32 i;
     u16 page;
 
-    buffer = (u8 *)func_800194f0(func_80019cc4(8, entry, 0));
-    func_8001a154(8, entry, buffer);
+    buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
+    cd_archive_read(8, entry, buffer);
     func_80043b38(buffer);
     DrawSync(0);
-    func_80019518((void *)buffer);
+    memory_free((void *)buffer);
     n = 0;
     for (i = 0; i < 256; i++) {
         page = func_80060a10(book, i);
@@ -1495,11 +1495,11 @@ void func_8001dcd0(s32 book, s32 page)
     ClearImage(&rect, 0, 0, 0);
     entry = func_80060a10(book, page);
     if (entry <= 0xf000) {
-        buffer = (u8 *)func_800194f0(func_80019cc4(8, entry, 0));
-        func_8001a154(8, entry, buffer);
+        buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
+        cd_archive_read(8, entry, buffer);
         func_80043b38(buffer);
         DrawSync(0);
-        func_80019518((void *)buffer);
+        memory_free((void *)buffer);
     }
 }
 
@@ -1790,7 +1790,7 @@ s32 func_8001e710(void)
     if (DAT_8009c384 != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqPause(DAT_801b09fc.seq_id);
     }
-    func_80019ab4();
+    cd_request_wait_idle();
     func_8002090c(text);
     func_8001eb3c(6, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
     func_80028034();
@@ -1972,12 +1972,12 @@ void func_8001ec84(void)
         if ((pad & PADLright) || (pad & PADLleft)) {
             if (row == 0) {
                 DAT_801b24e4.se_volume = levels[0];
-                func_80015790(0xc, 0x80, 0x80, 0);
+                audio_key_on(0xc, 0x80, 0x80, 0);
                 DAT_801b24e4.se_volume = levels[0];
             } else if (row == 1) {
                 if (DAT_8009c384 == 0) {
                     DAT_801b24e4.se_volume = levels[1];
-                    func_80015790(0xc, 0x80, 0x80, 0);
+                    audio_key_on(0xc, 0x80, 0x80, 0);
                     DAT_801b24e4.se_volume = levels[0];
                 } else {
                     if (levels[1] == 0) {
@@ -2353,7 +2353,7 @@ s32 func_8001fa60(void)
     func_80027198();
     func_8002090c(text);
     func_8001eb3c(9, text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-    func_80019ab4();
+    cd_request_wait_idle();
     func_80028034();
     for (i = 9; i != -1; i--) {
         found = func_800280d4();
@@ -2508,7 +2508,7 @@ void func_8002008c(void)
     if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
         SsSeqPause(DAT_801b09fc.seq_id);
     }
-    func_80019ab4();
+    cd_request_wait_idle();
     func_8002090c(text);
     func_80020fe8(text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
     func_80028034();
@@ -4355,9 +4355,9 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
         DAT_80081780[item] = 4;
     }
     saved = DAT_8009c230;
-    size = func_80019cc4(6, entry, 0);
+    size = cd_archive_entry_extent(6, entry, 0);
     DAT_8009c234 = (size + 2047) >> 11;
-    buffer = (u8 *)func_800194f0(size);
+    buffer = (u8 *)memory_allocate(size);
     DAT_8009c380 = buffer;
     func_80027d88(6, entry);
     DAT_8009c230 = 1;
@@ -4366,7 +4366,7 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     } while (DAT_8009c230 == 1);
     func_80043b38(buffer);
     DrawSync(0);
-    func_80019518((void *)buffer);
+    memory_free((void *)buffer);
     DAT_8009c230 = saved;
     func_80027a40();
     for (;;) {
@@ -4609,7 +4609,7 @@ void func_80025be8(u8 item)
         }
         if (DAT_8009c240 != 0) {
             CdControl(CdlPause, 0, 0);
-            if (func_80019b68(DAT_8009c37c, DAT_8009c240) == 0) {
+            if (cd_sectors_corrupt(DAT_8009c37c, DAT_8009c240) == 0) {
                 DAT_8009c244 = -1;
             }
             DAT_8009c240 = 0;
@@ -5204,13 +5204,13 @@ void func_80027310(s32 mode)
     DAT_80199154.draw[1].isbg = 1;
     DAT_80199154.draw[1].dfe = 1;
     if (mode == 1) {
-        func_800152f8();
+        audio_stop_sequence();
     } else if ((DAT_801b24e4.bgm_volume != 0 && DAT_8009c384 == 0) ||
                (DAT_801b24e4.bgm_volume == 0 && DAT_8009c384 != 0)) {
         if (DAT_801b24e4.bgm_volume == 0) {
-            func_800152f8();
+            audio_stop_sequence();
         } else {
-            func_80015240();
+            audio_start_sequence();
         }
     }
 }
@@ -5368,12 +5368,12 @@ ADDRESS(0x8002792c, 0x78)
 void func_8002792c(s32 se)
 {
     if (se == 12 || se == 13 || se == 14) {
-        func_80015790(se, 0x38, 0x38, 0);
+        audio_key_on(se, 0x38, 0x38, 0);
     } else if (se == 9) {
-        func_80015790(9, 0, 0x48, 0);
+        audio_key_on(9, 0, 0x48, 0);
         VSync(0);
         VSync(0);
-        func_80015790(9, 0x48, 0, 0);
+        audio_key_on(9, 0x48, 0, 0);
     }
 }
 
@@ -5438,9 +5438,9 @@ void func_80027ac0(void)
     u32 size;
 
     func_80027b5c();
-    size = func_80019cc4(6, DAT_8009c23c, 0);
+    size = cd_archive_entry_extent(6, DAT_8009c23c, 0);
     DAT_8009c234 = (size + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(size);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(size);
     DAT_8009c240 = func_80027d88(6, DAT_8009c23c);
     DAT_8009c230 = 1;
     DAT_8009c244 = DAT_8009c23c;
@@ -5458,9 +5458,9 @@ ADDRESS(0x80027b5c, 0x58)
 void func_80027b5c(void)
 {
     if (DAT_8009c238 == 1) {
-        func_80019518((void *)DAT_80199154.unk10148[3]);
+        memory_free((void *)DAT_80199154.unk10148[3]);
     } else if (DAT_8009c230 != 0) {
-        func_80019518((void *)DAT_8009c37c);
+        memory_free((void *)DAT_8009c37c);
     }
     DAT_8009c230 = 0;
     DAT_8009c238 = 0;
@@ -5469,7 +5469,7 @@ void func_80027b5c(void)
 ADDRESS(0x80027bb4, 0xd8)
 void func_80027bb4(void)
 {
-    func_80019ab4();
+    cd_request_wait_idle();
     EnterCriticalSection();
     DisableEvent(DAT_801c12e4.error_event);
     DisableEvent(DAT_801c12e4.complete_event);
@@ -5494,11 +5494,11 @@ void func_80027c8c(void)
     DisableEvent(DAT_801c12e4.error_event);
     DisableEvent(DAT_801c12e4.ready_event);
     CloseEvent(DAT_801c12e4.ready_event);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, func_80019848);
+    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
     EnableEvent(DAT_801c12e4.error_event);
     EnableEvent(DAT_801c12e4.complete_event);
     EnableEvent(DAT_801c12e4.ready_event);
-    CdReadyCallback(func_80019848);
+    CdReadyCallback(cd_data_ready_handler);
     ExitCriticalSection();
     CdControl(CdlPause, 0, 0);
     VSync(4);
@@ -5516,7 +5516,7 @@ s32 func_80027d88(u16 file, u16 entry)
 
     f = &DAT_801c12e4.files[file];
     size = f->sectors[entry + 1] - f->sectors[entry];
-    func_80019a74(&f->extent.pos, f->sectors[entry], &pos);
+    cd_location_add(&f->extent.pos, f->sectors[entry], &pos);
     CdControl(CdlPause, 0, 0);
     param[0] = CdlModeSpeed;
     do {

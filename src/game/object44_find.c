@@ -53,12 +53,13 @@ s32 func_80045ac8(s32 x, s32 y, s32 z, s32 radius, s32 shape)
             r = def->unk4;
         }
         if (r != 0) {
-            if (func_80016ec8(&obj->pos, x, y, z, r + radius, obj->unkc, shape) != -1) {
+            if (vector_distance_to_point(&obj->pos, x, y, z, r + radius, obj->unkc, shape) != -1) {
                 return i;
             }
         } else if (obj->unk3 & 4) {
-            if (func_80016d3c(&obj->angle, &obj->pos, x, y, z, def->arg.h.unke + radius,
-                              def->arg.h.unk10 + radius, obj->unkc, shape) != -1) {
+            if (vector_distance_to_point_in_rotated_box(&obj->angle, &obj->pos, x, y, z,
+                                                        def->arg.h.unke + radius, def->arg.h.unk10 + radius,
+                                                        obj->unkc, shape) != -1) {
                 return i;
             }
         }
@@ -94,58 +95,59 @@ s32 func_80045c7c(s32 start, VECTOR *pos, s32 height, s32 reach_up, int angle_in
             offset.vx = 0x700;
             offset.vy = 0;
             offset.vz = 0;
-            func_8001660c(obj->angle.vy, &m);
+            matrix_set_rotation_y(obj->angle.vy, &m);
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (func_80016ec8(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                              reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
+                                         reach_up) == -1) {
                 continue;
             }
-            if (func_80016a2c(angle, func_80016ab8(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
-                              range)) {
+            if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
+                                       range)) {
                 return i;
             }
         } else if (def->unk0 == 0) {
             offset.vx = -0x700;
             offset.vy = 0;
             offset.vz = 0;
-            func_8001660c(obj->angle.vy, &m);
+            matrix_set_rotation_y(obj->angle.vy, &m);
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (func_80016ec8(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                              reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
+                                         reach_up) == -1) {
                 continue;
             }
-            if (func_80016a2c(angle, func_80016ab8(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
-                              range)) {
+            if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
+                                       range)) {
                 return i;
             }
         } else if (def->unk0 == 1) {
             offset.vx = -0x400;
             offset.vy = 0;
             offset.vz = 0;
-            func_8001660c(obj->angle.vy, &m);
+            matrix_set_rotation_y(obj->angle.vy, &m);
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (func_80016ec8(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                              reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
+                                         reach_up) == -1) {
                 continue;
             }
-            if (func_80016a2c(angle, func_80016ab8(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
-                              range)) {
+            if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
+                                       range)) {
                 return i;
             }
         } else {
-            if (func_80016ec8(&obj->pos, pos->vx, pos->vy, pos->vz, def->unk6 + height, def->unk8,
-                              reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz, def->unk6 + height, def->unk8,
+                                         reach_up) == -1) {
                 continue;
             }
             if (obj->unk6 == 0x95
-                || func_80016a2c(angle, func_80016ab8(obj->pos.vx - pos->vx, obj->pos.vz - pos->vz),
-                                 range)) {
+                || angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - pos->vx,
+                                                                    obj->pos.vz - pos->vz),
+                                          range)) {
                 return i;
             }
         }
@@ -444,7 +446,7 @@ void func_80046760(Object44 *obj, s32 vertex, VECTOR *out)
     rot.vx = obj->angle.vx;
     rot.vy = obj->angle.vy + 2048;
     rot.vz = obj->angle.vz;
-    func_800168a8(&rot, &v, out);
+    vector_rotate_yxz(&rot, &v, out);
     out->vx += obj->pos.vx;
     out->vy += obj->pos.vy;
     out->vz += obj->pos.vz;
@@ -516,7 +518,7 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
         } else {
             dst->unk1 = 0x80;
         }
-        func_800168a8(&src->angle, from, &dst->pos);
+        vector_rotate_yxz(&src->angle, from, &dst->pos);
         dst->pos.vx += src->pos.vx;
         dst->pos.vy += src->pos.vy;
         dst->pos.vz += src->pos.vz;
@@ -530,13 +532,13 @@ s32 func_80046914(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 
                 dst->unka = 0xfff;
             }
         }
-        func_800168a8(&src->angle, from, &a);
-        func_800168a8(&src->angle, to, &b);
+        vector_rotate_yxz(&src->angle, from, &a);
+        vector_rotate_yxz(&src->angle, to, &b);
         src->arg.b.unk40++;
         t = (src->arg.b.unk40 << 12) / steps;
-        dst->pos.vx = func_80017158(a.vx, b.vx, t) + src->pos.vx;
-        dst->pos.vy = func_80017158(a.vy, b.vy, t) + src->pos.vy;
-        dst->pos.vz = func_80017158(a.vz, b.vz, t) + src->pos.vz;
+        dst->pos.vx = fixed_lerp_q12(a.vx, b.vx, t) + src->pos.vx;
+        dst->pos.vy = fixed_lerp_q12(a.vy, b.vy, t) + src->pos.vy;
+        dst->pos.vz = fixed_lerp_q12(a.vz, b.vz, t) + src->pos.vz;
         if (src->arg.b.unk40 < steps) {
             return 0;
         }
@@ -570,8 +572,8 @@ void func_80046c00(int mode, s32 phase, s32 last, s32 step)
             v = 0xff;
         }
         func_8003d624(mode, v, v, v);
-        func_80015a48();
-        func_80018cd0();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_8002b330(&pos, &angle);
         func_800422b8(&pos, &angle);
         if (level == end) {
@@ -629,7 +631,7 @@ s16 func_80046dcc(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *ou
 
     pos = *from;
     for (;;) {
-        func_80016c90(pos.vx - to->vx, -(to->vy + 1600) + pos.vy, pos.vz - to->vz, &rot);
+        vector_displacement_to_pitch_yaw(pos.vx - to->vx, -(to->vy + 1600) + pos.vy, pos.vz - to->vz, &rot);
         d = (rot.vy - obj->angle.vy) & 0xfff;
         if (d >= 2048) {
             d = 4096 - d;
@@ -638,23 +640,24 @@ s16 func_80046dcc(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *ou
         if (d > 4096) {
             d = 4096;
         }
-        rot.vy = func_80017170(rot.vy, obj->angle.vy, d);
+        rot.vy = angle_lerp_shortest_q12(rot.vy, obj->angle.vy, d);
         if (pitch == -1) {
             d = (rot.vx - obj->angle.vx) & 0xfff;
             if (d >= 2048) {
                 d = 4096 - d;
             }
-            rot.vx = func_80017170(rot.vx, obj->angle.vx, d);
+            rot.vx = angle_lerp_shortest_q12(rot.vx, obj->angle.vx, d);
         } else {
             rot.vx = pitch;
         }
-        func_800167cc(&rot, out);
-        func_80016928(dist, out);
+        pitch_yaw_to_forward_vector(&rot, out);
+        vector3s_scale_shift12(dist, out);
         if (--count == 0) {
             break;
         }
-        func_800175a8(from, &DAT_801b24e4.unk11c,
-                      func_80016c44(to->vx - pos.vx, to->vy - pos.vy, to->vz - pos.vz) / dist, &pos);
+        vector_add_scaled_delta(from, &DAT_801b24e4.unk11c,
+                                fixed_vector3_length(to->vx - pos.vx, to->vy - pos.vy,
+                                                     to->vz - pos.vz) / dist, &pos);
     }
     return rot.vy;
 }
@@ -667,13 +670,13 @@ static s16 DAT_8009c3d8;
 DATA(0x8009c3dc, 0x2, ".sbss")
 static s16 DAT_8009c3dc;
 
-/* Moves an Object44 forward along its yaw by DIST (func_800168f0 scale). */
+/* Moves an Object44 forward along its yaw by DIST (vector2i_scale_shift11 scale). */
 #define OBJ44_ADVANCE(obj, dist)                            \
     {                                                       \
         s32 dir[2];                                         \
                                                             \
-        func_80016240((obj)->angle.vy + 2048, dir);         \
-        func_800168f0(dist, dir);                           \
+        angle_to_forward_xz((obj)->angle.vy + 2048, dir);         \
+        vector2i_scale_shift11(dist, dir);                           \
         (obj)->pos.vx += dir[0];                            \
         (obj)->pos.vz += dir[1];                            \
     }
@@ -901,8 +904,8 @@ void func_80047010(void)
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                          DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -913,8 +916,8 @@ void func_80047010(void)
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
                     if (other->unk3 & 0x80) {
-                        turn = (func_80016ab8(DAT_801b24e4.pos.vx - other->pos.vx,
-                                              DAT_801b24e4.pos.vz - other->pos.vz) -
+                        turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - other->pos.vx,
+                                                   DAT_801b24e4.pos.vz - other->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                             other->unke = 0xf0;
@@ -933,14 +936,16 @@ void func_80047010(void)
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && func_80016a2c(DAT_8009c3d4 + 2048, obj->arg.h.unk42, 900)) {
+                    if (t < 21 && angle_within_tolerance(DAT_8009c3d4 + 2048, obj->arg.h.unk42, 900)) {
                         if ((other != NULL &&
-                             func_80016a2c(DAT_8009c3d4,
-                                           func_80016ab8(other->pos.vx - DAT_801b24e4.pos.vx,
-                                                         other->pos.vz - DAT_801b24e4.pos.vz), 0x400)) ||
-                            func_80016a2c(DAT_801b24e4.unk124.vy,
-                                          func_80016ab8(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                        obj->pos.vz - DAT_801b24e4.pos.vz), 0x400)) {
+                             angle_within_tolerance(DAT_8009c3d4,
+                                                    vector_xz_to_angle(other->pos.vx - DAT_801b24e4.pos.vx,
+                                                                       other->pos.vz - DAT_801b24e4.pos.vz),
+                                                    0x400)) ||
+                            angle_within_tolerance(DAT_801b24e4.unk124.vy,
+                                                   vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
+                                                                      obj->pos.vz - DAT_801b24e4.pos.vz),
+                                                   0x400)) {
                             {
                             MATRIX m;
                             SVECTOR v;
@@ -949,7 +954,7 @@ void func_80047010(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            func_8001660c(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             DAT_801b24e4.unk162 = 0;
                             DAT_801b24e4.unk164 = -76;
@@ -985,7 +990,7 @@ void func_80047010(void)
                             v.vx = -1792;
                             v.vy = 0;
                             v.vz = 0;
-                            func_8001660c(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
@@ -1032,8 +1037,8 @@ void func_80047010(void)
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                          DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -1044,8 +1049,8 @@ void func_80047010(void)
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
                     if (other->unk3 & 0x80) {
-                        turn = (func_80016ab8(DAT_801b24e4.pos.vx - other->pos.vx,
-                                              DAT_801b24e4.pos.vz - other->pos.vz) -
+                        turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - other->pos.vx,
+                                                   DAT_801b24e4.pos.vz - other->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                             other->unke = 0xf0;
@@ -1064,14 +1069,16 @@ void func_80047010(void)
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && func_80016a2c(DAT_8009c3d8 + 2048, obj->arg.h.unk42, 900)) {
+                    if (t < 21 && angle_within_tolerance(DAT_8009c3d8 + 2048, obj->arg.h.unk42, 900)) {
                         if ((other != NULL &&
-                             func_80016a2c(DAT_8009c3d8,
-                                           func_80016ab8(other->pos.vx - DAT_801b24e4.pos.vx,
-                                                         other->pos.vz - DAT_801b24e4.pos.vz), 0x400)) ||
-                            func_80016a2c(DAT_801b24e4.unk124.vy,
-                                          func_80016ab8(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                        obj->pos.vz - DAT_801b24e4.pos.vz), 0x400)) {
+                             angle_within_tolerance(DAT_8009c3d8,
+                                                    vector_xz_to_angle(other->pos.vx - DAT_801b24e4.pos.vx,
+                                                                       other->pos.vz - DAT_801b24e4.pos.vz),
+                                                    0x400)) ||
+                            angle_within_tolerance(DAT_801b24e4.unk124.vy,
+                                                   vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
+                                                                      obj->pos.vz - DAT_801b24e4.pos.vz),
+                                                   0x400)) {
                             {
                             MATRIX m;
                             SVECTOR v;
@@ -1080,7 +1087,7 @@ void func_80047010(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            func_8001660c(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             DAT_801b24e4.unk162 = 0;
                             DAT_801b24e4.unk164 = -76;
@@ -1116,7 +1123,7 @@ void func_80047010(void)
                             v.vx = 0x700;
                             v.vy = 0;
                             v.vz = 0;
-                            func_8001660c(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
@@ -1157,8 +1164,8 @@ void func_80047010(void)
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (func_80016ab8(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                          DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
+                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -1174,10 +1181,11 @@ void func_80047010(void)
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && func_80016a2c(DAT_8009c3dc + 2048, obj->arg.h.unk42, 900) &&
-                        func_80016a2c(DAT_8009c3dc,
-                                      func_80016ab8(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                    obj->pos.vz - DAT_801b24e4.pos.vz), 0x400)) {
+                    if (t < 21 && angle_within_tolerance(DAT_8009c3dc + 2048, obj->arg.h.unk42, 900) &&
+                        angle_within_tolerance(DAT_8009c3dc,
+                                               vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
+                                                                  obj->pos.vz - DAT_801b24e4.pos.vz),
+                                               0x400)) {
                         {
                             MATRIX m;
                             SVECTOR v;
@@ -1186,7 +1194,7 @@ void func_80047010(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            func_8001660c(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             DAT_801b24e4.unk162 = 0;
                             DAT_801b24e4.unk164 = -76;
@@ -1213,7 +1221,7 @@ void func_80047010(void)
                             v.vx = 0x400;
                             v.vy = 0;
                             v.vz = 0;
-                            func_8001660c(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
@@ -1272,14 +1280,14 @@ void func_80047010(void)
                     o1->unke = -180;
                     break;
                 case 2:
-                    func_800168a8(&obj->angle, &start, &a);
-                    func_800168a8(&obj->angle, &end, &b);
+                    vector_rotate_yxz(&obj->angle, &start, &a);
+                    vector_rotate_yxz(&obj->angle, &end, &b);
                     obj->arg.b.unk40++;
                     n = 40;
                     f = (obj->arg.b.unk40 << 12) / n;
-                    o1->pos.vx = func_80017158(a.vx, b.vx, f) + obj->pos.vx;
-                    o1->pos.vy = func_80017158(a.vy, b.vy, f) + obj->pos.vy;
-                    o1->pos.vz = func_80017158(a.vz, b.vz, f) + obj->pos.vz;
+                    o1->pos.vx = fixed_lerp_q12(a.vx, b.vx, f) + obj->pos.vx;
+                    o1->pos.vy = fixed_lerp_q12(a.vy, b.vy, f) + obj->pos.vy;
+                    o1->pos.vz = fixed_lerp_q12(a.vz, b.vz, f) + obj->pos.vz;
                     o1->angle.vy += 256;
                     if (obj->arg.b.unk40 >= n) {
                         func_8004482c(obj, def->arg.b.unkf);
@@ -1365,7 +1373,7 @@ void func_80047010(void)
                         func_80046dcc(obj, &DAT_801b24e4.pos, 400, &spark.pos, &spark.angle, -1, 0x400, 1);
                         func_80053c84(10, 0x83, 0x23, &spark.pos, &spark.angle, &obj->angle);
                     }
-                    obj->arg.sh.unk40 = func_80016168(0xa00, obj->angle.vx, obj->arg.sh.unk40, 8, 4);
+                    obj->arg.sh.unk40 = angle_velocity_step(0xa00, obj->angle.vx, obj->arg.sh.unk40, 8, 4);
                     obj->angle.vx = (obj->angle.vx + obj->arg.sh.unk40) & 0xfff;
                     if (obj->angle.vx < 3072) {
                         func_80044900(obj->arg.h.unk3a, 2);
@@ -1450,7 +1458,7 @@ void func_80047010(void)
                 }
                 break;
             case 3:
-                obj->angle.vx = func_80015f18(obj->angle.vx, 0xd44, 50);
+                obj->angle.vx = angle_approach(obj->angle.vx, 0xd44, 50);
                 if (obj->angle.vx == 0xd44) {
                     obj->unk8 = 4;
                 }
@@ -2151,7 +2159,7 @@ void func_80047010(void)
                     DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
                                              DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
                     func_80046c00(0x82, 0x1000, 0x1000, 0);
-                    func_80019ab4();
+                    cd_request_wait_idle();
                     func_80046c00(0x82, 0x1000, 0, -128);
                     func_8003d624(0xff, 0, 0, 0);
                 }
@@ -2193,20 +2201,20 @@ void func_80047010(void)
                         area3 = obj->arg.b.unk39;
                         area4 = obj->arg.b.unk3a.bytes[0];
                         do {
-                            func_80019538();
-                            func_80018358();
+                            cd_request_yield();
+                            resource_advance_transition();
                         } while ((s16)DAT_8018fad4.loading != 0);
                         if (area != DAT_8018fad4.area[0]) {
-                            func_80017c78(area, area, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+                            resource_request_transition(area, area, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
                         } else {
-                            func_80017c78(0xff, 0xff, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
+                            resource_request_transition(0xff, 0xff, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
                             DAT_801b24e4.unke = 1;
                         }
                         do {
-                            func_80019538();
-                            func_80018358();
+                            cd_request_yield();
+                            resource_advance_transition();
                         } while ((s16)DAT_8018fad4.loading != 0);
-                        func_80019ab4();
+                        cd_request_wait_idle();
                         DAT_801b24e4.unk101 = 0;
                         DAT_801b24e4.unk140 = 0;
                         DAT_801b24e4.unk13e = 0;
@@ -2217,9 +2225,9 @@ void func_80047010(void)
                         DAT_801b24e4.pos.vy = -(y << 7);
                         DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy = -(yaw << 4);
                         func_80046c00(1, 0x1000, 0x1000, 0);
-                        func_80019ab4();
+                        cd_request_wait_idle();
                         func_80046c00(1, 0x1000, 0, -256);
-                        func_80017c78(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
+                        resource_request_transition(0xff, 0xff, 0xff, area3, area4, 0x7f, 0x7f, 0x7f);
                     }
                 } else {
                     obj->arg.b.unk40 = 0;
@@ -2288,9 +2296,9 @@ void func_80047010(void)
         case 224:
             if (func_80046884(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38, obj->arg.b.unk39,
                               obj->pos.vy) != 0) {
-                func_80017c78(obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                              obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->arg.sb.unk40,
-                              obj->arg.sb.unk41, obj->arg.sb.unk42);
+                resource_request_transition(obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1],
+                                            obj->arg.b.unk3c, obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
+                                            obj->arg.sb.unk40, obj->arg.sb.unk41, obj->arg.sb.unk42);
             }
             break;
         case 225:
@@ -2651,7 +2659,7 @@ void func_80047010(void)
                     }
                 }
             } else if (obj->unk8 == 2) {
-                obj->angle.vx = func_80015f18(obj->angle.vx, obj->angle.pad, 160);
+                obj->angle.vx = angle_approach(obj->angle.vx, obj->angle.pad, 160);
                 if (obj->angle.vx == obj->angle.pad) {
                     obj->unk8 = 99;
                 }

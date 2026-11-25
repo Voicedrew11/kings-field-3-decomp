@@ -90,9 +90,9 @@ void func_801e85b8(s32 a, s32 b)
         if (second->unk10 >= 4095) {
             second->unk10 = 0xfff;
         }
-        func_80019ab4();
-        func_80015a48();
-        func_80018cd0();
+        cd_request_wait_idle();
+        cd_request_service_vab();
+        cd_request_service_stream();
         func_8002b330(&pos, &angle);
         func_800422b8(&pos, &angle);
     }
