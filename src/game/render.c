@@ -1214,20 +1214,14 @@ draw:
  * units down in view space: lit by light record light_id, posed by
  * func_800431e8 (the base pose when no slot is free) and drawn by
  * func_80039428 at depth offset depth.
- * K&R definition: depth is u16 here, int at the calls (func_80040ae4).
+ * depth arrives as int (the calls in func_80040ae4) and is narrowed to u16.
  */
 
 ADDRESS(0x800400ac, 0x4bc)
-void func_800400ac(id, rotation, owner, anim, time, shade, light_id, depth)
-    u16 id;
-    SVECTOR *rotation;
-    AnimSlot **owner;
-    u16 anim;
-    u16 time;
-    s32 shade;
-    s32 light_id;
-    u16 depth;
+void func_800400ac(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 anim, u16 time, s32 shade,
+                   s32 light_id, int depth_in)
 {
+    u16 depth = depth_in;
     MATRIX m;
     ScratchPad *scratch;
     Record6c *light;

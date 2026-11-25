@@ -112,12 +112,13 @@ void func_80019b1c(CdRequest *request);
 /* Word checksum of a sector read: nonzero when the last word disagrees. */
 s32 func_80019b68(u8 *buffer, s32 sectors);
 s32 func_80019cc4(s32 file, s32 entry, CdlLOC *pos);
-/* These definitions are old-style with 16-bit file and entry numbers: the
- * callee truncates them and callers pass ints unconverted. */
+/* 16-bit file and entry numbers: func_80019d98/df0 take ints and narrow them
+ * at entry (callers pass ints unconverted); func_80019e48 takes u16 itself,
+ * since the int-and-local form swaps its file/entry registers. */
 void func_80019d48(s32 file, s32 entry, u8 *buffer, CdCallback callback);
 void func_80019d98(int file, int entry, u8 *buffer, CdCallback callback);
 void func_80019df0(int file, int entry, u8 *buffer, CdCallback callback);
-void func_80019e48(int file, int entry, u8 *buffer, CdCallback callback);
+void func_80019e48(u16 file, u16 entry, u8 *buffer, CdCallback callback);
 s32 func_80019f14(int file, int entry);
 void func_80019f58(s32 fatal);
 void func_80019f60(CdlLOC *pos, u8 *buffer, s32 sectors);

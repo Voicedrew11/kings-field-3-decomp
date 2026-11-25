@@ -138,11 +138,14 @@ void func_80028f90(void)
     func_8001f4c0();
 }
 
-/* Marks the 32 arena blocks of part as cached unless they are still loading. */
+/*
+ * Marks the 32 arena blocks of part as cached unless they are still loading.
+ * int with no return value: a void return changes the loop's delay slot.
+ */
 ADDRESS(0x800290d8, 0xb0)
-func_800290d8(part)
-u8 part;
+int func_800290d8(int part_in)
 {
+    u8 part = part_in;
     u16 i;
     u8 *block;
 

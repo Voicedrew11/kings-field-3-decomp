@@ -33,10 +33,10 @@ void func_80053ba8(Object4c *obj, s32 a1, s32 scale, s32 a3);
 void func_80053be4(Object4c *obj, s32 a1, s32 scale, s32 a3);
 void func_80053c20(Object4c *obj, s32 a1, s32 a2, s32 a3);
 /*
- * K&R definition (u8 kind, flags and id arrive as int); callers pass 5 to 12
- * arguments and it reads those after vel through &vel, so no prototype.
+ * kind, flags and id are u8 in the callee (they arrive as int); callers pass
+ * 5 to 12 arguments and it reads those after vel through &vel.
  */
-Object4c *func_80053c84();
+Object4c *func_80053c84(int kind, int flags, int id, VECTOR *pos, SVECTOR *vel, ...);
 void func_80055b4c(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale);
 s32 func_80055bd8(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel);
 s32 func_80055db0(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,

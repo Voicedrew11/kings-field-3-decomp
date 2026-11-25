@@ -294,11 +294,7 @@ void func_80019df0(int file_in, int entry_in, u8 *buffer, CdCallback callback)
 }
 
 ADDRESS(0x80019e48, 0xcc)
-void func_80019e48(file, entry, buffer, callback)
-u16 file;
-u16 entry;
-u8 *buffer;
-CdCallback callback;
+void func_80019e48(u16 file, u16 entry, u8 *buffer, CdCallback callback)
 {
     CdlLOC pos;
     CdRequest *request = DAT_801c12e4.write;

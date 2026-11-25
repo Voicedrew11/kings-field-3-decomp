@@ -301,17 +301,15 @@ void func_80053c20(Object4c *obj, s32 a1, s32 a2, s32 y)
  * kind goes to unk6, flags to unk0, pos and vel are copied (vel may be NULL).
  * Each id sets its model, size, life and payload; some read further
  * arguments after vel through &vel (callers pass 5 to 12 arguments).
- * Unknown ids free the record again. K&R definition: kind, flags and id
- * arrive as int and are narrowed after the other parameters are copied.
+ * Unknown ids free the record again. kind, flags and id arrive as int and
+ * are narrowed at entry.
  */
 ADDRESS(0x80053c84, 0x1ec8)
-Object4c *func_80053c84(kind, flags, id, pos, vel)
-u8 kind;
-u8 flags;
-u8 id;
-VECTOR *pos;
-SVECTOR *vel;
+Object4c *func_80053c84(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECTOR *vel, ...)
 {
+    u8 kind = kind_in;
+    u8 flags = flags_in;
+    u8 id = id_in;
     Object4c *obj;
     s32 *args;
     Object4cTrail *trail;

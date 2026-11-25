@@ -544,7 +544,6 @@ void func_8003ab04(u16 id);
 void func_8003bfd0(void);
 void func_8003c35c(void);
 void func_8003df50(void);
-/* func_800400ac has a K&R definition: depth (u16 there) travels as int. */
 void func_8003e34c(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
                    AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    s32 flags, s32 depth);
