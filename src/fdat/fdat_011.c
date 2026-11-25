@@ -13,40 +13,64 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
+void area_handler_noop(void);
 void func_801e8398(void);
 void func_801e85a8(void);
 void func_801e85b0(void);
-void func_801e85b8(void);
-void func_801e85c0(void);
-void func_801e85c8(void);
-void func_801e85d0(void);
-void func_801e85d8(Object44 *obj);
-void func_801e8698(void);
-void func_801e86a0(void);
-void func_801e86a8(void);
-void func_801e86b0(void);
-void func_801e86b8(void);
-void func_801e86c0(Object88 *obj, s32 event);
-void func_801e87c0(void);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_blacksmith(Object88 *obj, s32 event);
+void area_on_load_reset_blacksmith(void);
 
 const FdatHeader fdat_header = {
     0x8,
     {
-        fdat_801e83b0, func_801e85b8, func_801e85c0, func_801e85d8,
-        func_801e86c0, func_801e87c0, func_801e86b8, func_801e8390,
-        func_801e8698, func_801e86a0, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e86a8, func_801e86b0, func_801e85c8, func_801e85d0,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_update_warp_arrival_cells,
+        /*  4 */ area_talk_event_blacksmith,
+        /*  5 */ area_on_load_reset_blacksmith,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x28,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
@@ -55,7 +79,7 @@ void func_801e8398(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 ADDRESS(0x801e85a8, 0x8)
 void func_801e85a8(void)
@@ -68,28 +92,28 @@ void func_801e85b0(void)
 }
 
 ADDRESS(0x801e85b8, 0x8)
-void func_801e85b8(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e85c0, 0x8)
-void func_801e85c0(void)
+void area_use_item_noop(void)
 {
 }
 
 ADDRESS(0x801e85c8, 0x8)
-void func_801e85c8(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e85d0, 0x8)
-void func_801e85d0(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 /* Slot 3: for an object whose unk3a.bytes[1] is 10, shows one of two notes. */
 ADDRESS(0x801e85d8, 0xc0)
-void func_801e85d8(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -105,33 +129,33 @@ void func_801e85d8(Object44 *obj)
 }
 
 ADDRESS(0x801e8698, 0x8)
-void func_801e8698(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e86a0, 0x8)
-void func_801e86a0(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e86a8, 0x8)
-void func_801e86a8(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e86b0, 0x8)
-void func_801e86b0(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e86b8, 0x8)
-void func_801e86b8(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 4: script events 0..2 of an object record. */
 ADDRESS(0x801e86c0, 0x100)
-void func_801e86c0(Object88 *obj, s32 event)
+void area_talk_event_blacksmith(Object88 *obj, s32 event)
 {
     s32 result;
 
@@ -164,7 +188,7 @@ void func_801e86c0(Object88 *obj, s32 event)
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e87c0, 0x20)
-void func_801e87c0(void)
+void area_on_load_reset_blacksmith(void)
 {
     DAT_801ba984.unk76[3] = 1;
     DAT_801ba984.unk84[5] = 3;

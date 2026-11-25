@@ -4,7 +4,7 @@
  * between its two distances (u16 at +0x12 and +0x10).
  */
 ADDRESS(0x801e875c, 0x44)
-s32 fdat_801e875c(u8 *script, s32 dist)
+s32 area_actor_target_check_approach_range(u8 *script, s32 dist)
 {
     if (script[0] != 0x85) {
         return 1;

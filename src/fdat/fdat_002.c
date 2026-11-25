@@ -17,51 +17,75 @@
 
 RODATA(0x801e8308, 0xa0)
 
-void func_801e83a8(void);
-void func_801e85b8(void);
-void func_801e8704(void);
-void func_801e870c(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
-                   s32 arg7, s32 arg8, s32 arg9);
-void func_801e8768(Object88 *obj);
-void func_801e87e0(Object44 *obj);
-void func_801e8960(void);
-void func_801e8968(void);
-void func_801e8970(void);
-void func_801e8978(void);
-void func_801e8980(void);
-void func_801e89d0(void);
-void func_801e89d8(u8 id);
-void func_801e8a34(Object88 *record, s32 event);
-void func_801e8d68(void);
+void area_handler_noop(void);
+void area_update_light_flicker_and_actor_swap(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_lethal_only(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void area_on_actor_removed_unlock_door(Object88 *obj);
+void area_region_trigger_set_doors_and_warp_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_check_items_held(void);
+void area_on_movie_start_noop(void);
+void area_on_movie_end_restore_hp_and_mp(u8 id);
+void area_talk_event_collect_items_and_wait(Object88 *record, s32 event);
+void area_on_load_restore_actors_and_doors(void);
 
 const FdatHeader fdat_header = {
     0x5,
     {
-        fdat_801e83b0, func_801e85b8, func_801e8704, func_801e87e0,
-        func_801e8a34, func_801e8d68, func_801e8980, func_801e89d8,
-        func_801e8960, func_801e8968, func_801e89d0, func_801e83a8,
-        func_801e83a8, func_801e83a8, func_801e83a8, func_801e83a8,
-        func_801e8970, func_801e8978, func_801e870c, func_801e8768,
-        func_801e83a8, func_801e83a8, func_801e83a8, func_801e83a8,
-        func_801e83a8, func_801e83a8, func_801e83a8, func_801e83a8,
-        func_801e83a8, func_801e83a8, func_801e83a8, func_801e83a8,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_light_flicker_and_actor_swap,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_set_doors_and_warp_cells,
+        /*  4 */ area_talk_event_collect_items_and_wait,
+        /*  5 */ area_on_load_restore_actors_and_doors,
+        /*  6 */ area_on_item_added_check_items_held,
+        /*  7 */ area_on_movie_end_restore_hp_and_mp,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_lethal_only,
+        /* 19 */ area_on_actor_removed_unlock_door,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x25,
 };
 
 ADDRESS(0x801e83a8, 0x8)
-void func_801e83a8(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 /*
  * Slot 1: swings object 158 back and forth; with flags 5 and 6 set and 0xb
  * clear, records 0..2 move on once record 1 is far from the player.
  */
 ADDRESS(0x801e85b8, 0x14c)
-void func_801e85b8(void)
+void area_update_light_flicker_and_actor_swap(void)
 {
     s32 k = 158;
     s32 dx;
@@ -89,14 +113,14 @@ void func_801e85b8(void)
 }
 
 ADDRESS(0x801e8704, 0x8)
-void func_801e8704(void)
+void area_use_item_noop(void)
 {
 }
 
 /* Slot 18: record 32 reports 0 while its unk1a is above the value. */
 ADDRESS(0x801e870c, 0x5c)
-void func_801e870c(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
-                   s32 arg7, s32 arg8, s32 arg9)
+void area_adjust_actor_magic_damage_lethal_only(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
     if (obj - DAT_80185da8.objects == 32 && *out < obj->unk1a) {
         *out = 0;
@@ -105,7 +129,7 @@ void func_801e870c(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
 
 /* Slot 19: record 32 sets flag 0xc once and opens object 344. */
 ADDRESS(0x801e8768, 0x78)
-void func_801e8768(Object88 *obj)
+void area_on_actor_removed_unlock_door(Object88 *obj)
 {
     s32 k;
 
@@ -125,7 +149,7 @@ void func_801e8768(Object88 *obj)
  * sets the doors, then, like switch 10, shows one of two notes.
  */
 ADDRESS(0x801e87e0, 0x180)
-void func_801e87e0(Object44 *obj)
+void area_region_trigger_set_doors_and_warp_cells(Object44 *obj)
 {
     Object44 *door;
 
@@ -171,28 +195,28 @@ void func_801e87e0(Object44 *obj)
 }
 
 ADDRESS(0x801e8960, 0x8)
-void func_801e8960(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8968, 0x8)
-void func_801e8968(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8970, 0x8)
-void func_801e8970(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8978, 0x8)
-void func_801e8978(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 /* Slot 6: sets flag 0xb once items 0, 0x85 and 0x64 are all held. */
 ADDRESS(0x801e8980, 0x50)
-void func_801e8980(void)
+void area_on_item_added_check_items_held(void)
 {
     if (game_counter_is_nonzero(0) > 0 && game_counter_is_nonzero(0x85) > 0 && game_counter_is_nonzero(0x64) > 0) {
         DAT_801ba984.unk4[7] = 1;
@@ -200,13 +224,13 @@ void func_801e8980(void)
 }
 
 ADDRESS(0x801e89d0, 0x8)
-void func_801e89d0(void)
+void area_on_movie_start_noop(void)
 {
 }
 
 /* Slot 7: event 0 restores the player's hp and raises unk1c by 30 up to its maximum. */
 ADDRESS(0x801e89d8, 0x5c)
-void func_801e89d8(u8 id)
+void area_on_movie_end_restore_hp_and_mp(u8 id)
 {
     if (id == 0) {
         DAT_801b24e4.hp = DAT_801b24e4.hp_max;
@@ -219,7 +243,7 @@ void func_801e89d8(u8 id)
 
 /* Slot 4: script events 0..5 of an object record. */
 ADDRESS(0x801e8a34, 0x334)
-void func_801e8a34(Object88 *record, s32 event)
+void area_talk_event_collect_items_and_wait(Object88 *record, s32 event)
 {
     s32 hundreds;
 
@@ -275,7 +299,7 @@ void func_801e8a34(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the records and doors of the flags. */
 ADDRESS(0x801e8d68, 0x39c)
-void func_801e8d68(void)
+void area_on_load_restore_actors_and_doors(void)
 {
     Object44 *door;
     s32 k;

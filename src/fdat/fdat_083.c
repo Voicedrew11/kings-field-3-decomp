@@ -14,56 +14,80 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e85a0(void);
-void func_801e85dc(void);
-void func_801e85e4(Object88 *obj);
-void func_801e8694(void);
-void func_801e869c(void);
-void func_801e86a4(void);
-void func_801e8a40(void);
-void func_801e8a48(void);
-void func_801e8a50(void);
-void func_801e8a64(void);
-void func_801e8a6c(void);
+void area_handler_noop(void);
+void area_update_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_trade_item(Object88 *obj);
+void area_region_trigger_noop(void);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_on_item_added_noop(void);
+void area_on_movie_start_noop(void);
+void area_on_movie_end_set_flag(void);
+void area_talk_event_noop(void);
+void area_on_load_store_area_index(void);
 
 const FdatHeader fdat_header = {
     0x20,
     {
-        fdat_801e83b0, func_801e85a0, fdat_801e85a8, func_801e8694,
-        func_801e8a64, func_801e8a6c, func_801e8a40, func_801e8a50,
-        func_801e869c, func_801e86a4, func_801e8a48, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        fdat_801e875c, fdat_801e87a0, func_801e85dc, func_801e85e4,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_notify_no_target,
+        /*  3 */ area_region_trigger_noop,
+        /*  4 */ area_talk_event_noop,
+        /*  5 */ area_on_load_store_area_index,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_on_movie_end_set_flag,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_approach_range,
+        /* 17 */ area_update_actor_target_fade_approach,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_trade_item,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x40,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 ADDRESS(0x801e85a0, 0x8)
-void func_801e85a0(void)
+void area_update_noop(void)
 {
 }
 
-#include "shared/fdat_801e85a8.inc"
+#include "shared/area_use_item_notify_no_target.inc"
 
 ADDRESS(0x801e85dc, 0x8)
-void func_801e85dc(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Slot 19: record 0 gives item 0x11 for item 0x10 once. */
 ADDRESS(0x801e85e4, 0xb0)
-void func_801e85e4(Object88 *obj)
+void area_on_actor_removed_trade_item(Object88 *obj)
 {
     if (obj - DAT_80185da8.objects != 0) {
         return;
@@ -84,49 +108,49 @@ void func_801e85e4(Object88 *obj)
 }
 
 ADDRESS(0x801e8694, 0x8)
-void func_801e8694(void)
+void area_region_trigger_noop(void)
 {
 }
 
 ADDRESS(0x801e869c, 0x8)
-void func_801e869c(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e86a4, 0x8)
-void func_801e86a4(void)
+void area_update_map_object_noop(void)
 {
 }
 
-#include "shared/fdat_801e875c.inc"
+#include "shared/area_actor_target_check_approach_range.inc"
 
-#include "shared/fdat_801e87a0.inc"
+#include "shared/area_update_actor_target_fade_approach.inc"
 
 ADDRESS(0x801e8a40, 0x8)
-void func_801e8a40(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e8a48, 0x8)
-void func_801e8a48(void)
+void area_on_movie_start_noop(void)
 {
 }
 
 /* Sets flag 0x37. */
 ADDRESS(0x801e8a50, 0x14)
-void func_801e8a50(void)
+void area_on_movie_end_set_flag(void)
 {
     DAT_801ba984.unk32[0x37] = 1;
 }
 
 ADDRESS(0x801e8a64, 0x8)
-void func_801e8a64(void)
+void area_talk_event_noop(void)
 {
 }
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e8a6c, 0x14)
-void func_801e8a6c(void)
+void area_on_load_store_area_index(void)
 {
     DAT_801ba984.unk84[5] = 0x1b;
 }

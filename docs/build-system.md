@@ -264,7 +264,8 @@ defines = ["KF_OPEN"]
   module, `bind = "name"`): a body several modules repeat is one fragment in
   `src/fdat/shared/`, its claim spelled with the address of the first module
   that has it, and its function carries that one shared identity name
-  (`fdat_<address>`) in every module's `function_identities.tsv` rows.
+  (for example `area_interact_item_containers`) in every module's
+  `function_identities.tsv` rows.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images (in SLPS-00017 the mode-1 arena limit was `0xfefff` in `GAME.EXE`

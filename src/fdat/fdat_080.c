@@ -15,50 +15,75 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8474(void);
-void func_801e8684(void);
-void func_801e86bc(void);
-void func_801e86c4(void);
-void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_801e8850(void);
-void func_801e8858(Object44 *obj);
-void func_801e8910(void);
-void func_801e8918(void);
-void func_801e8920(void);
-void func_801e8928(void);
-void func_801e8930(void);
-void func_801e8938(u8 id);
-void func_801e8958(u8 id);
-void func_801e8af0(Object88 *record, s32 event);
-void func_801e8b38(void);
+void area_handler_noop(void);
+void area_update_flag_on_element_stat(void);
+void area_use_item_noop(void);
+void area_refresh_lamp_effects_and_light(void);
+void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_on_movie_start_unlock_element(u8 id);
+void area_on_movie_end_raise_element_and_fade_objects(u8 id);
+void area_talk_event_signal_marker(Object88 *record, s32 event);
+void area_on_load_restore_lamps_and_markers(void);
 
 const FdatHeader fdat_header = {
     0x1f,
     {
-        fdat_801e83b0, func_801e8684, func_801e86bc, func_801e8858,
-        func_801e8af0, func_801e8b38, func_801e8930, func_801e8958,
-        func_801e8910, func_801e8918, func_801e8938, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8920, func_801e8928, func_801e8758, func_801e8850,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_flag_on_element_stat,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_set_flags_and_recalc_stats,
+        /*  4 */ area_talk_event_signal_marker,
+        /*  5 */ area_on_load_restore_lamps_and_markers,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_on_movie_end_raise_element_and_fade_objects,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_unlock_element,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_light_lamps,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x3f,
 };
 
-#include "shared/fdat_801e83a4.inc"
+#include "shared/light_blend_records.inc"
 
 ADDRESS(0x801e8474, 0x8)
-void func_801e8474(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 /* Slot 1: sets flag 0x31 once the player's unk34[3] is non-zero. */
 ADDRESS(0x801e8684, 0x38)
-void func_801e8684(void)
+void area_update_flag_on_element_stat(void)
 {
     if (DAT_801b24e4.unk34[3] != 0) {
         if (DAT_801ba984.unk32[0x31] == 0) {
@@ -68,7 +93,7 @@ void func_801e8684(void)
 }
 
 ADDRESS(0x801e86bc, 0x8)
-void func_801e86bc(void)
+void area_use_item_noop(void)
 {
 }
 
@@ -91,7 +116,7 @@ static Record30 DAT_801e8be8 = {
 
 /* Lights the effects of the twelve lamp bits and blends the area light by their count. */
 ADDRESS(0x801e86c4, 0x94)
-void func_801e86c4(void)
+void area_refresh_lamp_effects_and_light(void)
 {
     u32 bits;
     Effect *effect;
@@ -108,13 +133,13 @@ void func_801e86c4(void)
             effect->unk2 = 0;
         }
     }
-    fdat_801e83a4(&DAT_801e8bb8, &DAT_801e8be8, &DAT_80081c8c[41], t);
+    light_blend_records(&DAT_801e8bb8, &DAT_801e8be8, &DAT_80081c8c[41], t);
 }
 
 /* Slot 18: records 40..51 each light their lamp bit. */
 ADDRESS(0x801e8758, 0xf8)
-void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
-                   s32 arg7, s32 arg8, s32 arg9)
+void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
     s32 index = obj - DAT_80185da8.objects - 40;
     s32 bit;
@@ -126,7 +151,7 @@ void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
         if (arg6 == 0) {
             return;
         }
-        func_801e86c4();
+        area_refresh_lamp_effects_and_light();
         light_reset_records();
         light_refresh_record_rotations();
         player_update_status_visuals();
@@ -141,13 +166,13 @@ void func_801e8758(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
 }
 
 ADDRESS(0x801e8850, 0x8)
-void func_801e8850(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 /* Slot 3: switch objects 0..2. */
 ADDRESS(0x801e8858, 0xb8)
-void func_801e8858(Object44 *obj)
+void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -171,33 +196,33 @@ void func_801e8858(Object44 *obj)
 }
 
 ADDRESS(0x801e8910, 0x8)
-void func_801e8910(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8918, 0x8)
-void func_801e8918(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8920, 0x8)
-void func_801e8920(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8928, 0x8)
-void func_801e8928(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8930, 0x8)
-void func_801e8930(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 7. */
 ADDRESS(0x801e8938, 0x20)
-void func_801e8938(u8 id)
+void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 14) {
         DAT_801ba984.unk71[3] = 1;
@@ -206,7 +231,7 @@ void func_801e8938(u8 id)
 
 /* Slot 7: raises a stat and opens objects 6 and 87 over 16 frames each. */
 ADDRESS(0x801e8958, 0x198)
-void func_801e8958(u8 id)
+void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -252,7 +277,7 @@ void func_801e8958(u8 id)
 
 /* Slot 4: script event 0 of an object record sets flag 0x32 once. */
 ADDRESS(0x801e8af0, 0x48)
-void func_801e8af0(Object88 *record, s32 event)
+void area_talk_event_signal_marker(Object88 *record, s32 event)
 {
     if (event == 0) {
         if (DAT_801ba984.unk32[0x32] == 0) {
@@ -265,7 +290,7 @@ void func_801e8af0(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e8b38, 0x80)
-void func_801e8b38(void)
+void area_on_load_restore_lamps_and_markers(void)
 {
     if (DAT_801ba984.unk32[0x32] != 0) {
         map_object_apply_marker_signal(0xf2);
@@ -277,6 +302,6 @@ void func_801e8b38(void)
     if (DAT_801ba984.unk32[0x36] != 0) {
         map_object_process_marker_all(0xf1);
     }
-    func_801e86c4();
+    area_refresh_lamp_effects_and_light();
     DAT_801ba984.unk84[5] = 0x1a;
 }

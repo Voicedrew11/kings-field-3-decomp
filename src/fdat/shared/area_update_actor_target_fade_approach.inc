@@ -5,7 +5,7 @@
  * including module defines FDAT_801E87A0_STEP, the rise and sink per frame.
  */
 ADDRESS(0x801e87a0, 0x350)
-void fdat_801e87a0(void)
+void area_update_actor_target_fade_approach(void)
 {
     Object88 *obj;
     Object78 *def;

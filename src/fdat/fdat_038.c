@@ -13,44 +13,69 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e8398(VECTOR *pos, SVECTOR *angle);
-void func_801e85d0(void);
-void func_801e85d8(void);
-void func_801e85e0(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_801e866c(Object88 *obj);
-void func_801e875c(void);
-void func_801e8764(void);
-void func_801e876c(void);
-void func_801e8774(void);
-void func_801e877c(void);
-void func_801e8784(void);
-void func_801e878c(void);
-void func_801e8794(void);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void area_on_actor_removed_send_signals(Object88 *obj);
+void area_region_trigger_noop(void);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_noop(void);
+void area_on_load_clear_signalled_markers(void);
 
 const FdatHeader fdat_header = {
     0x11,
     {
-        func_801e8398, func_801e85d0, func_801e85d8, func_801e875c,
-        func_801e878c, func_801e8794, func_801e8784, func_801e8390,
-        func_801e8764, func_801e876c, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8774, func_801e877c, func_801e85e0, func_801e866c,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_noop,
+        /*  4 */ area_talk_event_noop,
+        /*  5 */ area_on_load_clear_signalled_markers,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_element_kill,
+        /* 19 */ area_on_actor_removed_send_signals,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x31,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e8398, 0x238)
-void func_801e8398(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -103,19 +128,19 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e85d0, 0x8)
-void func_801e85d0(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e85d8, 0x8)
-void func_801e85d8(void)
+void area_use_item_noop(void)
 {
 }
 
 /* Slot 18: records 50..52 report their unk1a while the last four arguments are 0. */
 ADDRESS(0x801e85e0, 0x8c)
-void func_801e85e0(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
-                   s32 arg7, s32 arg8, s32 arg9)
+void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
     s32 index = obj - DAT_80185da8.objects;
 
@@ -130,7 +155,7 @@ void func_801e85e0(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4, s32 ar
 
 /* Slot 19: records 50..52 each set their flag and start their object once. */
 ADDRESS(0x801e866c, 0xf0)
-void func_801e866c(Object88 *obj)
+void area_on_actor_removed_send_signals(Object88 *obj)
 {
     s32 index = obj - DAT_80185da8.objects;
 
@@ -157,43 +182,43 @@ void func_801e866c(Object88 *obj)
 }
 
 ADDRESS(0x801e875c, 0x8)
-void func_801e875c(void)
+void area_region_trigger_noop(void)
 {
 }
 
 ADDRESS(0x801e8764, 0x8)
-void func_801e8764(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e876c, 0x8)
-void func_801e876c(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8774, 0x8)
-void func_801e8774(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e877c, 0x8)
-void func_801e877c(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8784, 0x8)
-void func_801e8784(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e878c, 0x8)
-void func_801e878c(void)
+void area_talk_event_noop(void)
 {
 }
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e8794, 0xa8)
-void func_801e8794(void)
+void area_on_load_clear_signalled_markers(void)
 {
     s32 k;
 

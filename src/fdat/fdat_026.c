@@ -14,45 +14,69 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e85a0(void);
-void func_801e8644(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e8778(void);
-void func_801e8780(Object88 *obj);
-void func_801e87e8(void);
-void func_801e87f0(void);
-void func_801e87f8(void);
-void func_801e8800(void);
-void func_801e8808(void);
-void func_801e8810(void);
-void func_801e8818(Object88 *record, s32 event);
-void func_801e8918(void);
+void area_handler_noop(void);
+void area_update_respawn_actor_out_of_view(void);
+void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_disable_actor(Object88 *obj);
+void area_region_trigger_noop(void);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_grant_magic(Object88 *record, s32 event);
+void area_on_load_restore_actor_and_item_flags(void);
 
 const FdatHeader fdat_header = {
     0xd,
     {
-        fdat_801e83b0, func_801e85a0, func_801e8644, func_801e87e8,
-        func_801e8818, func_801e8918, func_801e8810, func_801e8390,
-        func_801e87f0, func_801e87f8, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8800, func_801e8808, func_801e8778, func_801e8780,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_respawn_actor_out_of_view,
+        /*  2 */ area_use_item_flash_and_set_flag,
+        /*  3 */ area_region_trigger_noop,
+        /*  4 */ area_talk_event_grant_magic,
+        /*  5 */ area_on_load_restore_actor_and_item_flags,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_disable_actor,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x2d,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 /* Slot 1: with flag 0x30 alone set, record 1 stops when it faces away from the player. */
 ADDRESS(0x801e85a0, 0xa4)
-void func_801e85a0(void)
+void area_update_respawn_actor_out_of_view(void)
 {
     s32 i;
 
@@ -74,7 +98,7 @@ void func_801e85a0(void)
 
 /* Slot 2: item 0x81 used on object 0x34 in front fades the screen and sets flag 0x30. */
 ADDRESS(0x801e8644, 0x134)
-void func_801e8644(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
 
@@ -97,13 +121,13 @@ void func_801e8644(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e8778, 0x8)
-void func_801e8778(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Slot 19: record 1 moves on once flag 0x30 is set. */
 ADDRESS(0x801e8780, 0x68)
-void func_801e8780(Object88 *obj)
+void area_on_actor_removed_disable_actor(Object88 *obj)
 {
     if (obj - DAT_80185da8.objects == 1) {
         if (DAT_801ba984.unk2c[4] == 1) {
@@ -114,38 +138,38 @@ void func_801e8780(Object88 *obj)
 }
 
 ADDRESS(0x801e87e8, 0x8)
-void func_801e87e8(void)
+void area_region_trigger_noop(void)
 {
 }
 
 ADDRESS(0x801e87f0, 0x8)
-void func_801e87f0(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e87f8, 0x8)
-void func_801e87f8(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8800, 0x8)
-void func_801e8800(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8808, 0x8)
-void func_801e8808(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8810, 0x8)
-void func_801e8810(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 4: script events 0 and 1 of an object record. */
 ADDRESS(0x801e8818, 0x100)
-void func_801e8818(Object88 *record, s32 event)
+void area_talk_event_grant_magic(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -174,7 +198,7 @@ void func_801e8818(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e8918, 0xb0)
-void func_801e8918(void)
+void area_on_load_restore_actor_and_item_flags(void)
 {
     if (DAT_801ba984.unk2c[4] != 0 && DAT_801ba984.unk32[0] == 0) {
         DAT_80185da8.objects[1].unk0 = 1;

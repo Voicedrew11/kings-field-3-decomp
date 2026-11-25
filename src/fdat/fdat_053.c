@@ -16,48 +16,72 @@
 
 RODATA(0x801e8308, 0x140)
 
-void func_801e8448(void);
-void func_801e8658(void);
-void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e891c(void);
-void func_801e8958(s32 index, s32 state);
-void func_801e89c0(Object88 *obj);
-void func_801e8b10(Object44 *obj);
-void func_801e8d24(void);
-void func_801e8d2c(void);
-void func_801e8d34(void);
-void func_801e8d3c(void);
-void func_801e8d44(void);
-void func_801e8d4c(u8 id);
-void func_801e8de8(u8 id);
-void func_801e8e08(Object88 *record, s32 event);
-void func_801e8f84(void);
+void area_handler_noop(void);
+void area_update_respawn_actor_out_of_view(void);
+void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_set_cell_toggle(s32 index, s32 state);
+void area_on_actor_removed_set_toggles(Object88 *obj);
+void area_region_trigger_trade_item_and_damage(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_on_movie_start_show_objects_and_wake_actor(u8 id);
+void area_on_movie_end_set_flag(u8 id);
+void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 event);
+void area_on_load_restore_objects_and_actors(void);
 
 const FdatHeader fdat_header = {
     0x16,
     {
-        fdat_801e83b0, func_801e8658, func_801e86f8, func_801e8b10,
-        func_801e8e08, func_801e8f84, func_801e8d44, func_801e8de8,
-        func_801e8d24, func_801e8d2c, func_801e8d4c, func_801e8448,
-        func_801e8448, func_801e8448, func_801e8448, func_801e8448,
-        func_801e8d34, func_801e8d3c, func_801e891c, func_801e89c0,
-        func_801e8448, func_801e8448, func_801e8448, func_801e8448,
-        func_801e8448, func_801e8448, func_801e8448, func_801e8448,
-        func_801e8448, func_801e8448, func_801e8448, func_801e8448,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_respawn_actor_out_of_view,
+        /*  2 */ area_use_item_place_on_object,
+        /*  3 */ area_region_trigger_trade_item_and_damage,
+        /*  4 */ area_talk_event_give_equipment_and_raise_element,
+        /*  5 */ area_on_load_restore_objects_and_actors,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_on_movie_end_set_flag,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_show_objects_and_wake_actor,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_set_toggles,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x36,
 };
 
 ADDRESS(0x801e8448, 0x8)
-void func_801e8448(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 /* Slot 1: with flag 0x55 at 1, record 15 stops when it faces away from the player. */
 ADDRESS(0x801e8658, 0xa0)
-void func_801e8658(void)
+void area_update_respawn_actor_out_of_view(void)
 {
     s32 i = 15;
 
@@ -78,7 +102,7 @@ void func_801e8658(void)
  * kind at the player and moves it onto object 11 over 64 frames.
  */
 ADDRESS(0x801e86f8, 0x224)
-void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
     Object44 *obj;
@@ -127,15 +151,15 @@ void func_801e86f8(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e891c, 0x8)
-void func_801e891c(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
-#include "shared/fdat_801e86d8.inc"
+#include "shared/area_disable_actor_range.inc"
 
 /* Sets object index's unk3f to state (0 or 1) and marks it changed. */
 ADDRESS(0x801e8958, 0x68)
-void func_801e8958(s32 index, s32 state)
+void area_set_cell_toggle(s32 index, s32 state)
 {
     Object44 *obj;
 
@@ -155,28 +179,28 @@ void func_801e8958(s32 index, s32 state)
 
 /* Slot 19: records 11..13 each start their record run once, 15 and 56 move on. */
 ADDRESS(0x801e89c0, 0x150)
-void func_801e89c0(Object88 *obj)
+void area_on_actor_removed_set_toggles(Object88 *obj)
 {
     switch (obj - DAT_80185da8.objects) {
     case 11:
         if (DAT_801ba984.unk32[0x20] == 0) {
             DAT_801ba984.unk32[0x20] = 1;
-            fdat_801e86d8(0x10, 1);
-            func_801e8958(0x50, 1);
+            area_disable_actor_range(0x10, 1);
+            area_set_cell_toggle(0x50, 1);
         }
         break;
     case 12:
         if (DAT_801ba984.unk32[0x21] == 0) {
             DAT_801ba984.unk32[0x21] = 1;
-            fdat_801e86d8(0x37, 1);
-            func_801e8958(0x51, 1);
+            area_disable_actor_range(0x37, 1);
+            area_set_cell_toggle(0x51, 1);
         }
         break;
     case 13:
         if (DAT_801ba984.unk32[0x22] == 0) {
             DAT_801ba984.unk32[0x22] = 1;
-            fdat_801e86d8(0x2e, 1);
-            func_801e8958(5, 1);
+            area_disable_actor_range(0x2e, 1);
+            area_set_cell_toggle(5, 1);
         }
         break;
     case 15:
@@ -197,7 +221,7 @@ void func_801e89c0(Object88 *obj)
  * a fade, switches 0x61 and 0x63 hurt the player.
  */
 ADDRESS(0x801e8b10, 0x214)
-void func_801e8b10(Object44 *obj)
+void area_region_trigger_trade_item_and_damage(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -234,33 +258,33 @@ void func_801e8b10(Object44 *obj)
 }
 
 ADDRESS(0x801e8d24, 0x8)
-void func_801e8d24(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8d2c, 0x8)
-void func_801e8d2c(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8d34, 0x8)
-void func_801e8d34(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8d3c, 0x8)
-void func_801e8d3c(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8d44, 0x8)
-void func_801e8d44(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 10: event 9 closes object 50, opens objects 52..61 and shows a note. */
 ADDRESS(0x801e8d4c, 0x9c)
-void func_801e8d4c(u8 id)
+void area_on_movie_start_show_objects_and_wake_actor(u8 id)
 {
     Object44 *obj;
     s32 i;
@@ -281,7 +305,7 @@ void func_801e8d4c(u8 id)
 
 /* Slot 7: event 9 sets flag 0x58. */
 ADDRESS(0x801e8de8, 0x20)
-void func_801e8de8(u8 id)
+void area_on_movie_end_set_flag(u8 id)
 {
     if (id == 9) {
         DAT_801ba984.unk32[0x26] = 1;
@@ -290,7 +314,7 @@ void func_801e8de8(u8 id)
 
 /* Slot 4: script events 0 and 1 of an object record. */
 ADDRESS(0x801e8e08, 0x17c)
-void func_801e8e08(Object88 *record, s32 event)
+void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -327,7 +351,7 @@ void func_801e8e08(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the objects of the flags. */
 ADDRESS(0x801e8f84, 0x374)
-void func_801e8f84(void)
+void area_on_load_restore_objects_and_actors(void)
 {
     Object44 *obj;
     Object44 *p;
@@ -335,22 +359,22 @@ void func_801e8f84(void)
     u16 id;
 
     if (DAT_801ba984.unk32[0x20] != 0) {
-        fdat_801e86d8(0x10, 1);
-        func_801e8958(0x50, 1);
+        area_disable_actor_range(0x10, 1);
+        area_set_cell_toggle(0x50, 1);
     } else {
-        func_801e8958(0x50, 0);
+        area_set_cell_toggle(0x50, 0);
     }
     if (DAT_801ba984.unk32[0x21] != 0) {
-        fdat_801e86d8(0x37, 1);
-        func_801e8958(0x51, 1);
+        area_disable_actor_range(0x37, 1);
+        area_set_cell_toggle(0x51, 1);
     } else {
-        func_801e8958(0x51, 0);
+        area_set_cell_toggle(0x51, 0);
     }
     if (DAT_801ba984.unk32[0x22] != 0) {
-        fdat_801e86d8(0x2e, 1);
-        func_801e8958(5, 1);
+        area_disable_actor_range(0x2e, 1);
+        area_set_cell_toggle(5, 1);
     } else {
-        func_801e8958(5, 0);
+        area_set_cell_toggle(5, 0);
     }
     DAT_80185da8.objects[15].unk0 = 8;
     if (DAT_801ba984.unk32[0x24] != 0) {

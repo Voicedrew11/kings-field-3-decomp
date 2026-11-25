@@ -12,44 +12,68 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e8398(VECTOR *pos, SVECTOR *angle);
-void func_801e85c4(void);
-void func_801e85cc(void);
-void func_801e85d4(void);
-void func_801e85dc(void);
-void func_801e85e4(Object44 *obj);
-void func_801e8680(void);
-void func_801e8688(void);
-void func_801e8690(void);
-void func_801e8698(void);
-void func_801e86a0(void);
-void func_801e86a8(void);
-void func_801e86b0(void);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_damage_player(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_noop(void);
+void area_on_load_restore_by_visit_count(void);
 
 const FdatHeader fdat_header = {
     0x13,
     {
-        func_801e8398, func_801e85c4, func_801e85cc, func_801e85e4,
-        func_801e86a8, func_801e86b0, func_801e86a0, func_801e8390,
-        func_801e8680, func_801e8688, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8690, func_801e8698, func_801e85d4, func_801e85dc,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_damage_player,
+        /*  4 */ area_talk_event_noop,
+        /*  5 */ area_on_load_restore_by_visit_count,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x33,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e8398, 0x22c)
-void func_801e8398(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -100,28 +124,28 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e85c4, 0x8)
-void func_801e85c4(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e85cc, 0x8)
-void func_801e85cc(void)
+void area_use_item_noop(void)
 {
 }
 
 ADDRESS(0x801e85d4, 0x8)
-void func_801e85d4(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e85dc, 0x8)
-void func_801e85dc(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 /* Slot 3: objects 0x62 (when player_camera_within_map_region hits) and 0x63 hurt the player. */
 ADDRESS(0x801e85e4, 0x9c)
-void func_801e85e4(Object44 *obj)
+void area_region_trigger_damage_player(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0x62:
@@ -137,38 +161,38 @@ void func_801e85e4(Object44 *obj)
 }
 
 ADDRESS(0x801e8680, 0x8)
-void func_801e8680(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8688, 0x8)
-void func_801e8688(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8690, 0x8)
-void func_801e8690(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8698, 0x8)
-void func_801e8698(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e86a0, 0x8)
-void func_801e86a0(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e86a8, 0x8)
-void func_801e86a8(void)
+void area_talk_event_noop(void)
 {
 }
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e86b0, 0x14c)
-void func_801e86b0(void)
+void area_on_load_restore_by_visit_count(void)
 {
     s32 state;
 

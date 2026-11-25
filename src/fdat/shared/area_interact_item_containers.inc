@@ -6,7 +6,7 @@
  * triggers its linked object (unk3a) or, with none, shows its message.
  */
 ADDRESS(0x801e83b0, 0x208)
-void fdat_801e83b0(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;

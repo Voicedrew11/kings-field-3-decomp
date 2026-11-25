@@ -12,44 +12,68 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e8398(VECTOR *pos, SVECTOR *angle);
-void func_801e85e4(void);
-void func_801e85ec(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e86e4(void);
-void func_801e86ec(void);
-void func_801e86f4(void);
-void func_801e86fc(void);
-void func_801e8704(void);
-void func_801e870c(void);
-void func_801e8714(void);
-void func_801e871c(void);
-void func_801e8724(void);
-void func_801e872c(void);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_noop(void);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_noop(void);
+void area_on_load_store_area_index(void);
 
 const FdatHeader fdat_header = {
     0x1c,
     {
-        func_801e8398, func_801e85e4, func_801e85ec, func_801e86f4,
-        func_801e8724, func_801e872c, func_801e871c, func_801e8390,
-        func_801e86fc, func_801e8704, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e870c, func_801e8714, func_801e86e4, func_801e86ec,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_place_in_socket,
+        /*  3 */ area_region_trigger_noop,
+        /*  4 */ area_talk_event_noop,
+        /*  5 */ area_on_load_store_area_index,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x3c,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e8398, 0x24c)
-void func_801e8398(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -102,13 +126,13 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e85e4, 0x8)
-void func_801e85e4(void)
+void area_update_noop(void)
 {
 }
 
 /* Slot 2: item 0x86 used on object 0x13f in front unlocks it. */
 ADDRESS(0x801e85ec, 0xf8)
-void func_801e85ec(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
     Object44 *obj;
@@ -137,53 +161,53 @@ void func_801e85ec(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e86e4, 0x8)
-void func_801e86e4(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e86ec, 0x8)
-void func_801e86ec(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 ADDRESS(0x801e86f4, 0x8)
-void func_801e86f4(void)
+void area_region_trigger_noop(void)
 {
 }
 
 ADDRESS(0x801e86fc, 0x8)
-void func_801e86fc(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8704, 0x8)
-void func_801e8704(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e870c, 0x8)
-void func_801e870c(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8714, 0x8)
-void func_801e8714(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e871c, 0x8)
-void func_801e871c(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e8724, 0x8)
-void func_801e8724(void)
+void area_talk_event_noop(void)
 {
 }
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e872c, 0x14)
-void func_801e872c(void)
+void area_on_load_store_area_index(void)
 {
     DAT_801ba984.unk84[5] = 0x17;
 }

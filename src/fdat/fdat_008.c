@@ -16,49 +16,73 @@
 
 RODATA(0x801e8308, 0xb8)
 
-void func_801e83c0(void);
-void func_801e83c8(VECTOR *pos, SVECTOR *angle);
-void func_801e864c(void);
-void func_801e86f4(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e8824(void);
-void func_801e882c(Object88 *obj);
-void func_801e888c(Object44 *obj);
-void func_801e89d0(Object44 *obj, Object44Def *def);
-void func_801e89fc(void);
-void func_801e8bdc(void);
-void func_801e8be4(void);
-void func_801e8bec(void);
-void func_801e8c1c(u8 id);
-void func_801e8c3c(u8 id);
-void func_801e8e08(Object88 *record, s32 event);
-void func_801e8eb4(void);
+void area_handler_noop(void);
+void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle);
+void area_update_cell_toggles_by_worn_item(void);
+void area_use_item_offer_items_in_order(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_open_gate(Object88 *obj);
+void area_region_trigger_lock_door_and_warp_cells(Object44 *obj);
+void area_init_map_object_dial(Object44 *obj, Object44Def *def);
+void area_update_map_object_dial(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_check_item_held(void);
+void area_on_movie_start_unlock_element(u8 id);
+void area_on_movie_end_raise_element_and_fade_objects(u8 id);
+void area_talk_event_request_item_or_give(Object88 *record, s32 event);
+void area_on_load_restore_objects(void);
 
 const FdatHeader fdat_header = {
     0x7,
     {
-        func_801e83c8, func_801e864c, func_801e86f4, func_801e888c,
-        func_801e8e08, func_801e8eb4, func_801e8bec, func_801e8c3c,
-        func_801e89d0, func_801e89fc, func_801e8c1c, func_801e83c0,
-        func_801e83c0, func_801e83c0, func_801e83c0, func_801e83c0,
-        func_801e8bdc, func_801e8be4, func_801e8824, func_801e882c,
-        func_801e83c0, func_801e83c0, func_801e83c0, func_801e83c0,
-        func_801e83c0, func_801e83c0, func_801e83c0, func_801e83c0,
-        func_801e83c0, func_801e83c0, func_801e83c0, func_801e83c0,
+        /*  0 */ area_interact_item_containers_and_dials,
+        /*  1 */ area_update_cell_toggles_by_worn_item,
+        /*  2 */ area_use_item_offer_items_in_order,
+        /*  3 */ area_region_trigger_lock_door_and_warp_cells,
+        /*  4 */ area_talk_event_request_item_or_give,
+        /*  5 */ area_on_load_restore_objects,
+        /*  6 */ area_on_item_added_check_item_held,
+        /*  7 */ area_on_movie_end_raise_element_and_fade_objects,
+        /*  8 */ area_init_map_object_dial,
+        /*  9 */ area_update_map_object_dial,
+        /* 10 */ area_on_movie_start_unlock_element,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_open_gate,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x27,
 };
 
 ADDRESS(0x801e83c0, 0x8)
-void func_801e83c0(void)
+void area_handler_noop(void)
 {
 }
 
 /*
- * Slot 0: fdat_801e83b0's shape with this module's message table; a kind
+ * Slot 0: area_interact_item_containers's shape with this module's message table; a kind
  * 0xa6 definition in front advances its object's unk38 (0..5) once.
  */
 ADDRESS(0x801e83c8, 0x284)
-void func_801e83c8(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -122,7 +146,7 @@ void func_801e83c8(VECTOR *pos, SVECTOR *angle)
  * object 82 is not in state 1); otherwise lets object 82 close.
  */
 ADDRESS(0x801e864c, 0xa8)
-void func_801e864c(void)
+void area_update_cell_toggles_by_worn_item(void)
 {
     Object44 *gate;
     Object44 *obj;
@@ -150,7 +174,7 @@ void func_801e864c(void)
 
 /* Slot 2: items 0x68 and 0x6b..0x6d, in the order flag 0x14 asks for, start record 4. */
 ADDRESS(0x801e86f4, 0x130)
-void func_801e86f4(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_offer_items_in_order(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
 
@@ -188,13 +212,13 @@ void func_801e86f4(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e8824, 0x8)
-void func_801e8824(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Slot 19: record 4 sets flag 0x19 and starts object 82. */
 ADDRESS(0x801e882c, 0x60)
-void func_801e882c(Object88 *obj)
+void area_on_actor_removed_open_gate(Object88 *obj)
 {
     if (obj - DAT_80185da8.objects == 4) {
         DAT_801ba984.unke[0xb] = 1;
@@ -205,7 +229,7 @@ void func_801e882c(Object88 *obj)
 
 /* Slot 3: switches 0 and 1 arm and disarm object 44; switch 10 shows one of two notes. */
 ADDRESS(0x801e888c, 0x144)
-void func_801e888c(Object44 *obj)
+void area_region_trigger_lock_door_and_warp_cells(Object44 *obj)
 {
     s32 k;
 
@@ -239,7 +263,7 @@ void func_801e888c(Object44 *obj)
 
 /* Slot 8: an object made from definition kind 0xa6 takes that kind. */
 ADDRESS(0x801e89d0, 0x2c)
-void func_801e89d0(Object44 *obj, Object44Def *def)
+void area_init_map_object_dial(Object44 *obj, Object44Def *def)
 {
     if (def->unk0 == 0xa6) {
         obj->unk4 = 0xa6;
@@ -259,7 +283,7 @@ static u32 DAT_801e8f80[17] = {
  * bit in DAT_801e8f80, 4 picks the setting again.
  */
 ADDRESS(0x801e89fc, 0x1e0)
-void func_801e89fc(void)
+void area_update_map_object_dial(void)
 {
     Object44 *obj = DAT_8018fb3c.unk8858;
     Object44Def *def = DAT_8018fb3c.unk8854;
@@ -320,18 +344,18 @@ void func_801e89fc(void)
 }
 
 ADDRESS(0x801e8bdc, 0x8)
-void func_801e8bdc(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8be4, 0x8)
-void func_801e8be4(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 /* Slot 6: sets flag 0x15 while item 0x4b is held. */
 ADDRESS(0x801e8bec, 0x30)
-void func_801e8bec(void)
+void area_on_item_added_check_item_held(void)
 {
     if (game_counter_is_nonzero(0x4b) != 0) {
         DAT_801ba984.unke[7] = 1;
@@ -340,7 +364,7 @@ void func_801e8bec(void)
 
 /* Slot 10: event 15 sets the third magic element flag. */
 ADDRESS(0x801e8c1c, 0x20)
-void func_801e8c1c(u8 id)
+void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 15) {
         DAT_801ba984.unk71[2] = 1;
@@ -349,7 +373,7 @@ void func_801e8c1c(u8 id)
 
 /* Slot 7: raises a stat, opens objects 70 and 91 over 16 frames each and arms object 44. */
 ADDRESS(0x801e8c3c, 0x1cc)
-void func_801e8c3c(u8 id)
+void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -400,7 +424,7 @@ void func_801e8c3c(u8 id)
 
 /* Slot 4: script events 0..3 set the item flag 0x14 asks for next; 4 and 5 trigger objects. */
 ADDRESS(0x801e8e08, 0xac)
-void func_801e8e08(Object88 *record, s32 event)
+void area_talk_event_request_item_or_give(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -426,7 +450,7 @@ void func_801e8e08(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the opened objects and counts the visits. */
 ADDRESS(0x801e8eb4, 0xcc)
-void func_801e8eb4(void)
+void area_on_load_restore_objects(void)
 {
     s32 k;
 

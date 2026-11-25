@@ -13,50 +13,74 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e85a0(void);
-void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e867c(void);
-void func_801e8684(void);
-void func_801e868c(Object44 *obj);
-void func_801e874c(void);
-void func_801e8754(void);
-void func_801e875c(void);
-void func_801e8764(void);
-void func_801e876c(void);
-void func_801e8774(Object88 *record, s32 event);
-void func_801e8880(void);
+void area_handler_noop(void);
+void area_update_noop(void);
+void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_clear_objects_and_give_items(Object88 *record, s32 event);
+void area_on_load_restore_cleared_objects(void);
 
 const FdatHeader fdat_header = {
     0xa,
     {
-        fdat_801e83b0, func_801e85a0, func_801e85a8, func_801e868c,
-        func_801e8774, func_801e8880, func_801e876c, func_801e8390,
-        func_801e874c, func_801e8754, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e875c, func_801e8764, func_801e867c, func_801e8684,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_operate_switch,
+        /*  3 */ area_region_trigger_update_warp_arrival_cells,
+        /*  4 */ area_talk_event_clear_objects_and_give_items,
+        /*  5 */ area_on_load_restore_cleared_objects,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x2a,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 ADDRESS(0x801e85a0, 0x8)
-void func_801e85a0(void)
+void area_update_noop(void)
 {
 }
 
 /* Slot 2: item 0x66 on a kind 0x53 object in front starts it. */
 ADDRESS(0x801e85a8, 0xd4)
-void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     VECTOR unused;
     SVECTOR unused_angle;
@@ -87,18 +111,18 @@ void func_801e85a8(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e867c, 0x8)
-void func_801e867c(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e8684, 0x8)
-void func_801e8684(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 /* Slot 3: for an object whose unk3a.bytes[1] is 10, shows one of two notes. */
 ADDRESS(0x801e868c, 0xc0)
-void func_801e868c(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -114,33 +138,33 @@ void func_801e868c(Object44 *obj)
 }
 
 ADDRESS(0x801e874c, 0x8)
-void func_801e874c(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8754, 0x8)
-void func_801e8754(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e875c, 0x8)
-void func_801e875c(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8764, 0x8)
-void func_801e8764(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e876c, 0x8)
-void func_801e876c(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 4: script events 0..2 of an object record. */
 ADDRESS(0x801e8774, 0x10c)
-void func_801e8774(Object88 *record, s32 event)
+void area_talk_event_clear_objects_and_give_items(Object88 *record, s32 event)
 {
     Object44 *obj;
     s32 i;
@@ -176,7 +200,7 @@ void func_801e8774(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads. */
 ADDRESS(0x801e8880, 0xac)
-void func_801e8880(void)
+void area_on_load_restore_cleared_objects(void)
 {
     Object44 *obj;
     s32 i;

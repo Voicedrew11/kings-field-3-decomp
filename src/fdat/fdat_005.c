@@ -14,49 +14,73 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e8398(VECTOR *pos, SVECTOR *angle);
-void func_801e85a8(void);
-void func_801e8680(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e8758(void);
-void func_801e8760(Object88 *obj);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_actor_swap_when_far(void);
+void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_set_flag(Object88 *obj);
 void func_801e87c4(void);
 void func_801e87cc(void);
 void func_801e87d4(void);
-void func_801e87dc(Object44 *obj);
-void func_801e889c(void);
-void func_801e88a4(void);
-void func_801e88ac(void);
-void func_801e88b4(void);
-void func_801e88bc(void);
-void func_801e88c4(void);
-void func_801e88cc(u8 id);
-void func_801e88e8(Object88 *record, s32 event);
-void func_801e89a8(void);
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_on_movie_start_noop(void);
+void area_on_movie_end_restore_hp(u8 id);
+void area_talk_event_give_items_and_copy_cells(Object88 *record, s32 event);
+void area_on_load_restore_actors_and_cells(void);
 
 const FdatHeader fdat_header = {
     0x6,
     {
-        func_801e8398, func_801e85a8, func_801e8680, func_801e87dc,
-        func_801e88e8, func_801e89a8, func_801e88bc, func_801e88cc,
-        func_801e889c, func_801e88a4, func_801e88c4, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e88ac, func_801e88b4, func_801e8758, func_801e8760,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_actor_swap_when_far,
+        /*  2 */ area_use_item_on_actor_unlock_door,
+        /*  3 */ area_region_trigger_update_warp_arrival_cells,
+        /*  4 */ area_talk_event_give_items_and_copy_cells,
+        /*  5 */ area_on_load_restore_actors_and_cells,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_on_movie_end_restore_hp,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_set_flag,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x26,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e8398, 0x210)
-void func_801e8398(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -107,7 +131,7 @@ void func_801e8398(VECTOR *pos, SVECTOR *angle)
 
 /* Slot 1: once record 20 is more than 20 map cells from the player, flag 0xf moves the records on. */
 ADDRESS(0x801e85a8, 0xd8)
-void func_801e85a8(void)
+void area_update_actor_swap_when_far(void)
 {
     s32 dx;
     s32 dz;
@@ -131,7 +155,7 @@ void func_801e85a8(void)
 
 /* Slot 2: item 0x7f used on record 20 starts it and opens object 71. */
 ADDRESS(0x801e8680, 0xd8)
-void func_801e8680(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
     s32 k;
@@ -155,13 +179,13 @@ void func_801e8680(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e8758, 0x8)
-void func_801e8758(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Slot 19: records 24 and 40 set flag 0x10 once. */
 ADDRESS(0x801e8760, 0x64)
-void func_801e8760(Object88 *obj)
+void area_on_actor_removed_set_flag(Object88 *obj)
 {
     s32 index = obj - DAT_80185da8.objects;
 
@@ -189,7 +213,7 @@ void func_801e87d4(void)
 
 /* Slot 3: for an object whose unk3a.bytes[1] is 10, shows one of two notes. */
 ADDRESS(0x801e87dc, 0xc0)
-void func_801e87dc(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -205,45 +229,45 @@ void func_801e87dc(Object44 *obj)
 }
 
 ADDRESS(0x801e889c, 0x8)
-void func_801e889c(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e88a4, 0x8)
-void func_801e88a4(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e88ac, 0x8)
-void func_801e88ac(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e88b4, 0x8)
-void func_801e88b4(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e88bc, 0x8)
-void func_801e88bc(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e88c4, 0x8)
-void func_801e88c4(void)
+void area_on_movie_start_noop(void)
 {
 }
 
 /* Slot 7: restores the player's hp. */
 ADDRESS(0x801e88cc, 0x1c)
-void func_801e88cc(u8 id)
+void area_on_movie_end_restore_hp(u8 id)
 {
     DAT_801b24e4.hp = DAT_801b24e4.hp_max;
 }
 
 /* Slot 4: script events 0..2 of an object record. */
 ADDRESS(0x801e88e8, 0xc0)
-void func_801e88e8(Object88 *record, s32 event)
+void area_talk_event_give_items_and_copy_cells(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -263,7 +287,7 @@ void func_801e88e8(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the records of the flags. */
 ADDRESS(0x801e89a8, 0x1d0)
-void func_801e89a8(void)
+void area_on_load_restore_actors_and_cells(void)
 {
     s32 k;
 

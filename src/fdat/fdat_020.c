@@ -15,38 +15,62 @@
 
 RODATA(0x801e8308, 0xa0)
 
-void func_801e848c(u8 n);
-void func_801e8534(void);
-void func_801e853c(VECTOR *pos, SVECTOR *angle);
-void func_801e874c(void);
-void func_801e8754(void);
-void func_801e875c(void);
-void func_801e8764(Object88 *obj);
-void func_801e87a8(Object44 *obj);
-void func_801e88e4(void);
-void func_801e88ec(void);
-void func_801e88f4(void);
-void func_801e88fc(void);
-void func_801e8904(void);
-void func_801e8934(Object88 *record, s32 event);
-void func_801e8a80(void);
+void area_set_light_blend(u8 n);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_make_persistent(Object88 *obj);
+void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_check_item_held(void);
+void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event);
+void area_on_load_restore_actors_doors_and_light(void);
 
 const FdatHeader fdat_header = {
     0xb,
     {
-        func_801e853c, func_801e874c, func_801e8754, func_801e87a8,
-        func_801e8934, func_801e8a80, func_801e8904, func_801e8534,
-        func_801e88e4, func_801e88ec, func_801e8534, func_801e8534,
-        func_801e8534, func_801e8534, func_801e8534, func_801e8534,
-        func_801e88f4, func_801e88fc, func_801e875c, func_801e8764,
-        func_801e8534, func_801e8534, func_801e8534, func_801e8534,
-        func_801e8534, func_801e8534, func_801e8534, func_801e8534,
-        func_801e8534, func_801e8534, func_801e8534, func_801e8534,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_worn_item_cells_and_warp_cells,
+        /*  4 */ area_talk_event_give_items_and_grant_magic,
+        /*  5 */ area_on_load_restore_actors_doors_and_light,
+        /*  6 */ area_on_item_added_check_item_held,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_make_persistent,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x2b,
 };
 
-#include "shared/fdat_801e83a4.inc"
+#include "shared/light_blend_records.inc"
 
 DATA(0x801e8ce8, 0x30, ".data")
 static Record30 DAT_801e8ce8 = {
@@ -83,7 +107,7 @@ static Record30 DAT_801e8d78 = {
 
 /* Blends area light records 42..44 by n sixteenths of the way to the lit state. */
 ADDRESS(0x801e848c, 0xa8)
-void func_801e848c(u8 n)
+void area_set_light_blend(u8 n)
 {
     s32 i;
     s32 t;
@@ -91,19 +115,19 @@ void func_801e848c(u8 n)
     for (i = 0, t = 0; i < n; i++) {
         t += 256;
     }
-    fdat_801e83a4(&DAT_801e8ce8, &DAT_801e8d78, &DAT_80081c8c[42], t);
-    fdat_801e83a4(&DAT_801e8d18, &DAT_801e8d78, &DAT_80081c8c[43], t);
-    fdat_801e83a4(&DAT_801e8d48, &DAT_801e8d78, &DAT_80081c8c[44], t);
+    light_blend_records(&DAT_801e8ce8, &DAT_801e8d78, &DAT_80081c8c[42], t);
+    light_blend_records(&DAT_801e8d18, &DAT_801e8d78, &DAT_80081c8c[43], t);
+    light_blend_records(&DAT_801e8d48, &DAT_801e8d78, &DAT_80081c8c[44], t);
 }
 
 ADDRESS(0x801e8534, 0x8)
-void func_801e8534(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e853c, 0x210)
-void func_801e853c(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -153,23 +177,23 @@ void func_801e853c(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e874c, 0x8)
-void func_801e874c(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e8754, 0x8)
-void func_801e8754(void)
+void area_use_item_noop(void)
 {
 }
 
 ADDRESS(0x801e875c, 0x8)
-void func_801e875c(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Slot 19: record 3 moves on. */
 ADDRESS(0x801e8764, 0x44)
-void func_801e8764(Object88 *obj)
+void area_on_actor_removed_make_persistent(Object88 *obj)
 {
     if (obj - DAT_80185da8.objects == 3) {
         obj->unk0 = 1;
@@ -178,7 +202,7 @@ void func_801e8764(Object88 *obj)
 
 /* Slot 3: switch 0 shows one of two notes by the player's unkf4; switch 10 one of two notes. */
 ADDRESS(0x801e87a8, 0x13c)
-void func_801e87a8(Object44 *obj)
+void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -202,28 +226,28 @@ void func_801e87a8(Object44 *obj)
 }
 
 ADDRESS(0x801e88e4, 0x8)
-void func_801e88e4(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e88ec, 0x8)
-void func_801e88ec(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e88f4, 0x8)
-void func_801e88f4(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e88fc, 0x8)
-void func_801e88fc(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 /* Slot 6: sets flag 0x28 while item 0x83 is held. */
 ADDRESS(0x801e8904, 0x30)
-void func_801e8904(void)
+void area_on_item_added_check_item_held(void)
 {
     if (game_counter_is_nonzero(0x83) > 0) {
         DAT_801ba984.unke[0x1a] = 1;
@@ -232,7 +256,7 @@ void func_801e8904(void)
 
 /* Slot 4: script events 0..5 of an object record. */
 ADDRESS(0x801e8934, 0x14c)
-void func_801e8934(Object88 *record, s32 event)
+void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -268,7 +292,7 @@ void func_801e8934(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the records and the area light. */
 ADDRESS(0x801e8a80, 0x268)
-void func_801e8a80(void)
+void area_on_load_restore_actors_doors_and_light(void)
 {
     Object88 *obj;
     Object44 *obj44;
@@ -279,7 +303,7 @@ void func_801e8a80(void)
         DAT_801ba984.unke[0x1c] = 1;
     }
     if (DAT_801ba984.unke[0x19] == 0) {
-        func_801e848c(0);
+        area_set_light_blend(0);
         obj44 = &DAT_8018fb3c.objects[121];
         obj44->unk0 = 0;
         DAT_8018fb3c.objects[121].arg.b.unk3c = 0;
@@ -293,7 +317,7 @@ void func_801e8a80(void)
         }
     } else if (DAT_801ba984.unk32[4] == 0) {
         DAT_801ba984.unke[0x1b] = 1;
-        func_801e848c(16);
+        area_set_light_blend(16);
         obj44 = &DAT_8018fb3c.objects[121];
         obj44->unk0 = 0;
         DAT_8018fb3c.objects[121].arg.b.unk3c = 0;
@@ -308,7 +332,7 @@ void func_801e8a80(void)
             obj->unk0 = 8;
         }
     } else {
-        func_801e848c(0);
+        area_set_light_blend(0);
         obj44 = &DAT_8018fb3c.objects[121];
         obj44->unk0 = 2;
         DAT_8018fb3c.objects[121].arg.b.unk3c = 0xff;

@@ -15,40 +15,64 @@
 
 RODATA(0x801e8308, 0x9c)
 
-void func_801e8488(u8 n);
-void func_801e84e0(void);
-void func_801e84e8(VECTOR *pos, SVECTOR *angle);
-void func_801e8744(void);
-void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item);
-void func_801e89a4(void);
-void func_801e89ac(void);
-void func_801e89b4(Object44 *obj);
-void func_801e8ae8(void);
-void func_801e8af0(void);
-void func_801e8af8(void);
-void func_801e8b00(void);
-void func_801e8b08(void);
-void func_801e8b10(u8 id);
-void func_801e8b30(u8 id);
-void func_801e8cc8(Object88 *record, s32 event);
-void func_801e8da8(void);
+void area_set_light_blend(u8 n);
+void area_handler_noop(void);
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s32 item);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_move_object_and_warp_cells(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_on_movie_start_unlock_element(u8 id);
+void area_on_movie_end_raise_element_and_fade_objects(u8 id);
+void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event);
+void area_on_load_restore_objects_and_light(void);
 
 const FdatHeader fdat_header = {
     0x9,
     {
-        func_801e84e8, func_801e8744, func_801e874c, func_801e89b4,
-        func_801e8cc8, func_801e8da8, func_801e8b08, func_801e8b30,
-        func_801e8ae8, func_801e8af0, func_801e8b10, func_801e84e0,
-        func_801e84e0, func_801e84e0, func_801e84e0, func_801e84e0,
-        func_801e8af8, func_801e8b00, func_801e89a4, func_801e89ac,
-        func_801e84e0, func_801e84e0, func_801e84e0, func_801e84e0,
-        func_801e84e0, func_801e84e0, func_801e84e0, func_801e84e0,
-        func_801e84e0, func_801e84e0, func_801e84e0, func_801e84e0,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_fade_object_and_brighten_light,
+        /*  3 */ area_region_trigger_move_object_and_warp_cells,
+        /*  4 */ area_talk_event_give_items_and_set_flags,
+        /*  5 */ area_on_load_restore_objects_and_light,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_on_movie_end_raise_element_and_fade_objects,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_on_movie_start_unlock_element,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x29,
 };
 
-#include "shared/fdat_801e83a4.inc"
+#include "shared/light_blend_records.inc"
 
 DATA(0x801e8e74, 0x30, ".data")
 static Record30 DAT_801e8e74 = {
@@ -69,7 +93,7 @@ static Record30 DAT_801e8ea4 = {
 
 /* Blends area light record 47 by n sixteenths of the way to the opened state. */
 ADDRESS(0x801e8488, 0x58)
-void func_801e8488(u8 n)
+void area_set_light_blend(u8 n)
 {
     s32 i;
     s32 t;
@@ -77,17 +101,17 @@ void func_801e8488(u8 n)
     for (i = 0, t = 0; i < n; i++) {
         t += 256;
     }
-    fdat_801e83a4(&DAT_801e8e74, &DAT_801e8ea4, &DAT_80081c8c[47], t);
+    light_blend_records(&DAT_801e8e74, &DAT_801e8ea4, &DAT_80081c8c[47], t);
 }
 
 ADDRESS(0x801e84e0, 0x8)
-void func_801e84e0(void)
+void area_handler_noop(void)
 {
 }
 
-/* Slot 0: fdat_801e83b0's shape with this module's message table. */
+/* Slot 0: area_interact_item_containers's shape with this module's message table. */
 ADDRESS(0x801e84e8, 0x25c)
-void func_801e84e8(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -142,7 +166,7 @@ void func_801e84e8(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e8744, 0x8)
-void func_801e8744(void)
+void area_update_noop(void)
 {
 }
 
@@ -151,7 +175,7 @@ void func_801e8744(void)
  * again while the area light brightens over 16 frames, and frees object 159.
  */
 ADDRESS(0x801e874c, 0x258)
-void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
+void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     VECTOR at;
     SVECTOR facing;
@@ -186,7 +210,7 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
         obj->unk5 = 0x32;
         obj->unk2 = 5;
         for (j = 15; j != -1; j--) {
-            func_801e8488(16 - j);
+            area_set_light_blend(16 - j);
             light_reset_records();
             light_refresh_record_rotations();
             player_update_status_visuals();
@@ -215,18 +239,18 @@ void func_801e874c(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e89a4, 0x8)
-void func_801e89a4(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e89ac, 0x8)
-void func_801e89ac(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
 /* Slot 3: switches 0 and 1 move object 115 beside them; switch 10 shows one of two notes. */
 ADDRESS(0x801e89b4, 0x134)
-void func_801e89b4(Object44 *obj)
+void area_region_trigger_move_object_and_warp_cells(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -251,33 +275,33 @@ void func_801e89b4(Object44 *obj)
 }
 
 ADDRESS(0x801e8ae8, 0x8)
-void func_801e8ae8(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8af0, 0x8)
-void func_801e8af0(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8af8, 0x8)
-void func_801e8af8(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8b00, 0x8)
-void func_801e8b00(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8b08, 0x8)
-void func_801e8b08(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 10: event 12 sets the first magic element flag. */
 ADDRESS(0x801e8b10, 0x20)
-void func_801e8b10(u8 id)
+void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 12) {
         DAT_801ba984.unk71[0] = 1;
@@ -286,7 +310,7 @@ void func_801e8b10(u8 id)
 
 /* Slot 7: raises a stat and opens objects 55 and 148 over 16 frames each. */
 ADDRESS(0x801e8b30, 0x198)
-void func_801e8b30(u8 id)
+void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -332,7 +356,7 @@ void func_801e8b30(u8 id)
 
 /* Slot 4: script events 0..4 of an object record. */
 ADDRESS(0x801e8cc8, 0xe0)
-void func_801e8cc8(Object88 *record, s32 event)
+void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -363,7 +387,7 @@ void func_801e8cc8(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the sunk object and the area light. */
 ADDRESS(0x801e8da8, 0xcc)
-void func_801e8da8(void)
+void area_on_load_restore_objects_and_light(void)
 {
     s32 k;
 
@@ -376,11 +400,11 @@ void func_801e8da8(void)
         if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
             DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
         }
-        func_801e8488(16);
+        area_set_light_blend(16);
     } else {
         DAT_80185da8.objects[7].unk0 = 1;
         DAT_80185da8.objects[26].unk0 = 8;
-        func_801e8488(0);
+        area_set_light_blend(0);
     }
     if (DAT_801ba984.unk7f[0] != 0) {
         DAT_8018fb3c.objects[55].unk6 = 0xff;

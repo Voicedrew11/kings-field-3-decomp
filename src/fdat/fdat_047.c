@@ -13,61 +13,85 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8390(void);
-void func_801e85a0(void);
-void func_801e85a8(void);
-void func_801e85b0(void);
-void func_801e85b8(s32 a, s32 b);
-void func_801e870c(Object88 *obj);
-void func_801e87d8(void);
-void func_801e87e0(void);
-void func_801e87e8(void);
-void func_801e87f0(void);
-void func_801e87f8(void);
-void func_801e8800(void);
-void func_801e8808(void);
-void func_801e8810(void);
+void area_handler_noop(void);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_fade_out_object_pair(s32 a, s32 b);
+void area_on_actor_removed_fade_object_pair(Object88 *obj);
+void area_region_trigger_noop(void);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_noop(void);
+void area_on_load_restore_removed_objects(void);
 
 const FdatHeader fdat_header = {
     0x14,
     {
-        fdat_801e83b0, func_801e85a0, func_801e85a8, func_801e87d8,
-        func_801e8808, func_801e8810, func_801e8800, func_801e8390,
-        func_801e87e0, func_801e87e8, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e87f0, func_801e87f8, func_801e85b0, func_801e870c,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
-        func_801e8390, func_801e8390, func_801e8390, func_801e8390,
+        /*  0 */ area_interact_item_containers,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_noop,
+        /*  4 */ area_talk_event_noop,
+        /*  5 */ area_on_load_restore_removed_objects,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_fade_object_pair,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x34,
 };
 
 ADDRESS(0x801e8390, 0x8)
-void func_801e8390(void)
+void area_handler_noop(void)
 {
 }
 
-#include "shared/fdat_801e83b0.inc"
+#include "shared/area_interact_item_containers.inc"
 
 ADDRESS(0x801e85a0, 0x8)
-void func_801e85a0(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e85a8, 0x8)
-void func_801e85a8(void)
+void area_use_item_noop(void)
 {
 }
 
 ADDRESS(0x801e85b0, 0x8)
-void func_801e85b0(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 /* Opens objects a and b over 16 frames (unk10 up to 0xfff), then frees them. */
 ADDRESS(0x801e85b8, 0x120)
-void func_801e85b8(s32 a, s32 b)
+void area_fade_out_object_pair(s32 a, s32 b)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -100,76 +124,76 @@ void func_801e85b8(s32 a, s32 b)
     second->unk6 = 0xff;
 }
 
-#include "shared/fdat_801e86d8.inc"
+#include "shared/area_disable_actor_range.inc"
 
 /* Slot 19: records 3 and 40 each open their pair of doors once. */
 ADDRESS(0x801e870c, 0xcc)
-void func_801e870c(Object88 *obj)
+void area_on_actor_removed_fade_object_pair(Object88 *obj)
 {
     switch (obj - DAT_80185da8.objects) {
     case 3:
         if (DAT_801ba984.unk32[0x1b] == 0) {
             DAT_801ba984.unk32[0x1b] = 1;
-            fdat_801e86d8(4, 2);
-            func_801e85b8(0x73, 0x74);
+            area_disable_actor_range(4, 2);
+            area_fade_out_object_pair(0x73, 0x74);
         }
         break;
     case 40:
         if (DAT_801ba984.unk32[0x1c] == 0) {
             DAT_801ba984.unk32[0x1c] = 1;
-            fdat_801e86d8(10, 2);
-            func_801e85b8(0x75, 0x76);
+            area_disable_actor_range(10, 2);
+            area_fade_out_object_pair(0x75, 0x76);
         }
         break;
     }
 }
 
 ADDRESS(0x801e87d8, 0x8)
-void func_801e87d8(void)
+void area_region_trigger_noop(void)
 {
 }
 
 ADDRESS(0x801e87e0, 0x8)
-void func_801e87e0(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e87e8, 0x8)
-void func_801e87e8(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e87f0, 0x8)
-void func_801e87f0(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e87f8, 0x8)
-void func_801e87f8(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8800, 0x8)
-void func_801e8800(void)
+void area_on_item_added_noop(void)
 {
 }
 
 ADDRESS(0x801e8808, 0x8)
-void func_801e8808(void)
+void area_talk_event_noop(void)
 {
 }
 
 /* Slot 5, called after the module loads: restores the opened doors. */
 ADDRESS(0x801e8810, 0x80)
-void func_801e8810(void)
+void area_on_load_restore_removed_objects(void)
 {
     if (DAT_801ba984.unk32[0x1b] != 0) {
-        fdat_801e86d8(4, 2);
+        area_disable_actor_range(4, 2);
         DAT_8018fb3c.objects[0x73].unk6 = 0xff;
         DAT_8018fb3c.objects[0x74].unk6 = 0xff;
     }
     if (DAT_801ba984.unk32[0x1c] != 0) {
-        fdat_801e86d8(10, 2);
+        area_disable_actor_range(10, 2);
         DAT_8018fb3c.objects[0x75].unk6 = 0xff;
         DAT_8018fb3c.objects[0x76].unk6 = 0xff;
     }

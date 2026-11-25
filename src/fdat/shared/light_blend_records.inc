@@ -4,7 +4,7 @@
  * claim; the module's first function, before its empty default handler).
  */
 ADDRESS(0x801e83a4, 0xe4)
-void fdat_801e83a4(Record30 *from, Record30 *to, Record30 *out, s32 t)
+void light_blend_records(Record30 *from, Record30 *to, Record30 *out, s32 t)
 {
     fixed_lerp_nine_halfwords_q12((MATRIX *)&from->unk14, (MATRIX *)&to->unk14, (MATRIX *)&out->unk14, t);
     fixed_lerp_nine_halfwords_q12((MATRIX *)&from->unk0, (MATRIX *)&to->unk0, (MATRIX *)&out->unk0, t);

@@ -13,50 +13,74 @@
 
 RODATA(0x801e8308, 0x88)
 
-void func_801e8474(void);
-void func_801e847c(VECTOR *pos, SVECTOR *angle);
-void func_801e86f4(void);
-void func_801e86fc(void);
-void func_801e8704(void);
-void func_801e870c(void);
-void func_801e8714(Object44 *obj);
-void func_801e8a68(void);
-void func_801e8a70(void);
-void func_801e8a78(void);
-void func_801e8a80(void);
-void func_801e8a88(void);
-void func_801e8a90(Object88 *record, s32 event);
-void func_801e8acc(void);
+void area_handler_noop(void);
+void area_interact_item_containers_and_unlock(VECTOR *pos, SVECTOR *angle);
+void area_update_noop(void);
+void area_use_item_noop(void);
+void area_adjust_actor_magic_damage_noop(void);
+void area_on_actor_removed_noop(void);
+void area_region_trigger_damage_barrier_and_doors(Object44 *obj);
+void area_init_map_object_noop(void);
+void area_update_map_object_noop(void);
+void area_actor_target_check_noop(void);
+void area_update_actor_target_noop(void);
+void area_on_item_added_noop(void);
+void area_talk_event_set_flags(Object88 *record, s32 event);
+void area_on_load_restore_doors_and_barrier(void);
 
 const FdatHeader fdat_header = {
     0xe,
     {
-        func_801e847c, func_801e86f4, func_801e86fc, func_801e8714,
-        func_801e8a90, func_801e8acc, func_801e8a88, func_801e8474,
-        func_801e8a68, func_801e8a70, func_801e8474, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8a78, func_801e8a80, func_801e8704, func_801e870c,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
-        func_801e8474, func_801e8474, func_801e8474, func_801e8474,
+        /*  0 */ area_interact_item_containers_and_unlock,
+        /*  1 */ area_update_noop,
+        /*  2 */ area_use_item_noop,
+        /*  3 */ area_region_trigger_damage_barrier_and_doors,
+        /*  4 */ area_talk_event_set_flags,
+        /*  5 */ area_on_load_restore_doors_and_barrier,
+        /*  6 */ area_on_item_added_noop,
+        /*  7 */ area_handler_noop,
+        /*  8 */ area_init_map_object_noop,
+        /*  9 */ area_update_map_object_noop,
+        /* 10 */ area_handler_noop,
+        /* 11 */ area_handler_noop,
+        /* 12 */ area_handler_noop,
+        /* 13 */ area_handler_noop,
+        /* 14 */ area_handler_noop,
+        /* 15 */ area_handler_noop,
+        /* 16 */ area_actor_target_check_noop,
+        /* 17 */ area_update_actor_target_noop,
+        /* 18 */ area_adjust_actor_magic_damage_noop,
+        /* 19 */ area_on_actor_removed_noop,
+        /* 20 */ area_handler_noop,
+        /* 21 */ area_handler_noop,
+        /* 22 */ area_handler_noop,
+        /* 23 */ area_handler_noop,
+        /* 24 */ area_handler_noop,
+        /* 25 */ area_handler_noop,
+        /* 26 */ area_handler_noop,
+        /* 27 */ area_handler_noop,
+        /* 28 */ area_handler_noop,
+        /* 29 */ area_handler_noop,
+        /* 30 */ area_handler_noop,
+        /* 31 */ area_handler_noop,
     },
     0x2e,
 };
 
-#include "shared/fdat_801e83a4.inc"
+#include "shared/light_blend_records.inc"
 
 ADDRESS(0x801e8474, 0x8)
-void func_801e8474(void)
+void area_handler_noop(void)
 {
 }
 
 /*
  * Slot 0: first sets flag 0x3a (and starts sound 0xf1) once item 0x7d is
- * held or the level reaches 50, then fdat_801e83b0's shape with this
+ * held or the level reaches 50, then area_interact_item_containers's shape with this
  * module's message table.
  */
 ADDRESS(0x801e847c, 0x278)
-void func_801e847c(VECTOR *pos, SVECTOR *angle)
+void area_interact_item_containers_and_unlock(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
     Object44 *obj;
@@ -113,22 +137,22 @@ void func_801e847c(VECTOR *pos, SVECTOR *angle)
 }
 
 ADDRESS(0x801e86f4, 0x8)
-void func_801e86f4(void)
+void area_update_noop(void)
 {
 }
 
 ADDRESS(0x801e86fc, 0x8)
-void func_801e86fc(void)
+void area_use_item_noop(void)
 {
 }
 
 ADDRESS(0x801e8704, 0x8)
-void func_801e8704(void)
+void area_adjust_actor_magic_damage_noop(void)
 {
 }
 
 ADDRESS(0x801e870c, 0x8)
-void func_801e870c(void)
+void area_on_actor_removed_noop(void)
 {
 }
 
@@ -138,7 +162,7 @@ void func_801e870c(void)
  * are set, then dissolves it over 16 frames; switch 10 shows one of two notes.
  */
 ADDRESS(0x801e8714, 0x354)
-void func_801e8714(Object44 *obj)
+void area_region_trigger_damage_barrier_and_doors(Object44 *obj)
 {
     VECTOR pos;
     SVECTOR angle;
@@ -208,33 +232,33 @@ void func_801e8714(Object44 *obj)
 }
 
 ADDRESS(0x801e8a68, 0x8)
-void func_801e8a68(void)
+void area_init_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8a70, 0x8)
-void func_801e8a70(void)
+void area_update_map_object_noop(void)
 {
 }
 
 ADDRESS(0x801e8a78, 0x8)
-void func_801e8a78(void)
+void area_actor_target_check_noop(void)
 {
 }
 
 ADDRESS(0x801e8a80, 0x8)
-void func_801e8a80(void)
+void area_update_actor_target_noop(void)
 {
 }
 
 ADDRESS(0x801e8a88, 0x8)
-void func_801e8a88(void)
+void area_on_item_added_noop(void)
 {
 }
 
 /* Slot 4: script events 0 and 1 of an object record set flags 0x37 and 0x38. */
 ADDRESS(0x801e8a90, 0x3c)
-void func_801e8a90(Object88 *record, s32 event)
+void area_talk_event_set_flags(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -248,7 +272,7 @@ void func_801e8a90(Object88 *record, s32 event)
 
 /* Slot 5, called after the module loads: restores the switch states. */
 ADDRESS(0x801e8acc, 0x140)
-void func_801e8acc(void)
+void area_on_load_restore_doors_and_barrier(void)
 {
     if (DAT_801ba984.unke[0x1a] != 0 && DAT_801ba984.unk2b != 0) {
         DAT_801ba984.unk32[4] = 1;
