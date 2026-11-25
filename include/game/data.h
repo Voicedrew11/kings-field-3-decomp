@@ -63,7 +63,7 @@ typedef struct Data801b24e4 {
     s16 unk3e;
     u16 unk40;      /* +0x40: 0..999 */
     u16 unk42[5];   /* +0x42: 0..999 each */
-    u16 unk4c;      /* +0x4c: the menu shows it plus one (func_800227ec, lhu) */
+    u16 unk4c;      /* +0x4c: the menu shows it plus one (menu_draw_player_status, lhu) */
     u8 unk4e[0x2];
     s32 unk50;
     u16 unk54[7];   /* +0x54: func_80029500 rebuilds them; never above 0x7fff */
@@ -733,7 +733,7 @@ typedef struct Record18 {
     u16 unk10;
     u16 unk12;
     u16 unk14;
-    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130); func_8001c6c0 lists it */
+    u16 unk16;      /* +0x16: unk1c cost of the spell (func_8002d130); menu_collect_available_magic_rows lists it */
 } Record18;
 
 typedef struct Data801b77ec {
@@ -851,7 +851,7 @@ extern Data8018fad4 DAT_8018fad4;
 extern Data8018fb3c DAT_8018fb3c;
 extern Data801b24e4 DAT_801b24e4;
 /* Area map bits: rooms seen per area (32 areas x 160 bits) and the 80 x 80 grid of
- * visited cells func_8001bea8 marks rooms from. */
+ * visited cells map_reveal_visited_rects marks rooms from. */
 extern u8 DAT_801b56cc[32][20];
 extern u8 DAT_801b594c[80][10];
 extern Data801b77ec DAT_801b77ec;

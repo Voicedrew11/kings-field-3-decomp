@@ -263,7 +263,7 @@ void resource_request_transition(u8 area0, u8 area1, u8 area2, u8 area3, u8 area
     }
 start:
     if (DAT_8018fad4.area[0] != AREA_RELOAD && DAT_8018fad4.area[0] != want0) {
-        func_8001bea8();
+        map_reveal_visited_rects();
         repeat_store_word((u32 *)DAT_801b594c, 0, 200);
         func_8005efd4(DAT_8018fad4.area[0]);
     }

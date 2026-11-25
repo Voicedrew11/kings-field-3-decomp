@@ -109,7 +109,7 @@ void game_main_loop(void)
     func_80034300();
     func_80030e14();
     SsSetMVol(127, 127);
-    if (func_8001fa60() != -1) {
+    if (menu_card_browser() != -1) {
         func_80028f90();
     } else {
         continued = 1;

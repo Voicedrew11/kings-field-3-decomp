@@ -11,7 +11,7 @@
 #include <LIBGTE.H>
 #include <LIBGPU.H>
 
-s32 func_8001fa60(void);
+s32 menu_card_browser(void);
 void func_80030fcc(void);
 s32 func_800324f0(s32 x, s32 y, s32 z);
 void func_80047010(void);

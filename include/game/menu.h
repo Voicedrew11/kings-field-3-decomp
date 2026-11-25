@@ -18,7 +18,7 @@
 
 /*
  * The menu's glyph sets and window frame (12-byte records from 0x8007e564):
- * [0] digits, [1] text, [5] the frame func_80025f38 draws.
+ * [0] digits, [1] text, [5] the frame menu_blit_panel_sprite draws.
  */
 typedef struct MenuFont {
     s16 unk0;
@@ -53,7 +53,7 @@ typedef struct MenuEntry {
     u8 text[24];
 } MenuEntry;
 
-/* A menu list window (func_80027688 sets it up from a button page title). */
+/* A menu list window (menu_list_init sets it up from a button page title). */
 typedef struct MenuList {
     s16 unk0;
     s16 unk2;
@@ -75,124 +75,127 @@ typedef struct MenuList {
 } MenuList;
 
 /* menu.c */
-void func_8001a634(void);
-s32 func_8001a774(void);
-void func_8001a9dc(void);
-s32 func_8001aa84(void);
-s32 func_8001aea4(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last);
-s32 func_8001af88(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last);
-s32 func_8001b150(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last);
-void func_8001b254(s32 item);
-void func_8001b4f8(void);
-void func_8001b564(void);
-void func_8001b594(void);
-void func_8001b5c4(u8 item);
-void func_8001b88c(s32 item);
-void func_8001babc(void);
-void func_8001bd48(void);
-void func_8001bea8(void);
-s32 func_8001c030(void);
+void menu_run_pause_screen(void);
+s32 menu_run_root_controller(void);
+void menu_draw_location_number(void);
+s32 menu_item_selection_controller(void);
+s32 menu_collect_masked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last);
+s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last);
+s32 menu_collect_guide_locked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first,
+                                        s32 last);
+void menu_apply_item_effect(s32 item);
+void player_clear_and_cap_status_effects(void);
+void player_cap_darkness_phase(void);
+void player_cap_curse_strength(void);
+void menu_show_item_picture(u8 item);
+void menu_draw_item_picture(s32 item);
+void menu_show_area_map(void);
+void menu_draw_revealed_map_rects(void);
+void map_reveal_visited_rects(void);
+s32 menu_choose_warp_destination(void);
 
 /* helpers past band E (call-site signatures) */
-s32 func_8001c48c(void);
-s32 func_8001c6c0(Record18 *spells, MenuEntry *entries, u32 *values, u8 *ids, s32 first, s32 last);
-void func_8001c7a8(void);
-void func_8001c9c0(MenuEntry *out);
-void func_8001cbb8(s32 slot);
-void func_8001d0c4(void);
-void func_8001d3a0(void);
-void func_8001d784(void);
-void func_8001d8a4(void);
-void func_8001d944(void);
-s32 func_8001dbc4(s32 index, s32 book, u8 *out);
-void func_8001dcd0(s32 book, s32 page);
-void func_8001dd94(void);
-void func_8001dee4(void);
-void func_8001e1b4(void);
-s32 func_8001e484(void);
-s32 func_8001e710(void);
-s32 func_8001ea34(struct DIRENTRY *dir, u8 *text, u32 *experience, u8 *levels, s32 *numbers);
-void func_8001eb3c(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
-void func_8001ec84(void);
-void func_8001f004(void);
-void func_8001f274(void);
-void func_8001f31c(void);
-void func_8001f4c0(void);
-s32 func_8001fc5c(struct DIRENTRY *dir);
-void func_8001fe9c(MenuText *lines);
-void func_8001ff94(MenuText *lines);
-s32 func_8001f8b4(void);
-void func_8002090c(MenuText *line);
-void func_8002098c(MenuText *lines);
-void func_80020a84(MenuText *lines);
-void func_80020b7c(MenuText *lines);
-void func_80020c74(MenuText *lines);
-void func_80020d6c(MenuText *line);
-void func_80020dec(MenuText *line);
-void func_80020e6c(MenuText *lines, s32 error);
-void func_8002008c(void);
-void func_800203c8(s32 number);
-s32 func_80020560(void);
-void func_80020fe8(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
-void func_80021114(s32 shop);
-void func_80021298(s32 shop);
-void func_800216a4(u8 *bag, u8 *counts, u32 *prices, u8 *ids, s32 first, s32 end, s32 shop);
-void func_80021724(s32 shop);
-void func_80021a4c(u32 *prices, u8 *ids, s32 first, s32 end, s32 shop);
-s32 func_80021aac(void);
-s32 func_80021d94(void);
-s32 func_8002200c(s32 mode);
-void func_80025e80(void);
-s32 func_800221e8(s32 selected, s32 last, s32 *chosen, s32 *confirmed, s32 *result);
-void func_800227ec(void);
-void func_800252f4(s32 page, s32 count, s32 selected, s32 flags);
-void func_80025f38(MenuFont *frame, MenuText *text);
-void func_800261dc(MenuFont *font, MenuText *text);
-void func_8002636c(MenuFont *font, MenuText *text);
-void func_80026acc(s32 x, s32 y, s32 w, s32 h);
-void func_80026570(s32 x, s32 y, char *text, s32 a3, s32 a4);
-void func_80026fe4(void);
-void func_800270f8(void);
-void func_80027198(void);
-void func_80027310(s32 a0);
-void func_8002792c(s32 se);
-s32 func_800279a4(void);
-void func_80027a40(void);
-void func_80023300(void);
-void func_80024a78(u8 *levels);
-void func_800246bc(u8 *options);
-void func_80023fd4(u8 style, u8 layout, s32 row);
-void func_80025b24(MenuText *yes, MenuText *no, s32 choice);
-void func_80023ce8(s32 page);
-s32 func_80024c70(MenuList *list, s32 kind, s32 flags, u8 item);
-void func_80024f88(MenuList *list, s32 a1, u8 item);
-u32 func_800222fc(MenuList *list, u8 *ids, s32 *confirmed, s32 *result, s32 a4);
-void func_80025be8(u8 item);
-void func_80025468(MenuList *list, s32 flags);
-void func_80027688(MenuList *list, s32 page, s32 button);
-void func_80027728(MenuList *list, u8 cursor);
-void func_80027a9c(u8 item);
-void func_80027b5c(void);
-void func_80027bb4(void);
-void func_80027c8c(void);
-void func_80027e60(void);
-void func_80027414(void);
-void func_80027494(s16 x, s16 y, s16 w, s16 h, s16 u, s16 v, s16 uw, s16 vh);
-void func_80027530(s32 depth);
-void func_800269c0(s32 x, s32 y, s32 value);
-void func_80026e4c(s32 x, s32 y, s32 w, s32 h);
-void func_80025db8(s32 big);
-void func_80026794(MenuText *text, s32 shadow);
-void func_80027a70(void);
-void func_800279d8(void);
-s32 func_80027d88(u16 file, u16 entry);
-void func_80027ea8(u8 status, u8 *data);
-void func_80027560(void);
-void func_800275e0(s32 depth);
-void func_80027610(s32 depth, s16 tpage);
-void func_80027ac0(void);
-void func_80026020(MenuFont *font, MenuText *text, s32 shade);
-void func_80026158(MenuFont *font, MenuText *text);
+s32 menu_choose_magic_action(void);
+s32 menu_collect_available_magic_rows(Record18 *spells, MenuEntry *entries, u32 *values, u8 *ids, s32 first,
+                                      s32 last);
+void menu_equipment_list_controller(void);
+void menu_build_equipped_label_rows(MenuEntry *out);
+void menu_equipment_category_controller(s32 slot);
+void menu_choose_primary_magic_shortcut(void);
+void menu_item_magic_controller(void);
+void menu_status_records_controller(void);
+void menu_show_combat_attributes(void);
+void menu_conversation_records_controller(void);
+s32 menu_conversation_load_character(s32 index, s32 book, u8 *out);
+void menu_conversation_load_page(s32 book, s32 page);
+void menu_storage_controller(void);
+void menu_storage_store_controller(void);
+void menu_storage_take_out_controller(void);
+s32 menu_run_system_choice(void);
+s32 menu_card_load_browser(void);
+s32 menu_card_build_slot_rows(struct DIRENTRY *dir, u8 *text, u32 *experience, u8 *levels, s32 *numbers);
+void menu_show_dialog_panel(s32 message, MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
+void menu_volume_brightness_controller(void);
+void menu_display_options_controller(void);
+void menu_apply_display_colors(void);
+void menu_button_config_controller(void);
+void menu_apply_button_config(void);
+s32 menu_card_load_slot_browser(struct DIRENTRY *dir);
+void menu_build_card_probe_error_rows(MenuText *lines);
+void menu_build_card_full_rows(MenuText *lines);
+s32 menu_prompt_quit_game(void);
+void menu_prepare_card_browser_rows(MenuText *line);
+void menu_prepare_card_not_inserted_rows(MenuText *lines);
+void menu_prepare_card_io_error_rows(MenuText *lines);
+void menu_prepare_card_format_declined_rows(MenuText *lines);
+void menu_prepare_card_write_full_rows(MenuText *lines);
+void menu_prepare_card_write_rows(MenuText *line);
+void menu_prepare_card_read_row(MenuText *line);
+void menu_prepare_card_read_failure_rows(MenuText *lines, s32 error);
+void menu_card_save_browser(void);
+void menu_card_save_slot(s32 number);
+s32 menu_confirm_card_format(void);
+void menu_draw_card_dialog_rows(MenuText *lines, s32 count, s32 x, s32 y, s32 w, s32 h, s32 back);
+void menu_item_buy_sell_controller(s32 shop);
+void menu_item_buy_controller(s32 shop);
+void menu_fill_item_counts_and_prices(u8 *bag, u8 *counts, u32 *prices, u8 *ids, s32 first, s32 end,
+                                      s32 shop);
+void menu_item_sell_controller(s32 shop);
+void menu_fill_item_prices(u32 *prices, u8 *ids, s32 first, s32 end, s32 shop);
+s32 menu_intellectual_choose_item(void);
+s32 menu_blacksmith_make_item(void);
+s32 menu_prompt_stay(s32 mode);
+void menu_draw_gold(void);
+s32 menu_poll_choice_input(s32 selected, s32 last, s32 *chosen, s32 *confirmed, s32 *result);
+void menu_draw_player_status(void);
+void menu_draw_window(s32 page, s32 count, s32 selected, s32 flags);
+void menu_blit_panel_sprite(MenuFont *frame, MenuText *text);
+void menu_draw_string(MenuFont *font, MenuText *text);
+void menu_draw_number(MenuFont *font, MenuText *text);
+void menu_draw_nine_slice_panel(s32 x, s32 y, s32 w, s32 h);
+void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 a3, s32 a4);
+void menu_frame_begin(void);
+void menu_present_frame(void);
+void menu_enter_display_state(void);
+void menu_exit_display_state(s32 a0);
+void menu_play_sound_cue(s32 se);
+s32 input_read_mark_active(void);
+void input_wait_release(void);
+void menu_draw_combat_attributes(void);
+void menu_draw_volume_brightness_sliders(u8 *levels);
+void menu_draw_options_rows(u8 *options);
+void menu_draw_button_config(u8 style, u8 layout, s32 row);
+void menu_draw_two_option(MenuText *yes, MenuText *no, s32 choice);
+void menu_draw_conversation_page(s32 page);
+s32 menu_preview_choice(MenuList *list, s32 kind, s32 flags, u8 item);
+void menu_show_item_guide(MenuList *list, s32 a1, u8 item);
+u32 menu_update_list_input(MenuList *list, u8 *ids, s32 *confirmed, s32 *result, s32 a4);
+void menu_update_item_preview(u8 item);
+void menu_render_list(MenuList *list, s32 flags);
+void menu_list_init(MenuList *list, s32 page, s32 button);
+void menu_list_set_cursor(MenuList *list, u8 cursor);
+void menu_request_item_model(u8 item);
+void menu_release_item_model(void);
+void menu_cd_install_data_ready_handler(void);
+void menu_cd_restore_data_ready_handler(void);
+void menu_wait_async_read(void);
+void primitive_buffer_begin_poly_ft4(void);
+void primitive_set_poly_ft4_rect(s16 x, s16 y, s16 w, s16 h, s16 u, s16 v, s16 uw, s16 vh);
+void primitive_buffer_commit_poly_ft4(s32 depth);
+void menu_draw_button_icon(s32 x, s32 y, s32 value);
+void menu_draw_backdrop(s32 x, s32 y, s32 w, s32 h);
+void menu_draw_quantity(s32 big);
+void menu_draw_small_glyph_string(MenuText *text, s32 shadow);
+void input_wait_press(void);
+void input_wait_brief_release(void);
+s32 cd_archive_start_async_read(u16 file, u16 entry);
+void menu_cd_data_ready_handler(u8 status, u8 *data);
+void primitive_buffer_begin_sprt(void);
+void primitive_buffer_commit_sprt(s32 depth);
+void primitive_buffer_add_draw_mode(s32 depth, s16 tpage);
+void menu_start_item_model_read(void);
+void menu_blit_panel_sprite_pulsing(MenuFont *font, MenuText *text, s32 shade);
+void menu_draw_string_dimmed(MenuFont *font, MenuText *text);
 
 extern MenuFont DAT_8007e564[];
 /* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
@@ -209,7 +212,7 @@ extern u16 DAT_800811a4[5][150];
 extern MapRect DAT_801ba6fc[160];
 
 /* The two frame packet pools (DAT_80199154.pools) as the menu saved them on
- * opening (func_80027198); func_80027310 puts them back. */
+ * opening (menu_enter_display_state); menu_exit_display_state puts them back. */
 extern PrimPool DAT_8009c404;
 extern PrimPool DAT_8009c410;
 

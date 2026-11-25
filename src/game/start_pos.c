@@ -134,7 +134,7 @@ end:
     switch (script[18] & 0xf0) {
     case 0x00:
         func_80030568();
-        func_80021114(script[18] & 0xf);
+        menu_item_buy_sell_controller(script[18] & 0xf);
         break;
     case 0x10:
     case 0x20:
@@ -143,7 +143,7 @@ end:
     case 0x30:
         if (DAT_801b24e4.unk4c == 4) {
             func_80030568();
-            n = func_80021aac();
+            n = menu_intellectual_choose_item();
             if (n != -1) {
                 func_800422b8(NULL, NULL);
                 func_800441d4(6, n + 488);
@@ -152,7 +152,7 @@ end:
         break;
     case 0x40:
         func_80030568();
-        if (func_8002200c(script[18] & 0xf) != -1) {
+        if (menu_prompt_stay(script[18] & 0xf) != -1) {
             DAT_801e7edc.unk370 = 1;
             DAT_801e7edc.unk384 = script[18] & 3;
         }

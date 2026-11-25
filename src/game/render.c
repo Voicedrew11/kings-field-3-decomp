@@ -1906,7 +1906,7 @@ void func_80041f9c(void)
             DAT_80081928[1].visible = 3;
             DAT_80081928[1].u = 0x80;
             DAT_80081928[1].v = 0x62;
-            func_800277c0(DAT_80199154.message_arg[DAT_80199154.message_tail], 4, 0, 0, digits);
+            menu_format_number(DAT_80199154.message_arg[DAT_80199154.message_tail], 4, 0, 0, digits);
             DAT_80081928[2].visible = 3;
             func_80041f8c(&DAT_80081928[2], digits[3]);
             DAT_80081928[3].visible = 3;

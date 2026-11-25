@@ -551,7 +551,7 @@ void func_8003f304(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *sca
                    AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
                    u8 flags, s32 depth);
 void func_80040ae4(void);
-void func_800277c0(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
+void menu_format_number(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void func_80043b38(u8 *file);
 
 #endif

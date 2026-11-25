@@ -145,7 +145,7 @@ void func_801e86c0(Object88 *obj, s32 event)
         break;
     case 1:
         func_80030568();
-        result = func_80021d94();
+        result = menu_blacksmith_make_item();
         DAT_801b24e4.unk178 = ~DAT_80081868[7];
         if (result < 0) {
             DAT_801ba984.unk76[2] = 0;

@@ -66,7 +66,7 @@ void func_80030fcc(void)
         cd_report_error(3);
     }
     if (DAT_801b24e4.unk178 & DAT_80081868[13]) {
-        func_8001a634();
+        menu_run_pause_screen();
     }
     DAT_801b24e4.unk180 = 200;
     DAT_801b24e4.unk184 = 32;
@@ -320,7 +320,7 @@ void func_80030fcc(void)
                     DAT_801b24e4.unk12c.vz = 0;
                     DAT_801b24e4.pos.vx = 0x1c800;
                     DAT_801b24e4.unk160 = 5;
-                    func_8001bea8();
+                    map_reveal_visited_rects();
                     repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                     func_8005efd4(DAT_8018fad4.area[0]);
                     func_8002b3a8();

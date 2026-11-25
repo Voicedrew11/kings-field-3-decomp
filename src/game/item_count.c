@@ -522,11 +522,11 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
         case 0xe:
             if ((s16)DAT_8018fad4.loading != 1) {
                 cd_request_wait_idle();
-                func_8001bea8();
+                map_reveal_visited_rects();
                 repeat_store_word((u32 *)DAT_801b594c, 0, 200);
                 func_8005efd4(DAT_8018fad4.area[0]);
                 func_80030568();
-                func_8002008c();
+                menu_card_save_browser();
             }
             break;
         }

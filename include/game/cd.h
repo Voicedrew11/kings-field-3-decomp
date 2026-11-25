@@ -110,7 +110,7 @@ void cd_wait_four_vsyncs(void);
 void cd_request_advance(CdRequest *request);
 void cd_location_add(CdlLOC *pos, s32 offset, CdlLOC *out);
 void cd_request_wait_idle(void);
-/* The CdReadyCallback that runs the request queue (the menu puts it back, func_80027c8c). */
+/* The CdReadyCallback that runs the request queue (the menu puts it back, menu_cd_restore_data_ready_handler). */
 void cd_data_ready_handler(void);
 void cd_request_wait_done(CdRequest *request);
 /* Word checksum of a sector read: nonzero when the last word disagrees. */

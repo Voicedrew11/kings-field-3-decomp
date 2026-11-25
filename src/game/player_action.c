@@ -472,7 +472,7 @@ void func_8002fe1c(void)
         if (DAT_801b24e4.unkc9 != 0xff) {
             if (DAT_800c85e8[0][DAT_801b24e4.unkc9] != 0) {
                 if (func_8002fddc(DAT_801b24e4.unkc9)) {
-                    func_8001b254(DAT_801b24e4.unkc9);
+                    menu_apply_item_effect(DAT_801b24e4.unkc9);
                 }
                 func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, DAT_801b24e4.unkc9);
             } else {
@@ -624,9 +624,9 @@ void func_800305d8(void)
             cd_request_yield();
             resource_advance_transition();
         } while ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 0);
-        func_8001bea8();
+        map_reveal_visited_rects();
         func_800290d8(DAT_8018fad4.area[0]);
-        result = func_8001a774();
+        result = menu_run_root_controller();
         if (result >= 0) {
             func_800422b8(NULL, NULL);
             func_8005cbe0(&DAT_801b24e4.pos, &DAT_801b24e4.unk12c, result);

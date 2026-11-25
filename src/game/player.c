@@ -135,7 +135,7 @@ void func_80028f90(void)
         func_80053c84(10, 64, 28, &DAT_801b24e4.pos, 0, 1);
     }
     func_80029500();
-    func_8001f4c0();
+    menu_apply_button_config();
 }
 
 /*
@@ -1112,7 +1112,7 @@ void func_8002b64c(void)
     DAT_801b24e4.unkfe = 3;
     DAT_801b24e4.unkff = 0;
     DAT_801b24e4.unk100 = 1;
-    func_8001f4c0();
+    menu_apply_button_config();
     DAT_801b24e4.unke = 0;
 }
 
