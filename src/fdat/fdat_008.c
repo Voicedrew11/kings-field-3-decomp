@@ -22,8 +22,8 @@ void area_update_cell_toggles_by_worn_item(void);
 void area_use_item_offer_items_in_order(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_open_gate(Actor *obj);
-void area_region_trigger_lock_door_and_warp_cells(Object44 *obj);
-void area_init_map_object_dial(Object44 *obj, Object44Def *def);
+void area_region_trigger_lock_door_and_warp_cells(MapObject *obj);
+void area_init_map_object_dial(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_dial(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
@@ -85,15 +85,15 @@ ADDRESS(0x801e83c8, 0x284)
 void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *link;
-    Object44Def *def;
+    MapObject *obj;
+    MapObject *link;
+    MapObjectDef *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        switch (def->unk0) {
+        switch (def->action) {
         case 9:
         case 0x15:
             if (obj->arg.b.unk3c != 0) {
@@ -103,37 +103,37 @@ void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
                         if (obj->arg.b.unk3f < 35) {
                             notify_enqueue(obj->arg.b.unk3f);
                         }
-                        if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
+                        if (obj->object_id == 212 || obj->object_id == 213 || obj->object_id == 0xf7) {
                             notify_enqueue(0x1a);
-                        } else if (obj->unk6 == 0xb7) {
+                        } else if (obj->object_id == 0xb7) {
                             notify_enqueue(0x1e);
-                        } else if (obj->unk6 == 0xf5) {
+                        } else if (obj->object_id == 0xf5) {
                             notify_enqueue(0xe);
-                        } else if (obj->unk6 == 0xba) {
+                        } else if (obj->object_id == 0xba) {
                             notify_enqueue(0x22);
-                        } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
+                        } else if (obj->object_id >= 190 && obj->object_id < 198) {
                             notify_enqueue(8);
                         }
                     }
                 } else {
                     link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
-                    if (link->unk6 == 0xff) {
+                    if (link->object_id == 0xff) {
                         goto message;
                     }
-                    link->unk0 = obj->arg.b.unk40;
+                    link->layer_mask = obj->arg.b.unk40;
                     link->arg.b.unk38 = 0xff;
                     event_map_object_interact(link);
-                    link->unk0 = 0;
+                    link->layer_mask = 0;
                     link->arg.b.unk38 = 0;
-                    if (link->unk6 == 0xff) {
+                    if (link->object_id == 0xff) {
                         obj->arg.b.unk3a.index = 0xffff;
                     }
                 }
             }
             break;
         case 0xa6:
-            if (obj->unk8 == 0) {
-                obj->unk8 = 1;
+            if (obj->action_state == 0) {
+                obj->action_state = 1;
                 obj->arg.b.unk38 = (obj->arg.b.unk38 + 1) % 6;
             }
             break;
@@ -148,8 +148,8 @@ void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
 ADDRESS(0x801e864c, 0xa8)
 void area_update_cell_toggles_by_worn_item(void)
 {
-    Object44 *gate;
-    Object44 *obj;
+    MapObject *gate;
+    MapObject *obj;
     s32 i;
 
     if (cur_avatar_status.unkf4 != 0x4b) {
@@ -158,15 +158,15 @@ void area_update_cell_toggles_by_worn_item(void)
             for (obj = &map_objects_slots.objects[100], i = 16; i != -1; i--, obj++) {
                 if (obj->arg.b.unk3f != 1) {
                     obj->arg.b.unk3f = 1;
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                 }
             }
         }
         gate->arg.b.unk40 = 1;
     } else {
         obj = &map_objects_slots.objects[82];
-        if (map_objects_slots.objects[82].unk8 == 0 && map_objects_slots.objects[82].arg.b.unk40 != 0) {
-            map_objects_slots.objects[82].unk8 = 4;
+        if (map_objects_slots.objects[82].action_state == 0 && map_objects_slots.objects[82].arg.b.unk40 != 0) {
+            map_objects_slots.objects[82].action_state = 4;
         }
         obj->arg.b.unk40 = 0;
     }
@@ -222,7 +222,7 @@ void area_on_actor_removed_open_gate(Actor *obj)
 {
     if (obj - actor_status.objects == 4) {
         cur_evt_state.unke[0xb] = 1;
-        map_objects_slots.objects[82].unk8 = 1;
+        map_objects_slots.objects[82].action_state = 1;
         map_objects_slots.objects[82].arg.b.unk38 = 3;
     }
 }
@@ -232,7 +232,7 @@ void area_on_actor_removed_open_gate(Actor *obj)
  * the warp-arrival cells.
  */
 ADDRESS(0x801e888c, 0x144)
-void area_region_trigger_lock_door_and_warp_cells(Object44 *obj)
+void area_region_trigger_lock_door_and_warp_cells(MapObject *obj)
 {
     s32 k;
 
@@ -266,11 +266,11 @@ void area_region_trigger_lock_door_and_warp_cells(Object44 *obj)
 
 /* Slot 8: an object made from definition kind 0xa6 takes that kind. */
 ADDRESS(0x801e89d0, 0x2c)
-void area_init_map_object_dial(Object44 *obj, Object44Def *def)
+void area_init_map_object_dial(MapObject *obj, MapObjectDef *def)
 {
-    if (def->unk0 == 0xa6) {
-        obj->unk4 = 0xa6;
-        obj->unk8 = 1;
+    if (def->action == 0xa6) {
+        obj->action = 0xa6;
+        obj->action_state = 1;
         obj->arg.b.unk40 = 0xff;
     }
 }
@@ -288,60 +288,60 @@ static u32 area_dial_setting_masks[17] = {
 ADDRESS(0x801e89fc, 0x1e0)
 void area_update_map_object_dial(void)
 {
-    Object44 *obj = map_objects_slots.unk8858;
-    Object44Def *def = map_objects_slots.unk8854;
-    Object44 *other;
+    MapObject *obj = map_objects_slots.current;
+    MapObjectDef *def = map_objects_slots.current_def;
+    MapObject *other;
     s32 bit;
     s32 i;
     s32 j;
 
-    if (obj->unk4 != 0xa6) {
+    if (obj->action != 0xa6) {
         return;
     }
-    switch (obj->unk8) {
+    switch (obj->action_state) {
     case 0:
         break;
     case 1:
-        map_object_play_spatial_sound(obj, def->arg.b.unkf);
+        map_object_play_spatial_sound(obj, def->arg.b.sound_id);
         if (obj->arg.b.unk38 != 0) {
-            obj->unk1 = obj->arg.b.unk38 - 1;
+            obj->animation_id = obj->arg.b.unk38 - 1;
         } else {
-            obj->unk1 = 5;
+            obj->animation_id = 5;
         }
-        obj->unk8 = 2;
-        obj->unka = 0;
+        obj->action_state = 2;
+        obj->animation_phase = 0;
         break;
     case 2:
-        obj->unka += 128;
-        if (obj->unka >= 4096) {
-            obj->unka = 0xfff;
-            obj->unk8 = 3;
+        obj->animation_phase += 128;
+        if (obj->animation_phase >= 4096) {
+            obj->animation_phase = 0xfff;
+            obj->action_state = 3;
         }
         break;
     case 3:
-        bit = 1 << (obj->unk1 + 1) % 6;
+        bit = 1 << (obj->animation_id + 1) % 6;
         other = &map_objects_slots.objects[100];
         for (j = 0, i = 16; i != -1; j++, i--, other++) {
             if (bit & area_dial_setting_masks[j]) {
                 if (other->arg.b.unk38 == j + 200 && other->arg.b.unk3f != 0) {
                     other->arg.b.unk3f = 0;
-                    other->unk8 = 1;
+                    other->action_state = 1;
                 }
             } else if (other->arg.b.unk3f != 1) {
                 other->arg.b.unk3f = 1;
-                other->unk8 = 1;
+                other->action_state = 1;
             }
         }
         obj->arg.b.unk40 = 0xff;
-        obj->unk8 = 0;
+        obj->action_state = 0;
         break;
     case 4:
         if (obj->arg.b.unk38 != 0) {
-            obj->unk1 = obj->arg.b.unk38 - 1;
+            obj->animation_id = obj->arg.b.unk38 - 1;
         } else {
-            obj->unk1 = 5;
+            obj->animation_id = 5;
         }
-        obj->unk8 = 3;
+        obj->action_state = 3;
         break;
     }
 }
@@ -383,19 +383,19 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     cur_avatar_status.unk34[2] += 20;
     player_learn_element_magic(2);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[70];
-    map_objects_slots.objects[70].unk5 = 0x32;
-    map_objects_slots.objects[70].unk2 = 5;
+    map_objects_slots.objects[70].lighting_override_index = 0x32;
+    map_objects_slots.objects[70].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -403,14 +403,14 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     obj = &map_objects_slots.objects[91];
-    map_objects_slots.objects[91].unk5 = 0x32;
-    map_objects_slots.objects[91].unk2 = 5;
+    map_objects_slots.objects[91].lighting_override_index = 0x32;
+    map_objects_slots.objects[91].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -418,7 +418,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     conversation_record_mark_page(12, 16);
     conversation_record_mark_page(12, 17);
     if (cur_evt_state.unke[8] == 0) {
@@ -461,8 +461,8 @@ void area_on_load_restore_objects(void)
     s32 k;
 
     if (cur_evt_state.unk7f[2] != 0) {
-        map_objects_slots.objects[70].unk6 = 0xff;
-        map_objects_slots.objects[91].unk6 = 0xff;
+        map_objects_slots.objects[70].object_id = 0xff;
+        map_objects_slots.objects[91].object_id = 0xff;
         cur_evt_state.unke[8] = 1;
     }
     if (cur_evt_state.unke[8] != 0) {
@@ -475,7 +475,7 @@ void area_on_load_restore_objects(void)
         }
     }
     if (cur_evt_state.unke[0xb] != 0) {
-        map_objects_slots.objects[82].unk8 = 1;
+        map_objects_slots.objects[82].action_state = 1;
         map_objects_slots.objects[82].arg.b.unk38 = 3;
     }
     if (cur_evt_state.unke[0xa] < 2) {

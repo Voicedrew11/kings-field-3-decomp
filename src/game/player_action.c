@@ -30,7 +30,7 @@ static u16 player_magic_attack_masks[4];
 ADDRESS(0x8002ecbc, 0x60)
 void player_check_fall_death(void)
 {
-    if (cur_avatar_status.unk172 >= 400 && map_world.unk12010 - cur_avatar_status.pos.vy > 20480) {
+    if (cur_avatar_status.unk172 >= 400 && map_world.collision_floor_height - cur_avatar_status.pos.vy > 20480) {
         player_death_begin(NULL);
         cur_avatar_status.unk109 = 1;
     }
@@ -69,17 +69,17 @@ void player_update_vertical_motion(void)
         cur_avatar_status.pos.vy += cur_avatar_status.unk172;
         cur_avatar_status.unk11c.vy = cur_avatar_status.unk172;
         cur_avatar_status.unk172 += 80;
-        if (cur_avatar_status.pos.vy > map_world.unk12010 + 100) {
-            cur_avatar_status.pos.vy = map_world.unk12010;
+        if (cur_avatar_status.pos.vy > map_world.collision_floor_height + 100) {
+            cur_avatar_status.pos.vy = map_world.collision_floor_height;
             cur_avatar_status.unk104 = 0;
         }
         break;
     case 0x20:
         player_check_fall_death();
         cur_avatar_status.pos.vy += cur_avatar_status.unk172;
-        if (cur_avatar_status.pos.vy <= map_world.unk12010 || cur_avatar_status.unk172 >= 0) {
-            if (cur_avatar_status.pos.vy - cur_avatar_status.unk172 > map_world.unk12010) {
-                cur_avatar_status.pos.vy = map_world.unk12010;
+        if (cur_avatar_status.pos.vy <= map_world.collision_floor_height || cur_avatar_status.unk172 >= 0) {
+            if (cur_avatar_status.pos.vy - cur_avatar_status.unk172 > map_world.collision_floor_height) {
+                cur_avatar_status.pos.vy = map_world.collision_floor_height;
             }
             cur_avatar_status.unk104 = 0;
         }
@@ -107,13 +107,13 @@ void player_update_vertical_motion(void)
             player_apply_damage_reaction(NULL, v * v * v / 118000, 0);
         }
         if (hit & 4) {
-            cur_avatar_status.pos.vy = map_world.unk12010;
+            cur_avatar_status.pos.vy = map_world.collision_floor_height;
             if (cur_avatar_status.unk172 >= 512) {
-                cur_avatar_status.pos.vy = map_world.unk12010 - (cur_avatar_status.unk172 >> 1);
+                cur_avatar_status.pos.vy = map_world.collision_floor_height - (cur_avatar_status.unk172 >> 1);
             }
         } else {
             collision_cache_load_hit_bounds();
-            y = map_world.unk1203c.vy - map_world.unk1204e - 1;
+            y = map_world.collision_hit_position.vy - map_world.collision_hit_height - 1;
             hit = collision_query_world(cur_avatar_status.pos.vx, y, cur_avatar_status.pos.vz, 800, 1700,
                                         0x31);
             if (hit == 0) {
@@ -143,13 +143,13 @@ void player_update_vertical_motion(void)
         }
         /* fall through */
     case 0:
-        d = map_world.unk12010 - cur_avatar_status.pos.vy;
+        d = map_world.collision_floor_height - cur_avatar_status.pos.vy;
         if (d < 0) {
             if (d >= -256) {
                 if (d < -128) {
                     cur_avatar_status.pos.vy -= 128;
                 } else {
-                    cur_avatar_status.pos.vy = map_world.unk12010;
+                    cur_avatar_status.pos.vy = map_world.collision_floor_height;
                 }
                 break;
             }
@@ -177,7 +177,7 @@ void player_update_vertical_motion(void)
                 if (d > 128) {
                     cur_avatar_status.pos.vy += 128;
                 } else {
-                    cur_avatar_status.pos.vy = map_world.unk12010;
+                    cur_avatar_status.pos.vy = map_world.collision_floor_height;
                 }
                 break;
             }
@@ -221,7 +221,7 @@ s32 player_move_reaction_with_collision(void)
     p.vz = cur_avatar_status.pos.vz + cur_avatar_status.unk188.knock.dir.vz;
     if (collision_query_world(p.vx, p.vy, p.vz, 800, 1700, 0x31) == 0) {
     moved:
-        if (cur_avatar_status.unk188.knock.dir.vy >= 300 && map_world.unk12010 - cur_avatar_status.pos.vy > 20480) {
+        if (cur_avatar_status.unk188.knock.dir.vy >= 300 && map_world.collision_floor_height - cur_avatar_status.pos.vy > 20480) {
             player_death_begin(NULL);
             cur_avatar_status.unk109 = 1;
         }
@@ -250,10 +250,10 @@ s32 player_move_reaction_with_collision(void)
                 goto moved;
             }
         }
-        if ((hit & ~0x205) || map_world.unk12010 + 256 < cur_avatar_status.pos.vy) {
+        if ((hit & ~0x205) || map_world.collision_floor_height + 256 < cur_avatar_status.pos.vy) {
             return 1;
         }
-        p.vy = map_world.unk12010;
+        p.vy = map_world.collision_floor_height;
         friction = 0x38;
         goto slide;
     stop:

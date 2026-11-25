@@ -174,8 +174,8 @@ void view_grid_occlude_walls_ascending(void)
             for (i = 24; i != 0; i--) {
                 if (x < 80 && *p != 0) {
                     cell = &map_world.cells[z][x];
-                    if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
-                        cell->layer[1].unk0 == 0xfd) {
+                    if (cell->layer[1].object_index == 0xff || cell->layer[1].object_index == 0xfe ||
+                        cell->layer[1].object_index == 0xfd) {
                         angle = vector_xz_to_angle(x - scene_display_sys.unk15b10,
                                                    z - scene_display_sys.unk15b14);
                         q = p;
@@ -262,8 +262,8 @@ void view_grid_occlude_walls_descending(void)
             for (i = 24; i != 0; i--) {
                 if (x > 0 && *p != 0) {
                     cell = &map_world.cells[z][x];
-                    if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
-                        cell->layer[1].unk0 == 0xfd) {
+                    if (cell->layer[1].object_index == 0xff || cell->layer[1].object_index == 0xfe ||
+                        cell->layer[1].object_index == 0xfd) {
                         angle = vector_xz_to_angle(x - scene_display_sys.unk15b10,
                                                    z - scene_display_sys.unk15b14);
                         q = p;

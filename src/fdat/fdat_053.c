@@ -22,7 +22,7 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_set_cell_toggle(s32 index, s32 state);
 void area_on_actor_removed_set_toggles(Actor *obj);
-void area_region_trigger_trade_item_and_damage(Object44 *obj);
+void area_region_trigger_trade_item_and_damage(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -105,8 +105,8 @@ ADDRESS(0x801e86f8, 0x224)
 void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *target;
+    MapObject *obj;
+    MapObject *target;
     VECTOR from;
     VECTOR to;
     s32 t;
@@ -120,14 +120,14 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
             continue;
         }
         target = &map_objects_slots.objects[11];
-        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.unk885e);
+        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.scatter_pool_sequence);
         map_object_reset(obj);
-        id = map_objects_slots.unk885e++;
-        obj->unke = -100;
-        obj->unk0 = 2;
+        id = map_objects_slots.scatter_pool_sequence++;
+        obj->render_depth_offset = -100;
+        obj->layer_mask = 2;
         obj->arg.h.unk3c = id;
-        obj->unk6 = item;
-        obj->unk4 = 0xff;
+        obj->object_id = item;
+        obj->action = 0xff;
         obj->angle.vz = 0;
         obj->angle.vx = 0;
         obj->angle.vy = map_objects_slots.objects[i].angle.vy;
@@ -161,18 +161,18 @@ void area_adjust_actor_magic_damage_noop(void)
 ADDRESS(0x801e8958, 0x68)
 void area_set_cell_toggle(s32 index, s32 state)
 {
-    Object44 *obj;
+    MapObject *obj;
 
     switch (state) {
     case 0:
         obj = &map_objects_slots.objects[index];
         obj->arg.b.unk3f = 0;
-        obj->unk8 = 1;
+        obj->action_state = 1;
         break;
     case 1:
         obj = &map_objects_slots.objects[index];
         obj->arg.b.unk3f = 1;
-        obj->unk8 = 1;
+        obj->action_state = 1;
         break;
     }
 }
@@ -224,7 +224,7 @@ void area_on_actor_removed_set_toggles(Actor *obj)
  * behind a fade, regions 0x61 and 0x63 hurt the player.
  */
 ADDRESS(0x801e8b10, 0x214)
-void area_region_trigger_trade_item_and_damage(Object44 *obj)
+void area_region_trigger_trade_item_and_damage(MapObject *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -292,15 +292,15 @@ void area_on_item_added_noop(void)
 ADDRESS(0x801e8d4c, 0x9c)
 void area_on_movie_start_show_objects_and_wake_actor(u8 id)
 {
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     if (id == 9) {
         obj = &map_objects_slots.objects[50];
-        obj->unk0 = 0;
+        obj->layer_mask = 0;
         obj += 2;
         for (i = 9; i != -1; i--) {
-            obj->unk0 = 2;
+            obj->layer_mask = 2;
             obj++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
@@ -336,7 +336,7 @@ void area_talk_event_give_equipment_and_raise_element(Actor *record, s32 event)
             player_set_equipment_slot(0x4f, 3);
             event_map_object_interact(NULL, 0x3c);
             player_set_equipment_slot(0x3c, 4);
-            map_objects_slots.objects[63].unk0 = 2;
+            map_objects_slots.objects[63].layer_mask = 2;
             map_objects_slots.objects[63].arg.b.unk3f = 0xff;
         }
         break;
@@ -359,8 +359,8 @@ void area_talk_event_give_equipment_and_raise_element(Actor *record, s32 event)
 ADDRESS(0x801e8f84, 0x374)
 void area_on_load_restore_objects_and_actors(void)
 {
-    Object44 *obj;
-    Object44 *p;
+    MapObject *obj;
+    MapObject *p;
     s32 i;
     u16 id;
 
@@ -384,44 +384,44 @@ void area_on_load_restore_objects_and_actors(void)
     }
     actor_status.objects[15].slot_state = 8;
     if (cur_evt_state.unk32[0x24] != 0) {
-        map_objects_slots.objects[63].unk0 = 2;
+        map_objects_slots.objects[63].layer_mask = 2;
         map_objects_slots.objects[63].arg.b.unk3f = 0xff;
     } else {
-        map_objects_slots.objects[63].unk0 = 0;
+        map_objects_slots.objects[63].layer_mask = 0;
         map_objects_slots.objects[63].arg.b.unk3f = 0;
     }
     if (cur_evt_state.unk32[0x25] == 0) {
         p = &map_objects_slots.objects[50];
-        p->unk0 = 2;
+        p->layer_mask = 2;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0 = 0;
+            p->layer_mask = 0;
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         actor_status.objects[56].slot_state = 8;
         actor_status.objects[56].layer_mask = 0;
-        map_objects_slots.objects[11].unk0 = 2;
+        map_objects_slots.objects[11].layer_mask = 2;
     } else if (cur_evt_state.unk32[0x25] == 1) {
         p = &map_objects_slots.objects[50];
-        p->unk0 = 0;
+        p->layer_mask = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0 = 2;
+            p->layer_mask = 2;
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         actor_status.objects[56].slot_state = 1;
         actor_status.objects[56].layer_mask = 0;
-        map_objects_slots.objects[11].unk0 = 2;
-        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.unk885e);
+        map_objects_slots.objects[11].layer_mask = 2;
+        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.scatter_pool_sequence);
         map_object_reset(obj);
-        id = map_objects_slots.unk885e++;
-        obj->unke = -100;
-        obj->unk6 = 0x8f;
+        id = map_objects_slots.scatter_pool_sequence++;
+        obj->render_depth_offset = -100;
+        obj->object_id = 0x8f;
         obj->arg.h.unk3c = id;
-        obj->unk0 = 2;
-        obj->unk4 = 0xff;
+        obj->layer_mask = 2;
+        obj->action = 0xff;
         obj->angle.vz = 0;
         obj->angle.vx = 0;
         obj->angle.vy = map_objects_slots.objects[11].angle.vy;
@@ -431,16 +431,16 @@ void area_on_load_restore_objects_and_actors(void)
         obj->pos.vz = map_objects_slots.objects[11].pos.vz;
     } else {
         p = &map_objects_slots.objects[50];
-        p->unk0 = 0;
+        p->layer_mask = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
-            p->unk0 = 2;
+            p->layer_mask = 2;
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
         actor_status.objects[56].slot_state = 8;
         actor_status.objects[56].layer_mask = 0;
-        map_objects_slots.objects[11].unk0 = 0;
+        map_objects_slots.objects[11].layer_mask = 0;
     }
     cur_evt_state.unk32[0x26] = 1;
     cur_evt_state.unk84[5] = 0x11;

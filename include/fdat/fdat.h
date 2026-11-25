@@ -48,7 +48,7 @@ extern s32 light_flicker_step;
  * prototype yet). Varargs: with obj NULL it takes the object index from the
  * second argument. event_target_stream_execute comes from game/misc.h.
  */
-void event_map_object_interact(Object44 *obj, ...);
+void event_map_object_interact(MapObject *obj, ...);
 
 /* src/fdat/shared/light_blend_records.inc (4 modules) */
 void light_blend_records(Record30 *from, Record30 *to, Record30 *out, s32 t);

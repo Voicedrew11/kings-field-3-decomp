@@ -18,7 +18,7 @@ void area_update_noop(void);
 void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -85,7 +85,7 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
     VECTOR unused;
     SVECTOR unused_angle;
     s32 i;
-    Object44 *obj;
+    MapObject *obj;
 
     if (item != 0x66) {
         return;
@@ -95,7 +95,7 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
         return;
     }
     obj = &map_objects_slots.objects[i];
-    if (obj->unk4 != 0x53) {
+    if (obj->action != 0x53) {
         return;
     }
     if (obj->arg.b.unk3d[0] >= 151) {
@@ -104,8 +104,8 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
     if (game_counter_is_nonzero(obj->arg.b.unk3d[0]) == 0) {
         return;
     }
-    if (obj->unka == 0 || obj->unka >= 4095) {
-        obj->unk8 = 1;
+    if (obj->animation_phase == 0 || obj->animation_phase >= 4095) {
+        obj->action_state = 1;
         cur_evt_state.unk0 = 1;
     }
 }
@@ -126,7 +126,7 @@ void area_on_actor_removed_noop(void)
  * (player +0x10a) and copies the normal pattern back.
  */
 ADDRESS(0x801e868c, 0xc0)
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -170,18 +170,18 @@ void area_on_item_added_noop(void)
 ADDRESS(0x801e8774, 0x10c)
 void area_talk_event_clear_objects_and_give_items(Actor *record, s32 event)
 {
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     switch (event) {
     case 0:
         obj = map_objects_slots.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
-            if (obj->unk4 == 0x56) {
+            if (obj->action == 0x56) {
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 obj->arg.b.unk38 = 0;
-                obj->unk0 = 0;
-                obj->unk4 = 0xff;
+                obj->layer_mask = 0;
+                obj->action = 0xff;
             }
         }
         if (game_counter_is_nonzero(0x66) != 0) {
@@ -206,7 +206,7 @@ void area_talk_event_clear_objects_and_give_items(Actor *record, s32 event)
 ADDRESS(0x801e8880, 0xac)
 void area_on_load_restore_cleared_objects(void)
 {
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     if (cur_evt_state.unke[0x12] == 0) {
@@ -218,11 +218,11 @@ void area_on_load_restore_cleared_objects(void)
     if (cur_evt_state.unke[0x14] != 0) {
         obj = map_objects_slots.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
-            if (obj->unk4 == 0x56) {
+            if (obj->action == 0x56) {
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 obj->arg.b.unk38 = 0;
-                obj->unk0 = 0;
-                obj->unk4 = 0xff;
+                obj->layer_mask = 0;
+                obj->action = 0xff;
             }
         }
     }

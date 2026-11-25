@@ -8,7 +8,7 @@
  * object or a run of several is not yet known, so the names stay
  * address-derived and only the fields the matched code touches are named.
  * The block at 0x80199154 is Data80199154 and the effect records at
- * 0x80182968 are Effect, both in game/render.h; the word at 0x801c12f0 is
+ * 0x80182968 are MapPlacedEntry, both in game/render.h; the word at 0x801c12f0 is
  * CdState.unkc (game/cd.h).
  */
 #include <kf/lib/types.h>
@@ -247,12 +247,12 @@ typedef struct EquipmentRecord {
  * One layer of a map cell; render_map_cell_object draws one (field names WIP).
  */
 typedef struct MapLayer {
-    u8 unk0;        /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
-    u8 unk1;        /* +0x01: floor height / -128 */
-    u8 unk2;        /* +0x02: layer 0: bits 2-7 count the Actor records on the
+    u8 object_index; /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
+    u8 elevation;   /* +0x01: floor height / -128 */
+    u8 quarter_turns; /* +0x02: layer 0: bits 2-7 count the Actor records on the
                      * cell (map_cell_add_layer_occupancy) */
-    u8 unk3;
-    u8 unk4;
+    u8 collision_shape_id;
+    u8 lighting_index;
 } MapLayer;
 
 /*
@@ -263,36 +263,36 @@ typedef struct MapCell {
     MapLayer layer[2];
 } MapCell;
 
-typedef struct Data801d4464 {
+typedef struct MapWorld {
     MapCell cells[80][80];
     u8 unkfa00[0x600];
-    u8 unk10000[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
+    u8 shape_bank[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
                           * (0x2000 bytes, through unk11ff4) here */
-    EquipmentRecord unk11c14[31]; /* +0x11c14: WIP count */
+    EquipmentRecord equipment_records[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
-    MapCell *unk12000; /* +0x12000: cell of the last collision test */
-    u8 *unk12004;   /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
+    MapCell *collision_cell; /* +0x12000: cell of the last collision test */
+    u8 *collision_layer; /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
     u8 unk12008[2];
-    u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
-    s32 unk1200c;   /* +0x1200c: height given to Actor records with flag 0x400 */
-    s32 unk12010;   /* +0x12010: floor height of the last collision test */
-    s32 unk12014;   /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
+    u16 collision_layer_offset; /* +0x1200a: copied to SoundState.unk24 with the listener */
+    s32 collision_layer_height; /* +0x1200c: height given to Actor records with flag 0x400 */
+    s32 collision_floor_height; /* +0x12010: floor height of the last collision test */
+    s32 collision_height_limit; /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
                      * player_move_horizontal lets the player through when it is 1700 above unk12010 */
-    s32 unk12018[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
+    s32 collision_bounds[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
                       * floor the Object4c spawns of effect_spawn_at_lower_bound must reach */
-    u32 unk12024;   /* +0x12024: hit bits of the last collision_query_world test */
-    s32 unk12028;   /* +0x12028: Actor index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
-    s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
+    u32 collision_hit_flags; /* +0x12024: hit bits of the last collision_query_world test */
+    s32 collision_actor_index; /* +0x12028: Actor index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
+    s32 collision_object_index; /* +0x1202c: MapObject index it hit, -1 for none */
     u8 unk12030[4];
-    s32 unk12034;   /* +0x12034: push of the last collision test (collision_evaluate_shape_records); from 64
+    s32 collision_slope_push; /* +0x12034: push of the last collision test (collision_evaluate_shape_records); from 64
                      * up player_move_horizontal moves the player by it */
-    s32 unk12038;   /* +0x12038: angle of that push */
-    VECTOR unk1203c; /* +0x1203c: point of the last wall hit (collision_cache_load_hit_bounds) */
-    u16 unk1204c;   /* +0x1204c: radius of what was hit (collision_cache_load_hit_bounds) */
-    u16 unk1204e;   /* +0x1204e: height of what was hit */
-    u16 unk12050;
+    s32 collision_slope_angle; /* +0x12038: angle of that push */
+    VECTOR collision_hit_position; /* +0x1203c: point of the last wall hit (collision_cache_load_hit_bounds) */
+    u16 collision_hit_radius; /* +0x1204c: radius of what was hit (collision_cache_load_hit_bounds) */
+    u16 collision_hit_height; /* +0x1204e: height of what was hit */
+    u16 collision_hit_half_width;
     u8 unk12052[2];
-} Data801d4464;
+} MapWorld;
 
 /* An in-game movie record (WIP: 52 bytes; movie_state holds 16, indexed by movie id). */
 typedef struct MovieRec {
@@ -335,34 +335,34 @@ typedef struct Data801e7edc {
 /*
  * Object records translate_active_world_positions moves when the area origin shifts (WIP: named
  * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
- * records it also moves are the placed effects (Effect, game/render.h).
+ * records it also moves are the placed effects (MapPlacedEntry, game/render.h).
  */
-/* Object44 +0x3a as the FDAT module handlers read it (WIP). */
-typedef union Object44Link {
+/* MapObject +0x3a as the FDAT module handlers read it (WIP). */
+typedef union MapObjectHalfword {
     u16 index;      /* slot 0: a linked object, 0xffff for none; kind 7 (map_object_refresh_cell_markers) */
     u8 bytes[2];    /* slot 3 compares bytes[1] with a per-module value; map_object_set_property reads
                      * bytes[0] and bytes[1] as angles */
-} Object44Link;
+} MapObjectHalfword;
 
 /*
- * Per-kind state of an Object44 from +0x34 (WIP views, by Object44.unk4): the
+ * Per-kind state of an MapObject from +0x34 (WIP views, by MapObject.unk4): the
  * GAME and FDAT code read it as bytes or halfwords by kind; map_object_pool_reset
  * clears the first three words.
  */
-typedef struct Object44Bytes {
+typedef struct MapObjectBytes {
     u8 unk34[4];
     u8 unk38;       /* +0x38: radius scale, 0x80 = 1 (flag 0x10) */
     u8 unk39;       /* +0x39: event_spawn_effect_object stores the index - 124 of the record it spawns */
-    Object44Link unk3a; /* +0x3a */
+    MapObjectHalfword unk3a; /* +0x3a */
     u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
     u8 unk3d[2];
     u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
     u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (map_object_step_offset_motion); FDAT slot 0
                      * copies it to the linked object's unk0 */
     u8 unk41[3];
-} Object44Bytes;
+} MapObjectBytes;
 
-typedef struct Object44Halves {
+typedef struct MapObjectHalves {
     u16 unk34[2];
     u16 unk38;
     u16 unk3a;
@@ -371,163 +371,163 @@ typedef struct Object44Halves {
                      * other wing's index, 0xffff for none */
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (map_object_step_offset_motion); kinds 0/1/0x1b:
                      * frames since the door started opening */
-    u16 unk42;      /* +0x42: kinds 0/1/0x1b: yaw when shut */
-} Object44Halves;
+    u16 base_yaw;   /* +0x42: kinds 0/1/0x1b: yaw when shut */
+} MapObjectHalves;
 
 /* Signed views of the same bytes and halfwords (kinds 6, 0x60..0x62, 0xe0, 0xea). */
-typedef struct Object44SBytes {
+typedef struct MapObjectSBytes {
     s8 unk34[4];
     s8 unk38;
     s8 unk39;
     s8 unk3a;
     s8 unk3b;
-    s8 unk3c;       /* +0x3c: kind 0xea: x shift in map cells (translate_player_effects_and_actors) */
-    s8 unk3d;       /* +0x3d: kind 0xea: z shift */
+    s8 cell_dx;     /* +0x3c: kind 0xea: x shift in map cells (translate_player_effects_and_actors) */
+    s8 cell_dz;     /* +0x3d: kind 0xea: z shift */
     s8 unk3e;
     s8 unk3f;
-    s8 unk40;       /* +0x40: kind 0xe0: shift passed to resource_request_transition (with unk41, unk42) */
-    s8 unk41;
-    s8 unk42;
+    s8 shift_x;     /* +0x40: kind 0xe0: shift passed to resource_request_transition (with unk41, unk42) */
+    s8 shift_z;
+    s8 shift_y;
     s8 unk43;
-} Object44SBytes;
+} MapObjectSBytes;
 
-typedef struct Object44SHalves {
+typedef struct MapObjectSHalves {
     s16 unk34[2];
     s16 unk38;
     s16 unk3a;
     s16 unk3c;
-    s16 unk3e;      /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect,
+    s16 motion_velocity; /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect,
                      * map_object_spawn_scattered_effect) */
     s16 unk40;      /* +0x40: kind 6: turn speed (angle_velocity_step) */
-    s16 unk42;
-} Object44SHalves;
+    s16 base_yaw;
+} MapObjectSHalves;
 
-typedef struct Object44Words {
-    s32 unk34;
+typedef struct MapObjectWords {
+    s32 animation_cache;
     s32 unk38;
     s32 unk3c;
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
-} Object44Words;
+} MapObjectWords;
 
 /* Kinds render_scene_and_update_resources draws with a model (0xf2 and the
  * default kinds): pose slot first. */
-typedef struct Object44Model {
-    struct AnimSlot *unk34; /* +0x34: pose slot (animation_prepare_asset_vertices) */
-    u8 unk38;       /* +0x38: kind 0xf2: x range in map cells it is drawn from */
-    u8 unk39;       /* +0x39: z range */
-    s16 unk3a;      /* +0x3a: kind 0xf2: x offset of the drawn position in map cells */
-    s16 unk3c;      /* +0x3c: z offset */
-    u8 unk3e;       /* +0x3e: height of the drawn position in map cells */
+typedef struct MapObjectModel {
+    struct AnimSlot *animation_cache; /* +0x34: pose slot (animation_prepare_asset_vertices) */
+    u8 radius_x;    /* +0x38: kind 0xf2: x range in map cells it is drawn from */
+    u8 radius_z;    /* +0x39: z range */
+    s16 cell_offset_x; /* +0x3a: kind 0xf2: x offset of the drawn position in map cells */
+    s16 cell_offset_z; /* +0x3c: z offset */
+    u8 cell_height; /* +0x3e: height of the drawn position in map cells */
     u8 unk3f[5];
-} Object44Model;
+} MapObjectModel;
 
 /* Kind 0xf0, drawn in view space by render_animated_object. */
-typedef struct Object44View {
-    struct AnimSlot *unk34; /* +0x34: pose slot */
-    u8 unk38;       /* +0x38: x range in map cells it is drawn from */
-    u8 unk39;       /* +0x39: z range */
-    u8 unk3a;       /* +0x3a: depth below 0x1fff */
-    u8 unk3b;       /* +0x3b: light record */
-    u8 unk3c;       /* +0x3c: shade */
+typedef struct MapObjectAnimated {
+    struct AnimSlot *animation_cache; /* +0x34: pose slot */
+    u8 radius_x;    /* +0x38: x range in map cells it is drawn from */
+    u8 radius_z;    /* +0x39: z range */
+    u8 depth_code;  /* +0x3a: depth below 0x1fff */
+    u8 lighting_index; /* +0x3b: light record */
+    u8 blend_mode;  /* +0x3c: shade */
     u8 unk3d[7];
-} Object44View;
+} MapObjectAnimated;
 
 /* Kind 0x1f: a sound played by distance from the player. */
-typedef struct Object44Sound {
+typedef struct MapObjectAmbientSound {
     u8 unk34[4];
-    u8 unk38;       /* +0x38: half width (1024 units) */
-    u8 unk39;       /* +0x39: half depth */
-    u8 unk3a;       /* +0x3a: sound effect - 496 */
-    u8 unk3b;       /* +0x3b: volume */
-    u8 unk3c;       /* +0x3c: fade-in distance (2048 units) */
-    u8 unk3d;       /* +0x3d: bit 0 fades by height too */
-    u16 unk3e;      /* +0x3e: interval in 6-frame units */
-    s32 unk40;      /* +0x40: frame of the next play */
-} Object44Sound;
+    u8 region_width; /* +0x38: half width (1024 units) */
+    u8 region_depth; /* +0x39: half depth */
+    u8 sound_id;    /* +0x3a: sound effect - 496 */
+    u8 maximum_volume; /* +0x3b: volume */
+    u8 fade_distance; /* +0x3c: fade-in distance (2048 units) */
+    u8 vertical_attenuation_flags; /* +0x3d: bit 0 fades by height too */
+    u16 repeat_delay_units; /* +0x3e: interval in 6-frame units */
+    s32 next_sound_frame; /* +0x40: frame of the next play */
+} MapObjectAmbientSound;
 
-typedef union Object44Arg {
-    Object44Bytes b;
-    Object44Halves h;
-    Object44Words w;
-    Object44SBytes sb;
-    Object44SHalves sh;
-    Object44Model m;
-    Object44View v;
-    Object44Sound s;
-} Object44Arg;
+typedef union MapObjectArg {
+    MapObjectBytes b;
+    MapObjectHalves h;
+    MapObjectWords w;
+    MapObjectSBytes sb;
+    MapObjectSHalves sh;
+    MapObjectModel m;
+    MapObjectAnimated v;
+    MapObjectAmbientSound s;
+} MapObjectArg;
 
-typedef struct Object44 {
-    u8 unk0;        /* +0x00: area (1 or 2): picks the map cell layer */
-    u8 unk1;        /* +0x01: 0x80 after set-up */
-    u8 unk2;
-    u8 unk3;        /* +0x03: flags; 0x10 scales its radius by arg.b.unk38, 0x4 takes Object44Def.unke/unk10 */
-    u8 unk4;        /* +0x04: kind, 0xff when free */
-    u8 unk5;
-    u16 unk6;       /* +0x06: index of its Object44Def; 0xff when free */
-    u16 unk8;       /* +0x08: FDAT_023 clears it when the key is used */
-    u16 unka;       /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
-    u16 unkc;       /* +0x0c: reach below its position (collision tests) */
-    s16 unke;
-    u16 unk10;      /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; light
+typedef struct MapObject {
+    u8 layer_mask;  /* +0x00: area (1 or 2): picks the map cell layer */
+    u8 animation_id; /* +0x01: 0x80 after set-up */
+    u8 render_mode;
+    u8 flags;       /* +0x03: flags; 0x10 scales its radius by arg.b.unk38, 0x4 takes MapObjectDef.unke/unk10 */
+    u8 action;      /* +0x04: kind, 0xff when free */
+    u8 lighting_override_index;
+    u16 object_id;  /* +0x06: index of its MapObjectDef; 0xff when free */
+    u16 action_state; /* +0x08: FDAT_023 clears it when the key is used */
+    u16 animation_phase; /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
+    u16 collision_height; /* +0x0c: reach below its position (collision tests) */
+    s16 render_depth_offset;
+    u16 lighting_blend; /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; light
                      * blend toward light2 (render_world_model) */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (scene_pose_interpolate) */
     SVECTOR scale;  /* +0x2c: 0x1000 = 1; FDAT_017 clears vx, vy and vz */
-    Object44Arg arg; /* +0x34 */
-} Object44;
+    MapObjectArg arg; /* +0x34 */
+} MapObject;
 
 /*
- * Object44Def +0x0c..+0x17 by type (WIP views): most types read bytes; the
+ * MapObjectDef +0x0c..+0x17 by type (WIP views): most types read bytes; the
  * moving types 0x51, 0x52 and 0x55 (map_object_update_actions) and the collision tests read
  * +0x0c..+0x11 as halfwords.
  */
-typedef struct Object44DefBytes {
+typedef struct MapObjectDefBytes {
     u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none; kind 0x51: first
                      * vertex map_object_sample_world_vertex tests */
     u8 unkd;        /* +0x0d: kind 0x51: second vertex */
     u8 unke;
-    u8 unkf;        /* +0x0f: sound effect when it starts moving (map_object_play_spatial_sound) */
+    u8 sound_id;    /* +0x0f: sound effect when it starts moving (map_object_play_spatial_sound) */
     u8 unk10[2];
-    u8 unk12[4];    /* +0x12: kinds 0x51/0x52/0x55: passed to effect_dispatch_magic_impact on a hit */
-    u8 unk16;       /* +0x16: kinds 0x51/0x52/0x55: sound effect (- 496), 0xff for none */
+    u8 impact_magic_values[4]; /* +0x12: kinds 0x51/0x52/0x55: passed to effect_dispatch_magic_impact on a hit */
+    u8 collision_sound_id; /* +0x16: kinds 0x51/0x52/0x55: sound effect (- 496), 0xff for none */
     u8 unk17;       /* +0x17: map layer byte kinds 0x51/0x52 set; kind 0x55: speed / 16 */
-} Object44DefBytes;
+} MapObjectDefBytes;
 
-typedef struct Object44DefHalves {
-    u16 unkc;       /* +0x0c: kinds 0x52/0x55: vertex map_object_sample_world_vertex tests */
+typedef struct MapObjectDefHalves {
+    u16 vertex_index; /* +0x0c: kinds 0x52/0x55: vertex map_object_sample_world_vertex tests */
     u16 unke;       /* +0x0e: collision radius */
     u16 unk10;      /* +0x10: collision height */
     u8 unk12[6];
-} Object44DefHalves;
+} MapObjectDefHalves;
 
 /* Signed view of the same halfwords: the pick-up offsets of the item kinds (event_map_object_interact). */
-typedef struct Object44DefSHalves {
-    s16 unkc;       /* +0x0c: items: height offset of the held position
+typedef struct MapObjectDefSHalves {
+    s16 height_offset; /* +0x0c: items: height offset of the held position
                      * (scene_position_from_camera_offset dy) */
-    s16 unke;       /* +0x0e: items: distance of the held position (dz) */
-    s16 unk10;      /* +0x10: items: Object44.unke while held */
+    s16 depth_offset; /* +0x0e: items: distance of the held position (dz) */
+    s16 held_depth_offset; /* +0x10: items: MapObject.unke while held */
     u8 unk12[6];
-} Object44DefSHalves;
+} MapObjectDefSHalves;
 
-typedef union Object44DefArg {
-    Object44DefBytes b;
-    Object44DefHalves h;
-    Object44DefSHalves sh;
-} Object44DefArg;
+typedef union MapObjectDefArg {
+    MapObjectDefBytes b;
+    MapObjectDefHalves h;
+    MapObjectDefSHalves sh;
+} MapObjectDefArg;
 
-/* The 0x18-byte records Object44.unk6 indexes (WIP). */
-typedef struct Object44Def {
-    u8 unk0;        /* +0x00: type (map_object_set_property) */
-    u8 unk1;        /* +0x01: picks the kind map_object_spawn_effect gives a spawned record */
-    u8 unk2;
-    u8 unk3;        /* +0x03: Object44.unk3 flags at set-up */
-    u16 unk4;       /* +0x04: radius */
-    u16 unk6;       /* +0x06: radius of the turned kinds (map_object_find_interaction_target) */
-    u16 unk8;       /* +0x08: height */
-    u16 unka;
-    Object44DefArg arg; /* +0x0c */
-} Object44Def;
+/* The 0x18-byte records MapObject.unk6 indexes (WIP). */
+typedef struct MapObjectDef {
+    u8 action;      /* +0x00: type (map_object_set_property) */
+    u8 kind;        /* +0x01: picks the kind map_object_spawn_effect gives a spawned record */
+    u8 vab_resource_index;
+    u8 flags;       /* +0x03: MapObject.unk3 flags at set-up */
+    u16 collision_radius; /* +0x04: radius */
+    u16 interaction_radius; /* +0x06: radius of the turned kinds (map_object_find_interaction_target) */
+    u16 collision_height; /* +0x08: height */
+    u16 initial_render_depth_offset;
+    MapObjectDefArg arg; /* +0x0c */
+} MapObjectDef;
 
 /* One of the 24 positions kinds 5 and 16 record behind them (effect_construct_record). */
 typedef struct Object4cTrail {
@@ -824,24 +824,24 @@ typedef struct Data8018fad4 {
     s8 shift[3];    /* +0x19: 0x7f is no shift */
     s16 unk1c;      /* +0x1c: sequence volume while the loader fades it out */
     u8 unk1e[2];
-    Object44 *unk20; /* +0x20: unk24 once a kind 0xf0 record was drawn, NULL when
+    MapObject *unk20; /* +0x20: unk24 once a kind 0xf0 record was drawn, NULL when
                       * the view hides them; drawn while an area loads */
-    Object44 unk24; /* +0x24: copy of the last kind 0xf0 record drawn */
+    MapObject unk24; /* +0x24: copy of the last kind 0xf0 record drawn */
 } Data8018fad4;
 
-typedef struct Data8018fb3c {
-    Object44Def defs[332];  /* WIP count: fills the space before objects */
-    Object44 objects[0x18c];
+typedef struct MapObjectState {
+    MapObjectDef defs[332]; /* WIP count: fills the space before objects */
+    MapObject objects[0x18c];
     u8 unk8850[4];
-    Object44Def *unk8854;   /* +0x8854: the def of unk8858 (map_object_update_actions) */
-    Object44 *unk8858;      /* +0x8858: the record map_object_find_collision_at_point does not test;
+    MapObjectDef *current_def; /* +0x8854: the def of unk8858 (map_object_update_actions) */
+    MapObject *current;     /* +0x8858: the record map_object_find_collision_at_point does not test;
                              * the object FDAT slot 9 handlers test */
     u8 unk885c[2];
-    u16 unk885e;
-    u16 unk8860;
-    u16 unk8862;
+    u16 scatter_pool_sequence;
+    u16 definition_drop_sequence;
+    u16 placement_drop_sequence;
     u8 unk8864[4];
-} Data8018fb3c;
+} MapObjectState;
 
 /*
  * FDAT window words in the load image (owner unit unknown): [2] the window
@@ -854,7 +854,7 @@ extern u8 resource_space[0x4d800];
 
 extern ActorState actor_status;
 extern Data8018fad4 asset_status;
-extern Data8018fb3c map_objects_slots;
+extern MapObjectState map_objects_slots;
 extern Data801b24e4 cur_avatar_status;
 /* Area map bits: rooms seen per area (32 areas x 160 bits) and the 80 x 80 grid of
  * visited cells map_reveal_visited_rects marks rooms from. */
@@ -895,7 +895,7 @@ extern Data801ba984 cur_evt_state;
 /* Two counts per item id (0..149; game_counter_increment caps each at 99), cleared by
  * event_state_initialize. */
 extern u8 event_item_counters_table[2][150];
-extern Data801d4464 map_world;
+extern MapWorld map_world;
 extern Data801e7edc movie_state;
 
 /*

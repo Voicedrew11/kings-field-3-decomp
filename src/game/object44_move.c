@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: point relative to the player and Object44 position/angle
+ * GAME.EXE: point relative to the player and MapObject position/angle
  * interpolation helpers (WIP module).
  */
 #include <kf/lib/address.h>
@@ -32,7 +32,7 @@ void scene_position_from_camera_offset(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, 
 
 /* Moves obj between two positions and two angles by t (either pair may be NULL). */
 ADDRESS(0x8005bee0, 0xe4)
-void scene_pose_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
+void scene_pose_interpolate(MapObject *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (from != NULL) {
         obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
@@ -47,7 +47,7 @@ void scene_pose_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *af
 }
 
 ADDRESS(0x8005bfc4, 0x88)
-void scene_position_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
+void scene_position_interpolate(MapObject *obj, VECTOR *from, VECTOR *to, s32 t)
 {
     if (from != NULL) {
         obj->pos.vx = fixed_lerp_q12(from->vx, to->vx, t);
@@ -57,7 +57,7 @@ void scene_position_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, s32 t)
 }
 
 ADDRESS(0x8005c04c, 0x88)
-void scene_angles_interpolate(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t)
+void scene_angles_interpolate(MapObject *obj, SVECTOR *afrom, SVECTOR *ato, s32 t)
 {
     if (afrom != NULL) {
         obj->angle.vx = angle_lerp_shortest_q12(afrom->vx, ato->vx, t);

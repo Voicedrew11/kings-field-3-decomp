@@ -1310,7 +1310,7 @@ void actor_update_behavior(void)
         break;
     }
     case 26: {
-        Object44 *door;
+        MapObject *door;
 
         if (obj->target_action_state == 0) {
             obj->target_action_state = 0xf0;
@@ -1323,7 +1323,7 @@ void actor_update_behavior(void)
         switch (obj->target_phase) {
         case 0:
             door = &map_objects_slots.objects[obj->unk20];
-            if (door->unk8 < 2 || door->angle.vx == 0 || door->angle.vx >= 3072) {
+            if (door->action_state < 2 || door->angle.vx == 0 || door->angle.vx >= 3072) {
                 break;
             }
             obj->target_phase = 2;

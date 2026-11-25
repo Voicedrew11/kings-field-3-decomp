@@ -22,7 +22,7 @@ void area_update_noop(void);
 void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_move_object_and_warp_cells(Object44 *obj);
+void area_region_trigger_move_object_and_warp_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -114,50 +114,50 @@ ADDRESS(0x801e84e8, 0x25c)
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *link;
-    Object44Def *def;
+    MapObject *obj;
+    MapObject *link;
+    MapObjectDef *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+        if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
                         notify_enqueue(obj->arg.b.unk3f);
                     }
-                    if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
+                    if (obj->object_id == 212 || obj->object_id == 213 || obj->object_id == 0xf7) {
                         notify_enqueue(0x1a);
-                    } else if (obj->unk6 == 0xb7) {
+                    } else if (obj->object_id == 0xb7) {
                         notify_enqueue(0x1e);
-                    } else if (obj->unk6 == 0x12d) {
+                    } else if (obj->object_id == 0x12d) {
                         notify_enqueue(0x1f);
-                    } else if (obj->unk6 == 0x12e) {
+                    } else if (obj->object_id == 0x12e) {
                         notify_enqueue(0x20);
-                    } else if (obj->unk6 == 0xf5) {
+                    } else if (obj->object_id == 0xf5) {
                         notify_enqueue(0xe);
-                    } else if (obj->unk6 == 0xba || obj->unk6 == 303 || obj->unk6 == 304) {
+                    } else if (obj->object_id == 0xba || obj->object_id == 303 || obj->object_id == 304) {
                         notify_enqueue(0x22);
-                    } else if (obj->unk6 == 0x131) {
+                    } else if (obj->object_id == 0x131) {
                         notify_enqueue(0x21);
-                    } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
+                    } else if (obj->object_id >= 190 && obj->object_id < 198) {
                         notify_enqueue(8);
                     }
                 }
             } else {
                 link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     goto message;
                 }
-                link->unk0 = obj->arg.b.unk40;
+                link->layer_mask = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
                 event_map_object_interact(link);
-                link->unk0 = 0;
+                link->layer_mask = 0;
                 link->arg.b.unk38 = 0;
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     obj->arg.b.unk3a.index = 0xffff;
                 }
             }
@@ -180,7 +180,7 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
 {
     VECTOR at;
     SVECTOR facing;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
     s32 j;
     s32 k;
@@ -196,11 +196,11 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
         obj = &map_objects_slots.objects[0x8d];
         actor_status.objects[7].slot_state = 8;
         actor_status.objects[26].slot_state = 1;
-        map_objects_slots.objects[0x8d].unk2 = 5;
-        map_objects_slots.objects[0x8d].unk10 = 0xfff;
+        map_objects_slots.objects[0x8d].render_mode = 5;
+        map_objects_slots.objects[0x8d].lighting_blend = 0xfff;
         for (j = 15; j != -1; j--) {
-            if ((s16)(obj->unk10 -= 256) < 0) {
-                obj->unk10 = 0;
+            if ((s16)(obj->lighting_blend -= 256) < 0) {
+                obj->lighting_blend = 0;
             }
             cd_request_wait_idle();
             cd_request_service_vab();
@@ -208,16 +208,16 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
             player_get_camera_pose(&at, &facing);
             render_game_frame(&at, &facing);
         }
-        obj->unk5 = 0x32;
-        obj->unk2 = 5;
+        obj->lighting_override_index = 0x32;
+        obj->render_mode = 5;
         for (j = 15; j != -1; j--) {
             area_set_light_blend(16 - j);
             light_reset_records();
             light_refresh_record_rotations();
             player_update_status_visuals();
-            obj->unk10 += 256;
-            if (obj->unk10 >= 4095) {
-                obj->unk10 = 0xfff;
+            obj->lighting_blend += 256;
+            if (obj->lighting_blend >= 4095) {
+                obj->lighting_blend = 0xfff;
             }
             cd_request_wait_idle();
             cd_request_service_vab();
@@ -225,10 +225,10 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
             player_get_camera_pose(&at, &facing);
             render_game_frame(&at, &facing);
         }
-        obj->unk6 = 0xff;
-        obj->unk4 = 0xff;
-        obj->unk0 = 0;
-        map_objects_slots.objects[159].unk6 = 0xff;
+        obj->object_id = 0xff;
+        obj->action = 0xff;
+        obj->layer_mask = 0;
+        map_objects_slots.objects[159].object_id = 0xff;
         k = 74;
         if (map_objects_slots.objects[k].arg.b.unk38 < 253) {
             map_objects_slots.objects[k].arg.b.unk38 = 0xff;
@@ -254,7 +254,7 @@ void area_on_actor_removed_noop(void)
  * swaps the warp-arrival cells.
  */
 ADDRESS(0x801e89b4, 0x134)
-void area_region_trigger_move_object_and_warp_cells(Object44 *obj)
+void area_region_trigger_move_object_and_warp_cells(MapObject *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -321,19 +321,19 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     cur_avatar_status.unk34[0] += 20;
     player_learn_element_magic(0);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[55];
-    map_objects_slots.objects[55].unk5 = 0x32;
-    map_objects_slots.objects[55].unk2 = 5;
+    map_objects_slots.objects[55].lighting_override_index = 0x32;
+    map_objects_slots.objects[55].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -341,14 +341,14 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     obj = &map_objects_slots.objects[148];
-    map_objects_slots.objects[148].unk5 = 0x32;
-    map_objects_slots.objects[148].unk2 = 5;
+    map_objects_slots.objects[148].lighting_override_index = 0x32;
+    map_objects_slots.objects[148].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -356,7 +356,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     conversation_record_mark_page(10, 0);
     conversation_record_mark_page(10, 1);
 }
@@ -401,8 +401,8 @@ void area_on_load_restore_objects_and_light(void)
     if (cur_evt_state.unke[0xf] != 0) {
         actor_status.objects[7].slot_state = 8;
         actor_status.objects[26].slot_state = 1;
-        map_objects_slots.objects[0x8d].unk6 = 0xff;
-        map_objects_slots.objects[159].unk6 = 0xff;
+        map_objects_slots.objects[0x8d].object_id = 0xff;
+        map_objects_slots.objects[159].object_id = 0xff;
         k = 74;
         if (map_objects_slots.objects[k].arg.b.unk38 < 253) {
             map_objects_slots.objects[k].arg.b.unk38 = 0xff;
@@ -414,8 +414,8 @@ void area_on_load_restore_objects_and_light(void)
         area_set_light_blend(0);
     }
     if (cur_evt_state.unk7f[0] != 0) {
-        map_objects_slots.objects[55].unk6 = 0xff;
-        map_objects_slots.objects[148].unk6 = 0xff;
+        map_objects_slots.objects[55].object_id = 0xff;
+        map_objects_slots.objects[148].object_id = 0xff;
     }
     cur_evt_state.unk84[5] = 4;
 }

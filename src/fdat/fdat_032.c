@@ -18,7 +18,7 @@ void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -99,7 +99,7 @@ void area_on_actor_removed_noop(void)
  * (player +0x10a) and copies the normal pattern back.
  */
 ADDRESS(0x801e85c0, 0xc0)
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -159,7 +159,7 @@ void area_talk_event_give_item_and_set_flag(Actor *record, s32 event)
 ADDRESS(0x801e8708, 0x35c)
 void area_on_load_restore_actor_groups_and_doors(void)
 {
-    Object44 *door;
+    MapObject *door;
     s32 i;
     s32 k;
 
@@ -171,12 +171,12 @@ void area_on_load_restore_actor_groups_and_doors(void)
 
         record->slot_state = 1;
         door = &map_objects_slots.objects[253];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 253;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
         door = &map_objects_slots.objects[90];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 90;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         {
@@ -195,7 +195,7 @@ void area_on_load_restore_actor_groups_and_doors(void)
         }
     } else if (cur_evt_state.unk84[5] != 10) {
         map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-        map_objects_slots.objects[90].unk0 = 2;
+        map_objects_slots.objects[90].layer_mask = 2;
         map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
         {
             Actor *records = actor_status.objects;
@@ -220,12 +220,12 @@ void area_on_load_restore_actor_groups_and_doors(void)
 
             record->slot_state = 1;
             door = &map_objects_slots.objects[253];
-            door->unk0 = 0;
+            door->layer_mask = 0;
             k = 253;
             map_objects_slots.objects[k].arg.b.unk38 = 0;
             map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
             door = &map_objects_slots.objects[90];
-            door->unk0 = 0;
+            door->layer_mask = 0;
             k = 90;
             map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
             {
@@ -244,7 +244,7 @@ void area_on_load_restore_actor_groups_and_doors(void)
             }
         } else {
             map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-            map_objects_slots.objects[90].unk0 = 2;
+            map_objects_slots.objects[90].layer_mask = 2;
             map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
             {
                 Actor *records = actor_status.objects;
@@ -257,7 +257,7 @@ void area_on_load_restore_actor_groups_and_doors(void)
     }
     if (cur_evt_state.unk32[0xc] != 0) {
         if (cur_evt_state.unk32[0xc] == 1) {
-            map_objects_slots.objects[253].unk0 = 2;
+            map_objects_slots.objects[253].layer_mask = 2;
             map_objects_slots.objects[253].arg.b.unk38 = 0xff;
             cur_evt_state.unk32[0xc] = 2;
         }

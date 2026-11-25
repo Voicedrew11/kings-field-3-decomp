@@ -98,24 +98,24 @@ void area_fade_out_object_pair(s32 a, s32 b)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *first;
-    Object44 *second;
+    MapObject *first;
+    MapObject *second;
     s32 i;
 
     first = &map_objects_slots.objects[a];
     second = &map_objects_slots.objects[b];
-    first->unk5 = 0x32;
-    second->unk5 = 0x32;
-    first->unk2 = 5;
-    second->unk2 = 5;
+    first->lighting_override_index = 0x32;
+    second->lighting_override_index = 0x32;
+    first->render_mode = 5;
+    second->render_mode = 5;
     for (i = 15; i != -1; i--) {
-        first->unk10 += 256;
-        second->unk10 += 256;
-        if (first->unk10 >= 4095) {
-            first->unk10 = 0xfff;
+        first->lighting_blend += 256;
+        second->lighting_blend += 256;
+        if (first->lighting_blend >= 4095) {
+            first->lighting_blend = 0xfff;
         }
-        if (second->unk10 >= 4095) {
-            second->unk10 = 0xfff;
+        if (second->lighting_blend >= 4095) {
+            second->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -123,8 +123,8 @@ void area_fade_out_object_pair(s32 a, s32 b)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    first->unk6 = 0xff;
-    second->unk6 = 0xff;
+    first->object_id = 0xff;
+    second->object_id = 0xff;
 }
 
 #include "shared/area_disable_actor_range.inc"
@@ -192,13 +192,13 @@ void area_on_load_restore_removed_objects(void)
 {
     if (cur_evt_state.unk32[0x1b] != 0) {
         area_disable_actor_range(4, 2);
-        map_objects_slots.objects[0x73].unk6 = 0xff;
-        map_objects_slots.objects[0x74].unk6 = 0xff;
+        map_objects_slots.objects[0x73].object_id = 0xff;
+        map_objects_slots.objects[0x74].object_id = 0xff;
     }
     if (cur_evt_state.unk32[0x1c] != 0) {
         area_disable_actor_range(10, 2);
-        map_objects_slots.objects[0x75].unk6 = 0xff;
-        map_objects_slots.objects[0x76].unk6 = 0xff;
+        map_objects_slots.objects[0x75].object_id = 0xff;
+        map_objects_slots.objects[0x76].object_id = 0xff;
     }
     cur_evt_state.unk84[5] = 0xf;
 }

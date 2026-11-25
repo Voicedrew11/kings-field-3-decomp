@@ -19,8 +19,8 @@ void area_update_noop(void);
 void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
-void area_init_map_object_socket(Object44 *obj, Object44Def *def);
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
+void area_init_map_object_socket(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_socket(void);
 void func_801e8884(void);
 void func_801e888c(void);
@@ -94,7 +94,7 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
     VECTOR unused;
     SVECTOR unused_angle;
     s32 i;
-    Object44 *obj;
+    MapObject *obj;
 
     if (item != 0x85) {
         return;
@@ -102,7 +102,7 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
     i = map_object_find_interaction_target(0, pos, 800, 0x6a4, angle->vy, 0x200);
     if (i != -1) {
         obj = &map_objects_slots.objects[i];
-        if (obj->unk6 == 0x140) {
+        if (obj->object_id == 0x140) {
             if (angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
                 return;
             }
@@ -110,7 +110,7 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
                 return;
             }
             obj->arg.b.unk38 = item;
-            obj->unk8 = 0;
+            obj->action_state = 0;
             cur_evt_state.unk0 = 1;
             game_counter_decrement(0x85);
             event_spawn_effect_object(obj, 0x85);
@@ -140,7 +140,7 @@ void area_on_actor_removed_noop(void)
  * (player +0x10a) and copies the normal pattern back.
  */
 ADDRESS(0x801e86f4, 0xc0)
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;
@@ -157,10 +157,10 @@ void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
 
 /* Slot 8: an object made from definition kind 0xa7 takes that kind. */
 ADDRESS(0x801e87b4, 0x1c)
-void area_init_map_object_socket(Object44 *obj, Object44Def *def)
+void area_init_map_object_socket(MapObject *obj, MapObjectDef *def)
 {
-    if (def->unk0 == 0xa7) {
-        obj->unk4 = 0xa7;
+    if (def->action == 0xa7) {
+        obj->action = 0xa7;
     }
 }
 
@@ -173,11 +173,11 @@ static SVECTOR area_socket_motion_end_offset = {0, -1600, 0x100, 0};
 ADDRESS(0x801e87d0, 0xb4)
 void area_update_map_object_socket(void)
 {
-    Object44 *obj = map_objects_slots.unk8858;
-    Object44 *other;
+    MapObject *obj = map_objects_slots.current;
+    MapObject *other;
     s32 i;
 
-    if (obj->unk4 != 0xa7) {
+    if (obj->action != 0xa7) {
         return;
     }
     if (map_object_step_offset_motion(obj, &map_objects_slots.objects[380 + obj->arg.b.unk39],
@@ -187,8 +187,8 @@ void area_update_map_object_socket(void)
     }
     other = map_objects_slots.objects;
     for (i = 0x18c; i != 0; i--, other++) {
-        if (other->unk4 == 0xe8) {
-            other->unk1 = 0x81;
+        if (other->action == 0xe8) {
+            other->animation_id = 0x81;
             other->arg.b.unk40 = 0;
         }
     }

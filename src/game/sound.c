@@ -194,7 +194,7 @@ void audio_update_listener(VECTOR *listener, SVECTOR *angle)
     if (listener != 0) {
         sound_status.listener = *listener;
         collision_sample_map_cell_layer(listener->vx, listener->vy, listener->vz);
-        sound_status.unk24 = map_world.unk1200a;
+        sound_status.unk24 = map_world.collision_layer_offset;
     }
     if (angle != 0) {
         sound_status.listener_angle = *angle;

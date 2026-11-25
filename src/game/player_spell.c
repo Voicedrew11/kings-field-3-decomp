@@ -228,7 +228,7 @@ void player_select_magic_action(s32 id)
 /*
  * Moves the player speed units along angle (4096ths of a turn), retrying
  * around what collision_query_world hit: the push of the last test, up to six turns
- * along a pushing Object44 (unk3 bit 2), around a wall point, shorter steps,
+ * along a pushing MapObject (unk3 bit 2), around a wall point, shorter steps,
  * one axis at a time, and along the slope of the hit record. Returns 1 when
  * the player moved freely; unk11c keeps the last step tried.
  */
@@ -236,7 +236,7 @@ ADDRESS(0x8002e3f8, 0x8c4)
 s32 player_move_horizontal(s32 angle, s32 speed)
 {
     VECTOR p;
-    Object44 *obj;
+    MapObject *obj;
     s32 dx;
     s32 dz;
     s32 hit;
@@ -271,12 +271,12 @@ retry:
     hit = collision_query_world(p.vx, cur_avatar_status.pos.vy, p.vz, 800, 1700, 0x31);
     if (hit == 0) {
     free:
-        if (map_world.unk12034 >= 64) {
+        if (map_world.collision_slope_push >= 64) {
             s32 px;
             s32 pz;
 
-            px = rcos(-map_world.unk12038 - 1024) * map_world.unk12034 >> 12;
-            pz = rsin(-map_world.unk12038 - 1024) * map_world.unk12034 >> 12;
+            px = rcos(-map_world.collision_slope_angle - 1024) * map_world.collision_slope_push >> 12;
+            pz = rsin(-map_world.collision_slope_angle - 1024) * map_world.collision_slope_push >> 12;
             if (!pushed) {
                 pushed = 1;
                 dx += px;
@@ -287,22 +287,22 @@ retry:
         moved = 1;
         cur_avatar_status.pos.vx = p.vx;
         cur_avatar_status.pos.vz = p.vz;
-        cur_avatar_status.unk160 = map_world.unk1200a;
+        cur_avatar_status.unk160 = map_world.collision_layer_offset;
         goto done;
     }
     blocked = 0;
     if (!(hit & ~0x207)) {
-        if (map_world.unk12010 + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.unk101 == 0
-            && map_world.unk12014 - map_world.unk12010 < -1700) {
+        if (map_world.collision_floor_height + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.unk101 == 0
+            && map_world.collision_height_limit - map_world.collision_floor_height < -1700) {
             goto free;
         }
         if (!(hit & 2)) {
             blocked = 1;
         }
     }
-    if (map_world.unk1202c != -1) {
-        obj = &map_objects_slots.objects[map_world.unk1202c];
-        if (obj->unk3 & 4) {
+    if (map_world.collision_object_index != -1) {
+        obj = &map_objects_slots.objects[map_world.collision_object_index];
+        if (obj->flags & 4) {
             tries++;
             lz = speed;
             if (lz < 0) {
@@ -377,15 +377,15 @@ retry:
             goto done;
         }
         collision_cache_load_hit_bounds();
-        wx = map_world.unk1203c.vx - cur_avatar_status.pos.vx;
-        wz = map_world.unk1203c.vz - cur_avatar_status.pos.vz;
+        wx = map_world.collision_hit_position.vx - cur_avatar_status.pos.vx;
+        wz = map_world.collision_hit_position.vz - cur_avatar_status.pos.vz;
         a = ratan2(dz - wz, dx - wx);
-        r = map_world.unk1204c + 880;
+        r = map_world.collision_hit_radius + 880;
         dx = rcos(a) * r / 4096;
         dz = rsin(a) * r / 4096;
-        p.vx = dx + map_world.unk1203c.vx;
+        p.vx = dx + map_world.collision_hit_position.vx;
         dx = p.vx - cur_avatar_status.pos.vx;
-        p.vz = dz + map_world.unk1203c.vz;
+        p.vz = dz + map_world.collision_hit_position.vz;
         dz = p.vz - cur_avatar_status.pos.vz;
         goto retry;
     }
@@ -419,7 +419,7 @@ retry:
         if (cornered) {
             goto slide;
         }
-        slope = map_world.unk12004[2] & 3;
+        slope = map_world.collision_layer[2] & 3;
         if (slope == 0 || slope == 2) {
             dz = (dx0 + dz0) >> 1;
             dx = dz;

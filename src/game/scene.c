@@ -133,9 +133,9 @@ ADDRESS(0x80017aa4, 0x1d4)
 void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
 {
     Object4c *a;
-    Object44 *b;
+    MapObject *b;
     Actor *c;
-    Effect *d;
+    MapPlacedEntry *d;
     u16 i;
     u16 j;
     u16 k;
@@ -157,7 +157,7 @@ void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
     b = map_objects_slots.objects;
     j = 0x18c;
     while (j--) {
-        if (b->unk6 != 0xff) {
+        if (b->object_id != 0xff) {
             b->pos.vx += dx;
             b->pos.vz += dz;
             b->pos.vy += dy;
@@ -177,7 +177,7 @@ void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
     d = map_placed_entries;
     l = 128;
     while (l--) {
-        if (d->id != 0xffff) {
+        if (d->model_index != 0xffff) {
             d->pos.vx += dx;
             d->pos.vz += dz;
             d->pos.vy += dy;
@@ -371,7 +371,7 @@ void resource_advance_transition(void)
     u32 *part;
     s32 i;
     u16 j;
-    Object44 *obj44;
+    MapObject *obj44;
     Actor *obj88;
     MapCell *cell;
     u8 *block;
@@ -392,7 +392,7 @@ void resource_advance_transition(void)
         asset_status.step = STEP_WAIT;
         obj44 = map_objects_slots.objects;
         for (i = 395; i != -1; i--) {
-            obj44->unk4 = 0xff;
+            obj44->action = 0xff;
             obj44++;
         }
         cd_archive_queue_read(FILE_FDAT, asset_status.previous[0] * 3, stream_work_buffer,
@@ -405,7 +405,7 @@ void resource_advance_transition(void)
                               resource_transition_set_phase_2);
         resource_copy_words((u32 *)map_world.cells, data + 1, 0x3e80);
         data = (u32 *)((u8 *)data + (*data + 4));
-        resource_copy_words((u32 *)map_world.unk10000, data + 1, 0x800);
+        resource_copy_words((u32 *)map_world.shape_bank, data + 1, 0x800);
         repeat_store_word((u32 *)map_visited_cells, 0, 200);
         if (asset_status.shift[0] != SHIFT_NONE) {
             asset_status.unk15 = 1;
@@ -439,27 +439,27 @@ void resource_advance_transition(void)
             }
             obj44 = map_objects_slots.objects;
             for (i = 395; i != -1; i--) {
-                if (obj44->arg.w.unk34 != 0) {
-                    pool_record_release((AnimSlot *)obj44->arg.w.unk34);
+                if (obj44->arg.w.animation_cache != 0) {
+                    pool_record_release((AnimSlot *)obj44->arg.w.animation_cache);
                 }
-                switch (obj44->unk4) {
+                switch (obj44->action) {
                 case 0x20:
                     memory_free((void *)obj44->arg.w.unk40);
-                    obj44->unk4 = 0xff;
+                    obj44->action = 0xff;
                     break;
                 case 0x22:
                     memory_free((void *)obj44->arg.w.unk40);
-                    obj44->unk4 = 0xff;
+                    obj44->action = 0xff;
                     break;
                 }
-                obj44->unk6 = 0xff;
+                obj44->object_id = 0xff;
                 obj44++;
             }
             if (asset_status.shift[0] != SHIFT_NONE) {
                 cell = map_world.cells[0];
                 for (i = 80 * 80; i != 0; i--) {
-                    cell->layer[0].unk2 &= 3;
-                    cell->layer[1].unk2 &= 3;
+                    cell->layer[0].quarter_turns &= 3;
+                    cell->layer[1].quarter_turns &= 3;
                     cell++;
                 }
                 map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
@@ -471,9 +471,9 @@ void resource_advance_transition(void)
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)&map_objects_slots.defs[300], part + 1, 0xc0);
             part = (u32 *)((u8 *)part + (*part + 4));
-            map_object_initialize_from_placements((Object44Place *)(part + 1));
+            map_object_initialize_from_placements((MapObjectPlacement *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
-            map_placed_expand_sources((EffectSpawn *)(part + 1));
+            map_placed_expand_sources((MapPlacedSource *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)map_rects, part + 1, 0xa0);
             event_world_state_restore_slot(asset_status.previous[0]);

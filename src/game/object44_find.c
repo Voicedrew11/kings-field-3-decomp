@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object44 searches and spawns (WIP module): the collision search
+ * GAME.EXE: MapObject searches and spawns (WIP module): the collision search
  * over the records, the facing test, and the pools of spawned records at the
  * end of the table.
  */
@@ -30,36 +30,37 @@ SDATA(0x8009c2f4, 0x44)
 ADDRESS(0x80045ac8, 0x1b4)
 s32 map_object_find_collision_at_point(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
-    Object44 *obj;
-    Object44Def *def;
+    MapObject *obj;
+    MapObjectDef *def;
     s32 i;
     s32 r;
 
     obj = map_objects_slots.objects;
     for (i = 0; i < 396; i++, obj++) {
-        if (obj->unk6 == 0xff) {
+        if (obj->object_id == 0xff) {
             continue;
         }
-        if (obj->unk0 == 0) {
+        if (obj->layer_mask == 0) {
             continue;
         }
-        if (obj == map_objects_slots.unk8858) {
+        if (obj == map_objects_slots.current) {
             continue;
         }
-        def = &map_objects_slots.defs[obj->unk6];
-        if (def->unk3 & 0x10) {
-            r = def->unk4 * obj->arg.b.unk38 >> 7;
+        def = &map_objects_slots.defs[obj->object_id];
+        if (def->flags & 0x10) {
+            r = def->collision_radius * obj->arg.b.unk38 >> 7;
         } else {
-            r = def->unk4;
+            r = def->collision_radius;
         }
         if (r != 0) {
-            if (vector_distance_to_point(&obj->pos, x, y, z, r + radius, obj->unkc, shape) != -1) {
+            if (vector_distance_to_point(&obj->pos, x, y, z, r + radius, obj->collision_height,
+                                         shape) != -1) {
                 return i;
             }
-        } else if (obj->unk3 & 4) {
+        } else if (obj->flags & 4) {
             if (vector_distance_to_point_in_rotated_box(&obj->angle, &obj->pos, x, y, z,
                                                         def->arg.h.unke + radius, def->arg.h.unk10 + radius,
-                                                        obj->unkc, shape) != -1) {
+                                                        obj->collision_height, shape) != -1) {
                 return i;
             }
         }
@@ -82,17 +83,17 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
     SVECTOR offset;
     VECTOR at;
     MATRIX m;
-    Object44 *obj;
-    Object44Def *def;
+    MapObject *obj;
+    MapObjectDef *def;
     s16 i;
 
     obj = &map_objects_slots.objects[start];
     for (i = start; i < 396; i++, obj++) {
-        if (obj->unk6 == 0xff) {
+        if (obj->object_id == 0xff) {
             continue;
         }
-        def = &map_objects_slots.defs[obj->unk6];
-        if (def->unk0 == 0x1b) {
+        def = &map_objects_slots.defs[obj->object_id];
+        if (def->action == 0x1b) {
             offset.vx = 0x700;
             offset.vy = 0;
             offset.vz = 0;
@@ -100,15 +101,15 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                                         reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->interaction_radius + height,
+                                         obj->collision_height, reach_up) == -1) {
                 continue;
             }
             if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
                                        range)) {
                 return i;
             }
-        } else if (def->unk0 == 0) {
+        } else if (def->action == 0) {
             offset.vx = -0x700;
             offset.vy = 0;
             offset.vz = 0;
@@ -116,15 +117,15 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                                         reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->interaction_radius + height,
+                                         obj->collision_height, reach_up) == -1) {
                 continue;
             }
             if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
                                        range)) {
                 return i;
             }
-        } else if (def->unk0 == 1) {
+        } else if (def->action == 1) {
             offset.vx = -0x400;
             offset.vy = 0;
             offset.vz = 0;
@@ -132,8 +133,8 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
             ApplyMatrix(&m, &offset, &at);
             at.vx += pos->vx;
             at.vz += pos->vz;
-            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->unk6 + height, obj->unkc,
-                                         reach_up) == -1) {
+            if (vector_distance_to_point(&obj->pos, at.vx, pos->vy, at.vz, def->interaction_radius + height,
+                                         obj->collision_height, reach_up) == -1) {
                 continue;
             }
             if (angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - at.vx, obj->pos.vz - at.vz),
@@ -141,11 +142,12 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
                 return i;
             }
         } else {
-            if (vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz, def->unk6 + height, def->unk8,
+            if (vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz,
+                                         def->interaction_radius + height, def->collision_height,
                                          reach_up) == -1) {
                 continue;
             }
-            if (obj->unk6 == 0x95
+            if (obj->object_id == 0x95
                 || angle_within_tolerance(angle, vector_xz_to_angle(obj->pos.vx - pos->vx,
                                                                     obj->pos.vz - pos->vz),
                                           range)) {
@@ -158,11 +160,11 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
 
 /* Gives a record without a kind the kind `kind`. */
 ADDRESS(0x80046014, 0x20)
-void map_object_start_action_if_idle(Object44 *obj, u8 kind)
+void map_object_start_action_if_idle(MapObject *obj, u8 kind)
 {
-    if (obj->unk4 == 0xff) {
-        obj->unk4 = kind;
-        obj->unk8 = 0;
+    if (obj->action == 0xff) {
+        obj->action = kind;
+        obj->action_state = 0;
     }
 }
 
@@ -171,10 +173,10 @@ void map_object_start_action_if_idle(Object44 *obj, u8 kind)
  * whose arg.h.unk3c stamp is oldest, else NULL.
  */
 ADDRESS(0x80046034, 0x88)
-Object44 *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
+MapObject *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
 {
-    Object44 *obj;
-    Object44 *oldest;
+    MapObject *obj;
+    MapObject *oldest;
     s32 best;
     s32 age;
 
@@ -182,7 +184,7 @@ Object44 *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
     oldest = NULL;
     best = 0;
     do {
-        if (obj->unk6 == 0xff) {
+        if (obj->object_id == 0xff) {
             return obj;
         }
         if (stamp != -1) {
@@ -201,28 +203,28 @@ Object44 *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
 }
 
 /*
- * Spawns a record of Object44Def def_id at pos raised by dy in one of the
+ * Spawns a record of MapObjectDef def_id at pos raised by dy in one of the
  * two ten-record pools (which 0: from 370, else from 360), replacing the
  * oldest when the pool is full.
  */
 ADDRESS(0x800460bc, 0x1d8)
 void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
 {
-    Object44 *obj;
-    Object44Def *def;
+    MapObject *obj;
+    MapObjectDef *def;
 
     if (which == 0) {
-        obj = map_object_effect_pool_acquire(370, 10, map_objects_slots.unk8862);
-        obj->arg.h.unk3c = map_objects_slots.unk8862++;
-        obj->unk6 = def_id;
+        obj = map_object_effect_pool_acquire(370, 10, map_objects_slots.placement_drop_sequence);
+        obj->arg.h.unk3c = map_objects_slots.placement_drop_sequence++;
+        obj->object_id = def_id;
     } else {
-        obj = map_object_effect_pool_acquire(360, 10, map_objects_slots.unk8860);
-        obj->arg.h.unk3c = map_objects_slots.unk8860++;
-        obj->unk6 = def_id;
+        obj = map_object_effect_pool_acquire(360, 10, map_objects_slots.definition_drop_sequence);
+        obj->arg.h.unk3c = map_objects_slots.definition_drop_sequence++;
+        obj->object_id = def_id;
     }
     map_object_reset(obj);
-    def = &map_objects_slots.defs[obj->unk6];
-    if (def->unk3 & 0x10) {
+    def = &map_objects_slots.defs[obj->object_id];
+    if (def->flags & 0x10) {
         obj->scale.vx <<= 1;
         obj->scale.vy <<= 1;
         obj->scale.vz <<= 1;
@@ -231,7 +233,7 @@ void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
     obj->pos.vy = dy + pos->vy;
     obj->pos.vz = pos->vz;
     obj->angle.vy = rand() >> 3;
-    switch (def->unk1) {
+    switch (def->kind) {
     case 16:
     case 19:
     case 22:
@@ -255,24 +257,24 @@ void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
         }
         break;
     }
-    obj->arg.sh.unk3e = 0;
+    obj->arg.sh.motion_velocity = 0;
     obj->arg.b.unk38 = 0xff;
 }
 
 /*
- * Spawns an Object44Def 0x95 record (kind 0x62) for Object44 target in the
+ * Spawns an MapObjectDef 0x95 record (kind 0x62) for MapObject target in the
  * ten-record pool from 350, at a random point 600 from pos raised by dy.
  */
 ADDRESS(0x80046294, 0x128)
 void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
 {
-    Object44 *obj;
+    MapObject *obj;
     u16 angle;
 
-    obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
+    obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.scatter_pool_sequence);
     map_object_reset(obj);
-    obj->arg.h.unk3c = map_objects_slots.unk885e++;
-    obj->unk6 = 0x95;
+    obj->arg.h.unk3c = map_objects_slots.scatter_pool_sequence++;
+    obj->object_id = 0x95;
     obj->arg.h.unk3a = target;
     angle = rand() >> 3;
     obj->pos.vx = (rsin(angle) * 600 >> 12) + pos->vx;
@@ -281,14 +283,14 @@ void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
     obj->angle.vy = rand() >> 3;
     obj->arg.b.unk38 = 0xff;
     map_object_start_action_if_idle(obj, 0x62);
-    obj->arg.sh.unk3e = -120;
+    obj->arg.sh.motion_velocity = -120;
 }
 
 /* Passes the switch event id to every record whose kind listens for it. */
 ADDRESS(0x800463bc, 0x24c)
 void map_object_apply_marker_signal(u8 id)
 {
-    Object44 *obj;
+    MapObject *obj;
     u16 i;
     u8 v;
 
@@ -298,7 +300,7 @@ void map_object_apply_marker_signal(u8 id)
     }
     i = 396;
     while (i--) {
-        switch (obj->unk4) {
+        switch (obj->action) {
         case 0x54:
         case 162:
         case 163:
@@ -308,13 +310,13 @@ void map_object_apply_marker_signal(u8 id)
             break;
         case 0x5f:
             if (obj->arg.b.unk38 == id) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
                 obj->arg.b.unk3f = obj->arg.b.unk3f == 0;
             }
             break;
         case 0x58:
             if (obj->arg.b.unk39 == id) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
                 obj->arg.b.unk38 = obj->arg.b.unk38 == 0;
             }
             break;
@@ -332,7 +334,7 @@ void map_object_apply_marker_signal(u8 id)
             break;
         case 0x59:
             if (obj->arg.b.unk38 == id) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
             }
             break;
         case 0x56:
@@ -356,10 +358,10 @@ void map_object_apply_marker_signal(u8 id)
                 v = obj->arg.b.unk38;
                 if (v == id) {
                     if (v < 200) {
-                        if (obj->unk8 != 0) {
+                        if (obj->action_state != 0) {
                             break;
                         }
-                        obj->unk8 = 1;
+                        obj->action_state = 1;
                         if (v < 100) {
                             break;
                         }
@@ -379,9 +381,9 @@ void map_object_apply_marker_signal(u8 id)
  * 4 a kind that always reacts.
  */
 ADDRESS(0x80046608, 0xe0)
-s32 map_object_check_and_consume_marker(Object44 *obj, s32 id)
+s32 map_object_check_and_consume_marker(MapObject *obj, s32 id)
 {
-    switch (obj->unk4) {
+    switch (obj->action) {
     case 0:
     case 1:
     case 2:
@@ -389,7 +391,7 @@ s32 map_object_check_and_consume_marker(Object44 *obj, s32 id)
     case 4:
     case 5:
     case 0x1b:
-        if (obj->unk8 != 0) {
+        if (obj->action_state != 0) {
             return 0;
         }
         /* fall through */
@@ -419,7 +421,7 @@ s32 map_object_check_and_consume_marker(Object44 *obj, s32 id)
 ADDRESS(0x800466e8, 0x78)
 void map_object_process_marker_all(u8 id)
 {
-    Object44 *obj;
+    MapObject *obj;
     u16 i;
 
     obj = map_objects_slots.objects;
@@ -435,12 +437,13 @@ void map_object_process_marker_all(u8 id)
 
 /* World position of vertex of the record's animated model. */
 ADDRESS(0x80046760, 0x124)
-void map_object_sample_world_vertex(Object44 *obj, s32 vertex, VECTOR *out)
+void map_object_sample_world_vertex(MapObject *obj, s32 vertex, VECTOR *out)
 {
     SVECTOR rot;
     SVECTOR v;
 
-    animation_sample_vertex(map_object_asset_index(obj->unk6), obj->unk1, obj->unka, vertex, &v);
+    animation_sample_vertex(map_object_asset_index(obj->object_id), obj->animation_id, obj->animation_phase,
+                            vertex, &v);
     v.vx = v.vx * obj->scale.vx >> 12;
     v.vy = v.vy * obj->scale.vy >> 12;
     v.vz = v.vz * obj->scale.vz >> 12;
@@ -485,14 +488,14 @@ s32 player_camera_within_map_region(s32 x, s32 z, s32 w, s32 h, s32 y)
  * Returns 1 on the last step.
  */
 ADDRESS(0x80046914, 0x2ec)
-s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, SVECTOR *to, s32 fade,
+s32 map_object_step_offset_motion(MapObject *src, MapObject *dst, SVECTOR *from, SVECTOR *to, s32 fade,
                                   s32 steps)
 {
     VECTOR a;
     VECTOR b;
     s32 t;
 
-    switch (src->unk8) {
+    switch (src->action_state) {
     case 0:
         if (src->arg.b.unk38 == 0xff) {
             return 0;
@@ -502,23 +505,23 @@ s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, S
         } else {
             src->arg.b.unk40 = steps - 1;
         }
-        src->unk8 = 1;
+        src->action_state = 1;
         map_object_reset(dst);
-        dst->unk4 = 0x70;
-        dst->unk0 = src->unk0;
-        switch (dst->unk6) {
+        dst->action = 0x70;
+        dst->layer_mask = src->layer_mask;
+        switch (dst->object_id) {
         case 0x88:
             dst->angle.vx = 0x400;
-            dst->unke = 100;
+            dst->render_depth_offset = 100;
             break;
         case 0x85:
-            dst->unke = -220;
+            dst->render_depth_offset = -220;
             break;
         }
         if (fade) {
-            dst->unk1 = 0;
+            dst->animation_id = 0;
         } else {
-            dst->unk1 = 0x80;
+            dst->animation_id = 0x80;
         }
         vector_rotate_yxz(&src->angle, from, &dst->pos);
         dst->pos.vx += src->pos.vx;
@@ -529,9 +532,9 @@ s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, S
         /* fall through */
     case 1:
         if (fade) {
-            dst->unka += 204;
-            if (dst->unka >= 4096) {
-                dst->unka = 0xfff;
+            dst->animation_phase += 204;
+            if (dst->animation_phase >= 4096) {
+                dst->animation_phase = 0xfff;
             }
         }
         vector_rotate_yxz(&src->angle, from, &a);
@@ -545,13 +548,13 @@ s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, S
             return 0;
         }
         if (fade) {
-            dst->unka = 0xfff;
+            dst->animation_phase = 0xfff;
         }
         if ((s16)asset_status.loading == 0) {
             map_object_play_spatial_sound(dst, 0x12);
         }
         dst->arg.b.unk38 = 0xff;
-        src->unk8 = 0x63;
+        src->action_state = 0x63;
         return 1;
     }
     return 0;
@@ -624,7 +627,7 @@ void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
  * out is the view direction scaled by dist. Returns the last yaw.
  */
 ADDRESS(0x80046dcc, 0x244)
-s16 map_object_compute_aim_vector(Object44 *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *out, s16 pitch,
+s16 map_object_compute_aim_vector(MapObject *obj, VECTOR *from, s32 dist, VECTOR *to, SVECTOR *out, s16 pitch,
                                   s16 rate, s32 count)
 {
     VECTOR pos;
@@ -672,7 +675,7 @@ static s16 map_object_door0_view_yaw;
 DATA(0x8009c3dc, 0x2, ".sbss")
 static s16 map_object_door1_view_yaw;
 
-/* Moves an Object44 forward along its yaw by DIST (vector2i_scale_shift11 scale). */
+/* Moves an MapObject forward along its yaw by DIST (vector2i_scale_shift11 scale). */
 #define OBJ44_ADVANCE(obj, dist)                            \
     {                                                       \
         s32 dir[2];                                         \
@@ -684,185 +687,185 @@ static s16 map_object_door1_view_yaw;
     }
 
 /*
- * Steps every live Object44 record by its kind (doors, lifts, levers, switches,
+ * Steps every live MapObject record by its kind (doors, lifts, levers, switches,
  * warps, falling items); kinds without a case go to FDAT handler 9 with the
  * record and its def in map_objects_slots.unk8858 / unk8854.
  */
 ADDRESS(0x80047010, 0x4514)
 void map_object_update_actions(void)
 {
-    Object44 *obj;
-    Object44Def *def;
+    MapObject *obj;
+    MapObjectDef *def;
     s32 i;
 
     obj = map_objects_slots.objects;
     i = 0x18c;
     do {
-        if (obj->unk4 == 0xff) {
+        if (obj->action == 0xff) {
             continue;
         }
-        map_objects_slots.unk8858 = obj;
-        def = &map_objects_slots.defs[obj->unk6];
-        map_objects_slots.unk8854 = def;
-        switch (obj->unk4) {
+        map_objects_slots.current = obj;
+        def = &map_objects_slots.defs[obj->object_id];
+        map_objects_slots.current_def = def;
+        switch (obj->action) {
         case 3:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 break;
             case 1:
-                if (obj->unka == 0) {
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                if (obj->animation_phase == 0) {
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door3_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
-                obj->unka += 72;
-                if (obj->unka == 0xc18) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase += 72;
+                if (obj->animation_phase == 0xc18) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door_shape_pattern, 1, 0xff);
                 }
-                if (obj->unka >= 0x1000) {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 2;
+                if (obj->animation_phase >= 0x1000) {
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 2;
                 }
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door_shape_pattern, 0, 0xff);
-                    obj->unk8 = 21;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 21;
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 21:
-                obj->unka -= 72;
-                if ((s16)obj->unka <= 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase -= 72;
+                if ((s16)obj->animation_phase <= 0) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door3_object_pattern, 0, 0xff);
-                    obj->unka = 0;
-                    obj->unk8 = 0;
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
             default:
-                obj->unk8++;
+                obj->action_state++;
                 break;
             }
             break;
         case 4:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 break;
             case 1:
-                if (obj->unka == 0) {
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                if (obj->animation_phase == 0) {
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door4_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
-                obj->unka += 72;
-                if (obj->unka == 0xc18) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase += 72;
+                if (obj->animation_phase == 0xc18) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door_shape_pattern, 1, 0xff);
                 }
-                if (obj->unka >= 0x1000) {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 2;
+                if (obj->animation_phase >= 0x1000) {
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 2;
                 }
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door_shape_pattern, 0, 0xff);
-                    obj->unk8 = 21;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 21;
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 21:
-                obj->unka -= 72;
-                if ((s16)obj->unka <= 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase -= 72;
+                if ((s16)obj->animation_phase <= 0) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door4_object_pattern, 0, 0xff);
-                    obj->unka = 0;
-                    obj->unk8 = 0;
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
             default:
-                obj->unk8++;
+                obj->action_state++;
                 break;
             }
             break;
         case 5:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 break;
             case 1:
-                if (obj->unka == 0) {
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                if (obj->animation_phase == 0) {
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door5_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
-                obj->unka += 72;
-                if (obj->unka == 0xc18) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase += 72;
+                if (obj->animation_phase == 0xc18) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door5_shape_pattern, 1, 0xff);
                 }
-                if (obj->unka >= 0x1000) {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 2;
+                if (obj->animation_phase >= 0x1000) {
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 2;
                 }
                 break;
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door5_shape_pattern, 0, 0xff);
-                    obj->unk8 = 21;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 21;
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 21:
-                obj->unka -= 72;
-                if ((s16)obj->unka <= 0) {
-                    map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                obj->animation_phase -= 72;
+                if ((s16)obj->animation_phase <= 0) {
+                    map_cell_apply_rotated_pattern(obj->layer_mask, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                                                    map_object_door5_object_pattern, 0, 0xff);
-                    obj->unka = 0;
-                    obj->unk8 = 0;
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
             default:
-                obj->unk8++;
+                obj->action_state++;
                 break;
             }
             break;
         case 2:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
-                obj->unk3 |= 2;
+                obj->flags |= 2;
                 if (obj->arg.b.unk38 >= 150 && obj->arg.b.unk38 <= 198 && (obj->arg.b.unk38 & 1)) {
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                 }
                 break;
             case 1:
-                if (obj->unka == 0) {
-                    obj->unk3 &= ~2;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
+                if (obj->animation_phase == 0) {
+                    obj->flags &= ~2;
+                    map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
                                                  obj->arg.b.unk3c, obj->arg.b.unk39,
                                                  obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                                                  obj->angle.vy, 45);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
-                obj->unka += 72;
-                if (obj->unka == 0xc18) {
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                obj->animation_phase += 72;
+                if (obj->animation_phase == 0xc18) {
+                    map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
                                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
                                                  def->arg.b.unke, obj->angle.vy, 45);
                 }
-                if (obj->unka >= 0x1000) {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 2;
+                if (obj->animation_phase >= 0x1000) {
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 2;
                 }
                 break;
             case 20:
@@ -870,79 +873,80 @@ void map_object_update_actions(void)
                     break;
                 }
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
-                    obj->unk8 = 21;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
+                    obj->action_state = 21;
+                    map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd,
                                                  obj->arg.b.unk3c, obj->arg.b.unk39,
                                                  obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                                                  obj->angle.vy, 45);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 21:
-                obj->unka -= 72;
-                if ((s16)obj->unka <= 0) {
-                    obj->unka = 0;
-                    obj->unk8 = 0;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2,
+                obj->animation_phase -= 72;
+                if ((s16)obj->animation_phase <= 0) {
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
+                    map_cell_copy_rotated_fields(obj->layer_mask,
+                                                 obj->arg.b.unk3a.bytes[1] + def->arg.b.unkd * 2,
                                                  obj->arg.b.unk3c, obj->arg.b.unk39,
                                                  obj->arg.b.unk3a.bytes[0], def->arg.b.unkd, def->arg.b.unke,
                                                  obj->angle.vy, 45);
                 }
                 break;
             default:
-                obj->unk8++;
+                obj->action_state++;
                 break;
             }
             break;
         case 27:
             {
-                Object44 *other;
-                Object44Def *odef;
+                MapObject *other;
+                MapObjectDef *odef;
                 s32 t;
                 u32 turn;
 
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &map_objects_slots.objects[obj->arg.h.unk3e];
-                    odef = &map_objects_slots.defs[other->unk6];
+                    odef = &map_objects_slots.defs[other->object_id];
                 }
-                if (obj->unk8 == 0) {
+                if (obj->action_state == 0) {
                     break;
                 }
-                if (obj->unk3 & 0x80) {
+                if (obj->flags & 0x80) {
                     turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
                                                cur_avatar_status.pos.vz - obj->pos.vz) -
-                            obj->arg.h.unk42) & 0xfff;
+                            obj->arg.h.base_yaw) & 0xfff;
                     if (turn <= 2048) {
-                        obj->unke = -48;
+                        obj->render_depth_offset = -48;
                     } else {
-                        obj->unke = 0xf0;
+                        obj->render_depth_offset = 0xf0;
                     }
                 }
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &map_objects_slots.objects[obj->arg.h.unk3e];
-                    if (other->unk3 & 0x80) {
+                    if (other->flags & 0x80) {
                         turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - other->pos.vx,
                                                    cur_avatar_status.pos.vz - other->pos.vz) -
-                            obj->arg.h.unk42) & 0xfff;
+                            obj->arg.h.base_yaw) & 0xfff;
                     if (turn <= 2048) {
-                            other->unke = 0xf0;
+                            other->render_depth_offset = 0xf0;
                         } else {
-                            other->unke = -48;
+                            other->render_depth_offset = -48;
                         }
                     }
                 } else {
                     other = NULL;
                 }
-                if (obj->unk8 == 1) {
-                    obj->unk8 = 2;
+                if (obj->action_state == 1) {
+                    obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
                     map_object_door1b_view_yaw = scene_display_sys.unk15b08.vy;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(map_object_door1b_view_yaw + 2048, obj->arg.h.unk42,
-                                                         900)) {
+                    if (t < 21 && angle_within_tolerance(map_object_door1b_view_yaw + 2048,
+                                                         obj->arg.h.base_yaw, 900)) {
                         if ((other != NULL &&
                              angle_within_tolerance(map_object_door1b_view_yaw,
                                                     vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
@@ -960,7 +964,7 @@ void map_object_update_actions(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             cur_avatar_status.unk162 = 0;
                             cur_avatar_status.unk164 = -76;
@@ -969,21 +973,22 @@ void map_object_update_actions(void)
                             }
                         }
                     }
-                    obj->unk1 = 0x81;
+                    obj->animation_id = 0x81;
                     obj->angle.vy -= 32;
                     if (other != NULL) {
                         other->angle.vy += 32;
-                        other->unk1 = 0x81;
+                        other->animation_id = 0x81;
                     }
                     if (t == 24) {
-                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                                     obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1],
+                                                     obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                     obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.base_yaw,
+                                                     45);
                     } else if (t == 31) {
-                        obj->unk1 = 0x82;
+                        obj->animation_id = 0x82;
                         obj->arg.h.unk40 = 280;
                         if (other != NULL) {
-                            other->unk1 = 0x82;
+                            other->animation_id = 0x82;
                         }
                     }
                 } else if (t >= 300) {
@@ -996,35 +1001,35 @@ void map_object_update_actions(void)
                             v.vx = -1792;
                             v.vy = 0;
                             v.vz = 0;
-                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc,
-                                                      0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000,
+                                                      obj->collision_height, 0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3,
+                            map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1] + 3,
                                                          obj->arg.b.unk3c, obj->arg.b.unk39,
-                                                         obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.unk42,
-                                                         45);
-                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                                                         obj->arg.b.unk3a.bytes[0], 3, 2,
+                                                         obj->arg.sh.base_yaw, 45);
+                            map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                         }
-                        obj->unk1 = 0x81;
+                        obj->animation_id = 0x81;
                         obj->angle.vy += 32;
                         if (other != NULL) {
                             other->angle.vy -= 32;
-                            other->unk1 = 0x81;
+                            other->animation_id = 0x81;
                         }
                     } else {
-                        obj->unk8 = 0;
-                        obj->unk1 = 0x80;
-                        obj->unke = -50;
+                        obj->action_state = 0;
+                        obj->animation_id = 0x80;
+                        obj->render_depth_offset = -50;
                         if (other != NULL) {
-                            odef->unk0 = 0x24;
-                            other->unk1 = 0x80;
-                            other->unke = -50;
+                            odef->action = 0x24;
+                            other->animation_id = 0x80;
+                            other->render_depth_offset = -50;
                         }
                     }
                 }
@@ -1032,53 +1037,53 @@ void map_object_update_actions(void)
             break;
         case 0:
             {
-                Object44 *other;
-                Object44Def *odef;
+                MapObject *other;
+                MapObjectDef *odef;
                 s32 t;
                 u32 turn;
 
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &map_objects_slots.objects[obj->arg.h.unk3e];
-                    odef = &map_objects_slots.defs[other->unk6];
+                    odef = &map_objects_slots.defs[other->object_id];
                 }
-                if (obj->unk8 == 0) {
+                if (obj->action_state == 0) {
                     break;
                 }
-                if (obj->unk3 & 0x80) {
+                if (obj->flags & 0x80) {
                     turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
                                                cur_avatar_status.pos.vz - obj->pos.vz) -
-                            obj->arg.h.unk42) & 0xfff;
+                            obj->arg.h.base_yaw) & 0xfff;
                     if (turn <= 2048) {
-                        obj->unke = -48;
+                        obj->render_depth_offset = -48;
                     } else {
-                        obj->unke = 0xf0;
+                        obj->render_depth_offset = 0xf0;
                     }
                 }
                 if (obj->arg.h.unk3e != 0xffff) {
                     other = &map_objects_slots.objects[obj->arg.h.unk3e];
-                    if (other->unk3 & 0x80) {
+                    if (other->flags & 0x80) {
                         turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - other->pos.vx,
                                                    cur_avatar_status.pos.vz - other->pos.vz) -
-                            obj->arg.h.unk42) & 0xfff;
+                            obj->arg.h.base_yaw) & 0xfff;
                     if (turn <= 2048) {
-                            other->unke = 0xf0;
+                            other->render_depth_offset = 0xf0;
                         } else {
-                            other->unke = -48;
+                            other->render_depth_offset = -48;
                         }
                     }
                 } else {
                     other = NULL;
                 }
-                if (obj->unk8 == 1) {
-                    obj->unk8 = 2;
+                if (obj->action_state == 1) {
+                    obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
                     map_object_door0_view_yaw = scene_display_sys.unk15b08.vy;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(map_object_door0_view_yaw + 2048, obj->arg.h.unk42,
-                                                         900)) {
+                    if (t < 21 && angle_within_tolerance(map_object_door0_view_yaw + 2048,
+                                                         obj->arg.h.base_yaw, 900)) {
                         if ((other != NULL &&
                              angle_within_tolerance(map_object_door0_view_yaw,
                                                     vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
@@ -1096,7 +1101,7 @@ void map_object_update_actions(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             cur_avatar_status.unk162 = 0;
                             cur_avatar_status.unk164 = -76;
@@ -1105,21 +1110,22 @@ void map_object_update_actions(void)
                             }
                         }
                     }
-                    obj->unk1 = 0x81;
+                    obj->animation_id = 0x81;
                     obj->angle.vy += 32;
                     if (other != NULL) {
                         other->angle.vy -= 32;
-                        other->unk1 = 0x81;
+                        other->animation_id = 0x81;
                     }
                     if (t == 24) {
-                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], 3, 2,
-                                                     obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1],
+                                                     obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                     obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.base_yaw,
+                                                     45);
                     } else if (t == 31) {
-                        obj->unk1 = 0x82;
+                        obj->animation_id = 0x82;
                         obj->arg.h.unk40 = 280;
                         if (other != NULL) {
-                            other->unk1 = 0x82;
+                            other->animation_id = 0x82;
                         }
                     }
                 } else if (t >= 300) {
@@ -1132,35 +1138,35 @@ void map_object_update_actions(void)
                             v.vx = 0x700;
                             v.vy = 0;
                             v.vz = 0;
-                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000, obj->unkc,
-                                                      0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 3000,
+                                                      obj->collision_height, 0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 3,
+                            map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1] + 3,
                                                          obj->arg.b.unk3c, obj->arg.b.unk39,
-                                                         obj->arg.b.unk3a.bytes[0], 3, 2, obj->arg.sh.unk42,
-                                                         45);
-                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                                                         obj->arg.b.unk3a.bytes[0], 3, 2,
+                                                         obj->arg.sh.base_yaw, 45);
+                            map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                         }
-                        obj->unk1 = 0x81;
+                        obj->animation_id = 0x81;
                         obj->angle.vy -= 32;
                         if (other != NULL) {
                             other->angle.vy += 32;
-                            other->unk1 = 0x81;
+                            other->animation_id = 0x81;
                         }
                     } else {
-                        obj->unk8 = 0;
-                        obj->unk1 = 0x80;
-                        obj->unke = -50;
+                        obj->action_state = 0;
+                        obj->animation_id = 0x80;
+                        obj->render_depth_offset = -50;
                         if (other != NULL) {
-                            odef->unk0 = 0x24;
-                            other->unk1 = 0x80;
-                            other->unke = -50;
+                            odef->action = 0x24;
+                            other->animation_id = 0x80;
+                            other->render_depth_offset = -50;
                         }
                     }
                 }
@@ -1171,28 +1177,29 @@ void map_object_update_actions(void)
                 s32 t;
                 u32 turn;
 
-                if (obj->unk8 == 0) {
+                if (obj->action_state == 0) {
                     break;
                 }
-                if (obj->unk3 & 0x80) {
+                if (obj->flags & 0x80) {
                     turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
                                                cur_avatar_status.pos.vz - obj->pos.vz) -
-                            obj->arg.h.unk42) & 0xfff;
+                            obj->arg.h.base_yaw) & 0xfff;
                     if (turn <= 2048) {
-                        obj->unke = -48;
+                        obj->render_depth_offset = -48;
                     } else {
-                        obj->unke = 0xf0;
+                        obj->render_depth_offset = 0xf0;
                     }
                 }
-                if (obj->unk8 == 1) {
-                    obj->unk8 = 2;
+                if (obj->action_state == 1) {
+                    obj->action_state = 2;
                     obj->arg.h.unk40 = 0;
                     map_object_door1_view_yaw = scene_display_sys.unk15b08.vy;
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(map_object_door1_view_yaw + 2048, obj->arg.h.unk42,
+                    if (t < 21 && angle_within_tolerance(map_object_door1_view_yaw + 2048,
+                                                         obj->arg.h.base_yaw,
                                                          900) &&
                         angle_within_tolerance(map_object_door1_view_yaw,
                                                vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
@@ -1206,7 +1213,7 @@ void map_object_update_actions(void)
                             v.vx = 0;
                             v.vy = 0;
                             v.vz = -76;
-                            matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
                             cur_avatar_status.unk162 = 0;
                             cur_avatar_status.unk164 = -76;
@@ -1214,12 +1221,13 @@ void map_object_update_actions(void)
                             cur_avatar_status.pos.vz += out.vz;
                             }
                     }
-                    obj->unk1 = 0x81;
+                    obj->animation_id = 0x81;
                     obj->angle.vy += 32;
                     if (t == 24) {
-                        map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
-                                                     obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
-                                                     def->arg.b.unkd, def->arg.b.unke, obj->arg.sh.unk42, 45);
+                        map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1],
+                                                     obj->arg.b.unk3c, obj->arg.b.unk39,
+                                                     obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
+                                                     def->arg.b.unke, obj->arg.sh.base_yaw, 45);
                     } else if (t == 31) {
                         obj->arg.h.unk40 = 280;
                     }
@@ -1233,34 +1241,34 @@ void map_object_update_actions(void)
                             v.vx = 0x400;
                             v.vy = 0;
                             v.vz = 0;
-                            matrix_set_rotation_y(obj->arg.h.unk42, &m);
+                            matrix_set_rotation_y(obj->arg.h.base_yaw, &m);
                             ApplyMatrix(&m, &v, &out);
                             out.vx += obj->pos.vx;
                             out.vz += obj->pos.vz;
-                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 1500, obj->unkc,
-                                                      0xc0) != 0) {
+                            if (collision_query_world(out.vx, obj->pos.vy, out.vz, 1500,
+                                                      obj->collision_height, 0xc0) != 0) {
                                 obj->arg.h.unk40 = 300;
                                 break;
                             }
-                            map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + 2,
+                            map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1] + 2,
                                                          obj->arg.b.unk3c, obj->arg.b.unk39,
                                                          obj->arg.b.unk3a.bytes[0], def->arg.b.unkd,
-                                                         def->arg.b.unke, obj->arg.sh.unk42, 45);
-                            map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                                                         def->arg.b.unke, obj->arg.sh.base_yaw, 45);
+                            map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                         }
                         obj->angle.vy -= 32;
                     } else {
-                        obj->unk1 = 0x80;
-                        obj->unk8 = 0;
-                        obj->unke = -50;
+                        obj->animation_id = 0x80;
+                        obj->action_state = 0;
+                        obj->render_depth_offset = -50;
                     }
                 }
             }
             break;
         case 23:
             {
-                Object44 *o1;
-                Object44 *o2;
+                MapObject *o1;
+                MapObject *o2;
                 VECTOR a;
                 VECTOR b;
                 s32 f;
@@ -1270,28 +1278,28 @@ void map_object_update_actions(void)
 
                 o1 = &map_objects_slots.objects[obj->arg.h.unk3c];
                 o2 = &map_objects_slots.objects[obj->arg.h.unk3a];
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 0:
                     if (obj->arg.b.unk38 == 0xfe) {
-                        obj->unk4 = 0xff;
-                        obj->unk0 = 0;
-                        obj->unk8 = 8;
+                        obj->action = 0xff;
+                        obj->layer_mask = 0;
+                        obj->action_state = 8;
                     } else {
                         map_object_set_property(obj->arg.h.unk3a, 0);
                         map_object_set_property(obj->arg.h.unk3a, 3, 0);
-                        obj->unk8 = 1;
+                        obj->action_state = 1;
                     }
                     break;
                 case 1:
                     if (obj->arg.b.unk38 != 0xfe) {
                         break;
                     }
-                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->layer_mask);
                     obj->arg.b.unk40 = 0;
                     o1->pos.vy -= 30000;
                     o1->arg.b.unk38 = 0;
-                    obj->unk8 = 2;
-                    o1->unke = -180;
+                    obj->action_state = 2;
+                    o1->render_depth_offset = -180;
                     break;
                 case 2:
                     vector_rotate_yxz(&obj->angle, &start, &a);
@@ -1304,37 +1312,37 @@ void map_object_update_actions(void)
                     o1->pos.vz = fixed_lerp_q12(a.vz, b.vz, f) + obj->pos.vz;
                     o1->angle.vy += 256;
                     if (obj->arg.b.unk40 >= n) {
-                        map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                        map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                         obj->arg.b.unk40 = 0;
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                     }
                     break;
                 case 3:
                     obj->arg.b.unk40++;
                     if (obj->arg.b.unk40 > 20) {
-                        obj->unk8 = 4;
+                        obj->action_state = 4;
                     }
                     break;
                 case 4:
-                    obj->unk5 = 50;
-                    obj->unk10 = 0x400;
-                    obj->unk8 = 5;
-                    obj->unk2 = (obj->unk2 & 0xf8) | 5;
-                    o1->unk5 = 50;
-                    o1->unk2 = (o1->unk2 & 0xf8) | 5;
+                    obj->lighting_override_index = 50;
+                    obj->lighting_blend = 0x400;
+                    obj->action_state = 5;
+                    obj->render_mode = (obj->render_mode & 0xf8) | 5;
+                    o1->lighting_override_index = 50;
+                    o1->render_mode = (o1->render_mode & 0xf8) | 5;
                     break;
                 case 5:
-                    if (obj->unk10 < 0x1000) {
-                        obj->unk10 += 192;
+                    if (obj->lighting_blend < 0x1000) {
+                        obj->lighting_blend += 192;
                         break;
                     }
-                    o1->unk4 = 0xff;
-                    o1->unk0 = 0;
-                    o1->unk6 = 0xff;
-                    obj->unk10 = 0x1000;
-                    obj->unk0 = 0;
+                    o1->action = 0xff;
+                    o1->layer_mask = 0;
+                    o1->object_id = 0xff;
+                    obj->lighting_blend = 0x1000;
+                    obj->layer_mask = 0;
                     obj->arg.b.unk40 = 0;
-                    obj->unk8 = 6;
+                    obj->action_state = 6;
                     break;
                 case 6:
                     obj->arg.b.unk40++;
@@ -1342,15 +1350,15 @@ void map_object_update_actions(void)
                         o2->pos.vy -= 48;
                         break;
                     }
-                    o2->unk4 = 0x10;
+                    o2->action = 0x10;
                     o2->arg.w.unk40 = o2->pos.vy;
-                    obj->unk8 = 7;
+                    obj->action_state = 7;
                     break;
                 case 7:
                     map_object_set_property(obj->arg.h.unk3a, 2);
                     map_object_set_property(obj->arg.h.unk3a, 3, 0);
-                    obj->unk4 = 0xff;
-                    obj->unk8 = 8;
+                    obj->action = 0xff;
+                    obj->action_state = 8;
                     break;
                 }
             }
@@ -1359,23 +1367,23 @@ void map_object_update_actions(void)
             {
             Object4cTrail spark;
 
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->angle.vx = 0xa00;
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                 } else {
                     map_object_set_property(obj->arg.h.unk3a, 0);
                     map_object_set_property(obj->arg.h.unk3a, 3, 0);
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                 }
                 break;
             case 1:
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->arg.sh.unk40 = -16;
-                    obj->unk8 = 2;
-                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 2;
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->layer_mask);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 2:
@@ -1394,7 +1402,7 @@ void map_object_update_actions(void)
                         map_object_set_property(obj->arg.h.unk3a, 2);
                     }
                     if (obj->arg.sh.unk40 == 0 && obj->angle.vx == 0xa00) {
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                     }
                 }
                 break;
@@ -1402,65 +1410,65 @@ void map_object_update_actions(void)
             }
             break;
         case 7:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (obj->arg.h.unk3a != 0xffff) {
-                    Object44 *o;
+                    MapObject *o;
 
                     o = &map_objects_slots.objects[obj->arg.h.unk3a];
-                    o->unke += 200;
+                    o->render_depth_offset += 200;
                 }
                 if (obj->arg.b.unk38 == 0xfe) {
                     if (def->arg.b.unkc != 0xff) {
                         map_object_set_cell_marker(obj, 1, def->arg.b.unkc);
                     }
-                    obj->unka = 0xfff;
-                    obj->unk8 = 3;
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 3;
                 } else {
                     map_object_set_property(obj->arg.h.unk3a, 0);
                     map_object_set_property(obj->arg.h.unk3a, 3, 0);
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                 }
                 break;
             case 1:
                 if (obj->arg.b.unk38 == 0xfe) {
-                    obj->unk8 = 2;
-                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 2;
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->layer_mask);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                     if (def->arg.b.unkc != 0xff) {
                         map_object_set_cell_marker(obj, 1, def->arg.b.unkc);
                     }
                 }
                 break;
             case 2:
-                obj->unka += 128;
-                if (obj->unka >= 4095) {
-                    obj->unka = 0xfff;
+                obj->animation_phase += 128;
+                if (obj->animation_phase >= 4095) {
+                    obj->animation_phase = 0xfff;
                     map_object_set_property(obj->arg.h.unk3a, 2);
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                 }
                 break;
             }
             break;
         case 8:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->angle.vx = 0xd44;
                     OBJ44_ADVANCE(obj, 160);
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                 } else {
                     map_object_set_property(obj->arg.h.unk3a, 0);
                     map_object_set_property(obj->arg.h.unk3a, 3, 0);
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                 }
                 break;
             case 1:
                 if (obj->arg.b.unk38 == 0xfe) {
                     obj->arg.h.unk40 = 16;
-                    obj->unk8 = 2;
-                    map_object_set_property(obj->arg.h.unk3a, 1, obj->unk0);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    obj->action_state = 2;
+                    map_object_set_property(obj->arg.h.unk3a, 1, obj->layer_mask);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 2:
@@ -1468,29 +1476,29 @@ void map_object_update_actions(void)
                     OBJ44_ADVANCE(obj, 10);
                     if (--obj->arg.h.unk40 == 0) {
                         map_object_set_property(obj->arg.h.unk3a, 2);
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                     }
                 }
                 break;
             case 3:
                 obj->angle.vx = angle_approach(obj->angle.vx, 0xd44, 50);
                 if (obj->angle.vx == 0xd44) {
-                    obj->unk8 = 4;
+                    obj->action_state = 4;
                 }
                 break;
             }
             break;
         case 9:
             if (obj->arg.h.unk3a != 0xffff) {
-                Object44 *o;
+                MapObject *o;
 
                 o = &map_objects_slots.objects[obj->arg.h.unk3a];
-                if (o->unk6 != 0xff) {
-                    o->unk0 = 0;
+                if (o->object_id != 0xff) {
+                    o->layer_mask = 0;
                     o->arg.b.unk38 = 0;
                 }
             }
-            obj->unk4 = 0xff;
+            obj->action = 0xff;
             break;
         case 83:
             {
@@ -1499,14 +1507,14 @@ void map_object_update_actions(void)
 
                 step = 0x100;
                 if (asset_status.area[0] == 13) {
-                    se = def->arg.b.unkf + 496;
+                    se = def->arg.b.sound_id + 496;
                 } else {
-                    se = def->arg.b.unkf;
+                    se = def->arg.b.sound_id;
                 }
                 if (obj->arg.h.unk3a != 0xffff) {
                     step = obj->arg.h.unk3a;
                 }
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 1:
                     if (se != 15) {
                         map_object_play_spatial_sound(obj, se);
@@ -1517,27 +1525,27 @@ void map_object_update_actions(void)
                     switch (obj->arg.b.unk38) {
                     case 0:
                     case 1:
-                        obj->unk8 = 2;
+                        obj->action_state = 2;
                         break;
                     case 2:
-                        obj->unk8 = 2;
+                        obj->action_state = 2;
                         obj->arg.b.unk38 = 3;
                         break;
                     case 3:
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                         obj->arg.b.unk38 = 2;
                         break;
                     }
                     break;
                 case 2:
-                    obj->unka += step;
-                    if (se == 15 && obj->unka > 1024 && obj->unka <= step + 1024) {
+                    obj->animation_phase += step;
+                    if (se == 15 && obj->animation_phase > 1024 && obj->animation_phase <= step + 1024) {
                         map_object_play_spatial_sound(obj, 15);
                     }
-                    if (obj->unka < 0x1000) {
+                    if (obj->animation_phase < 0x1000) {
                         break;
                     }
-                    obj->unka = 0xfff;
+                    obj->animation_phase = 0xfff;
                 arrived:
                     if (obj->arg.b.unk3c != 1) {
                         map_object_apply_marker_signal(obj->arg.b.unk39);
@@ -1545,44 +1553,44 @@ void map_object_update_actions(void)
                     switch (obj->arg.b.unk38) {
                     case 1:
                         map_object_play_spatial_sound(obj, se);
-                        obj->unk8 = 4;
+                        obj->action_state = 4;
                         break;
                     case 0:
-                        obj->unk8 = 99;
+                        obj->action_state = 99;
                         break;
                     case 2:
                     case 3:
-                        obj->unk8 = 0;
+                        obj->action_state = 0;
                         break;
                     }
                     break;
                 case 3:
-                    if (se == 15 && obj->unka > 3072 && obj->unka <= step + 3072) {
+                    if (se == 15 && obj->animation_phase > 3072 && obj->animation_phase <= step + 3072) {
                         map_object_play_spatial_sound(obj, 15);
                     }
-                    obj->unka -= step;
-                    if ((s16)obj->unka <= 0) {
-                        obj->unka = 0;
+                    obj->animation_phase -= step;
+                    if ((s16)obj->animation_phase <= 0) {
+                        obj->animation_phase = 0;
                         goto arrived;
                     }
                     break;
                 case 4:
-                    obj->unka -= step;
-                    if ((s16)obj->unka <= 0) {
-                        obj->unk8 = 99;
+                    obj->animation_phase -= step;
+                    if ((s16)obj->animation_phase <= 0) {
+                        obj->action_state = 99;
                     }
                     break;
                 case 9:
                     if (obj->arg.b.unk38 == 3) {
-                        obj->unka = 0xfff;
+                        obj->animation_phase = 0xfff;
                     }
-                    obj->unk8 = 0;
+                    obj->action_state = 0;
                     break;
                 }
             }
             break;
         case 84:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (player_camera_within_map_region(obj->arg.b.unk39 - ((obj->arg.b.unk3a.bytes[1] - 1) >> 1),
                                                     obj->arg.b.unk3a.bytes[0] - ((obj->arg.b.unk3c - 1) >> 1),
@@ -1592,28 +1600,28 @@ void map_object_update_actions(void)
                     map_cell_apply_rotated_pattern(
                         obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                         map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 break;
             case 1:
-                obj->unka += 256;
-                if (obj->unka < 1024) {
+                obj->animation_phase += 256;
+                if (obj->animation_phase < 1024) {
                     break;
                 }
                 if (obj->arg.b.unk3d[1] & 2) {
-                    obj->unk8 = 99;
+                    obj->action_state = 99;
                     obj->arg.b.unk38 = 0xff;
                 } else {
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                 }
                 break;
             case 32:
-                obj->unka += 128;
-                if (obj->unka >= 4095) {
-                    obj->unk1 = 0;
-                    obj->unka = 0;
-                    obj->unk8 = 0;
+                obj->animation_phase += 128;
+                if (obj->animation_phase >= 4095) {
+                    obj->animation_id = 0;
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
                     map_cell_apply_rotated_pattern(
                         obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
                         map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
@@ -1623,19 +1631,19 @@ void map_object_update_actions(void)
             case 99:
                 break;
             default:
-                obj->unk8++;
+                obj->action_state++;
                 break;
             }
             break;
         case 95:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 1:
                 switch (obj->arg.b.unk3f) {
                 case 0:
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                     break;
                 case 1:
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                     break;
                 }
                 map_cell_copy_rotated_fields(2, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
@@ -1643,13 +1651,13 @@ void map_object_update_actions(void)
                                              obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
                 break;
             case 2:
-                obj->unk8 = 99;
+                obj->action_state = 99;
                 map_cell_copy_rotated_fields(2, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c, obj->arg.b.unk39,
                                              obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
                                              obj->arg.b.unk3d[1], obj->angle.vy, 45);
                 break;
             case 3:
-                obj->unk8 = 99;
+                obj->action_state = 99;
                 break;
             }
             break;
@@ -1662,15 +1670,15 @@ void map_object_update_actions(void)
                 VECTOR r;
 
                 speed = obj->arg.b.unk3a.bytes[0] << 2;
-                if (obj->unk6 == 222) {
+                if (obj->object_id == 222) {
                     speed = obj->arg.b.unk3a.bytes[0] << 4;
                 }
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 0:
                     if (obj->arg.b.unk38 == 0) {
-                        obj->unk8 = 2;
-                        obj->unk1 = 1;
-                        obj->unka = 0;
+                        obj->action_state = 2;
+                        obj->animation_id = 1;
+                        obj->animation_phase = 0;
                         break;
                     }
                     if (obj->arg.b.unk3a.bytes[1] == 0xfe) {
@@ -1680,47 +1688,47 @@ void map_object_update_actions(void)
                         player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
                                                         obj->arg.b.unk3a.bytes[1],
                                                         obj->arg.b.unk3c, obj->pos.vy) != 0) {
-                        obj->unk8 = 1;
-                        obj->unk1 = 0;
-                        obj->unka = 0;
+                        obj->action_state = 1;
+                        obj->animation_id = 0;
+                        obj->animation_phase = 0;
                         obj->arg.b.unk40 = 0;
-                        if (def->arg.b.unk16 != 0xff) {
-                            map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
+                        if (def->arg.b.collision_sound_id != 0xff) {
+                            map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
                         } else {
                             map_object_play_spatial_sound(obj, 30);
                         }
                     }
                     break;
                 case 1:
-                    if (obj->arg.b.unk3a.bytes[1] != 0xff && obj->unka == 0) {
+                    if (obj->arg.b.unk3a.bytes[1] != 0xff && obj->animation_phase == 0) {
                         map_object_set_cell_marker(obj, 1, def->arg.b.unk17);
                         map_object_play_spatial_sound(obj, 30);
                     }
-                    if (obj->arg.b.unk38 == 0 && obj->unka >= 0x1000 - speed) {
-                        obj->unk8 = 2;
-                        obj->unk1 = 1;
-                        obj->unka = 0;
+                    if (obj->arg.b.unk38 == 0 && obj->animation_phase >= 0x1000 - speed) {
+                        obj->action_state = 2;
+                        obj->animation_id = 1;
+                        obj->animation_phase = 0;
                         break;
                     }
-                    obj->unka += speed;
-                    if (obj->unka >= 4095) {
+                    obj->animation_phase += speed;
+                    if (obj->animation_phase >= 4095) {
                         if (obj->arg.b.unk3a.bytes[1] == 0xff) {
-                            if (def->arg.b.unk16 != 0xff) {
-                                map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
+                            if (def->arg.b.collision_sound_id != 0xff) {
+                                map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
                             } else {
                                 map_object_play_spatial_sound(obj, 30);
                             }
-                            obj->unka &= 0xfff;
+                            obj->animation_phase &= 0xfff;
                         } else {
-                            obj->unka = 0;
-                            obj->unk8 = 0;
+                            obj->animation_phase = 0;
+                            obj->action_state = 0;
                             map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
                             break;
                         }
                     }
-                    if (obj->unka >= 2048 && obj->unka < speed + 2048 && obj->arg.b.unk3a.bytes[1] == 0xff &&
-                        def->arg.b.unk16 != 0xff) {
-                        map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
+                    if (obj->animation_phase >= 2048 && obj->animation_phase < speed + 2048 && obj->arg.b.unk3a.bytes[1] == 0xff &&
+                        def->arg.b.collision_sound_id != 0xff) {
+                        map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
                     }
                     map_object_sample_world_vertex(obj, def->arg.b.unkc, &p);
                     hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
@@ -1733,9 +1741,11 @@ void map_object_update_actions(void)
                         if (obj->arg.b.unk40 == 0) {
                             obj->arg.b.unk40 = 1;
                             effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
-                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
-                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
-                                                         0, &p);
+                                                         def->arg.b.impact_magic_values[0],
+                                                         def->arg.b.impact_magic_values[1],
+                                                         def->arg.b.impact_magic_values[2],
+                                                         def->arg.b.impact_magic_values[3], 0, 0, 0, 0, 0,
+                                                         &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -1743,13 +1753,13 @@ void map_object_update_actions(void)
                     break;
                 case 2:
                     {
-                        obj->unka += 64;
-                        if (obj->unka >= 4095) {
-                            obj->unka = 0xfff;
+                        obj->animation_phase += 64;
+                        if (obj->animation_phase >= 4095) {
+                            obj->animation_phase = 0xfff;
                             if (obj->arg.b.unk38 == 0xff) {
-                                obj->unk8 = 3;
-                                obj->unk1 = 1;
-                                obj->unka = 0xfff;
+                                obj->action_state = 3;
+                                obj->animation_id = 1;
+                                obj->animation_phase = 0xfff;
                             }
                         }
                         map_object_sample_world_vertex(obj, def->arg.b.unkc, &q);
@@ -1764,9 +1774,11 @@ void map_object_update_actions(void)
                             if (obj->arg.b.unk40 == 0) {
                                 obj->arg.b.unk40 = 1;
                                 effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
-                                                             def->arg.b.unk12[0], def->arg.b.unk12[1],
-                                                             def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
-                                                             0, 0, 0, &q);
+                                                             def->arg.b.impact_magic_values[0],
+                                                             def->arg.b.impact_magic_values[1],
+                                                             def->arg.b.impact_magic_values[2],
+                                                             def->arg.b.impact_magic_values[3], 0, 0, 0, 0, 0,
+                                                             &q);
                             }
                         } else {
                             obj->arg.b.unk40 = 0;
@@ -1775,10 +1787,10 @@ void map_object_update_actions(void)
                     break;
                 case 3:
                     {
-                        obj->unka -= 64;
-                        if (obj->unka >= 0x8000) {
-                            obj->unk8 = 0;
-                            obj->unka = 0;
+                        obj->animation_phase -= 64;
+                        if (obj->animation_phase >= 0x8000) {
+                            obj->action_state = 0;
+                            obj->animation_phase = 0;
                         }
                         map_object_sample_world_vertex(obj, def->arg.b.unkc, &r);
                         hit = collision_query_world(r.vx, r.vy, r.vz, def->arg.h.unke, def->arg.h.unk10,
@@ -1792,9 +1804,11 @@ void map_object_update_actions(void)
                             if (obj->arg.b.unk40 == 0) {
                                 obj->arg.b.unk40 = 1;
                                 effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
-                                                             def->arg.b.unk12[0], def->arg.b.unk12[1],
-                                                             def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0,
-                                                             0, 0, 0, &r);
+                                                             def->arg.b.impact_magic_values[0],
+                                                             def->arg.b.impact_magic_values[1],
+                                                             def->arg.b.impact_magic_values[2],
+                                                             def->arg.b.impact_magic_values[3], 0, 0, 0, 0, 0,
+                                                             &r);
                             }
                         } else {
                             obj->arg.b.unk40 = 0;
@@ -1805,27 +1819,28 @@ void map_object_update_actions(void)
             }
             break;
         case 87:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 1:
-                map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
                                              obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
                                              obj->arg.b.unk3d[1], obj->angle.vy, 45);
-                obj->unk8 = 2;
+                obj->action_state = 2;
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
-                map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 break;
             case 2:
-                obj->unka += 256;
-                if (obj->unka >= 2048) {
-                    obj->unk8 = 3;
+                obj->animation_phase += 256;
+                if (obj->animation_phase >= 2048) {
+                    obj->action_state = 3;
                 }
                 break;
             case 3:
-                obj->unka += 64;
-                if (obj->unka >= 4095) {
-                    obj->unka = 0;
-                    obj->unk8 = 0;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
+                obj->animation_phase += 64;
+                if (obj->animation_phase >= 4095) {
+                    obj->animation_phase = 0;
+                    obj->action_state = 0;
+                    map_cell_copy_rotated_fields(obj->layer_mask,
+                                                 obj->arg.b.unk3a.bytes[1] + obj->arg.b.unk3d[0],
                                                  obj->arg.b.unk3c, obj->arg.b.unk39,
                                                  obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3d[0],
                                                  obj->arg.b.unk3d[1], obj->angle.vy, 45);
@@ -1837,11 +1852,11 @@ void map_object_update_actions(void)
             }
             break;
         case 90:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (obj->arg.b.unk38 == 0) {
-                    obj->unk8 = 1;
-                    obj->unka = 0;
+                    obj->action_state = 1;
+                    obj->animation_phase = 0;
                 } else {
                     s32 w;
                     s32 h;
@@ -1861,29 +1876,29 @@ void map_object_update_actions(void)
                     if (player_camera_within_map_region(obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0], w, h,
                                                         obj->pos.vy) != 0) {
                         obj->arg.b.unk38 = 0;
-                        obj->unk8 = 1;
-                        obj->unka = 0;
-                        map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                        obj->action_state = 1;
+                        obj->animation_phase = 0;
+                        map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                     }
                 }
                 break;
             case 1:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x1130, 0xc80, 0xc0) == 0) {
-                    obj->unk8 = 2;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
+                    obj->action_state = 2;
+                    map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
                                                  obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
                                                  obj->arg.b.unk3d[0], obj->arg.b.unk3d[1], obj->angle.vy, 45);
-                    map_object_play_spatial_sound(obj, def->arg.b.unkf);
+                    map_object_play_spatial_sound(obj, def->arg.b.sound_id);
                 }
                 break;
             case 2:
-                if (obj->unka < 2048) {
-                    obj->unka += 256;
-                } else if (obj->unka < 4095) {
-                    obj->unka += 64;
+                if (obj->animation_phase < 2048) {
+                    obj->animation_phase += 256;
+                } else if (obj->animation_phase < 4095) {
+                    obj->animation_phase += 64;
                 } else {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 9;
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 9;
                 }
                 break;
             }
@@ -1894,12 +1909,12 @@ void map_object_update_actions(void)
                 s32 hit;
 
                 speed = obj->arg.b.unk3a.bytes[0] << 2;
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 0:
                     if (obj->arg.b.unk38 == 0) {
-                        obj->unk8 = 2;
-                        obj->unk1 = 1;
-                        obj->unka = 0;
+                        obj->action_state = 2;
+                        obj->animation_id = 1;
+                        obj->animation_phase = 0;
                         break;
                     }
                     if (obj->arg.b.unk3a.bytes[1] == 0xfe) {
@@ -1909,11 +1924,11 @@ void map_object_update_actions(void)
                         player_camera_within_map_region(obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3c,
                                                         obj->arg.b.unk3d[0],
                                                         obj->arg.b.unk3d[1], obj->pos.vy) != 0) {
-                        obj->unk8 = 1;
-                        obj->unk1 = 0;
-                        obj->unka = 0;
+                        obj->action_state = 1;
+                        obj->animation_id = 0;
+                        obj->animation_phase = 0;
                         obj->arg.b.unk40 = 0;
-                        map_object_play_spatial_sound(obj, def->arg.b.unk16);
+                        map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id);
                     }
                     break;
                 case 1:
@@ -1921,39 +1936,41 @@ void map_object_update_actions(void)
                     VECTOR p;
 
                     if (obj->arg.b.unk3d[0] != 0xff) {
-                        if (obj->unka == 0) {
+                        if (obj->animation_phase == 0) {
                             map_object_set_cell_marker(obj, 1, def->arg.b.unk17);
-                            map_object_play_spatial_sound(obj, def->arg.b.unk16);
-                        } else if (obj->unka >= 1500 && obj->unka < speed + 1500) {
+                            map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id);
+                        } else if (obj->animation_phase >= 1500 && obj->animation_phase < speed + 1500) {
                             map_object_play_spatial_sound(obj, 30);
                         }
                     }
-                    if (obj->arg.b.unk38 == 0 && obj->unka >= 0x1000 - speed) {
-                        obj->unk8 = 2;
-                        obj->unk1 = 1;
-                        obj->unka = 0;
+                    if (obj->arg.b.unk38 == 0 && obj->animation_phase >= 0x1000 - speed) {
+                        obj->action_state = 2;
+                        obj->animation_id = 1;
+                        obj->animation_phase = 0;
                         break;
                     }
-                    obj->unka += speed;
-                    if (obj->unka >= 4095) {
+                    obj->animation_phase += speed;
+                    if (obj->animation_phase >= 4095) {
                         if (obj->arg.b.unk3d[0] != 0xff) {
-                            obj->unka = 0;
-                            obj->unk8 = 0;
+                            obj->animation_phase = 0;
+                            obj->action_state = 0;
                             map_object_set_cell_marker(obj, 0, def->arg.b.unk17);
                             break;
                         }
-                        map_object_play_spatial_sound(obj, def->arg.b.unk16);
-                        obj->unka &= 0xfff;
+                        map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id);
+                        obj->animation_phase &= 0xfff;
                     }
-                    map_object_sample_world_vertex(obj, def->arg.h.unkc, &p);
+                    map_object_sample_world_vertex(obj, def->arg.h.vertex_index, &p);
                     hit = collision_query_world(p.vx, p.vy, p.vz, def->arg.h.unke, def->arg.h.unk10, 0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             obj->arg.b.unk40 = 1;
                             effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
-                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
-                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
-                                                         0, &p);
+                                                         def->arg.b.impact_magic_values[0],
+                                                         def->arg.b.impact_magic_values[1],
+                                                         def->arg.b.impact_magic_values[2],
+                                                         def->arg.b.impact_magic_values[3], 0, 0, 0, 0, 0,
+                                                         &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -1961,21 +1978,21 @@ void map_object_update_actions(void)
                     }
                     break;
                 case 2:
-                    obj->unka += 64;
-                    if (obj->unka >= 4095) {
-                        obj->unka = 0xfff;
+                    obj->animation_phase += 64;
+                    if (obj->animation_phase >= 4095) {
+                        obj->animation_phase = 0xfff;
                         if (obj->arg.b.unk38 == 0xff) {
-                            obj->unk8 = 3;
-                            obj->unk1 = 1;
-                            obj->unka = 0xfff;
+                            obj->action_state = 3;
+                            obj->animation_id = 1;
+                            obj->animation_phase = 0xfff;
                         }
                     }
                     break;
                 case 3:
-                    obj->unka -= 64;
-                    if (obj->unka >= 0x8000) {
-                        obj->unk8 = 0;
-                        obj->unka = 0;
+                    obj->animation_phase -= 64;
+                    if (obj->animation_phase >= 0x8000) {
+                        obj->action_state = 0;
+                        obj->animation_phase = 0;
                     }
                     break;
                 }
@@ -1988,45 +2005,47 @@ void map_object_update_actions(void)
                 s32 step;
 
                 speed = obj->arg.b.unk3a.bytes[0] << 3;
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 0:
                     if (obj->arg.b.unk38 == 0) {
-                        obj->unk8 = 2;
+                        obj->action_state = 2;
                         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
-                        obj->unka = 0;
+                        obj->animation_phase = 0;
                         break;
                     }
-                    obj->unk8 = 1;
+                    obj->action_state = 1;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
-                    obj->unka = 0;
+                    obj->animation_phase = 0;
                     obj->arg.b.unk40 = 0;
-                    map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
+                    map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
                     break;
                 case 1:
                     {
                     VECTOR p;
                     VECTOR unused; /* never referenced; retail's frame reserves it */
 
-                    if (obj->arg.b.unk38 == 0 && obj->unka >= 0x1000 - speed) {
-                        obj->unk8 = 2;
+                    if (obj->arg.b.unk38 == 0 && obj->animation_phase >= 0x1000 - speed) {
+                        obj->action_state = 2;
                         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
-                        obj->unka = 0;
+                        obj->animation_phase = 0;
                         break;
                     }
-                    obj->unka += speed;
-                    if (obj->unka >= 4095) {
-                        map_object_play_spatial_sound(obj, def->arg.b.unk16 + 496);
-                        obj->unka &= 0xfff;
+                    obj->animation_phase += speed;
+                    if (obj->animation_phase >= 4095) {
+                        map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
+                        obj->animation_phase &= 0xfff;
                     }
-                    map_object_sample_world_vertex(obj, def->arg.h.unkc, &p);
+                    map_object_sample_world_vertex(obj, def->arg.h.vertex_index, &p);
                     hit = collision_query_world(p.vx, p.vy + 2048, p.vz, def->arg.h.unke, def->arg.h.unk10,
                                                 0x90);
                     if (hit != 0) {
                         if (obj->arg.b.unk40 == 0) {
                             effect_dispatch_magic_impact(hit, 0x80, NULL, 5000, 5, obj->arg.b.unk39,
-                                                         def->arg.b.unk12[0], def->arg.b.unk12[1],
-                                                         def->arg.b.unk12[2], def->arg.b.unk12[3], 0, 0, 0, 0,
-                                                         0, &p);
+                                                         def->arg.b.impact_magic_values[0],
+                                                         def->arg.b.impact_magic_values[1],
+                                                         def->arg.b.impact_magic_values[2],
+                                                         def->arg.b.impact_magic_values[3], 0, 0, 0, 0, 0,
+                                                         &p);
                         }
                     } else {
                         obj->arg.b.unk40 = 0;
@@ -2095,44 +2114,44 @@ void map_object_update_actions(void)
                     }
                     break;
                 case 2:
-                    obj->unka += 64;
-                    if (obj->unka >= 4095) {
-                        obj->unka = 0xfff;
+                    obj->animation_phase += 64;
+                    if (obj->animation_phase >= 4095) {
+                        obj->animation_phase = 0xfff;
                         if (obj->arg.b.unk38 == 0xff) {
-                            obj->unk8 = 3;
+                            obj->action_state = 3;
                             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
-                            obj->unka = 0xfff;
+                            obj->animation_phase = 0xfff;
                         }
                     }
                     break;
                 case 3:
-                    obj->unka -= 64;
-                    if (obj->unka >= 0x8000) {
-                        obj->unk8 = 0;
-                        obj->unka = 0;
+                    obj->animation_phase -= 64;
+                    if (obj->animation_phase >= 0x8000) {
+                        obj->action_state = 0;
+                        obj->animation_phase = 0;
                     }
                     break;
                 }
             }
             break;
         case 86:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 if (obj->arg.b.unk39 == 0) {
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                     obj->arg.b.unk38 = 0;
-                    obj->unk0 = 0;
+                    obj->layer_mask = 0;
                 } else {
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                     obj->arg.b.unk38 = 0x80;
-                    obj->unk8 = 1;
-                    obj->unk0 = 2;
+                    obj->action_state = 1;
+                    obj->layer_mask = 2;
                 }
                 break;
             case 1:
                 if (obj->arg.b.unk39 == 0) {
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                 }
                 break;
             case 2:
@@ -2142,20 +2161,20 @@ void map_object_update_actions(void)
                 if (obj->scale.vx <= 0) {
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                     obj->arg.b.unk38 = 0;
-                    obj->unk0 = 0;
+                    obj->layer_mask = 0;
                     if (obj->arg.b.unk39 == 0xff) {
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                     }
                 }
                 break;
             case 3:
-                obj->unk0 = 2;
+                obj->layer_mask = 2;
                 obj->scale.vx += 256;
                 obj->scale.vy += 256;
                 obj->scale.vz += 256;
                 if (obj->scale.vx >= 4096) {
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
-                    obj->unk8 = 0;
+                    obj->action_state = 0;
                     obj->arg.b.unk38 = 0x80;
                 }
                 break;
@@ -2169,13 +2188,13 @@ void map_object_update_actions(void)
                 if (obj->arg.b.unk40 == 0) {
                     CVECTOR c = {0x80, 0x80, 0x80, 0};
                     s32 n = 0x18c;
-                    Object44 *o;
+                    MapObject *o;
 
                     render_frames_with_color_overlay(0x82, 0, 0, 0);
                     render_frames_with_color_overlay(0x82, 0, 0x1000, 0x80);
                     o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
-                        if (o->unk4 == 0xe7) {
+                        if (o->action == 0xe7) {
                             o->arg.b.unk40 = 1;
                         }
                     }
@@ -2195,7 +2214,7 @@ void map_object_update_actions(void)
             } else {
                 obj->arg.b.unk40 = 0;
             }
-            obj->unka = (obj->unka + 64) & 0xfff;
+            obj->animation_phase = (obj->animation_phase + 64) & 0xfff;
             break;
         case 235:
             if (obj->arg.b.unk3f == 0) {
@@ -2205,7 +2224,7 @@ void map_object_update_actions(void)
                 if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, 1, 1,
                                                     obj->pos.vy) != 0) {
                     if (obj->arg.b.unk40 == 0) {
-                        Object44 *o;
+                        MapObject *o;
                         s32 n = 0x18c;
                         u8 x;
                         u8 z;
@@ -2217,7 +2236,7 @@ void map_object_update_actions(void)
 
                         o = map_objects_slots.objects;
                         for (; n != 0; n--, o++) {
-                            if (o->unk4 == 0xeb) {
+                            if (o->action == 0xeb) {
                                 o->arg.b.unk40 = 1;
                             }
                         }
@@ -2264,10 +2283,10 @@ void map_object_update_actions(void)
                 }
             }
             if (asset_status.area[0] == 24) {
-                if (obj->unk6 == 0x144) {
+                if (obj->object_id == 0x144) {
                     obj->angle.vy += 128;
                 }
-                if (obj->unk6 == 0x145) {
+                if (obj->object_id == 0x145) {
                     obj->angle.vy += 256;
                 }
             }
@@ -2276,17 +2295,18 @@ void map_object_update_actions(void)
             if (player_camera_within_map_region(obj->arg.b.unk38, obj->arg.b.unk39, obj->arg.b.unk3a.bytes[0],
                                                 obj->arg.b.unk3a.bytes[1], obj->pos.vy) != 0) {
                 if (obj->arg.b.unk40 == 0) {
-                    Object44 *o;
+                    MapObject *o;
                     s32 n = 0x18c;
 
                     o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
-                        if (o->unk4 == 0xe7) {
+                        if (o->action == 0xe7) {
                             o->arg.b.unk40 = 1;
                         }
                     }
                     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
-                    translate_player_effects_and_actors(obj->arg.sb.unk3c << 11, 0, obj->arg.sb.unk3d << 11);
+                    translate_player_effects_and_actors(obj->arg.sb.cell_dx << 11, 0,
+                                                        obj->arg.sb.cell_dz << 11);
                     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
                 }
             } else {
@@ -2299,12 +2319,12 @@ void map_object_update_actions(void)
                 if (obj->arg.b.unk40 == 0) {
                     CVECTOR c = {0x80, 0x80, 0x80, 0};
                     s32 n = 0x18c;
-                    Object44 *o;
+                    MapObject *o;
 
                     render_zoom_screen_transition(&c.r, 320, 240, 1);
                     o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
-                        if (o->unk4 == 0xe8) {
+                        if (o->action == 0xe8) {
                             o->arg.b.unk40 = 1;
                         }
                     }
@@ -2321,14 +2341,14 @@ void map_object_update_actions(void)
             } else if (obj->arg.b.unk40 != 0xff) {
                 obj->arg.b.unk40 = 0;
             }
-            obj->unka = (obj->unka + 64) & 0xfff;
+            obj->animation_phase = (obj->animation_phase + 64) & 0xfff;
             break;
         case 224:
             if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                 obj->arg.b.unk39, obj->pos.vy) != 0) {
                 resource_request_transition(obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1],
                                             obj->arg.b.unk3c, obj->arg.b.unk3d[0], obj->arg.b.unk3d[1],
-                                            obj->arg.sb.unk40, obj->arg.sb.unk41, obj->arg.sb.unk42);
+                                            obj->arg.sb.shift_x, obj->arg.sb.shift_z, obj->arg.sb.shift_y);
             }
             break;
         case 225:
@@ -2340,7 +2360,7 @@ void map_object_update_actions(void)
                     }
                     switch (obj->arg.b.unk3a.bytes[0] & 0xf) {
                     case 0:
-                        ((void (*)(Object44 *))asset_status.handlers[3])(obj);
+                        ((void (*)(MapObject *))asset_status.handlers[3])(obj);
                         break;
                     case 1:
                         map_object_apply_marker_signal(obj->arg.b.unk3a.bytes[1]);
@@ -2387,7 +2407,7 @@ void map_object_update_actions(void)
             break;
         case 230:
             {
-                Object44 *o;
+                MapObject *o;
                 s32 n;
 
                 if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
@@ -2397,7 +2417,7 @@ void map_object_update_actions(void)
                         obj->arg.b.unk40 = 1;
                         o = &map_objects_slots.objects[obj->arg.h.unk3a];
                         do {
-                            o->unke += obj->arg.b.unk3d[0];
+                            o->render_depth_offset += obj->arg.b.unk3d[0];
                             n--;
                             o++;
                         } while (n != 0);
@@ -2407,7 +2427,7 @@ void map_object_update_actions(void)
                         o = &map_objects_slots.objects[obj->arg.h.unk3a];
                         n = obj->arg.b.unk3c;
                         do {
-                            o->unke -= obj->arg.b.unk3d[0];
+                            o->render_depth_offset -= obj->arg.b.unk3d[0];
                             n--;
                             o++;
                         } while (n != 0);
@@ -2417,38 +2437,38 @@ void map_object_update_actions(void)
             }
             break;
         case 88:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 1:
                 switch (obj->arg.b.unk38) {
                 case 0:
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                     map_object_play_spatial_sound(obj, 20);
                     break;
                 case 1:
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                     map_object_play_spatial_sound(obj, 20);
                     break;
                 }
-                map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3c + obj->arg.b.unk3d[1],
+                map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3c + obj->arg.b.unk3d[1],
                                              obj->arg.b.unk3d[0], obj->arg.b.unk3a.bytes[0],
                                              obj->arg.b.unk3a.bytes[1], obj->arg.b.unk3d[1], obj->arg.b.unk3f,
                                              obj->angle.vy, 45);
                 break;
             case 2:
-                obj->unka -= 64;
-                if ((s16)obj->unka <= 0) {
-                    obj->unk8 = 99;
-                    obj->unka = 0;
-                    map_cell_copy_rotated_fields(obj->unk0, obj->arg.b.unk3c, obj->arg.b.unk3d[0],
+                obj->animation_phase -= 64;
+                if ((s16)obj->animation_phase <= 0) {
+                    obj->action_state = 99;
+                    obj->animation_phase = 0;
+                    map_cell_copy_rotated_fields(obj->layer_mask, obj->arg.b.unk3c, obj->arg.b.unk3d[0],
                                                  obj->arg.b.unk3a.bytes[0], obj->arg.b.unk3a.bytes[1],
                                                  obj->arg.b.unk3d[1], obj->arg.b.unk3f, obj->angle.vy, 45);
                 }
                 break;
             case 3:
-                obj->unka += 64;
-                if (obj->unka >= 4096) {
-                    obj->unka = 0xfff;
-                    obj->unk8 = 99;
+                obj->animation_phase += 64;
+                if (obj->animation_phase >= 4096) {
+                    obj->animation_phase = 0xfff;
+                    obj->action_state = 99;
                 }
                 break;
             }
@@ -2457,54 +2477,54 @@ void map_object_update_actions(void)
             {
                 MapLayer *layer;
 
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 1:
-                    obj->unk8 = 2;
+                    obj->action_state = 2;
                     obj->arg.h.unk40 = obj->arg.h.unk3a;
-                    obj->unk0 = obj->arg.b.unk41[1];
+                    obj->layer_mask = obj->arg.b.unk41[1];
                     break;
                 case 2:
                     if (obj->arg.h.unk40-- == 0) {
-                        obj->unk8 = 3;
+                        obj->action_state = 3;
                         {
                             MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
                             layer = row[obj->pos.vx >> 11].layer;
                         }
-                        if (obj->unk0 != 1) {
+                        if (obj->layer_mask != 1) {
                             layer++;
                         }
-                        layer->unk3 = 0x74;
+                        layer->collision_shape_id = 0x74;
                     }
                     break;
                 case 3:
-                    obj->unk10 -= 256;
-                    if ((s16)obj->unk10 <= 0) {
-                        obj->unk10 = 0;
-                        obj->unk8 = 4;
+                    obj->lighting_blend -= 256;
+                    if ((s16)obj->lighting_blend <= 0) {
+                        obj->lighting_blend = 0;
+                        obj->action_state = 4;
                         obj->arg.h.unk40 = obj->arg.h.unk3c;
                     }
                     break;
                 case 4:
                     if (obj->arg.h.unk40-- == 0) {
-                        obj->unk8 = 5;
+                        obj->action_state = 5;
                     }
                     break;
                 case 5:
-                    obj->unk10 += 256;
-                    if (obj->unk10 >= 4096) {
-                        obj->unk10 = 0x1000;
-                        obj->unk8 = 0;
+                    obj->lighting_blend += 256;
+                    if (obj->lighting_blend >= 4096) {
+                        obj->lighting_blend = 0x1000;
+                        obj->action_state = 0;
                         {
                             MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
                             layer = row[obj->pos.vx >> 11].layer;
                         }
-                        if (obj->unk0 != 1) {
+                        if (obj->layer_mask != 1) {
                             layer++;
                         }
-                        layer->unk3 = 0x75;
-                        obj->unk0 = 0;
+                        layer->collision_shape_id = 0x75;
+                        obj->layer_mask = 0;
                     }
                     break;
                 }
@@ -2512,14 +2532,14 @@ void map_object_update_actions(void)
             break;
         case 17:
             {
-                Object44 *o;
+                MapObject *o;
                 static SVECTOR from = {0, -100, 300, 0};
                 static SVECTOR to = {0, 0, 64, 0};
 
                 o = &map_objects_slots.objects[obj->arg.b.unk39 + 380];
-                if (obj->unk8 != 0 && o->unk6 == 0xff) {
+                if (obj->action_state != 0 && o->object_id == 0xff) {
                     obj->arg.b.unk38 = 0xff;
-                    obj->unk8 = 0;
+                    obj->action_state = 0;
                     (map_objects_slots.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 &=
                         ~obj->arg.b.unk3a.bytes[0];
                 }
@@ -2531,20 +2551,20 @@ void map_object_update_actions(void)
             break;
         case 24:
             {
-                Object44 *o;
+                MapObject *o;
                 static SVECTOR from = {0, -1536, 400, 0};
                 static SVECTOR to = {0, -1280, 0, 0};
-                Object44 *sw;
+                MapObject *sw;
 
                 o = &map_objects_slots.objects[obj->arg.b.unk39 + 380];
-                if (o->unk6 == 0x86 &&
+                if (o->object_id == 0x86 &&
                     (asset_status.area[0] == 23 ||
                      ((s16)asset_status.loading == 1 && asset_status.previous[0] == 23))) {
                     to.vy = -1152;
                 }
-                if (obj->unk8 != 0 && o->unk6 == 0xff) {
+                if (obj->action_state != 0 && o->object_id == 0xff) {
                     obj->arg.b.unk38 = 0xff;
-                    obj->unk8 = 0;
+                    obj->action_state = 0;
                     sw = map_objects_slots.objects + obj->arg.b.unk3a.bytes[1];
                     if (obj->arg.b.unk3d[0] != 0xff) {
                         sw->arg.b.unk38 &= ~obj->arg.b.unk3d[0];
@@ -2560,39 +2580,39 @@ void map_object_update_actions(void)
             break;
         case 26:
             {
-                Object44 *o;
+                MapObject *o;
                 static SVECTOR from = {0, -100, 300, 0};
                 static SVECTOR to = {0, 0, 64, 0};
-                Object44 *sw;
+                MapObject *sw;
 
                 o = &map_objects_slots.objects[obj->arg.b.unk39 + 350];
                 if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
                     sw = map_objects_slots.objects + obj->arg.b.unk3a.bytes[1];
                     o->arg.b.unk38 = 0;
                     sw->arg.b.unk38 |= obj->arg.b.unk3a.bytes[0];
-                    obj->unk8 = 3;
+                    obj->action_state = 3;
                 }
-                switch (obj->unk8) {
+                switch (obj->action_state) {
                 case 3:
-                    obj->unk5 = 50;
-                    obj->unk2 = (obj->unk2 & 0xf8) | 5;
-                    o->unk5 = 50;
-                    o->unk2 = (o->unk2 & 0xf8) | 5;
-                    obj->unk8 = 4;
+                    obj->lighting_override_index = 50;
+                    obj->render_mode = (obj->render_mode & 0xf8) | 5;
+                    o->lighting_override_index = 50;
+                    o->render_mode = (o->render_mode & 0xf8) | 5;
+                    obj->action_state = 4;
                     break;
                 case 4:
-                    obj->unk10 += 256;
-                    o->unk10 += 256;
-                    if (obj->unk10 >= 4095) {
-                        obj->unk10 = 0xfff;
-                        o->unk10 = 0xfff;
-                        obj->unk8 = 5;
+                    obj->lighting_blend += 256;
+                    o->lighting_blend += 256;
+                    if (obj->lighting_blend >= 4095) {
+                        obj->lighting_blend = 0xfff;
+                        o->lighting_blend = 0xfff;
+                        obj->action_state = 5;
                     }
                     break;
                 case 5:
-                    obj->unk6 = 0xff;
-                    o->unk6 = 0xff;
-                    obj->unk8 = 99;
+                    obj->object_id = 0xff;
+                    o->object_id = 0xff;
+                    obj->action_state = 99;
                     break;
                 }
             }
@@ -2608,11 +2628,11 @@ void map_object_update_actions(void)
                 if (obj->arg.h.unk3a != 0xffff) {
                     e = &actor_status.objects[obj->arg.h.unk3a];
                 }
-                if (obj->unk8 == 0) {
+                if (obj->action_state == 0) {
                     if (e != NULL) {
-                        obj->unka = (e->animation_phase + obj->arg.h.unk3c) & 0xfff;
+                        obj->animation_phase = (e->animation_phase + obj->arg.h.unk3c) & 0xfff;
                     } else {
-                        obj->unka = (obj->unka + obj->arg.h.unk38) & 0xfff;
+                        obj->animation_phase = (obj->animation_phase + obj->arg.h.unk38) & 0xfff;
                     }
                 }
             }
@@ -2628,74 +2648,74 @@ void map_object_update_actions(void)
             }
             break;
         case 96:
-            switch (obj->unk8) {
+            switch (obj->action_state) {
             case 0:
                 {
                     s32 floor;
 
-                    floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
-                                                         def->unk8);
-                    obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
-                    obj->pos.vy += obj->arg.sh.unk3e;
-                    obj->arg.sh.unk3e += 20;
+                    floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz,
+                                                         def->collision_radius, def->collision_height);
+                    obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
+                    obj->pos.vy += obj->arg.sh.motion_velocity;
+                    obj->arg.sh.motion_velocity += 20;
                     if (obj->pos.vy >= floor) {
                         obj->pos.vy = floor;
-                        obj->arg.sh.unk3e = 16;
-                        obj->unk8 = 1;
+                        obj->arg.sh.motion_velocity = 16;
+                        obj->action_state = 1;
                     }
                 }
                 break;
             case 1:
-                obj->angle.vx += obj->arg.sh.unk3e;
-                obj->arg.sh.unk3e += 16;
+                obj->angle.vx += obj->arg.sh.motion_velocity;
+                obj->arg.sh.motion_velocity += 16;
                 if (obj->angle.vx >= 1024) {
                     obj->angle.vx = 0x400;
-                    obj->unk8 = 99;
+                    obj->action_state = 99;
                 }
                 break;
             }
             break;
         case 97:
-            if (obj->unk8 == 0) {
+            if (obj->action_state == 0) {
                 s32 floor;
 
-                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
-                                                     def->unk8);
-                obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
+                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz,
+                                                     def->collision_radius, def->collision_height);
+                obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
                 obj->pos.vy += 20;
                 obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
                 if (obj->pos.vy >= floor) {
                     obj->pos.vy = floor;
-                    obj->unk8 = 99;
+                    obj->action_state = 99;
                 }
             }
             break;
         case 98:
-            if (obj->unk8 < 2) {
+            if (obj->action_state < 2) {
                 s32 floor;
                 s32 ang;
 
-                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
-                                                     def->unk8);
-                obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
-                obj->pos.vy += obj->arg.sh.unk3e;
+                floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz,
+                                                     def->collision_radius, def->collision_height);
+                obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
+                obj->pos.vy += obj->arg.sh.motion_velocity;
                 effect_spawn_at_lower_bound(&obj->pos, 0x1000, 6000, 300);
                 ang = obj->angle.vx;
-                obj->angle.vx = (obj->unk8 == 0 ? ang + 160 : ang - 160) & 0xfff;
-                obj->arg.sh.unk3e += 30;
-                if (obj->arg.sh.unk3e >= 0 && obj->pos.vy >= floor) {
-                    if (obj->arg.sh.unk3e < 80) {
+                obj->angle.vx = (obj->action_state == 0 ? ang + 160 : ang - 160) & 0xfff;
+                obj->arg.sh.motion_velocity += 30;
+                if (obj->arg.sh.motion_velocity >= 0 && obj->pos.vy >= floor) {
+                    if (obj->arg.sh.motion_velocity < 80) {
                         obj->pos.vy = floor;
-                        obj->unk8 = 2;
+                        obj->action_state = 2;
                     } else {
-                        obj->arg.sh.unk3e = -(obj->arg.sh.unk3e >> 1);
-                        obj->unk8 = obj->unk8 == 0;
+                        obj->arg.sh.motion_velocity = -(obj->arg.sh.motion_velocity >> 1);
+                        obj->action_state = obj->action_state == 0;
                     }
                 }
-            } else if (obj->unk8 == 2) {
+            } else if (obj->action_state == 2) {
                 obj->angle.vx = angle_approach(obj->angle.vx, obj->angle.pad, 160);
                 if (obj->angle.vx == obj->angle.pad) {
-                    obj->unk8 = 99;
+                    obj->action_state = 99;
                 }
             }
             break;
@@ -2707,5 +2727,5 @@ void map_object_update_actions(void)
             break;
         }
     } while (obj++, --i != 0);
-    map_objects_slots.unk8858 = NULL;
+    map_objects_slots.current = NULL;
 }

@@ -23,7 +23,7 @@ void area_on_actor_removed_set_flag(Actor *obj);
 void func_801e87c4(void);
 void func_801e87cc(void);
 void func_801e87d4(void);
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -83,45 +83,45 @@ ADDRESS(0x801e8398, 0x210)
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *link;
-    Object44Def *def;
+    MapObject *obj;
+    MapObject *link;
+    MapObjectDef *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+        if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
                         notify_enqueue(obj->arg.b.unk3f);
                     }
-                    if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7 ||
-                        obj->unk6 == 0x134) {
+                    if (obj->object_id == 212 || obj->object_id == 213 || obj->object_id == 0xf7 ||
+                        obj->object_id == 0x134) {
                         notify_enqueue(0x1a);
-                    } else if (obj->unk6 == 0xb7) {
+                    } else if (obj->object_id == 0xb7) {
                         notify_enqueue(0x1e);
-                    } else if (obj->unk6 == 0xf5) {
+                    } else if (obj->object_id == 0xf5) {
                         notify_enqueue(0xe);
-                    } else if (obj->unk6 == 0xba) {
+                    } else if (obj->object_id == 0xba) {
                         notify_enqueue(0x22);
-                    } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
+                    } else if (obj->object_id >= 190 && obj->object_id < 198) {
                         notify_enqueue(8);
                     }
                 }
             } else {
                 link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     goto message;
                 }
-                link->unk0 = obj->arg.b.unk40;
+                link->layer_mask = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
                 event_map_object_interact(link);
-                link->unk0 = 0;
+                link->layer_mask = 0;
                 link->arg.b.unk38 = 0;
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     obj->arg.b.unk3a.index = 0xffff;
                 }
             }
@@ -217,7 +217,7 @@ void func_801e87d4(void)
  * (player +0x10a) and copies the normal pattern back.
  */
 ADDRESS(0x801e87dc, 0xc0)
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;

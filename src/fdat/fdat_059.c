@@ -93,7 +93,7 @@ void area_on_actor_removed_show_object(Actor *obj)
     if (obj - actor_status.objects == 20) {
         cur_evt_state.unk32[0x27] = 1;
         map_objects_slots.objects[85].arg.b.unk3f = 0xff;
-        map_objects_slots.objects[85].unk0 = 2;
+        map_objects_slots.objects[85].layer_mask = 2;
     }
 }
 
@@ -143,10 +143,10 @@ void area_on_load_restore_actor_and_object(void)
     }
     if (cur_evt_state.unk32[0x27] != 0) {
         map_objects_slots.objects[85].arg.b.unk3f = 0xff;
-        map_objects_slots.objects[85].unk0 = 2;
+        map_objects_slots.objects[85].layer_mask = 2;
     } else {
         map_objects_slots.objects[85].arg.b.unk3f = 0;
-        map_objects_slots.objects[85].unk0 = 0;
+        map_objects_slots.objects[85].layer_mask = 0;
     }
     cur_evt_state.unk84[5] = 0x13;
 }

@@ -76,48 +76,48 @@ ADDRESS(0x801e8398, 0x24c)
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *link;
-    Object44Def *def;
+    MapObject *obj;
+    MapObject *link;
+    MapObjectDef *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+        if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
                         notify_enqueue(obj->arg.b.unk3f);
                     }
-                    if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7) {
+                    if (obj->object_id == 212 || obj->object_id == 213 || obj->object_id == 0xf7) {
                         notify_enqueue(0x1a);
-                    } else if (obj->unk6 == 0xb7) {
+                    } else if (obj->object_id == 0xb7) {
                         notify_enqueue(0x1e);
-                    } else if (obj->unk6 == 0x145) {
+                    } else if (obj->object_id == 0x145) {
                         notify_enqueue(0x1f);
-                    } else if (obj->unk6 == 0x146) {
+                    } else if (obj->object_id == 0x146) {
                         notify_enqueue(0x20);
-                    } else if (obj->unk6 == 0xf5) {
+                    } else if (obj->object_id == 0xf5) {
                         notify_enqueue(0xe);
-                    } else if (obj->unk6 == 0xba || obj->unk6 == 0x142 || obj->unk6 == 0x143 || obj->unk6 == 0x144) {
+                    } else if (obj->object_id == 0xba || obj->object_id == 0x142 || obj->object_id == 0x143 || obj->object_id == 0x144) {
                         notify_enqueue(0x22);
-                    } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
+                    } else if (obj->object_id >= 190 && obj->object_id < 198) {
                         notify_enqueue(8);
                     }
                 }
             } else {
                 link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     goto message;
                 }
-                link->unk0 = obj->arg.b.unk40;
+                link->layer_mask = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
                 event_map_object_interact(link);
-                link->unk0 = 0;
+                link->layer_mask = 0;
                 link->arg.b.unk38 = 0;
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     obj->arg.b.unk3a.index = 0xffff;
                 }
             }
@@ -135,7 +135,7 @@ ADDRESS(0x801e85ec, 0xf8)
 void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     s32 i;
-    Object44 *obj;
+    MapObject *obj;
 
     if (item != 0x86) {
         return;
@@ -145,12 +145,12 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
         return;
     }
     obj = &map_objects_slots.objects[i];
-    if (obj->unk6 == 0x13f) {
+    if (obj->object_id == 0x13f) {
         if (obj->arg.b.unk38 != 0xff) {
             return;
         }
         obj->arg.b.unk38 = item;
-        obj->unk8 = 0;
+        obj->action_state = 0;
         cur_evt_state.unk0 = 1;
         game_counter_decrement(0x86);
         event_spawn_effect_object(obj, 0x86);

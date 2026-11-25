@@ -381,7 +381,7 @@ retry:
     if (hit == 0) {
     clear:
         if (obj->vertical_motion_state == 0 && (mode & 0x24)) {
-            s32 floor = map_world.unk12010;
+            s32 floor = map_world.collision_floor_height;
             s32 step_x;
             s32 step_z;
 
@@ -401,13 +401,13 @@ retry:
             }
             collision_query_shapes_with_layer_sample(obj->pos.vx, obj->pos.vy, obj->pos.vz + step_z,
                                                      obj->collision_radius, ACTOR_SHAPE(obj));
-            if (floor < map_world.unk12010) {
-                floor = map_world.unk12010;
+            if (floor < map_world.collision_floor_height) {
+                floor = map_world.collision_floor_height;
             }
             collision_query_shapes_with_layer_sample(obj->pos.vx + step_x, obj->pos.vy, obj->pos.vz,
                                                      obj->collision_radius, ACTOR_SHAPE(obj));
-            if (floor < map_world.unk12010) {
-                floor = map_world.unk12010;
+            if (floor < map_world.collision_floor_height) {
+                floor = map_world.collision_floor_height;
             }
             if (obj->pos.vy < floor - 1100) {
                 hits |= 0x100;
@@ -435,8 +435,8 @@ retry:
             goto finish;
         }
         collision_cache_load_hit_bounds();
-        angle = vector_xz_to_angle(map_world.unk1203c.vx - obj->pos.vx,
-                                   map_world.unk1203c.vz - obj->pos.vz);
+        angle = vector_xz_to_angle(map_world.collision_hit_position.vx - obj->pos.vx,
+                                   map_world.collision_hit_position.vz - obj->pos.vz);
         heading = vector_xz_to_angle(dx, dz);
         if (angle_mod_delta_le_half_turn(heading, angle)) {
             angle = (angle + 1024) & 0xfff;
@@ -453,7 +453,7 @@ retry:
             goto blocked;
         }
         if (!(hit & ~0x205)) {
-            if (obj->pos.vy <= map_world.unk12010 + 800) {
+            if (obj->pos.vy <= map_world.collision_floor_height + 800) {
                 goto clear;
             }
             goto blocked;
@@ -505,7 +505,7 @@ diagonal:
     if (cornered) {
         goto blocked;
     }
-    switch (map_world.unk12004[2] & 3) {
+    switch (map_world.collision_layer[2] & 3) {
     case 0:
     case 2:
         dx = (dx0 + dz0) >> 1;

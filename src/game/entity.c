@@ -43,7 +43,7 @@ void actor_set_home_position(Actor *obj)
         obj->pos.vy = 0;
     }
     if (obj->flags & 0x400) {
-        obj->pos.vy = map_world.unk1200c;
+        obj->pos.vy = map_world.collision_layer_height;
     }
     if (!(obj->flags & 0x10)) {
         obj->pos.vy += obj->vertical_anchor_offset;

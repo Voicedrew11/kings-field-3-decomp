@@ -17,7 +17,7 @@ ADDRESS(0x80052e5c, 0x228)
 void actor_update_frame(void)
 {
     Actor *obj;
-    Object44 *carrier;
+    MapObject *carrier;
 
     obj = actor_status.objects;
     actor_status.active_actor_count = 0;

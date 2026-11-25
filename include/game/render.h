@@ -96,33 +96,33 @@ typedef struct AnimSlot {
 
 /* A placed effect (128 of them follow a frame counter); translate_active_world_positions moves
  * them with the area origin. */
-typedef struct Effect {
-    u16 id;         /* 0xffff: unused */
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;        /* random phase below unk3 */
+typedef struct MapPlacedEntry {
+    u16 model_index; /* 0xffff: unused */
+    u8 layer_mask;
+    u8 frame_count;
+    u8 frame_period;
+    u8 frame_index; /* random phase below unk3 */
     u8 unk6[2];
     VECTOR pos;
-} Effect;
+} MapPlacedEntry;
 
 /* An effect placement record of a map file: map cell plus offsets. */
-typedef struct EffectSpawn {
-    u16 id;         /* 0xffff: none */
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
+typedef struct MapPlacedSource {
+    u16 model_index; /* 0xffff: none */
+    u8 frame_count;
+    u8 frame_period;
+    u8 layer_mask;
     u8 cell_z;
     u8 cell_x;
     u8 unk7[3];
     s16 dz;
     s16 dx;
     s16 dy;
-} EffectSpawn;
+} MapPlacedSource;
 
 /* Counter the effect code keeps ahead of the records (WIP). */
 extern s32 map_placed_frame_counter;
-extern Effect map_placed_entries[128];
+extern MapPlacedEntry map_placed_entries[128];
 
 /* Heap the frame packet pools and the 2D quad buffer are carved from (WIP extent). */
 extern u8 ot_packet_memory[];
@@ -255,8 +255,8 @@ typedef struct ScratchLoad {
     SVECTOR angle;      /* +0x114: rotation handed to the model front ends */
     u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
     u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
-    u8 models[332];     /* +0x124: model flags from id 128 (Actor) or 256 (Object44) */
-    u8 sounds[96];      /* +0x270: sound bank flags from 51 (Actor) or 147 (Object44) */
+    u8 models[332];     /* +0x124: model flags from id 128 (Actor) or 256 (MapObject) */
+    u8 sounds[96];      /* +0x270: sound bank flags from 51 (Actor) or 147 (MapObject) */
 } ScratchLoad;
 
 /* Scratchpad words from +0x100 while a frame is built (view_build_visibility_grid). */
@@ -503,7 +503,7 @@ void pool_record_release(AnimSlot *slot);
 void pool_release_all(void);
 void pool_release_stale(void);
 void pool_allocate(AnimSlot **out);
-void map_placed_expand_sources(EffectSpawn *spawn);
+void map_placed_expand_sources(MapPlacedSource *spawn);
 s32 menu_fade_transition(s32 level, s32 step);
 void menu_show_transition_image(u16 file, u16 entry);
 

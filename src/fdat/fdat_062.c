@@ -171,7 +171,7 @@ void area_on_movie_end_fade_object(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     if (id == 5) {
@@ -180,12 +180,12 @@ void area_on_movie_end_fade_object(u8 id)
     if (id == 10) {
         obj = &map_objects_slots.objects[2];
         cur_evt_state.unk32[0x2a] = 1;
-        map_objects_slots.objects[2].unk5 = 0x32;
-        map_objects_slots.objects[2].unk2 = 5;
+        map_objects_slots.objects[2].lighting_override_index = 0x32;
+        map_objects_slots.objects[2].render_mode = 5;
         for (i = 15; i != -1; i--) {
-            obj->unk10 += 256;
-            if (obj->unk10 >= 4095) {
-                obj->unk10 = 0xfff;
+            obj->lighting_blend += 256;
+            if (obj->lighting_blend >= 4095) {
+                obj->lighting_blend = 0xfff;
             }
             cd_request_wait_idle();
             cd_request_service_vab();
@@ -193,7 +193,7 @@ void area_on_movie_end_fade_object(u8 id)
             player_get_camera_pose(&pos, &angle);
             render_game_frame(&pos, &angle);
         }
-        obj->unk6 = 0xff;
+        obj->object_id = 0xff;
     }
 }
 

@@ -131,7 +131,7 @@ void func_8005da94(void)
  * the callee narrows them again).
  */
 ADDRESS(0x8005db30, 0x7a0)
-void event_map_object_interact(Object44 *obj, ...)
+void event_map_object_interact(MapObject *obj, ...)
 {
     va_list args;
     SVECTOR angle_to;
@@ -139,9 +139,9 @@ void event_map_object_interact(Object44 *obj, ...)
     VECTOR to;
     VECTOR from;
     u8 *model;
-    Object44Def *def;
-    Object44 *link;
-    Object44 *driver;
+    MapObjectDef *def;
+    MapObject *link;
+    MapObject *driver;
     s32 id;
     s32 pitch;
     s32 start;
@@ -158,11 +158,11 @@ void event_map_object_interact(Object44 *obj, ...)
         va_start(args, obj);
         id = va_arg(args, s32);
         va_end(args);
-        obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
+        obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.scatter_pool_sequence);
         map_object_reset(obj);
-        obj->unk6 = id;
-        obj->unk0 = 2;
-        obj->unk4 = 0xff;
+        obj->object_id = id;
+        obj->layer_mask = 2;
+        obj->action = 0xff;
         obj->angle.vz = 0;
         obj->angle.vy = 0;
         obj->angle.vx = 0;
@@ -172,36 +172,36 @@ void event_map_object_interact(Object44 *obj, ...)
         obj->pos.vz += rsin(scene_display_sys.unk15b08.vy - 3072) * 1024 >> 12;
         obj->pos.vy -= 1024;
     }
-    def = &map_objects_slots.defs[obj->unk6];
-    spin = obj->unke;
+    def = &map_objects_slots.defs[obj->object_id];
+    spin = obj->render_depth_offset;
     if (obj->arg.b.unk38 != 0xff) {
         return;
     }
-    if (def->unk1 == 0x20) {
+    if (def->kind == 0x20) {
         notify_enqueue(25, obj->arg.h.unk3a);
-        obj->unk6 = 0xff;
+        obj->object_id = 0xff;
         cur_avatar_status.unk50 += obj->arg.h.unk3a;
         return;
     }
-    if (obj->unk4 == 0x70 && obj->unk6 == 0x86) {
+    if (obj->action == 0x70 && obj->object_id == 0x86) {
         driver = &map_objects_slots.objects[obj->arg.h.unk40];
         link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
-        if (link->unk4 == 2 && link->unk8 != 0) {
+        if (link->action == 2 && link->action_state != 0) {
             return;
         }
-    } else if (obj->unk4 == 0x70 && obj->unk6 == 0x8d) {
+    } else if (obj->action == 0x70 && obj->object_id == 0x8d) {
         driver = &map_objects_slots.objects[obj->arg.h.unk40];
         link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
-        if (link->unk4 == 2 && link->unk8 != 0) {
+        if (link->action == 2 && link->action_state != 0) {
             return;
         }
-    } else if (obj->unk4 == 0x70 && obj->unk6 == 0x88) {
+    } else if (obj->action == 0x70 && obj->object_id == 0x88) {
         driver = &map_objects_slots.objects[obj->arg.h.unk40];
         link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
-        if (link->unk4 == 2 && link->unk8 != 0) {
+        if (link->action == 2 && link->action_state != 0) {
             return;
         }
-    } else if (obj->unk6 == 0x85 && asset_status.area[0] == 7) {
+    } else if (obj->object_id == 0x85 && asset_status.area[0] == 7) {
         if (!angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 256)) {
             return;
         }
@@ -216,15 +216,15 @@ void event_map_object_interact(Object44 *obj, ...)
         pitch = 4095;
     }
     prev = PadRead(1);
-    held = def->arg.sh.unk10;
+    held = def->arg.sh.held_depth_offset;
     angle_from = obj->angle;
     from = obj->pos;
-    scene_position_from_camera_offset(0, 500, 1500, pitch, cur_avatar_status.unk124.vy, def->arg.sh.unkc,
-                                      def->arg.sh.unke, &to);
+    scene_position_from_camera_offset(0, 500, 1500, pitch, cur_avatar_status.unk124.vy,
+                                      def->arg.sh.height_offset, def->arg.sh.depth_offset, &to);
     angle_to.vz = 0;
     angle_to.vx = 0;
     angle_to.vy = (cur_avatar_status.unk124.vy + 2048) & 0xfff;
-    model_id = map_object_asset_index(obj->unk6);
+    model_id = map_object_asset_index(obj->object_id);
     resource_registry_get(model_id, &model);
     while (model == NULL) {
         cd_request_service_vab();
@@ -239,13 +239,13 @@ void event_map_object_interact(Object44 *obj, ...)
         }
         prev = pad;
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
-        obj->unke = value_approach(spin, held, t >> 4);
+        obj->render_depth_offset = value_approach(spin, held, t >> 4);
         cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         cd_request_service_vab();
         cd_request_service_stream();
         render_game_frame(NULL, &cur_avatar_status.unk124);
     }
-    obj->unke = held;
+    obj->render_depth_offset = held;
     for (;;) {
         pad = PadRead(1);
         if (prev == 0 && pad != 0) {
@@ -259,8 +259,8 @@ void event_map_object_interact(Object44 *obj, ...)
     }
 pressed:
     if ((pad & action_button_masks[7]) || id != -1) {
-        if (game_counter_increment(obj->unk6) == 0) {
-            switch (obj->unk6) {
+        if (game_counter_increment(obj->object_id) == 0) {
+            switch (obj->object_id) {
             case 0x93:
                 n = (rand() * 6 >> 15) + 4;
                 if (event_item_counters_table[0][0x93] < 99 - n) {
@@ -280,7 +280,7 @@ pressed:
             goto back;
         }
         if (id != -1) {
-            obj->unk6 = 0xff;
+            obj->object_id = 0xff;
             player_clear_motion();
             return;
         }
@@ -301,18 +301,18 @@ back:
     for (t = 4096; t >= 0; t -= 512) {
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
         cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
-        obj->unke = value_approach(spin, held, t >> 4);
+        obj->render_depth_offset = value_approach(spin, held, t >> 4);
         render_game_frame(NULL, &cur_avatar_status.unk124);
     }
     if (pad) {
-        obj->unk6 = 0xff;
+        obj->object_id = 0xff;
     }
     player_clear_motion();
 }
 
 /*
  * The action button at pos facing angle: the Actor within reach in front
- * gets event_target_stream_execute, then each Object44 record
+ * gets event_target_stream_execute, then each MapObject record
  * map_object_find_interaction_target finds in front acts by the type of its def
  * (doors and locks show why they stay shut or open, items are picked up, the
  * healing and save points fade the screen), and the loaded FDAT module's
@@ -324,9 +324,9 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
 {
     VECTOR p;
     Actor *o88;
-    Object44 *obj;
-    Object44Def *def;
-    Object44 *link;
+    MapObject *obj;
+    MapObjectDef *def;
+    MapObject *link;
     s32 i;
 
     p.vx = pos->vx;
@@ -343,20 +343,20 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
     }
     for (i = 0; (i = map_object_find_interaction_target(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        switch (def->unk0) {
+        switch (def->action) {
         case 0xa5:
         case 0xff:
-            if (obj->unk6 == 0xf8) {
+            if (obj->object_id == 0xf8) {
                 notify_enqueue(0x1d);
-            } else if (obj->unk6 == 0xf9) {
+            } else if (obj->object_id == 0xf9) {
                 notify_enqueue(0x1c);
             }
             break;
         case 0x40:
             event_map_object_interact(obj);
-            if (obj->unk6 == 0xff) {
+            if (obj->object_id == 0xff) {
                 goto done;
             }
             break;
@@ -364,26 +364,26 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
             if (obj->arg.b.unk3d[1] == 0) {
                 break;
             }
-            if (obj->unk8 != 0) {
+            if (obj->action_state != 0) {
                 break;
             }
             if (obj->arg.b.unk3d[0] == 0xff) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
             }
             break;
         case 0x57:
-            if (obj->unk8 == 0) {
-                obj->unk8 = 1;
+            if (obj->action_state == 0) {
+                obj->action_state = 1;
             }
             break;
         case 3:
         case 4:
         case 5:
-            if (obj->unk8 != 0) {
+            if (obj->action_state != 0) {
                 break;
             }
             if (obj->arg.b.unk38 == 0xff) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
             } else {
                 notify_enqueue(6);
             }
@@ -392,7 +392,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
         case 1:
         case 2:
         case 0x1b:
-            if (obj->unk8 != 0) {
+            if (obj->action_state != 0) {
                 break;
             }
             switch (obj->arg.b.unk38) {
@@ -410,14 +410,14 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                 break;
             case 0xfd:
             case 0xfe:
-                if (obj->unk6 != 0xae) {
-                    obj->unk8 = 1;
+                if (obj->object_id != 0xae) {
+                    obj->action_state = 1;
                     break;
                 }
                 notify_enqueue(6);
                 break;
             case 0xff:
-                obj->unk8 = 1;
+                obj->action_state = 1;
                 break;
             default:
                 notify_enqueue(6);
@@ -425,19 +425,19 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
             }
             break;
         case 0x51:
-            if (obj->unk8 != 0) {
+            if (obj->action_state != 0) {
                 break;
             }
             if (obj->arg.b.unk38 == 0xff) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
             }
             break;
         case 0x52:
-            if (obj->unk8 != 0) {
+            if (obj->action_state != 0) {
                 break;
             }
             if (obj->arg.b.unk38 == 0xff) {
-                obj->unk8 = 1;
+                obj->action_state = 1;
             }
             break;
         case 6:
@@ -461,7 +461,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                     notify_enqueue(0x1a);
                 } else {
                     link = &map_objects_slots.objects[obj->arg.h.unk3a];
-                    if (link->unk6 == 0xff) {
+                    if (link->object_id == 0xff) {
                         goto missing;
                     }
                 }

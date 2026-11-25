@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: map cell patches (WIP module): records that rewrite the layer
  * bytes of map cells around a point, turned by an angle, and a block copy
- * of cells to a turned destination. Callers: the Object44 set-up
+ * of cells to a turned destination. Callers: the MapObject set-up
  * map_object_initialize_from_placements and the big switch map_object_update_actions.
  */
 #include <kf/lib/address.h>
@@ -18,7 +18,8 @@
  * value other than 0xff replaces bits 0-6 of unk4 on both layers.
  */
 ADDRESS(0x800443c8, 0x1f0)
-void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags)
+void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapCellPattern *rec, s32 index,
+                                    s32 flags)
 {
     s32 c;
     s32 s;
@@ -37,28 +38,28 @@ void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapPatch *
     s = rsin(angle);
     near = area == 1 ? 0 : 5;
     far = near == 0 ? 5 : 0;
-    while (rec->bytes[0][0] != 0xff) {
+    while (rec->variant[0][0] != 0xff) {
         px = ((rec->dx * c - rec->dz * s) >> 12) + x;
         pz = ((rec->dz * c + rec->dx * s) >> 12) + z;
         cell = &map_world.cells[pz][px];
-        bytes = rec->bytes[index];
+        bytes = rec->variant[index];
         own = (MapLayer *)((u8 *)cell + near);
         other = (MapLayer *)((u8 *)cell + far);
         if (bytes[0] != 0xfc) {
-            own->unk3 = bytes[0];
+            own->collision_shape_id = bytes[0];
         }
         if (bytes[1] != 0xfc) {
-            other->unk3 = bytes[1];
+            other->collision_shape_id = bytes[1];
         }
         if (bytes[2] != 0xff) {
-            own->unk0 = bytes[2];
+            own->object_index = bytes[2];
         }
         if (bytes[3] != 0xff) {
-            other->unk0 = bytes[3];
+            other->object_index = bytes[3];
         }
         if (flags != 0xff) {
-            own->unk4 = (own->unk4 & 0x7f) | flags;
-            other->unk4 = (other->unk4 & 0x7f) | flags;
+            own->lighting_index = (own->lighting_index & 0x7f) | flags;
+            other->lighting_index = (other->lighting_index & 0x7f) | flags;
         }
         rec++;
     }
@@ -122,25 +123,25 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
         while (--j != -1) {
             if (copy) {
                 if (mask & 1) {
-                    dst->layer[1].unk0 = src->layer[1].unk0;
+                    dst->layer[1].object_index = src->layer[1].object_index;
                 }
                 if (mask & 2) {
-                    dst->layer[1].unk1 = src->layer[1].unk1;
+                    dst->layer[1].elevation = src->layer[1].elevation;
                 }
                 if (mask & 4) {
-                    dst->layer[1].unk2 = (dst->layer[1].unk2 & 0xfc) | ((src->layer[1].unk2 + turn) & 3);
+                    dst->layer[1].quarter_turns = (dst->layer[1].quarter_turns & 0xfc) | ((src->layer[1].quarter_turns + turn) & 3);
                 }
                 if (mask & 8) {
-                    dst->layer[1].unk3 = src->layer[1].unk3;
+                    dst->layer[1].collision_shape_id = src->layer[1].collision_shape_id;
                 }
                 if (mask & 0x10) {
-                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x3f) | (dst->layer[1].unk4 & 0xc0);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x3f) | (dst->layer[1].lighting_index & 0xc0);
                 }
                 if (mask & 0x20) {
-                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x40) | (dst->layer[1].unk4 & 0xbf);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x40) | (dst->layer[1].lighting_index & 0xbf);
                 }
                 if (mask & 0x40) {
-                    dst->layer[1].unk4 = (src->layer[1].unk4 & 0x80) | (dst->layer[1].unk4 & 0x7f);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x80) | (dst->layer[1].lighting_index & 0x7f);
                 }
             }
             src++;

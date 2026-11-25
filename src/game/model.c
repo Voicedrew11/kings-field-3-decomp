@@ -1638,8 +1638,8 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 
     transform = &SCRATCH->draw.transform;
     scratch = SCRATCH;
-    turn = layer->unk2 & 3;
-    light = &scene_display_sys.unk15da8[layer->unk4 & 0x3f];
+    turn = layer->quarter_turns & 3;
+    light = &scene_display_sys.unk15da8[layer->lighting_index & 0x3f];
     gte_SetLightMatrix(&light->unk0[turn]);
     gte_SetColorMatrix(&light->unk50);
     fog_set_range(light->unk68, light->unk6a);
@@ -1652,7 +1652,7 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
     gte_stflg(&flag);
     gte_SetRotMatrix(&scene_display_sys.unk15a38[turn]);
     gte_SetTransMatrix(transform);
-    part = layer->unk0;
+    part = layer->object_index;
     if ((s16)asset_status.loading == 1 && asset_status.unk16 != 0 &&
         part >= ((ModelData *)SCRATCH->model)->unk4 >> 1) {
         return;
@@ -1687,23 +1687,23 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
     pos = &SCRATCH->u.layer.unk100;
     origin = &SCRATCH->u.layer.unk108;
     cell = &map_world.cells[z][x];
-    kind = cell->layer[0].unk0;
+    kind = cell->layer[0].object_index;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;
         pos->vz = (z << 11) - origin->vz + 1024;
-        pos->vy = (-cell->layer[0].unk1 << 7) - origin->vy;
+        pos->vy = (-cell->layer[0].elevation << 7) - origin->vy;
         render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.unk100, flags);
-        kind = cell->layer[1].unk0;
+        kind = cell->layer[1].object_index;
         if (kind < 240) {
-            pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
+            pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
             render_map_cell_object(&cell->layer[1], &SCRATCH->u.layer.unk100, flags);
         }
     } else {
-        kind = cell->layer[1].unk0;
+        kind = cell->layer[1].object_index;
         if ((flags & 2) && kind < 240) {
             pos->vx = (x << 11) - origin->vx + 1024;
             pos->vz = (z << 11) - origin->vz + 1024;
-            pos->vy = (-cell->layer[1].unk1 << 7) - origin->vy;
+            pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
             render_map_cell_object(&cell->layer[1], pos, flags);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: an Actor's talk script (event_target_stream_execute), an Object44 spawn
+ * GAME.EXE: an Actor's talk script (event_target_stream_execute), an MapObject spawn
  * helper, the player's move to one of 14 start positions (areas loaded
  * through resource_request_transition) and the item use dispatcher (event_scene_command_dispatch) (WIP
  * module). The .rdata is player_warp_to_destination's local table initializer, then the
@@ -168,16 +168,16 @@ end:
     cur_evt_state.unk0 = 1;
 }
 
-/* Spawns Object44 0x17c and links obj to it (its index - 124). */
+/* Spawns MapObject 0x17c and links obj to it (its index - 124). */
 ADDRESS(0x8005c7e8, 0x7c)
-void event_spawn_effect_object(Object44 *obj, s32 id)
+void event_spawn_effect_object(MapObject *obj, s32 id)
 {
-    Object44 *made;
+    MapObject *made;
     s32 i;
 
     made = map_object_effect_pool_acquire(0x17c, 0x10, -1);
     obj->arg.b.unk39 = made - map_objects_slots.objects - 124;
-    made->unk6 = id;
+    made->object_id = id;
     made->arg.b.unk38 = 0;
 }
 
@@ -264,12 +264,12 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
 {
     VECTOR unused[2]; /* the frame keeps 32 unused bytes here */
     Actor *o88;
-    Object44 *obj;
-    Object44 *obj2;
+    MapObject *obj;
+    MapObject *obj2;
     Actor *o88b;
-    Object44 *obj2b;
+    MapObject *obj2b;
     Actor *target;
-    Object44 *made;
+    MapObject *made;
     s32 dist;
     s32 i;
     s32 element;
@@ -376,8 +376,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     }
                     cd_request_wait_idle();
                     o88->render_depth_offset = -1;
-                    obj2->unk10 = 0x400;
-                    obj2->unk2 = 5;
+                    obj2->lighting_blend = 0x400;
+                    obj2->render_mode = 5;
                     o88->lighting_blend = 0x1000;
                     o88->render_mode = 5;
                     while (--i != -1) {
@@ -385,7 +385,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                             o88->render_depth_offset -= 8;
                             obj2->scale.vx += 8;
                             obj2->scale.vz += 8;
-                            obj2->unk10 += 256;
+                            obj2->lighting_blend += 256;
                             o88->lighting_blend -= 256;
                         } else {
                             o88->render_depth_offset = 100;
@@ -397,7 +397,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     o88->lighting_blend = 0x800;
                     o88->render_mode = 0;
                     o88->slot_state = 1;
-                    obj2->unk6 = 0xff;
+                    obj2->object_id = 0xff;
                     cur_evt_state.unke[0x19] = 1;
                     break;
                 }
@@ -419,8 +419,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     }
                     cd_request_wait_idle();
                     o88b->render_depth_offset = -1;
-                    obj2b->unk10 = 0x400;
-                    obj2b->unk2 = 5;
+                    obj2b->lighting_blend = 0x400;
+                    obj2b->render_mode = 5;
                     o88b->lighting_blend = 0x1000;
                     o88b->render_mode = 5;
                     while (--i != -1) {
@@ -428,7 +428,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                             o88b->render_depth_offset -= 8;
                             obj2b->scale.vx += 8;
                             obj2b->scale.vz += 8;
-                            obj2b->unk10 += 256;
+                            obj2b->lighting_blend += 256;
                             o88b->lighting_blend -= 256;
                         } else {
                             o88b->render_depth_offset = 0;
@@ -440,7 +440,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     o88b->lighting_blend = 0x800;
                     o88b->render_mode = 0;
                     o88b->slot_state = 1;
-                    obj2b->unk6 = 0xff;
+                    obj2b->object_id = 0xff;
                     cur_evt_state.unk2c[0] = 1;
                     break;
                 }
@@ -491,10 +491,10 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             break;
         }
         made = &map_objects_slots.objects[i];
-        if (made->unk6 == 0x101) {
+        if (made->object_id == 0x101) {
             if (made->arg.b.unk38 == 0xff) {
                 made->arg.b.unk38 = id;
-                made->unk8 = 0;
+                made->action_state = 0;
                 cur_evt_state.unk0 = 1;
                 game_counter_decrement(id);
                 event_spawn_effect_object(made, id);
@@ -512,24 +512,24 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                 break;
             }
             obj = &map_objects_slots.objects[i];
-            if (obj->unk6 == 0xa2) {
+            if (obj->object_id == 0xa2) {
                 if (obj->arg.b.unk38 == 0x88) {
                     obj->arg.b.unk38 = 0xfe;
                     cur_evt_state.unk0 = 1;
                     game_counter_decrement(id);
                 }
-            } else if (obj->unk6 == 0x102) {
+            } else if (obj->object_id == 0x102) {
                 if (obj->arg.b.unk38 == 0xff) {
-                    Object44 *made;
+                    MapObject *made;
 
                     obj->arg.b.unk38 = id;
-                    obj->unk8 = 0;
+                    obj->action_state = 0;
                     cur_evt_state.unk0 = 1;
                     game_counter_decrement(id);
-                    made = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
+                    made = map_object_effect_pool_acquire(350, 10, map_objects_slots.scatter_pool_sequence);
                     map_object_reset(made);
-                    made->arg.h.unk3c = map_objects_slots.unk885e++;
-                    made->unk6 = id;
+                    made->arg.h.unk3c = map_objects_slots.scatter_pool_sequence++;
+                    made->object_id = id;
                     made->arg.b.unk38 = 0;
                     obj->arg.b.unk39 = made - map_objects_slots.objects - 94;
                 }
@@ -545,13 +545,13 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         if (i == -1) {
             break;
         }
-        if (map_objects_slots.objects[i].unk6 == 0xfe) {
+        if (map_objects_slots.objects[i].object_id == 0xfe) {
             if (game_counter_increment(0x77) == 0) {
                 notify_enqueue(12);
                 game_counter_decrement(id);
             }
             cur_evt_state.unk0 = 1;
-        } else if (map_objects_slots.objects[i].unk6 == 0xfb) {
+        } else if (map_objects_slots.objects[i].object_id == 0xfb) {
             if (game_counter_increment(0x78) == 0) {
                 notify_enqueue(12);
                 game_counter_decrement(id);
@@ -616,7 +616,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             cur_evt_state.unk0 = 1;
         } else {
             n = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
-            if (n != -1 && map_objects_slots.objects[n].unk0 != 0 && n == 11 && asset_status.area[0] == 17) {
+            if (n != -1 && map_objects_slots.objects[n].layer_mask != 0 && n == 11 && asset_status.area[0] == 17) {
                 menu_show_transition_image(6, 305);
                 cur_evt_state.unk0 = 1;
             }
@@ -624,7 +624,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         if (cur_evt_state.unk0 == 0) {
             obj = map_objects_slots.objects;
             for (i = 395; i != -1; i--, obj++) {
-                if (map_objects_slots.defs[obj->unk6].unk0 == 0xe2 && obj->arg.b.unk40 == flag
+                if (map_objects_slots.defs[obj->object_id].action == 0xe2 && obj->arg.b.unk40 == flag
                     && player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                        obj->arg.b.unk39,
                                                        0x8000) != 0) {

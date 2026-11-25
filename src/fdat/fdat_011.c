@@ -21,7 +21,7 @@ void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -117,7 +117,7 @@ void area_on_actor_removed_noop(void)
  * (player +0x10a) and copies the normal pattern back.
  */
 ADDRESS(0x801e85d8, 0xc0)
-void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
+void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 {
     if (obj->arg.b.unk3a.bytes[1] != 10) {
         return;

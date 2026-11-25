@@ -176,7 +176,7 @@ What decides the numbers:
 
 local-alloc ties a dying operand to the result (one register, e.g.
 `subu s0,s0,s3`) only when both are block-local (`combine_regs`): a
-block-scoped `Object44 *made` dying in `made - objects` gives retail's tie in
+block-scoped `MapObject *made` dying in `made - objects` gives retail's tie in
 `0x8005cbe0`, a function-scope one does not. The tie is also refused when the
 result already has a quantity, which a hard-register operand earlier in the
 insn gives it (`block_alloc` tries operands in order).

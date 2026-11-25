@@ -143,7 +143,7 @@ void area_on_movie_start_unlock_element_and_remove_actor(u8 id)
 {
     if (id == 4) {
         if (cur_evt_state.unk32[0x14] != 0) {
-            map_objects_slots.objects[20].unk6 = 0xff;
+            map_objects_slots.objects[20].object_id = 0xff;
             actor_status.objects[30].slot_state = 8;
             actor_status.objects[30].lifecycle = 3;
         }
@@ -162,7 +162,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     if (id == 13) {
@@ -170,12 +170,12 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_learn_element_magic(1);
         player_recalculate_combat_stats();
         obj = &map_objects_slots.objects[15];
-        map_objects_slots.objects[15].unk5 = 0x32;
-        map_objects_slots.objects[15].unk2 = 5;
+        map_objects_slots.objects[15].lighting_override_index = 0x32;
+        map_objects_slots.objects[15].render_mode = 5;
         for (i = 15; i != -1; i--) {
-            obj->unk10 += 256;
-            if (obj->unk10 >= 4095) {
-                obj->unk10 = 0xfff;
+            obj->lighting_blend += 256;
+            if (obj->lighting_blend >= 4095) {
+                obj->lighting_blend = 0xfff;
             }
             cd_request_wait_idle();
             cd_request_service_vab();
@@ -183,14 +183,14 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
             player_get_camera_pose(&pos, &angle);
             render_game_frame(&pos, &angle);
         }
-        obj->unk6 = 0xff;
+        obj->object_id = 0xff;
         obj = &map_objects_slots.objects[86];
-        map_objects_slots.objects[86].unk5 = 0x32;
-        map_objects_slots.objects[86].unk2 = 5;
+        map_objects_slots.objects[86].lighting_override_index = 0x32;
+        map_objects_slots.objects[86].render_mode = 5;
         for (i = 15; i != -1; i--) {
-            obj->unk10 += 256;
-            if (obj->unk10 >= 4095) {
-                obj->unk10 = 0xfff;
+            obj->lighting_blend += 256;
+            if (obj->lighting_blend >= 4095) {
+                obj->lighting_blend = 0xfff;
             }
             cd_request_wait_idle();
             cd_request_service_vab();
@@ -198,7 +198,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
             player_get_camera_pose(&pos, &angle);
             render_game_frame(&pos, &angle);
         }
-        obj->unk6 = 0xff;
+        obj->object_id = 0xff;
         conversation_record_mark_page(0xb, 0);
         conversation_record_mark_page(0xb, 1);
     }
@@ -225,13 +225,13 @@ void area_on_load_restore_objects_and_actor(void)
 {
     cur_evt_state.unk32[0x19] = 1;
     if (cur_evt_state.unk7f[1] != 0) {
-        map_objects_slots.objects[15].unk6 = 0xff;
-        map_objects_slots.objects[86].unk6 = 0xff;
+        map_objects_slots.objects[15].object_id = 0xff;
+        map_objects_slots.objects[86].object_id = 0xff;
     }
     if (cur_evt_state.unk32[0x14] == 0) {
         cur_evt_state.unk32[0x15] = 1;
     } else {
-        map_objects_slots.objects[20].unk6 = 0xff;
+        map_objects_slots.objects[20].object_id = 0xff;
         actor_status.objects[30].slot_state = 8;
         actor_status.objects[30].lifecycle = 3;
     }

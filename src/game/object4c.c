@@ -100,7 +100,7 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_
     if (flags == 0x80) {
         player_apply_damage(a6, a7, a8, a9, a10, a11, a12, a13, a14, a3, a5, target);
     } else if (flags == 0x10) {
-        obj = &actor_status.objects[map_world.unk12028];
+        obj = &actor_status.objects[map_world.collision_actor_index];
         def = &actor_status.groups[obj->group_index];
         if (target != NULL &&
             !angle_within_tolerance(obj->angle.vy,
@@ -115,8 +115,8 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_
         } else {
             kind |= 0x20;
         }
-        actor_apply_magic_to_actor(map_world.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind,
-                                   rec, target);
+        actor_apply_magic_to_actor(map_world.collision_actor_index, a4, a6, a7, a8, a10, a11, a12, a13, a14,
+                                   a3, kind, rec, target);
         if (mode & 0x10000) {
             obj->flags |= 0x800;
         }

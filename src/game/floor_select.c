@@ -458,27 +458,27 @@ s32 collision_sample_map_cell_layer(s32 x, s32 y, s32 z)
     if (x >= 0 && x <= 0x27fff && z >= 0 && z <= 0x27fff) {
         cell = &map_world.cells[z >> 11][x >> 11];
         h = -(y >> 7);
-        if (cell->layer[0].unk1 > cell->layer[1].unk1) {
-            if (h >= cell->layer[0].unk1 || cell->layer[1].unk1 == 0) {
+        if (cell->layer[0].elevation > cell->layer[1].elevation) {
+            if (h >= cell->layer[0].elevation || cell->layer[1].elevation == 0) {
             lower:
-                map_world.unk1200a = 0;
-                map_world.unk1200c = -cell->layer[0].unk1 << 7;
+                map_world.collision_layer_offset = 0;
+                map_world.collision_layer_height = -cell->layer[0].elevation << 7;
             } else {
             upper:
-                map_world.unk1200a = 5;
-                map_world.unk1200c = -cell->layer[1].unk1 << 7;
+                map_world.collision_layer_offset = 5;
+                map_world.collision_layer_height = -cell->layer[1].elevation << 7;
             }
         } else {
-            if (h < cell->layer[1].unk1 && cell->layer[0].unk1 != 0) {
+            if (h < cell->layer[1].elevation && cell->layer[0].elevation != 0) {
                 goto lower;
             }
             goto upper;
         }
     } else {
         cell = &collision_default_cell;
-        map_world.unk1200a = 0;
-        map_world.unk1200c = 0;
+        map_world.collision_layer_offset = 0;
+        map_world.collision_layer_height = 0;
     }
-    map_world.unk12000 = cell;
-    return map_world.unk1200c;
+    map_world.collision_cell = cell;
+    return map_world.collision_layer_height;
 }

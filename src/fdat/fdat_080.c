@@ -22,7 +22,7 @@ void area_refresh_lamp_effects_and_light(void);
 void area_adjust_actor_magic_damage_light_lamps(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void area_on_actor_removed_noop(void);
-void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj);
+void area_region_trigger_set_flags_and_recalc_stats(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -119,18 +119,18 @@ ADDRESS(0x801e86c4, 0x94)
 void area_refresh_lamp_effects_and_light(void)
 {
     u32 bits;
-    Effect *effect;
+    MapPlacedEntry *placed;
     s32 i;
     s32 t;
 
     bits = cur_evt_state.unk32[0x34] | cur_evt_state.unk32[0x35] << 8;
-    effect = map_placed_entries;
-    for (i = 0, t = 0; i < 12; effect++, i++, bits >>= 1) {
+    placed = map_placed_entries;
+    for (i = 0, t = 0; i < 12; placed++, i++, bits >>= 1) {
         if (bits & 1) {
-            effect->unk2 = 2;
+            placed->layer_mask = 2;
             t += 320;
         } else {
-            effect->unk2 = 0;
+            placed->layer_mask = 0;
         }
     }
     light_blend_records(&area_light_blend_from, &area_light_blend_to, &light_default_records[41], t);
@@ -172,7 +172,7 @@ void area_on_actor_removed_noop(void)
 
 /* Slot 3: switch objects 0..2. */
 ADDRESS(0x801e8858, 0xb8)
-void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj)
+void area_region_trigger_set_flags_and_recalc_stats(MapObject *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -238,19 +238,19 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object44 *obj;
+    MapObject *obj;
     s32 i;
 
     cur_avatar_status.unk34[3] += 20;
     player_learn_element_magic(3);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[6];
-    map_objects_slots.objects[6].unk5 = 0x32;
-    map_objects_slots.objects[6].unk2 = 5;
+    map_objects_slots.objects[6].lighting_override_index = 0x32;
+    map_objects_slots.objects[6].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -258,14 +258,14 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     obj = &map_objects_slots.objects[87];
-    map_objects_slots.objects[87].unk5 = 0x32;
-    map_objects_slots.objects[87].unk2 = 5;
+    map_objects_slots.objects[87].lighting_override_index = 0x32;
+    map_objects_slots.objects[87].render_mode = 5;
     for (i = 15; i != -1; i--) {
-        obj->unk10 += 256;
-        if (obj->unk10 >= 4095) {
-            obj->unk10 = 0xfff;
+        obj->lighting_blend += 256;
+        if (obj->lighting_blend >= 4095) {
+            obj->lighting_blend = 0xfff;
         }
         cd_request_wait_idle();
         cd_request_service_vab();
@@ -273,7 +273,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         player_get_camera_pose(&pos, &angle);
         render_game_frame(&pos, &angle);
     }
-    obj->unk6 = 0xff;
+    obj->object_id = 0xff;
     conversation_record_mark_page(9, 0);
     conversation_record_mark_page(9, 1);
 }
@@ -299,8 +299,8 @@ void area_on_load_restore_lamps_and_markers(void)
         map_object_apply_marker_signal(0xf2);
     }
     if (cur_evt_state.unk7f[3] != 0) {
-        map_objects_slots.objects[6].unk6 = 0xff;
-        map_objects_slots.objects[87].unk6 = 0xff;
+        map_objects_slots.objects[6].object_id = 0xff;
+        map_objects_slots.objects[87].object_id = 0xff;
     }
     if (cur_evt_state.unk32[0x36] != 0) {
         map_object_process_marker_all(0xf1);

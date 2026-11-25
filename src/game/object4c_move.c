@@ -184,7 +184,7 @@ s32 effect_spawn_at_lower_bound(VECTOR *pos, s32 a1, s32 a2, s32 height)
     SVECTOR v;
     s32 floor;
 
-    floor = map_world.unk12018[0];
+    floor = map_world.collision_bounds[0];
     if (pos->vy < floor) {
         return 0;
     }
@@ -266,12 +266,12 @@ s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a
 
     dx = 0;
     dz = 0;
-    floor = map_world.unk12018[0];
+    floor = map_world.collision_bounds[0];
     if (pos->vy >= floor && floor + 500 >= pos->vy) {
         while (--count != -1) {
             p.vx = dx + pos->vx;
             p.vz = dz + pos->vz;
-            p.vy = map_world.unk12018[0];
+            p.vy = map_world.collision_bounds[0];
             r = random_centered_triangular_scaled(range) + 4096;
             effect_construct_record(10, 0, 0x70, &p, &v, a3 * r >> 12, a4 * r >> 12);
             dx = (rand() * spread >> 14) - spread;
@@ -301,7 +301,7 @@ s32 effect_collision_step(s32 radius, s32 height, s32 spin)
         p.vz = obj->pos.vz - (obj->vel.vz >> 1);
         hit = effect_probe_collision_by_type(&p, radius, height);
     }
-    obj->unka = map_world.unk1200a == 0 ? 1 : 2;
+    obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
     obj->angle.vz = (obj->angle.vz - spin) & 0xfff;
     return hit;
 }
@@ -539,7 +539,7 @@ void effect_update_dispatch(void)
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            obj->unka = map_world.unk1200a == 0 ? 1 : 2;
+            obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 82:
@@ -581,7 +581,7 @@ void effect_update_dispatch(void)
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            obj->unka = map_world.unk1200a == 0 ? 1 : 2;
+            obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 86:
@@ -833,11 +833,11 @@ void effect_update_dispatch(void)
     case 12:
         if (obj->arg.s.unk44 == 0) {
             collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x400, obj->scale.vx, 0x30);
-            if (map_world.unk12024 == 0x10) {
+            if (map_world.collision_hit_flags == 0x10) {
                 effect_apply_current_magic(0x10010, 5000, NULL);
             }
             obj->arg.s.unk44++;
-            effect_construct_record(10, 0, 0x65, &obj->pos, NULL, map_world.unk12028);
+            effect_construct_record(10, 0, 0x65, &obj->pos, NULL, map_world.collision_actor_index);
             obj->arg.s.unk48 = 0;
             obj->arg.s.unk4a = 0;
         }
@@ -1053,8 +1053,8 @@ void effect_update_dispatch(void)
                 effect_apply_current_magic_backstep(
                     collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy, 0x30));
                 collision_probe_floor_height(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
-                obj->pos.vy = map_world.unk12010;
-                d = map_world.unk12010 - map_world.unk12014;
+                obj->pos.vy = map_world.collision_floor_height;
+                d = map_world.collision_floor_height - map_world.collision_height_limit;
                 obj->scale.vy = d > 0x7fff ? 0x4000 : d >> 1;
                 if (link->unk0 == OBJECT4C_FREE) {
                     obj->arg.c.unk44 = 1;
@@ -1114,7 +1114,7 @@ void effect_update_dispatch(void)
                 effect_construct_record(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
             } else {
                 collision_query_world(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
-                if (map_world.unk12024 == 0x80) {
+                if (map_world.collision_hit_flags == 0x80) {
                     VECTOR q;
 
                     q = cur_avatar_status.pos;
@@ -1268,10 +1268,10 @@ void effect_update_dispatch(void)
                     } else {
                         effect_collision_backtrack();
                         collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, 50, 0);
-                        if (map_world.unk12010 < map_world.unk12018[0]) {
-                            at.vy = map_world.unk12010;
+                        if (map_world.collision_floor_height < map_world.collision_bounds[0]) {
+                            at.vy = map_world.collision_floor_height;
                         } else {
-                            at.vy = map_world.unk12018[0];
+                            at.vy = map_world.collision_bounds[0];
                         }
                         d = at.vy - obj->pos.vy;
                         goto burst;
@@ -1283,10 +1283,10 @@ void effect_update_dispatch(void)
                 obj->vel.vy -= 70;
                 obj->vel.vx = fixed_lerp_q12(0, obj->vel.vx, 3000);
                 obj->vel.vz = fixed_lerp_q12(0, obj->vel.vz, 3000);
-                if (map_world.unk12010 < map_world.unk12018[0]) {
-                    at.vy = map_world.unk12010;
+                if (map_world.collision_floor_height < map_world.collision_bounds[0]) {
+                    at.vy = map_world.collision_floor_height;
                 } else {
-                    at.vy = map_world.unk12018[0];
+                    at.vy = map_world.collision_bounds[0];
                 }
                 d = at.vy - obj->pos.vy;
                 if (d >= 7000) {
@@ -1577,7 +1577,7 @@ void effect_update_dispatch(void)
             }
             {
             boom2:
-                effect_apply_current_magic_backstep(map_world.unk12024);
+                effect_apply_current_magic_backstep(map_world.collision_hit_flags);
                 for (i = 5; i != -1; i--) {
                     v.vx = (rand() * 400 >> 15) - 200;
                     v.vz = (rand() * 400 >> 15) - 200;
@@ -1774,11 +1774,11 @@ void effect_update_dispatch(void)
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
-                    if (map_world.unk12024 != 0x10) {
+                    if (map_world.collision_hit_flags != 0x10) {
                         goto fail16;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = map_world.unk12028;
+                    obj->arg.b.unk4a = map_world.collision_actor_index;
                     o = &actor_status.objects[obj->arg.b.unk4a];
                     if (o->target_type != 2 && o->target_type != 3) {
                         goto fail16;
@@ -1909,11 +1909,11 @@ void effect_update_dispatch(void)
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
-                    if (map_world.unk12024 != 0x10) {
+                    if (map_world.collision_hit_flags != 0x10) {
                         goto fail5;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = map_world.unk12028;
+                    obj->arg.b.unk4a = map_world.collision_actor_index;
                     o = &actor_status.objects[obj->arg.b.unk4a];
                     if (o->target_type != 2 && o->target_type != 3) {
                         goto fail5;
@@ -2189,10 +2189,10 @@ void effect_update_dispatch(void)
             hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, 10, 0xb0);
             if (hit == 0) {
                 collision_probe_floor_height(obj->pos.vx, obj->arg.w.unk48, obj->pos.vz, 0, 0);
-                if (obj->pos.vy < map_world.unk12010) {
+                if (obj->pos.vy < map_world.collision_floor_height) {
                     goto fly95;
                 }
-                obj->pos.vy = map_world.unk12010;
+                obj->pos.vy = map_world.collision_floor_height;
             }
             p = obj->pos;
             v.vx = 0;

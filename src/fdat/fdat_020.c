@@ -22,7 +22,7 @@ void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
 void area_on_actor_removed_make_persistent(Actor *obj);
-void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj);
+void area_region_trigger_worn_item_cells_and_warp_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -130,45 +130,45 @@ ADDRESS(0x801e853c, 0x210)
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
-    Object44 *obj;
-    Object44 *link;
-    Object44Def *def;
+    MapObject *obj;
+    MapObject *link;
+    MapObjectDef *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
-        def = &map_objects_slots.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->object_id];
         cur_evt_state.unk0 = 1;
-        if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
+        if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
                 if (obj->arg.b.unk3f != 0) {
                     if (obj->arg.b.unk3f < 35) {
                         notify_enqueue(obj->arg.b.unk3f);
                     }
-                    if (obj->unk6 == 212 || obj->unk6 == 213 || obj->unk6 == 0xf7 ||
-                        obj->unk6 == 0x133) {
+                    if (obj->object_id == 212 || obj->object_id == 213 || obj->object_id == 0xf7 ||
+                        obj->object_id == 0x133) {
                         notify_enqueue(0x1a);
-                    } else if (obj->unk6 == 0xb7) {
+                    } else if (obj->object_id == 0xb7) {
                         notify_enqueue(0x1e);
-                    } else if (obj->unk6 == 0xf5) {
+                    } else if (obj->object_id == 0xf5) {
                         notify_enqueue(0xe);
-                    } else if (obj->unk6 == 0xba) {
+                    } else if (obj->object_id == 0xba) {
                         notify_enqueue(0x22);
-                    } else if (obj->unk6 >= 190 && obj->unk6 < 198) {
+                    } else if (obj->object_id >= 190 && obj->object_id < 198) {
                         notify_enqueue(8);
                     }
                 }
             } else {
                 link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     goto message;
                 }
-                link->unk0 = obj->arg.b.unk40;
+                link->layer_mask = obj->arg.b.unk40;
                 link->arg.b.unk38 = 0xff;
                 event_map_object_interact(link);
-                link->unk0 = 0;
+                link->layer_mask = 0;
                 link->arg.b.unk38 = 0;
-                if (link->unk6 == 0xff) {
+                if (link->object_id == 0xff) {
                     obj->arg.b.unk3a.index = 0xffff;
                 }
             }
@@ -205,7 +205,7 @@ void area_on_actor_removed_make_persistent(Actor *obj)
  * player +0xf4 (item 0x4b or not); region 10 swaps the warp-arrival cells.
  */
 ADDRESS(0x801e87a8, 0x13c)
-void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj)
+void area_region_trigger_worn_item_cells_and_warp_cells(MapObject *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -298,7 +298,7 @@ ADDRESS(0x801e8a80, 0x268)
 void area_on_load_restore_actors_doors_and_light(void)
 {
     Actor *obj;
-    Object44 *obj44;
+    MapObject *obj44;
     s32 i;
 
     if (cur_avatar_status.unk32 >= 50 && cur_avatar_status.unk34[0] >= 50 && cur_avatar_status.unk34[1] >= 50 &&
@@ -308,7 +308,7 @@ void area_on_load_restore_actors_doors_and_light(void)
     if (cur_evt_state.unke[0x19] == 0) {
         area_set_light_blend(0);
         obj44 = &map_objects_slots.objects[121];
-        obj44->unk0 = 0;
+        obj44->layer_mask = 0;
         map_objects_slots.objects[121].arg.b.unk3c = 0;
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0;
         actor_status.objects[3].slot_state = 8;
@@ -322,11 +322,11 @@ void area_on_load_restore_actors_doors_and_light(void)
         cur_evt_state.unke[0x1b] = 1;
         area_set_light_blend(16);
         obj44 = &map_objects_slots.objects[121];
-        obj44->unk0 = 0;
+        obj44->layer_mask = 0;
         map_objects_slots.objects[121].arg.b.unk3c = 0;
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0;
         obj44 = &map_objects_slots.objects[91];
-        obj44->unk0 = 0;
+        obj44->layer_mask = 0;
         actor_status.objects[3].slot_state = 1;
         obj = &actor_status.objects[4];
         actor_status.objects[0].slot_state = 8;
@@ -337,11 +337,11 @@ void area_on_load_restore_actors_doors_and_light(void)
     } else {
         area_set_light_blend(0);
         obj44 = &map_objects_slots.objects[121];
-        obj44->unk0 = 2;
+        obj44->layer_mask = 2;
         map_objects_slots.objects[121].arg.b.unk3c = 0xff;
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0xff;
         obj44 = &map_objects_slots.objects[91];
-        obj44->unk0 = 0;
+        obj44->layer_mask = 0;
         actor_status.objects[3].slot_state = 8;
         obj = &actor_status.objects[4];
         actor_status.objects[0].slot_state = 8;
@@ -354,7 +354,7 @@ void area_on_load_restore_actors_doors_and_light(void)
         actor_status.objects[58].slot_state = 8;
     } else {
         obj44 = &map_objects_slots.objects[83];
-        obj44->unk0 = 0;
+        obj44->layer_mask = 0;
     }
     cur_evt_state.unk84[5] = 6;
 }

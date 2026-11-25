@@ -94,7 +94,7 @@ void event_arena_owner_pointers_subtract_delta(s32 delta)
 
 /*
  * Saves area's state in its saved block: the live Actor records, the talk
- * script positions and each Object44 record by its Object44Def type.
+ * script positions and each MapObject record by its MapObjectDef type.
  */
 ADDRESS(0x8005efd4, 0x470)
 void event_world_state_save_slot(s32 area)
@@ -103,7 +103,7 @@ void event_world_state_save_slot(s32 area)
     u8 buf[0xc00];
     Actor *obj;
     ActorGroup *def;
-    Object44 *rec;
+    MapObject *rec;
     u8 *script;
     u8 *p;
     u8 *block;
@@ -141,15 +141,15 @@ void event_world_state_save_slot(s32 area)
     *p++ = 0xff;
     rec = map_objects_slots.objects;
     for (i = 0; i < 396; i++) {
-        if (rec->unk6 == 0xff) {
+        if (rec->object_id == 0xff) {
             *p++ = 0xff;
         } else {
-            switch (map_objects_slots.defs[rec->unk6].unk0) {
+            switch (map_objects_slots.defs[rec->object_id].action) {
             case 0x40:
-                switch (rec->unk4) {
+                switch (rec->action) {
                 case 0x60:
                     *p++ = 0xf0;
-                    *p++ = rec->unk6;
+                    *p++ = rec->object_id;
                     *p++ = rec->pos.vx >> 2;
                     *p++ = rec->pos.vx >> 10;
                     *p++ = rec->pos.vz >> 2;
@@ -160,7 +160,7 @@ void event_world_state_save_slot(s32 area)
                     break;
                 case 0x61:
                     *p++ = 0xf1;
-                    *p++ = rec->unk6;
+                    *p++ = rec->object_id;
                     *p++ = rec->pos.vx >> 2;
                     *p++ = rec->pos.vx >> 10;
                     *p++ = rec->pos.vz >> 2;
@@ -170,7 +170,7 @@ void event_world_state_save_slot(s32 area)
                     break;
                 case 0x62:
                     *p++ = 0xf2;
-                    *p++ = rec->unk6;
+                    *p++ = rec->object_id;
                     *p++ = rec->pos.vx >> 2;
                     *p++ = rec->pos.vx >> 10;
                     *p++ = rec->pos.vz >> 2;
@@ -181,7 +181,7 @@ void event_world_state_save_slot(s32 area)
                     break;
                 case 0x70:
                     *p++ = 0xf3;
-                    *p++ = rec->unk6;
+                    *p++ = rec->object_id;
                     *p++ = rec->arg.b.unk38;
                     break;
                 default:
@@ -262,7 +262,7 @@ ADDRESS(0x8005f444, 0x378)
 void event_world_state_restore_slot(s32 area)
 {
     u8 *ptrs[32];
-    Object44 *rec;
+    MapObject *rec;
     u8 *script;
     u8 *p;
     s32 i;
@@ -297,7 +297,7 @@ void event_world_state_restore_slot(s32 area)
     for (i = 0; i < 396; i++) {
         switch (*p++) {
         case 0xff:
-            rec->unk6 = 0xff;
+            rec->object_id = 0xff;
             break;
         case 0xf4:
             rec->arg.b.unk38 = *p++;
@@ -306,8 +306,8 @@ void event_world_state_restore_slot(s32 area)
             break;
         case 0xf0:
             map_object_reset(rec);
-            rec->unk4 = 0x60;
-            rec->unk6 = *p++;
+            rec->action = 0x60;
+            rec->object_id = *p++;
             x = *p++;
             x |= *p++ << 8;
             z = *p++;
@@ -320,15 +320,15 @@ void event_world_state_restore_slot(s32 area)
             rec->pos.vx = x << 2;
             rec->pos.vz = z << 2;
             rec->pos.vy = y;
-            rec->unk8 = 99;
+            rec->action_state = 99;
             collision_sample_map_cell_layer(rec->pos.vx, rec->pos.vy, rec->pos.vz);
-            rec->unk0 = map_world.unk1200a == 0 ? 1 : 2;
+            rec->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
             rec->arg.b.unk38 = 0xff;
             break;
         case 0xf1:
             map_object_reset(rec);
-            rec->unk4 = 0x61;
-            rec->unk6 = *p++;
+            rec->action = 0x61;
+            rec->object_id = *p++;
             x = *p++;
             x |= *p++ << 8;
             z = *p++;
@@ -338,8 +338,8 @@ void event_world_state_restore_slot(s32 area)
             goto place;
         case 0xf2:
             map_object_reset(rec);
-            rec->unk4 = 0x62;
-            rec->unk6 = *p++;
+            rec->action = 0x62;
+            rec->object_id = *p++;
             x = *p++;
             x |= *p++ << 8;
             z = *p++;
@@ -347,14 +347,14 @@ void event_world_state_restore_slot(s32 area)
             y = *p++;
             y |= *p++ << 8;
             rec->arg.h.unk3a = (*p++ << 2) + (rand() >> 13);
-            if (rec->unk6 == 0x79) {
+            if (rec->object_id == 0x79) {
                 rec->angle.vx = 0x400;
             }
             goto place;
         case 0xf3:
             map_object_reset(rec);
-            rec->unk4 = 0x70;
-            rec->unk6 = *p++;
+            rec->action = 0x70;
+            rec->object_id = *p++;
         case 0xfd:
             rec->arg.b.unk38 = *p++;
             break;

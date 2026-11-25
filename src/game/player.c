@@ -61,7 +61,7 @@ static SVECTOR player_magic_spawn_offsets[5] = {
 ADDRESS(0x80028d54, 0xf4)
 void player_update_collision_bounds(void)
 {
-    s32 height0 = map_world.unk12018[0] + 1600;
+    s32 height0 = map_world.collision_bounds[0] + 1600;
     s32 height1;
     s32 height2;
 
@@ -69,12 +69,12 @@ void player_update_collision_bounds(void)
         < -1000) {
         player_death_begin(0);
     }
-    height1 = map_world.unk12018[1] + 1600;
+    height1 = map_world.collision_bounds[1] + 1600;
     if ((cur_avatar_status.unk158 = height1 - (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170))
         <= 0) {
         player_death_begin(0);
     }
-    height2 = map_world.unk12018[2] + 1600;
+    height2 = map_world.collision_bounds[2] + 1600;
     if ((cur_avatar_status.unk15c = height2 - (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170))
         <= 0) {
         player_death_begin(0);
@@ -216,7 +216,7 @@ void player_add_equipment_bonuses(s32 id)
     if (id == 0xff) {
         return;
     }
-    r = &map_world.unk11c14[id];
+    r = &map_world.equipment_records[id];
     cur_avatar_status.unk66 += r->defense_slash;
     cur_avatar_status.unk68 += r->defense_blow;
     cur_avatar_status.unk6a += r->defense_stab;
@@ -1276,37 +1276,37 @@ void player_set_equipment_slot(u8 id, u8 slot)
         break;
     }
     if (cur_avatar_status.unkf0 != 0xff) {
-        cur_avatar_status.unkd4 = &map_world.unk11c14[cur_avatar_status.unkf0];
+        cur_avatar_status.unkd4 = &map_world.equipment_records[cur_avatar_status.unkf0];
     } else {
         cur_avatar_status.unkd4 = NULL;
     }
     if (cur_avatar_status.unkf1 != 0xff) {
-        cur_avatar_status.unkd8 = &map_world.unk11c14[cur_avatar_status.unkf1];
+        cur_avatar_status.unkd8 = &map_world.equipment_records[cur_avatar_status.unkf1];
     } else {
         cur_avatar_status.unkd8 = NULL;
     }
     if (cur_avatar_status.unkf3 != 0xff) {
-        cur_avatar_status.unke0 = &map_world.unk11c14[cur_avatar_status.unkf3];
+        cur_avatar_status.unke0 = &map_world.equipment_records[cur_avatar_status.unkf3];
     } else {
         cur_avatar_status.unke0 = NULL;
     }
     if (cur_avatar_status.unkf4 != 0xff) {
-        cur_avatar_status.unke4 = &map_world.unk11c14[cur_avatar_status.unkf4];
+        cur_avatar_status.unke4 = &map_world.equipment_records[cur_avatar_status.unkf4];
     } else {
         cur_avatar_status.unke4 = NULL;
     }
     if (cur_avatar_status.unkf2 != 0xff) {
-        cur_avatar_status.unkdc = &map_world.unk11c14[cur_avatar_status.unkf2];
+        cur_avatar_status.unkdc = &map_world.equipment_records[cur_avatar_status.unkf2];
     } else {
         cur_avatar_status.unkdc = NULL;
     }
     if (cur_avatar_status.unkf5 != 0xff) {
-        cur_avatar_status.unke8 = &map_world.unk11c14[cur_avatar_status.unkf5];
+        cur_avatar_status.unke8 = &map_world.equipment_records[cur_avatar_status.unkf5];
     } else {
         cur_avatar_status.unke8 = NULL;
     }
     if (cur_avatar_status.unkf6 != 0xff) {
-        cur_avatar_status.unkec = &map_world.unk11c14[cur_avatar_status.unkf6];
+        cur_avatar_status.unkec = &map_world.equipment_records[cur_avatar_status.unkf6];
     } else {
         cur_avatar_status.unkec = NULL;
     }

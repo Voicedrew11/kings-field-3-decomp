@@ -77,19 +77,19 @@ void actor_update_vertical_motion(void)
 {
     Actor *obj = actor_status.current;
     ActorGroup *def = actor_status.current_group;
-    u16 *wet = &map_world.unk1200a;
+    u16 *wet = &map_world.collision_layer_offset;
 
     collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->collision_radius,
                                  ACTOR_SHAPE(obj));
     obj->layer_mask = *wet == 0 ? 1 : 2;
     if (obj->flags & 0x400) {
-        map_world.unk12010 = map_world.unk1200c;
+        map_world.collision_floor_height = map_world.collision_layer_height;
     }
     switch (obj->vertical_motion_state) {
     case 0: {
         s32 dy;
 
-        dy = map_world.unk12010 - obj->pos.vy;
+        dy = map_world.collision_floor_height - obj->pos.vy;
         if (dy < 0) {
             obj->vertical_motion_state = 0x20;
             obj->vel.vy = -100;
@@ -117,14 +117,14 @@ void actor_update_vertical_motion(void)
         }
         if (hit & 4) {
             if (obj->flags & 0x400) {
-                s32 floor = map_world.unk1200c;
+                s32 floor = map_world.collision_layer_height;
 
                 if (obj->pos.vy < floor) {
                     goto fall;
                 }
                 obj->pos.vy = floor;
             } else {
-                obj->pos.vy = map_world.unk12010;
+                obj->pos.vy = map_world.collision_floor_height;
             }
             obj->vel.vy = 0;
             goto idle;
@@ -137,10 +137,10 @@ void actor_update_vertical_motion(void)
     case 0x20:
         obj->pos.vy += obj->vel.vy;
         obj->vel.vy += 5;
-        if (map_world.unk12010 < obj->pos.vy && obj->vel.vy < 0) {
+        if (map_world.collision_floor_height < obj->pos.vy && obj->vel.vy < 0) {
             return;
         }
-        obj->pos.vy = map_world.unk12010;
+        obj->pos.vy = map_world.collision_floor_height;
     idle:
         obj->vertical_motion_state = 0;
         return;

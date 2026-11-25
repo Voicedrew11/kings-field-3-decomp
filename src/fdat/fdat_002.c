@@ -23,7 +23,7 @@ void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_lethal_only(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void area_on_actor_removed_unlock_door(Actor *obj);
-void area_region_trigger_set_doors_and_warp_cells(Object44 *obj);
+void area_region_trigger_set_doors_and_warp_cells(MapObject *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
@@ -93,12 +93,12 @@ void area_update_light_flicker_and_actor_swap(void)
     s32 dz;
 
     if (rand() < 8192) {
-        map_objects_slots.objects[k].unk10 += light_flicker_step * 16;
+        map_objects_slots.objects[k].lighting_blend += light_flicker_step * 16;
     }
-    if (map_objects_slots.objects[k].unk10 > 2048) {
+    if (map_objects_slots.objects[k].lighting_blend > 2048) {
         light_flicker_step = -light_flicker_step;
-        if (map_objects_slots.objects[k].unk10 >= 4096) {
-            map_objects_slots.objects[k].unk10 = 0;
+        if (map_objects_slots.objects[k].lighting_blend >= 4096) {
+            map_objects_slots.objects[k].lighting_blend = 0;
         }
     }
     if (cur_evt_state.unk4[1] != 0 && cur_evt_state.unk4[2] != 0 && cur_evt_state.unk4[7] == 0) {
@@ -151,9 +151,9 @@ void area_on_actor_removed_unlock_door(Actor *obj)
  * the normal cell pattern.
  */
 ADDRESS(0x801e87e0, 0x180)
-void area_region_trigger_set_doors_and_warp_cells(Object44 *obj)
+void area_region_trigger_set_doors_and_warp_cells(MapObject *obj)
 {
-    Object44 *door;
+    MapObject *door;
 
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
@@ -163,23 +163,23 @@ void area_region_trigger_set_doors_and_warp_cells(Object44 *obj)
                 actor_status.objects[1].slot_state = 8;
                 actor_status.objects[2].slot_state = 8;
                 door = &map_objects_slots.objects[214];
-                door->unk0 = 2;
+                door->layer_mask = 2;
                 door->arg.b.unk3c = 0xff;
                 door = &map_objects_slots.objects[177];
                 door->arg.b.unk3d[1] = 0xff;
                 door = &map_objects_slots.objects[111];
-                door->unk0 = 0;
+                door->layer_mask = 0;
                 door->arg.b.unk3c = 0;
                 door = &map_objects_slots.objects[182];
                 door->arg.b.unk3d[1] = 0;
                 door = &map_objects_slots.objects[62];
-                door->unk0 = 2;
+                door->layer_mask = 2;
                 door->arg.b.unk38 = 0xff;
                 door = &map_objects_slots.objects[195];
-                door->unk0 = 2;
+                door->layer_mask = 2;
                 door->arg.b.unk38 = 0xff;
                 door = &map_objects_slots.objects[172];
-                door->unk0 = 2;
+                door->layer_mask = 2;
                 door->arg.b.unk38 = 0xff;
             }
         }
@@ -305,7 +305,7 @@ void area_talk_event_collect_items_and_wait(Actor *record, s32 event)
 ADDRESS(0x801e8d68, 0x39c)
 void area_on_load_restore_actors_and_doors(void)
 {
-    Object44 *door;
+    MapObject *door;
     s32 k;
 
     if (cur_evt_state.unke[0xc] != 0) {
@@ -327,27 +327,27 @@ void area_on_load_restore_actors_and_doors(void)
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 214;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 177;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[111];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 111;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 182;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[62];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 62;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[195];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 195;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[172];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[2] == 0) {
@@ -355,27 +355,27 @@ void area_on_load_restore_actors_and_doors(void)
         actor_status.objects[1].slot_state = 1;
         actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 214;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 177;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[111];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 111;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 182;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[62];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 62;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[195];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 195;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[172];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[6] == 0) {
@@ -383,27 +383,27 @@ void area_on_load_restore_actors_and_doors(void)
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 1;
         door = &map_objects_slots.objects[214];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 214;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 177;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[111];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 111;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 182;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[62];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 62;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[195];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 195;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[172];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[7] == 0) {
@@ -411,27 +411,27 @@ void area_on_load_restore_actors_and_doors(void)
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
-        door->unk0 = 2;
+        door->layer_mask = 2;
         k = 214;
         map_objects_slots.objects[k].arg.b.unk3c = 0xff;
         k = 177;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0xff;
         door = &map_objects_slots.objects[111];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 111;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 182;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[62];
-        door->unk0 = 2;
+        door->layer_mask = 2;
         k = 62;
         map_objects_slots.objects[k].arg.b.unk38 = 0xff;
         door = &map_objects_slots.objects[195];
-        door->unk0 = 2;
+        door->layer_mask = 2;
         k = 195;
         map_objects_slots.objects[k].arg.b.unk38 = 0xff;
         door = &map_objects_slots.objects[172];
-        door->unk0 = 2;
+        door->layer_mask = 2;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0xff;
     } else {
@@ -439,27 +439,27 @@ void area_on_load_restore_actors_and_doors(void)
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 214;
         map_objects_slots.objects[k].arg.b.unk3c = 0;
         k = 177;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         door = &map_objects_slots.objects[111];
-        door->unk0 = 2;
+        door->layer_mask = 2;
         k = 111;
         map_objects_slots.objects[k].arg.b.unk3c = 0xff;
         k = 182;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0xff;
         door = &map_objects_slots.objects[62];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 62;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[195];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 195;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
         door = &map_objects_slots.objects[172];
-        door->unk0 = 0;
+        door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     }
@@ -476,10 +476,10 @@ void area_on_load_restore_actors_and_doors(void)
         }
     }
     k = 158;
-    if (map_objects_slots.objects[k].unk5 == 0xff) {
-        map_objects_slots.objects[k].unk5 = 0x3f;
-        map_objects_slots.objects[k].unk2 = 7;
-        map_objects_slots.objects[k].unk10 = 0x800;
+    if (map_objects_slots.objects[k].lighting_override_index == 0xff) {
+        map_objects_slots.objects[k].lighting_override_index = 0x3f;
+        map_objects_slots.objects[k].render_mode = 7;
+        map_objects_slots.objects[k].lighting_blend = 0x800;
     }
     cur_evt_state.unk84[5] = 0;
 }
