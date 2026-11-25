@@ -534,7 +534,7 @@ void func_8001b5c4(u8 item)
     i = 0;
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518(DAT_8009c37c);
+    func_80019518((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_80027a40();
     do {
@@ -583,7 +583,7 @@ void func_8001b88c(s32 item)
         shade = (DAT_801b24e4.unkfd - 128) / 4;
     }
     setRGB0(DAT_8009c374, shade + 64, shade + 64, shade + 64);
-    SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
     DAT_8009c374->tpage = GetTPage(0, 0, 0x3c0, 0x100);
     DAT_8009c374->clut = 0x7806;
     if (item == 0x5f) {
@@ -595,7 +595,7 @@ void func_8001b88c(s32 item)
     }
     func_80027530(0x1e);
     func_80027414();
-    SetSemiTrans(DAT_8009c374, 1);
+    SetSemiTrans((void *)DAT_8009c374, 1);
     setRGB0(DAT_8009c374, shade + 64, shade + 64, shade + 64);
     DAT_8009c374->tpage = GetTPage(0, 1, 0x3c0, 0x100);
     DAT_8009c374->clut = 0x7806;
@@ -629,7 +629,7 @@ void func_8001babc(void)
     i = 0;
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518(DAT_8009c37c);
+    func_80019518((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_8001bea8();
     func_80027a40();
@@ -746,7 +746,7 @@ s32 func_8001c030(void)
     } while (DAT_8009c230 == 1);
     func_80043b38(DAT_8009c37c);
     DrawSync(0);
-    func_80019518(DAT_8009c37c);
+    func_80019518((void *)DAT_8009c37c);
     DAT_8009c230 = 0;
     func_80027a40();
     for (;;) {
@@ -913,7 +913,7 @@ void func_8001c7a8(void)
 
     confirmed = 0;
     result = MENU_NONE;
-    memcpy(labels, DAT_8007f230, sizeof(labels));
+    memcpy((void *)labels, (const void *)DAT_8007f230, sizeof(labels));
     func_8001c9c0(names);
     func_80027688(&list, 0, 2);
     list.count = 10;
@@ -1061,7 +1061,7 @@ void func_8001cbb8(s32 slot)
         break;
     }
     n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, first, last);
-    memcpy(&entries[n], &DAT_8007f230[11], 10);
+    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 10);
     counts[n] = 0xff;
     ids[n] = 0xff;
     n++;
@@ -1163,7 +1163,7 @@ void func_8001d0c4(void)
     result = MENU_NONE;
     confirmed = 0;
     n = func_8001c6c0(DAT_801b77ec.unk0, entries, values, ids, 0, 0x16);
-    memcpy(&entries[n], &DAT_8007f230[11], 12);
+    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 12);
     values[n] = -1;
     ids[n] = 0xff;
     n++;
@@ -1245,7 +1245,7 @@ void func_8001d3a0(void)
     n = func_8001aea4(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
     DAT_800c85e8[0][0x85] = saved;
     n += func_8001c6c0(DAT_801b77ec.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
-    memcpy(&entries[n], &DAT_8007f230[11], 12);
+    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 12);
     n++;
     func_80027688(&list, 0, 2);
     list.count = n;
@@ -1469,7 +1469,7 @@ s32 func_8001dbc4(s32 index, s32 book, u8 *out)
     func_8001a154(8, entry, buffer);
     func_80043b38(buffer);
     DrawSync(0);
-    func_80019518(buffer);
+    func_80019518((void *)buffer);
     n = 0;
     for (i = 0; i < 256; i++) {
         page = func_80060a10(book, i);
@@ -1499,7 +1499,7 @@ void func_8001dcd0(s32 book, s32 page)
         func_8001a154(8, entry, buffer);
         func_80043b38(buffer);
         DrawSync(0);
-        func_80019518(buffer);
+        func_80019518((void *)buffer);
     }
 }
 
@@ -2466,11 +2466,11 @@ void func_8001fe9c(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[25], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[25], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[26], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[26], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8001ff94, 0xf8)
@@ -2478,11 +2478,11 @@ void func_8001ff94(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[28], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[28], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[29], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[29], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8002008c, 0x33c)
@@ -2651,13 +2651,13 @@ s32 func_80020560(void)
     labels[1].x = DAT_8007e660[11].x;
     labels[1].y = DAT_8007e660[11].y;
     lines[0].y = 0x7a;
-    memcpy(lines[0].text, &DAT_8007f230[36], sizeof(MenuEntry));
+    memcpy((void *)lines[0].text, (const void *)&DAT_8007f230[36], sizeof(MenuEntry));
     lines[1].x = 0x4c;
     lines[1].y = 0x89;
-    memcpy(lines[1].text, &DAT_8007f230[30], sizeof(MenuEntry));
+    memcpy((void *)lines[1].text, (const void *)&DAT_8007f230[30], sizeof(MenuEntry));
     lines[2].x = 0x4c;
     lines[2].y = 0x98;
-    memcpy(lines[2].text, &DAT_8007f230[31], sizeof(MenuEntry));
+    memcpy((void *)lines[2].text, (const void *)&DAT_8007f230[31], sizeof(MenuEntry));
     for (;;) {
         if (chosen != -1 || result != MENU_NONE) {
             func_80027a40();
@@ -2698,7 +2698,7 @@ void func_8002090c(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy(line->text, &DAT_8007f230[24], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&DAT_8007f230[24], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8002098c, 0xf8)
@@ -2706,11 +2706,11 @@ void func_8002098c(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[36], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[36], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[38], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[38], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020a84, 0xf8)
@@ -2718,11 +2718,11 @@ void func_80020a84(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[33], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[33], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[27], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020b7c, 0xf8)
@@ -2730,11 +2730,11 @@ void func_80020b7c(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[32], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[32], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[39], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[39], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020c74, 0xf8)
@@ -2742,11 +2742,11 @@ void func_80020c74(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy(lines->text, &DAT_8007f230[40], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[40], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[41], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[41], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020d6c, 0x80)
@@ -2754,7 +2754,7 @@ void func_80020d6c(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy(line->text, &DAT_8007f230[10], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&DAT_8007f230[10], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020dec, 0x80)
@@ -2762,7 +2762,7 @@ void func_80020dec(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy(line->text, &DAT_8007f230[37], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&DAT_8007f230[37], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020e6c, 0x17c)
@@ -2771,14 +2771,14 @@ void func_80020e6c(MenuText *lines, s32 error)
     lines->x = 0x4c;
     lines->y = 0x69;
     if (error == 1) {
-        memcpy(lines->text, &DAT_8007f230[34], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&DAT_8007f230[34], sizeof(MenuEntry));
     } else {
-        memcpy(lines->text, &DAT_8007f230[35], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&DAT_8007f230[35], sizeof(MenuEntry));
     }
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy(lines->text, &DAT_8007f230[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&DAT_8007f230[27], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020fe8, 0x12c)
@@ -3481,14 +3481,14 @@ void func_800227ec(void)
 
     label.x = 0xa3;
     label.y = 0x24;
-    memcpy(label.text, &DAT_8007f230[12], 20);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[12], 20);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
     func_800277c0(DAT_801b24e4.experience, 7, 0, 0, number.text);
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.y += 17;
-    memcpy(label.text, &DAT_8007f230[13], 20);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[13], 20);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     number.y += 17;
     func_800277c0(DAT_801b24e4.level, 7, 0, 0, number.text);
@@ -3613,27 +3613,27 @@ void func_800227ec(void)
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 17;
-    memcpy(label.text, &DAT_8007f230[16], 12);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[16], 12);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     dy = 17;
     number.x = label.x + 56;
     number.y += 17;
     if (DAT_801b24e4.unk84 != 0) {
-        memcpy(number.text, &DAT_8007f230[17], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[17], 12);
     } else if (DAT_801b24e4.unk7a != 0) {
-        memcpy(number.text, &DAT_8007f230[18], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[18], 12);
     } else if (DAT_801b24e4.unk82 != 0) {
-        memcpy(number.text, &DAT_8007f230[19], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[19], 12);
     } else if (DAT_801b24e4.unk78 != 0) {
-        memcpy(number.text, &DAT_8007f230[20], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[20], 12);
     } else if (DAT_801b24e4.unk7e != 0) {
-        memcpy(number.text, &DAT_8007f230[21], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[21], 12);
     } else {
-        memcpy(number.text, &DAT_8007f230[22], 12);
+        memcpy((void *)number.text, (const void *)&DAT_8007f230[22], 12);
     }
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &number);
     label.y += dy;
-    memcpy(label.text, &DAT_8007f230[23], 10);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[23], 10);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y += dy;
@@ -3650,7 +3650,7 @@ void func_80023300(void)
 
     label.x = 0x1e;
     label.y = 0x22;
-    memcpy(label.text, &DAT_8007f230[14], 10);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[14], 10);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     label.text[0] = 0x7f;
     label.text[1] = 0x7f;
@@ -3770,7 +3770,7 @@ void func_80023300(void)
     func_8002636c(&DAT_8007e564[MENU_FONT_NUMBER], &number);
     label.x = 0xa4;
     label.y = 0x22;
-    memcpy(label.text, &DAT_8007f230[15], 12);
+    memcpy((void *)label.text, (const void *)&DAT_8007f230[15], 12);
     func_800261dc(&DAT_8007e564[MENU_FONT_TEXT], &label);
     label.text[0] = 0x7f;
     label.text[1] = 0x7f;
@@ -4073,7 +4073,7 @@ void func_80023fd4(u8 style, u8 layout, s32 row)
         func_80027494(0x37, 0x7a, 0x35, 0xf, DAT_8007e564[11].unk4, DAT_8007e564[11].unk6,
                       DAT_8007e564[11].unk8, DAT_8007e564[11].unka);
     }
-    SetSemiTrans(DAT_8009c374, 1);
+    SetSemiTrans((void *)DAT_8009c374, 1);
     func_80027530(0x31);
     func_80026acc(0x1f, 0x20, 0x102, 0xb0);
     func_800269c0(0x5b, 0xd6, 9);
@@ -4204,7 +4204,7 @@ void func_80024a78(u8 *levels)
         DAT_8009c378->h = DAT_8007e564[k].unka;
         DAT_8009c378->u0 = DAT_8007e564[k].unk4;
         DAT_8009c378->v0 = DAT_8007e564[k].unk6;
-        SetSemiTrans(DAT_8009c378, DAT_801b24e4.unk100);
+        SetSemiTrans((void *)DAT_8009c378, DAT_801b24e4.unk100);
         func_800275e0(0x32);
         func_80027560();
         setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
@@ -4366,7 +4366,7 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     } while (DAT_8009c230 == 1);
     func_80043b38(buffer);
     DrawSync(0);
-    func_80019518(buffer);
+    func_80019518((void *)buffer);
     DAT_8009c230 = saved;
     func_80027a40();
     for (;;) {
@@ -4549,7 +4549,7 @@ void func_80025468(MenuList *list, s32 flags)
             func_80027494(list->x + 6, list->y + i * 16 + 5, DAT_8007e564[11].unk8, DAT_8007e564[11].unka,
                           DAT_8007e564[11].unk4, DAT_8007e564[11].unk6, DAT_8007e564[11].unk8,
                           DAT_8007e564[11].unka);
-            SetSemiTrans(DAT_8009c374, 1);
+            SetSemiTrans((void *)DAT_8009c374, 1);
             func_80027530(0x31);
         }
     }
@@ -4712,7 +4712,7 @@ void func_80025f38(MenuFont *frame, MenuText *text)
     DAT_8009c374->clut = frame->unk2;
     func_80027494(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6, frame->unk8,
                   frame->unka);
-    SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
     func_80027530(0x32);
 }
 
@@ -4735,7 +4735,7 @@ void func_80026020(MenuFont *frame, MenuText *text, s32 shade)
     DAT_8009c374->clut = frame->unk2;
     func_80027494(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6, frame->unk8,
                   frame->unka);
-    SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
     func_80027530(0x32);
 }
 
@@ -5034,7 +5034,7 @@ void func_80026acc(s32 x0, s32 y0, s32 w, s32 h)
         for (;;) {
             func_80027414();
             setRGB0(DAT_8009c374, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-            SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+            SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
             DAT_8009c374->tpage = f->unk0;
             DAT_8009c374->clut = f->unk2;
             func_80027494(x, y, ww, hh, f->unk4, v, ww, hh);
@@ -5069,7 +5069,7 @@ void func_80026acc(s32 x0, s32 y0, s32 w, s32 h)
         do {
             func_80027414();
             setRGB0(DAT_8009c374, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-            SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+            SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
             DAT_8009c374->tpage = f->unk0;
             DAT_8009c374->clut = f->unk2;
             func_80027494(x, y, ww, hh, f->unk4, f->unk6, ww, hh);
@@ -5102,14 +5102,14 @@ void func_80026e4c(s32 x, s32 y, s32 w, s32 h)
 {
     func_80027414();
     setRGB0(DAT_8009c374, 0x40, 0x40, 0x40);
-    SetSemiTrans(DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
     DAT_8009c374->tpage = 0x1c;
     DAT_8009c374->clut = 0x7b05;
     func_80027494(x, y, w, h, 0, 0x30, 0x80, 0xc8);
     func_80027530(0x32);
     func_80027414();
     setRGB0(DAT_8009c374, 0x40, 0x40, 0x40);
-    SetSemiTrans(DAT_8009c374, 1);
+    SetSemiTrans((void *)DAT_8009c374, 1);
     DAT_8009c374->tpage = GetTPage(0, 1, 0x300, 0x100);
     DAT_8009c374->clut = 0x7b05;
     func_80027494(x, y, w, h, 0, 0x30, 0x80, 0xc8);
@@ -5234,7 +5234,7 @@ void func_80027494(s16 x, s16 y, s16 w, s16 h, s16 u, s16 v, s16 uw, s16 vh)
 ADDRESS(0x80027530, 0x30)
 void func_80027530(s32 depth)
 {
-    AddPrim(DAT_80199154.ot + depth, DAT_8009c374);
+    AddPrim((void *)(DAT_80199154.ot + depth), (void *)DAT_8009c374);
 }
 
 ADDRESS(0x80027560, 0x80)
@@ -5249,7 +5249,7 @@ void func_80027560(void)
 ADDRESS(0x800275e0, 0x30)
 void func_800275e0(s32 depth)
 {
-    AddPrim(DAT_80199154.ot + depth, DAT_8009c378);
+    AddPrim((void *)(DAT_80199154.ot + depth), (void *)DAT_8009c378);
 }
 
 ADDRESS(0x80027610, 0x78)
@@ -5260,7 +5260,7 @@ void func_80027610(s32 depth, s16 tpage)
     mode = (DR_MODE *)DAT_80199154.pool->next;
     DAT_80199154.pool->next += sizeof(DR_MODE);
     SetDrawMode(mode, 0, 0, tpage, 0);
-    AddPrim(DAT_80199154.ot + depth + 1, mode);
+    AddPrim((void *)(DAT_80199154.ot + depth + 1), (void *)mode);
 }
 
 ADDRESS(0x80027688, 0xa0)
@@ -5458,9 +5458,9 @@ ADDRESS(0x80027b5c, 0x58)
 void func_80027b5c(void)
 {
     if (DAT_8009c238 == 1) {
-        func_80019518(DAT_80199154.unk10148[3]);
+        func_80019518((void *)DAT_80199154.unk10148[3]);
     } else if (DAT_8009c230 != 0) {
-        func_80019518(DAT_8009c37c);
+        func_80019518((void *)DAT_8009c37c);
     }
     DAT_8009c230 = 0;
     DAT_8009c238 = 0;
@@ -5548,7 +5548,7 @@ void func_80027ea8(u8 status, u8 *data)
             DAT_8009c234 = 0;
             DAT_8009c230 = 3;
         } else {
-            CdGetSector(DAT_8009c380, 0x200);
+            CdGetSector((void *)DAT_8009c380, 0x200);
             DAT_8009c380 += 2048;
             if (--DAT_8009c234 == 0) {
                 DAT_8009c230 = 2;

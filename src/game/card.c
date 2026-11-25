@@ -105,7 +105,7 @@ void func_80028034(void)
 ADDRESS(0x80028090, 0x44)
 void func_80028090(void)
 {
-    func_80019518(DAT_8009c3c8);
+    func_80019518((void *)DAT_8009c3c8);
     EnterCriticalSection();
     StopCARD();
     PadInit(0);
@@ -166,10 +166,10 @@ s32 func_800281c4(struct DIRENTRY *dir, s32 *count)
         if (strncmp(dir->name, DAT_80081818, 12) == 0) {
             number[0] = dir->name[12];
             slot = atoi(number) - 1;
-            memcpy(&sorted[slot], dir, sizeof(*dir));
+            memcpy((void *)&sorted[slot], (const void *)dir, sizeof(*dir));
         }
     }
-    memcpy(top, sorted, sizeof(sorted));
+    memcpy((void *)top, (const void *)sorted, sizeof(sorted));
     return used > 0x18000;
 }
 
@@ -192,12 +192,12 @@ s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number)
         return 1;
     strcat(path, name);
     fd = open(path, O_RDONLY);
-    if (fd == -1 || read(fd, &header, sizeof(header)) != sizeof(header))
+    if (fd == -1 || read(fd, (void *)&header, sizeof(header)) != sizeof(header))
         return 1;
     close(fd);
     *experience = 0;
     for (scale = 100000, i = 0; i < 6; i++) {
-        memcpy(&ch, &header.title[40 + i * 2], 2);
+        memcpy((void *)&ch, (const void *)&header.title[40 + i * 2], 2);
         if (ch != SJIS_SPACE) {
             ch = (ch >> 8) - SJIS_DIGIT_ZERO;
             *experience += ch * scale;
@@ -206,7 +206,7 @@ s32 func_80028398(char *name, s32 *experience, s32 *level, s32 *number)
     }
     *level = 0;
     for (scale = 10, i = 0; i < 2; i++) {
-        memcpy(&ch, &header.title[58 + i * 2], 2);
+        memcpy((void *)&ch, (const void *)&header.title[58 + i * 2], 2);
         if (ch != SJIS_SPACE) {
             ch = (ch >> 8) - SJIS_DIGIT_ZERO;
             *level += ch * scale;
@@ -247,7 +247,7 @@ retry:
     path[17] = number + '0';
     path[18] = '\0';
     fd = open(path, O_RDONLY);
-    if (fd == -1 || read(fd, DAT_8009c3c8, CARD_FILE_SIZE) != CARD_FILE_SIZE) {
+    if (fd == -1 || read(fd, (void *)DAT_8009c3c8, CARD_FILE_SIZE) != CARD_FILE_SIZE) {
         result = 1;
     } else {
         close(fd);
@@ -340,7 +340,7 @@ retry:
     memset(DAT_8009c3c8, 0, CARD_FILE_SIZE);
     func_8005f7bc(DAT_8009c3c8 + CARD_DATA);
     sum = header.checksum = func_80028c74(DAT_8009c3c8 + CARD_DATA);
-    memcpy(DAT_8009c3c8, &header, sizeof(header));
+    memcpy((void *)DAT_8009c3c8, (const void *)&header, sizeof(header));
     if (!found) {
         fd = open(path, O_CREAT | (3 << 16));
         if (fd == -1)
@@ -350,11 +350,11 @@ retry:
     }
     fd = open(path, O_WRONLY);
     if (fd != -1) {
-        if (write(fd, DAT_8009c3c8, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
+        if (write(fd, (const void *)DAT_8009c3c8, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
             close(fd);
             fd = open(path, O_RDONLY);
             if (fd != -1) {
-                if (read(fd, DAT_8009c3c8, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
+                if (read(fd, (void *)DAT_8009c3c8, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
                     close(fd);
                     if (sum == func_80028c74(DAT_8009c3c8 + CARD_DATA)) {
                         DAT_8009c2c0 = number;

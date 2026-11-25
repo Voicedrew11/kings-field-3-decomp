@@ -248,7 +248,7 @@ void func_8003c868(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32 h, u8 
     if (semi != 0xff) {
         setSemiTrans(p, 1);
     }
-    DrawPrim(p);
+    DrawPrim((void *)p);
 }
 
 ADDRESS(0x8003c968, 0x74)
@@ -2526,7 +2526,7 @@ void func_80043894(AnimSlot *slot)
     slot->state = 0;
     *slot->owner = NULL;
     if (slot->pose != NULL) {
-        free(slot->pose);
+        free((void *)slot->pose);
         slot->pose = NULL;
     }
 }

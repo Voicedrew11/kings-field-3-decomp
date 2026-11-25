@@ -146,7 +146,7 @@ void func_80019848(void)
     case CD_REQUEST_FREE:
         break;
     case CD_REQUEST_STREAM:
-        CdGetSector(request->buffer, 0x200);
+        CdGetSector((void *)request->buffer, 0x200);
         request->count--;
         if (request->callback) {
             ((CdRequestCallback)request->callback)(request);
