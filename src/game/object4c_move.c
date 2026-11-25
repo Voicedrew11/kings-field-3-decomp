@@ -2,7 +2,7 @@
  * GAME.EXE: Effect movement (WIP module): steering and speed limits of
  * the current record, spawning further records from it, its step and
  * collision test, and effect_update_dispatch, the per-frame update of the current
- * record by its id (Effect.unk1).
+ * record by its kind (Effect.kind).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -72,7 +72,7 @@ s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel
     return 0;
 }
 
-/* Homing: turns the current record toward an Actor record (unk0 bit 6) or the player, then
+/* Homing: turns the current record toward an Actor record (type bit 6) or the player, then
  * effect_move_probe. */
 ADDRESS(0x80055db0, 0x1c4)
 s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
@@ -282,7 +282,7 @@ s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a
     return 0;
 }
 
-/* Moves the current record one step, tests it (also half a step back when unkd), spins it. */
+/* Moves the current record one step, tests it (also half a step back when midpoint_collision_enabled), spins it. */
 ADDRESS(0x800566d4, 0x12c)
 s32 effect_collision_step(s32 radius, s32 height, s32 spin)
 {
@@ -331,10 +331,10 @@ void effect_collision_backtrack_half(void)
 }
 
 /*
- * Per-frame update of the current Effect record (effect_status.unk2f04),
- * switched on its id; obj->unk7 is the phase of the multi-step ids. Most
- * ids move the record, test it for hits and leave a particle trail through
- * effect_construct_record; a record is freed by setting unk0 to EFFECT_FREE.
+ * Per-frame update of the current Effect record (effect_status.current),
+ * switched on its kind; obj->phase is the phase of the multi-step kinds. Most
+ * kinds move the record, test it for hits and leave a particle trail through
+ * effect_construct_record; a record is freed by setting type to EFFECT_FREE.
  *
  * Stack frame: a case block opened at a case label stays open to the end
  * of the switch (the closing braces at the bottom), so its locals keep

@@ -21,44 +21,44 @@
  * from the globals each comment names and card_payload_restore_game_state copies it back.
  */
 typedef struct SaveData {
-    u8 active_resource_ids[5]; /* +0x0000: asset_status.area */
+    u8 active_resource_ids[5]; /* +0x0000: asset_status.active_resource_ids */
     u8 unk5[3];
-    u8 event_flags[0x100];  /* +0x0008: cur_evt_state from unk4 (the script bytes) */
-    u8 event_arena[0x5000]; /* +0x0108: cur_evt_state.unk104, the block arena */
-    u16 saved_event_offsets[32]; /* +0x5108: cur_evt_state.unk5104 */
-    u8 conversation_page_states[0x3c0]; /* +0x5148: conversation_records.unk1e0, the slot runs */
+    u8 event_flags[0x100];  /* +0x0008: cur_evt_state from flags (the script bytes) */
+    u8 event_arena[0x5000]; /* +0x0108: cur_evt_state.arena, the block arena */
+    u16 saved_event_offsets[32]; /* +0x5108: cur_evt_state.saved_offsets */
+    u8 conversation_page_states[0x3c0]; /* +0x5148: conversation_records.page_states, the slot runs */
     u8 game_counters[2][150]; /* +0x5508: event_item_counters_table, the item counts */
-    u8 magic_menu_available[96]; /* +0x5634: effect_status.unk0[n].unk0 */
+    u8 magic_menu_available[96]; /* +0x5634: effect_status.magic_records[n].unk0 */
     VECTOR pos;             /* +0x5694: PlayerState.pos */
-    SVECTOR camera_rotation_target; /* +0x56a4: PlayerState.unk12c */
+    SVECTOR camera_rotation_target; /* +0x56a4: PlayerState.camera_rotation_target */
     u32 play_minutes;       /* +0x56ac */
     s32 experience;         /* +0x56b0 */
-    s32 next_level_experience; /* +0x56b4: PlayerState.unk4 */
-    s32 gold;               /* +0x56b8: PlayerState.unk50 */
-    s32 weapon_growth_experience; /* +0x56bc: PlayerState.unk8 */
-    u16 map_layer_offset;   /* +0x56c0: PlayerState.unk160 */
+    s32 next_level_experience; /* +0x56b4: PlayerState.next_level_experience */
+    s32 gold;               /* +0x56b8: PlayerState.gold */
+    s32 weapon_growth_experience; /* +0x56bc: PlayerState.weapon_growth_experience */
+    u16 map_layer_offset;   /* +0x56c0: PlayerState.map_layer_offset */
     u16 hp_max;             /* +0x56c2 */
     u16 hp;                 /* +0x56c4 */
-    u16 mp_max;             /* +0x56c6: PlayerState.unk1a */
-    u16 mp;                 /* +0x56c8: PlayerState.unk1c */
-    u16 base_physical_power; /* +0x56ca: PlayerState.unk32 */
-    u16 base_magic[5];      /* +0x56cc: PlayerState.unk34 */
+    u16 mp_max;             /* +0x56c6: PlayerState.mp_max */
+    u16 mp;                 /* +0x56c8: PlayerState.mp */
+    u16 base_physical_power; /* +0x56ca: PlayerState.base_physical_power */
+    u16 base_magic[5];      /* +0x56cc: PlayerState.base_magic */
     s16 unk56d6;            /* +0x56d6: PlayerState.unk3e */
-    u16 wisdom;             /* +0x56d8: PlayerState.unk4c */
-    u16 physical_power_training; /* +0x56da: PlayerState.unk24 */
-    u16 magic_training[5];  /* +0x56dc: PlayerState.unk26 */
+    u16 wisdom;             /* +0x56d8: PlayerState.wisdom */
+    u16 physical_power_training; /* +0x56da: PlayerState.physical_power_training */
+    u16 magic_training[5];  /* +0x56dc: PlayerState.magic_training */
     s16 unk56e6;            /* +0x56e6: PlayerState.unk30 */
-    s16 status_timers[15];  /* +0x56e8: PlayerState.unk78..unk94 */
+    s16 status_timers[15];  /* +0x56e8: PlayerState.poison_timer..magic_boost_timer (timers and phases) */
     u8 level;               /* +0x5706 */
     u8 unk5707;             /* +0x5707: PlayerState.unkd */
-    u8 equipped_ids[7];     /* +0x5708: PlayerState.unkf0..unkf6 */
-    u8 primary_magic_shortcut_id; /* +0x570f: PlayerState.unkc7 */
-    u8 secondary_magic_shortcut_id; /* +0x5710: PlayerState.unkc8 */
-    u8 secondary_item_shortcut_id; /* +0x5711: PlayerState.unkc9 */
-    u8 equipped_weapon_id;  /* +0x5712: PlayerState.unkcb */
+    u8 equipped_ids[7];     /* +0x5708: PlayerState.equipped_head_id..equipped_extra_id */
+    u8 primary_magic_shortcut_id; /* +0x570f: PlayerState.primary_magic_shortcut_id */
+    u8 secondary_magic_shortcut_id; /* +0x5710: PlayerState.secondary_magic_shortcut_id */
+    u8 secondary_item_shortcut_id; /* +0x5711: PlayerState.secondary_item_shortcut_id */
+    u8 equipped_weapon_id;  /* +0x5712: PlayerState.equipped_weapon_id */
     u8 se_volume;           /* +0x5713 */
     u8 bgm_volume;          /* +0x5714 */
-    u8 options[8];          /* +0x5715: PlayerState.unkf9..unk100 */
+    u8 options[8];          /* +0x5715: PlayerState.vitals_display..panel_translucent */
     u8 unk571d;
     u8 revealed_map_rects[32][20]; /* +0x571e: map_revealed_rects, the rooms seen */
     u8 item_guide_levels[150]; /* +0x599e: item_guide_level */

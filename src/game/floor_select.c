@@ -33,7 +33,7 @@ static MapCell collision_default_cell = { { { 0xff, 0x00, 0x00, 0x3f, 0x00 }, { 
 
 /*
  * The player's frame: marks the map cell visited, reads the pad, steps the
- * walk speeds (unk180/unk184), runs the unk101 mode, then the per-frame
+ * walk speeds (movement_step_limit/turn_step_limit), runs the reaction_mode, then the per-frame
  * timers, the view angle sums, the Actor hit test, player_update_weapon_attack and the
  * effects of the weapon and the EquipmentRecord slots.
  */
@@ -281,7 +281,7 @@ void player_update_frame(void)
         cur_avatar_status.reaction.damage.vel.vy = 1;
         player_move_reaction_with_collision();
         player_update_reaction_rotation_offsets();
-        /* unk134 and unk136 are tested as one word (lw). */
+        /* reaction_rotation_offset_x and _y are tested as one word (lw). */
         if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0 && cur_avatar_status.reaction_rotation_offset_z == 0) {
             player_reset_reaction_state();
         }

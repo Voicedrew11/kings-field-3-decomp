@@ -15,8 +15,9 @@
 RODATA(0x80011920, 0x154)
 
 /*
- * Starts spell id (MagicRecord): checks and pays its unk1c cost, then sets the
- * repeat count unk106, the interval unk107 and the direction unk14c that
+ * Starts spell id (MagicRecord): checks and pays its mp cost, then sets the
+ * repeat count queued_magic_casts_remaining, the interval queued_magic_repeat_interval
+ * and the direction magic_origin_offset that
  * player_update_actions_and_charge casts it with.
  */
 ADDRESS(0x8002deec, 0x50c)
@@ -228,9 +229,9 @@ void player_select_magic_action(s32 id)
 /*
  * Moves the player speed units along angle (4096ths of a turn), retrying
  * around what collision_query_world hit: the push of the last test, up to six turns
- * along a pushing MapObject (unk3 bit 2), around a wall point, shorter steps,
+ * along a pushing MapObject (flags bit 2), around a wall point, shorter steps,
  * one axis at a time, and along the slope of the hit record. Returns 1 when
- * the player moved freely; unk11c keeps the last step tried.
+ * the player moved freely; frame_displacement keeps the last step tried.
  */
 ADDRESS(0x8002e3f8, 0x8c4)
 s32 player_move_horizontal(s32 angle, s32 speed)

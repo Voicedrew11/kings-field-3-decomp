@@ -52,7 +52,7 @@ u8 magic_element_learn_ids[5][7] = {
     { 0x1d, 0x1e, 0x13, 0x14, 0x15, 0xff, 0x00 },
 };
 
-/* Offsets (unk14c) of the five shots of spells 72..74 (player_dispatch_magic_effect). */
+/* Offsets (magic_origin_offset) of the five shots of spells 72..74 (player_dispatch_magic_effect). */
 DATA(0x800818e4, 0x28, ".data")
 static SVECTOR player_magic_spawn_offsets[5] = {
     { 0, 0, 100, 0 }, { -1500, 0, 0, 0 }, { -3000, 0, -2000, 0 }, { 1500, 0, 0, 0 }, { 3000, 0, -2000, 0 }
@@ -1442,7 +1442,7 @@ Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *
 }
 
 /*
- * Casts spell id (77 kinds, MagicRecord indices): aims along unk14c with
+ * Casts spell id (77 kinds, MagicRecord indices): aims along magic_origin_offset with
  * player_probe_view_target_and_vectors and spawns the spell's Effect records with effect_construct_record;
  * spells 68, 69, 72 and 73/74 spawn under the ids 120..124. Declared with an
  * ellipsis: the prologue spills all four argument registers and va_start

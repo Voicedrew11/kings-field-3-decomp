@@ -8,7 +8,7 @@
 #include <sys/types.h>
 
 /* A cell patch record (10 bytes; lists end with bytes[0][0] == 0xff): per
- * variant the own and other layer's unk3, then their unk0, and the cell
+ * variant the own and other layer's collision_shape_id, then their object_index, and the cell
  * offset from the patch origin before the turn. */
 typedef struct MapCellPattern {
     u8 variant[2][4];

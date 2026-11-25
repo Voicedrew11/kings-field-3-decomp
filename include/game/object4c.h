@@ -3,10 +3,10 @@
 
 /*
  * GAME.EXE Effect records (src/game/object4c*.c, WIP names): the 128
- * records of effect_status.objects, made by effect_construct_record from an id that
+ * records of effect_status.objects, made by effect_construct_record from a kind that
  * indexes the MagicRecord records at the start of effect_status, then moved,
- * tested for hits and drawn. effect_status.unk2f04 names the record being
- * updated and unk2f00 its MagicRecord record.
+ * tested for hits and drawn. effect_status.current names the record being
+ * updated and .current_magic its MagicRecord.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@
 #include <game/data.h>
 #include <game/player.h>
 
-/* Effect.unk0 of a free record. */
+/* Effect.type of a free record. */
 #define EFFECT_FREE 0xff
 
 s32 effect_play_spatial_sound(Effect *obj, s32 se);

@@ -39,9 +39,9 @@ void event_state_initialize(void)
 }
 
 /*
- * The ending once FDAT slot 1 has run: with unk69 1 and unk6a set, fades the
+ * The ending once FDAT slot 1 has run: with ending_state 1 and ending_variant set, fades the
  * music out, moves the player to start position 13 and plays movie 7, then
- * loads areas 9 and 11; with unk6a clear, fades out, stops the sequence,
+ * loads areas 9 and 11; with ending_variant clear, fades out, stops the sequence,
  * plays movie 8 and leaves the game loop (main_end_flag = 4).
  */
 ADDRESS(0x8005eb20, 0x338)

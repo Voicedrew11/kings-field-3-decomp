@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: an Actor's talk script (event_target_stream_execute), an MapObject spawn
+ * GAME.EXE: an Actor's talk script (event_target_stream_execute), a MapObject spawn
  * helper, the player's move to one of 14 start positions (areas loaded
  * through resource_request_transition) and the item use dispatcher (event_scene_command_dispatch) (WIP
  * module). The .rdata is player_warp_to_destination's local table initializer, then the

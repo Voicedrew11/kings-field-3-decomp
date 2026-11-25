@@ -70,7 +70,7 @@ s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
 
 /*
  * Hit by the current record: the player (kind 0x80) or the Actor record
- * of unk12028 (0x10). effect_apply_current_magic passes a3 unmasked, so the narrow
+ * of map_world.collision_actor_index (0x10). effect_apply_current_magic passes a3 unmasked, so the narrow
  * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
  * and reads it back with lhu; this source spills it with sh.
  */
@@ -123,7 +123,7 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_
     }
 }
 
-/* Mean of the PlayerState.unk42 stats the record's MagicRecord.unk5 bits pick (5 without 0x40). */
+/* Mean of the PlayerState.magic stats the record's MagicRecord.element_mask bits pick (5 without 0x40). */
 ADDRESS(0x80053624, 0xd4)
 u16 effect_magic_power(Effect *obj)
 {
@@ -186,7 +186,7 @@ void effect_apply_current_magic_backstep(s32 flags)
 }
 
 /*
- * Area hit of the current record: the player (unk0 bit 0) and the Actor
+ * Area hit of the current record: the player (type bit 0) and the Actor
  * records (bit 1). Both callees read flags as a word, but retail passes it
  * masked to 16 bits (andi) to both.
  */

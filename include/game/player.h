@@ -51,7 +51,7 @@ void player_begin_weapon_attack(s32 hand);
 struct Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
 /* Pad bit per action (WIP), defined in player.c; [7] toggles a setting in
- * PlayerState.unk178 (menu_fade_transition). */
+ * PlayerState.pad_buttons (menu_fade_transition). */
 extern u16 action_button_masks[14];
 
 void player_dispatch_magic_effect(s32 id, ...);

@@ -11,7 +11,7 @@
 
 /* One record of an area's MapObject placement table (map_object_initialize_from_placements reads 350). */
 typedef struct MapObjectPlacement {
-    u8 layer_mask;  /* +0x00: MapObject.unk0 (area) */
+    u8 layer_mask;  /* +0x00: MapObject.layer_mask (area) */
     u8 cell_z;      /* +0x01: map cell z */
     u8 cell_x;      /* +0x02: map cell x */
     u8 unk3;

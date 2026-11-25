@@ -142,7 +142,7 @@ void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
 }
 
 /*
- * Slot 1: unless the player's unkf4 is 0x4b, raises objects 100..116 (when
+ * Slot 1: unless the player's equipped_leg_id is 0x4b, raises objects 100..116 (when
  * object 82 is not in state 1); otherwise lets object 82 close.
  */
 ADDRESS(0x801e864c, 0xa8)

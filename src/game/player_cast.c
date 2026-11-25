@@ -42,9 +42,9 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
 }
 
 /*
- * Whether the weapon's spell of hand (0: WeaponRecord.unk3, 1: unk4) may be cast:
+ * Whether the weapon's spell of hand (0: WeaponRecord.unk3, 1: alternate_magic_id) may be cast:
  * the spell must be learned; weapon 2 and 13..17 always may, others need
- * unk40 and every unk42 at 50 or more.
+ * physical_power and every magic[] at 50 or more.
  */
 ADDRESS(0x8002cfe0, 0x150)
 s32 player_meets_weapon_magic_requirement(s32 hand)
@@ -80,7 +80,7 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
     return cur_avatar_status.physical_power >= 50 && low >= 50;
 }
 
-/* Casts spell id (MagicRecord) along dir when unk1c covers its cost; pay takes the cost. */
+/* Casts spell id (MagicRecord) along dir when mp covers its cost; pay takes the cost. */
 ADDRESS(0x8002d130, 0x170)
 void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 {
@@ -124,8 +124,8 @@ void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 }
 
 /*
- * Weapon swing and bow update (once per frame): unkc0 runs the swing of the
- * held weapon (WeaponRecord, unkb0) from 0 to 4096; the bows (27, 28) spend an
+ * Weapon swing and bow update (once per frame): weapon_attack_phase runs the swing of the
+ * held weapon (equipped_weapon_record) from 0 to 4096; the bows (27, 28) spend an
  * arrow (event_item_counters_table) and aim it, the other weapons cast the weapon spell,
  * play the swing sound and probe for an Actor along the swing.
  */

@@ -214,7 +214,7 @@ insn gives it (`block_alloc` tries operands in order).
   register, which loop.c can hoist; `base[n].field` folds the offset into the
   constant (`0x8005f444`).
 - **The address taken first becomes the base.** `u_long **buf =
-  movie_state.unk374;` before `dec` makes `dec` `buf - 52` (`0x80061364`);
+  movie_state.vlc_buffers;` before `dec` makes `dec` `buf - 52` (`0x80061364`);
   `find_best_addr` prefers `(plus base off)` to a register at equal cost
   (`0x8002e3f8`).
 - **No rehash on a register's first quantity.** `insert_regs` does not call

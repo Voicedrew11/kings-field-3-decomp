@@ -673,7 +673,7 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
 
 /*
  * Draws the weapon model (resident model 32) while the player attacks
- * (unkc0 is the attack time, -1 for none): lit by the light record of the map
+ * (weapon_attack_phase is the attack time, -1 for none): lit by the light record of the map
  * layer under the player, posed by animation_prepare_asset_vertices and placed by the weapon
  * record's offset and angle; drawn at depth offset 24.
  */
@@ -1486,7 +1486,7 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
  * Actor records (models from 128, sound banks from 51), the MapObject
  * records (models from 256 and the area bank, sound banks from 147; kind
  * 0x1f plays its sound by the player's distance), the Effect records and
- * the placed effects. The passes flag the model ids and sound banks in use
+ * the placed models. The passes flag the model ids and sound banks in use
  * and resource_tmd_update_range/resource_vab_update_range load the missing ones and release the rest.
  */
 

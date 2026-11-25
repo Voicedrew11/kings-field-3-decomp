@@ -320,7 +320,7 @@ void actor_play_target_sound(Actor *obj)
 /*
  * Runs one frame of the current record's script record (actor_status.current
  * and .def): its sound and light fade first, then the record's behaviour by
- * script id (Actor.unke; unkf 0 starts it), FDAT slot 17 for the ids this
+ * target type (Actor.target_type; target_action_state 0 starts it), FDAT slot 17 for the ids this
  * module does not know, and last the ride on its target record (flag 0x10).
  * The angles passed to actor_move_along_heading are narrowed to s16 here; the FDAT
  * callers pass theirs as int.

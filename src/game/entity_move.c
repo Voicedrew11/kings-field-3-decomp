@@ -71,7 +71,7 @@ void actor_suspend_vertical_motion(void)
     actor_status.current->vertical_motion_state = 0x60;
 }
 
-/* Falls, lands and jumps the current record (unkd 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
+/* Falls, lands and jumps the current record (vertical_motion_state 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
 ADDRESS(0x8004e330, 0x3c8)
 void actor_update_vertical_motion(void)
 {
@@ -362,7 +362,7 @@ s32 actor_sample_rotated_animation_vertex(Actor *obj, s32 vertex, VECTOR *out)
     return 1;
 }
 
-/* obj's aim point (Actor.unk28 bits 0-1: position, offset, rotated offset). */
+/* obj's aim point (Actor.flags bits 0-1: position, offset, rotated offset). */
 ADDRESS(0x8004eee0, 0x128)
 VECTOR *actor_resolve_group_position(Actor *obj, VECTOR *out)
 {

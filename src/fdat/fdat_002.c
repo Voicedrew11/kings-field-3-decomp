@@ -81,7 +81,7 @@ void area_handler_noop(void)
 #include "shared/area_interact_item_containers.inc"
 
 /*
- * Slot 1: drifts object 158's light blend (unk10) at random, a flicker; with
+ * Slot 1: drifts object 158's light blend (lighting_blend) at random, a flicker; with
  * flags 5 and 6 set and 0xb clear, once actor 1 is far from the player it
  * disables actors 0 and 1 (state 8) and enables actor 2.
  */
@@ -118,7 +118,7 @@ void area_use_item_noop(void)
 {
 }
 
-/* Slot 18: record 32 reports 0 while its unk1a is above the value. */
+/* Slot 18: record 32 reports 0 while its health is above the value. */
 ADDRESS(0x801e870c, 0x5c)
 void area_adjust_actor_magic_damage_lethal_only(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
@@ -231,7 +231,7 @@ void area_on_movie_start_noop(void)
 {
 }
 
-/* Slot 7: event 0 restores the player's hp and raises unk1c by 30 up to its maximum. */
+/* Slot 7: event 0 restores the player's hp and raises mp by 30 up to its maximum. */
 ADDRESS(0x801e89d8, 0x5c)
 void area_on_movie_end_restore_hp_and_mp(u8 id)
 {

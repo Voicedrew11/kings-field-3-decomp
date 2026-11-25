@@ -5,9 +5,9 @@
  * GAME.EXE globals outside the sound, CD and render headers (WIP), mostly
  * the BSS blocks the game loop clears word by word at start-up. Each extent
  * is the word count main passes to repeat_store_word; whether a block is one
- * object or a run of several is not yet known, so the names stay
- * address-derived and only the fields the matched code touches are named.
- * The block at 0x80199154 is GraphicsRuntime and the effect records at
+ * object or a run of several is not yet known for every block, and only the
+ * fields the matched code touches are named.
+ * The block at 0x80199154 is GraphicsRuntime and the placed models at
  * 0x80182968 are MapPlacedEntry, both in game/render.h; the word at 0x801c12f0 is
  * CdState.unkc (game/cd.h).
  */
@@ -16,20 +16,20 @@
 #include <psyq/sdk.h>
 #include <kf/decenv.h>
 
-/* PlayerState.unk188 in modes 3, 0x10, 0x11 and 0x12 (player_begin_moving_damage_reaction). */
+/* PlayerState.reaction in modes 3, 0x10, 0x11 and 0x12 (player_begin_moving_damage_reaction). */
 typedef struct PlayerDamageReaction {
     SVECTOR vel;    /* +0x0 */
-    SVECTOR angular_vel; /* +0x8: added to unk134..unk138 (player_update_reaction_rotation_offsets) */
+    SVECTOR angular_vel; /* +0x8: added to reaction_rotation_offset_x..z (player_update_reaction_rotation_offsets) */
 } PlayerDamageReaction;
 
-/* PlayerState.unk188 in modes 7, 8 and 9 (player_begin_movie_approach). */
+/* PlayerState.reaction in modes 7, 8 and 9 (player_begin_movie_approach). */
 typedef struct PlayerMovieReaction {
     u8 movie_id;    /* +0x0 */
     u8 step;
-    SVECTOR start_rotation; /* +0x2: copy of PlayerState.unk12c */
+    SVECTOR start_rotation; /* +0x2: copy of PlayerState.camera_rotation_target */
 } PlayerMovieReaction;
 
-/* PlayerState.unk188: one view per unk101 mode (mode 5 counts in count). */
+/* PlayerState.reaction: one view per reaction_mode (mode 5 counts in bob_phase). */
 typedef union PlayerReaction {
     PlayerDamageReaction damage;
     PlayerMovieReaction movie;
@@ -50,29 +50,30 @@ typedef struct PlayerState {
     s16 damage_scale;
     u16 hp_max;     /* +0x16: 0..999, from the level table */
     u16 hp;         /* +0x18: 0 is death (player_adjust_hp_unclamped) */
-    u16 mp_max;     /* +0x1a: maximum of unk1c; 0..999, from the level table */
+    u16 mp_max;     /* +0x1a: maximum of mp; 0..999, from the level table */
     u16 mp;
     u16 attack_charge_current; /* +0x1e: out of 5000 */
-    u16 attack_charge_committed; /* +0x20: copy of unk1e; scales the swing hit (player_update_weapon_attack) */
+    u16 attack_charge_committed; /* +0x20: copy of attack_charge_current; scales the swing hit (player_update_weapon_attack) */
     u16 magic_charge; /* +0x22: out of 5000 */
-    u16 physical_power_training; /* +0x24: counts up to 100 for a point of unk32 */
-    u16 magic_training[5]; /* +0x26: count up to 400 for a point of unk34[n] */
+    u16 physical_power_training; /* +0x24: counts up to 100 for a point of base_physical_power */
+    u16 magic_training[5]; /* +0x26: count up to 400 for a point of base_magic[n] */
     s16 unk30;
-    u16 base_physical_power; /* +0x32: player_recalculate_combat_stats copies it to unk40 */
-    u16 base_magic[5]; /* +0x34: player_recalculate_combat_stats copies them to unk42 */
+    u16 base_physical_power; /* +0x32: player_recalculate_combat_stats copies it to physical_power */
+    u16 base_magic[5]; /* +0x34: player_recalculate_combat_stats copies them to magic */
     s16 unk3e;
     u16 physical_power; /* +0x40: 0..999 */
     u16 magic[5];   /* +0x42: 0..999 each */
     u16 wisdom;     /* +0x4c: the menu shows it plus one (menu_draw_player_status, lhu) */
     u8 unk4e[0x2];
     s32 gold;
-    u16 attack_components[7]; /* +0x54: player_recalculate_combat_stats rebuilds them; never above 0x7fff */
+    u16 attack_components[7]; /* +0x54: player_recalculate_combat_stats rebuilds them; never above 0x7fff;
+                     * with attack_water really one u16[8] (type later) */
     u16 attack_water;
     u8 unk64[0x2];
-    u16 defense_slash; /* +0x66..+0x76: player_recalculate_combat_stats rebuilds them from Record20s */
+    u16 defense_slash; /* +0x66..+0x76: player_recalculate_combat_stats rebuilds them from EquipmentRecords */
     u16 defense_blow;
     u16 defense_stab;
-    u16 defense_holy;
+    u16 defense_holy; /* +0x6c: component 3; the menu's attack and defence tables label it differently */
     u16 defense_fire;
     u16 defense_earth;
     u16 defense_wind;
@@ -98,10 +99,10 @@ typedef struct PlayerState {
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
     u16 *magic_attack_mask_cursor; /* +0xa8: next pad bit of the player_magic_attack_masks sequence (player_update_actions_and_charge) */
-    struct MagicRecord *selected_magic_record; /* +0xac: &effect_status.unk0[id] (player_dispatch_weapon_magic) */
-    struct WeaponRecord *equipped_weapon_record; /* +0xb0: &weapon_table[unkcb] */
+    struct MagicRecord *selected_magic_record; /* +0xac: &effect_status.magic_records[id] (player_dispatch_weapon_magic) */
+    struct WeaponRecord *equipped_weapon_record; /* +0xb0: &weapon_table[equipped_weapon_id] */
     u8 *weapon_asset_buffer; /* +0xb4 */
-    s32 weapon_animation_cache;
+    s32 weapon_animation_cache; /* +0xb8: holds an AnimSlot * (type later) */
     struct Effect *weapon_effect; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
     s16 weapon_attack_phase; /* +0xc0: -1 blocks the Actor script records of ids 19 and 20 */
     s16 weapon_attack_window; /* +0xc2: swing time of the next hit (player_update_weapon_attack) */
@@ -118,14 +119,19 @@ typedef struct PlayerState {
     u8 weapon_attack_fully_charged;
     u8 weapon_guard_active;
     u8 unkd1[0x3];
-    struct EquipmentRecord *equipped_head_record; /* +0xd4..+0xec: &map_world.unk11c14[] of unkf0..unkf6 */
+    struct EquipmentRecord *equipped_head_record; /* +0xd4..+0xec: &map_world.equipment_records[]
+                     * of equipped_head_id..equipped_extra_id */
     struct EquipmentRecord *equipped_body_record;
     struct EquipmentRecord *equipped_shield_record;
     struct EquipmentRecord *equipped_arm_record;
     struct EquipmentRecord *equipped_leg_record;
     struct EquipmentRecord *equipped_accessory_record;
     struct EquipmentRecord *equipped_extra_record;
-    u8 equipped_head_id; /* +0xf0..+0xf6: EquipmentRecord indices, 0xff for none */
+    u8 equipped_head_id; /* +0xf0..+0xf6: EquipmentRecord indices, 0xff for none, in byte order
+                     * head, body, shield, arm, leg/feet, accessory, extra: shields are items
+                     * 0x33..0x3e, arms 0x3f..0x47, feet 0x48..0x50, and floor_select.c tests
+                     * +0xf2 == 0x35 (a shield). player_set_equipment_slot's cases (2 arm,
+                     * 3 leg, 4 shield) follow neither this order nor KF2's slot enum */
     u8 equipped_body_id;
     u8 equipped_shield_id;
     u8 equipped_arm_id;
@@ -168,10 +174,14 @@ typedef struct PlayerState {
     s16 camera_yaw_offset;
     s16 camera_roll_offset;
     u8 unk14a[0x2];
-    SVECTOR magic_origin_offset; /* +0x14c: player_probe_view_target_and_vectors rotates it by unk124 */
-    s32 collision_lower_clearance; /* +0x154: top edge of the full-screen overlay pair; >= 240 hides it */
-    s32 collision_upper_clearance; /* +0x158: top edge of a single overlay; >= 240 hides it */
-    s32 collision_second_upper_clearance; /* +0x15c: top edge of a single overlay; >= 240 hides it */
+    SVECTOR magic_origin_offset; /* +0x14c: player_probe_view_target_and_vectors rotates it by camera_rotation */
+    s32 collision_lower_clearance; /* +0x154: clearance to collision_bounds[0]
+                     * (player_update_collision_bounds); the overlay draw also reads it as the
+                     * top edge of the full-screen pair, >= 240 hides it */
+    s32 collision_upper_clearance; /* +0x158: clearance to collision_bounds[1]; read as the
+                     * top edge of a single overlay too */
+    s32 collision_second_upper_clearance; /* +0x15c: clearance to collision_bounds[2]; read as
+                     * the top edge of a single overlay too */
     u16 map_layer_offset;
     s16 strafe_velocity;
     s16 forward_velocity;
@@ -189,14 +199,17 @@ typedef struct PlayerState {
     u8 unk17c[0x4];
     s32 movement_step_limit;
     s32 turn_step_limit;
-    PlayerReaction reaction; /* +0x188: parameters of the unk101 mode */
+    PlayerReaction reaction; /* +0x188: parameters of the current reaction_mode */
     u8 unk198[0x4];
 } PlayerState;
 
 typedef struct EventState {
     s32 interaction_handled;
     u8 flags[9];    /* +0x04: script bytes from here (event_target_stream_resolve_cursor tests
-                     * unk4[n]); [0] the highest area entered (resource_request_transition) */
+                     * flags[n]); [0] the highest area entered (resource_request_transition);
+                     * the 0x100 event flag bytes run +0x04..+0x103: unkd, unke, unk2b and the
+                     * fields after them up to +0x103 are slices of the same bytes (FDAT code
+                     * indexes them so) */
     u8 unkd;       /* +0x0d: the game loop sets it to 1 on a continued game */
     u8 unke[0x1d];
     u8 unk2b;
@@ -217,7 +230,7 @@ typedef struct EventState {
     u8 element_magic_learned[5]; /* +0x7f: per magic element */
     u8 unk84[6];
     u8 area_visited[0x20]; /* +0x8a: per area, 1 once resource_request_transition loaded it */
-    u8 stream_actor_definition_id; /* +0xaa: Actor.unk1 of the record whose script
+    u8 stream_actor_definition_id; /* +0xaa: Actor.definition_id of the record whose script
                     * event_target_stream_resolve_cursor entered */
     u8 unkab[0x59];
     u8 arena[0x5000]; /* +0x104: block arena (game/memory.h), cleared by event_state_initialize */
@@ -231,12 +244,12 @@ typedef struct EquipmentRecord {
     u16 defense_blow;
     u16 defense_stab;
     u16 poison_resistance;
-    u16 defense_holy;
+    u16 defense_holy; /* +0x0a: component 3 (see PlayerState.defense_holy) */
     u16 defense_fire;
     u16 defense_earth;
     u16 defense_wind;
     u16 defense_water;
-    u16 hp_regen_interval; /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
+    u16 hp_regen_interval; /* +0x14..+0x1a: frame periods of the hp/mp gain and loss */
     u16 hp_drain_interval;
     u16 mp_regen_interval;
     u16 mp_drain_interval;
@@ -268,16 +281,19 @@ typedef struct MapWorld {
     u8 unkfa00[0x600];
     u8 shape_bank[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
                           * (0x2000 bytes, through unk11ff4) here */
-    EquipmentRecord equipment_records[31]; /* +0x11c14: WIP count */
+    EquipmentRecord equipment_records[31]; /* +0x11c14: by item id; MapWorld ends at
+                     * item_gear_recs (0x801e64b8), so ids >= 34 land in that table: its by-item-id
+                     * base (layout fix later) */
     u8 unk11ff4[0xc];
     MapCell *collision_cell; /* +0x12000: cell of the last collision test */
-    u8 *collision_layer; /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
+    u8 *collision_layer; /* +0x12004: MapLayer of the last collision test (declared u8 *,
+                     * type later); [2] bits 0-1 its slope */
     u8 unk12008[2];
-    u16 collision_layer_offset; /* +0x1200a: copied to SoundState.unk24 with the listener */
+    u16 collision_layer_offset; /* +0x1200a: copied to SoundState.listener_layer_offset with the listener */
     s32 collision_layer_height; /* +0x1200c: height given to Actor records with flag 0x400 */
     s32 collision_floor_height; /* +0x12010: floor height of the last collision test */
     s32 collision_height_limit; /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
-                     * player_move_horizontal lets the player through when it is 1700 above unk12010 */
+                     * player_move_horizontal lets the player through when it is 1700 above collision_floor_height */
     s32 collision_bounds[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
                       * floor the Effect spawns of effect_spawn_at_lower_bound must reach */
     u32 collision_hit_flags; /* +0x12024: hit bits of the last collision_query_world test */
@@ -304,7 +320,7 @@ typedef struct MovieRecord {
                      * (player_update_frame mode 7), -1 to keep one */
     s16 approach_angle_y;
     s16 approach_angle_z;
-    s16 fade_back;  /* +0x0a: nonzero fades tint unk22 back in after the movie */
+    s16 fade_back;  /* +0x0a: nonzero fades tint overlay_mode back in after the movie */
     s32 approach_x; /* +0x0c..+0x14: position the player moves to before it, -1 to keep */
     s32 approach_y;
     s32 approach_z;
@@ -320,13 +336,13 @@ typedef struct MovieRecord {
 } MovieRecord;
 
 typedef struct MovieState {
-    MovieRecord movies[16]; /* +0x000: by movie id (unk380 points into them) */
+    MovieRecord movies[16]; /* +0x000: by movie id (current_movie points into them) */
     DECENV dec;     /* +0x340: the in-game movie player's decode environment */
     s16 state;
     s16 stream_status; /* +0x372: 99 once the stream passed the movie's last frame */
     u_long *vlc_buffers[2]; /* +0x374: VLC buffers strSetDefDecEnv hands to dec */
     u_long *slice_buffer; /* +0x37c: slice buffer */
-    MovieRecord *current_movie; /* +0x380: the record of movie unk384 */
+    MovieRecord *current_movie; /* +0x380: the record of movie movie_id */
     u8 movie_id;    /* +0x384: movie id, 0xff for none */
     u8 unk385[3];
     s32 stream_frame; /* +0x388: frame number of the last sector (strNext) */
@@ -335,7 +351,7 @@ typedef struct MovieState {
 /*
  * Object records translate_active_world_positions moves when the area origin shifts (WIP: named
  * by size; 0xff/0xffff in the first field marks a free record). The 24-byte
- * records it also moves are the placed effects (MapPlacedEntry, game/render.h).
+ * records it also moves are the placed models (MapPlacedEntry, game/render.h).
  */
 /* MapObject +0x3a as the FDAT module handlers read it (WIP). */
 typedef union MapObjectHalfword {
@@ -345,20 +361,23 @@ typedef union MapObjectHalfword {
 } MapObjectHalfword;
 
 /*
- * Per-kind state of an MapObject from +0x34 (WIP views, by MapObject.unk4): the
+ * Per-kind state of a MapObject from +0x34 (WIP views, by MapObject.action): the
  * GAME and FDAT code read it as bytes or halfwords by kind; map_object_pool_reset
  * clears the first three words.
  */
 typedef struct MapObjectBytes {
     u8 unk34[4];
-    u8 unk38;       /* +0x38: radius scale, 0x80 = 1 (flag 0x10) */
+    u8 unk38;       /* +0x38: by kind: radius scale, 0x80 = 1 (flag 0x10); marker of doors,
+                     * levers, sockets and containers (0xff armed, 0xfe triggered); kind 0x53
+                     * transition mode; kind 0x58 toggle; 0x51/0x52/0x55 running toggle; region
+                     * x (0xe8/0xea) */
     u8 unk39;       /* +0x39: event_spawn_effect_object stores the index - 124 of the record it spawns */
     MapObjectHalfword unk3a; /* +0x3a */
     u8 unk3c;       /* +0x3c: FDAT slot 0 acts only when set */
     u8 unk3d[2];
     u8 unk3f;       /* +0x3f: FDAT slot 0 shows this message when below 35 */
     u8 unk40;       /* +0x40: kind 0x70 driver: steps taken (map_object_step_offset_motion); FDAT slot 0
-                     * copies it to the linked object's unk0 */
+                     * copies it to the linked object's layer_mask */
     u8 unk41[3];
 } MapObjectBytes;
 
@@ -366,9 +385,11 @@ typedef struct MapObjectHalves {
     u16 unk34[2];
     u16 unk38;
     u16 unk3a;
-    u16 unk3c;      /* +0x3c: age stamp map_object_effect_pool_acquire replaces the oldest by */
-    u16 unk3e;      /* +0x3e: kind 0x1f: delay in units of 6 VSyncs; kinds 0/0x1b: the
-                     * other wing's index, 0xffff for none */
+    u16 unk3c;      /* +0x3c: spawned-pool age stamp (map_object_effect_pool_acquire replaces
+                     * the oldest); item id (FDAT_053); object index (kind 0x17); countdown and
+                     * phase seeds */
+    u16 unk3e;      /* +0x3e: kinds 0/0x1b: the other door leaf's index, 0xffff for none;
+                     * kind 0x1f: repeat delay at set-up, in units of 6 VSyncs (object44.c) */
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (map_object_step_offset_motion); kinds 0/1/0x1b:
                      * frames since the door started opening */
     u16 base_yaw;   /* +0x42: kinds 0/1/0x1b: yaw when shut */
@@ -385,7 +406,7 @@ typedef struct MapObjectSBytes {
     s8 cell_dz;     /* +0x3d: kind 0xea: z shift */
     s8 unk3e;
     s8 unk3f;
-    s8 shift_x;     /* +0x40: kind 0xe0: shift passed to resource_request_transition (with unk41, unk42) */
+    s8 shift_x;     /* +0x40: kind 0xe0: shift passed to resource_request_transition (with shift_z, shift_y) */
     s8 shift_z;
     s8 shift_y;
     s8 unk43;
@@ -457,19 +478,20 @@ typedef union MapObjectArg {
 } MapObjectArg;
 
 typedef struct MapObject {
-    u8 layer_mask;  /* +0x00: area (1 or 2): picks the map cell layer */
+    u8 layer_mask;  /* +0x00: map layer mask: 1 first layer, 2 second, 0 hidden (skipped by
+                     * the draws and the collision tests) */
     u8 animation_id; /* +0x01: 0x80 after set-up */
     u8 render_mode;
-    u8 flags;       /* +0x03: flags; 0x10 scales its radius by arg.b.unk38, 0x4 takes MapObjectDef.unke/unk10 */
-    u8 action;      /* +0x04: kind, 0xff when free */
+    u8 flags;       /* +0x03: flags; 0x10 scales its radius by arg.b.unk38, 0x4 takes MapObjectDef arg.h.unke/unk10 */
+    u8 action;      /* +0x04: action, 0xff when free */
     u8 lighting_override_index;
     u16 object_id;  /* +0x06: index of its MapObjectDef; 0xff when free */
     u16 action_state; /* +0x08: FDAT_023 clears it when the key is used */
-    u16 animation_phase; /* +0x0a: FDAT_017 tests it for 0 or >= 4095 */
+    u16 animation_phase; /* +0x0a: Q12; FDAT_017 tests it for 0 or >= 4095 */
     u16 collision_height; /* +0x0c: reach below its position (collision tests) */
     s16 render_depth_offset;
-    u16 lighting_blend; /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; light
-                     * blend toward light2 (render_world_model) */
+    u16 lighting_blend; /* +0x10: FDAT_047 raises it by 256 a frame up to 0xfff; Q12
+                     * blend toward lighting_override_index (render_world_model) */
     u8 unk12[2];
     VECTOR pos;     /* +0x14 */
     SVECTOR angle;  /* +0x24 (scene_pose_interpolate) */
@@ -485,8 +507,8 @@ typedef struct MapObject {
 typedef struct MapObjectDefBytes {
     u8 unkc;        /* +0x0c: map layer byte kind 7 sets, 0xff for none; kind 0x51: first
                      * vertex map_object_sample_world_vertex tests */
-    u8 unkd;        /* +0x0d: kind 0x51: second vertex */
-    u8 unke;
+    u8 unkd;        /* +0x0d: cell-copy width; kind 0x51: second probe vertex */
+    u8 unke;        /* +0x0e: cell-copy height; kind 0x54: pattern-pair index */
     u8 sound_id;    /* +0x0f: sound effect when it starts moving (map_object_play_spatial_sound) */
     u8 unk10[2];
     u8 impact_magic_values[4]; /* +0x12: kinds 0x51/0x52/0x55: passed to effect_dispatch_magic_impact on a hit */
@@ -496,8 +518,10 @@ typedef struct MapObjectDefBytes {
 
 typedef struct MapObjectDefHalves {
     u16 vertex_index; /* +0x0c: kinds 0x52/0x55: vertex map_object_sample_world_vertex tests */
-    u16 unke;       /* +0x0e: collision radius */
-    u16 unk10;      /* +0x10: collision height */
+    u16 unke;       /* +0x0e: probe radius (0x51/0x52/0x55); box half width (flag 4); hit
+                     * half width (collision_cache_load_hit_bounds) */
+    u16 unk10;      /* +0x10: probe height (0x51/0x52/0x55); box half depth (flag 4); hit
+                     * radius (collision_cache_load_hit_bounds) */
     u8 unk12[6];
 } MapObjectDefHalves;
 
@@ -506,7 +530,7 @@ typedef struct MapObjectDefSHalves {
     s16 height_offset; /* +0x0c: items: height offset of the held position
                      * (scene_position_from_camera_offset dy) */
     s16 depth_offset; /* +0x0e: items: distance of the held position (dz) */
-    s16 held_depth_offset; /* +0x10: items: MapObject.unke while held */
+    s16 held_depth_offset; /* +0x10: items: MapObject.render_depth_offset while held */
     u8 unk12[6];
 } MapObjectDefSHalves;
 
@@ -516,12 +540,12 @@ typedef union MapObjectDefArg {
     MapObjectDefSHalves sh;
 } MapObjectDefArg;
 
-/* The 0x18-byte records MapObject.unk6 indexes (WIP). */
+/* The 0x18-byte records MapObject.object_id indexes (WIP). */
 typedef struct MapObjectDef {
     u8 action;      /* +0x00: type (map_object_set_property) */
     u8 kind;        /* +0x01: picks the kind map_object_spawn_effect gives a spawned record */
     u8 vab_resource_index;
-    u8 flags;       /* +0x03: MapObject.unk3 flags at set-up */
+    u8 flags;       /* +0x03: MapObject.flags at set-up */
     u16 collision_radius; /* +0x04: radius */
     u16 interaction_radius; /* +0x06: radius of the turned kinds (map_object_find_interaction_target) */
     u16 collision_height; /* +0x08: height */
@@ -535,18 +559,18 @@ typedef struct EffectTrailRow {
     SVECTOR angle;
 } EffectTrailRow;
 
-/* Effect+0x44..+0x4b: effect_construct_record stores bytes, halfwords or words there by id (WIP views). */
+/* Effect+0x44..+0x4b: effect_construct_record stores bytes, halfwords or words there by kind (WIP views). */
 typedef struct EffectBytes {
     u8 unk44;
     u8 unk45;
     u8 unk46[2];
-    u8 trail_frame_index; /* +0x48: ids 5 and 16: cursor into their 24 trail records */
-    u8 trail_phase_counter; /* +0x49: ids 5 and 16: step counter of the current phase */
-    u8 trail_actor_index; /* +0x4a: ids 5 and 16: index of the Actor record they hold */
+    u8 trail_frame_index; /* +0x48: kinds 5 and 16: cursor into their 24 trail records */
+    u8 trail_phase_counter; /* +0x49: kinds 5 and 16: step counter of the current phase */
+    u8 trail_actor_index; /* +0x4a: kinds 5 and 16: index of the Actor record they hold */
     u8 unk4b;
 } EffectBytes;
 
-/* Signed views of the payload: effect_update_dispatch reads some ids' bytes with lb, halfwords with lh. */
+/* Signed views of the payload: effect_update_dispatch reads some kinds' bytes with lb, halfwords with lh. */
 
 typedef struct EffectSBytes {
     s8 unk44;
@@ -573,8 +597,8 @@ typedef struct EffectSHalves {
 } EffectSHalves;
 
 typedef struct EffectWords {
-    EffectTrailRow *trail_rows; /* +0x44: ids 5 and 16: their 24 trail records */
-    s32 origin_y;   /* +0x48: id 95: the height it was made at */
+    EffectTrailRow *trail_rows; /* +0x44: kinds 5 and 16: their 24 trail records */
+    s32 origin_y;   /* +0x48: kind 95: the height it was made at */
 } EffectWords;
 
 typedef union EffectArg {
@@ -587,7 +611,7 @@ typedef union EffectArg {
 
 typedef struct Effect {
     u8 type;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
-                     * 0x40 averages the MagicRecord.unk5 stats (effect_magic_power) */
+                     * 0x40 averages the MagicRecord.element_mask stats (effect_magic_power) */
     u8 kind;        /* +0x01: index of its MagicRecord record */
     u8 base_render_id;
     u8 render_id;   /* +0x03: model id - 40 (effect_sample_rotated_vertex) */
@@ -603,25 +627,31 @@ typedef struct Effect {
     u8 midpoint_collision_enabled;
     u16 clut_offset;
     s16 updates_remaining;
-    s16 lighting_blend; /* +0x12: light blend toward light2 (render_world_model); id 6 compares it signed */
-    u16 animation_phase; /* +0x14: animation time */
+    s16 lighting_blend; /* +0x12: Q12 blend toward lighting_override_index (render_world_model);
+                     * kind 6 compares it signed */
+    u16 animation_phase; /* +0x14: animation time (Q12) */
     u8 unk16[2];
     VECTOR pos;     /* +0x18 */
     SVECTOR angle;  /* +0x28 */
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
     struct AnimSlot *animation_cache; /* +0x40: pose slot (animation_prepare_asset_vertices) */
-    EffectArg arg; /* +0x44: per-id payload (effect_construct_record) */
+    EffectArg arg; /* +0x44: per-kind payload (effect_construct_record) */
 } Effect;
 
+/*
+ * The 200 actor records of actor_status. unk20, unk22, unk24 and unk72 mean
+ * different things per target type (KF2 resolves them with unions); a later
+ * layout pass can give them per-kind views.
+ */
 typedef struct Actor {
     u8 slot_state;  /* +0x00: 0xff when free */
-    u8 definition_id; /* +0x01: ActorGroup.unk0 of its record */
+    u8 definition_id; /* +0x01: ActorGroup.definition_id of its record */
     u8 group_index; /* +0x02: index of its ActorGroup record */
     u8 layer_mask;
     u8 unk4;
     u8 placement_flags; /* +0x05: bit 0 keeps its initial yaw */
-    u8 home_layer_mask; /* +0x06: area passed to collision_sample_map_layer_height */
+    u8 home_layer_mask; /* +0x06: home layer mask (collision_sample_map_layer_height) */
     u8 home_cell_z; /* +0x07: map cell z */
     u8 home_cell_x; /* +0x08: map cell x */
     u8 lifecycle;   /* +0x09: state, 1 active */
@@ -629,24 +659,27 @@ typedef struct Actor {
     u8 death_drop_object_id;
     u8 animation_id; /* +0x0c: animation */
     u8 vertical_motion_state;
-    u8 target_type; /* +0x0e: id of the running script record, 0xff none */
-    u8 target_action_state; /* +0x0f: script step, 0xff restart */
-    u8 previous_target_type; /* +0x10: previous unke */
+    u8 target_type; /* +0x0e: type of the running target record, 0xff none */
+    u8 target_action_state; /* +0x0f: target action state, 0xff restart */
+    u8 previous_target_type; /* +0x10: previous target_type */
     u8 unk11;
     u8 unk12;
     u8 render_mode;
-    u8 lighting_override_index; /* +0x14: second light record (render_world_model light2) */
+    u8 lighting_override_index; /* +0x14: second light record (render_world_model) */
     s8 render_depth_offset; /* +0x15: depth offset (render_world_model) */
-    s16 lighting_blend; /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
-    u16 animation_phase; /* +0x18: animation time */
+    s16 lighting_blend; /* +0x16: Q12 light blend; FDAT slot 17 raises and lowers it (-12000 at the start) */
+    u16 animation_phase; /* +0x18: animation time (Q12) */
     u16 health;
     u16 collision_radius;
     u16 collision_height;
-    u16 unk20;      /* +0x20: initial yaw */
-    s16 unk22;      /* +0x22: z offset in its cell */
-    s16 unk24;      /* +0x24: x offset in its cell */
+    u16 unk20;      /* +0x20: home yaw (ActorPlacement.unk8 as -unk8 & 0xfff); one target
+                     * type keeps a map-object index here (entity_sound.c) */
+    s16 unk22;      /* +0x22: home z offset in its cell (ActorPlacement.unka); linked actors:
+                     * the index of the actor followed; flag 0x10000: a carrier map object */
+    s16 unk24;      /* +0x24: home x offset in its cell (ActorPlacement.unkc); linked actors:
+                     * the vertex on the actor followed (slot-3 fallback ActorGroup.unk1a) */
     s16 vertical_anchor_offset; /* +0x26: height above the floor */
-    u32 flags;      /* +0x28: flags (ActorGroup.unk34) */
+    u32 flags;      /* +0x28: flags (ActorGroup.initial_actor_flags) */
     VECTOR pos;     /* +0x2c */
     s32 ballistic_origin_y;
     SVECTOR angle;  /* +0x40 */
@@ -655,26 +688,27 @@ typedef struct Actor {
     s16 turn_rate;
     u8 unk5a[2];
     struct AnimSlot *animation_cache; /* +0x5c: pose slot (animation_prepare_asset_vertices) */
-    u8 *target;     /* +0x60: running script record */
+    u8 *target;     /* +0x60: running target record */
     s16 movement_yaw; /* +0x64: FDAT slot 17 stores the angle to the player */
     s16 animation_step;
     s16 ballistic_horizontal_speed;
     s16 ballistic_launch_speed_y;
     s16 ballistic_acceleration;
     u8 unk6e[2];
-    s16 target_phase; /* +0x70: script phase (FDAT slot 17: 0..2); script 5 keeps two
-                     * byte flags here (ACTOR_B70/B71) */
-    SVECTOR unk72;  /* +0x72: script direction; vx/vy also counters and indexes, pad a
-                     * height (script 12); FDAT slot 17 toggles vy when the turn completes */
+    s16 target_phase; /* +0x70: target phase (FDAT slot 17: 0..2); target type 5 keeps
+                     * two byte flags here (ACTOR_B70/B71) */
+    SVECTOR unk72;  /* +0x72: per-target scratch: a direction, counters and target record
+                     * word indexes in vx/vy, a height in pad (target 12); FDAT slot 17 toggles
+                     * vy when the turn completes */
     u8 unk7a[6];
-    s16 fade_out_phase; /* +0x80: phase of script 31 */
+    s16 fade_out_phase; /* +0x80: phase of target type 31 */
     u8 unk82[2];
     u8 hit_flash_phase; /* +0x84: cleared by a hit below the hurt threshold (actor_apply_magic_to_actor) */
     u8 unk85[3];
 } Actor;
 
 /*
- * The record an Actor is made from (its unk2 indexes actor_status.defs);
+ * The record an Actor is made from (its group_index indexes actor_status.groups);
  * player_probe_view_target_and_vectors hands one to actor_find_target_of_type.
  */
 typedef struct ActorGroup {
@@ -686,28 +720,28 @@ typedef struct ActorGroup {
     u8 render_depth_offset;
     u8 activation_range_cells; /* +0x0a: wake range in map cells */
     u8 deactivation_range_cells; /* +0x0b: sleep range in map cells */
-    s16 position_offset_x; /* +0x0c: offset of the record's point (Actor.unk28 bits 0-1) */
+    s16 position_offset_x; /* +0x0c: offset of the record's point (Actor.flags bits 0-1) */
     s16 position_offset_y;
     s16 position_offset_z;
     u16 collision_radius;
     u16 collision_height;
     s16 player_facing_tolerance; /* +0x16: yaw range of its front (player_update_weapon_attack) */
     s16 actor_facing_tolerance; /* +0x18: yaw range (effect_dispatch_magic_impact) */
-    u16 unk1a;
+    u16 unk1a;      /* +0x1a: initial health; the slot-3 linked actors' fallback vertex index */
     u16 default_vertical_anchor_offset;
     s16 experience_reward; /* +0x1e: passed to player_add_experience when the record dies */
     u16 defense_components[8]; /* +0x20: resistances to the eight attack stats (actor_apply_magic_to_actor) */
-    u16 gold_drop_center; /* +0x30: drop id (map_object_spawn_gold_drop) when script 3 ends */
+    u16 gold_drop_center; /* +0x30: centre of the gold amount dropped when target 3 ends (map_object_spawn_gold_drop) */
     u16 initial_model_scale_q12; /* +0x32: scale */
-    u32 initial_actor_flags; /* +0x34: flags copied to Actor.unk28 */
-    u8 *targets[16]; /* +0x38: script records, the first byte their id; 0 ends */
+    u32 initial_actor_flags; /* +0x34: flags copied to Actor.flags */
+    u8 *targets[16]; /* +0x38: target records, the first byte their type; 0 ends */
 } ActorGroup;
 
 typedef struct ActorState {
     Actor objects[200];
     ActorGroup groups[40];  /* +0x6a40 */
     u8 target_candidate_blob[0x2000];
-    u8 actor_overlap_exclusion_flags; /* +0x9d00: Actor.unk28 flags the searches skip */
+    u8 actor_overlap_exclusion_flags; /* +0x9d00: Actor.flags bits the searches skip */
     u8 unk9d01[3];
     s32 actor_collision_query_flags; /* +0x9d04: mask passed to the collision tests */
     ActorGroup *current_group; /* +0x9d08: record of current */
@@ -715,7 +749,7 @@ typedef struct ActorState {
     ActorGroup *other_group; /* +0x9d10: record of target */
     Actor *other_actor;     /* +0x9d14: objects[current->unk22] when flag 0x10 */
     s32 current_index;      /* +0x9d18: index of current */
-    s32 current_group_index; /* +0x9d1c: current->unk2 */
+    s32 current_group_index; /* +0x9d1c: current->group_index */
     s32 active_actor_count; /* +0x9d20: active records updated this frame */
     s32 actor_update_frame_count; /* +0x9d24: frame counter */
     Actor *player_view_target; /* +0x9d28: player_probe_view_target_and_vectors keeps its last object here */
@@ -725,47 +759,47 @@ typedef struct ActorState {
 typedef struct MagicRecord {
     u8 menu_available; /* +0x00: player_learn_element_magic sets it to 1 */
     u8 charge_rate;
-    u8 sound_id;    /* +0x02: SoundState.effects[unk2 + 144], 0xff for none */
+    u8 sound_id;    /* +0x02: SoundState.effects[sound_id + 144], 0xff for none */
     u8 training_gain;
     u8 player_status_flags;
-    u8 element_mask; /* +0x05: bits 0-4 pick PlayerState.unk42[0..4] */
+    u8 element_mask; /* +0x05: bits 0-4 pick PlayerState.magic[0..4] */
     u16 damage_slash;
     u16 damage_blow;
     u16 damage_stab;
-    u16 damage_holy;
+    u16 damage_holy; /* +0x0c: component 3 (see PlayerState.defense_holy) */
     u16 damage_fire;
     u16 damage_earth;
     u16 damage_wind;
     u16 damage_water;
-    u16 mp_cost;    /* +0x16: unk1c cost of the spell (player_dispatch_weapon_magic);
+    u16 mp_cost;    /* +0x16: mp cost of the spell (player_dispatch_weapon_magic);
                      * menu_collect_available_magic_rows lists it */
 } MagicRecord;
 
 typedef struct EffectState {
     MagicRecord magic_records[96];
     Effect objects[128];    /* +0x900 */
-    MagicRecord *current_magic; /* +0x2f00: record of unk2f04 */
+    MagicRecord *current_magic; /* +0x2f00: record of current */
     Effect *current;        /* +0x2f04: the Effect record being updated */
-    s32 current_index;      /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
+    s32 current_index;      /* +0x2f08: index of current (effect_pool_sweep) */
 } EffectState;
 
 /* 12-byte level records (player_lv_grow_list, one per level). */
 typedef struct PlayerLevelGrowth {
     u16 hp_max;     /* new PlayerState.hp_max */
-    u16 mp_max;     /* new PlayerState.unk1a */
-    u16 physical_power_step; /* added to PlayerState.unk32 */
+    u16 mp_max;     /* new PlayerState.mp_max */
+    u16 physical_power_step; /* added to PlayerState.base_physical_power */
     u16 magic_step;
     s32 experience_threshold; /* experience for the next level */
 } PlayerLevelGrowth;
 
-/* 0x44-byte records player_recalculate_combat_stats adds to the player's unk54[]/unk62 (WIP). */
+/* 0x44-byte records player_recalculate_combat_stats adds to the player's attack_components[]/attack_water (WIP). */
 typedef struct WeaponRecord {
     u8 unk0[4];
     u8 alternate_magic_id;
     u8 magic_shots;
     u16 attack_components[8];
     u16 hp_regen_interval; /* +0x16: frame period of an hp point (player_update_frame), 0 for none */
-    u16 mp_regen_interval; /* +0x18: frame period of a PlayerState.unk1c point, 0 for none */
+    u16 mp_regen_interval; /* +0x18: frame period of a PlayerState.mp point, 0 for none */
     u16 attack_reach; /* +0x1a: reach of the swing probe (player_update_weapon_attack) */
     u16 attack_phase_step; /* +0x1c..+0x32: per hand the swing speed, hit time, limits and steps
                      * player_update_weapon_attack runs the swing with (WIP names) */
@@ -832,12 +866,13 @@ typedef struct ResourceState {
     u16 loading;    /* +0x00: resource_run_initial_transition steps resource_advance_transition
                      * until it clears */
     SCENE_STEP_SHARED s16 step; /* +0x02: the CD callbacks resource_transition_set_phase_1.. set it */
-    u8 active_resource_ids[5]; /* +0x04: 99 asks for a reload, 0xff keeps a part; [0] picks
-                     * the model id bank (map_object_asset_index) */
+    u8 active_resource_ids[5]; /* +0x04: [0] area, [1] model set, [2] map stream, [3] VAB,
+                     * [4] sequence; 99 asks for a reload, 0xff keeps a part; [0] picks the
+                     * model id bank (map_object_asset_index) */
     u8 current_area;
     u8 unka[2];
     FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
-    u8 requested_resource_ids[5]; /* +0x10: [0] is the model id bank while loading, 0xff for none */
+    u8 requested_resource_ids[5]; /* +0x10: the ids being loaded, 0xff for none */
     u8 world_shift_applied; /* +0x15: set once the loader shifted the origin (resource_advance_transition) */
     u8 tmd_object_limit_active; /* +0x16: render_map_cell_object limits the parts drawn while loading */
     u8 area_records_loaded; /* +0x17 */
@@ -845,7 +880,7 @@ typedef struct ResourceState {
     s8 shift[3];    /* +0x19: 0x7f is no shift */
     s16 sequence_fade_volume; /* +0x1c: sequence volume while the loader fades it out */
     u8 unk1e[2];
-    MapObject *animated_object; /* +0x20: unk24 once a kind 0xf0 record was drawn, NULL when
+    MapObject *animated_object; /* +0x20: animated_object_copy once a kind 0xf0 record was drawn, NULL when
                       * the view hides them; drawn while an area loads */
     MapObject animated_object_copy; /* +0x24: copy of the last kind 0xf0 record drawn */
 } ResourceState;
@@ -854,7 +889,7 @@ typedef struct MapObjectState {
     MapObjectDef defs[332]; /* WIP count: fills the space before objects */
     MapObject objects[0x18c];
     u8 unk8850[4];
-    MapObjectDef *current_def; /* +0x8854: the def of unk8858 (map_object_update_actions) */
+    MapObjectDef *current_def; /* +0x8854: the def of current (map_object_update_actions) */
     MapObject *current;     /* +0x8858: the record map_object_find_collision_at_point does not test;
                              * the object FDAT slot 9 handlers test */
     u8 unk885c[2];
@@ -883,19 +918,19 @@ extern u8 map_revealed_rects[32][20];
 extern u8 map_visited_cells[80][10];
 extern EffectState effect_status;
 
-/* A record of the table resource_initialize_game_assets copies in (conversation_records.unk0). */
+/* A record of the table resource_initialize_game_assets copies in (conversation_records.sources). */
 typedef struct ConversationSource {
     u8 id;          /* 0xff ends the table */
-    u8 count;       /* slots in its run of conversation_records.unk1e0 */
+    u8 count;       /* slots in its run of conversation_records.page_states */
     u16 first_entry;
 } ConversationSource;
 
-/* A record conversation_records_initialize builds from a ConversationSource (conversation_records.unkc0). */
+/* A record conversation_records_initialize builds from a ConversationSource (conversation_records.records). */
 typedef struct ConversationRecord {
     u8 id;          /* 0xff ends the table */
     u8 unk1;
-    u16 first_entry; /* ConversationSource.unk2 */
-    u16 offset;     /* start of its run in conversation_records.unk1e0, 0xffff for none */
+    u16 first_entry; /* ConversationSource.first_entry */
+    u16 offset;     /* start of its run in conversation_records.page_states, 0xffff for none */
 } ConversationRecord;
 
 /*
@@ -908,7 +943,7 @@ typedef struct ConversationRecord {
 typedef struct ConversationRecords {
     ConversationSource sources[48];
     ConversationRecord records[48]; /* +0xc0 */
-    u8 page_states[0x3c0]; /* +0x1e0: the runs (SaveData.unk5148) */
+    u8 page_states[0x3c0]; /* +0x1e0: the runs (SaveData.conversation_page_states) */
     u32 unk5a0[0x200];   /* +0x5a0 */
 } ConversationRecords;
 extern ConversationRecords conversation_records;
@@ -931,7 +966,7 @@ extern u32 tmd_0_buffer[];
 extern u32 item_gear_recs[];
 extern u8 resource_tmd_arc_work[];
 
-/* What game_initialize_session points PlayerState.unkb4 at (WIP extent). */
+/* What game_initialize_session points PlayerState.weapon_asset_buffer at (WIP extent). */
 extern u8 player_weapon_asset_bufs[];
 
 #endif

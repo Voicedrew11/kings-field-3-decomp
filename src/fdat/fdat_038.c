@@ -137,7 +137,7 @@ void area_use_item_noop(void)
 {
 }
 
-/* Slot 18: records 50..52 report their unk1a while the last four arguments are 0. */
+/* Slot 18: records 50..52 report their health while the last four arguments are 0. */
 ADDRESS(0x801e85e0, 0x8c)
 void area_adjust_actor_magic_damage_element_kill(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)

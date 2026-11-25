@@ -4,8 +4,8 @@
 /*
  * GAME.EXE Actor records (src/game/entity*.c, WIP names): the 200
  * records of actor_status made from its ActorGroup records, their placement
- * on the map, the script records each runs, their movement and the searches
- * over them. actor_status.current and .def name the record being updated.
+ * on the map, the target records each runs, their movement and the searches
+ * over them. actor_status.current and .current_group name the record being updated.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -18,11 +18,11 @@
 #define SCRIPT_U16(script, offset) (*(u16 *)((script) + (offset)))
 #define SCRIPT_S16(script, offset) (*(s16 *)((script) + (offset)))
 
-/* Script 5's two byte flags where the other scripts keep their phase (Actor.unk70). */
+/* Target type 5's two byte flags where the other types keep their phase (Actor.target_phase). */
 #define ACTOR_B70(obj) (((u8 *)&(obj)->target_phase)[0])
 #define ACTOR_B71(obj) (((u8 *)&(obj)->target_phase)[1])
 
-/* Actor.unk0 of a free record. */
+/* Actor.slot_state of a free record. */
 #define ACTOR_FREE 0xff
 
 /* The shape word the collision tests take for an Actor record. */
@@ -30,7 +30,7 @@
 
 /* A placement record of an area: one per Actor record (actor_load_records). */
 typedef struct ActorPlacement {
-    u8 slot_state;  /* Actor.unk0, 0xff for none */
+    u8 slot_state;  /* Actor.slot_state, 0xff for none */
     u8 group_index; /* ActorGroup record index */
     u8 placement_flags;
     u8 cell_z;      /* map cell z */
@@ -41,7 +41,7 @@ typedef struct ActorPlacement {
     u16 unk8;       /* yaw, negated */
     s16 unka;       /* z offset */
     s16 unkc;       /* x offset; -1 takes ActorGroup.unk1a */
-    s16 vertical_anchor_offset; /* height; -1 takes ActorGroup.unk1c */
+    s16 vertical_anchor_offset; /* height; -1 takes ActorGroup.default_vertical_anchor_offset */
 } ActorPlacement;
 
 extern Actor *actor_animation_shift_target;

@@ -61,7 +61,7 @@ void map_object_reset(MapObject *obj)
 
 /*
  * Sets the state of record id by the type of its MapObjectDef: mode 0 stops
- * it, 1 sets unk0 to the byte argument, 2 marks it, 3 sets unke to the
+ * it, 1 sets layer_mask to the byte argument, 2 marks it, 3 sets render_depth_offset to the
  * halfword argument.
  */
 ADDRESS(0x80044900, 0x240)
@@ -152,7 +152,7 @@ void map_object_set_property(s32 id, s32 mode, ...)
 
 /*
  * Writes the record's map cell byte for its area layer: value with no scale
- * when mode is 0 and PlayerState.unk90 is clear, else 0xfc with full scale.
+ * when mode is 0 and PlayerState.map_marker_visual_effect_timer is clear, else 0xfc with full scale.
  */
 ADDRESS(0x80044b40, 0xf4)
 void map_object_set_cell_marker(MapObject *obj, s32 mode, u8 value)

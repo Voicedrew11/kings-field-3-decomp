@@ -1,7 +1,7 @@
 /*
  * GAME.EXE: player state, continued (same WIP module as src/game/player.c;
- * split from it at the unreconstructed player_dispatch_magic_effect): the unk101 modes and
- * their parameters, hp/unk1c changes and the per-frame effect timers.
+ * split from it at the unreconstructed player_dispatch_magic_effect): the reaction_mode modes and
+ * their parameters, hp/mp changes and the per-frame effect timers.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -49,7 +49,7 @@ void player_play_landing_sound(s32 speed)
     }
 }
 
-/* Vertical movement per unk104 fall state: steps up and down, falls, jumps and landings. */
+/* Vertical movement per vertical_motion_state: steps up and down, falls, jumps and landings. */
 ADDRESS(0x8002ed60, 0x5c0)
 void player_update_vertical_motion(void)
 {
@@ -207,7 +207,7 @@ void player_update_vertical_motion(void)
     player_update_collision_bounds();
 }
 
-/* Mode 0x10 flight: moves the player along unk188.knock.dir, sliding on walls; 1 when it lands. */
+/* Mode 0x10 flight: moves the player along reaction.damage.vel, sliding on walls; 1 when it lands. */
 ADDRESS(0x8002f320, 0x2a0)
 s32 player_move_reaction_with_collision(void)
 {
@@ -263,7 +263,7 @@ s32 player_move_reaction_with_collision(void)
     return 0;
 }
 
-/* Turning (unk168 into the yaw unk12c.vy) and looking up and down (unk16a into the pitch). */
+/* Turning (yaw_step into camera_rotation_target.vy) and looking up and down (pitch_step into the pitch). */
 ADDRESS(0x8002f5c0, 0x3fc)
 void player_update_camera_rotation(void)
 {
@@ -348,7 +348,7 @@ void player_update_camera_rotation(void)
     }
 }
 
-/* Walking (unk164) and strafing (unk162), then the move along the yaw. */
+/* Walking (forward_velocity) and strafing (strafe_velocity), then the move along the yaw. */
 ADDRESS(0x8002f9bc, 0x420)
 void player_update_horizontal_motion(void)
 {

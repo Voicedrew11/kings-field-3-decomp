@@ -49,7 +49,7 @@ typedef struct ColorSum {
 typedef struct ModelFile {
     u32 size;
     s32 animated;   /* 0: static model, no animation */
-    s32 tmd;        /* offset of the vertex data */
+    s32 tmd;        /* offset of the TMD (ModelData), not of vertex data */
     s32 deltas;     /* offset of the delta-run offset table */
     s32 anims;      /* offset of the animation offset table */
 } ModelFile;
@@ -68,7 +68,7 @@ typedef struct ModelPart {
 /* The data block a ModelFile's vertices offset points at. */
 typedef struct ModelData {
     u32 unk0;
-    u32 unk4;       /* +0x04: render_map_cell_object draws only parts below unk4 / 2 while loading */
+    u32 unk4;       /* +0x04: render_map_cell_object draws only parts below animated / 2 while loading */
     s32 count;      /* +0x08: parts */
     ModelPart parts[1];
 } ModelData;
@@ -101,7 +101,7 @@ typedef struct MapPlacedEntry {
     u8 layer_mask;
     u8 frame_count;
     u8 frame_period;
-    u8 frame_index; /* random phase below unk3 */
+    u8 frame_index; /* random phase below frame_count */
     u8 unk6[2];
     VECTOR pos;
 } MapPlacedEntry;
@@ -135,17 +135,17 @@ typedef struct Matrix3x3 {
 
 /* 48-byte light records of the area tables (light_default_records, WIP names). */
 typedef struct LightSourceRecord {
-    Matrix3x3 light_matrix; /* fixed_lerp_nine_halfwords_q12 blends it into LightRecord.unk0[0] */
-    Matrix3x3 color_matrix; /* into LightRecord.unk50 */
+    Matrix3x3 light_matrix; /* fixed_lerp_nine_halfwords_q12 blends it into LightRecord.light_matrices[0] */
+    Matrix3x3 color_matrix; /* into LightRecord.color_matrix */
     CVECTOR back_color;
-    u16 fog_near;       /* kept 4096 below unk2e */
+    u16 fog_near;       /* kept 4096 below fog_far */
     u16 fog_far;
 } LightSourceRecord;
 
 /* The area's light records (resource_initialize_game_assets copies them out of the first FDAT.T entry). */
 extern LightSourceRecord light_default_records[64];
 
-/* The working copy of a LightSourceRecord: unk0[0] and its three quarter turns. */
+/* The working copy of a LightSourceRecord: light_matrices[0] and its three quarter turns. */
 typedef struct LightRecord {
     Matrix3x3 light_matrices[4];
     Matrix3x3 color_matrix;
@@ -154,9 +154,9 @@ typedef struct LightRecord {
     u16 fog_far;
 } LightRecord;
 
-/* A VRAM area copied from unk10 to unk8 every unk1 + 1 frames (vram_scroll_update). */
+/* A VRAM area copied from copy_rect to rect every update_interval + 1 frames (vram_scroll_update). */
 typedef struct VramScroll {
-    u8 mode;            /* 0xff free; 1 scrolls the source by unk3 rows */
+    u8 mode;            /* 0xff free; 1 scrolls the source by row_step rows */
     u8 update_interval; /* frames between steps */
     u8 frames_until_update; /* frames to the next step */
     u8 row_step;        /* step */
@@ -186,7 +186,7 @@ typedef struct GraphicsRuntime {
     DRAWENV draw[2];                /* +0x10068 */
     DISPENV disp[2];                /* +0x10120 */
     u8 *tmd_slots[4];               /* +0x10148: model data by id (tmd_register) */
-    u8 *current_tmd;                /* +0x10158: vertex data of the last model registered */
+    u8 *current_tmd;                /* +0x10158: TMD (ModelData) of the last model registered */
     u8 *models[0x62d];              /* +0x1015c: loaded files by id: models 0..103 stay resident,
                                      * area banks from 256 + area * 32 (map_object_asset_index), the
                                      * 32 blocks of an area part from 556 + part * 32
@@ -200,7 +200,10 @@ typedef struct GraphicsRuntime {
     u16 message_arg[8];             /* +0x15984: number shown with message 25 */
     u8 frame;                       /* +0x15994: index of draw[]/disp[] in use */
     u8 view_range;                  /* +0x15995: view range in map cells */
-    u8 unk15996;
+    u8 unk15996;                    /* +0x15996: gates the kind-0xf0 (MapObjectAnimated) draws;
+                                     * with shield item 0x35 it enables +1 MP every 900 frames;
+                                     * map-object action 0xe3 sets it per region, display_initialize
+                                     * sets it to 1 */
     u8 fade_level;                  /* +0x15997 */
     u8 fade_hold;                   /* +0x15998 */
     u8 message_queue[8];            /* +0x15999: message ids, 0xff when free */
@@ -218,7 +221,7 @@ typedef struct GraphicsRuntime {
     VramScroll scroll[2];           /* +0x159c8: VRAM scrolls, mode 0xff when free */
     MATRIX view_matrix;             /* +0x159f8: view rotation */
     u8 unk15a18[0x20];
-    MATRIX view_matrix_turns[4];    /* +0x15a38: unk159f8 turned by 0..3 quarters */
+    MATRIX view_matrix_turns[4];    /* +0x15a38: view_matrix turned by 0..3 quarters */
     MATRIX pitch_matrix;            /* +0x15ab8: rotation about x by the view pitch */
     u8 unk15ad8[0x20];
     VECTOR view_position;           /* +0x15af8: viewer position */
@@ -233,7 +236,7 @@ typedef struct GraphicsRuntime {
     s32 fog_far;                    /* +0x15b2c: fog far */
     u8 grid[25][25];                /* +0x15b30: map cells around the viewer */
     u8 unk15da1[3];
-    s32 light_rotations_dirty;      /* +0x15da4: unk15da8 turns need rebuilding */
+    s32 light_rotations_dirty;      /* +0x15da4: the turns of lights need rebuilding */
     LightRecord lights[64];         /* +0x15da8 */
 } GraphicsRuntime;
 
@@ -286,16 +289,16 @@ typedef struct PrimTag {
 typedef struct ScratchModelWork {
     VECTOR transformed; /* +0x54: gte_stlvnl result of the overlay vertex loop (render_active_model_rows) */
     CVECTOR rgb;        /* +0x64: colour the models are lit with */
-    s32 near;           /* +0x68: GraphicsRuntime.unk15b28 (fog near, render_enqueue_tmd_subdivided) */
-    s32 far;            /* +0x6c: GraphicsRuntime.unk15b2c (fog far) */
+    s32 near;           /* +0x68: GraphicsRuntime.fog_near (fog near, render_enqueue_tmd_subdivided) */
+    s32 far;            /* +0x6c: GraphicsRuntime.fog_far (fog far) */
     s32 opz;            /* +0x70: gte_nclip result of the primitive being drawn */
 } ScratchModelWork;
 
 /* Scratchpad words from +0x54 while a map layer part is drawn (render_enqueue_map). */
 typedef struct ScratchMapWork {
     CVECTOR rgb;        /* +0x54: colour the ground is lit with */
-    s32 near;           /* +0x58: GraphicsRuntime.unk15b28 (fog near) */
-    s32 far;            /* +0x5c: GraphicsRuntime.unk15b2c (fog far) */
+    s32 near;           /* +0x58: GraphicsRuntime.fog_near (fog near) */
+    s32 far;            /* +0x5c: GraphicsRuntime.fog_far (fog far) */
     s32 opz;            /* +0x60: gte_nclip result of the face being drawn */
     s16 z;              /* +0x64: ordering table depth of the face */
     s16 clip;           /* +0x66: faces with every vertex nearer than this are dropped */
@@ -315,7 +318,7 @@ typedef struct ScratchCount {
     s16 z;              /* +0x74: ordering table depth of the face (render_enqueue_tmd_subdivided) */
     s16 clip;           /* +0x76: faces with every vertex nearer than this are dropped
                          * (render_enqueue_tmd_subdivided); render_world_model sets 100 */
-    s32 tmd_prim_count; /* +0x78: GraphicsRuntime.unk159bc; the renderers add each part's
+    s32 tmd_prim_count; /* +0x78: GraphicsRuntime.tmd_prim_count; the renderers add each part's
                          * primitive count */
     s32 ot_count;       /* +0x7c */
     s32 prim_count;     /* +0x80 */
@@ -370,7 +373,7 @@ typedef struct SpriteRec {
     u8 h;
     s16 x;
     s16 y;
-    s16 width;
+    s16 width;      /* +0x0a: written with the same value as w, never read */
     s16 unkc;
     u16 clut;
     u16 tpage;
@@ -385,10 +388,10 @@ extern SpriteRec hud_sprites[31];
 typedef struct RenderModelRow {
     u8 visible;     /* 1 drawn (render_active_model_rows) */
     u8 animation_id; /* +0x01 */
-    u8 lighting_index; /* +0x02: light record (GraphicsRuntime.unk15da8) */
+    u8 lighting_index; /* +0x02: light record (GraphicsRuntime.lights) */
     u8 unk3;
     u16 model;      /* +0x04: model file id */
-    u16 animation_phase; /* +0x06: animation time */
+    u16 animation_phase; /* +0x06: animation time (Q12) */
     SVECTOR scale;  /* +0x08: ScaleMatrix factors */
     SVECTOR pos;    /* +0x10: translation */
     SVECTOR angle;  /* +0x18: vx follows the view pitch; vy eased toward the viewer's heading */

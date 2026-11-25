@@ -81,7 +81,7 @@ void area_handler_noop(void)
 
 #include "shared/area_interact_item_containers.inc"
 
-/* Slot 1: sets flag 0x31 once the player's unk34[3] is non-zero. */
+/* Slot 1: sets flag 0x31 once the player's base_magic[3] is non-zero. */
 ADDRESS(0x801e8684, 0x38)
 void area_update_flag_on_element_stat(void)
 {

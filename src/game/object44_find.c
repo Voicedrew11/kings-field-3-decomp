@@ -676,7 +676,7 @@ static s16 map_object_door0_view_yaw;
 DATA(0x8009c3dc, 0x2, ".sbss")
 static s16 map_object_door1_view_yaw;
 
-/* Moves an MapObject forward along its yaw by DIST (vector2i_scale_shift11 scale). */
+/* Moves a MapObject forward along its yaw by DIST (vector2i_scale_shift11 scale). */
 #define OBJ44_ADVANCE(obj, dist)                            \
     {                                                       \
         s32 dir[2];                                         \
@@ -690,7 +690,7 @@ static s16 map_object_door1_view_yaw;
 /*
  * Steps every live MapObject record by its kind (doors, lifts, levers, switches,
  * warps, falling items); kinds without a case go to FDAT handler 9 with the
- * record and its def in map_objects_slots.unk8858 / unk8854.
+ * record and its def in map_objects_slots.current / current_def.
  */
 ADDRESS(0x80047010, 0x4514)
 void map_object_update_actions(void)

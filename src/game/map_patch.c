@@ -15,7 +15,7 @@
  * Applies the patch records at rec (variant index) to the cells around
  * (x, z) turned by angle: the area's own layer takes bytes 0 and 2 of the
  * variant, the other layer bytes 1 and 3 (0xfc / 0xff keep a byte); a flags
- * value other than 0xff replaces bits 0-6 of unk4 on both layers.
+ * value other than 0xff replaces bits 0-6 of lighting_index on both layers.
  */
 ADDRESS(0x800443c8, 0x1f0)
 void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapCellPattern *rec, s32 index,
@@ -68,7 +68,7 @@ void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapCellPat
 /*
  * Copies a w x h block of map cells from (sx, sz) to (dx, dz), turned by
  * angle in quarter turns; mask picks the layer 1 bytes and bits copied
- * (bits 0-1 of unk2 are turned with the block). flags bit 1 enables the copy.
+ * (bits 0-1 of quarter_turns are turned with the block). flags bit 1 enables the copy.
  */
 ADDRESS(0x800445b8, 0x274)
 void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,

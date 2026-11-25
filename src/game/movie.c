@@ -33,7 +33,7 @@ RODATA(0x80013680, 0x64)
 #define STREAM_MODE (0x100 | CdlModeSpeed | CdlModeRT)
 
 /*
- * Plays movie movie_state.unk380: releases the area's model blocks, takes
+ * Plays movie movie_state.current_movie: releases the area's model blocks, takes
  * three arena blocks for the VLC and slice buffers, shrinks the packet pools
  * to 0x7400 bytes and streams the movie's STR file (a random DRM file for
  * file numbers from 16) until its last frame, fading the music back in.
@@ -246,7 +246,7 @@ s32 strNextVlc(void)
     return 0;
 }
 
-/* Next movie sector; sets unk372 to 99 past the movie's last frame. */
+/* Next movie sector; sets stream_status to 99 past the movie's last frame. */
 ADDRESS(0x800616dc, 0xc0)
 u_long *strNext(DECENV *dec)
 {
@@ -324,7 +324,7 @@ void movie_state_reset(void)
     movie_state.movie_id = 0xff;
 }
 
-/* Steps the in-game movie state (unk370) of movie unk384. */
+/* Steps the in-game movie state (state) of movie movie_id. */
 ADDRESS(0x80061940, 0x284)
 void movie_update_state(void)
 {

@@ -18,11 +18,11 @@
 RODATA(0x80011b0c, 0xc4)
 
 /*
- * Runs the collision shape records of the map cell layer in unk12004 for a
+ * Runs the collision shape records of the map cell layer in collision_layer for a
  * body at (x, y, z) of radius and shape (bits 0-27 its height, bits 28-31
  * select the base floor and limit tests of record 0x18): floors, ceilings,
- * walls, stairs and ramps lower unk12010 (floor) and set unk12014 (limit),
- * and steep ones push through unk12034/unk12038. Record 0x40 switches once
+ * walls, stairs and ramps lower collision_floor_height and set
+ * collision_height_limit, and steep ones push through collision_slope_push/_angle. Record 0x40 switches once
  * to the cell's other layer. Returns the hit bits (4 floor, 8 limit, 1 and 2
  * walls).
  */
@@ -37,7 +37,7 @@ s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     s16 *p;
     s32 count;
     s32 top;
-    s32 *heights; /* map_world.unk1200c, unk12010 and unk12014 */
+    s32 *heights; /* map_world.collision_layer_height, collision_floor_height and collision_height_limit */
     s32 cell_x;
     s32 cell_z;
     s16 local_x; /* 16-bit copies for the stair, ramp and diagonal tests */
@@ -782,7 +782,7 @@ void collision_cache_load_hit_bounds(void)
  * Tests a shape at (x, y, z) against what mask selects: bit 0 the map, bit 1
  * the map's pits, bit 4 or 6 the Actor records, bit 5 the MapObject records,
  * bit 7 the player. Returns the bits that hit. mask is a u16: callers pass
- * actor_status.unk9d04 (a word) with lhu.
+ * actor_status.actor_collision_query_flags (a word) with lhu.
  */
 ADDRESS(0x80033f38, 0x248)
 s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
