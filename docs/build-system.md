@@ -188,7 +188,7 @@ absent, as in graphs written before it).
 ## Status and banking
 
 The status universe is every contiguous, non-vendored function: currently
-1 PSX, 488 GAME, 28 OPEN, and 18 END functions. Progress is counted per function even
+1 PSX, 593 GAME, 34 OPEN, 13 END and 437 FDAT functions. Progress is counted per function even
 when several functions share a module unit; the objdiff report lists each
 function inside its unit. Only manifested units with real base objects enter
 objdiff. This keeps an absent reconstruction distinct from a

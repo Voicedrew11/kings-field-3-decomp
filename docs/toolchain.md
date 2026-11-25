@@ -11,14 +11,14 @@ instructions, and the source forms behind them, is in
 
 | Part | Pinned file | Source | Status |
 | --- | --- | --- | --- |
-| Compiler | `CC1PSX.EXE`, "GNU C 2.6.0 [AL 1.1, MM 40] Sony Playstation" (sha256 `6587ed37…`) | Sony "GNU C Compiler Version 2.60 (World)" floppy, `CC1PSX.EXZ` dated 1994-10-07 | proven for `PSX.EXE`; probe elsewhere |
-| Flags | `-O2 -G8` (the compiler's own `-G` default) | profile `gcc260-o2-g8` | proven for `psx.main` |
+| Compiler | `CC1PSX.EXE`, "GNU C 2.6.0 [AL 1.1, MM 40] Sony Playstation" (sha256 `6587ed37…`) | Sony "GNU C Compiler Version 2.60 (World)" floppy, `CC1PSX.EXZ` dated 1994-10-07 | proven: `PSX.EXE` and all 28 FDAT modules rebuild byte-identically |
+| Flags | `-O2 -G8` (the compiler's own `-G` default), or `-O2 -G0` | profiles `gcc260-o2-g8`, `gcc260-o2-g0` | proven per unit that matches (e.g. `psx.main`; `-G0` for the FDAT modules) |
 | Assembler | ASPSX 2.21 (1995-06-22, `b52bf3d4…`) | Runtime Library 3.3 CD `PSYQ/ASPSX.EXE` | proven |
-| GTE post-processor | DMPSX 2.03 with `INLINE.TBL` | Runtime Library 3.3 CD `PSX/BIN` | probe (no GTE unit yet) |
-| Linker | PSYLINK 2.27 (1995-08-30, `39c9e16b…`) | Runtime Library 3.3 CD `PSYQ/PSYLINK.EXE` | proven for `PSX.EXE` |
+| GTE post-processor | DMPSX 2.03 with `INLINE.TBL` | Runtime Library 3.3 CD `PSX/BIN` | proven (GAME GTE functions exact, e.g. `0x80035394`, `0x8003bb04`, `0x800400ac`) |
+| Linker | PSYLINK 2.27 (1995-08-30, `39c9e16b…`) | Runtime Library 3.3 CD `PSYQ/PSYLINK.EXE` | proven for `PSX.EXE` and the 28 FDAT modules |
 | Converter | CPE2X 1.5 `/CA` (1995-07-07, `777caca8…`) | Runtime Library 3.3 CD `PSXGRAPH/BIN/CPE2X.EXE` | proven (header byte-identical) |
 | Libraries | Library 3.3: `PSX/LIB` archives, `2MBYTE.OBJ`, `NONE2.OBJ`, `MALLOC.OBJ` | Runtime Library 3.3 CD | proven for `PSX.EXE`; probe for GAME, OPEN, END |
-| Headers | `PSX/INCLUDE` (LF copy in `include-lf/`) | Runtime Library 3.3 CD | probe |
+| Headers | `PSX/INCLUDE` (LF copy in `include-lf/`) | Runtime Library 3.3 CD | `INLINE.H` and `GTEMAC.H` proven by the GTE functions; probe otherwise |
 
 Both media are Archive.org `ps1_sdks` items, fetched by SHA-256 in
 `nix/psx-toolchain.nix`: the floppy image
@@ -50,8 +50,9 @@ file (sha256 `c8e696c3…ae70`). Facts that discriminate:
 - PSYLINK 2.37 (Psy-Q 3.5) links the same objects to a different file;
   PSYLINK 2.27 reproduces it.
 
-**GAME samples.** Scratch compiles (not yet units) of four GAME functions
-match retail exactly, relocation fields aside: the mult/div leaf at
+**GAME samples.** Scratch compiles of four GAME functions matched retail
+exactly, relocation fields aside, before any GAME unit existed (all four are
+now banked exact in their units): the mult/div leaf at
 `0x8004c5ec`, the `kf_PlaySound(a, b, b, 0)` wrapper at `0x8001576c`, the
 four-call sequence at `0x80015064`, and the frame gate at `0x80019614`
 (`while (counter < 4) VSync(0); counter = 0;`). The frame gate settles the
@@ -61,7 +62,9 @@ address with `lui`/`addiu`, loads through `0(reg)` and keeps the address in
 is a member of a `volatile` aggregate (an array element or a struct member
 give the same code); a plain `volatile` scalar compiles to the `lw sym`
 macro form instead. The 2.7.2-cdk rebuild needed `%hi`/`%lo` for the same
-shape.
+shape. The counter is the `frame_gate` member of the CD state
+`DAT_801c12e4` (`include/game/cd.h`), which the CD module reaches as one
+aggregate.
 
 **ASPSX.** On GAME's mult/div leaf at `0x8004c5ec`, ASPSX 2.21 assembles the
 2.6.0 output to retail exactly (the `div` with its `break 7`/`break 6`
@@ -140,19 +143,16 @@ remain inspectable. It does not reach the linked executable.
 
 ## Profiles
 
-`config/units.toml` keeps `gcc260-o2-g8` (proven for `psx.main`) and
-`gcc260-o2-g0`, a probe for translation units whose globals are all reached
-through `lui`/low pairs: 95 GAME, 20 OPEN and 5 END game functions use `$gp`
+`config/units.toml` keeps `gcc260-o2-g8` and `gcc260-o2-g0`, the latter for
+translation units whose globals are all reached through `lui`/low pairs
+(every FDAT module, `game.save_data`); each is proven for the units that
+match under it: 95 GAME, 20 OPEN and 5 END game functions use `$gp`
 and the rest do not, so both settings occur. The King's Field II probe
 profiles (GCC 2.5.7/2.6.0 rebuilds with ASPSX 1.07) are removed; the
 `gcc257-native`, `gcc260-native` and `gcc241-kit` compilers stay selectable.
 
 ## Open questions
 
-- Which aggregate holds GAME's frame counter (array or struct) is not yet
-  known; both compile identically.
-- Whether DMPSX 2.03 is the version that rewrote GAME's 18 GTE renderer
-  functions is unproven until one of them matches.
 - The overlays' link layouts in `scripts/psxbuild/link.py` come from the
   signature census, not from a link.
 
