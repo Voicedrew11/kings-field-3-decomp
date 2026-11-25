@@ -649,7 +649,7 @@ void func_80044d9c(Object44Place *place)
             obj->arg.w.unk40 = frames + 30;
             break;
         default:
-            DAT_8018fad4.handlers[8](obj, def);
+            ((void (*)(Object44 *, Object44Def *))DAT_8018fad4.handlers[8])(obj, def);
             break;
         case 33:
         case 255:

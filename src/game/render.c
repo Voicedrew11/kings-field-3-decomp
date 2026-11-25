@@ -1407,7 +1407,7 @@ void func_80040830(s32 file, s32 entry, s32 id)
     if (model != NULL) {
         func_80019474(model, 3);
         func_8001949c(model, id);
-        func_80019d48(file, entry, model, func_80040658);
+        func_80019d48(file, entry, model, (CdCallback)func_80040658);
     }
 }
 

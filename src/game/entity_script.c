@@ -344,7 +344,8 @@ void func_8004c668(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u1
         dmg = 0x68db7;
     }
     dmg = (dmg * a10 / 5000 + 128) >> 4;
-    DAT_8018fad4.handlers[18](obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
+    ((void (*)(Object88 *, s32 *, u16, u16, u16, u16, u16, u16, u16, u16))
+         DAT_8018fad4.handlers[18])(obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
     if (dmg == 0) {
         return;
     }

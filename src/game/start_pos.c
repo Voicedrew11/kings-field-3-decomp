@@ -82,7 +82,7 @@ void func_8005c308(Object88 *obj)
         case 0xf4:
             script[16]++;
             p++;
-            DAT_8018fad4.handlers[4](obj, *p);
+            ((void (*)(Object88 *, u8))DAT_8018fad4.handlers[4])(obj, *p);
             break;
         case 0xf5:
             script[16]++;
@@ -635,7 +635,7 @@ void func_8005cbe0(VECTOR *pos, SVECTOR *angle, s32 id)
         break;
     }
 done:
-    DAT_8018fad4.handlers[2](pos, angle, id);
+    ((void (*)(VECTOR *, SVECTOR *, s32))DAT_8018fad4.handlers[2])(pos, angle, id);
     if (DAT_801ba984.unk0 == 0) {
         func_80041eec(10);
     }

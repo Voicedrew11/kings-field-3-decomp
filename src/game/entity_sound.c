@@ -546,7 +546,7 @@ void func_800500a8(void)
                         obj->unk16 = 0x1000;
                     }
                 } else {
-                    DAT_8018fad4.handlers[19](obj);
+                    ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
                     if (obj->unk0 == 1) {
                         func_8004b770(obj);
                     } else if (obj->unk0 == 2) {

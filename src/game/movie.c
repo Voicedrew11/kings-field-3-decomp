@@ -359,7 +359,7 @@ void func_80061940(void)
         DAT_801e7edc.unk372 = 0;
         break;
     case 4:
-        DAT_8018fad4.handlers[10](id);
+        ((void (*)(u8))DAT_8018fad4.handlers[10])(id);
         func_80060d20();
         if (DAT_801ba984.unk61 == 1) {
             DAT_801ba984.unk61 = 2;
@@ -378,7 +378,7 @@ void func_80061940(void)
     case 8:
         if (DAT_801e7edc.unk372 == 1) {
             DAT_801e7edc.unk370 = 0;
-            DAT_8018fad4.handlers[7](id);
+            ((void (*)(u8))DAT_8018fad4.handlers[7])(id);
         }
         DAT_801e7edc.unk372 = 0;
         break;

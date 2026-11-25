@@ -118,12 +118,12 @@ void func_800196e8(void)
                     CdSeekL(&request->retry_pos);
                 } else {
                     if (request->callback) {
-                        request->callback(request->buffer);
+                        ((CdBufferCallback)request->callback)(request->buffer);
                     }
                     func_8001967c(request);
                 }
             } else if (request->callback) {
-                request->callback(request);
+                ((CdRequestCallback)request->callback)(request);
             }
             break;
         }
@@ -149,7 +149,7 @@ void func_80019848(void)
         CdGetSector(request->buffer, 0x200);
         request->count--;
         if (request->callback) {
-            request->callback(request);
+            ((CdRequestCallback)request->callback)(request);
         }
         if (request->count == 0) {
             func_8001967c(request);

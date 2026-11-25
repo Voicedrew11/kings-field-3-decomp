@@ -111,7 +111,7 @@ void func_8004b794(void)
     for (i = 199; i != -1; i--) {
         if (obj->unk0 == 1 && obj->unk9 == 1 && obj->unke == 3 && obj->unkf == 0xf0) {
             if (obj->unk70 != 0 || obj->unk18 > 0x800) {
-                DAT_8018fad4.handlers[19](obj);
+                ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
                 func_8004b770(obj);
             }
         }

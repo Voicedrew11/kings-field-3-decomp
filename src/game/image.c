@@ -36,7 +36,7 @@ void func_80018c60(int file_in, int entry_in)
     u16 file = file_in;
     u16 entry = entry_in;
 
-    func_80019e48(file, entry, DAT_801c17a4, func_80018c54);
+    func_80019e48(file, entry, DAT_801c17a4, (CdCallback)func_80018c54);
 }
 
 ADDRESS(0x80018c94, 0x3c)

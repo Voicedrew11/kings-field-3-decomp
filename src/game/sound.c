@@ -439,5 +439,5 @@ void func_80015ce0(s32 file, s32 sector, s32 index)
     request->u.sound.slot = slot;
     request->u.sound.bank = index;
     request->u.sound.spu_addr = spu_addr;
-    func_80019df0(file, sector * 2, slot->buffer, func_80015908);
+    func_80019df0(file, sector * 2, slot->buffer, (CdCallback)func_80015908);
 }

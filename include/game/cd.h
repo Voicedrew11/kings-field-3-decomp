@@ -33,8 +33,12 @@ struct SoundSlot;
 #define CD_REQUEST_SOUND 0x30  /* sound bank read (src/game/sound.c) */
 #define CD_REQUEST_IMAGE 0x40  /* VRAM image read (func_80018cd0) */
 
-/* Called with the buffer (CD_REQUEST_READ) or with the request. */
+/* Called with the buffer (CD_REQUEST_READ) or with the request; stored
+ * untyped and cast to one of the two below where it is called. */
 typedef void (*CdCallback)();
+struct CdRequest;
+typedef void (*CdBufferCallback)(u8 *buffer);
+typedef void (*CdRequestCallback)(struct CdRequest *request);
 
 /* CdRequest.u for a sound bank read. */
 typedef struct CdSoundRequest {

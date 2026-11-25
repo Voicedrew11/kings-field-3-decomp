@@ -529,5 +529,5 @@ void func_8005e2d0(VECTOR *pos, SVECTOR *angle)
         }
     }
 done:
-    DAT_8018fad4.handlers[0](&p, angle);
+    ((void (*)(VECTOR *, SVECTOR *))DAT_8018fad4.handlers[0])(&p, angle);
 }

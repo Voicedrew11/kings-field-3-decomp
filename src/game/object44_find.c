@@ -2302,7 +2302,7 @@ void func_80047010(void)
                     }
                     switch (obj->arg.b.unk3a.bytes[0] & 0xf) {
                     case 0:
-                        DAT_8018fad4.handlers[3](obj);
+                        ((void (*)(Object44 *))DAT_8018fad4.handlers[3])(obj);
                         break;
                     case 1:
                         func_800463bc(obj->arg.b.unk3a.bytes[1]);
