@@ -588,11 +588,11 @@ void render_frames_with_color_overlay(int mode, s32 phase, s32 last, s32 step)
     }
 }
 
-/* Moves the player, the Object4c and the Actor records by (dx, dy, dz). */
+/* Moves the player, the Effect and the Actor records by (dx, dy, dz). */
 ADDRESS(0x80046cb0, 0x11c)
 void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
 {
-    Object4c *o4c;
+    Effect *o4c;
     Actor *o88;
     u16 i;
 
@@ -602,7 +602,7 @@ void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
     o4c = effect_status.objects;
     i = 128;
     while (i--) {
-        if (o4c->unk0 != 0xff && (o4c->unk8 & 0xc) != 0xc) {
+        if (o4c->type != 0xff && (o4c->render_flags & 0xc) != 0xc) {
             o4c->pos.vx += dx;
             o4c->pos.vz += dz;
             o4c->pos.vy += dy;
@@ -1365,7 +1365,7 @@ void map_object_update_actions(void)
             break;
         case 6:
             {
-            Object4cTrail spark;
+            EffectTrailRow spark;
 
             switch (obj->action_state) {
             case 0:

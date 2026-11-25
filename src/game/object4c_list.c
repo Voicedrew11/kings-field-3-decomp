@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object4c record list (WIP module, after effect_update_dispatch): clearing
+ * GAME.EXE: Effect record list (WIP module, after effect_update_dispatch): clearing
  * the records, loading the MagicRecord table and the per-frame update loop.
  */
 #include <kf/lib/address.h>
@@ -13,12 +13,12 @@
 ADDRESS(0x8005bbf4, 0x30)
 void effect_pool_reset(void)
 {
-    Object4c *obj;
+    Effect *obj;
     u16 i;
 
     obj = effect_status.objects;
     for (i = 0; i < 128; i++) {
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
         obj++;
     }
 }
@@ -30,7 +30,7 @@ void magic_load_records(u32 *src)
     u32 *dst;
     s32 i;
 
-    dst = (u32 *)effect_status.unk0;
+    dst = (u32 *)effect_status.magic_records;
     i = 0x240;
     do {
         *dst++ = *src++;
@@ -41,20 +41,20 @@ void magic_load_records(u32 *src)
 ADDRESS(0x8005bc50, 0xe4)
 void effect_pool_sweep(void)
 {
-    Object4c *obj;
+    Effect *obj;
 
     obj = effect_status.objects;
-    effect_status.unk2f08 = 0;
+    effect_status.current_index = 0;
     do {
-        if (obj->unk0 != OBJECT4C_FREE) {
-            effect_status.unk2f04 = obj;
-            effect_status.unk2f00 = &effect_status.unk0[obj->unk1];
-            if (--obj->unk10 == -1) {
-                obj->unk0 = OBJECT4C_FREE;
+        if (obj->type != EFFECT_FREE) {
+            effect_status.current = obj;
+            effect_status.current_magic = &effect_status.magic_records[obj->kind];
+            if (--obj->updates_remaining == -1) {
+                obj->type = EFFECT_FREE;
             } else {
                 effect_update_dispatch();
             }
         }
         obj++;
-    } while (++effect_status.unk2f08 < 128);
+    } while (++effect_status.current_index < 128);
 }

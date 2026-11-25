@@ -476,7 +476,7 @@ next:
         if (*spell == 0xff) {
             return;
         }
-        r = &effect_status.unk0[*spell];
+        r = &effect_status.magic_records[*spell];
         if (r->menu_available == 0) {
             goto learn;
         }
@@ -1088,12 +1088,12 @@ void player_initialize_state(void)
     cur_avatar_status.unk12c.vz = 0;
     cur_avatar_status.pos.vx = 0x1f000;
     cur_avatar_status.unk160 = 5;
-    r = effect_status.unk0;
+    r = effect_status.magic_records;
     for (i = 95; i != -1; i--) {
         r->menu_available = 0;
         r++;
     }
-    effect_status.unk0[29].menu_available = 1;
+    effect_status.magic_records[29].menu_available = 1;
     player_reset_status();
 }
 
@@ -1185,7 +1185,7 @@ void player_set_primary_magic_shortcut_id(u8 id)
     sound_status.bank_select = 0;
     cur_avatar_status.unkc7 = id;
     if (cur_avatar_status.unkc7 != 0xff) {
-        r = &effect_status.unk0[cur_avatar_status.unkc7];
+        r = &effect_status.magic_records[cur_avatar_status.unkc7];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             effect = &sound_status.effects[se];
@@ -1195,7 +1195,7 @@ void player_set_primary_magic_shortcut_id(u8 id)
         }
     }
     if (id != 0xff) {
-        r = &effect_status.unk0[id];
+        r = &effect_status.magic_records[id];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             if (bank != NULL && bank->slot == NULL) {
@@ -1218,7 +1218,7 @@ void player_set_secondary_magic_shortcut_id(u8 id)
     sound_status.bank_select = 1;
     cur_avatar_status.unkc8 = id;
     if (cur_avatar_status.unkc8 != 0xff) {
-        r = &effect_status.unk0[cur_avatar_status.unkc8];
+        r = &effect_status.magic_records[cur_avatar_status.unkc8];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             effect = &sound_status.effects[se];
@@ -1228,7 +1228,7 @@ void player_set_secondary_magic_shortcut_id(u8 id)
         }
     }
     if (id != 0xff) {
-        r = &effect_status.unk0[id];
+        r = &effect_status.magic_records[id];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             if (bank != NULL && bank->slot == NULL) {
@@ -1340,26 +1340,26 @@ void player_equip_weapon(u8 id)
     cur_avatar_status.unkc6 = 0;
     cur_avatar_status.unkd0 = 0;
     if (cur_evt_state.unk2b != 0) {
-        effect_status.unk0[56].menu_available = 1;
-        effect_status.unk0[58].menu_available = 1;
-        effect_status.unk0[60].menu_available = 1;
-        effect_status.unk0[62].menu_available = 1;
-        effect_status.unk0[64].menu_available = 1;
-        effect_status.unk0[76].menu_available = 1;
+        effect_status.magic_records[56].menu_available = 1;
+        effect_status.magic_records[58].menu_available = 1;
+        effect_status.magic_records[60].menu_available = 1;
+        effect_status.magic_records[62].menu_available = 1;
+        effect_status.magic_records[64].menu_available = 1;
+        effect_status.magic_records[76].menu_available = 1;
     }
     if (cur_evt_state.unk31 != 0) {
-        effect_status.unk0[54].menu_available = 1;
-        effect_status.unk0[55].menu_available = 1;
-        effect_status.unk0[66].menu_available = 1;
-        effect_status.unk0[67].menu_available = 1;
-        effect_status.unk0[68].menu_available = 1;
-        effect_status.unk0[69].menu_available = 1;
-        effect_status.unk0[70].menu_available = 1;
-        effect_status.unk0[71].menu_available = 1;
-        effect_status.unk0[72].menu_available = 1;
-        effect_status.unk0[73].menu_available = 1;
-        effect_status.unk0[74].menu_available = 1;
-        effect_status.unk0[75].menu_available = 1;
+        effect_status.magic_records[54].menu_available = 1;
+        effect_status.magic_records[55].menu_available = 1;
+        effect_status.magic_records[66].menu_available = 1;
+        effect_status.magic_records[67].menu_available = 1;
+        effect_status.magic_records[68].menu_available = 1;
+        effect_status.magic_records[69].menu_available = 1;
+        effect_status.magic_records[70].menu_available = 1;
+        effect_status.magic_records[71].menu_available = 1;
+        effect_status.magic_records[72].menu_available = 1;
+        effect_status.magic_records[73].menu_available = 1;
+        effect_status.magic_records[74].menu_available = 1;
+        effect_status.magic_records[75].menu_available = 1;
     }
     player_recalculate_combat_stats();
 }
@@ -1434,7 +1434,7 @@ Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *
 
 /*
  * Casts spell id (77 kinds, MagicRecord indices): aims along unk14c with
- * player_probe_view_target_and_vectors and spawns the spell's Object4c records with effect_construct_record;
+ * player_probe_view_target_and_vectors and spawns the spell's Effect records with effect_construct_record;
  * spells 68, 69, 72 and 73/74 spawn under the ids 120..124. Declared with an
  * ellipsis: the prologue spills all four argument registers and va_start
  * keeps id in its stack slot (read back as a byte for the spawns).
@@ -1448,7 +1448,7 @@ void player_dispatch_magic_effect(s32 id, ...)
     s32 dist;
     s32 range;
     Actor *obj;
-    Object4c *made;
+    Effect *made;
     SVECTOR *row;
     s32 i;
     s32 k;

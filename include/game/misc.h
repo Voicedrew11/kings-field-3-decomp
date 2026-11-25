@@ -2,7 +2,7 @@
 #define GAME_MISC_H
 
 /*
- * GAME.EXE functions after the Object4c modules (src/game/misc_5bd34.c,
+ * GAME.EXE functions after the Effect modules (src/game/misc_5bd34.c,
  * object44_move.c, ...; WIP names and module edges).
  */
 #include <kf/lib/types.h>

@@ -25,7 +25,7 @@ RODATA(0x800126e8, 0x5cc)
 /*
  * Fires attack id of the current record from its model vertex (-1: the
  * offset in the next three arguments rotated by its angle; -2: between two
- * vertices, aimed at a point eased toward the player): Object4c records
+ * vertices, aimed at a point eased toward the player): Effect records
  * through effect_construct_record, aimed at the player. The arguments past vertex
  * are read through its address: retail homes a2/a3 like a `...` function
  * and stores vertex to its slot.
@@ -35,7 +35,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
 {
     Actor *obj;
     Actor *o;
-    Object4c *shot;
+    Effect *shot;
     ActorGroup *def;
     VECTOR *target;
     s32 *args;
@@ -86,7 +86,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         AIM(500);
         shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
         if (shot != NULL) {
-            shot->unkb = 3;
+            shot->cooldown = 3;
         }
         break;
     case 0xf:
@@ -102,7 +102,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         actor_compute_target_direction(obj, target, 0, &pos, &dir, -1, 0x400, 1);
         shot = effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir);
         if (shot != NULL) {
-            shot->unkb = 0;
+            shot->cooldown = 0;
         }
         break;
     case 0x13:
@@ -205,7 +205,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         vector3s_scale_shift12(0x226, &dir);
         shot = effect_construct_record((u8)kind, 0x83, 0x28, &pos, &dir);
         if (shot != NULL) {
-            shot->unkb = 3;
+            shot->cooldown = 3;
         }
         break;
     case 6:
@@ -280,8 +280,8 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
         if (shot != NULL) {
             shot->arg.h.unk44 = pos.vy;
-            shot->unk10 = 0x32;
-            shot->unk7 = 0;
+            shot->updates_remaining = 0x32;
+            shot->phase = 0;
         }
         break;
     }

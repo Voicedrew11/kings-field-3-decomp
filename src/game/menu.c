@@ -838,7 +838,7 @@ s32 menu_choose_magic_action(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_magic_rows(effect_status.unk0, entries, values, ids, 0x17, 0x1e);
+    n = menu_collect_available_magic_rows(effect_status.magic_records, entries, values, ids, 0x17, 0x1e);
     menu_list_init(&list, 0, 1);
     list.rows = 4;
     list.count = n;
@@ -1165,7 +1165,7 @@ void menu_choose_primary_magic_shortcut(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_magic_rows(effect_status.unk0, entries, values, ids, 0, 0x16);
+    n = menu_collect_available_magic_rows(effect_status.magic_records, entries, values, ids, 0, 0x16);
     memcpy((void *)&entries[n], (const void *)&menu_label_rows[11], 12);
     values[n] = -1;
     ids[n] = 0xff;
@@ -1247,7 +1247,8 @@ void menu_item_magic_controller(void)
     event_item_counters_table[0][0x85] = 0;
     n = menu_collect_masked_item_rows(event_item_counters_table[0], entries, counts, ids, 0x65, 0x92);
     event_item_counters_table[0][0x85] = saved;
-    n += menu_collect_available_magic_rows(effect_status.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
+    n += menu_collect_available_magic_rows(effect_status.magic_records, &entries[n], &values[n], &spells[n],
+                                           0, 0x1e);
     memcpy((void *)&entries[n], (const void *)&menu_label_rows[11], 12);
     n++;
     menu_list_init(&list, 0, 2);

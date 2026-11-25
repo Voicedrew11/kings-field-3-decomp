@@ -1,8 +1,8 @@
 /*
- * GAME.EXE: Object4c movement (WIP module): steering and speed limits of
+ * GAME.EXE: Effect movement (WIP module): steering and speed limits of
  * the current record, spawning further records from it, its step and
  * collision test, and effect_update_dispatch, the per-frame update of the current
- * record by its id (Object4c.unk1).
+ * record by its id (Effect.unk1).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -46,10 +46,10 @@ void effect_rotate_scale_offset_y(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale)
 ADDRESS(0x80055bd8, 0x1d8)
 s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel)
 {
-    Object4c *obj;
+    Effect *obj;
     s32 speed;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     vector3s_scale_shift12(scale, accel);
     obj->vel.vx += accel->vx;
     obj->vel.vy += accel->vy;
@@ -78,15 +78,15 @@ ADDRESS(0x80055db0, 0x1c4)
 s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
                         s32 cone)
 {
-    Object4c *obj;
+    Effect *obj;
     VECTOR target;
     SVECTOR dir;
     SVECTOR accel;
     s32 dist;
     Actor *found;
 
-    obj = effect_status.unk2f04;
-    if (obj->unk0 & 0x40) {
+    obj = effect_status.current;
+    if (obj->type & 0x40) {
         found = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 24000, cone, cone, &dist, 0);
         if (found != NULL) {
             target.vx = found->pos.vx;
@@ -118,12 +118,12 @@ s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s3
 ADDRESS(0x80055f74, 0x1c0)
 s32 effect_target_motion(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near, s32 radius, s32 height)
 {
-    Object4c *obj;
+    Effect *obj;
     VECTOR d;
     SVECTOR accel;
     s32 dist;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     d.vx = target->vx - obj->pos.vx;
     d.vy = target->vy - obj->pos.vy;
     d.vz = target->vz - obj->pos.vz;
@@ -146,33 +146,33 @@ s32 effect_target_motion(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near,
 ADDRESS(0x80056134, 0xa4)
 void effect_scale_step(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
 {
-    Object4c *obj;
+    Effect *obj;
     s32 r;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     obj->scale.vy = obj->scale.vz = obj->scale.vx += grow;
     r = rate * obj->scale.vx >> 12;
     effect_apply_radial_magic_damage(&obj->pos, r - (rate * grow >> 12), r - 1, mode, falloff, 0x1000);
     if (obj->scale.vx >= limit) {
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
     }
 }
 
 /* Spawns record 0x6e at vertex of obj, yaw jittered. */
 ADDRESS(0x800561d8, 0x90)
-void effect_spawn_zero_direction(Object4c *obj, s32 vertex)
+void effect_spawn_zero_direction(Effect *obj, s32 vertex)
 {
     VECTOR pos;
     SVECTOR angle;
-    Object4c *made;
+    Effect *made;
 
     effect_sample_world_vertex(obj, vertex, &pos, &obj->scale);
     angle.vx = obj->angle.vx;
     angle.vy = obj->angle.vy + (rand() >> 7) - 128;
     angle.vz = obj->angle.vz;
-    made = effect_construct_record(10, obj->unk0, 0x6e, &pos, &effect_zero_direction, &angle);
+    made = effect_construct_record(10, obj->type, 0x6e, &pos, &effect_zero_direction, &angle);
     if (made != NULL) {
-        made->unk7 = 2;
+        made->phase = 2;
     }
 }
 
@@ -205,7 +205,7 @@ s32 effect_spawn_at_lower_bound(VECTOR *pos, s32 a1, s32 a2, s32 height)
  * values are a speed backwards along the record's angle.
  */
 ADDRESS(0x800562f0, 0x290)
-void effect_spawn_motion(Object4c *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+void effect_spawn_motion(Effect *obj, s32 vertex, s32 mode, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
     s32 *args;
     SVECTOR dir;
@@ -286,22 +286,22 @@ s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a
 ADDRESS(0x800566d4, 0x12c)
 s32 effect_collision_step(s32 radius, s32 height, s32 spin)
 {
-    Object4c *obj;
+    Effect *obj;
     VECTOR p;
     s32 hit;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     obj->pos.vx += obj->vel.vx;
     obj->pos.vy += obj->vel.vy;
     obj->pos.vz += obj->vel.vz;
     hit = effect_probe_collision_by_type(&obj->pos, radius, height);
-    if (obj->unkd != 0 && hit == 0) {
+    if (obj->midpoint_collision_enabled != 0 && hit == 0) {
         p.vx = obj->pos.vx - (obj->vel.vx >> 1);
         p.vy = obj->pos.vy - (obj->vel.vy >> 1);
         p.vz = obj->pos.vz - (obj->vel.vz >> 1);
         hit = effect_probe_collision_by_type(&p, radius, height);
     }
-    obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
+    obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
     obj->angle.vz = (obj->angle.vz - spin) & 0xfff;
     return hit;
 }
@@ -310,9 +310,9 @@ s32 effect_collision_step(s32 radius, s32 height, s32 spin)
 ADDRESS(0x80056800, 0x40)
 void effect_collision_backtrack(void)
 {
-    Object4c *obj;
+    Effect *obj;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     obj->pos.vx -= obj->vel.vx;
     obj->pos.vy -= obj->vel.vy;
     obj->pos.vz -= obj->vel.vz;
@@ -322,19 +322,19 @@ void effect_collision_backtrack(void)
 ADDRESS(0x80056840, 0x7c)
 void effect_collision_backtrack_half(void)
 {
-    Object4c *obj;
+    Effect *obj;
 
-    obj = effect_status.unk2f04;
+    obj = effect_status.current;
     obj->pos.vx -= obj->vel.vx / 2;
     obj->pos.vy -= obj->vel.vy / 2;
     obj->pos.vz -= obj->vel.vz / 2;
 }
 
 /*
- * Per-frame update of the current Object4c record (effect_status.unk2f04),
+ * Per-frame update of the current Effect record (effect_status.unk2f04),
  * switched on its id; obj->unk7 is the phase of the multi-step ids. Most
  * ids move the record, test it for hits and leave a particle trail through
- * effect_construct_record; a record is freed by setting unk0 to OBJECT4C_FREE.
+ * effect_construct_record; a record is freed by setting unk0 to EFFECT_FREE.
  *
  * Stack frame: a case block opened at a case label stays open to the end
  * of the switch (the closing braces at the bottom), so its locals keep
@@ -346,7 +346,7 @@ void effect_collision_backtrack_half(void)
 ADDRESS(0x800568bc, 0x5338)
 void effect_update_dispatch(void)
 {
-    Object4c *obj;
+    Effect *obj;
     s32 id;
     s32 phase;
     s32 hit;
@@ -354,9 +354,9 @@ void effect_update_dispatch(void)
     VECTOR p;
     VECTOR spare;
 
-    obj = effect_status.unk2f04;
-    id = obj->unk1;
-    phase = obj->unk7;
+    obj = effect_status.current;
+    id = obj->kind;
+    phase = obj->phase;
     switch (id) {
     case 0:
     case 40:
@@ -378,19 +378,19 @@ void effect_update_dispatch(void)
         if (phase < 3) {
             goto grow86;
         }
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
         break;
     case 3:
         obj->scale.vy += 1200;
-        obj->unk4 = (obj->unk10 & 1) - 128;
-        obj->unke = (obj->unk10 % 2) << 6;
+        obj->animation_id = (obj->updates_remaining & 1) - 128;
+        obj->clut_offset = (obj->updates_remaining % 2) << 6;
         break;
     case 6:
     case 51:
         if (obj->arg.b.unk44 == 2) {
-            obj->unk12 += 256;
-            if (obj->unk12 >= 0x1000) {
-                obj->unk0 = OBJECT4C_FREE;
+            obj->lighting_blend += 256;
+            if (obj->lighting_blend >= 0x1000) {
+                obj->type = EFFECT_FREE;
             }
             break;
         }
@@ -403,9 +403,9 @@ void effect_update_dispatch(void)
             effect_apply_current_magic_backstep(hit);
             if (obj->arg.b.unk44 == 1) {
                 obj->arg.b.unk44 = 2;
-                obj->unk9 = 5;
-                obj->unkc = 0x32;
-                obj->unk12 = 0x400;
+                obj->render_mode = 5;
+                obj->lighting_override_index = 0x32;
+                obj->lighting_blend = 0x400;
                 break;
             }
             effect_collision_backtrack();
@@ -425,7 +425,7 @@ void effect_update_dispatch(void)
             if (hit != 0) {
                 if (hit & 3) {
                     effect_collision_backtrack();
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 if (obj->arg.b.unk44 == 0) {
                     obj->arg.b.unk44 = 1;
@@ -454,10 +454,10 @@ void effect_update_dispatch(void)
             hit = effect_collision_step(180, 0, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 } else {
                     effect_apply_current_magic_backstep(hit);
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 effect_play_spatial_sound(obj, 0x27);
                 effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0, 2);
@@ -469,7 +469,7 @@ void effect_update_dispatch(void)
                 SVECTOR v;
 
                 v.vx = v.vy = v.vz = 0;
-                if (obj->unk10 % 3 == 0) {
+                if (obj->updates_remaining % 3 == 0) {
                     effect_construct_record(10, 0, 3, &obj->pos, &v);
                 }
             }
@@ -484,16 +484,16 @@ void effect_update_dispatch(void)
         if (obj->scale.vy < 0x1000) {
             obj->scale.vy += 150;
         }
-        if (obj->unk10 > 32) {
+        if (obj->updates_remaining > 32) {
             obj->pos.vy -= 40;
         } else {
             obj->pos.vy += 85;
         }
-        obj->unk0 = 0x81;
+        obj->type = 0x81;
         effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
-        obj->unk0 = 0x84;
+        obj->type = 0x84;
         if (effect_collision_step(100, 200, 0) != 0) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 80:
@@ -536,10 +536,10 @@ void effect_update_dispatch(void)
             effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             if (hit != 0) {
                 effect_apply_current_magic_backstep(hit | 0x20000);
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 break;
             }
-            obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
+            obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 82:
@@ -578,10 +578,10 @@ void effect_update_dispatch(void)
             effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             if (hit != 0) {
                 effect_apply_current_magic_backstep(hit | 0x20000);
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 break;
             }
-            obj->unka = map_world.collision_layer_offset == 0 ? 1 : 2;
+            obj->layer_mask = map_world.collision_layer_offset == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 86:
@@ -595,19 +595,19 @@ void effect_update_dispatch(void)
             effect_collision_backtrack();
         hit86b:
             effect_apply_current_magic_backstep(hit);
-            obj->unk7 = 1;
+            obj->phase = 1;
         } else if (phase >= 3) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
             break;
         }
     grow86:
-        obj->unk4 = phase - 128;
+        obj->animation_id = phase - 128;
         obj->scale.vz = obj->scale.vy = obj->scale.vx += 2048;
-        obj->unk7++;
+        obj->phase++;
         break;
     case 85:
         if (phase == 9) {
-            Object4cTrail spare2;
+            EffectTrailRow spare2;
             VECTOR a;
             VECTOR c;
             VECTOR old;
@@ -617,11 +617,11 @@ void effect_update_dispatch(void)
 
             o = &actor_status.objects[obj->arg.s.unk44];
             if (o->lifecycle != 1) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 break;
             }
             if (o->target_type != 0x19) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 break;
             }
             actor_sample_rotated_animation_vertex(o, obj->arg.s.unk46, &a);
@@ -645,8 +645,8 @@ void effect_update_dispatch(void)
             }
             effect_play_spatial_sound(obj, 0x33);
             actor_compute_target_direction(o, &cur_avatar_status.pos, 650, pos, &obj->vel, -1, 0x400, 5);
-            obj->unk7 = 0;
-            obj->unk10 = 50;
+            obj->phase = 0;
+            obj->updates_remaining = 50;
             break;
         }
         effect_spawn_motion(obj, -1, 0x100, obj->scale.vx, -300, 2, 9, 0);
@@ -656,7 +656,7 @@ void effect_update_dispatch(void)
         hit = effect_collision_step(180, 0x80000000, 0);
         if (hit != 0) {
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
                 obj->arg.b.unk44 = 1;
@@ -674,7 +674,7 @@ void effect_update_dispatch(void)
             if (!(hit & 0xf)) {
                 effect_apply_current_magic_backstep(hit);
             }
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         obj->angle.vy += 300;
@@ -690,7 +690,7 @@ void effect_update_dispatch(void)
             effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0xc00, -256, 8, 0x1c, 0, 1, 2);
             hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 effect_apply_current_magic_backstep(hit);
             }
             break;
@@ -699,7 +699,7 @@ void effect_update_dispatch(void)
         if (hit != 0) {
             SVECTOR v;
 
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
             effect_apply_current_magic_backstep(hit);
             for (i = 15; i != -1; i--) {
                 v.vx = (rand() * 500 >> 15) - 250;
@@ -716,7 +716,7 @@ void effect_update_dispatch(void)
             obj->angle.vz += 400;
             obj->angle.vx = ratan2(obj->vel.vy, fixed_vector2_length(obj->vel.vx, obj->vel.vz));
             obj->angle.vy = ratan2(obj->vel.vz, obj->vel.vx) - 1024;
-            if (obj->unk10 == 45 && obj->arg.s.unk46 == 0) {
+            if (obj->updates_remaining == 45 && obj->arg.s.unk46 == 0) {
                 v.vx = (-obj->vel.vz + obj->vel.vx + obj->vel.vx) >> 1;
                 v.vz = (obj->vel.vx + obj->vel.vz + obj->vel.vz) >> 1;
                 v.vy = obj->vel.vy;
@@ -729,22 +729,22 @@ void effect_update_dispatch(void)
             hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
                 effect_apply_current_magic_backstep(hit);
-                obj->unk1 = 0x58;
-                obj->unk8 = 1;
-                obj->unk9 = 5;
-                obj->unk2 = 0x15;
-                obj->unk3 = 0x15;
-                obj->unkc = 0x34;
-                obj->unk12 = 0x1000;
-                obj->unk10 = 40;
-                obj->unk4 = 0;
+                obj->kind = 0x58;
+                obj->render_flags = 1;
+                obj->render_mode = 5;
+                obj->base_render_id = 0x15;
+                obj->render_id = 0x15;
+                obj->lighting_override_index = 0x34;
+                obj->lighting_blend = 0x1000;
+                obj->updates_remaining = 40;
+                obj->animation_id = 0;
                 obj->scale.vx = 0;
                 obj->scale.vy = 0;
                 obj->scale.vz = 0;
                 obj->angle.vx = 0;
                 obj->angle.vy = 0;
                 obj->angle.vz = 0;
-                obj->unke = 0x40;
+                obj->clut_offset = 0x40;
                 effect_play_spatial_sound(obj, 0x28);
                 effect_construct_record(10, 3, 0x58, &obj->pos, NULL, 0x80, 1);
                 break;
@@ -764,7 +764,7 @@ void effect_update_dispatch(void)
             hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
                 effect_apply_current_magic_backstep(hit);
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = (rand() * 20 >> 15) - 10;
             v.vy = (rand() * 20 >> 15) - 10;
@@ -780,7 +780,7 @@ void effect_update_dispatch(void)
             hit = effect_collision_step(180, 0x80000000, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 if (obj->arg.b.unk44 == 0) {
                     obj->arg.b.unk44 = 1;
@@ -809,7 +809,7 @@ void effect_update_dispatch(void)
             obj->scale.vx += 256;
             obj->scale.vz += 256;
             if (obj->scale.vx > 0x1000) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             break;
         }
@@ -827,7 +827,7 @@ void effect_update_dispatch(void)
                                              obj->scale.vx * 4 - 1, 2000, 0x1000, obj->arg.s.unk48);
         }
         if (obj->scale.vx > obj->arg.s.unk44) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 12:
@@ -874,7 +874,7 @@ void effect_update_dispatch(void)
             if (!(hit & 0xf)) {
                 effect_apply_current_magic_backstep(hit);
             }
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 50:
@@ -886,18 +886,18 @@ void effect_update_dispatch(void)
             if (!(hit & 0xf)) {
                 effect_apply_current_magic_backstep(hit);
             }
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 58:
-        obj->unke = (obj->unke + 64) & 0x40;
+        obj->clut_offset = (obj->clut_offset + 64) & 0x40;
         hit = effect_collision_step(180, 0, -600);
         if (hit != 0) {
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             effect_apply_current_magic_backstep(hit);
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 21:
@@ -914,7 +914,7 @@ void effect_update_dispatch(void)
                 break;
             }
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             if (!(hit & 0x10)) {
                 break;
@@ -936,7 +936,7 @@ void effect_update_dispatch(void)
         hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
                 effect_apply_current_magic_backstep(hit);
@@ -949,12 +949,12 @@ void effect_update_dispatch(void)
     case 9:
         hit = effect_collision_step(250, 0x80000000, 0);
         if (hit != 0 && (hit & 0xf)) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         if (obj->arg.s.unk44 >= 11 && obj->arg.s.unk44 % 6 == 0) {
             effect_construct_record(10, 0x42, 0x5e, &obj->pos, NULL, obj->arg.s.unk46);
         }
-        obj->unk14 = (obj->unk14 + 128) & 0xfff;
+        obj->animation_phase = (obj->animation_phase + 128) & 0xfff;
         obj->arg.s.unk44++;
         break;
     case 17:
@@ -964,7 +964,7 @@ void effect_update_dispatch(void)
             hit = effect_collision_step(250, 0x80000000, 0);
             if (hit != 0) {
                 if (hit & 0xf) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 effect_apply_current_magic_backstep(hit);
             }
@@ -974,7 +974,7 @@ void effect_update_dispatch(void)
                 v.vz = 0;
                 effect_construct_record(10, 0x42, 0x59, &obj->pos, &v);
             }
-            obj->unk14 = (obj->unk14 + 128) & 0xfff;
+            obj->animation_phase = (obj->animation_phase + 128) & 0xfff;
             obj->arg.s.unk44++;
             break;
     case 89:
@@ -995,7 +995,7 @@ void effect_update_dispatch(void)
             obj->scale.vx += 640;
             obj->scale.vz += 640;
             if (obj->scale.vx > 14000) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             if (obj->scale.vx >= 768) {
                 VECTOR p;
@@ -1017,32 +1017,33 @@ void effect_update_dispatch(void)
         }
         break;
     case 122:
-        if (effect_aim_and_move(600, 40, 36, 180, 360, 0x1000, 0x104, 0x800) != -1 && obj->unk10 >= 2) {
+        if (effect_aim_and_move(600, 40, 36, 180, 360, 0x1000, 0x104,
+                                0x800) != -1 && obj->updates_remaining >= 2) {
             effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
         }
         effect_collision_backtrack();
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 0);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 1);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 2);
         effect_play_spatial_sound(obj, 0x27);
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
         break;
     case 120:
-        if (effect_collision_step(180, 360, 0) == 0 && obj->unk10 >= 2) {
+        if (effect_collision_step(180, 360, 0) == 0 && obj->updates_remaining >= 2) {
             effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
             break;
         }
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 0);
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 1);
-        effect_construct_record(10, obj->unk0 | 3, 0x48, &obj->pos, NULL, 2);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 0);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 1);
+        effect_construct_record(10, obj->type | 3, 0x48, &obj->pos, NULL, 2);
         effect_play_spatial_sound(obj, 0x27);
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
         break;
     case 92:
     case 93:
         {
-            Object4c *link;
+            Effect *link;
             s32 d;
 
             obj->pos.vx += obj->vel.vx;
@@ -1056,7 +1057,7 @@ void effect_update_dispatch(void)
                 obj->pos.vy = map_world.collision_floor_height;
                 d = map_world.collision_floor_height - map_world.collision_height_limit;
                 obj->scale.vy = d > 0x7fff ? 0x4000 : d >> 1;
-                if (link->unk0 == OBJECT4C_FREE) {
+                if (link->type == EFFECT_FREE) {
                     obj->arg.c.unk44 = 1;
                     obj->arg.s.unk46 = 0;
                     obj->scale.pad = obj->scale.vy;
@@ -1066,7 +1067,7 @@ void effect_update_dispatch(void)
                 obj->scale.vy = fixed_lerp_q12(obj->scale.pad, 0, obj->arg.s.unk46);
                 obj->arg.s.unk46 += 512;
                 if (obj->arg.s.unk46 >= 0x1000) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 break;
             }
@@ -1087,12 +1088,12 @@ void effect_update_dispatch(void)
             obj->pos.vz += obj->vel.vz;
             if (collision_query_shapes_with_layer_sample(mid.vx, mid.vy, mid.vz, 5, 10) != 0 ||
                 collision_query_shapes_with_layer_sample(obj->pos.vx, obj->pos.vy, obj->pos.vz, 5, 10) != 0) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
-            if (obj->unk0 & 0x40) {
-                effect_construct_record(10, obj->unk0, 0x45, &obj->pos, NULL, 420);
+            if (obj->type & 0x40) {
+                effect_construct_record(10, obj->type, 0x45, &obj->pos, NULL, 420);
             } else {
-                effect_construct_record(obj->unk6, obj->unk0, 0x45, &obj->pos, NULL, 420);
+                effect_construct_record(obj->damage_multiplier_tenths, obj->type, 0x45, &obj->pos, NULL, 420);
             }
             break;
     case 124:
@@ -1111,7 +1112,7 @@ void effect_update_dispatch(void)
             if (n != -1) {
                 o = &actor_status.objects[n];
                 effect_play_spatial_sound(obj, 0x27);
-                effect_construct_record(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
+                effect_construct_record(10, obj->type, 0x44, &o->pos, NULL, 1260);
             } else {
                 collision_query_world(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
                 if (map_world.collision_hit_flags == 0x80) {
@@ -1120,7 +1121,8 @@ void effect_update_dispatch(void)
                     q = cur_avatar_status.pos;
                     q.vy -= 1700;
                     effect_play_spatial_sound(obj, 0x27);
-                    effect_construct_record(obj->unk6, obj->unk0, 0x44, &cur_avatar_status.pos, NULL, 1260);
+                    effect_construct_record(obj->damage_multiplier_tenths, obj->type, 0x44,
+                                            &cur_avatar_status.pos, NULL, 1260);
                 }
             }
             effect_spawn_at_lower_bound(&p, 0x2000, 0x7fff, 10000);
@@ -1132,13 +1134,13 @@ void effect_update_dispatch(void)
             break;
         }
         effect_apply_current_magic_backstep(hit);
-        obj->unk0 = OBJECT4C_FREE;
+        obj->type = EFFECT_FREE;
         break;
     case 31:
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             if (obj->arg.s.unk44 == 0) {
                 obj->arg.s.unk46 -= 10;
             } else {
@@ -1152,9 +1154,9 @@ void effect_update_dispatch(void)
                 obj->arg.s.unk44 = 0;
             }
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x84;
+            obj->type = 0x84;
             if (effect_collision_step(100, 200, 0) != 0) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1165,12 +1167,12 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 4, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x84;
+            obj->type = 0x84;
             if (effect_collision_step(100, 200, 0) != 0) {
                 effect_collision_backtrack();
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1181,12 +1183,12 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x84;
+            obj->type = 0x84;
             if (effect_collision_step(100, 200, 0) != 0) {
                 effect_collision_backtrack();
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1198,12 +1200,12 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x84;
+            obj->type = 0x84;
             if (effect_collision_step(100, 200, 0) != 0) {
                 effect_collision_backtrack();
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1216,12 +1218,12 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             if (effect_collision_step(100, 200, 0) != 0) {
                 effect_collision_backtrack();
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1232,12 +1234,12 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
 
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             effect_apply_radial_magic_damage(&obj->pos, 0, obj->scale.vx >> 3, 0x8000, 0x400, 0x1000);
-            obj->unk0 = 0x81;
+            obj->type = 0x81;
             if (effect_collision_step(100, 200, 0) != 0) {
                 effect_collision_backtrack();
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             v.vx = obj->vel.vx * 2 / 5;
             v.vy = obj->vel.vy * 2 / 5;
@@ -1252,10 +1254,10 @@ void effect_update_dispatch(void)
             SVECTOR v;
             s32 d;
 
-            if (obj->unk7 == 2) {
+            if (obj->phase == 2) {
                 obj->scale.vy = obj->scale.vx -= 128;
                 if (obj->scale.vx <= 0) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 break;
             }
@@ -1277,7 +1279,7 @@ void effect_update_dispatch(void)
                         goto burst;
                     }
                 }
-                obj->unk7 = 1;
+                obj->phase = 1;
             }
             if (phase == 1) {
                 obj->vel.vy -= 70;
@@ -1291,28 +1293,28 @@ void effect_update_dispatch(void)
                 d = at.vy - obj->pos.vy;
                 if (d >= 7000) {
                 burst:
-                    obj->unk7 = 2;
+                    obj->phase = 2;
                     at.vx = obj->pos.vx;
                     at.vz = obj->pos.vz;
                     switch (id) {
                     case 113:
-                        effect_construct_record(10, obj->unk0 | 3, 0x72, &at, &v, d);
-                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 1);
+                        effect_construct_record(10, obj->type | 3, 0x72, &at, &v, d);
+                        effect_construct_record(10, obj->type, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 1);
                         break;
                     case 125:
-                        effect_construct_record(10, obj->unk0 | 3, 0x7e, &at, &v, d);
-                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 3);
+                        effect_construct_record(10, obj->type | 3, 0x7e, &at, &v, d);
+                        effect_construct_record(10, obj->type, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 3);
                         break;
                     case 129:
-                        effect_construct_record(10, obj->unk0 | 3, 0x80, &at, &v, d);
-                        effect_construct_record(10, obj->unk0, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 0);
+                        effect_construct_record(10, obj->type | 3, 0x80, &at, &v, d);
+                        effect_construct_record(10, obj->type, 0x16, &at, &v, d >> 1, d >> 4, 0x800, 0);
                         break;
                     }
                     effect_play_spatial_sound(obj, 0x27);
                 }
             } else if (phase == 0) {
                 if (obj->arg.s.unk44-- <= 0) {
-                    obj->unk7 = 1;
+                    obj->phase = 1;
                 }
             }
             for (i = 3; i != -1; i--) {
@@ -1337,27 +1339,27 @@ void effect_update_dispatch(void)
                 r = SquareRoot12(SquareRoot12(r * (r * r >> 12))) >> 3;
                 switch (id) {
                 case 114:
-                    effect_construct_record(10, obj->unk0 | 3, 0x13, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->type | 3, 0x13, &obj->pos, &v, r);
                     break;
                 case 126:
-                    effect_construct_record(10, obj->unk0 | 3, 0x29, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->type | 3, 0x29, &obj->pos, &v, r);
                     break;
                 case 128:
-                    effect_construct_record(10, obj->unk0 | 3, 0x2d, &obj->pos, &v, r);
+                    effect_construct_record(10, obj->type | 3, 0x2d, &obj->pos, &v, r);
                     break;
                 }
             }
-            obj->unk4 = (phase & 1) - 128;
-            if (obj->unk7 < 9) {
+            obj->animation_id = (phase & 1) - 128;
+            if (obj->phase < 9) {
                 d = fixed_vector3_length(cur_avatar_status.pos.vx - obj->pos.vx,
                                          cur_avatar_status.pos.vy - obj->pos.vy,
                                          cur_avatar_status.pos.vz - obj->pos.vz);
                 if (d <= 32000) {
-                    d = ((rsin(obj->unk7 << 8) >> 1) + 1024) * (32000 - d) / 32000;
+                    d = ((rsin(obj->phase << 8) >> 1) + 1024) * (32000 - d) / 32000;
                     light_interpolate_color_and_fog(200, 180, 160, 0, 32000, d);
                 }
             }
-            obj->unk7++;
+            obj->phase++;
             break;
     case 19:
     case 41:
@@ -1376,7 +1378,7 @@ void effect_update_dispatch(void)
         hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             if (obj->arg.b.unk44 == 0) {
                 obj->arg.b.unk44 = 1;
@@ -1398,7 +1400,7 @@ void effect_update_dispatch(void)
             if (!(hit & 0xf)) {
                 effect_apply_current_magic_backstep(hit);
             }
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
         break;
@@ -1408,23 +1410,23 @@ void effect_update_dispatch(void)
         hit = effect_collision_step(180, 0, 0);
         if (hit != 0) {
             effect_apply_current_magic_backstep(hit);
-            obj->unk1 = 0x58;
-            obj->unk8 = 1;
-            obj->unk9 = 5;
-            obj->unk2 = 0x15;
-            obj->unk3 = 0x15;
-            obj->unkc = 0x34;
-            obj->unk12 = 0x1000;
-            obj->unk10 = 40;
-            obj->unk4 = 0;
+            obj->kind = 0x58;
+            obj->render_flags = 1;
+            obj->render_mode = 5;
+            obj->base_render_id = 0x15;
+            obj->render_id = 0x15;
+            obj->lighting_override_index = 0x34;
+            obj->lighting_blend = 0x1000;
+            obj->updates_remaining = 40;
+            obj->animation_id = 0;
             obj->scale.vx = 0;
             obj->scale.vy = 0;
             obj->scale.vz = 0;
-            obj->unke = 0x40;
+            obj->clut_offset = 0x40;
             break;
         }
         effect_spawn_at_lower_bound(&obj->pos, 0x2000, 0x2000, 500);
-        if ((obj->unk0 & 0x40) && obj->vel.vy < 800) {
+        if ((obj->type & 0x40) && obj->vel.vy < 800) {
             obj->vel.vy += 10;
         }
         break;
@@ -1440,7 +1442,7 @@ void effect_update_dispatch(void)
                 effect_construct_record(10, 0x81, 0x2e, &obj->pos, &obj->vel);
             }
             if (++obj->arg.s.unk46 >= 7) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             break;
         }
@@ -1449,7 +1451,7 @@ void effect_update_dispatch(void)
         hit = effect_collision_step(180, 0x80000000, 0);
         if (hit != 0) {
             if (hit & 0xf) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             } else {
                 effect_apply_current_magic_backstep(hit);
             }
@@ -1458,7 +1460,7 @@ void effect_update_dispatch(void)
         if (++obj->arg.s.unk44 >= 6) {
             obj->arg.s.unk44 = 0;
         }
-        obj->unke = obj->arg.s.unk44 << 6;
+        obj->clut_offset = obj->arg.s.unk44 << 6;
         break;
     case 90:
         obj->scale.vz += obj->arg.s.unk46;
@@ -1473,7 +1475,7 @@ void effect_update_dispatch(void)
                                              obj->scale.vx * 4 - 1, 2000, 0x1000, obj->arg.s.unk48);
         }
         if (obj->scale.vx > obj->arg.s.unk44) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         obj->angle.vy += 512;
         break;
@@ -1491,7 +1493,7 @@ void effect_update_dispatch(void)
                                              0x400, 0x1000);
         }
         if (obj->scale.vx > 3200) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         break;
     case 88:
@@ -1503,7 +1505,7 @@ void effect_update_dispatch(void)
     case 71:
         switch (phase) {
         case 101:
-            obj->unk7++;
+            obj->phase++;
             break;
         case 100:
             goto spawn18;
@@ -1512,29 +1514,29 @@ void effect_update_dispatch(void)
         case 110:
         shrink18:
             if (id == 18) {
-                obj->unke = 0;
+                obj->clut_offset = 0;
             }
             effect_scale_step(0x2000, 799, 70, 0xc00, 0x8000);
             obj->angle.vy += 64;
         break;
         default:
-            if (obj->unk7 == 0) {
+            if (obj->phase == 0) {
                 audio_play_spatial_range(0x2c, &obj->pos, 0x6e, 0x6d60, 0x7148, 0);
             }
-            obj->unk7++;
+            obj->phase++;
             if (effect_aim_and_move(obj->arg.s.unk44, obj->arg.s.unk46, obj->arg.s.unk48, 160, 0, 6000,
                                     obj->arg.s.unk4a, 0x800) == -1) {
-                Object4c *made;
+                Effect *made;
 
             spawn18:
-                made = effect_construct_record(10, obj->unk0 | 3, id, &obj->pos, NULL, &obj->angle);
-                made->unk7 = 101;
+                made = effect_construct_record(10, obj->type | 3, id, &obj->pos, NULL, &obj->angle);
+                made->phase = 101;
             become18:
-                obj->unk3 = 0x15;
-                obj->unk7 = 110;
+                obj->render_id = 0x15;
+                obj->phase = 110;
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
-                obj->unke = 0x40;
-                obj->unk0 |= 3;
+                obj->clut_offset = 0x40;
+                obj->type |= 3;
                 effect_play_spatial_sound(obj, 0x28);
                 goto shrink18;
             } else {
@@ -1585,7 +1587,7 @@ void effect_update_dispatch(void)
                     effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 7500, -750, 8, 22, 10, 1, 2);
                 }
                 effect_scatter_lower_bound(&obj->pos, 5, 0x400, 0x2000, 0x4000, 0x1000);
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
                 break;
             }
         fall2:
@@ -1594,7 +1596,7 @@ void effect_update_dispatch(void)
                 goto boom2;
             }
         trail2:
-            if (obj->unk10 < 74) {
+            if (obj->updates_remaining < 74) {
                 v.vx = (rand() * 60 >> 15) - 30;
                 v.vy = (rand() * 60 >> 15) - 30;
                 v.vz = (rand() * 60 >> 15) - 30;
@@ -1639,7 +1641,7 @@ void effect_update_dispatch(void)
                 obj->scale.vz -= 560;
                 obj->angle.vy += 500;
                 if (obj->scale.vy < 100) {
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 break;
             }
@@ -1675,7 +1677,7 @@ void effect_update_dispatch(void)
             obj->scale.vz -= 128;
             obj->angle.vy += 200;
             if (obj->scale.vy < 120) {
-                obj->unk0 = OBJECT4C_FREE;
+                obj->type = EFFECT_FREE;
             }
             break;
         }
@@ -1683,20 +1685,20 @@ void effect_update_dispatch(void)
     case 4:
         switch (phase) {
         case 0:
-            if (effect_collision_step(250, 0x80000000, 0) != 0 || obj->unk10 < 2) {
-                Object4c *made;
+            if (effect_collision_step(250, 0x80000000, 0) != 0 || obj->updates_remaining < 2) {
+                Effect *made;
 
                 effect_scatter_lower_bound(&obj->pos, 8, 400, 0x2000, 0x8000, 0x400);
-                made = effect_construct_record(10, obj->unk0 | 3, 4, &obj->pos, NULL, &obj->angle);
-                made->unk7 = 2;
+                made = effect_construct_record(10, obj->type | 3, 4, &obj->pos, NULL, &obj->angle);
+                made->phase = 2;
                 effect_play_spatial_sound(obj, 0x27);
             case 5:
-                obj->unk7 = 1;
-                obj->unk3 = 0x15;
-                obj->unkc = 0x34;
+                obj->phase = 1;
+                obj->render_id = 0x15;
+                obj->lighting_override_index = 0x34;
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
-                obj->unk10 = -1;
-                obj->unk0 |= 3;
+                obj->updates_remaining = -1;
+                obj->type |= 3;
                 goto shrink4;
             } else {
                 SVECTOR dir;
@@ -1705,7 +1707,7 @@ void effect_update_dispatch(void)
                 Actor *o;
                 s32 dist;
 
-                obj->unk14 = (obj->unk14 + 128) & 0xfff;
+                obj->animation_phase = (obj->animation_phase + 128) & 0xfff;
                 if (obj->arg.b.unk45 != 0) {
                     effect_sample_world_vertex(obj, 0, &a, &obj->scale);
                     o = &actor_status.objects[obj->arg.b.unk44];
@@ -1713,7 +1715,7 @@ void effect_update_dispatch(void)
                     t.vy = o->pos.vy - (o->collision_height >> 1);
                     t.vz = o->pos.vz;
                     vector_direction_scaled(&a, &t, 800, &dir);
-                    effect_construct_record(10, obj->unk0, 0, &a, &dir);
+                    effect_construct_record(10, obj->type, 0, &a, &dir);
                     obj->arg.b.unk45--;
                 } else if (rand() < 2048) {
                     o = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 25000, 800, 800,
@@ -1737,67 +1739,67 @@ void effect_update_dispatch(void)
             obj->angle.vy += 64;
             break;
         default:
-            obj->unk7++;
+            obj->phase++;
             break;
         }
         break;
     case 16:
         {
             Actor *o;
-            Object4cTrail *trail;
+            EffectTrailRow *trail;
             s32 a;
             VECTOR tmp;
 
             switch (phase) {
             case 0:
                 {
-                    Object4c *made;
+                    Effect *made;
 
                     for (i = 0; i < 8; i++) {
                         made = effect_construct_record(10, 0, 0x74, &obj->pos, &obj->vel, &obj->angle, i);
                         if (i == 0) {
-                            made->unk3 = 0x10;
+                            made->render_id = 0x10;
                         }
-                        made->arg.b.unk44 = effect_status.unk2f08;
+                        made->arg.b.unk44 = effect_status.current_index;
                         made->arg.b.unk45 = i;
                     }
-                    made->unk3 = 0x12;
-                    obj->unk7 = 1;
+                    made->render_id = 0x12;
+                    obj->phase = 1;
                 }
             case 1:
-                if (obj->unk10 < 3) {
+                if (obj->updates_remaining < 3) {
                 fail16:
-                    obj->unk7 = 3;
-                    obj->unk10 = -1;
-                    obj->arg.b.unk49 = 24;
+                    obj->phase = 3;
+                    obj->updates_remaining = -1;
+                    obj->arg.b.trail_phase_counter = 24;
                     break;
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
-                    obj->unk10 = -1;
+                    obj->updates_remaining = -1;
                     if (map_world.collision_hit_flags != 0x10) {
                         goto fail16;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = map_world.collision_actor_index;
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    obj->arg.b.trail_actor_index = map_world.collision_actor_index;
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     if (o->target_type != 2 && o->target_type != 3) {
                         goto fail16;
                     }
-                    obj->unk8 = 1;
-                    obj->unk3 = 0x13;
-                    obj->unk7 = 2;
-                    obj->arg.b.unk49 = 0;
+                    obj->render_flags = 1;
+                    obj->render_id = 0x13;
+                    obj->phase = 2;
+                    obj->arg.b.trail_phase_counter = 0;
                     obj->angle.vz = 0;
                     obj->angle.vx = 0;
                     obj->angle.pad = -vector_xz_to_angle(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
                     goto case16_2;
                 } else {
-                    if (++obj->arg.b.unk48 >= 24) {
-                        obj->arg.b.unk48 = 0;
+                    if (++obj->arg.b.trail_frame_index >= 24) {
+                        obj->arg.b.trail_frame_index = 0;
                     }
-                    trail = &obj->arg.w.unk44[obj->arg.b.unk48];
-                    a = obj->arg.b.unk49 << 4;
-                    obj->arg.b.unk49 += 8;
+                    trail = &obj->arg.w.trail_rows[obj->arg.b.trail_frame_index];
+                    a = obj->arg.b.trail_phase_counter << 4;
+                    obj->arg.b.trail_phase_counter += 8;
                     trail->pos.vx = obj->pos.vx;
                     trail->pos.vz = obj->pos.vz;
                     trail->pos.vy = (rsin(a) >> 3) + obj->pos.vy;
@@ -1813,29 +1815,30 @@ void effect_update_dispatch(void)
                     s32 d;
                     u32 k;
 
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     o->flags |= 0x800;
                     n = o->collision_radius;
-                    if (++obj->arg.b.unk48 >= 24) {
-                        obj->arg.b.unk48 = 0;
+                    if (++obj->arg.b.trail_frame_index >= 24) {
+                        obj->arg.b.trail_frame_index = 0;
                     }
                     obj->pos = *actor_resolve_group_position(o, &tmp);
                     obj->pos.vy -= o->collision_height >> 1;
-                    k = obj->arg.b.unk49;
+                    k = obj->arg.b.trail_phase_counter;
                     if (k >= 17) {
                         if (k >= 60) {
-                            obj->unk7 = 4;
+                            obj->phase = 4;
                             break;
                         }
                     } else {
                         obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
-                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height, obj->arg.b.unk49 * 350);
+                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height,
+                                                       obj->arg.b.trail_phase_counter * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;
                     a = obj->angle.pad;
-                    obj->arg.b.unk49++;
-                    trail = &obj->arg.w.unk44[obj->arg.b.unk48];
+                    obj->arg.b.trail_phase_counter++;
+                    trail = &obj->arg.w.trail_rows[obj->arg.b.trail_frame_index];
                     obj->angle.pad = a + d;
                     trail->pos.vx = (rsin(a) * n >> 12) + obj->pos.vx;
                     trail->pos.vz = (rcos(a) * n >> 12) + obj->pos.vz;
@@ -1846,13 +1849,13 @@ void effect_update_dispatch(void)
                 }
                 break;
             case 3:
-                if (++obj->arg.b.unk48 >= 24) {
-                    obj->arg.b.unk48 = 0;
+                if (++obj->arg.b.trail_frame_index >= 24) {
+                    obj->arg.b.trail_frame_index = 0;
                 }
-                if (obj->arg.b.unk49 == 0) {
+                if (obj->arg.b.trail_phase_counter == 0) {
                     goto release16;
                 }
-                obj->arg.b.unk49--;
+                obj->arg.b.trail_phase_counter--;
                 break;
             case 4:
                 {
@@ -1868,9 +1871,9 @@ void effect_update_dispatch(void)
                         effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 1500, -128, 9, 0x30, 0, 1, 0);
                     }
                 release16:
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     o->flags &= ~0x800;
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 break;
             }
@@ -1878,7 +1881,7 @@ void effect_update_dispatch(void)
     case 5:
         {
             Actor *o;
-            Object4cTrail *trail;
+            EffectTrailRow *trail;
             s32 a;
             SVECTOR v;
             VECTOR tmp;
@@ -1886,42 +1889,42 @@ void effect_update_dispatch(void)
             switch (phase) {
             case 0:
                 {
-                    Object4c *made;
+                    Effect *made;
 
                     for (i = 0; i < 8; i++) {
                         made = effect_construct_record(10, 0, 0x67, &obj->pos, &obj->vel, &obj->angle, i);
                         if (i == 0) {
-                            made->unk3 = 0x10;
+                            made->render_id = 0x10;
                         }
-                        made->arg.b.unk44 = effect_status.unk2f08;
+                        made->arg.b.unk44 = effect_status.current_index;
                         made->arg.b.unk45 = i;
                     }
-                    made->unk3 = 0x12;
-                    obj->unk7 = 1;
+                    made->render_id = 0x12;
+                    obj->phase = 1;
                 }
             case 1:
-                if (obj->unk10 < 3) {
+                if (obj->updates_remaining < 3) {
                 fail5:
-                    obj->unk7 = 3;
-                    obj->unk10 = -1;
-                    obj->arg.b.unk49 = 24;
+                    obj->phase = 3;
+                    obj->updates_remaining = -1;
+                    obj->arg.b.trail_phase_counter = 24;
                     break;
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
-                    obj->unk10 = -1;
+                    obj->updates_remaining = -1;
                     if (map_world.collision_hit_flags != 0x10) {
                         goto fail5;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = map_world.collision_actor_index;
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    obj->arg.b.trail_actor_index = map_world.collision_actor_index;
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     if (o->target_type != 2 && o->target_type != 3) {
                         goto fail5;
                     }
-                    obj->unk8 = 1;
-                    obj->unk3 = 0x13;
-                    obj->unk7 = 2;
-                    obj->arg.b.unk49 = 0;
+                    obj->render_flags = 1;
+                    obj->render_id = 0x13;
+                    obj->phase = 2;
+                    obj->arg.b.trail_phase_counter = 0;
                     obj->angle.vz = 0;
                     obj->angle.vx = 0;
                     obj->angle.pad = -vector_xz_to_angle(obj->pos.vx - o->pos.vx, obj->pos.vz - o->pos.vz);
@@ -1930,12 +1933,12 @@ void effect_update_dispatch(void)
                     }
                     goto case5_2;
                 } else {
-                    if (++obj->arg.b.unk48 >= 24) {
-                        obj->arg.b.unk48 = 0;
+                    if (++obj->arg.b.trail_frame_index >= 24) {
+                        obj->arg.b.trail_frame_index = 0;
                     }
-                    trail = &obj->arg.w.unk44[obj->arg.b.unk48];
-                    a = obj->arg.b.unk49 << 4;
-                    obj->arg.b.unk49 += 8;
+                    trail = &obj->arg.w.trail_rows[obj->arg.b.trail_frame_index];
+                    a = obj->arg.b.trail_phase_counter << 4;
+                    obj->arg.b.trail_phase_counter += 8;
                     trail->pos.vx = obj->pos.vx;
                     trail->pos.vz = obj->pos.vz;
                     trail->pos.vy = (rsin(a) >> 3) + obj->pos.vy;
@@ -1951,33 +1954,34 @@ void effect_update_dispatch(void)
                     s32 d;
                     u32 k;
 
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     o->flags |= 0x800;
                     v.vx = rand() * 100 / 32767 - 50;
                     v.vy = -(rand() * 160 / 32767) - 200;
                     v.vz = rand() * 100 / 32767 - 50;
                     effect_construct_record(10, 0, 0x6f, &o->pos, &v, 0x1000, 0x200, 6, 0x1c, 2, 1, 2);
                     n = o->collision_radius;
-                    if (++obj->arg.b.unk48 >= 24) {
-                        obj->arg.b.unk48 = 0;
+                    if (++obj->arg.b.trail_frame_index >= 24) {
+                        obj->arg.b.trail_frame_index = 0;
                     }
                     obj->pos = *actor_resolve_group_position(o, &tmp);
                     obj->pos.vy -= o->collision_height >> 1;
-                    k = obj->arg.b.unk49;
+                    k = obj->arg.b.trail_phase_counter;
                     if (k >= 17) {
                         if (k >= 60) {
-                            obj->unk7 = 4;
+                            obj->phase = 4;
                             break;
                         }
                     } else {
                         obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
-                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height, obj->arg.b.unk49 * 350);
+                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height,
+                                                       obj->arg.b.trail_phase_counter * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;
                     a = obj->angle.pad;
-                    obj->arg.b.unk49++;
-                    trail = &obj->arg.w.unk44[obj->arg.b.unk48];
+                    obj->arg.b.trail_phase_counter++;
+                    trail = &obj->arg.w.trail_rows[obj->arg.b.trail_frame_index];
                     obj->angle.pad = a + d;
                     trail->pos.vx = (rsin(a) * n >> 12) + obj->pos.vx;
                     trail->pos.vz = (rcos(a) * n >> 12) + obj->pos.vz;
@@ -1988,13 +1992,13 @@ void effect_update_dispatch(void)
                 }
                 break;
             case 3:
-                if (++obj->arg.b.unk48 >= 24) {
-                    obj->arg.b.unk48 = 0;
+                if (++obj->arg.b.trail_frame_index >= 24) {
+                    obj->arg.b.trail_frame_index = 0;
                 }
-                if (obj->arg.b.unk49 == 0) {
+                if (obj->arg.b.trail_phase_counter == 0) {
                     goto release5;
                 }
-                obj->arg.b.unk49--;
+                obj->arg.b.trail_phase_counter--;
                 break;
             case 4:
                 {
@@ -2005,63 +2009,63 @@ void effect_update_dispatch(void)
                         effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 5, 0x1c, 10, 1, 1);
                     }
                 release5:
-                    o = &actor_status.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.trail_actor_index];
                     o->flags &= ~0x800;
-                    obj->unk0 = OBJECT4C_FREE;
+                    obj->type = EFFECT_FREE;
                 }
                 break;
             }
             break;
     case 116:
         {
-            Object4c *link;
-            Object4cTrail *t;
+            Effect *link;
+            EffectTrailRow *t;
             s32 k;
 
             link = &effect_status.objects[obj->arg.b.unk44];
-            if (phase == 0 && link->unk7 >= 3) {
-                obj->unk7 = 1;
-                obj->unk10 = obj->arg.b.unk45 * 3;
+            if (phase == 0 && link->phase >= 3) {
+                obj->phase = 1;
+                obj->updates_remaining = obj->arg.b.unk45 * 3;
             }
-            if (link->unk7 == 4) {
-                obj->unk0 = OBJECT4C_FREE;
+            if (link->phase == 4) {
+                obj->type = EFFECT_FREE;
                 break;
             }
-            k = link->arg.b.unk48 - obj->arg.b.unk45 * 3;
+            k = link->arg.b.trail_frame_index - obj->arg.b.unk45 * 3;
             if (k < 0) {
                 k += 24;
             }
-            t = &link->arg.w.unk44[k];
+            t = &link->arg.w.trail_rows[k];
             obj->pos = t->pos;
             obj->angle = t->angle;
             break;
     case 103:
         {
-            Object4c *link;
-            Object4cTrail *t;
+            Effect *link;
+            EffectTrailRow *t;
             SVECTOR v;
             s32 k;
 
             link = &effect_status.objects[obj->arg.b.unk44];
-            if (obj->unk10 < 188) {
+            if (obj->updates_remaining < 188) {
                 v.vx = (rand() * 100 >> 15) - 50;
                 v.vz = (rand() * 100 >> 15) - 50;
                 v.vy = -120;
                 effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, -256, 4, 0x16, 0, 2, 5);
             }
-            if (phase == 0 && link->unk7 >= 3) {
-                obj->unk7 = 1;
-                obj->unk10 = obj->arg.b.unk45 * 3;
+            if (phase == 0 && link->phase >= 3) {
+                obj->phase = 1;
+                obj->updates_remaining = obj->arg.b.unk45 * 3;
             }
-            if (link->unk7 == 4) {
-                obj->unk0 = OBJECT4C_FREE;
+            if (link->phase == 4) {
+                obj->type = EFFECT_FREE;
                 break;
             }
-            k = link->arg.b.unk48 - obj->arg.b.unk45 * 3;
+            k = link->arg.b.trail_frame_index - obj->arg.b.unk45 * 3;
             if (k < 0) {
                 k += 24;
             }
-            t = &link->arg.w.unk44[k];
+            t = &link->arg.w.trail_rows[k];
             obj->pos = t->pos;
             obj->angle = t->angle;
             break;
@@ -2077,15 +2081,15 @@ void effect_update_dispatch(void)
         {
             VECTOR p;
 
-            if (obj->unk10 >= 10) {
+            if (obj->updates_remaining >= 10) {
                 obj->pos.vx += obj->vel.vx;
                 obj->pos.vz += obj->vel.vz;
-                obj->unk4 = (obj->unk10 & 1) - 128;
+                obj->animation_id = (obj->updates_remaining & 1) - 128;
             } else {
                 obj->pos.vx -= obj->vel.vx;
                 obj->pos.vz -= obj->vel.vz;
                 obj->scale.vy += 512;
-                obj->unk4 = (obj->unk10 & 1) - 128;
+                obj->animation_id = (obj->updates_remaining & 1) - 128;
             }
             p.vx = obj->vel.vx + obj->pos.vx;
             p.vy = obj->vel.vy + obj->pos.vy;
@@ -2093,46 +2097,46 @@ void effect_update_dispatch(void)
             effect_apply_radial_magic_damage(&p, 0, obj->scale.vx, 0x8000, 0x400, 0x1000);
             break;
     case 112:
-        obj->unk7++;
-        obj->scale.vy = rsin(obj->unk7 << 8) * obj->arg.s.unk44 >> 12;
-        if (obj->unk7 >= 8) {
-            obj->unk0 = OBJECT4C_FREE;
+        obj->phase++;
+        obj->scale.vy = rsin(obj->phase << 8) * obj->arg.s.unk44 >> 12;
+        if (obj->phase >= 8) {
+            obj->type = EFFECT_FREE;
         }
         break;
     case 26:
         if (cur_avatar_status.unk86 == 0) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         obj->angle.vy += 64;
         break;
     case 27:
         if (cur_avatar_status.unk88 == 0) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         obj->angle.vy -= 256;
         break;
     case 28:
         if (cur_avatar_status.unk8a == 0) {
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
         }
         obj->angle.vy -= 64;
         break;
     case 23:
-        if (obj->unk10 == 4) {
+        if (obj->updates_remaining == 4) {
             cur_avatar_status.hp += 80;
             if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
                 cur_avatar_status.hp = cur_avatar_status.hp_max;
             }
         }
-        light_interpolate_color_and_fog(230, 200, 160, 0, 23000, rsin(obj->unk10 << 8));
+        light_interpolate_color_and_fog(230, 200, 160, 0, 23000, rsin(obj->updates_remaining << 8));
         break;
     case 25:
         {
             VECTOR p;
             SVECTOR v;
-            Object4c *made;
+            Effect *made;
 
-            if (obj->unk10 == 12) {
+            if (obj->updates_remaining == 12) {
                 cur_avatar_status.unk78 = 0;
             }
             p.vx = (rand() >> 5) - 512;
@@ -2142,17 +2146,17 @@ void effect_update_dispatch(void)
             v.vx = 0;
             v.vy = 0;
             made = effect_construct_record(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 2);
-            made->unka = 1;
-            made->unk8 = 14;
-            light_interpolate_color_and_fog(160, 180, 220, 0, 18000, rsin(obj->unk10 << 7));
+            made->layer_mask = 1;
+            made->render_flags = 14;
+            light_interpolate_color_and_fog(160, 180, 220, 0, 18000, rsin(obj->updates_remaining << 7));
             break;
     case 30:
         {
             VECTOR p;
             SVECTOR v;
-            Object4c *made;
+            Effect *made;
 
-            if (obj->unk10 == 12) {
+            if (obj->updates_remaining == 12) {
                 cur_avatar_status.hp += 200;
                 if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
                     cur_avatar_status.hp = cur_avatar_status.hp_max;
@@ -2167,10 +2171,10 @@ void effect_update_dispatch(void)
                 p.vy = (rand() >> 8) + 200;
                 p.vz = 0x400;
                 made = effect_construct_record(10, 0, 0x6f, &p, &v, 700, -30, 10, 0x26, -10, 1, 1);
-                made->unka = 1;
-                made->unk8 = 14;
+                made->layer_mask = 1;
+                made->render_flags = 14;
             }
-            light_interpolate_color_and_fog(240, 240, 160, 0, 18000, rsin(obj->unk10 << 7));
+            light_interpolate_color_and_fog(240, 240, 160, 0, 18000, rsin(obj->updates_remaining << 7));
             break;
     case 8:
         effect_play_spatial_sound(obj, 0x23);
@@ -2188,7 +2192,7 @@ void effect_update_dispatch(void)
             obj->angle.vy += 256;
             hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, 10, 0xb0);
             if (hit == 0) {
-                collision_probe_floor_height(obj->pos.vx, obj->arg.w.unk48, obj->pos.vz, 0, 0);
+                collision_probe_floor_height(obj->pos.vx, obj->arg.w.origin_y, obj->pos.vz, 0, 0);
                 if (obj->pos.vy < map_world.collision_floor_height) {
                     goto fly95;
                 }
@@ -2199,7 +2203,7 @@ void effect_update_dispatch(void)
             v.vy = -32;
             v.vz = 0;
             effect_apply_current_magic_backstep(hit);
-            effect_construct_record(10, obj->unk0, 0x5a, &p, &v, 1600, 100, 0x800);
+            effect_construct_record(10, obj->type, 0x5a, &p, &v, 1600, 100, 0x800);
             for (i = 3; i != -1; i--) {
                 v.vx = 0;
                 v.vy = -360;
@@ -2209,7 +2213,7 @@ void effect_update_dispatch(void)
                 p.vz += (rand() * 1000 >> 15) - 500;
                 effect_construct_record(10, 0, 0x6f, &p, &v, 0x4000, -128, 5, 0x1d, 0, 1, 2);
             }
-            obj->unk0 = OBJECT4C_FREE;
+            obj->type = EFFECT_FREE;
             break;
         fly95:
             for (i = 5; i != -1; i--) {

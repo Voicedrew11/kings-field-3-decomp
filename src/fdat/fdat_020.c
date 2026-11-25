@@ -280,12 +280,12 @@ void area_talk_event_give_items_and_grant_magic(Actor *record, s32 event)
         color_overlay_transition(0x200, 0x80, 0xc8, 0x80, 0, 0, 0);
         set_accumulated_color_overlay(0, 0, 0, 0, 1);
         cur_evt_state.unk2b = 1;
-        effect_status.unk0[56].menu_available = 1;
-        effect_status.unk0[58].menu_available = 1;
-        effect_status.unk0[60].menu_available = 1;
-        effect_status.unk0[62].menu_available = 1;
-        effect_status.unk0[64].menu_available = 1;
-        effect_status.unk0[76].menu_available = 1;
+        effect_status.magic_records[56].menu_available = 1;
+        effect_status.magic_records[58].menu_available = 1;
+        effect_status.magic_records[60].menu_available = 1;
+        effect_status.magic_records[62].menu_available = 1;
+        effect_status.magic_records[64].menu_available = 1;
+        effect_status.magic_records[76].menu_available = 1;
         break;
     case 5:
         event_map_object_interact(NULL, 10);

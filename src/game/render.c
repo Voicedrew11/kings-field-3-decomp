@@ -1476,7 +1476,7 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
  * Draws the objects in view once a frame and keeps their files loaded: the
  * Actor records (models from 128, sound banks from 51), the MapObject
  * records (models from 256 and the area bank, sound banks from 147; kind
- * 0x1f plays its sound by the player's distance), the Object4c records and
+ * 0x1f plays its sound by the player's distance), the Effect records and
  * the placed effects. The passes flag the model ids and sound banks in use
  * and resource_tmd_update_range/resource_vab_update_range load the missing ones and release the rest.
  */
@@ -1491,7 +1491,7 @@ void render_scene_and_update_resources(void)
     ActorGroup *def;
     MapObject *rec;
     MapObjectDef *rec_def;
-    Object4c *obj4c;
+    Effect *effect;
     MapPlacedEntry *placed;
     VECTOR *at;
     s32 i;
@@ -1738,41 +1738,46 @@ void render_scene_and_update_resources(void)
                                0x1fff - rec->arg.v.depth_code);
         rec->flags |= 0x80;
     }
-    obj4c = effect_status.objects;
-    for (i = 127; i != -1; i--, obj4c++) {
-        if (obj4c->unk0 == 0xff) {
+    effect = effect_status.objects;
+    for (i = 127; i != -1; i--, effect++) {
+        if (effect->type == 0xff) {
             continue;
         }
-        if ((obj4c->unk8 & 3) == 0) {
+        if ((effect->render_flags & 3) == 0) {
             continue;
         }
-        if ((obj4c->unk8 & 3) != 2 && !(map_cell_layer_mask(&obj4c->pos) & obj4c->unka)) {
+        if ((effect->render_flags & 3) != 2 && !(map_cell_layer_mask(&effect->pos) & effect->layer_mask)) {
             continue;
         }
-        scratch->draw.count.clut = obj4c->unke;
-        switch (obj4c->unk8 & 0xc) {
+        scratch->draw.count.clut = effect->clut_offset;
+        switch (effect->render_flags & 0xc) {
         case 0:
-            scratch->u.load.angle.vx = obj4c->angle.vx;
-            scratch->u.load.angle.vy = obj4c->angle.vy + 2048;
-            scratch->u.load.angle.vz = obj4c->angle.vz;
-            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &scratch->u.load.angle,
-                               &obj4c->scale, &obj4c->unk40, &scene_display_sys.unk159f8, obj4c->unk4,
-                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            scratch->u.load.angle.vx = effect->angle.vx;
+            scratch->u.load.angle.vy = effect->angle.vy + 2048;
+            scratch->u.load.angle.vz = effect->angle.vz;
+            render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos,
+                               &scratch->u.load.angle, &effect->scale, &effect->animation_cache,
+                               &scene_display_sys.unk159f8, effect->animation_id, effect->animation_phase,
+                               effect->lighting_override_index, effect->lighting_blend, effect->render_mode,
+                               -60);
             break;
         case 4:
-            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                               &obj4c->scale, &obj4c->unk40, &render_world_identity_matrix, obj4c->unk4,
-                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos, &effect->angle,
+                               &effect->scale, &effect->animation_cache, &render_world_identity_matrix,
+                               effect->animation_id, effect->animation_phase, effect->lighting_override_index,
+                               effect->lighting_blend, effect->render_mode, -60);
             break;
         case 8:
-            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                               &obj4c->scale, &obj4c->unk40, &scene_display_sys.unk15ab8, obj4c->unk4,
-                               obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
+            render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos, &effect->angle,
+                               &effect->scale, &effect->animation_cache, &scene_display_sys.unk15ab8,
+                               effect->animation_id, effect->animation_phase, effect->lighting_override_index,
+                               effect->lighting_blend, effect->render_mode, -60);
             break;
         case 0xc:
-            render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                               &obj4c->scale, &obj4c->unk40, NULL, obj4c->unk4, obj4c->unk14,
-                               obj4c->unkc, obj4c->unk12, obj4c->unk9, 20);
+            render_world_model(effect->layer_mask, effect->render_id + 40, &effect->pos, &effect->angle,
+                               &effect->scale, &effect->animation_cache, NULL, effect->animation_id,
+                               effect->animation_phase, effect->lighting_override_index,
+                               effect->lighting_blend, effect->render_mode, 20);
             break;
         }
     }

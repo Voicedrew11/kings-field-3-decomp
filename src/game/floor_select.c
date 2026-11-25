@@ -50,7 +50,7 @@ void player_update_frame(void)
     s32 cz;
     u8 c;
     s32 part;
-    Object4c *o4c;
+    Effect *o4c;
 
     actor_status.actor_overlap_exclusion_flags = 4;
     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
@@ -314,7 +314,7 @@ void player_update_frame(void)
             } else {
                 o4c = effect_status.objects;
                 for (i = 128; i != 0; i--) {
-                    o4c->unk0 = 0xff;
+                    o4c->type = 0xff;
                     o4c++;
                 }
                 part = 0xff;

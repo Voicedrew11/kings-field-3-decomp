@@ -32,7 +32,7 @@ void player_select_magic_action(s32 id)
     if (id == 0xff) {
         return;
     }
-    r = &effect_status.unk0[id];
+    r = &effect_status.magic_records[id];
     cost = r->mp_cost;
     if (cur_avatar_status.unkf0 == 0x26) {
         cost <<= 1;

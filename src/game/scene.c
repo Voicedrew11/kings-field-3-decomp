@@ -132,7 +132,7 @@ void resource_run_initial_transition(void)
 ADDRESS(0x80017aa4, 0x1d4)
 void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
 {
-    Object4c *a;
+    Effect *a;
     MapObject *b;
     Actor *c;
     MapPlacedEntry *d;
@@ -147,7 +147,7 @@ void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
     a = effect_status.objects;
     i = 128;
     while (i--) {
-        if (a->unk0 != 0xff && (a->unk8 & 0xc) != 0xc) {
+        if (a->type != 0xff && (a->render_flags & 0xc) != 0xc) {
             a->pos.vx += dx;
             a->pos.vz += dz;
             a->pos.vy += dy;

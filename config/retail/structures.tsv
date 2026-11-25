@@ -21,9 +21,17 @@ Data801983a8	0xda0	supported	asm;conversation_records_initialize relates the thr
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (translate_active_world_positions/cd_vsync_handler), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
 Data801b24e4Mode	0x10	supported	asm;player_begin_moving_damage_reaction/player_begin_movie_approach/player_begin_actor_overlap_bob views of +0x188	WIP (game-j)
-Data801b77ec	0x2f0c	supported	asm;game loop word-count clear;player_learn_element_magic/player_initialize_state 24-byte records at +0;translate_active_world_positions records at +0x900	WIP (game-c, game-d)
 Data801ba984	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
 Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+Effect	0x4c	supported	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
+EffectArg	0x8	supported	asm;effect_construct_record stores Effect+0x44..+0x4b as bytes, halfwords and words by id	WIP (game-sw)
+EffectBytes	0x8	supported	asm;effect_construct_record sb to Effect+0x44/+0x45/+0x48/+0x49 by id	WIP (game-sw)
+EffectHalves	0x8	supported	asm;effect_construct_record sh to Effect+0x44/+0x46/+0x48/+0x4a by id; player_update_weapon_attack/actor_dispatch_group_effect sh +0x44	WIP (game-sw)
+EffectSBytes	0x8	supported	asm;effect_update_dispatch lb of Effect+0x44/+0x45 (ids 72, 92/93)	WIP (game-568bc)
+EffectSHalves	0x8	supported	asm;effect_update_dispatch lh of Effect+0x44/+0x46/+0x48/+0x4a by id	WIP (game-568bc)
+EffectState	0x2f0c	supported	asm;game loop word-count clear;player_learn_element_magic/player_initialize_state 24-byte records at +0;translate_active_world_positions records at +0x900	WIP (game-c, game-d)
+EffectTrailRow	0x18	supported	asm;effect_construct_record copies pos (16 bytes) and angle (8 bytes) into 24-byte records of effect_trails_table	WIP (game-sw)
+EffectWords	0x8	supported	asm;effect_construct_record sw trail pointer to Effect+0x44 (ids 5, 16) and pos.vy to +0x48 (id 95)	WIP (game-sw)
 EquipmentRecord	0x20	supported	asm;player_add_equipment_bonuses/player_set_equipment_slot 32-byte stride at map_world+0x11c14	WIP (game-d)
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
@@ -62,14 +70,6 @@ ModelData	0x28	supported	asm;animation_prepare_asset_vertices, animation_sample_
 ModelFile	0x14	supported	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;render_enqueue_textured_tmd/render_enqueue_tmd_fixed_depth 28-byte parts at model data + 12: +0x04 vertex count (menu_render_item_model), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
 MovieRec	0x34	supported	asm;movie_update_state 52-byte stride from movie_state (unk380 = &movies[id]); movie_play_stream file byte; strNext last frame;player_update_frame modes 7/8/9 fields +0x4..+0x2c	WIP (game-top)
-Object4c	0x4c	supported	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
-Object4cArg	0x8	supported	asm;effect_construct_record stores Object4c+0x44..+0x4b as bytes, halfwords and words by id	WIP (game-sw)
-Object4cBytes	0x8	supported	asm;effect_construct_record sb to Object4c+0x44/+0x45/+0x48/+0x49 by id	WIP (game-sw)
-Object4cChars	0x8	supported	asm;effect_update_dispatch lb of Object4c+0x44/+0x45 (ids 72, 92/93)	WIP (game-568bc)
-Object4cHalves	0x8	supported	asm;effect_construct_record sh to Object4c+0x44/+0x46/+0x48/+0x4a by id; player_update_weapon_attack/actor_dispatch_group_effect sh +0x44	WIP (game-sw)
-Object4cShorts	0x8	supported	asm;effect_update_dispatch lh of Object4c+0x44/+0x46/+0x48/+0x4a by id	WIP (game-568bc)
-Object4cTrail	0x18	supported	asm;effect_construct_record copies pos (16 bytes) and angle (8 bytes) into 24-byte records of effect_trails_table	WIP (game-sw)
-Object4cWords	0x8	supported	asm;effect_construct_record sw trail pointer to Object4c+0x44 (ids 5, 16) and pos.vy to +0x48 (id 95)	WIP (game-sw)
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
 PrimTag	0x4	supported	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code)	WIP (game-gte)
 Record04	0x4	supported	asm;conversation_records_initialize 4-byte stride at conversation_records	WIP (game-i)

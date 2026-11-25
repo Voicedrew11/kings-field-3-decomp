@@ -102,7 +102,7 @@ typedef struct Data801b24e4 {
     struct WeaponRecord *unkb0; /* +0xb0: &weapon_table[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
-    struct Object4c *unkbc; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
+    struct Effect *unkbc; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
     s16 unkc0;      /* +0xc0: -1 blocks the Actor script records of ids 19 and 20 */
     s16 unkc2;      /* +0xc2: swing time of the next hit (player_update_weapon_attack) */
     s16 unkc4;      /* +0xc4: swing time of the next swing sound */
@@ -279,7 +279,7 @@ typedef struct MapWorld {
     s32 collision_height_limit; /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
                      * player_move_horizontal lets the player through when it is 1700 above unk12010 */
     s32 collision_bounds[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
-                      * floor the Object4c spawns of effect_spawn_at_lower_bound must reach */
+                      * floor the Effect spawns of effect_spawn_at_lower_bound must reach */
     u32 collision_hit_flags; /* +0x12024: hit bits of the last collision_query_world test */
     s32 collision_actor_index; /* +0x12028: Actor index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
     s32 collision_object_index; /* +0x1202c: MapObject index it hit, -1 for none */
@@ -530,89 +530,89 @@ typedef struct MapObjectDef {
 } MapObjectDef;
 
 /* One of the 24 positions kinds 5 and 16 record behind them (effect_construct_record). */
-typedef struct Object4cTrail {
+typedef struct EffectTrailRow {
     VECTOR pos;
     SVECTOR angle;
-} Object4cTrail;
+} EffectTrailRow;
 
-/* Object4c+0x44..+0x4b: effect_construct_record stores bytes, halfwords or words there by id (WIP views). */
-typedef struct Object4cBytes {
+/* Effect+0x44..+0x4b: effect_construct_record stores bytes, halfwords or words there by id (WIP views). */
+typedef struct EffectBytes {
     u8 unk44;
     u8 unk45;
     u8 unk46[2];
-    u8 unk48;       /* +0x48: ids 5 and 16: cursor into their 24 trail records */
-    u8 unk49;       /* +0x49: ids 5 and 16: step counter of the current phase */
-    u8 unk4a;       /* +0x4a: ids 5 and 16: index of the Actor record they hold */
+    u8 trail_frame_index; /* +0x48: ids 5 and 16: cursor into their 24 trail records */
+    u8 trail_phase_counter; /* +0x49: ids 5 and 16: step counter of the current phase */
+    u8 trail_actor_index; /* +0x4a: ids 5 and 16: index of the Actor record they hold */
     u8 unk4b;
-} Object4cBytes;
+} EffectBytes;
 
 /* Signed views of the payload: effect_update_dispatch reads some ids' bytes with lb, halfwords with lh. */
 
-typedef struct Object4cChars {
+typedef struct EffectSBytes {
     s8 unk44;
     s8 unk45;
     s8 unk46[2];
     s8 unk48;
     s8 unk49;
     s8 unk4a[2];
-} Object4cChars;
+} EffectSBytes;
 
-typedef struct Object4cHalves {
+typedef struct EffectHalves {
     u16 unk44;      /* +0x44: a shot arrow keeps its starting height here (player_update_weapon_attack) */
     u16 unk46;
     u16 unk48;
     u16 unk4a;
-} Object4cHalves;
+} EffectHalves;
 
 /* Signed halfword view (effect_update_dispatch). */
-typedef struct Object4cShorts {
+typedef struct EffectSHalves {
     s16 unk44;
     s16 unk46;
     s16 unk48;
     s16 unk4a;
-} Object4cShorts;
+} EffectSHalves;
 
-typedef struct Object4cWords {
-    Object4cTrail *unk44; /* +0x44: ids 5 and 16: their 24 trail records */
-    s32 unk48;      /* +0x48: id 95: the height it was made at */
-} Object4cWords;
+typedef struct EffectWords {
+    EffectTrailRow *trail_rows; /* +0x44: ids 5 and 16: their 24 trail records */
+    s32 origin_y;   /* +0x48: id 95: the height it was made at */
+} EffectWords;
 
-typedef union Object4cArg {
-    Object4cBytes b;
-    Object4cChars c;
-    Object4cHalves h;
-    Object4cShorts s;
-    Object4cWords w;
-} Object4cArg;
+typedef union EffectArg {
+    EffectBytes b;
+    EffectSBytes c;
+    EffectHalves h;
+    EffectSHalves s;
+    EffectWords w;
+} EffectArg;
 
-typedef struct Object4c {
-    u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
+typedef struct Effect {
+    u8 type;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
                      * 0x40 averages the MagicRecord.unk5 stats (effect_magic_power) */
-    u8 unk1;        /* +0x01: index of its MagicRecord record */
-    u8 unk2;
-    u8 unk3;        /* +0x03: model id - 40 (effect_sample_rotated_vertex) */
-    u8 unk4;        /* +0x04: animation */
+    u8 kind;        /* +0x01: index of its MagicRecord record */
+    u8 base_render_id;
+    u8 render_id;   /* +0x03: model id - 40 (effect_sample_rotated_vertex) */
+    u8 animation_id; /* +0x04: animation */
     u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;        /* +0x08: both of bits 2 and 3 set keeps it in place */
-    u8 unk9;
-    u8 unka;
-    u8 unkb;        /* +0x0b: frames before the collision test (effect_probe_collision_by_type) */
-    u8 unkc;
-    u8 unkd;
-    u16 unke;
-    s16 unk10;
-    s16 unk12;      /* +0x12: light blend toward light2 (render_world_model); id 6 compares it signed */
-    u16 unk14;      /* +0x14: animation time */
+    u8 damage_multiplier_tenths;
+    u8 phase;
+    u8 render_flags; /* +0x08: both of bits 2 and 3 set keeps it in place */
+    u8 render_mode;
+    u8 layer_mask;
+    u8 cooldown;    /* +0x0b: frames before the collision test (effect_probe_collision_by_type) */
+    u8 lighting_override_index;
+    u8 midpoint_collision_enabled;
+    u16 clut_offset;
+    s16 updates_remaining;
+    s16 lighting_blend; /* +0x12: light blend toward light2 (render_world_model); id 6 compares it signed */
+    u16 animation_phase; /* +0x14: animation time */
     u8 unk16[2];
     VECTOR pos;     /* +0x18 */
     SVECTOR angle;  /* +0x28 */
     SVECTOR scale;  /* +0x30: 0x1000 = 1 */
     SVECTOR vel;    /* +0x38 */
-    struct AnimSlot *unk40; /* +0x40: pose slot (animation_prepare_asset_vertices) */
-    Object4cArg arg; /* +0x44: per-id payload (effect_construct_record) */
-} Object4c;
+    struct AnimSlot *animation_cache; /* +0x40: pose slot (animation_prepare_asset_vertices) */
+    EffectArg arg; /* +0x44: per-id payload (effect_construct_record) */
+} Effect;
 
 typedef struct Actor {
     u8 slot_state;  /* +0x00: 0xff when free */
@@ -741,13 +741,13 @@ typedef struct MagicRecord {
                      * menu_collect_available_magic_rows lists it */
 } MagicRecord;
 
-typedef struct Data801b77ec {
-    MagicRecord unk0[96];
-    Object4c objects[128];  /* +0x900 */
-    MagicRecord *unk2f00;   /* +0x2f00: record of unk2f04 */
-    Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
-    s32 unk2f08;            /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
-} Data801b77ec;
+typedef struct EffectState {
+    MagicRecord magic_records[96];
+    Effect objects[128];    /* +0x900 */
+    MagicRecord *current_magic; /* +0x2f00: record of unk2f04 */
+    Effect *current;        /* +0x2f04: the Effect record being updated */
+    s32 current_index;      /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
+} EffectState;
 
 /* 12-byte level records (player_lv_grow_list, one per level). */
 typedef struct Record0c {
@@ -860,7 +860,7 @@ extern Data801b24e4 cur_avatar_status;
  * visited cells map_reveal_visited_rects marks rooms from. */
 extern u8 map_revealed_rects[32][20];
 extern u8 map_visited_cells[80][10];
-extern Data801b77ec effect_status;
+extern EffectState effect_status;
 
 /* A record of the table resource_initialize_game_assets copies in (conversation_records.unk0). */
 typedef struct Record04 {

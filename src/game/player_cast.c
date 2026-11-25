@@ -53,11 +53,11 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
 
     if (cur_avatar_status.unkcb != 0xff) {
         if (hand == 0 && cur_avatar_status.unkb0->unk0[3] != 0xff
-            && effect_status.unk0[cur_avatar_status.unkb0->unk0[3]].menu_available == 0) {
+            && effect_status.magic_records[cur_avatar_status.unkb0->unk0[3]].menu_available == 0) {
             return 0;
         }
         if (hand == 1 && cur_avatar_status.unkb0->alternate_magic_id != 0xff
-            && effect_status.unk0[cur_avatar_status.unkb0->alternate_magic_id].menu_available == 0) {
+            && effect_status.magic_records[cur_avatar_status.unkb0->alternate_magic_id].menu_available == 0) {
             return 0;
         }
     }
@@ -84,7 +84,7 @@ ADDRESS(0x8002d130, 0x170)
 void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 {
     VECTOR unused;
-    MagicRecord *r = &effect_status.unk0[id];
+    MagicRecord *r = &effect_status.magic_records[id];
 
     if (cur_avatar_status.unk1c < r->mp_cost) {
         return;
@@ -141,7 +141,7 @@ void player_update_weapon_attack(void)
     SVECTOR dir;
     s32 dist;
     WeaponRecord *w;
-    Object4c *arrow;
+    Effect *arrow;
     Actor *obj;
     ActorGroup *def;
     VECTOR *target;
@@ -184,7 +184,7 @@ void player_update_weapon_attack(void)
                                                     &cur_avatar_status.unk124);
                     cur_avatar_status.unkbc = arrow;
                     if (arrow != NULL) {
-                        arrow->unk7 = 99;
+                        arrow->phase = 99;
                     }
                     if (cur_avatar_status.unkcb == 28) {
                         d = (rand() * 5 >> 15) + 3;
@@ -237,10 +237,10 @@ void player_update_weapon_attack(void)
                 break;
             }
             if (arrow != NULL) {
-                arrow->unk7 = 0;
+                arrow->phase = 0;
                 pitch_yaw_to_forward_vector(&arrow->angle, &arrow->vel);
                 vector3s_scale_shift12(cur_avatar_status.unk1e * 900 / 5000, &arrow->vel);
-                arrow->unk10 = 50;
+                arrow->updates_remaining = 50;
                 arrow->arg.h.unk44 = arrow->pos.vy;
             }
             cur_avatar_status.unkca = 1;

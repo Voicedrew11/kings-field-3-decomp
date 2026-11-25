@@ -86,7 +86,7 @@ void card_payload_capture_game_state(u8 *data)
     save->unk5715[6] = cur_avatar_status.unkff;
     save->unk5715[7] = cur_avatar_status.unk100;
     p = save->unk5634;
-    r = effect_status.unk0;
+    r = effect_status.magic_records;
     for (i = 95; i != -1; i--) {
         *p++ = r->menu_available;
         r++;
@@ -178,7 +178,7 @@ void card_payload_restore_game_state(u8 *data)
     cur_avatar_status.unkff = save->unk5715[6];
     cur_avatar_status.unk100 = save->unk5715[7];
     p = save->unk5634;
-    r = effect_status.unk0;
+    r = effect_status.magic_records;
     for (i = 95; i != -1; i--) {
         r->menu_available = *p++;
         r++;
