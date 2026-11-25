@@ -130,5 +130,5 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e85f8, 0x14)
 void area_on_load_store_area_index(void)
 {
-    DAT_801ba984.unk84[5] = 0x15;
+    cur_evt_state.unk84[5] = 0x15;
 }

@@ -87,16 +87,16 @@ void area_interact_item_containers_and_unlock(VECTOR *pos, SVECTOR *angle)
     Object44 *link;
     Object44Def *def;
 
-    if (DAT_801ba984.unk32[8] == 0) {
-        if (game_counter_is_nonzero(0x7d) > 0 || DAT_801b24e4.level >= 50) {
-            DAT_801ba984.unk32[8] = 1;
+    if (cur_evt_state.unk32[8] == 0) {
+        if (game_counter_is_nonzero(0x7d) > 0 || cur_avatar_status.level >= 50) {
+            cur_evt_state.unk32[8] = 1;
             map_object_process_marker_all(0xf1);
         }
     }
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -119,7 +119,7 @@ void area_interact_item_containers_and_unlock(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
@@ -172,32 +172,32 @@ void area_region_trigger_damage_barrier_and_doors(Object44 *obj)
 
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (DAT_801ba984.unk32[6] == 1 && player_camera_within_map_region(0x36, 0xf, 10, 4, 0x8000) == 0) {
-            DAT_80185da8.objects[2].unk0 = 8;
-            DAT_8018fb3c.objects[249].unk0 = 2;
-            DAT_8018fb3c.objects[249].arg.b.unk3c = 0xff;
-            DAT_8018fb3c.objects[262].arg.b.unk3d[1] = 0xff;
+        if (cur_evt_state.unk32[6] == 1 && player_camera_within_map_region(0x36, 0xf, 10, 4, 0x8000) == 0) {
+            actor_status.objects[2].unk0 = 8;
+            map_objects_slots.objects[249].unk0 = 2;
+            map_objects_slots.objects[249].arg.b.unk3c = 0xff;
+            map_objects_slots.objects[262].arg.b.unk3d[1] = 0xff;
         }
         break;
     case 1:
-        if (DAT_801ba984.unk32[7] == 0) {
-            if (DAT_801ba984.unk7f[0] != 0 && DAT_801ba984.unk7f[1] != 0 &&
-                DAT_801ba984.unk7f[2] != 0 && DAT_801ba984.unk7f[3] != 0) {
-                DAT_801ba984.unk32[7] = 1;
+        if (cur_evt_state.unk32[7] == 0) {
+            if (cur_evt_state.unk7f[0] != 0 && cur_evt_state.unk7f[1] != 0 &&
+                cur_evt_state.unk7f[2] != 0 && cur_evt_state.unk7f[3] != 0) {
+                cur_evt_state.unk32[7] = 1;
             }
-            obj = &DAT_8018fb3c.objects[58];
+            obj = &map_objects_slots.objects[58];
             obj->unk0 = 2;
-            if (DAT_801b24e4.unk101 == 0x10) {
+            if (cur_avatar_status.unk101 == 0x10) {
                 audio_play_spatial_default_range(0x28, &obj->pos, 0x78, 0);
             }
             player_apply_radial_damage(&obj->pos, 0, 0x1000, 0x8000, 0x1000, 0x40, 0x40, 0x40, 0x40, 0x40,
                                        0x40, 0x40, 0x40, 0x40, 0x400, 10);
-        } else if (DAT_801ba984.unk32[7] == 1) {
-            other = &DAT_8018fb3c.objects[58];
+        } else if (cur_evt_state.unk32[7] == 1) {
+            other = &map_objects_slots.objects[58];
             other->unk0 = 2;
-            DAT_8018fb3c.objects[58].unk5 = 0x32;
-            DAT_8018fb3c.objects[58].unk2 = 5;
-            DAT_8018fb3c.objects[58].unk10 = 0;
+            map_objects_slots.objects[58].unk5 = 0x32;
+            map_objects_slots.objects[58].unk2 = 5;
+            map_objects_slots.objects[58].unk10 = 0;
             for (i = 15; i != -1; i--) {
                 other->unk10 += 256;
                 if (other->unk10 >= 4095) {
@@ -212,20 +212,20 @@ void area_region_trigger_damage_barrier_and_doors(Object44 *obj)
             other->unk6 = 0xff;
             other->unk4 = 0xff;
             other->unk0 = 0;
-            DAT_801ba984.unk32[7] = 2;
+            cur_evt_state.unk32[7] = 2;
         } else {
-            DAT_8018fb3c.objects[58].unk6 = 0xff;
-            DAT_8018fb3c.objects[58].unk4 = 0xff;
-            DAT_8018fb3c.objects[58].unk0 = 0;
+            map_objects_slots.objects[58].unk6 = 0xff;
+            map_objects_slots.objects[58].unk4 = 0xff;
+            map_objects_slots.objects[58].unk0 = 0;
         }
         break;
     case 10:
         if (player_camera_within_map_region(0x24, 0x36, 7, 0xc, 0x8000) != 0) {
-            if (DAT_801b24e4.unk10a != 0) {
+            if (cur_avatar_status.unk10a != 0) {
                 map_cell_copy_rotated_fields(2, 0x2a, 0x4f, 0x26, 0x36, 3, 1, 0, 0x2f);
             }
         } else {
-            DAT_801b24e4.unk10a = 0;
+            cur_avatar_status.unk10a = 0;
             map_cell_copy_rotated_fields(2, 0x2d, 0x4f, 0x26, 0x36, 3, 1, 0, 0x2f);
         }
         break;
@@ -263,10 +263,10 @@ void area_talk_event_set_flags(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
-        DAT_801ba984.unk32[5] = 1;
+        cur_evt_state.unk32[5] = 1;
         break;
     case 1:
-        DAT_801ba984.unk32[6] = 1;
+        cur_evt_state.unk32[6] = 1;
         break;
     }
 }
@@ -275,31 +275,31 @@ void area_talk_event_set_flags(Object88 *record, s32 event)
 ADDRESS(0x801e8acc, 0x140)
 void area_on_load_restore_doors_and_barrier(void)
 {
-    if (DAT_801ba984.unke[0x1a] != 0 && DAT_801ba984.unk2b != 0) {
-        DAT_801ba984.unk32[4] = 1;
+    if (cur_evt_state.unke[0x1a] != 0 && cur_evt_state.unk2b != 0) {
+        cur_evt_state.unk32[4] = 1;
     }
-    if (DAT_801ba984.unk32[6] == 0) {
-        DAT_80185da8.objects[2].unk0 = 1;
-        DAT_8018fb3c.objects[249].unk0 = 0;
-        DAT_8018fb3c.objects[249].arg.b.unk3c = 0;
-        DAT_8018fb3c.objects[262].arg.b.unk3d[1] = 0;
+    if (cur_evt_state.unk32[6] == 0) {
+        actor_status.objects[2].unk0 = 1;
+        map_objects_slots.objects[249].unk0 = 0;
+        map_objects_slots.objects[249].arg.b.unk3c = 0;
+        map_objects_slots.objects[262].arg.b.unk3d[1] = 0;
     } else {
-        DAT_80185da8.objects[2].unk0 = 8;
-        DAT_8018fb3c.objects[249].unk0 = 2;
-        DAT_8018fb3c.objects[249].arg.b.unk3c = 0xff;
-        DAT_8018fb3c.objects[262].arg.b.unk3d[1] = 0xff;
+        actor_status.objects[2].unk0 = 8;
+        map_objects_slots.objects[249].unk0 = 2;
+        map_objects_slots.objects[249].arg.b.unk3c = 0xff;
+        map_objects_slots.objects[262].arg.b.unk3d[1] = 0xff;
     }
-    if (DAT_801ba984.unk32[7] != 0) {
-        DAT_8018fb3c.objects[58].unk6 = 0xff;
-        DAT_8018fb3c.objects[58].unk4 = 0xff;
-        DAT_8018fb3c.objects[58].unk0 = 0;
-        DAT_801ba984.unk32[7] = 2;
+    if (cur_evt_state.unk32[7] != 0) {
+        map_objects_slots.objects[58].unk6 = 0xff;
+        map_objects_slots.objects[58].unk4 = 0xff;
+        map_objects_slots.objects[58].unk0 = 0;
+        cur_evt_state.unk32[7] = 2;
     }
-    if (DAT_801ba984.unk32[8] == 0) {
-        if (game_counter_is_nonzero(0x7d) > 0 || DAT_801b24e4.level >= 40) {
-            DAT_801ba984.unk32[8] = 1;
+    if (cur_evt_state.unk32[8] == 0) {
+        if (game_counter_is_nonzero(0x7d) > 0 || cur_avatar_status.level >= 40) {
+            cur_evt_state.unk32[8] = 1;
             map_object_process_marker_all(0xf1);
         }
     }
-    DAT_801ba984.unk84[5] = 9;
+    cur_evt_state.unk84[5] = 9;
 }

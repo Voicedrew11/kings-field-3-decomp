@@ -5,8 +5,8 @@
  * cell grid and the per-frame object drawer, the 2D overlay sprites and
  * messages, the animated model poses and the picture fade. One TU:
  * render_map_cell_window, render_active_model_rows, render_player_weapon and
- * render_animated_object read DAT_8009c2e0 and menu_show_transition_image
- * reads DAT_8009c2d0 $gp-relative, which ASPSX emits only for .sdata defined
+ * render_animated_object read map_textured_primitive_color and menu_show_transition_image
+ * reads menu_transition_rect $gp-relative, which ASPSX emits only for .sdata defined
  * in the same file.
  */
 /* render_scene_and_update_resources reads Data8018fad4.step as volatile (see game/data.h). */
@@ -34,10 +34,10 @@
 RODATA(0x80011bd0, 0xc)
 
 DATA(0x8009c2d0, 0x8, ".sdata")
-RECT DAT_8009c2d0 = { 320, 0, 320, 240 };
+RECT menu_transition_rect = { 320, 0, 320, 240 };
 
 DATA(0x8009c2d8, 0x8, ".sdata")
-RECT DAT_8009c2d8 = { 960, 256, 64, 240 };
+RECT menu_transition_image_rect = { 960, 256, 64, 240 };
 
 /* A delta run marker: the next word is a count instead of a vertex. */
 #define DELTA_RUN (-32768)
@@ -45,13 +45,13 @@ RECT DAT_8009c2d8 = { 960, 256, 64, 240 };
 /* Brightness the 3D overlays share with the status sprites (.sdata). */
 
 DATA(0x8009c2e0, 0x4, ".sdata")
-CVECTOR DAT_8009c2e0 = { 0x80, 0x80, 0x80, 0 };
+CVECTOR map_textured_primitive_color = { 0x80, 0x80, 0x80, 0 };
 
 DATA(0x8009c2e4, 0x8, ".sdata")
 SVECTOR DAT_8009c2e4 = { 0x1000, 0x1000, 0x1000, 0 };
 
 DATA(0x8009c2ec, 0x4, ".sdata")
-s32 DAT_8009c2ec = 0;
+s32 render_model_yaw_smoothing_accumulator = 0;
 
 /*
  * Draws the map layers of the 25 x 25 cell grid around the viewer
@@ -72,31 +72,31 @@ void render_map_cell_window(void)
 
     pos = &SCRATCH->u.layer.unk100;
     origin = &SCRATCH->u.layer.unk108;
-    SCRATCH->model = DAT_80199154.unk10148[0];
-    SCRATCH->ot = DAT_80199154.ot + 240;
-    *(u32 *)&SCRATCH->w.map.rgb = *(u32 *)&DAT_8009c2e0;
-    SCRATCH->next = DAT_80199154.pool->next;
-    SCRATCH->end = DAT_80199154.pool->end;
+    SCRATCH->model = scene_display_sys.unk10148[0];
+    SCRATCH->ot = scene_display_sys.ot + 240;
+    *(u32 *)&SCRATCH->w.map.rgb = *(u32 *)&map_textured_primitive_color;
+    SCRATCH->next = scene_display_sys.pool->next;
+    SCRATCH->end = scene_display_sys.pool->end;
     SCRATCH->w.map.clip = 100;
-    SCRATCH->screen = DAT_80199154.screen;
-    SCRATCH->u.layer.unk108.vx = DAT_80199154.unk15af8.vx;
-    SCRATCH->u.layer.unk108.vy = DAT_80199154.unk15af8.vy;
-    SCRATCH->u.layer.unk108.vz = DAT_80199154.unk15af8.vz;
-    SCRATCH->u.layer.unk108.pad = DAT_80199154.unk15af8.pad;
-    SCRATCH->w.map.count = DAT_80199154.unk159bc;
-    SCRATCH->w.map.ot_count = DAT_80199154.ot_count;
-    SCRATCH->w.map.prim_count = DAT_80199154.prim_count;
-    resource_copy_words((u32 *)SCRATCH->u.view.grid, (u32 *)DAT_80199154.grid, 0x9c);
+    SCRATCH->screen = scene_display_sys.screen;
+    SCRATCH->u.layer.unk108.vx = scene_display_sys.unk15af8.vx;
+    SCRATCH->u.layer.unk108.vy = scene_display_sys.unk15af8.vy;
+    SCRATCH->u.layer.unk108.vz = scene_display_sys.unk15af8.vz;
+    SCRATCH->u.layer.unk108.pad = scene_display_sys.unk15af8.pad;
+    SCRATCH->w.map.count = scene_display_sys.unk159bc;
+    SCRATCH->w.map.ot_count = scene_display_sys.ot_count;
+    SCRATCH->w.map.prim_count = scene_display_sys.prim_count;
+    resource_copy_words((u32 *)SCRATCH->u.view.grid, (u32 *)scene_display_sys.grid, 0x9c);
     grid = &SCRATCH->u.view.grid[0][0];
-    SCRATCH->u.view.x = DAT_80199154.unk15b20;
-    SCRATCH->u.view.z = DAT_80199154.unk15b24;
-    z = DAT_80199154.unk15b24;
+    SCRATCH->u.view.x = scene_display_sys.unk15b20;
+    SCRATCH->u.view.z = scene_display_sys.unk15b24;
+    z = scene_display_sys.unk15b24;
     for (i = 25; i != 0; z++, i--) {
         if (z >= 0 && z < 80) {
             x = SCRATCH->u.view.x;
             for (j = 25; j != 0; x++, j--, grid++) {
                 if (x >= 0 && x < 80 && *grid != 0) {
-                    cell = &DAT_801d4464.cells[z][x];
+                    cell = &map_world.cells[z][x];
                     kind = cell->layer[0].unk0;
                     if ((*grid & 2) && kind < 240) {
                         pos->vx = (x << 11) - origin->vx + 1024;
@@ -123,13 +123,13 @@ void render_map_cell_window(void)
             grid += 25;
         }
     }
-    DAT_80199154.unk159bc = SCRATCH->w.map.count;
-    DAT_80199154.ot_count = SCRATCH->w.map.ot_count;
-    DAT_80199154.pool->next = SCRATCH->next;
+    scene_display_sys.unk159bc = SCRATCH->w.map.count;
+    scene_display_sys.ot_count = SCRATCH->w.map.ot_count;
+    scene_display_sys.pool->next = SCRATCH->next;
 }
 
 /*
- * Draws the 3D overlays (the compass needles of DAT_80081c20, visible == 1)
+ * Draws the 3D overlays (the compass needles of render_model_rows, visible == 1)
  * in view space: each lit by its light record turned by its rotation, scaled,
  * posed by animation_prepare_asset_vertices (the base pose is rebuilt when it returns nonzero,
  * unlike render_animated_object), and projected flat (screen x/y = view x/y, depth =
@@ -151,11 +151,11 @@ void render_active_model_rows(void)
     s32 offset;
 
     scratch = SCRATCH;
-    for (rec = DAT_80081c20; rec->visible != 0xff; rec++) {
+    for (rec = render_model_rows; rec->visible != 0xff; rec++) {
         if (rec->visible != 1) {
             continue;
         }
-        light = &DAT_80199154.unk15da8[rec->light];
+        light = &scene_display_sys.unk15da8[rec->light];
         m.t[0] = rec->pos.vx;
         m.t[1] = rec->pos.vy;
         m.t[2] = rec->pos.vz;
@@ -171,17 +171,17 @@ void render_active_model_rows(void)
         ScaleMatrix(&m, &scale);
         gte_SetRotMatrix(&m);
         gte_SetTransMatrix(&m);
-        file = DAT_80199154.models[rec->model];
+        file = scene_display_sys.models[rec->model];
         model = file + ((ModelFile *)file)->vertices;
-        scratch->ot = DAT_80199154.ot;
-        *(u32 *)&scratch->w.model.rgb = *(u32 *)&DAT_8009c2e0;
-        scratch->draw.count.unk4 = DAT_80199154.unk159bc;
-        scratch->draw.count.ot_count = DAT_80199154.ot_count;
-        scratch->draw.count.prim_count = DAT_80199154.prim_count;
+        scratch->ot = scene_display_sys.ot;
+        *(u32 *)&scratch->w.model.rgb = *(u32 *)&map_textured_primitive_color;
+        scratch->draw.count.unk4 = scene_display_sys.unk159bc;
+        scratch->draw.count.ot_count = scene_display_sys.ot_count;
+        scratch->draw.count.prim_count = scene_display_sys.prim_count;
         scratch->model = model;
-        scratch->next = DAT_80199154.pool->next;
-        scratch->end = DAT_80199154.pool->end;
-        scratch->screen = DAT_80199154.screen;
+        scratch->next = scene_display_sys.pool->next;
+        scratch->end = scene_display_sys.pool->end;
+        scratch->screen = scene_display_sys.screen;
         scratch->draw.count.clut = 0;
         if (animation_prepare_asset_vertices(&rec->slot, rec->model, rec->anim, rec->time,
                                              ((ModelData *)model)->parts[0].unk4) != 0) {
@@ -224,9 +224,9 @@ void render_active_model_rows(void)
             }
         }
         render_enqueue_textured_tmd(0, 0);
-        DAT_80199154.pool->next = scratch->next;
-        DAT_80199154.unk159bc = scratch->draw.count.unk4;
-        DAT_80199154.ot_count = scratch->draw.count.ot_count;
+        scene_display_sys.pool->next = scratch->next;
+        scene_display_sys.unk159bc = scratch->draw.count.unk4;
+        scene_display_sys.ot_count = scratch->draw.count.ot_count;
     }
 }
 
@@ -236,7 +236,7 @@ void render_textured_quad_immediate(int x0, int y0, int x1, int y1, u8 u, u8 v, 
 {
     POLY_FT4 *p;
 
-    p = (POLY_FT4 *)(DAT_80199154.buffer + DAT_80199154.frame * 160);
+    p = (POLY_FT4 *)(scene_display_sys.buffer + scene_display_sys.frame * 160);
     setRGB0(p, r, g, b);
     p->tpage = tpage;
     p->clut = clut;
@@ -270,31 +270,31 @@ void loading_screen_show(void)
 
     strcpy(name, "\\LOAD.MSG;1");
     if (CdSearchFile(&file, name) == 0) {
-        PutDispEnv(&DAT_80199154.disp[1]);
-        PutDrawEnv(&DAT_80199154.draw[1]);
+        PutDispEnv(&scene_display_sys.disp[1]);
+        PutDrawEnv(&scene_display_sys.draw[1]);
         SetDispMask(1);
         return;
     }
     file.size = (file.size + 2047) & ~2047;
     for (i = 0; i < 50; i++) {
         CdControl(CdlSetloc, (u_char *)&file.pos, 0);
-        CdRead(file.size >> 11, (u_long *)DAT_80199154.buffer, CdlModeSpeed);
+        CdRead(file.size >> 11, (u_long *)scene_display_sys.buffer, CdlModeSpeed);
         while ((sync = CdReadSync(1, result)) > 0) {
         }
         if (sync == 0) {
             i = 100;
         }
     }
-    tim_upload_images(DAT_80199154.buffer);
+    tim_upload_images(scene_display_sys.buffer);
     render_textured_quad_immediate(100, 30, 220, 150, 0, 0, 120, 120, 0xff, 0x1f, 0x723c, 0x58, 0x58, 0x58);
     render_textured_quad_immediate(96, 160, 224, 184, 0, 120, 128, 24, 0xff, 0x1f, 0x727c, 0x58, 0x58, 0x58);
     DrawSync(0);
     VSync(0);
-    PutDispEnv(&DAT_80199154.disp[1]);
-    PutDrawEnv(&DAT_80199154.draw[1]);
+    PutDispEnv(&scene_display_sys.disp[1]);
+    PutDrawEnv(&scene_display_sys.draw[1]);
     SetDispMask(1);
-    DAT_80199154.fade_level = 0;
-    DAT_80199154.fade_hold = 0;
+    scene_display_sys.fade_level = 0;
+    scene_display_sys.fade_hold = 0;
 }
 
 ADDRESS(0x8003cbc8, 0x134)
@@ -302,23 +302,23 @@ void loading_screen_update_fade(void)
 {
     u8 level;
 
-    if (DAT_80199154.fade_hold != 0) {
-        if (DAT_80199154.fade_level == 0) {
-            DAT_80199154.fade_level = 0xff;
-            DAT_80199154.fade_hold--;
+    if (scene_display_sys.fade_hold != 0) {
+        if (scene_display_sys.fade_level == 0) {
+            scene_display_sys.fade_level = 0xff;
+            scene_display_sys.fade_hold--;
         } else {
-            DAT_80199154.fade_level--;
+            scene_display_sys.fade_level--;
         }
-    } else if (DAT_80199154.fade_level != 0) {
-        level = DAT_80199154.fade_level >> 1;
-        DAT_80199154.frame = DAT_80199154.frame == 0;
-        PutDispEnv(&DAT_80199154.disp[DAT_80199154.frame]);
-        PutDrawEnv(&DAT_80199154.draw[DAT_80199154.frame]);
+    } else if (scene_display_sys.fade_level != 0) {
+        level = scene_display_sys.fade_level >> 1;
+        scene_display_sys.frame = scene_display_sys.frame == 0;
+        PutDispEnv(&scene_display_sys.disp[scene_display_sys.frame]);
+        PutDrawEnv(&scene_display_sys.draw[scene_display_sys.frame]);
         loading_screen_draw_quad(level, level >> 1);
         loading_screen_draw_quad(level >> 1, level >> 2);
         DrawSync(0);
         VSync(0);
-        DAT_80199154.fade_level--;
+        scene_display_sys.fade_level--;
     }
 }
 
@@ -328,12 +328,12 @@ void render_textured_quad(int x0, int y0, int x1, int y1, u8 u, u8 v, s32 w, s32
 {
     POLY_FT4 *p;
 
-    p = (POLY_FT4 *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(POLY_FT4);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    p = (POLY_FT4 *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(POLY_FT4);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
+    scene_display_sys.prim_count++;
     setRGB0(p, r, g, b);
     p->tpage = tpage;
     p->clut = clut;
@@ -355,12 +355,12 @@ void render_gouraud_quad(int x0, int y0, int x1, int y1, u8 semi, u32 *rgb0, u32
 {
     POLY_G4 *p;
 
-    p = (POLY_G4 *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(POLY_G4);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    p = (POLY_G4 *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(POLY_G4);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
+    scene_display_sys.prim_count++;
     *(u32 *)&p->r0 = *rgb0;
     *(u32 *)&p->r1 = *rgb1;
     *(u32 *)&p->r2 = *rgb2;
@@ -383,18 +383,18 @@ void render_sprite(int x, int y, u8 u, u8 v, u8 w, u8 h, u8 semi, u16 tpage, u16
     DR_MODE *mode;
     SPRT *p;
 
-    mode = (DR_MODE *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(DR_MODE);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    mode = (DR_MODE *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(DR_MODE);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
-    p = (SPRT *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(SPRT);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    scene_display_sys.prim_count++;
+    p = (SPRT *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(SPRT);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
+    scene_display_sys.prim_count++;
     p->x0 = x;
     p->y0 = y;
     p->u0 = u;
@@ -419,8 +419,8 @@ void render_sliding_panel_primary(void)
 {
     s32 y;
 
-    if (DAT_801b24e4.unk154 < 240) {
-        y = DAT_801b24e4.unk154 + 120;
+    if (cur_avatar_status.unk154 < 240) {
+        y = cur_avatar_status.unk154 + 120;
         if (y < 0) {
             y = 0;
         }
@@ -434,8 +434,8 @@ void render_sliding_panel_secondary(void)
 {
     s32 y;
 
-    if (DAT_801b24e4.unk158 < 240) {
-        y = DAT_801b24e4.unk158 + 120;
+    if (cur_avatar_status.unk158 < 240) {
+        y = cur_avatar_status.unk158 + 120;
         if (y < 0) {
             y = 0;
         }
@@ -448,8 +448,8 @@ void render_sliding_panel_tertiary(void)
 {
     s32 y;
 
-    if (DAT_801b24e4.unk15c < 240) {
-        y = DAT_801b24e4.unk15c + 120;
+    if (cur_avatar_status.unk15c < 240) {
+        y = cur_avatar_status.unk15c + 120;
         if (y < 0) {
             y = 0;
         }
@@ -462,51 +462,55 @@ void render_sliding_panel_tertiary(void)
 ADDRESS(0x8003d4ac, 0xbc)
 void func_8003d4ac(void)
 {
-    if (DAT_80199154.tint.mode != 0xff) {
-        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
-                             0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
-                             (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
+    if (scene_display_sys.tint.mode != 0xff) {
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1,
+                             ((scene_display_sys.tint.mode & 3) << 5) | 12, 0x7a8d, scene_display_sys.tint.r,
+                             scene_display_sys.tint.g, scene_display_sys.tint.b,
+                             (scene_display_sys.tint.mode & 0x80) ? 1 : 0x40);
     }
 }
 
 ADDRESS(0x8003d568, 0xbc)
 void render_color_overlay(void)
 {
-    if (DAT_80199154.tint.mode != 0xff) {
-        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.tint.mode & 3) << 5) | 12,
-                             0x7a8d, DAT_80199154.tint.r, DAT_80199154.tint.g, DAT_80199154.tint.b,
-                             (DAT_80199154.tint.mode & 0x80) ? 1 : 0x40);
+    if (scene_display_sys.tint.mode != 0xff) {
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1,
+                             ((scene_display_sys.tint.mode & 3) << 5) | 12, 0x7a8d, scene_display_sys.tint.r,
+                             scene_display_sys.tint.g, scene_display_sys.tint.b,
+                             (scene_display_sys.tint.mode & 0x80) ? 1 : 0x40);
     }
 }
 
 ADDRESS(0x8003d624, 0x28)
 void render_set_color_overlay(u8 mode, u8 r, u8 g, u8 b)
 {
-    DAT_80199154.tint.mode = mode;
-    DAT_80199154.tint.r = r;
-    DAT_80199154.tint.g = g;
-    DAT_80199154.tint.b = b;
+    scene_display_sys.tint.mode = mode;
+    scene_display_sys.tint.r = r;
+    scene_display_sys.tint.g = g;
+    scene_display_sys.tint.b = b;
 }
 
 ADDRESS(0x8003d64c, 0x150)
 void render_accumulated_color_overlay_additive(void)
 {
-    if (DAT_80199154.sum[0].count != 0) {
-        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[0].mode & 3) << 5) | 12,
-                             0x7a8d, DAT_80199154.sum[0].r / DAT_80199154.sum[0].count,
-                             DAT_80199154.sum[0].g / DAT_80199154.sum[0].count,
-                             DAT_80199154.sum[0].b / DAT_80199154.sum[0].count, 0x30);
+    if (scene_display_sys.sum[0].count != 0) {
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1,
+                             ((scene_display_sys.sum[0].mode & 3) << 5) | 12, 0x7a8d,
+                             scene_display_sys.sum[0].r / scene_display_sys.sum[0].count,
+                             scene_display_sys.sum[0].g / scene_display_sys.sum[0].count,
+                             scene_display_sys.sum[0].b / scene_display_sys.sum[0].count, 0x30);
     }
 }
 
 ADDRESS(0x8003d79c, 0x150)
 void render_accumulated_color_overlay_subtractive(void)
 {
-    if (DAT_80199154.sum[1].count != 0) {
-        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1, ((DAT_80199154.sum[1].mode & 3) << 5) | 12,
-                             0x7a8d, DAT_80199154.sum[1].r / DAT_80199154.sum[1].count,
-                             DAT_80199154.sum[1].g / DAT_80199154.sum[1].count,
-                             DAT_80199154.sum[1].b / DAT_80199154.sum[1].count, 0x30);
+    if (scene_display_sys.sum[1].count != 0) {
+        render_textured_quad(0, 0, 320, 240, 0, 0xa0, 15, 15, 1,
+                             ((scene_display_sys.sum[1].mode & 3) << 5) | 12, 0x7a8d,
+                             scene_display_sys.sum[1].r / scene_display_sys.sum[1].count,
+                             scene_display_sys.sum[1].g / scene_display_sys.sum[1].count,
+                             scene_display_sys.sum[1].b / scene_display_sys.sum[1].count, 0x30);
     }
 }
 
@@ -515,18 +519,18 @@ void accumulate_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
-        DAT_80199154.sum[0].count++;
-        DAT_80199154.sum[0].mode = which;
-        DAT_80199154.sum[0].r += (r * scale) >> 12;
-        DAT_80199154.sum[0].g += (g * scale) >> 12;
-        DAT_80199154.sum[0].b += (b * scale) >> 12;
+        scene_display_sys.sum[0].count++;
+        scene_display_sys.sum[0].mode = which;
+        scene_display_sys.sum[0].r += (r * scale) >> 12;
+        scene_display_sys.sum[0].g += (g * scale) >> 12;
+        scene_display_sys.sum[0].b += (b * scale) >> 12;
         break;
     case 2:
-        DAT_80199154.sum[1].count++;
-        DAT_80199154.sum[1].mode = which;
-        DAT_80199154.sum[1].r += (r * scale) >> 12;
-        DAT_80199154.sum[1].g += (g * scale) >> 12;
-        DAT_80199154.sum[1].b += (b * scale) >> 12;
+        scene_display_sys.sum[1].count++;
+        scene_display_sys.sum[1].mode = which;
+        scene_display_sys.sum[1].r += (r * scale) >> 12;
+        scene_display_sys.sum[1].g += (g * scale) >> 12;
+        scene_display_sys.sum[1].b += (b * scale) >> 12;
         break;
     }
 }
@@ -536,18 +540,18 @@ void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
 {
     switch (which) {
     case 1:
-        DAT_80199154.sum[0].count++;
-        DAT_80199154.sum[0].mode = which;
-        DAT_80199154.sum[0].r = (r * scale) >> 12;
-        DAT_80199154.sum[0].g = (g * scale) >> 12;
-        DAT_80199154.sum[0].b = (b * scale) >> 12;
+        scene_display_sys.sum[0].count++;
+        scene_display_sys.sum[0].mode = which;
+        scene_display_sys.sum[0].r = (r * scale) >> 12;
+        scene_display_sys.sum[0].g = (g * scale) >> 12;
+        scene_display_sys.sum[0].b = (b * scale) >> 12;
         break;
     case 2:
-        DAT_80199154.sum[1].count++;
-        DAT_80199154.sum[1].mode = which;
-        DAT_80199154.sum[1].r = (r * scale) >> 12;
-        DAT_80199154.sum[1].g = (g * scale) >> 12;
-        DAT_80199154.sum[1].b = (b * scale) >> 12;
+        scene_display_sys.sum[1].count++;
+        scene_display_sys.sum[1].mode = which;
+        scene_display_sys.sum[1].r = (r * scale) >> 12;
+        scene_display_sys.sum[1].g = (g * scale) >> 12;
+        scene_display_sys.sum[1].b = (b * scale) >> 12;
         break;
     }
 }
@@ -569,15 +573,16 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
     g = rgb[1];
     b = rgb[2];
     DrawSync(0);
-    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x7400;
-    StoreImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
+    scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[0].end + 0x7400;
+    StoreImage(&menu_transition_rect, (u_long *)scene_display_sys.pools[1].end);
     DrawSync(0);
-    MoveImage(&DAT_80199154.draw[DAT_80199154.frame].clip, DAT_8009c2d0.x, DAT_8009c2d0.y);
+    MoveImage(&scene_display_sys.draw[scene_display_sys.frame].clip, menu_transition_rect.x,
+              menu_transition_rect.y);
     DrawSync(0);
-    DAT_80199154.draw[0].isbg = 0;
-    DAT_80199154.draw[1].isbg = 0;
+    scene_display_sys.draw[0].isbg = 0;
+    scene_display_sys.draw[1].isbg = 0;
     while (count > 0) {
         if (step < 0) {
             r -= 4;
@@ -589,12 +594,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
             b += 3;
         }
         display_begin_frame();
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         top = y;
         bottom = 240 - y;
         setPolyFT4(p);
@@ -619,13 +624,13 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
         p->r0 = r;
         p->g0 = g;
         p->b0 = b;
-        addPrim(DAT_80199154.ot, p);
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        addPrim(scene_display_sys.ot, p);
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         right = x;
         setPolyFT4(p);
         p->x0 = 192;
@@ -649,19 +654,19 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
         p->r0 = r;
         p->g0 = g;
         p->b0 = b;
-        addPrim(DAT_80199154.ot, p);
+        addPrim(scene_display_sys.ot, p);
         count--;
         DrawSync(0);
         display_present_frame();
         x += step * 4;
         y += step * 3;
     }
-    DAT_80199154.draw[0].isbg = 1;
-    DAT_80199154.draw[1].isbg = 1;
-    LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
-    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x1a000;
+    scene_display_sys.draw[0].isbg = 1;
+    scene_display_sys.draw[1].isbg = 1;
+    LoadImage(&menu_transition_rect, (u_long *)scene_display_sys.pools[1].end);
+    scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x1a000;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[0].end + 0x1a000;
     DrawSync(0);
 }
 
@@ -684,50 +689,50 @@ void render_player_weapon(void)
     ScreenVertex *screen;
     s32 i;
 
-    if (DAT_801b24e4.unkc0 == -1) {
+    if (cur_avatar_status.unkc0 == -1) {
         return;
     }
     scratch = SCRATCH;
-    light = &DAT_80199154.unk15da8[((MapLayer *)((u8 *)&DAT_801d4464.cells[DAT_801b24e4.pos.vz >> 11]
-                                                         [DAT_801b24e4.pos.vx >> 11] +
-                                                DAT_801b24e4.unk160))->unk4 & 0x3f];
+    light = &scene_display_sys.unk15da8[((MapLayer *)((u8 *)&map_world.cells[cur_avatar_status.pos.vz >> 11]
+                                                         [cur_avatar_status.pos.vx >> 11] +
+                                                cur_avatar_status.unk160))->unk4 & 0x3f];
     gte_SetColorMatrix(&light->unk50);
     gte_SetLightMatrix(&light->unk0[0]);
     fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    m.t[0] = (s16)DAT_801b24e4.unkb0->unk34;
-    m.t[1] = (s16)DAT_801b24e4.unkb0->unk36;
-    m.t[2] = (s16)DAT_801b24e4.unkb0->unk38;
-    RotMatrix((SVECTOR *)&DAT_801b24e4.unkb0->unk3c, &m);
+    m.t[0] = (s16)cur_avatar_status.unkb0->unk34;
+    m.t[1] = (s16)cur_avatar_status.unkb0->unk36;
+    m.t[2] = (s16)cur_avatar_status.unkb0->unk38;
+    RotMatrix((SVECTOR *)&cur_avatar_status.unkb0->unk3c, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
-    file = DAT_80199154.models[32];
+    file = scene_display_sys.models[32];
     model = file + ((ModelFile *)file)->vertices;
     SCRATCH->model = model;
-    if (animation_prepare_asset_vertices((AnimSlot **)&DAT_801b24e4.unkb8, 32, DAT_801b24e4.unkca,
-                                         DAT_801b24e4.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
+    if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.unkb8, 32, cur_avatar_status.unkca,
+                                         cur_avatar_status.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
         return;
     }
-    SCRATCH->ot = DAT_80199154.ot;
-    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
-    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
-    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
-    SCRATCH->next = DAT_80199154.pool->next;
-    SCRATCH->end = DAT_80199154.pool->end;
-    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->ot = scene_display_sys.ot;
+    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
+    SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
+    SCRATCH->next = scene_display_sys.pool->next;
+    SCRATCH->end = scene_display_sys.pool->end;
+    SCRATCH->screen = scene_display_sys.screen;
     SCRATCH->draw.count.clut = 0;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     vertex = SCRATCH->vertices;
-    screen = DAT_80199154.screen;
+    screen = scene_display_sys.screen;
     i = ((ModelData *)model)->parts[0].unk4;
     while (--i != -1) {
         gte_ldv0(vertex);
         gte_rtps();
         gte_stsxy(&screen->sxy);
         gte_stszotz(&screen->z);
-        if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
-            screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
-                          (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+        if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
+            screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
+                          (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
         } else {
             screen->fog = 0;
         }
@@ -741,9 +746,9 @@ void render_player_weapon(void)
         vertex += 8;
     }
     render_enqueue_textured_tmd(0, 24);
-    DAT_80199154.pool->next = scratch->next;
-    DAT_80199154.unk159bc = scratch->draw.count.unk4;
-    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    scene_display_sys.pool->next = scratch->next;
+    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
 /*
@@ -783,48 +788,48 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     mat = &m;
     scratch = SCRATCH;
     SCRATCH->draw.count.clip = 100;
-    SCRATCH->screen = DAT_80199154.screen;
-    SCRATCH->unk48 = DAT_80199154.screen;
-    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
-    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
-    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
-    SCRATCH->next = DAT_80199154.pool->next;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
-    SCRATCH->end = DAT_80199154.pool->end;
+    SCRATCH->screen = scene_display_sys.screen;
+    SCRATCH->unk48 = scene_display_sys.screen;
+    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
+    SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
+    SCRATCH->next = scene_display_sys.pool->next;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
+    SCRATCH->end = scene_display_sys.pool->end;
     mode = flags;
     if (SCRATCH->end - 30720 < SCRATCH->next) {
         mode &= 0xbf;
     }
-    gte_SetRotMatrix(&DAT_80199154.unk159f8);
-    gte_SetTransMatrix(&DAT_80199154.unk159f8);
+    gte_SetRotMatrix(&scene_display_sys.unk159f8);
+    gte_SetTransMatrix(&scene_display_sys.unk159f8);
     if (view != NULL) {
-        delta.vx = pos->vx - DAT_80199154.unk15af8.vx;
-        delta.vy = pos->vy - DAT_80199154.unk15af8.vy;
-        delta.vz = pos->vz - DAT_80199154.unk15af8.vz;
-        rel.vx = pos->vx - DAT_80199154.unk15af8.vx;
-        rel.vy = pos->vy - DAT_80199154.unk15af8.vy;
-        rel.vz = pos->vz - DAT_80199154.unk15af8.vz;
+        delta.vx = pos->vx - scene_display_sys.unk15af8.vx;
+        delta.vy = pos->vy - scene_display_sys.unk15af8.vy;
+        delta.vz = pos->vz - scene_display_sys.unk15af8.vz;
+        rel.vx = pos->vx - scene_display_sys.unk15af8.vx;
+        rel.vy = pos->vy - scene_display_sys.unk15af8.vy;
+        rel.vz = pos->vz - scene_display_sys.unk15af8.vz;
         gte_ldv0(&rel);
         gte_rt();
         gte_stlvnl(mat->t);
         gte_stflg(&flag);
         {
-            MapCell *row = DAT_801d4464.cells[pos->vz >> 11];
+            MapCell *row = map_world.cells[pos->vz >> 11];
 
             layer = row[pos->vx >> 11].layer;
         }
         if (area != 1) {
             layer++;
         }
-        light = &DAT_80199154.unk15da8[layer->unk4 & 0x3f];
+        light = &scene_display_sys.unk15da8[layer->unk4 & 0x3f];
     } else {
         mat->t[0] = pos->vx;
         mat->t[1] = pos->vy;
         mat->t[2] = pos->vz;
-        light = &DAT_80199154.unk15da8
-            [((MapLayer *)((u8 *)&DAT_801d4464.cells[DAT_80199154.unk15af8.vz >> 11]
-                                                      [DAT_80199154.unk15af8.vx >> 11] +
-                           DAT_801b24e4.unk160))->unk4 & 0x3f];
+        light = &scene_display_sys.unk15da8
+            [((MapLayer *)((u8 *)&map_world.cells[scene_display_sys.unk15af8.vz >> 11]
+                                                      [scene_display_sys.unk15af8.vx >> 11] +
+                           cur_avatar_status.unk160))->unk4 & 0x3f];
     }
     if (mode & 0x80) {
         mode &= 0x7f;
@@ -833,7 +838,7 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     }
     matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
-        other = &DAT_80199154.unk15da8[light2];
+        other = &scene_display_sys.unk15da8[light2];
         if (other->unk50.m[0][0] != -1) {
             fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
             gte_SetColorMatrix(&blend);
@@ -876,7 +881,7 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     }
     gte_SetRotMatrix(mat);
     gte_SetTransMatrix(mat);
-    file = DAT_80199154.models[id];
+    file = scene_display_sys.models[id];
     model = file + ((ModelFile *)file)->vertices;
     scratch->model = model;
     if (anim < 128) {
@@ -929,9 +934,9 @@ draw:
                 gte_rtps();
                 gte_stsxy(&screen->sxy);
                 gte_stszotz(&screen->z);
-                if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
-                    screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
-                                  (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+                if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
+                    screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
+                                  (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
                 } else {
                     screen->fog = 0;
                 }
@@ -973,9 +978,9 @@ draw:
                 gte_rtps();
                 gte_stsxy(&screen->sxy);
                 gte_stszotz(&screen->z);
-                if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
-                    screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
-                                  (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+                if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
+                    screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
+                                  (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
                 } else {
                     screen->fog = 0;
                 }
@@ -1008,9 +1013,9 @@ draw:
         render_enqueue_textured_tmd(n, depth);
     }
 done:
-    DAT_80199154.pool->next = scratch->next;
-    DAT_80199154.unk159bc = scratch->draw.count.unk4;
-    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    scene_display_sys.pool->next = scratch->next;
+    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
 /*
@@ -1051,23 +1056,23 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     mat = &m;
     scratch = SCRATCH;
     SCRATCH->draw.count.clip = 100;
-    SCRATCH->screen = DAT_80199154.screen;
-    SCRATCH->unk48 = DAT_80199154.screen;
-    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
-    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
-    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
-    SCRATCH->next = DAT_80199154.pool->next;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
-    SCRATCH->end = DAT_80199154.pool->end;
-    gte_SetRotMatrix(&DAT_80199154.unk159f8);
-    gte_SetTransMatrix(&DAT_80199154.unk159f8);
-    light = DAT_80199154.unk15da8;
+    SCRATCH->screen = scene_display_sys.screen;
+    SCRATCH->unk48 = scene_display_sys.screen;
+    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
+    SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
+    SCRATCH->next = scene_display_sys.pool->next;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
+    SCRATCH->end = scene_display_sys.pool->end;
+    gte_SetRotMatrix(&scene_display_sys.unk159f8);
+    gte_SetTransMatrix(&scene_display_sys.unk159f8);
+    light = scene_display_sys.unk15da8;
     if (view != NULL) {
-        delta.vx = pos->vx - DAT_80199154.unk15af8.vx;
-        delta.vy = pos->vy - DAT_80199154.unk15af8.vy;
-        delta.vz = pos->vz - DAT_80199154.unk15af8.vz;
+        delta.vx = pos->vx - scene_display_sys.unk15af8.vx;
+        delta.vy = pos->vy - scene_display_sys.unk15af8.vy;
+        delta.vz = pos->vz - scene_display_sys.unk15af8.vz;
         turn = ratan2(delta.vz, delta.vx) - 1024;
-        angle = (DAT_801b24e4.unk124.vy - turn) & 0xfff;
+        angle = (cur_avatar_status.unk124.vy - turn) & 0xfff;
         if ((u32)(angle - 2048) < 1536 || (u32)(angle - 513) < 1536) {
             return;
         }
@@ -1091,7 +1096,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
             mat->t[1] >>= 1;
             mat->t[2] >>= 1;
         }
-        light = DAT_80199154.unk15da8;
+        light = scene_display_sys.unk15da8;
     } else {
         m.t[0] = pos->vx;
         m.t[1] = pos->vy;
@@ -1102,7 +1107,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     }
     matrix_set_rotation_yxz(rotation, mat);
     if (light2 != 0xff) {
-        other = &DAT_80199154.unk15da8[light2];
+        other = &scene_display_sys.unk15da8[light2];
         if (other->unk50.m[0][0] != -1) {
             fixed_lerp_nine_halfwords_q12((MATRIX *)&light->unk50, (MATRIX *)&other->unk50, &blend, t);
             gte_SetColorMatrix(&blend);
@@ -1155,7 +1160,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     }
     gte_SetRotMatrix(mat);
     gte_SetTransMatrix(mat);
-    file = DAT_80199154.models[id];
+    file = scene_display_sys.models[id];
     model = file + ((ModelFile *)file)->vertices;
     scratch->model = model;
     if (anim < 128) {
@@ -1207,9 +1212,9 @@ draw:
         }
     }
     render_enqueue_distant_tmd(n, depth, shift, dist);
-    DAT_80199154.pool->next = scratch->next;
-    DAT_80199154.unk159bc = scratch->draw.count.unk4;
-    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    scene_display_sys.pool->next = scratch->next;
+    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
 /*
@@ -1238,25 +1243,25 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
     m.t[2] = 0;
     matrix_set_rotation_yxz(rotation, &m);
     scratch = SCRATCH;
-    gte_MulMatrix0(&DAT_80199154.unk159f8, &m, &m);
+    gte_MulMatrix0(&scene_display_sys.unk159f8, &m, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
-    light = &DAT_80199154.unk15da8[light_id & 0x7f];
+    light = &scene_display_sys.unk15da8[light_id & 0x7f];
     gte_SetColorMatrix(&light->unk50);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
     gte_SetLightMatrix(&light->unk0[0]);
-    file = DAT_80199154.models[id];
+    file = scene_display_sys.models[id];
     model = file + ((ModelFile *)file)->vertices;
-    SCRATCH->ot = DAT_80199154.ot;
-    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
-    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
-    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
+    SCRATCH->ot = scene_display_sys.ot;
+    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
+    SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->model = model;
-    SCRATCH->next = DAT_80199154.pool->next;
-    SCRATCH->end = DAT_80199154.pool->end;
-    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->next = scene_display_sys.pool->next;
+    SCRATCH->end = scene_display_sys.pool->end;
+    SCRATCH->screen = scene_display_sys.screen;
     SCRATCH->draw.count.clut = 0;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     if (animation_prepare_asset_vertices(owner, id, anim, time, ((ModelData *)model)->parts[0].unk4) == 0) {
         u8 *vertex;
         ScreenVertex *screen;
@@ -1293,9 +1298,9 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
         }
     }
     render_enqueue_tmd_fixed_depth(0, depth, shade);
-    DAT_80199154.pool->next = scratch->next;
-    DAT_80199154.unk159bc = scratch->draw.count.unk4;
-    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    scene_display_sys.pool->next = scratch->next;
+    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
 ADDRESS(0x80040568, 0x80)
@@ -1304,10 +1309,10 @@ u16 map_object_asset_index(u16 id)
     if (id < 300) {
         return id + 256;
     }
-    if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 1 && DAT_8018fad4.previous[0] != 0xff) {
-        return id + (DAT_8018fad4.previous[0] * 32 + 256);
+    if ((s16)asset_status.loading == 1 && asset_status.unk17 == 1 && asset_status.previous[0] != 0xff) {
+        return id + (asset_status.previous[0] * 32 + 256);
     }
-    return id + (DAT_8018fad4.area[0] * 32 + 256);
+    return id + (asset_status.area[0] * 32 + 256);
 }
 
 ADDRESS(0x800405e8, 0x70)
@@ -1316,7 +1321,7 @@ void resource_registry_get(u16 id, u8 **out)
     u8 *model;
     u8 state;
 
-    model = DAT_80199154.models[id];
+    model = scene_display_sys.models[id];
     *out = model;
     if (id < 104) {
         return;
@@ -1345,11 +1350,11 @@ u8 map_cell_layer_mask(VECTOR *pos)
     s32 row;
     s32 col;
 
-    row = (pos->vz >> 11) + DAT_80199154.grid_z;
+    row = (pos->vz >> 11) + scene_display_sys.grid_z;
     if (row >= 0 && row < 25) {
-        col = (pos->vx >> 11) + DAT_80199154.grid_x;
+        col = (pos->vx >> 11) + scene_display_sys.grid_x;
         if (col >= 0 && col < 25) {
-            return DAT_80199154.grid[row][col];
+            return scene_display_sys.grid[row][col];
         }
         return 0;
     }
@@ -1360,8 +1365,8 @@ ADDRESS(0x80040708, 0xc4)
 u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
 {
     u8 cells = 0;
-    s32 row = (pos->vz >> 11) + DAT_80199154.grid_z - radius;
-    s32 col0 = (pos->vx >> 11) + DAT_80199154.grid_x - radius;
+    s32 row = (pos->vz >> 11) + scene_display_sys.grid_z - radius;
+    s32 col0 = (pos->vx >> 11) + scene_display_sys.grid_x - radius;
     s32 col;
     s32 i;
     s32 j;
@@ -1374,7 +1379,7 @@ u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
             j = radius;
             do {
                 if (col >= 0 && (u32)col < 25) {
-                    cells |= DAT_80199154.grid[row][col];
+                    cells |= scene_display_sys.grid[row][col];
                 }
                 col++;
                 j--;
@@ -1392,9 +1397,9 @@ s32 map_cell_visible(VECTOR *pos, s32 range_x, s32 range_z)
     s32 z = pos->vz >> 11;
     s32 x;
 
-    if (z - range_z <= DAT_80199154.unk15b14 && DAT_80199154.unk15b14 <= z + range_z) {
+    if (z - range_z <= scene_display_sys.unk15b14 && scene_display_sys.unk15b14 <= z + range_z) {
         x = pos->vx >> 11;
-        if (x - range_x <= DAT_80199154.unk15b10 && DAT_80199154.unk15b10 <= x + range_x) {
+        if (x - range_x <= scene_display_sys.unk15b10 && scene_display_sys.unk15b10 <= x + range_x) {
             return 1;
         }
     }
@@ -1406,8 +1411,8 @@ void resource_tmd_queue_read(s32 file, s32 entry, s32 id)
 {
     u8 *model;
 
-    model = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, cd_archive_entry_size(file, entry),
-                                        &DAT_80199154.models[id]);
+    model = memory_arena_allocate_block((HeapBlock *)resource_space, cd_archive_entry_size(file, entry),
+                                        &scene_display_sys.models[id]);
     if (model != NULL) {
         memory_block_set_kind(model, 3);
         memory_block_set_tag(model, id);
@@ -1424,7 +1429,7 @@ void resource_vab_update_range(s32 file, s32 entry, s32 bank, s32 count)
 
     wanted = SCRATCH->u.load.sound_wanted;
     for (i = entry, end = count + entry; i < end; i++, bank++) {
-        SoundBank *record = &DAT_801b09fc.banks[bank];
+        SoundBank *record = &sound_status.banks[bank];
         SoundSlot *slot = record->slot;
 
         if (*wanted++ != 0) {
@@ -1450,7 +1455,7 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
     wanted = SCRATCH->u.load.model_wanted;
     for (i = entry, end = count + entry; i < end; i++, id++) {
         if (*wanted++ != 0) {
-            model = DAT_80199154.models[id];
+            model = scene_display_sys.models[id];
             if (model == NULL) {
                 resource_tmd_queue_read(file, i, id);
                 continue;
@@ -1459,7 +1464,7 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
                 memory_block_set_kind(model, 2);
             }
         } else {
-            model = DAT_80199154.models[id];
+            model = scene_display_sys.models[id];
             if (model != NULL && memory_block_kind(model) != 3) {
                 memory_block_set_kind(model, 1);
             }
@@ -1504,12 +1509,12 @@ void render_scene_and_update_resources(void)
     scratch = SCRATCH;
     SCRATCH->u.load.model_wanted = SCRATCH->u.load.models;
     SCRATCH->u.load.sound_wanted = SCRATCH->u.load.sounds;
-    SCRATCH->ot = DAT_80199154.ot;
-    SCRATCH->ot2 = DAT_80199154.ot2;
+    SCRATCH->ot = scene_display_sys.ot;
+    SCRATCH->ot2 = scene_display_sys.ot2;
     repeat_store_word((u32 *)SCRATCH->u.load.models, 0, 0x20);
     repeat_store_word((u32 *)SCRATCH->u.load.sounds, 0, 0x18);
     SCRATCH->draw.count.clut = 0;
-    obj = DAT_80185da8.objects;
+    obj = actor_status.objects;
     for (i = 199; i != -1; i--, obj++) {
         if (obj->unk9 != 1) {
             continue;
@@ -1533,33 +1538,33 @@ void render_scene_and_update_resources(void)
             at = actor_resolve_group_position(obj, &pos);
             if (obj->unk28 & 0x20) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                render_world_model(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle,
-                                   &obj->scale, &obj->unk5c, &DAT_8007e4c4, obj->unkc, obj->unk18,
+                render_world_model(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle, &obj->scale,
+                                   &obj->unk5c, &render_world_identity_matrix, obj->unkc, obj->unk18,
                                    obj->unk14, obj->unk16, obj->unk13, obj->unk15);
             } else {
                 scratch->u.load.angle.vx = obj->angle.vx;
                 scratch->u.load.angle.vy = obj->angle.vy + 2048;
                 scratch->u.load.angle.vz = obj->angle.vz;
                 render_world_model(obj->unk3, obj->unk1 + 128, at, &scratch->u.load.angle,
-                                   &obj->scale, &obj->unk5c, &DAT_80199154.unk159f8, obj->unkc,
+                                   &obj->scale, &obj->unk5c, &scene_display_sys.unk159f8, obj->unkc,
                                    obj->unk18, obj->unk14, obj->unk16, obj->unk13, obj->unk15);
             }
         }
-        def = &DAT_80185da8.defs[obj->unk2];
+        def = &actor_status.defs[obj->unk2];
         scratch->u.load.sounds[def->unk7[0]] = 1;
         scratch->u.load.sounds[def->unk7[1]] = 1;
         scratch->u.load.models[obj->unk1] = 1;
     }
     resource_tmd_update_range(0, 0, 0x80, 0x80);
     resource_vab_update_range(2, 0x91, 0x33, 0x60);
-    now = DAT_801c12e4.frames;
+    now = cdrom_ctl.frames;
     repeat_store_word((u32 *)scratch->u.load.models, 0, 0x53);
     repeat_store_word((u32 *)scratch->u.load.sounds, 0, 8);
-    if (DAT_80199154.unk15996 == 0) {
-        DAT_8018fad4.unk20 = NULL;
+    if (scene_display_sys.unk15996 == 0) {
+        asset_status.unk20 = NULL;
     }
     scratch->draw.count.clut = 0;
-    rec = DAT_8018fb3c.objects;
+    rec = map_objects_slots.objects;
     for (i = 395; i != -1; i--, rec++) {
         if (rec->unk6 == 0xff) {
             continue;
@@ -1586,12 +1591,12 @@ void render_scene_and_update_resources(void)
             pos.vz = ((rec->arg.m.unk3c << 11) + rec->pos.vz) >> 1;
             pos.vy = (rec->pos.vy - (rec->arg.m.unk3e << 11)) >> 1;
             render_distant_world_model(rec->unk0, id, &pos, &scratch->u.load.angle, &rec->scale,
-                                       &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
+                                       &rec->arg.m.unk34, &scene_display_sys.unk159f8, rec->unk1, rec->unka,
                                        rec->unk5, rec->unk10, rec->unk2, rec->unke);
             rec->unk3 |= 0x80;
             break;
         case 0xf0:
-            if (DAT_80199154.unk15996 == 0) {
+            if (scene_display_sys.unk15996 == 0) {
                 break;
             }
             if (map_cell_visible(&rec->pos, rec->arg.v.unk38, rec->arg.v.unk39) == 0) {
@@ -1604,26 +1609,26 @@ void render_scene_and_update_resources(void)
                                        rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
                 rec->unk3 |= 0x80;
             }
-            DAT_8018fad4.unk24 = *rec;
-            DAT_8018fad4.unk20 = &DAT_8018fad4.unk24;
+            asset_status.unk24 = *rec;
+            asset_status.unk20 = &asset_status.unk24;
             break;
         case 0x1f:
             if (player_camera_within_map_region(rec->pos.vx >> 11, rec->pos.vz >> 11, rec->arg.s.unk38,
                                                 rec->arg.s.unk39, 0x8000) != 0) {
-                sound = &DAT_801b09fc.effects[rec->arg.s.unk3a + 496];
+                sound = &sound_status.effects[rec->arg.s.unk3a + 496];
                 if (sound->bank >= 147 && sound->bank < 179) {
                     scratch->u.load.sounds[sound->bank - 147] = 1;
                 }
                 if (rec->arg.s.unk40 - now < 0) {
                     rec->arg.s.unk40 = now + rec->arg.s.unk3e * 6;
                     range = rec->arg.s.unk38 << 10;
-                    dist = DAT_801b24e4.pos.vx - (range + rec->pos.vx);
+                    dist = cur_avatar_status.pos.vx - (range + rec->pos.vx);
                     if (dist < 0) {
                         dist = -dist;
                     }
                     near = range - dist;
                     range = rec->arg.s.unk39 << 10;
-                    dist = DAT_801b24e4.pos.vz - (range + rec->pos.vz);
+                    dist = cur_avatar_status.pos.vz - (range + rec->pos.vz);
                     if (dist < 0) {
                         dist = -dist;
                     }
@@ -1641,7 +1646,7 @@ void render_scene_and_update_resources(void)
                         volume = rec->arg.s.unk3b * near / range;
                     }
                     if (rec->arg.s.unk3d & 1) {
-                        dist = DAT_801b24e4.pos.vy - rec->pos.vy;
+                        dist = cur_avatar_status.pos.vy - rec->pos.vy;
                         if (dist < 0) {
                             dist = -dist;
                         }
@@ -1661,9 +1666,9 @@ void render_scene_and_update_resources(void)
                 if (!(cells & rec->unk0) && !(rec->unk3 & 8)) {
                     break;
                 }
-                rec_def = &DAT_8018fb3c.defs[rec->unk6];
+                rec_def = &map_objects_slots.defs[rec->unk6];
             } else {
-                rec_def = &DAT_8018fb3c.defs[rec->unk6];
+                rec_def = &map_objects_slots.defs[rec->unk6];
                 cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
                 if (!(cells & rec->unk0) && !(rec->unk3 & 8)) {
                     break;
@@ -1690,15 +1695,15 @@ void render_scene_and_update_resources(void)
             if (rec->unk3 & 0x40) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
                 render_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                                   &rec->arg.m.unk34, &DAT_80199154.unk15ab8, rec->unk1, rec->unka,
+                                   &rec->arg.m.unk34, &scene_display_sys.unk15ab8, rec->unk1, rec->unka,
                                    rec->unk5, rec->unk10, flags, rec->unke);
             } else if (rec->unk3 & 8) {
                 render_distant_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                                           &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
-                                           rec->unk5, rec->unk10, flags, rec->unke);
+                                           &rec->arg.m.unk34, &scene_display_sys.unk159f8, rec->unk1,
+                                           rec->unka, rec->unk5, rec->unk10, flags, rec->unke);
             } else {
                 render_world_model(rec->unk0, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
-                                   &rec->arg.m.unk34, &DAT_80199154.unk159f8, rec->unk1, rec->unka,
+                                   &rec->arg.m.unk34, &scene_display_sys.unk159f8, rec->unk1, rec->unka,
                                    rec->unk5, rec->unk10, flags, rec->unke);
             }
             rec->unk3 |= 0x80;
@@ -1709,21 +1714,21 @@ void render_scene_and_update_resources(void)
     scratch->u.load.models[264] = 0;
     resource_tmd_update_range(0, 0x80, 0x100, 0x118);
     scratch->u.load.model_wanted = &scratch->u.load.models[300];
-    if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk17 == 1
-        && DAT_8018fad4.previous[0] != 0xff) {
-        resource_tmd_update_range(1, DAT_8018fad4.previous[0] * 32, DAT_8018fad4.previous[0] * 32 + 556, 32);
+    if ((s16)asset_status.loading == 1 && asset_status.unk17 == 1
+        && asset_status.previous[0] != 0xff) {
+        resource_tmd_update_range(1, asset_status.previous[0] * 32, asset_status.previous[0] * 32 + 556, 32);
     } else {
-        resource_tmd_update_range(1, DAT_8018fad4.area[0] * 32, DAT_8018fad4.area[0] * 32 + 556, 32);
+        resource_tmd_update_range(1, asset_status.area[0] * 32, asset_status.area[0] * 32 + 556, 32);
     }
     resource_vab_update_range(2, 0xf1, 0x93, 0x20);
-    if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.step > 0
-        && (rec = DAT_8018fad4.unk20) != NULL) {
+    if ((s16)asset_status.loading == 1 && asset_status.step > 0
+        && (rec = asset_status.unk20) != NULL) {
         id = rec->unk6 - 221;
         render_animated_object(id, &rec->angle, &rec->arg.v.unk34, rec->unk1, rec->unka,
                                rec->arg.v.unk3c, rec->arg.v.unk3b, 0x1fff - rec->arg.v.unk3a);
         rec->unk3 |= 0x80;
     }
-    obj4c = DAT_801b77ec.objects;
+    obj4c = effect_status.objects;
     for (i = 127; i != -1; i--, obj4c++) {
         if (obj4c->unk0 == 0xff) {
             continue;
@@ -1741,17 +1746,17 @@ void render_scene_and_update_resources(void)
             scratch->u.load.angle.vy = obj4c->angle.vy + 2048;
             scratch->u.load.angle.vz = obj4c->angle.vz;
             render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &scratch->u.load.angle,
-                               &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk159f8, obj4c->unk4,
+                               &obj4c->scale, &obj4c->unk40, &scene_display_sys.unk159f8, obj4c->unk4,
                                obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 4:
             render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                               &obj4c->scale, &obj4c->unk40, &DAT_8007e4c4, obj4c->unk4,
+                               &obj4c->scale, &obj4c->unk40, &render_world_identity_matrix, obj4c->unk4,
                                obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 8:
             render_world_model(obj4c->unka, obj4c->unk3 + 40, &obj4c->pos, &obj4c->angle,
-                               &obj4c->scale, &obj4c->unk40, &DAT_80199154.unk15ab8, obj4c->unk4,
+                               &obj4c->scale, &obj4c->unk40, &scene_display_sys.unk15ab8, obj4c->unk4,
                                obj4c->unk14, obj4c->unkc, obj4c->unk12, obj4c->unk9, -60);
             break;
         case 0xc:
@@ -1761,7 +1766,7 @@ void render_scene_and_update_resources(void)
             break;
         }
     }
-    effect = DAT_80182968;
+    effect = map_placed_entries;
     scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
     scratch->draw.count.clut = 0;
     for (i = 127; i != -1; i--, effect++) {
@@ -1770,21 +1775,21 @@ void render_scene_and_update_resources(void)
         }
         if (effect->id & 0x8000) {
             render_distant_world_model(effect->unk2, (effect->id & 0x7fff) + 40, &effect->pos,
-                                       &scratch->u.load.angle, NULL, NULL, &DAT_8007e4c4, effect->unk5 + 128,
-                                       0, 0x3c, 0x1000, 7, 0);
+                                       &scratch->u.load.angle, NULL, NULL, &render_world_identity_matrix,
+                                       effect->unk5 + 128, 0, 0x3c, 0x1000, 7, 0);
         } else if (map_cell_layer_mask(&effect->pos) & effect->unk2) {
             render_world_model(effect->unk2, effect->id + 40, &effect->pos, &scratch->u.load.angle,
-                               NULL, NULL, &DAT_80199154.unk15ab8, effect->unk5 + 128, 0, 0x36, 0x1000,
+                               NULL, NULL, &scene_display_sys.unk15ab8, effect->unk5 + 128, 0, 0x36, 0x1000,
                                5, 0);
         }
-        if (effect->unk4 != 0 && DAT_80182964 % effect->unk4 == 0) {
+        if (effect->unk4 != 0 && map_placed_frame_counter % effect->unk4 == 0) {
             effect->unk5++;
             if (effect->unk5 >= effect->unk3) {
                 effect->unk5 = 0;
             }
         }
     }
-    DAT_80182964++;
+    map_placed_frame_counter++;
 }
 
 ADDRESS(0x80041ad4, 0x2c8)
@@ -1793,19 +1798,19 @@ void render_sprite_record(SpriteRec *sprite, u16 mode, u8 *rgb)
     DR_MODE *dr;
     SPRT *p;
 
-    dr = (DR_MODE *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(DR_MODE);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    dr = (DR_MODE *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(DR_MODE);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
-    p = (SPRT *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(SPRT);
-    if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+    scene_display_sys.prim_count++;
+    p = (SPRT *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(SPRT);
+    if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
         return;
     }
-    DAT_80199154.prim_count++;
-    if (DAT_8018fad4.area[0] == 10 && mode == 2) {
+    scene_display_sys.prim_count++;
+    if (asset_status.area[0] == 10 && mode == 2) {
         p->x0 = sprite->x + 1;
         p->y0 = sprite->y + 1;
     } else {
@@ -1834,9 +1839,9 @@ void notification_draw(void)
     u8 bright[4];
     u8 dim[4];
 
-    sprite = DAT_80081928;
-    bright[0] = bright[1] = bright[2] = DAT_80199154.message_level;
-    dim[0] = dim[2] = dim[1] = DAT_80199154.message_level >> 2;
+    sprite = notification_quads;
+    bright[0] = bright[1] = bright[2] = scene_display_sys.message_level;
+    dim[0] = dim[2] = dim[1] = scene_display_sys.message_level >> 2;
     for (; sprite->visible != 0xff; sprite++) {
         if (sprite->visible & 1) {
             render_sprite_record(sprite, 1, bright);
@@ -1856,8 +1861,8 @@ void render_hud_sprites(void)
     SpriteRec *sprite;
     u8 rgb[4];
 
-    sprite = DAT_800819b4;
-    rgb[0] = rgb[1] = rgb[2] = DAT_801b24e4.unkfd;
+    sprite = hud_sprites;
+    rgb[0] = rgb[1] = rgb[2] = cur_avatar_status.unkfd;
     for (; sprite->visible != 0xff; sprite++) {
         if (sprite->visible != 0) {
             render_sprite_record(sprite, sprite->mode, rgb);
@@ -1872,12 +1877,12 @@ void notify_enqueue(s32 message, ...)
 
     va_start(args, message);
     if (message < 240) {
-        if (DAT_80199154.message_queue[DAT_80199154.message_head] == 0xff) {
-            DAT_80199154.message_queue[DAT_80199154.message_head] = message;
+        if (scene_display_sys.message_queue[scene_display_sys.message_head] == 0xff) {
+            scene_display_sys.message_queue[scene_display_sys.message_head] = message;
             if (message == 25) {
-                DAT_80199154.message_arg[DAT_80199154.message_head] = va_arg(args, s32);
+                scene_display_sys.message_arg[scene_display_sys.message_head] = va_arg(args, s32);
             }
-            DAT_80199154.message_head = (DAT_80199154.message_head + 1) & 7;
+            scene_display_sys.message_head = (scene_display_sys.message_head + 1) & 7;
         }
     }
     va_end(args);
@@ -1895,61 +1900,62 @@ void notification_update(void)
     u32 message;
     u8 digits[20];
 
-    switch (DAT_80199154.message_state) {
+    switch (scene_display_sys.message_state) {
     case 0:
-        message = DAT_80199154.message_queue[DAT_80199154.message_tail];
+        message = scene_display_sys.message_queue[scene_display_sys.message_tail];
         if (message == 0xff) {
             break;
         }
-        DAT_80199154.message_state = 1;
-        DAT_80199154.message_timer = 15;
-        DAT_80199154.message_level = 0;
+        scene_display_sys.message_state = 1;
+        scene_display_sys.message_timer = 15;
+        scene_display_sys.message_level = 0;
         if (message == 25) {
-            DAT_80081928[0].visible = 0;
-            DAT_80081928[1].visible = 3;
-            DAT_80081928[1].u = 0x80;
-            DAT_80081928[1].v = 0x62;
-            menu_format_number(DAT_80199154.message_arg[DAT_80199154.message_tail], 4, 0, 0, digits);
-            DAT_80081928[2].visible = 3;
-            notification_digit_set_u(&DAT_80081928[2], digits[3]);
-            DAT_80081928[3].visible = 3;
-            notification_digit_set_u(&DAT_80081928[3], digits[2]);
-            DAT_80081928[4].visible = 3;
-            notification_digit_set_u(&DAT_80081928[4], digits[1]);
-            DAT_80081928[5].visible = 3;
-            notification_digit_set_u(&DAT_80081928[5], digits[0]);
+            notification_quads[0].visible = 0;
+            notification_quads[1].visible = 3;
+            notification_quads[1].u = 0x80;
+            notification_quads[1].v = 0x62;
+            menu_format_number(scene_display_sys.message_arg[scene_display_sys.message_tail], 4, 0, 0,
+                               digits);
+            notification_quads[2].visible = 3;
+            notification_digit_set_u(&notification_quads[2], digits[3]);
+            notification_quads[3].visible = 3;
+            notification_digit_set_u(&notification_quads[3], digits[2]);
+            notification_quads[4].visible = 3;
+            notification_digit_set_u(&notification_quads[4], digits[1]);
+            notification_quads[5].visible = 3;
+            notification_digit_set_u(&notification_quads[5], digits[0]);
         } else {
-            DAT_80081928[0].visible = 3;
-            DAT_80081928[1].visible = DAT_80081928[2].visible = DAT_80081928[3].visible =
-                DAT_80081928[4].visible = DAT_80081928[5].visible = 0;
-            DAT_80081928[0].u = message / 18 * 128;
-            DAT_80081928[0].v = (u8)(message % 18) * 14;
+            notification_quads[0].visible = 3;
+            notification_quads[1].visible = notification_quads[2].visible = notification_quads[3].visible =
+                notification_quads[4].visible = notification_quads[5].visible = 0;
+            notification_quads[0].u = message / 18 * 128;
+            notification_quads[0].v = (u8)(message % 18) * 14;
         }
         break;
     case 1:
-        DAT_80199154.message_level += 20;
-        if (DAT_80199154.message_level >= 100) {
-            DAT_80199154.message_state = 2;
+        scene_display_sys.message_level += 20;
+        if (scene_display_sys.message_level >= 100) {
+            scene_display_sys.message_state = 2;
         }
         break;
     case 2:
-        if (--DAT_80199154.message_timer == 0) {
-            DAT_80199154.message_state = 3;
+        if (--scene_display_sys.message_timer == 0) {
+            scene_display_sys.message_state = 3;
         }
         break;
     case 3:
-        DAT_80199154.message_level -= 20;
-        if (DAT_80199154.message_level == 0) {
-            message = DAT_80081928[0].visible = DAT_80081928[1].visible =
-                DAT_80081928[2].visible = DAT_80081928[3].visible = DAT_80081928[4].visible =
-                    DAT_80081928[5].visible =
-                        DAT_80199154.message_queue[DAT_80199154.message_tail];
+        scene_display_sys.message_level -= 20;
+        if (scene_display_sys.message_level == 0) {
+            message = notification_quads[0].visible = notification_quads[1].visible =
+                notification_quads[2].visible = notification_quads[3].visible = notification_quads[4].visible =
+                    notification_quads[5].visible =
+                        scene_display_sys.message_queue[scene_display_sys.message_tail];
             do {
-                DAT_80199154.message_queue[DAT_80199154.message_tail] = 0xff;
-                DAT_80199154.message_tail = (DAT_80199154.message_tail + 1) & 7;
-            } while (message == DAT_80199154.message_queue[DAT_80199154.message_tail]
+                scene_display_sys.message_queue[scene_display_sys.message_tail] = 0xff;
+                scene_display_sys.message_tail = (scene_display_sys.message_tail + 1) & 7;
+            } while (message == scene_display_sys.message_queue[scene_display_sys.message_tail]
                      && message != 25);
-            DAT_80199154.message_state = 0;
+            scene_display_sys.message_state = 0;
         }
         break;
     }
@@ -1960,7 +1966,7 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
 
-    DAT_8009c2e0.b = DAT_8009c2e0.g = DAT_8009c2e0.r = DAT_801b24e4.unkfd;
+    map_textured_primitive_color.b = map_textured_primitive_color.g = map_textured_primitive_color.r = cur_avatar_status.unkfd;
     display_set_view_transform(pos, angle);
     vram_scroll_update();
     notification_update();
@@ -1968,54 +1974,54 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
     display_begin_frame();
     pool_mark_allocated();
     render_player_weapon();
-    DAT_800819b4[13].visible = DAT_800819b4[14].visible = 0;
-    DAT_80081c20[0].visible = DAT_801b24e4.unkfa & 1;
-    DAT_80081c20[1].visible = (DAT_801b24e4.unkfa & 2) >> 1;
-    DAT_800819b4[0].visible = DAT_800819b4[1].visible = DAT_800819b4[2].visible =
-        DAT_800819b4[3].visible = DAT_800819b4[4].visible = DAT_800819b4[5].visible =
-            DAT_800819b4[6].visible = DAT_800819b4[7].visible = DAT_800819b4[8].visible =
-                DAT_800819b4[9].visible = DAT_800819b4[10].visible = DAT_800819b4[11].visible =
-                    DAT_800819b4[12].visible = DAT_801b24e4.unkf9 & 1;
-    DAT_800819b4[15].visible = DAT_800819b4[16].visible = DAT_800819b4[17].visible =
-        DAT_800819b4[18].visible = DAT_800819b4[19].visible = DAT_800819b4[20].visible =
-            DAT_800819b4[21].visible = DAT_800819b4[22].visible = DAT_800819b4[23].visible =
-                DAT_800819b4[24].visible = DAT_800819b4[25].visible = DAT_800819b4[26].visible =
-                    DAT_800819b4[27].visible = DAT_800819b4[28].visible =
-                        DAT_800819b4[29].visible = (DAT_801b24e4.unkf9 & 2) >> 1;
-    i = DAT_801b24e4.unkfa - 1;
+    hud_sprites[13].visible = hud_sprites[14].visible = 0;
+    render_model_rows[0].visible = cur_avatar_status.unkfa & 1;
+    render_model_rows[1].visible = (cur_avatar_status.unkfa & 2) >> 1;
+    hud_sprites[0].visible = hud_sprites[1].visible = hud_sprites[2].visible =
+        hud_sprites[3].visible = hud_sprites[4].visible = hud_sprites[5].visible =
+            hud_sprites[6].visible = hud_sprites[7].visible = hud_sprites[8].visible =
+                hud_sprites[9].visible = hud_sprites[10].visible = hud_sprites[11].visible =
+                    hud_sprites[12].visible = cur_avatar_status.unkf9 & 1;
+    hud_sprites[15].visible = hud_sprites[16].visible = hud_sprites[17].visible =
+        hud_sprites[18].visible = hud_sprites[19].visible = hud_sprites[20].visible =
+            hud_sprites[21].visible = hud_sprites[22].visible = hud_sprites[23].visible =
+                hud_sprites[24].visible = hud_sprites[25].visible = hud_sprites[26].visible =
+                    hud_sprites[27].visible = hud_sprites[28].visible =
+                        hud_sprites[29].visible = (cur_avatar_status.unkf9 & 2) >> 1;
+    i = cur_avatar_status.unkfa - 1;
     if (i >= 0) {
-        DAT_8009c2ec += angle_shortest_delta(DAT_80081c20[i].angle.vy, DAT_80199154.unk15b08.vy);
-        if (DAT_8009c2ec > 0) {
-            DAT_8009c2ec -= (DAT_8009c2ec + 7) >> 3;
-        } else if (DAT_8009c2ec < 0) {
-            DAT_8009c2ec -= (DAT_8009c2ec - 7) >> 3;
+        render_model_yaw_smoothing_accumulator += angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.unk15b08.vy);
+        if (render_model_yaw_smoothing_accumulator > 0) {
+            render_model_yaw_smoothing_accumulator -= (render_model_yaw_smoothing_accumulator + 7) >> 3;
+        } else if (render_model_yaw_smoothing_accumulator < 0) {
+            render_model_yaw_smoothing_accumulator -= (render_model_yaw_smoothing_accumulator - 7) >> 3;
         }
-        DAT_80081c20[i == 0].angle.vy = DAT_80081c20[i].angle.vy =
-            DAT_80081c20[i].angle.vy + (DAT_8009c2ec >> 6);
-        DAT_80081c20[i == 0].angle.vx = DAT_80081c20[i].angle.vx = DAT_80199154.unk15b08.vx;
+        render_model_rows[i == 0].angle.vy = render_model_rows[i].angle.vy =
+            render_model_rows[i].angle.vy + (render_model_yaw_smoothing_accumulator >> 6);
+        render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx = scene_display_sys.unk15b08.vx;
     }
-    if (DAT_801b24e4.unkf9 == 1) {
-        DAT_800819b4[4].unka = DAT_800819b4[4].w = DAT_801b24e4.hp * 48 / DAT_801b24e4.hp_max;
-        DAT_800819b4[5].unka = DAT_800819b4[5].w = DAT_801b24e4.unk1e * 48 / 5000;
-        DAT_800819b4[6].unka = DAT_800819b4[6].w = DAT_801b24e4.unk1c * 48 / DAT_801b24e4.unk1a;
-        DAT_800819b4[7].unka = DAT_800819b4[7].w = DAT_801b24e4.unk22 * 48 / 5000;
-    } else if (DAT_801b24e4.unkf9 == 2) {
+    if (cur_avatar_status.unkf9 == 1) {
+        hud_sprites[4].unka = hud_sprites[4].w = cur_avatar_status.hp * 48 / cur_avatar_status.hp_max;
+        hud_sprites[5].unka = hud_sprites[5].w = cur_avatar_status.unk1e * 48 / 5000;
+        hud_sprites[6].unka = hud_sprites[6].w = cur_avatar_status.unk1c * 48 / cur_avatar_status.unk1a;
+        hud_sprites[7].unka = hud_sprites[7].w = cur_avatar_status.unk22 * 48 / 5000;
+    } else if (cur_avatar_status.unkf9 == 2) {
         u16 hp;
         u16 mp;
         s32 n;
 
-        hp = DAT_801b24e4.hp % 1000;
+        hp = cur_avatar_status.hp % 1000;
         n = hp;
-        DAT_800819b4[17].u = n / 100 * 12 + 0x80;
-        DAT_800819b4[18].u = n % 100 / 10 * 12 + 0x80;
-        DAT_800819b4[19].u = n % 10 * 12 + 0x80;
-        mp = DAT_801b24e4.unk1c % 1000;
+        hud_sprites[17].u = n / 100 * 12 + 0x80;
+        hud_sprites[18].u = n % 100 / 10 * 12 + 0x80;
+        hud_sprites[19].u = n % 10 * 12 + 0x80;
+        mp = cur_avatar_status.unk1c % 1000;
         n = mp;
-        DAT_800819b4[22].u = n / 100 * 12 + 0x80;
-        DAT_800819b4[23].u = n % 100 / 10 * 12 + 0x80;
-        DAT_800819b4[24].u = n % 10 * 12 + 0x80;
-        DAT_800819b4[25].unka = DAT_800819b4[25].w = DAT_801b24e4.unk1e * 64 / 5000;
-        DAT_800819b4[26].unka = DAT_800819b4[26].w = DAT_801b24e4.unk22 * 64 / 5000;
+        hud_sprites[22].u = n / 100 * 12 + 0x80;
+        hud_sprites[23].u = n % 100 / 10 * 12 + 0x80;
+        hud_sprites[24].u = n % 10 * 12 + 0x80;
+        hud_sprites[25].unka = hud_sprites[25].w = cur_avatar_status.unk1e * 64 / 5000;
+        hud_sprites[26].unka = hud_sprites[26].w = cur_avatar_status.unk22 * 64 / 5000;
     }
     render_active_model_rows();
     render_hud_sprites();
@@ -2054,32 +2060,32 @@ void menu_render_item_model(void)
     scratch = SCRATCH;
     gte_SetBackColor(60, 60, 60);
     SetGeomScreen(200);
-    model = DAT_80199154.unk10148[3];
+    model = scene_display_sys.unk10148[3];
     SCRATCH->model = model;
     SCRATCH->part = ((ModelData *)model)->parts;
     offset = SCRATCH->part->vertices + 12;
     SCRATCH->vertices = (u8 *)(offset + (s32)model);
     fog_set_range(20000, 24000);
-    SCRATCH->ot = DAT_80199154.ot;
-    SCRATCH->draw.count.unk4 = DAT_80199154.unk159bc;
-    SCRATCH->draw.count.ot_count = DAT_80199154.ot_count;
-    SCRATCH->draw.count.prim_count = DAT_80199154.prim_count;
-    SCRATCH->next = DAT_80199154.pool->next;
+    SCRATCH->ot = scene_display_sys.ot;
+    SCRATCH->draw.count.unk4 = scene_display_sys.unk159bc;
+    SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
+    SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
+    SCRATCH->next = scene_display_sys.pool->next;
     SCRATCH->draw.count.clut = 0;
-    SCRATCH->end = DAT_80199154.pool->end;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&DAT_8009c2e0;
-    SCRATCH->screen = DAT_80199154.screen;
+    SCRATCH->end = scene_display_sys.pool->end;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
+    SCRATCH->screen = scene_display_sys.screen;
     i = ((ModelData *)SCRATCH->model)->parts[0].unk4;
     vertex = SCRATCH->vertices;
-    screen = DAT_80199154.screen;
+    screen = scene_display_sys.screen;
     while (--i != -1) {
         gte_ldv0(vertex);
         gte_rtps();
         gte_stsxy(&screen->sxy);
         gte_stszotz(&screen->z);
-        if (DAT_80199154.unk15b28 != DAT_80199154.unk15b2c) {
-            screen->fog = ((screen->z - (DAT_80199154.unk15b28 >> 2)) << 14) /
-                          (DAT_80199154.unk15b2c - DAT_80199154.unk15b28);
+        if (scene_display_sys.unk15b28 != scene_display_sys.unk15b2c) {
+            screen->fog = ((screen->z - (scene_display_sys.unk15b28 >> 2)) << 14) /
+                          (scene_display_sys.unk15b2c - scene_display_sys.unk15b28);
         } else {
             screen->fog = 0;
         }
@@ -2093,9 +2099,9 @@ void menu_render_item_model(void)
         vertex += 8;
     }
     render_enqueue_textured_tmd(0, 100);
-    DAT_80199154.pool->next = scratch->next;
-    DAT_80199154.unk159bc = scratch->draw.count.unk4;
-    DAT_80199154.ot_count = scratch->draw.count.ot_count;
+    scene_display_sys.pool->next = scratch->next;
+    scene_display_sys.unk159bc = scratch->draw.count.unk4;
+    scene_display_sys.ot_count = scratch->draw.count.ot_count;
 }
 
 ADDRESS(0x80042b70, 0x38)
@@ -2103,8 +2109,8 @@ void asset_registry_select(u16 id)
 {
     u8 *file;
 
-    file = DAT_80199154.models[id];
-    DAT_80199154.vertices = file + ((ModelFile *)file)->vertices;
+    file = scene_display_sys.models[id];
+    scene_display_sys.vertices = file + ((ModelFile *)file)->vertices;
 }
 
 ADDRESS(0x80042ba8, 0xbc)
@@ -2118,9 +2124,9 @@ void asset_registry_load_tmd_archive(u16 id, u8 *file)
     while (count--) {
         size = *(u32 *)file;
         if (size >= 5) {
-            DAT_80199154.models[id] = file;
+            scene_display_sys.models[id] = file;
             asset_registry_select(id);
-            tmd_prepare_primitive_indices(DAT_80199154.vertices);
+            tmd_prepare_primitive_indices(scene_display_sys.vertices);
         }
         file += size;
         id++;
@@ -2130,9 +2136,9 @@ void asset_registry_load_tmd_archive(u16 id, u8 *file)
 ADDRESS(0x80042c64, 0x48)
 void asset_registry_set(u16 id, u8 *file)
 {
-    DAT_80199154.models[id] = file;
+    scene_display_sys.models[id] = file;
     asset_registry_select(id);
-    tmd_prepare_primitive_indices(DAT_80199154.vertices);
+    tmd_prepare_primitive_indices(scene_display_sys.vertices);
 }
 
 ADDRESS(0x80042cac, 0xc4)
@@ -2329,7 +2335,7 @@ s16 *animation_find_sparse_vertex(s16 *deltas, s32 index)
 ADDRESS(0x800431e8, 0x344)
 s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
 {
-    ModelFile *model = (ModelFile *)DAT_80199154.models[id];
+    ModelFile *model = (ModelFile *)scene_display_sys.models[id];
     AnimSlot *slot = *owner;
     ScratchPad *scratch = SCRATCH;
     AnimKey *key;
@@ -2345,7 +2351,7 @@ s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 tim
         if (slot != NULL) {
             pool_record_release(slot);
         }
-        data = DAT_80199154.models[id];
+        data = scene_display_sys.models[id];
         data += ((ModelFile *)data)->vertices;
         scratch->model = data;
         scratch->part = ((ModelData *)scratch->model)->parts;
@@ -2404,15 +2410,15 @@ s32 animation_prepare_asset_vertices(AnimSlot **owner, s32 id, s32 anim, s32 tim
     {
         u16 c = count;
         u32 *src = (u32 *)slot->pose;
-        u32 *dst = (u32 *)DAT_80199154.pose;
+        u32 *dst = (u32 *)scene_display_sys.pose;
 
         do {
             *dst++ = *src++;
             *dst++ = *src++;
         } while (--c != 0);
     }
-    animation_apply_sparse_morph(DAT_80199154.pose, (s16 *)((u8 *)model + slot->base), frac);
-    scratch->vertices = (u8 *)DAT_80199154.pose;
+    animation_apply_sparse_morph(scene_display_sys.pose, (s16 *)((u8 *)model + slot->base), frac);
+    scratch->vertices = (u8 *)scene_display_sys.pose;
     slot->state = 2;
     return (s32)slot;
 }
@@ -2485,7 +2491,7 @@ s32 asset_vertex_count(s32 id, s32 part)
     u8 *file;
     ModelData *data;
 
-    file = DAT_80199154.models[id];
+    file = scene_display_sys.models[id];
     if (file == NULL) {
         return 0;
     }
@@ -2499,7 +2505,7 @@ void pool_reset(void)
     AnimSlot *slot;
     u16 n;
 
-    slot = DAT_80199154.slots;
+    slot = scene_display_sys.slots;
     n = 12;
     do {
         slot->state = 0;
@@ -2514,7 +2520,7 @@ void pool_mark_allocated(void)
     AnimSlot *slot;
     u16 n;
 
-    slot = DAT_80199154.slots;
+    slot = scene_display_sys.slots;
     n = 12;
     do {
         if (slot->state != 0) {
@@ -2541,7 +2547,7 @@ void pool_release_all(void)
     AnimSlot *slot;
     s16 n;
 
-    slot = DAT_80199154.slots;
+    slot = scene_display_sys.slots;
     n = 12;
     do {
         if (slot->state != 0) {
@@ -2557,7 +2563,7 @@ void pool_release_stale(void)
     AnimSlot *slot;
     u16 n;
 
-    slot = DAT_80199154.slots;
+    slot = scene_display_sys.slots;
     n = 12;
     do {
         if (slot->state == 1) {
@@ -2572,7 +2578,7 @@ void pool_allocate(AnimSlot **out)
 {
     u16 n;
 
-    *out = DAT_80199154.slots;
+    *out = scene_display_sys.slots;
     n = 12;
     do {
         if ((*out)->state == 0) {
@@ -2590,7 +2596,7 @@ void map_placed_expand_sources(EffectSpawn *spawn)
     Effect *effect;
     s32 i;
 
-    effect = DAT_80182968;
+    effect = map_placed_entries;
     for (i = 127; i != -1; i--) {
         if (spawn->id != 0xffff) {
             effect->id = spawn->id;
@@ -2645,13 +2651,13 @@ s32 menu_fade_transition(s32 level, s32 step)
     result = -1;
     for (;;) {
         display_begin_frame();
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
         dim = 128 - (level >> 1);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return KF_VALUELESS;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         setPolyFT4(p);
         setSemiTrans(p, 1);
         setXYWH(p, 32, 32, 256, 208);
@@ -2659,13 +2665,13 @@ s32 menu_fade_transition(s32 level, s32 step)
         p->clut = GetClut(96, 480);
         p->tpage = GetTPage(0, 1, 960, 256);
         setRGB0(p, level, level, level);
-        addPrim(DAT_80199154.ot, p);
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        addPrim(scene_display_sys.ot, p);
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return KF_VALUELESS;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         setPolyFT4(p);
         setSemiTrans(p, 1);
         setXYWH(p, 33, 33, 256, 208);
@@ -2673,33 +2679,33 @@ s32 menu_fade_transition(s32 level, s32 step)
         p->clut = GetClut(96, 480);
         p->tpage = GetTPage(0, 2, 960, 256);
         setRGB0(p, level, level, level);
-        addPrim(DAT_80199154.ot, p);
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        addPrim(scene_display_sys.ot, p);
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return KF_VALUELESS;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         setPolyFT4(p);
         setXYWH(p, 0, 0, 192, 240);
         setUVWH(p, 0, 0, 192, 240);
         p->clut = 0;
         p->tpage = GetTPage(2, 0, 320, 0);
         setRGB0(p, dim, dim, dim);
-        addPrim(DAT_80199154.ot, p);
-        p = (POLY_FT4 *)DAT_80199154.pool->next;
-        DAT_80199154.pool->next += sizeof(POLY_FT4);
-        if (DAT_80199154.pool->next > DAT_80199154.pool->end) {
+        addPrim(scene_display_sys.ot, p);
+        p = (POLY_FT4 *)scene_display_sys.pool->next;
+        scene_display_sys.pool->next += sizeof(POLY_FT4);
+        if (scene_display_sys.pool->next > scene_display_sys.pool->end) {
             return KF_VALUELESS;
         }
-        DAT_80199154.prim_count++;
+        scene_display_sys.prim_count++;
         setPolyFT4(p);
         setXYWH(p, 192, 0, 128, 240);
         setUVWH(p, 0, 0, 128, 240);
         p->clut = 0;
         p->tpage = GetTPage(2, 0, 512, 0);
         setRGB0(p, dim, dim, dim);
-        addPrim(DAT_80199154.ot, p);
+        addPrim(scene_display_sys.ot, p);
         level += step;
         DrawSync(0);
         display_present_frame();
@@ -2713,19 +2719,19 @@ s32 menu_fade_transition(s32 level, s32 step)
             }
         } else if (pad != 0) {
             DrawSync(0);
-            if (pad & DAT_80081868[7]) {
-                DAT_801b24e4.unk178 |= DAT_80081868[7];
+            if (pad & action_button_masks[7]) {
+                cur_avatar_status.unk178 |= action_button_masks[7];
             } else if (pad != 0) {
-                DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+                cur_avatar_status.unk178 &= ~action_button_masks[7];
             }
             return level;
         }
     }
     DrawSync(0);
-    if (pad & DAT_80081868[7]) {
-        DAT_801b24e4.unk178 |= DAT_80081868[7];
+    if (pad & action_button_masks[7]) {
+        cur_avatar_status.unk178 |= action_button_masks[7];
     } else if (pad != 0) {
-        DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+        cur_avatar_status.unk178 &= ~action_button_masks[7];
     }
     return result;
 }
@@ -2740,17 +2746,18 @@ void menu_show_transition_image(u16 file, u16 entry)
     u32 pad;
 
     DrawSync(0);
-    cd_archive_read(file, entry, DAT_80199154.buffer);
-    ClearImage(&DAT_8009c2d8, 0, 0, 0);
+    cd_archive_read(file, entry, scene_display_sys.buffer);
+    ClearImage(&menu_transition_image_rect, 0, 0, 0);
     DrawSync(0);
-    tim_upload_images(DAT_80199154.buffer);
+    tim_upload_images(scene_display_sys.buffer);
     DrawSync(0);
-    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x7400;
-    StoreImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
+    scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[0].end + 0x7400;
+    StoreImage(&menu_transition_rect, (u_long *)scene_display_sys.pools[1].end);
     DrawSync(0);
-    MoveImage(&DAT_80199154.draw[DAT_80199154.frame].clip, DAT_8009c2d0.x, DAT_8009c2d0.y);
+    MoveImage(&scene_display_sys.draw[scene_display_sys.frame].clip, menu_transition_rect.x,
+              menu_transition_rect.y);
     DrawSync(0);
     level = menu_fade_transition(0, 12);
     if (level < 0) {
@@ -2764,16 +2771,16 @@ void menu_show_transition_image(u16 file, u16 entry)
                 break;
             }
         }
-        if (pad & DAT_80081868[7]) {
-            DAT_801b24e4.unk178 |= DAT_80081868[7];
+        if (pad & action_button_masks[7]) {
+            cur_avatar_status.unk178 |= action_button_masks[7];
         } else if (pad != 0) {
-            DAT_801b24e4.unk178 &= ~DAT_80081868[7];
+            cur_avatar_status.unk178 &= ~action_button_masks[7];
         }
         level = 80;
     }
     menu_fade_transition(level, -12);
-    LoadImage(&DAT_8009c2d0, (u_long *)DAT_80199154.pools[1].end);
-    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[0].end + 0x1a000;
+    LoadImage(&menu_transition_rect, (u_long *)scene_display_sys.pools[1].end);
+    scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x1a000;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[0].end + 0x1a000;
 }

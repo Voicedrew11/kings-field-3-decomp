@@ -63,7 +63,7 @@ is a member of a `volatile` aggregate (an array element or a struct member
 give the same code); a plain `volatile` scalar compiles to the `lw sym`
 macro form instead. The 2.7.2-cdk rebuild needed `%hi`/`%lo` for the same
 shape. The counter is the `frame_gate` member of the CD state
-`DAT_801c12e4` (`include/game/cd.h`), which the CD module reaches as one
+`cdrom_ctl` (`include/game/cd.h`), which the CD module reaches as one
 aggregate.
 
 **ASPSX.** On GAME's mult/div leaf at `0x8004c5ec`, ASPSX 2.21 assembles the

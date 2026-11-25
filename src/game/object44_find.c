@@ -35,7 +35,7 @@ s32 map_object_find_collision_at_point(s32 x, s32 y, s32 z, s32 radius, s32 shap
     s32 i;
     s32 r;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     for (i = 0; i < 396; i++, obj++) {
         if (obj->unk6 == 0xff) {
             continue;
@@ -43,10 +43,10 @@ s32 map_object_find_collision_at_point(s32 x, s32 y, s32 z, s32 radius, s32 shap
         if (obj->unk0 == 0) {
             continue;
         }
-        if (obj == DAT_8018fb3c.unk8858) {
+        if (obj == map_objects_slots.unk8858) {
             continue;
         }
-        def = &DAT_8018fb3c.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->unk6];
         if (def->unk3 & 0x10) {
             r = def->unk4 * obj->arg.b.unk38 >> 7;
         } else {
@@ -86,12 +86,12 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
     Object44Def *def;
     s16 i;
 
-    obj = &DAT_8018fb3c.objects[start];
+    obj = &map_objects_slots.objects[start];
     for (i = start; i < 396; i++, obj++) {
         if (obj->unk6 == 0xff) {
             continue;
         }
-        def = &DAT_8018fb3c.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->unk6];
         if (def->unk0 == 0x1b) {
             offset.vx = 0x700;
             offset.vy = 0;
@@ -178,7 +178,7 @@ Object44 *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp)
     s32 best;
     s32 age;
 
-    obj = &DAT_8018fb3c.objects[first];
+    obj = &map_objects_slots.objects[first];
     oldest = NULL;
     best = 0;
     do {
@@ -212,16 +212,16 @@ void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
     Object44Def *def;
 
     if (which == 0) {
-        obj = map_object_effect_pool_acquire(370, 10, DAT_8018fb3c.unk8862);
-        obj->arg.h.unk3c = DAT_8018fb3c.unk8862++;
+        obj = map_object_effect_pool_acquire(370, 10, map_objects_slots.unk8862);
+        obj->arg.h.unk3c = map_objects_slots.unk8862++;
         obj->unk6 = def_id;
     } else {
-        obj = map_object_effect_pool_acquire(360, 10, DAT_8018fb3c.unk8860);
-        obj->arg.h.unk3c = DAT_8018fb3c.unk8860++;
+        obj = map_object_effect_pool_acquire(360, 10, map_objects_slots.unk8860);
+        obj->arg.h.unk3c = map_objects_slots.unk8860++;
         obj->unk6 = def_id;
     }
     map_object_reset(obj);
-    def = &DAT_8018fb3c.defs[obj->unk6];
+    def = &map_objects_slots.defs[obj->unk6];
     if (def->unk3 & 0x10) {
         obj->scale.vx <<= 1;
         obj->scale.vy <<= 1;
@@ -269,9 +269,9 @@ void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
     Object44 *obj;
     u16 angle;
 
-    obj = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+    obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
     map_object_reset(obj);
-    obj->arg.h.unk3c = DAT_8018fb3c.unk885e++;
+    obj->arg.h.unk3c = map_objects_slots.unk885e++;
     obj->unk6 = 0x95;
     obj->arg.h.unk3a = target;
     angle = rand() >> 3;
@@ -292,7 +292,7 @@ void map_object_apply_marker_signal(u8 id)
     u16 i;
     u8 v;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     if (id == 0xff) {
         return;
     }
@@ -422,7 +422,7 @@ void map_object_process_marker_all(u8 id)
     Object44 *obj;
     u16 i;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     if (id == 0xff) {
         return;
     }
@@ -463,14 +463,14 @@ s32 player_camera_within_map_region(s32 x, s32 z, s32 w, s32 h, s32 y)
     s32 px;
     s32 pz;
 
-    px = DAT_801b24e4.pos.vx >> 11;
-    pz = DAT_801b24e4.pos.vz >> 11;
+    px = cur_avatar_status.pos.vx >> 11;
+    pz = cur_avatar_status.pos.vz >> 11;
     if (x <= px && px < x + w && z <= pz && pz < z + h) {
         if (y != 0x8000) {
-            if (y + 2048 < DAT_801b24e4.pos.vy) {
+            if (y + 2048 < cur_avatar_status.pos.vy) {
                 return 0;
             }
-            if (DAT_801b24e4.pos.vy < y - 3200) {
+            if (cur_avatar_status.pos.vy < y - 3200) {
                 return 0;
             }
         }
@@ -525,7 +525,7 @@ s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, S
         dst->pos.vy += src->pos.vy;
         dst->pos.vz += src->pos.vz;
         dst->angle.vy = src->angle.vy;
-        dst->arg.h.unk40 = src - DAT_8018fb3c.objects;
+        dst->arg.h.unk40 = src - map_objects_slots.objects;
         /* fall through */
     case 1:
         if (fade) {
@@ -547,7 +547,7 @@ s32 map_object_step_offset_motion(Object44 *src, Object44 *dst, SVECTOR *from, S
         if (fade) {
             dst->unka = 0xfff;
         }
-        if ((s16)DAT_8018fad4.loading == 0) {
+        if ((s16)asset_status.loading == 0) {
             map_object_play_spatial_sound(dst, 0x12);
         }
         dst->arg.b.unk38 = 0xff;
@@ -593,10 +593,10 @@ void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
     Object88 *o88;
     u16 i;
 
-    DAT_801b24e4.pos.vx += dx;
-    DAT_801b24e4.pos.vz += dz;
-    DAT_801b24e4.pos.vy += dy;
-    o4c = DAT_801b77ec.objects;
+    cur_avatar_status.pos.vx += dx;
+    cur_avatar_status.pos.vz += dz;
+    cur_avatar_status.pos.vy += dy;
+    o4c = effect_status.objects;
     i = 128;
     while (i--) {
         if (o4c->unk0 != 0xff && (o4c->unk8 & 0xc) != 0xc) {
@@ -606,7 +606,7 @@ void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
         }
         o4c++;
     }
-    o88 = DAT_80185da8.objects;
+    o88 = actor_status.objects;
     i = 200;
     while (i--) {
         if (o88->unk0 != 0xff) {
@@ -657,7 +657,7 @@ s16 map_object_compute_aim_vector(Object44 *obj, VECTOR *from, s32 dist, VECTOR 
         if (--count == 0) {
             break;
         }
-        vector_add_scaled_delta(from, &DAT_801b24e4.unk11c,
+        vector_add_scaled_delta(from, &cur_avatar_status.unk11c,
                                 fixed_vector3_length(to->vx - pos.vx, to->vy - pos.vy,
                                                      to->vz - pos.vz) / dist, &pos);
     }
@@ -666,11 +666,11 @@ s16 map_object_compute_aim_vector(Object44 *obj, VECTOR *from, s32 dist, VECTOR 
 
 /* Frame-time reference yaws of the door kinds 0x1b, 0 and 1 while they swing (map_object_update_actions). */
 DATA(0x8009c3d4, 0x2, ".sbss")
-static s16 DAT_8009c3d4;
+static s16 map_object_door1b_view_yaw;
 DATA(0x8009c3d8, 0x2, ".sbss")
-static s16 DAT_8009c3d8;
+static s16 map_object_door0_view_yaw;
 DATA(0x8009c3dc, 0x2, ".sbss")
-static s16 DAT_8009c3dc;
+static s16 map_object_door1_view_yaw;
 
 /* Moves an Object44 forward along its yaw by DIST (vector2i_scale_shift11 scale). */
 #define OBJ44_ADVANCE(obj, dist)                            \
@@ -686,7 +686,7 @@ static s16 DAT_8009c3dc;
 /*
  * Steps every live Object44 record by its kind (doors, lifts, levers, switches,
  * warps, falling items); kinds without a case go to FDAT handler 9 with the
- * record and its def in DAT_8018fb3c.unk8858 / unk8854.
+ * record and its def in map_objects_slots.unk8858 / unk8854.
  */
 ADDRESS(0x80047010, 0x4514)
 void map_object_update_actions(void)
@@ -695,15 +695,15 @@ void map_object_update_actions(void)
     Object44Def *def;
     s32 i;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     i = 0x18c;
     do {
         if (obj->unk4 == 0xff) {
             continue;
         }
-        DAT_8018fb3c.unk8858 = obj;
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_8018fb3c.unk8854 = def;
+        map_objects_slots.unk8858 = obj;
+        def = &map_objects_slots.defs[obj->unk6];
+        map_objects_slots.unk8854 = def;
         switch (obj->unk4) {
         case 3:
             switch (obj->unk8) {
@@ -713,13 +713,13 @@ void map_object_update_actions(void)
                 if (obj->unka == 0) {
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828fc, 1, 0xff);
+                                                   map_object_door3_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828dc, 1, 0xff);
+                                                   map_object_door_shape_pattern, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -729,7 +729,7 @@ void map_object_update_actions(void)
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828dc, 0, 0xff);
+                                                   map_object_door_shape_pattern, 0, 0xff);
                     obj->unk8 = 21;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
@@ -738,7 +738,7 @@ void map_object_update_actions(void)
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828fc, 0, 0xff);
+                                                   map_object_door3_object_pattern, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -757,13 +757,13 @@ void map_object_update_actions(void)
                 if (obj->unka == 0) {
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008291c, 1, 0xff);
+                                                   map_object_door4_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828dc, 1, 0xff);
+                                                   map_object_door_shape_pattern, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -773,7 +773,7 @@ void map_object_update_actions(void)
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_800828dc, 0, 0xff);
+                                                   map_object_door_shape_pattern, 0, 0xff);
                     obj->unk8 = 21;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
@@ -782,7 +782,7 @@ void map_object_update_actions(void)
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008291c, 0, 0xff);
+                                                   map_object_door4_object_pattern, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -801,13 +801,13 @@ void map_object_update_actions(void)
                 if (obj->unka == 0) {
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008295c, 1, 0xff);
+                                                   map_object_door5_object_pattern, 1, 0xff);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
                 obj->unka += 72;
                 if (obj->unka == 0xc18) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008293c, 1, 0xff);
+                                                   map_object_door5_shape_pattern, 1, 0xff);
                 }
                 if (obj->unka >= 0x1000) {
                     obj->unka = 0xfff;
@@ -817,7 +817,7 @@ void map_object_update_actions(void)
             case 20:
                 if (collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x700, 0xc80, 0xc0) == 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008293c, 0, 0xff);
+                                                   map_object_door5_shape_pattern, 0, 0xff);
                     obj->unk8 = 21;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
@@ -826,7 +826,7 @@ void map_object_update_actions(void)
                 obj->unka -= 72;
                 if ((s16)obj->unka <= 0) {
                     map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                                   DAT_8008295c, 0, 0xff);
+                                                   map_object_door5_object_pattern, 0, 0xff);
                     obj->unka = 0;
                     obj->unk8 = 0;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -902,15 +902,15 @@ void map_object_update_actions(void)
                 u32 turn;
 
                 if (obj->arg.h.unk3e != 0xffff) {
-                    other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
-                    odef = &DAT_8018fb3c.defs[other->unk6];
+                    other = &map_objects_slots.objects[obj->arg.h.unk3e];
+                    odef = &map_objects_slots.defs[other->unk6];
                 }
                 if (obj->unk8 == 0) {
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                               cur_avatar_status.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -919,10 +919,10 @@ void map_object_update_actions(void)
                     }
                 }
                 if (obj->arg.h.unk3e != 0xffff) {
-                    other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
+                    other = &map_objects_slots.objects[obj->arg.h.unk3e];
                     if (other->unk3 & 0x80) {
-                        turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - other->pos.vx,
-                                                   DAT_801b24e4.pos.vz - other->pos.vz) -
+                        turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - other->pos.vx,
+                                                   cur_avatar_status.pos.vz - other->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                             other->unke = 0xf0;
@@ -936,20 +936,21 @@ void map_object_update_actions(void)
                 if (obj->unk8 == 1) {
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
-                    DAT_8009c3d4 = DAT_80199154.unk15b08.vy;
+                    map_object_door1b_view_yaw = scene_display_sys.unk15b08.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(DAT_8009c3d4 + 2048, obj->arg.h.unk42, 900)) {
+                    if (t < 21 && angle_within_tolerance(map_object_door1b_view_yaw + 2048, obj->arg.h.unk42,
+                                                         900)) {
                         if ((other != NULL &&
-                             angle_within_tolerance(DAT_8009c3d4,
-                                                    vector_xz_to_angle(other->pos.vx - DAT_801b24e4.pos.vx,
-                                                                       other->pos.vz - DAT_801b24e4.pos.vz),
+                             angle_within_tolerance(map_object_door1b_view_yaw,
+                                                    vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
+                                                                       other->pos.vz - cur_avatar_status.pos.vz),
                                                     0x400)) ||
-                            angle_within_tolerance(DAT_801b24e4.unk124.vy,
-                                                   vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                                      obj->pos.vz - DAT_801b24e4.pos.vz),
+                            angle_within_tolerance(cur_avatar_status.unk124.vy,
+                                                   vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
+                                                                      obj->pos.vz - cur_avatar_status.pos.vz),
                                                    0x400)) {
                             {
                             MATRIX m;
@@ -961,10 +962,10 @@ void map_object_update_actions(void)
                             v.vz = -76;
                             matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
-                            DAT_801b24e4.unk162 = 0;
-                            DAT_801b24e4.unk164 = -76;
-                            DAT_801b24e4.pos.vx += out.vx;
-                            DAT_801b24e4.pos.vz += out.vz;
+                            cur_avatar_status.unk162 = 0;
+                            cur_avatar_status.unk164 = -76;
+                            cur_avatar_status.pos.vx += out.vx;
+                            cur_avatar_status.pos.vz += out.vz;
                             }
                         }
                     }
@@ -1037,15 +1038,15 @@ void map_object_update_actions(void)
                 u32 turn;
 
                 if (obj->arg.h.unk3e != 0xffff) {
-                    other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
-                    odef = &DAT_8018fb3c.defs[other->unk6];
+                    other = &map_objects_slots.objects[obj->arg.h.unk3e];
+                    odef = &map_objects_slots.defs[other->unk6];
                 }
                 if (obj->unk8 == 0) {
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                               cur_avatar_status.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -1054,10 +1055,10 @@ void map_object_update_actions(void)
                     }
                 }
                 if (obj->arg.h.unk3e != 0xffff) {
-                    other = &DAT_8018fb3c.objects[obj->arg.h.unk3e];
+                    other = &map_objects_slots.objects[obj->arg.h.unk3e];
                     if (other->unk3 & 0x80) {
-                        turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - other->pos.vx,
-                                                   DAT_801b24e4.pos.vz - other->pos.vz) -
+                        turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - other->pos.vx,
+                                                   cur_avatar_status.pos.vz - other->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                             other->unke = 0xf0;
@@ -1071,20 +1072,21 @@ void map_object_update_actions(void)
                 if (obj->unk8 == 1) {
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
-                    DAT_8009c3d8 = DAT_80199154.unk15b08.vy;
+                    map_object_door0_view_yaw = scene_display_sys.unk15b08.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(DAT_8009c3d8 + 2048, obj->arg.h.unk42, 900)) {
+                    if (t < 21 && angle_within_tolerance(map_object_door0_view_yaw + 2048, obj->arg.h.unk42,
+                                                         900)) {
                         if ((other != NULL &&
-                             angle_within_tolerance(DAT_8009c3d8,
-                                                    vector_xz_to_angle(other->pos.vx - DAT_801b24e4.pos.vx,
-                                                                       other->pos.vz - DAT_801b24e4.pos.vz),
+                             angle_within_tolerance(map_object_door0_view_yaw,
+                                                    vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
+                                                                       other->pos.vz - cur_avatar_status.pos.vz),
                                                     0x400)) ||
-                            angle_within_tolerance(DAT_801b24e4.unk124.vy,
-                                                   vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                                      obj->pos.vz - DAT_801b24e4.pos.vz),
+                            angle_within_tolerance(cur_avatar_status.unk124.vy,
+                                                   vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
+                                                                      obj->pos.vz - cur_avatar_status.pos.vz),
                                                    0x400)) {
                             {
                             MATRIX m;
@@ -1096,10 +1098,10 @@ void map_object_update_actions(void)
                             v.vz = -76;
                             matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
-                            DAT_801b24e4.unk162 = 0;
-                            DAT_801b24e4.unk164 = -76;
-                            DAT_801b24e4.pos.vx += out.vx;
-                            DAT_801b24e4.pos.vz += out.vz;
+                            cur_avatar_status.unk162 = 0;
+                            cur_avatar_status.unk164 = -76;
+                            cur_avatar_status.pos.vx += out.vx;
+                            cur_avatar_status.pos.vz += out.vz;
                             }
                         }
                     }
@@ -1173,8 +1175,8 @@ void map_object_update_actions(void)
                     break;
                 }
                 if (obj->unk3 & 0x80) {
-                    turn = (vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                               DAT_801b24e4.pos.vz - obj->pos.vz) -
+                    turn = (vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                               cur_avatar_status.pos.vz - obj->pos.vz) -
                             obj->arg.h.unk42) & 0xfff;
                     if (turn <= 2048) {
                         obj->unke = -48;
@@ -1185,15 +1187,16 @@ void map_object_update_actions(void)
                 if (obj->unk8 == 1) {
                     obj->unk8 = 2;
                     obj->arg.h.unk40 = 0;
-                    DAT_8009c3dc = DAT_80199154.unk15b08.vy;
+                    map_object_door1_view_yaw = scene_display_sys.unk15b08.vy;
                     map_object_play_spatial_sound(obj, def->arg.b.unkf);
                 }
                 t = obj->arg.sh.unk40++;
                 if (t < 32) {
-                    if (t < 21 && angle_within_tolerance(DAT_8009c3dc + 2048, obj->arg.h.unk42, 900) &&
-                        angle_within_tolerance(DAT_8009c3dc,
-                                               vector_xz_to_angle(obj->pos.vx - DAT_801b24e4.pos.vx,
-                                                                  obj->pos.vz - DAT_801b24e4.pos.vz),
+                    if (t < 21 && angle_within_tolerance(map_object_door1_view_yaw + 2048, obj->arg.h.unk42,
+                                                         900) &&
+                        angle_within_tolerance(map_object_door1_view_yaw,
+                                               vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
+                                                                  obj->pos.vz - cur_avatar_status.pos.vz),
                                                0x400)) {
                         {
                             MATRIX m;
@@ -1205,10 +1208,10 @@ void map_object_update_actions(void)
                             v.vz = -76;
                             matrix_set_rotation_y(obj->arg.h.unk42 + 2048, &m);
                             ApplyMatrix(&m, &v, &out);
-                            DAT_801b24e4.unk162 = 0;
-                            DAT_801b24e4.unk164 = -76;
-                            DAT_801b24e4.pos.vx += out.vx;
-                            DAT_801b24e4.pos.vz += out.vz;
+                            cur_avatar_status.unk162 = 0;
+                            cur_avatar_status.unk164 = -76;
+                            cur_avatar_status.pos.vx += out.vx;
+                            cur_avatar_status.pos.vz += out.vz;
                             }
                     }
                     obj->unk1 = 0x81;
@@ -1265,8 +1268,8 @@ void map_object_update_actions(void)
                 static SVECTOR start = {0, -512, 0, 0};
                 static SVECTOR end = {0, 0, 0, 0};
 
-                o1 = &DAT_8018fb3c.objects[obj->arg.h.unk3c];
-                o2 = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                o1 = &map_objects_slots.objects[obj->arg.h.unk3c];
+                o2 = &map_objects_slots.objects[obj->arg.h.unk3a];
                 switch (obj->unk8) {
                 case 0:
                     if (obj->arg.b.unk38 == 0xfe) {
@@ -1381,8 +1384,8 @@ void map_object_update_actions(void)
                         spark.pos.vx = obj->pos.vx + (rcos(obj->angle.vy - 1024) * -160 >> 12);
                         spark.pos.vy = obj->pos.vy + 320;
                         spark.pos.vz = obj->pos.vz - (rsin(obj->angle.vy - 1024) * -160 >> 12);
-                        map_object_compute_aim_vector(obj, &DAT_801b24e4.pos, 400, &spark.pos, &spark.angle,
-                                                      -1, 0x400, 1);
+                        map_object_compute_aim_vector(obj, &cur_avatar_status.pos, 400, &spark.pos,
+                                                      &spark.angle, -1, 0x400, 1);
                         effect_construct_record(10, 0x83, 0x23, &spark.pos, &spark.angle, &obj->angle);
                     }
                     obj->arg.sh.unk40 = angle_velocity_step(0xa00, obj->angle.vx, obj->arg.sh.unk40, 8, 4);
@@ -1404,7 +1407,7 @@ void map_object_update_actions(void)
                 if (obj->arg.h.unk3a != 0xffff) {
                     Object44 *o;
 
-                    o = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                    o = &map_objects_slots.objects[obj->arg.h.unk3a];
                     o->unke += 200;
                 }
                 if (obj->arg.b.unk38 == 0xfe) {
@@ -1481,7 +1484,7 @@ void map_object_update_actions(void)
             if (obj->arg.h.unk3a != 0xffff) {
                 Object44 *o;
 
-                o = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                o = &map_objects_slots.objects[obj->arg.h.unk3a];
                 if (o->unk6 != 0xff) {
                     o->unk0 = 0;
                     o->arg.b.unk38 = 0;
@@ -1495,7 +1498,7 @@ void map_object_update_actions(void)
                 s32 se;
 
                 step = 0x100;
-                if (DAT_8018fad4.area[0] == 13) {
+                if (asset_status.area[0] == 13) {
                     se = def->arg.b.unkf + 496;
                 } else {
                     se = def->arg.b.unkf;
@@ -1588,7 +1591,7 @@ void map_object_update_actions(void)
                     obj->arg.b.unk38 == 0xff) {
                     map_cell_apply_rotated_pattern(
                         obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                        DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
+                        map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 1, 0x80);
                     obj->unk8 = 1;
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
                 }
@@ -1613,7 +1616,7 @@ void map_object_update_actions(void)
                     obj->unk8 = 0;
                     map_cell_apply_rotated_pattern(
                         obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                        DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
+                        map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0, 0);
                     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
                 }
                 break;
@@ -2170,20 +2173,20 @@ void map_object_update_actions(void)
 
                     render_frames_with_color_overlay(0x82, 0, 0, 0);
                     render_frames_with_color_overlay(0x82, 0, 0x1000, 0x80);
-                    o = DAT_8018fb3c.objects;
+                    o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
                         if (o->unk4 == 0xe7) {
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
-                    DAT_801b24e4.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
-                    DAT_801b24e4.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
-                    DAT_801b24e4.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
-                    DAT_801b24e4.unk12c.vy = -(obj->arg.b.unk3f << 4);
+                    map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
+                    cur_avatar_status.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
+                    cur_avatar_status.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
+                    cur_avatar_status.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
+                    cur_avatar_status.unk12c.vy = -(obj->arg.b.unk3f << 4);
                     player_sync_position_to_map();
-                    DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
-                                             DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
+                    cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy + cur_avatar_status.unk136 +
+                                             cur_avatar_status.unk13e + cur_avatar_status.unk146;
                     render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
                     cd_request_wait_idle();
                     render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
@@ -2212,7 +2215,7 @@ void map_object_update_actions(void)
                         u8 area3;
                         u8 area4;
 
-                        o = DAT_8018fb3c.objects;
+                        o = map_objects_slots.objects;
                         for (; n != 0; n--, o++) {
                             if (o->unk4 == 0xeb) {
                                 o->arg.b.unk40 = 1;
@@ -2230,27 +2233,27 @@ void map_object_update_actions(void)
                         do {
                             cd_request_yield();
                             resource_advance_transition();
-                        } while ((s16)DAT_8018fad4.loading != 0);
-                        if (area != DAT_8018fad4.area[0]) {
+                        } while ((s16)asset_status.loading != 0);
+                        if (area != asset_status.area[0]) {
                             resource_request_transition(area, area, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
                         } else {
                             resource_request_transition(0xff, 0xff, area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
-                            DAT_801b24e4.unke = 1;
+                            cur_avatar_status.unke = 1;
                         }
                         do {
                             cd_request_yield();
                             resource_advance_transition();
-                        } while ((s16)DAT_8018fad4.loading != 0);
+                        } while ((s16)asset_status.loading != 0);
                         cd_request_wait_idle();
-                        DAT_801b24e4.unk101 = 0;
-                        DAT_801b24e4.unk140 = 0;
-                        DAT_801b24e4.unk13e = 0;
-                        DAT_801b24e4.unk13c = 0;
-                        DAT_801b24e4.unk124 = DAT_801b24e4.unk12c;
-                        DAT_801b24e4.pos.vx = (x << 11) + 1024;
-                        DAT_801b24e4.pos.vz = (z << 11) + 1024;
-                        DAT_801b24e4.pos.vy = -(y << 7);
-                        DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy = -(yaw << 4);
+                        cur_avatar_status.unk101 = 0;
+                        cur_avatar_status.unk140 = 0;
+                        cur_avatar_status.unk13e = 0;
+                        cur_avatar_status.unk13c = 0;
+                        cur_avatar_status.unk124 = cur_avatar_status.unk12c;
+                        cur_avatar_status.pos.vx = (x << 11) + 1024;
+                        cur_avatar_status.pos.vz = (z << 11) + 1024;
+                        cur_avatar_status.pos.vy = -(y << 7);
+                        cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy = -(yaw << 4);
                         render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
                         cd_request_wait_idle();
                         render_frames_with_color_overlay(1, 0x1000, 0, -256);
@@ -2260,7 +2263,7 @@ void map_object_update_actions(void)
                     obj->arg.b.unk40 = 0;
                 }
             }
-            if (DAT_8018fad4.area[0] == 24) {
+            if (asset_status.area[0] == 24) {
                 if (obj->unk6 == 0x144) {
                     obj->angle.vy += 128;
                 }
@@ -2276,15 +2279,15 @@ void map_object_update_actions(void)
                     Object44 *o;
                     s32 n = 0x18c;
 
-                    o = DAT_8018fb3c.objects;
+                    o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
                         if (o->unk4 == 0xe7) {
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
+                    map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
                     translate_player_effects_and_actors(obj->arg.sb.unk3c << 11, 0, obj->arg.sb.unk3d << 11);
-                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, 1);
+                    map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
                 }
             } else {
                 obj->arg.b.unk40 = 0;
@@ -2299,20 +2302,20 @@ void map_object_update_actions(void)
                     Object44 *o;
 
                     render_zoom_screen_transition(&c.r, 320, 240, 1);
-                    o = DAT_8018fb3c.objects;
+                    o = map_objects_slots.objects;
                     for (; n != 0; n--, o++) {
                         if (o->unk4 == 0xe8) {
                             o->arg.b.unk40 = 1;
                         }
                     }
-                    map_cell_add_layer_occupancy(DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vz, 800, -1);
-                    DAT_801b24e4.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
-                    DAT_801b24e4.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
-                    DAT_801b24e4.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
-                    DAT_801b24e4.unk12c.vy = -(obj->arg.b.unk3f << 4);
+                    map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
+                    cur_avatar_status.pos.vx = (obj->arg.b.unk3c << 11) + 1024;
+                    cur_avatar_status.pos.vz = (obj->arg.b.unk3d[0] << 11) + 1024;
+                    cur_avatar_status.unk160 = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
+                    cur_avatar_status.unk12c.vy = -(obj->arg.b.unk3f << 4);
                     player_sync_position_to_map();
-                    DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy + DAT_801b24e4.unk136 +
-                                             DAT_801b24e4.unk13e + DAT_801b24e4.unk146;
+                    cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy + cur_avatar_status.unk136 +
+                                             cur_avatar_status.unk13e + cur_avatar_status.unk146;
                     render_zoom_screen_transition(&c.r, 320, 240, -1);
                 }
             } else if (obj->arg.b.unk40 != 0xff) {
@@ -2337,13 +2340,13 @@ void map_object_update_actions(void)
                     }
                     switch (obj->arg.b.unk3a.bytes[0] & 0xf) {
                     case 0:
-                        ((void (*)(Object44 *))DAT_8018fad4.handlers[3])(obj);
+                        ((void (*)(Object44 *))asset_status.handlers[3])(obj);
                         break;
                     case 1:
                         map_object_apply_marker_signal(obj->arg.b.unk3a.bytes[1]);
                         break;
                     case 2:
-                        DAT_801ba984.unkab[obj->arg.b.unk3a.bytes[1]] = obj->arg.b.unk3c;
+                        cur_evt_state.unkab[obj->arg.b.unk3a.bytes[1]] = obj->arg.b.unk3c;
                         break;
                     }
                 }
@@ -2354,28 +2357,28 @@ void map_object_update_actions(void)
         case 227:
             if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                 obj->arg.b.unk39, 0x8000) != 0) {
-                DAT_80199154.unk15995 = obj->arg.b.unk3a.bytes[0];
-                DAT_80199154.unk15996 = obj->arg.b.unk3a.bytes[1];
+                scene_display_sys.unk15995 = obj->arg.b.unk3a.bytes[0];
+                scene_display_sys.unk15996 = obj->arg.b.unk3a.bytes[1];
             }
             break;
         case 228:
             {
                 u8 *movie;
 
-                movie = &DAT_801e7edc.unk384;
+                movie = &movie_state.unk384;
                 if (*movie == 0xff) {
                     if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
                                                         obj->arg.b.unk38, obj->arg.b.unk39, 0x8000) != 0) {
-                        DAT_801e7edc.unk370 = 1;
+                        movie_state.unk370 = 1;
                         *movie = obj->arg.b.unk3a.bytes[0];
                     }
                 } else if (*movie == obj->arg.b.unk3a.bytes[0]) {
                     if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11,
                                                         obj->arg.b.unk38, obj->arg.b.unk39, 0x8000) == 0) {
-                        if (DAT_801e7edc.unk370 == 0) {
+                        if (movie_state.unk370 == 0) {
                             *movie = 0xff;
                         }
-                        if (DAT_801e7edc.unk370 == 16) {
+                        if (movie_state.unk370 == 16) {
                             *movie = 0xff;
                         }
                     }
@@ -2392,7 +2395,7 @@ void map_object_update_actions(void)
                     if (obj->arg.b.unk40 == 0) {
                         n = obj->arg.b.unk3c;
                         obj->arg.b.unk40 = 1;
-                        o = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                        o = &map_objects_slots.objects[obj->arg.h.unk3a];
                         do {
                             o->unke += obj->arg.b.unk3d[0];
                             n--;
@@ -2401,7 +2404,7 @@ void map_object_update_actions(void)
                     }
                 } else {
                     if (obj->arg.b.unk40 == 1) {
-                        o = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                        o = &map_objects_slots.objects[obj->arg.h.unk3a];
                         n = obj->arg.b.unk3c;
                         do {
                             o->unke -= obj->arg.b.unk3d[0];
@@ -2464,7 +2467,7 @@ void map_object_update_actions(void)
                     if (obj->arg.h.unk40-- == 0) {
                         obj->unk8 = 3;
                         {
-                            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+                            MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
                             layer = row[obj->pos.vx >> 11].layer;
                         }
@@ -2493,7 +2496,7 @@ void map_object_update_actions(void)
                         obj->unk10 = 0x1000;
                         obj->unk8 = 0;
                         {
-                            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+                            MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
                             layer = row[obj->pos.vx >> 11].layer;
                         }
@@ -2513,15 +2516,15 @@ void map_object_update_actions(void)
                 static SVECTOR from = {0, -100, 300, 0};
                 static SVECTOR to = {0, 0, 64, 0};
 
-                o = &DAT_8018fb3c.objects[obj->arg.b.unk39 + 380];
+                o = &map_objects_slots.objects[obj->arg.b.unk39 + 380];
                 if (obj->unk8 != 0 && o->unk6 == 0xff) {
                     obj->arg.b.unk38 = 0xff;
                     obj->unk8 = 0;
-                    (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 &=
+                    (map_objects_slots.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 &=
                         ~obj->arg.b.unk3a.bytes[0];
                 }
                 if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
-                    (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
+                    (map_objects_slots.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
                         obj->arg.b.unk3a.bytes[0];
                 }
             }
@@ -2533,16 +2536,16 @@ void map_object_update_actions(void)
                 static SVECTOR to = {0, -1280, 0, 0};
                 Object44 *sw;
 
-                o = &DAT_8018fb3c.objects[obj->arg.b.unk39 + 380];
+                o = &map_objects_slots.objects[obj->arg.b.unk39 + 380];
                 if (o->unk6 == 0x86 &&
-                    (DAT_8018fad4.area[0] == 23 ||
-                     ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.previous[0] == 23))) {
+                    (asset_status.area[0] == 23 ||
+                     ((s16)asset_status.loading == 1 && asset_status.previous[0] == 23))) {
                     to.vy = -1152;
                 }
                 if (obj->unk8 != 0 && o->unk6 == 0xff) {
                     obj->arg.b.unk38 = 0xff;
                     obj->unk8 = 0;
-                    sw = DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1];
+                    sw = map_objects_slots.objects + obj->arg.b.unk3a.bytes[1];
                     if (obj->arg.b.unk3d[0] != 0xff) {
                         sw->arg.b.unk38 &= ~obj->arg.b.unk3d[0];
                     } else {
@@ -2550,7 +2553,7 @@ void map_object_update_actions(void)
                     }
                 }
                 if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
-                    (DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
+                    (map_objects_slots.objects + obj->arg.b.unk3a.bytes[1])->arg.b.unk38 |=
                         obj->arg.b.unk3a.bytes[0];
                 }
             }
@@ -2562,9 +2565,9 @@ void map_object_update_actions(void)
                 static SVECTOR to = {0, 0, 64, 0};
                 Object44 *sw;
 
-                o = &DAT_8018fb3c.objects[obj->arg.b.unk39 + 350];
+                o = &map_objects_slots.objects[obj->arg.b.unk39 + 350];
                 if (map_object_step_offset_motion(obj, o, &from, &to, 0, 20) != 0) {
-                    sw = DAT_8018fb3c.objects + obj->arg.b.unk3a.bytes[1];
+                    sw = map_objects_slots.objects + obj->arg.b.unk3a.bytes[1];
                     o->arg.b.unk38 = 0;
                     sw->arg.b.unk38 |= obj->arg.b.unk3a.bytes[0];
                     obj->unk8 = 3;
@@ -2603,7 +2606,7 @@ void map_object_update_actions(void)
 
                 e = NULL;
                 if (obj->arg.h.unk3a != 0xffff) {
-                    e = &DAT_80185da8.objects[obj->arg.h.unk3a];
+                    e = &actor_status.objects[obj->arg.h.unk3a];
                 }
                 if (obj->unk8 == 0) {
                     if (e != NULL) {
@@ -2620,8 +2623,8 @@ void map_object_update_actions(void)
             break;
         case 18:
         case 22:
-            if (obj->arg.w.unk40 - (s32)DAT_801c12e4.frames < 0) {
-                obj->arg.w.unk40 = DAT_801c12e4.frames + 30;
+            if (obj->arg.w.unk40 - (s32)cdrom_ctl.frames < 0) {
+                obj->arg.w.unk40 = cdrom_ctl.frames + 30;
             }
             break;
         case 96:
@@ -2632,7 +2635,7 @@ void map_object_update_actions(void)
 
                     floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
                                                          def->unk8);
-                    obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+                    obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
                     obj->pos.vy += obj->arg.sh.unk3e;
                     obj->arg.sh.unk3e += 20;
                     if (obj->pos.vy >= floor) {
@@ -2658,7 +2661,7 @@ void map_object_update_actions(void)
 
                 floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
                                                      def->unk8);
-                obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+                obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
                 obj->pos.vy += 20;
                 obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
                 if (obj->pos.vy >= floor) {
@@ -2674,7 +2677,7 @@ void map_object_update_actions(void)
 
                 floor = collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, def->unk4,
                                                      def->unk8);
-                obj->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+                obj->unk0 = map_world.unk1200a == 0 ? 1 : 2;
                 obj->pos.vy += obj->arg.sh.unk3e;
                 effect_spawn_at_lower_bound(&obj->pos, 0x1000, 6000, 300);
                 ang = obj->angle.vx;
@@ -2697,12 +2700,12 @@ void map_object_update_actions(void)
             }
             break;
         default:
-            DAT_8018fad4.handlers[9]();
+            asset_status.handlers[9]();
             break;
         case 229:
         case 233:
             break;
         }
     } while (obj++, --i != 0);
-    DAT_8018fb3c.unk8858 = NULL;
+    map_objects_slots.unk8858 = NULL;
 }

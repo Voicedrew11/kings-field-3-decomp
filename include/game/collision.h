@@ -3,7 +3,7 @@
 
 /*
  * GAME.EXE collision tests (src/game/collision.c, WIP). A shape word carries
- * the height in its low 28 bits; results land in DAT_801d4464 from +0x12000
+ * the height in its low 28 bits; results land in map_world from +0x12000
  * (cell, floor height, hit bits and indices, the hit point and size).
  */
 #include <kf/lib/types.h>

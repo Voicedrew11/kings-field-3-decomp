@@ -3,7 +3,7 @@
 
 /*
  * GAME.EXE player state functions (src/game/player.c, WIP module) over the
- * player record DAT_801b24e4 (game/data.h). Signatures follow the call sites
+ * player record cur_avatar_status (game/data.h). Signatures follow the call sites
  * reconstructed so far.
  */
 #include <kf/lib/types.h>
@@ -51,7 +51,7 @@ struct Object88 *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset,
 
 /* Pad bit per action (WIP), defined in player.c; [7] toggles a setting in
  * Data801b24e4.unk178 (menu_fade_transition). */
-extern u16 DAT_80081868[14];
+extern u16 action_button_masks[14];
 
 void player_dispatch_magic_effect(s32 id, ...);
 

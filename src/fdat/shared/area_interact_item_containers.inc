@@ -14,9 +14,9 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -37,7 +37,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }

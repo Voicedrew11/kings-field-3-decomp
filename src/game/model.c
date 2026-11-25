@@ -15,7 +15,7 @@
 ADDRESS(0x80035c44, 0x40)
 void tmd_register(u16 id, u8 *data)
 {
-    DAT_80199154.vertices = DAT_80199154.unk10148[id] = data;
+    scene_display_sys.vertices = scene_display_sys.unk10148[id] = data;
     tmd_prepare_primitive_indices(data);
 }
 
@@ -23,7 +23,7 @@ void tmd_register(u16 id, u8 *data)
 ADDRESS(0x80035c84, 0x20)
 void tmd_set_slot(u16 id, u8 *data)
 {
-    DAT_80199154.unk10148[id] = data;
+    scene_display_sys.unk10148[id] = data;
 }
 
 /*
@@ -234,8 +234,8 @@ void render_enqueue_tmd_subdivided(u16 id)
     scratch = SCRATCH;
     SCRATCH->unk48 = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.model.near = DAT_80199154.unk15b28;
-    SCRATCH->w.model.far = DAT_80199154.unk15b2c;
+    SCRATCH->w.model.near = scene_display_sys.unk15b28;
+    SCRATCH->w.model.far = scene_display_sys.unk15b2c;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     n = SCRATCH->part->unk4;
@@ -1134,8 +1134,8 @@ void render_enqueue_map(u16 id)
     scratch = SCRATCH;
     SCRATCH->unk48 = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.map.near = DAT_80199154.unk15b28;
-    SCRATCH->w.map.far = DAT_80199154.unk15b2c;
+    SCRATCH->w.map.near = scene_display_sys.unk15b28;
+    SCRATCH->w.map.far = scene_display_sys.unk15b2c;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     n = SCRATCH->part->unk4;
@@ -1388,8 +1388,8 @@ void render_enqueue_map_subdivided(u16 id)
     scratch = SCRATCH;
     SCRATCH->unk48 = SCRATCH->screen;
     SCRATCH->vertex = SCRATCH->vertices;
-    SCRATCH->w.map.near = DAT_80199154.unk15b28;
-    SCRATCH->w.map.far = DAT_80199154.unk15b2c;
+    SCRATCH->w.map.near = scene_display_sys.unk15b28;
+    SCRATCH->w.map.far = scene_display_sys.unk15b2c;
     SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
     SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
     n = SCRATCH->part->unk4;
@@ -1639,21 +1639,21 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
     transform = &SCRATCH->draw.transform;
     scratch = SCRATCH;
     turn = layer->unk2 & 3;
-    light = &DAT_80199154.unk15da8[layer->unk4 & 0x3f];
+    light = &scene_display_sys.unk15da8[layer->unk4 & 0x3f];
     gte_SetLightMatrix(&light->unk0[turn]);
     gte_SetColorMatrix(&light->unk50);
     fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    gte_SetRotMatrix(&DAT_80199154.unk159f8);
-    gte_SetTransMatrix(&DAT_80199154.unk159f8);
+    gte_SetRotMatrix(&scene_display_sys.unk159f8);
+    gte_SetTransMatrix(&scene_display_sys.unk159f8);
     gte_ldv0(pos);
     gte_rt();
     gte_stlvnl(SCRATCH->draw.transform.t);
     gte_stflg(&flag);
-    gte_SetRotMatrix(&DAT_80199154.unk15a38[turn]);
+    gte_SetRotMatrix(&scene_display_sys.unk15a38[turn]);
     gte_SetTransMatrix(transform);
     part = layer->unk0;
-    if ((s16)DAT_8018fad4.loading == 1 && DAT_8018fad4.unk16 != 0 &&
+    if ((s16)asset_status.loading == 1 && asset_status.unk16 != 0 &&
         part >= ((ModelData *)SCRATCH->model)->unk4 >> 1) {
         return;
     }
@@ -1686,7 +1686,7 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
 
     pos = &SCRATCH->u.layer.unk100;
     origin = &SCRATCH->u.layer.unk108;
-    cell = &DAT_801d4464.cells[z][x];
+    cell = &map_world.cells[z][x];
     kind = cell->layer[0].unk0;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;

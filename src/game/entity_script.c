@@ -27,8 +27,8 @@ void actor_select_best_target(s32 dist)
     s32 score;
     s32 i;
 
-    obj = DAT_80185da8.current;
-    def = DAT_80185da8.def;
+    obj = actor_status.current;
+    def = actor_status.def;
     if (obj->unkf == 0xf0 || obj->unkf == 0) {
         return;
     }
@@ -57,8 +57,8 @@ void actor_select_best_target(s32 dist)
 ADDRESS(0x8004c01c, 0x4c)
 void actor_select_target_for_player_distance(void)
 {
-    actor_select_best_target(fixed_vector2_length(DAT_80185da8.current->pos.vx - DAT_801b24e4.pos.vx,
-                                                  DAT_80185da8.current->pos.vz - DAT_801b24e4.pos.vz));
+    actor_select_best_target(fixed_vector2_length(actor_status.current->pos.vx - cur_avatar_status.pos.vx,
+                                                  actor_status.current->pos.vz - cur_avatar_status.pos.vz));
 }
 
 /* The script record of the given id, or 0. */
@@ -85,13 +85,13 @@ u8 *actor_find_target_of_type(Object78 *def, u8 id)
 ADDRESS(0x8004c0b0, 0x54)
 void actor_select_target_type_in_own_group(Object88 *obj, u8 id)
 {
-    actor_set_target(obj, actor_find_target_of_type(&DAT_80185da8.defs[obj->unk2], id));
+    actor_set_target(obj, actor_find_target_of_type(&actor_status.defs[obj->unk2], id));
 }
 
 ADDRESS(0x8004c104, 0x2c)
 void actor_reset_target_and_reselect(void)
 {
-    DAT_80185da8.current->unkf = 0xff;
+    actor_status.current->unkf = 0xff;
     actor_select_target_for_player_distance();
 }
 
@@ -103,8 +103,8 @@ void actor_set_animation(u8 anim)
     if (anim == 0xff) {
         return;
     }
-    obj = DAT_80185da8.current;
-    if (DAT_80199150 != 0 && DAT_80199148 == obj) {
+    obj = actor_status.current;
+    if (actor_animation_shift_enabled != 0 && actor_animation_shift_target == obj) {
         anim += 2;
     }
     obj->unkc = anim;
@@ -119,11 +119,11 @@ void actor_set_animation_if_changed(u8 anim)
     if (anim == 0xff) {
         return;
     }
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     if (obj->unkc == anim) {
         return;
     }
-    if (DAT_80199150 != 0 && DAT_80199148 == obj) {
+    if (actor_animation_shift_enabled != 0 && actor_animation_shift_target == obj) {
         anim += 2;
     }
     obj->unkc = anim;
@@ -134,23 +134,23 @@ void actor_set_animation_if_changed(u8 anim)
 ADDRESS(0x8004c1f0, 0x33c)
 void actor_update_lifecycle_for_player_range(void)
 {
-    Object88 *obj = DAT_80185da8.current;
-    Object78 *def = DAT_80185da8.def;
+    Object88 *obj = actor_status.current;
+    Object78 *def = actor_status.def;
     u8 kind = obj->unk0;
     s32 dist;
 
     switch (obj->unk9) {
     case 0:
-        dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
+        dist = vector_distance_to_point(&obj->pos, cur_avatar_status.pos.vx, 0xffff, cur_avatar_status.pos.vz,
                                         (def->unka + 1) << 11, 0, 0);
         if (dist == -1) {
             return;
         }
         if (kind == 3 || kind == 4) {
-            if (DAT_80185da8.target->unk9 != 1) {
+            if (actor_status.target->unk9 != 1) {
                 return;
             }
-            actor_prepare_and_initialize(DAT_80185da8.current);
+            actor_prepare_and_initialize(actor_status.current);
             actor_select_best_target(dist);
             return;
         }
@@ -160,7 +160,7 @@ void actor_update_lifecycle_for_player_range(void)
                 return;
             }
         } else {
-            if (dist < def->unka << 11 && DAT_801b24e4.unke == 0) {
+            if (dist < def->unka << 11 && cur_avatar_status.unke == 0) {
                 goto wake;
             }
             if (kind != 1) {
@@ -179,7 +179,7 @@ void actor_update_lifecycle_for_player_range(void)
             }
             return;
         }
-        actor_prepare_and_initialize(DAT_80185da8.current);
+        actor_prepare_and_initialize(actor_status.current);
         {
             u8 *script = actor_find_target_of_type(def, 0x15);
             if (script == NULL) {
@@ -201,7 +201,7 @@ void actor_update_lifecycle_for_player_range(void)
         }
         return;
     case 1:
-        dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
+        dist = vector_distance_to_point(&obj->pos, cur_avatar_status.pos.vx, 0xffff, cur_avatar_status.pos.vz,
                                         def->unkb << 11, 0, 0);
         if (dist != -1) {
             return;
@@ -212,12 +212,12 @@ void actor_update_lifecycle_for_player_range(void)
         return;
     case 2:
         if (kind == 3 || kind == 4) {
-            if (DAT_80185da8.target->unk9 == 1) {
+            if (actor_status.target->unk9 == 1) {
                 return;
             }
         } else {
-            dist = vector_distance_to_point(&obj->pos, DAT_801b24e4.pos.vx, 0xffff, DAT_801b24e4.pos.vz,
-                                            def->unkb << 11, 0, 0);
+            dist = vector_distance_to_point(&obj->pos, cur_avatar_status.pos.vx, 0xffff,
+                                            cur_avatar_status.pos.vz, def->unkb << 11, 0, 0);
             if (dist != -1) {
                 return;
             }
@@ -235,7 +235,7 @@ void actor_retarget_or_disable_group_members(u16 kind)
     Object88 *obj;
     s16 i;
 
-    obj = DAT_80185da8.objects;
+    obj = actor_status.objects;
     for (i = 199; i != -1; i--) {
         if (obj->unk0 != OBJECT88_FREE && obj->unk2 == kind) {
             if (obj->unk9 == 1) {
@@ -296,7 +296,7 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
     s32 i;
     u8 chance;
 
-    obj = &DAT_80185da8.objects[index];
+    obj = &actor_status.objects[index];
     if (obj->unk1 == 0x6e) {
         return;
     }
@@ -313,9 +313,9 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
         return;
     }
     if (obj->unk0 == 3) {
-        obj = &DAT_80185da8.objects[obj->unk22];
+        obj = &actor_status.objects[obj->unk22];
     }
-    def = &DAT_80185da8.defs[obj->unk2];
+    def = &actor_status.defs[obj->unk2];
     if (obj->unke == 3 && obj->unk18 >= 1548) {
         return;
     }
@@ -349,7 +349,7 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
     }
     dmg = (dmg * a10 / 5000 + 128) >> 4;
     ((void (*)(Object88 *, s32 *, u16, u16, u16, u16, u16, u16, u16, u16))
-         DAT_8018fad4.handlers[18])(obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
+         asset_status.handlers[18])(obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
     if (dmg == 0) {
         return;
     }
@@ -377,7 +377,7 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
         }
     }
     if ((kind & 0x40) && (mode & 0x10)) {
-        switch (DAT_801b24e4.unkcb) {
+        switch (cur_avatar_status.unkcb) {
         case 0x1f:
             player_adjust_hp_on_weapon_hit((rand() * 9 >> 15) + 1);
             break;
@@ -398,10 +398,10 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
             player_add_experience(def->unk1e);
         }
         if (obj->unk1 < 43) {
-            if (DAT_801ba984.unk7d == 0) {
-                DAT_801ba984.unk7d = 1;
+            if (cur_evt_state.unk7d == 0) {
+                cur_evt_state.unk7d = 1;
             }
-            DAT_801ba984.unk7e++;
+            cur_evt_state.unk7e++;
         }
         hp = 0;
         actor_select_target_type_in_own_group(obj, 3);
@@ -428,8 +428,8 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
     obj->unk1a = hp;
 push:
     if (obj->unk28 & 0x10) {
-        link = &DAT_80185da8.objects[obj->unk22];
-        mass = (DAT_80185da8.defs + link->unk2)->unk1[1];
+        link = &actor_status.objects[obj->unk22];
+        mass = (actor_status.defs + link->unk2)->unk1[1];
     } else {
         mass = def->unk1[1];
     }

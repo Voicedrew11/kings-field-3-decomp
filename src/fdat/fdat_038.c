@@ -83,9 +83,9 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -110,7 +110,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
@@ -142,7 +142,7 @@ ADDRESS(0x801e85e0, 0x8c)
 void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
-    s32 index = obj - DAT_80185da8.objects;
+    s32 index = obj - actor_status.objects;
 
     if (index == 50 || index == 51 || index == 52) {
         if (arg6 == 0 && arg7 == 0 && arg8 == 0 && arg9 == 0) {
@@ -157,24 +157,24 @@ void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 ar
 ADDRESS(0x801e866c, 0xf0)
 void area_on_actor_removed_send_signals(Object88 *obj)
 {
-    s32 index = obj - DAT_80185da8.objects;
+    s32 index = obj - actor_status.objects;
 
     switch (index) {
     case 50:
-        if (DAT_801ba984.unk32[0x10] == 0) {
-            DAT_801ba984.unk32[0x10] = 1;
+        if (cur_evt_state.unk32[0x10] == 0) {
+            cur_evt_state.unk32[0x10] = 1;
             map_object_apply_marker_signal(0x64);
         }
         break;
     case 51:
-        if (DAT_801ba984.unk32[0x11] == 0) {
-            DAT_801ba984.unk32[0x11] = 1;
+        if (cur_evt_state.unk32[0x11] == 0) {
+            cur_evt_state.unk32[0x11] = 1;
             map_object_apply_marker_signal(0x65);
         }
         break;
     case 52:
-        if (DAT_801ba984.unk32[0x12] == 0) {
-            DAT_801ba984.unk32[0x12] = 1;
+        if (cur_evt_state.unk32[0x12] == 0) {
+            cur_evt_state.unk32[0x12] = 1;
             map_object_apply_marker_signal(0x66);
         }
         break;
@@ -223,16 +223,16 @@ void area_on_load_clear_signalled_markers(void)
     s32 k;
 
     k = 241;
-    if (DAT_801ba984.unk32[0x10] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x64) {
-        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+    if (cur_evt_state.unk32[0x10] == 1 && map_objects_slots.objects[k].arg.b.unk38 == 0x64) {
+        map_objects_slots.objects[k].arg.b.unk38 = 0xff;
     }
     k = 242;
-    if (DAT_801ba984.unk32[0x11] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x65) {
-        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+    if (cur_evt_state.unk32[0x11] == 1 && map_objects_slots.objects[k].arg.b.unk38 == 0x65) {
+        map_objects_slots.objects[k].arg.b.unk38 = 0xff;
     }
     k = 243;
-    if (DAT_801ba984.unk32[0x12] == 1 && DAT_8018fb3c.objects[k].arg.b.unk38 == 0x66) {
-        DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+    if (cur_evt_state.unk32[0x12] == 1 && map_objects_slots.objects[k].arg.b.unk38 == 0x66) {
+        map_objects_slots.objects[k].arg.b.unk38 = 0xff;
     }
-    DAT_801ba984.unk84[5] = 0xc;
+    cur_evt_state.unk84[5] = 0xc;
 }

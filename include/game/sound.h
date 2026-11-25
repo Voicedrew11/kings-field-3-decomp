@@ -42,7 +42,7 @@ typedef struct SoundUnk5c8 {
 
 typedef struct SoundState {
     u8 bank_select;         /* +0x000: picks slot 0 or 1 for banks 3..50 */
-    u_long *seq_data;       /* +0x004 */
+    u_long *seq_buffer;     /* +0x004 */
     s32 seq_playing;        /* +0x008 */
     s16 seq_id;             /* +0x00c */
     s32 seq_ready;          /* +0x010 */
@@ -55,21 +55,21 @@ typedef struct SoundState {
     SoundSlot slots[11];    /* +0x1a90 */
 } SoundState;
 
-extern SoundState DAT_801b09fc;
+extern SoundState sound_status;
 
 /* Main-RAM buffers the sound slots read VAB bodies into. */
-extern u8 DAT_8014a958[2][0x1000];
-extern u8 DAT_8014c958[0x1000];
-extern u8 DAT_8017b964[2][0x1000];
-extern u8 DAT_8017d964[4][0x1000];
-extern u8 DAT_80181964[0x1000];
-extern u8 DAT_80183568[0x1000];
+extern u8 sound_magic_vab_buffers[2][0x1000];
+extern u8 sound_sequence_vab_buffer[0x1000];
+extern u8 sound_map_object_vab_buffers[2][0x1000];
+extern u8 sound_actor_vab_buffers[4][0x1000];
+extern u8 sound_main_vab_buffer[0x1000];
+extern u8 sound_weapon_vab_buffer[0x1000];
 
 /* libsnd sequence attribute table for SsSetTableSize(table, 2, 1). */
-extern char DAT_800c8768[SS_SEQ_TABSIZ * 2 * 1];
+extern char ss_sep_area[SS_SEQ_TABSIZ * 2 * 1];
 
 /* The sequence the background music plays from. */
-extern u_long DAT_801b268c[];
+extern u_long seq_data[];
 
 void audio_initialize_runtime(void);
 void audio_start_sequence(void);

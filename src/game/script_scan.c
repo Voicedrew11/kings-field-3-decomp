@@ -67,7 +67,7 @@ u8 *event_target_stream_resolve_cursor(Object88 *obj)
     u8 *p;
     u8 n;
 
-    script = DAT_80185da8.defs[obj->unk2].scripts[0];
+    script = actor_status.defs[obj->unk2].scripts[0];
     p = script + 20;
     for (;;) {
         switch (*p) {
@@ -80,12 +80,12 @@ u8 *event_target_stream_resolve_cursor(Object88 *obj)
         found:
             return script + (script[16] + 20);
         case 0xf1:
-            if (DAT_801ba984.unk4[p[1]] == p[2]) {
+            if (cur_evt_state.unk4[p[1]] == p[2]) {
                 n = event_target_stream_find_marker(script, p[3]);
                 if (script[16] < n) {
                     script[16] = n;
                 }
-                DAT_801ba984.unkaa = obj->unk1;
+                cur_evt_state.unkaa = obj->unk1;
                 script[19] = 0;
                 goto found;
             }

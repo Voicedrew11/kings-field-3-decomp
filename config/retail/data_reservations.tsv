@@ -1,4 +1,4 @@
 image	va	name	size	class	evidence
-GAME.EXE	0x8009c3d4	DAT_8009c3d4	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)
-GAME.EXE	0x8009c3d8	DAT_8009c3d8	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)
-GAME.EXE	0x8009c3dc	DAT_8009c3dc	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)
+GAME.EXE	0x8009c3d4	map_object_door1b_view_yaw	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)
+GAME.EXE	0x8009c3d8	map_object_door0_view_yaw	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)
+GAME.EXE	0x8009c3dc	map_object_door1_view_yaw	0x4	fixed	ASPSX gives each `.lcomm x,2` of game.object44_find a 4-byte slot (native .sbss 12 bytes; retail 0x8009c3d4/3d8/3dc)

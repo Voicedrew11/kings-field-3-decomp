@@ -85,9 +85,9 @@ void area_handler_noop(void)
 ADDRESS(0x801e8684, 0x38)
 void area_update_flag_on_element_stat(void)
 {
-    if (DAT_801b24e4.unk34[3] != 0) {
-        if (DAT_801ba984.unk32[0x31] == 0) {
-            DAT_801ba984.unk32[0x31] = 1;
+    if (cur_avatar_status.unk34[3] != 0) {
+        if (cur_evt_state.unk32[0x31] == 0) {
+            cur_evt_state.unk32[0x31] = 1;
         }
     }
 }
@@ -98,7 +98,7 @@ void area_use_item_noop(void)
 }
 
 DATA(0x801e8bb8, 0x30, ".data")
-static Record30 DAT_801e8bb8 = {
+static Record30 area_light_blend_from = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{128, 128, 128}, {128, 128, 128}, {128, 128, 128}}, 0},
     {0x50, 0x50, 0x50, 0},
@@ -106,7 +106,7 @@ static Record30 DAT_801e8bb8 = {
     12000,
 };
 DATA(0x801e8be8, 0x30, ".data")
-static Record30 DAT_801e8be8 = {
+static Record30 area_light_blend_to = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{2662, 2662, 2662}, {2662, 2662, 2662}, {2662, 2662, 2662}}, 0},
     {0x78, 0x78, 0x78, 0},
@@ -123,8 +123,8 @@ void area_refresh_lamp_effects_and_light(void)
     s32 i;
     s32 t;
 
-    bits = DAT_801ba984.unk32[0x34] | DAT_801ba984.unk32[0x35] << 8;
-    effect = DAT_80182968;
+    bits = cur_evt_state.unk32[0x34] | cur_evt_state.unk32[0x35] << 8;
+    effect = map_placed_entries;
     for (i = 0, t = 0; i < 12; effect++, i++, bits >>= 1) {
         if (bits & 1) {
             effect->unk2 = 2;
@@ -133,7 +133,7 @@ void area_refresh_lamp_effects_and_light(void)
             effect->unk2 = 0;
         }
     }
-    light_blend_records(&DAT_801e8bb8, &DAT_801e8be8, &DAT_80081c8c[41], t);
+    light_blend_records(&area_light_blend_from, &area_light_blend_to, &light_default_records[41], t);
 }
 
 /* Slot 18: records 40..51 each light their lamp bit. */
@@ -141,12 +141,12 @@ ADDRESS(0x801e8758, 0xf8)
 void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
-    s32 index = obj - DAT_80185da8.objects - 40;
+    s32 index = obj - actor_status.objects - 40;
     s32 bit;
 
     if (index >= 0 && index < 12) {
-        DAT_801ba984.unk32[0x34] |= bit = 1 << index;
-        DAT_801ba984.unk32[0x35] |= bit >> 8;
+        cur_evt_state.unk32[0x34] |= bit = 1 << index;
+        cur_evt_state.unk32[0x35] |= bit >> 8;
         *out = 0;
         if (arg6 == 0) {
             return;
@@ -156,9 +156,9 @@ void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg
         light_refresh_record_rotations();
         player_update_status_visuals();
     }
-    if ((*(u32 *)&DAT_801ba984.unk32[0x32] & 0xffff0000) == 0x0fff0000) {
-        if (DAT_801ba984.unk32[0x36] == 0) {
-            DAT_801ba984.unk32[0x36] = 1;
+    if ((*(u32 *)&cur_evt_state.unk32[0x32] & 0xffff0000) == 0x0fff0000) {
+        if (cur_evt_state.unk32[0x36] == 0) {
+            cur_evt_state.unk32[0x36] = 1;
             audio_play_sound_16();
         }
         map_object_process_marker_all(0xf1);
@@ -176,19 +176,19 @@ void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (DAT_801ba984.unk32[0x30] != 1) {
-            DAT_801ba984.unk32[0x30] = 1;
+        if (cur_evt_state.unk32[0x30] != 1) {
+            cur_evt_state.unk32[0x30] = 1;
         }
         break;
     case 1:
-        if (DAT_801ba984.unk32[0x33] != 1) {
-            DAT_801ba984.unk32[0x33] = 1;
+        if (cur_evt_state.unk32[0x33] != 1) {
+            cur_evt_state.unk32[0x33] = 1;
             player_recalculate_combat_stats();
         }
         break;
     case 2:
-        if (DAT_801ba984.unk32[0x33] != 0) {
-            DAT_801ba984.unk32[0x33] = 0;
+        if (cur_evt_state.unk32[0x33] != 0) {
+            cur_evt_state.unk32[0x33] = 0;
             player_recalculate_combat_stats();
         }
         break;
@@ -225,7 +225,7 @@ ADDRESS(0x801e8938, 0x20)
 void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 14) {
-        DAT_801ba984.unk71[3] = 1;
+        cur_evt_state.unk71[3] = 1;
     }
 }
 
@@ -241,12 +241,12 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     Object44 *obj;
     s32 i;
 
-    DAT_801b24e4.unk34[3] += 20;
+    cur_avatar_status.unk34[3] += 20;
     player_learn_element_magic(3);
     player_recalculate_combat_stats();
-    obj = &DAT_8018fb3c.objects[6];
-    DAT_8018fb3c.objects[6].unk5 = 0x32;
-    DAT_8018fb3c.objects[6].unk2 = 5;
+    obj = &map_objects_slots.objects[6];
+    map_objects_slots.objects[6].unk5 = 0x32;
+    map_objects_slots.objects[6].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -259,9 +259,9 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
-    obj = &DAT_8018fb3c.objects[87];
-    DAT_8018fb3c.objects[87].unk5 = 0x32;
-    DAT_8018fb3c.objects[87].unk2 = 5;
+    obj = &map_objects_slots.objects[87];
+    map_objects_slots.objects[87].unk5 = 0x32;
+    map_objects_slots.objects[87].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -283,8 +283,8 @@ ADDRESS(0x801e8af0, 0x48)
 void area_talk_event_signal_marker(Object88 *record, s32 event)
 {
     if (event == 0) {
-        if (DAT_801ba984.unk32[0x32] == 0) {
-            DAT_801ba984.unk32[0x32] = 1;
+        if (cur_evt_state.unk32[0x32] == 0) {
+            cur_evt_state.unk32[0x32] = 1;
             map_object_apply_marker_signal(0xf2);
             audio_play_sound_16();
         }
@@ -295,16 +295,16 @@ void area_talk_event_signal_marker(Object88 *record, s32 event)
 ADDRESS(0x801e8b38, 0x80)
 void area_on_load_restore_lamps_and_markers(void)
 {
-    if (DAT_801ba984.unk32[0x32] != 0) {
+    if (cur_evt_state.unk32[0x32] != 0) {
         map_object_apply_marker_signal(0xf2);
     }
-    if (DAT_801ba984.unk7f[3] != 0) {
-        DAT_8018fb3c.objects[6].unk6 = 0xff;
-        DAT_8018fb3c.objects[87].unk6 = 0xff;
+    if (cur_evt_state.unk7f[3] != 0) {
+        map_objects_slots.objects[6].unk6 = 0xff;
+        map_objects_slots.objects[87].unk6 = 0xff;
     }
-    if (DAT_801ba984.unk32[0x36] != 0) {
+    if (cur_evt_state.unk32[0x36] != 0) {
         map_object_process_marker_all(0xf1);
     }
     area_refresh_lamp_effects_and_light();
-    DAT_801ba984.unk84[5] = 0x1a;
+    cur_evt_state.unk84[5] = 0x1a;
 }

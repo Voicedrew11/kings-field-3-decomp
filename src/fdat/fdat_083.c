@@ -89,20 +89,20 @@ void area_adjust_actor_magic_damage_noop(void)
 ADDRESS(0x801e85e4, 0xb0)
 void area_on_actor_removed_trade_item(Object88 *obj)
 {
-    if (obj - DAT_80185da8.objects != 0) {
+    if (obj - actor_status.objects != 0) {
         return;
     }
-    if (DAT_801b24e4.unk101 == 0x11) {
+    if (cur_avatar_status.unk101 == 0x11) {
         return;
     }
-    DAT_801ba984.unk32[0x37] = 1;
+    cur_evt_state.unk32[0x37] = 1;
     if (game_counter_is_nonzero(0x10) <= 0) {
         return;
     }
-    DAT_801ba984.unk32[0x38] = 1;
+    cur_evt_state.unk32[0x38] = 1;
     game_counter_decrement(0x10);
     game_counter_increment(0x11);
-    if (DAT_801b24e4.unkcb == 0x10) {
+    if (cur_avatar_status.unkcb == 0x10) {
         player_equip_weapon(0x11);
     }
 }
@@ -140,7 +140,7 @@ void area_on_movie_start_noop(void)
 ADDRESS(0x801e8a50, 0x14)
 void area_on_movie_end_set_flag(void)
 {
-    DAT_801ba984.unk32[0x37] = 1;
+    cur_evt_state.unk32[0x37] = 1;
 }
 
 ADDRESS(0x801e8a64, 0x8)
@@ -152,5 +152,5 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e8a6c, 0x14)
 void area_on_load_store_area_index(void)
 {
-    DAT_801ba984.unk84[5] = 0x1b;
+    cur_evt_state.unk84[5] = 0x1b;
 }

@@ -101,9 +101,9 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
     }
     i = map_object_find_interaction_target(0, pos, 800, 0x6a4, angle->vy, 0x200);
     if (i != -1) {
-        obj = &DAT_8018fb3c.objects[i];
+        obj = &map_objects_slots.objects[i];
         if (obj->unk6 == 0x140) {
-            if (angle_within_tolerance(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
+            if (angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
                 return;
             }
             if (obj->arg.b.unk38 != 0xff) {
@@ -111,15 +111,15 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
             }
             obj->arg.b.unk38 = item;
             obj->unk8 = 0;
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
             game_counter_decrement(0x85);
             event_spawn_effect_object(obj, 0x85);
         } else if (map_object_check_and_consume_marker(obj, 0x85) == 3) {
             notify_enqueue(7);
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
         }
     } else {
-        DAT_801ba984.unk0 = 1;
+        cur_evt_state.unk0 = 1;
         notify_enqueue(0x23);
     }
 }
@@ -146,11 +146,11 @@ void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
         return;
     }
     if (player_camera_within_map_region(0x12, 0x1c, 3, 3, 0x8000) != 0) {
-        if (DAT_801b24e4.unk10a != 0) {
+        if (cur_avatar_status.unk10a != 0) {
             map_cell_copy_rotated_fields(2, 0x15, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
         }
     } else {
-        DAT_801b24e4.unk10a = 0;
+        cur_avatar_status.unk10a = 0;
         map_cell_copy_rotated_fields(2, 0x18, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
     }
 }
@@ -165,33 +165,34 @@ void area_init_map_object_socket(Object44 *obj, Object44Def *def)
 }
 
 DATA(0x801e8908, 0x8, ".data")
-static SVECTOR DAT_801e8908 = {0, -1600, 0x400, 0};
+static SVECTOR area_socket_motion_start_offset = {0, -1600, 0x400, 0};
 DATA(0x801e8910, 0x8, ".data")
-static SVECTOR DAT_801e8910 = {0, -1600, 0x100, 0};
+static SVECTOR area_socket_motion_end_offset = {0, -1600, 0x100, 0};
 
 /* Slot 9: when the tested kind 0xa7 object reaches its target, frees every 0xe8 object. */
 ADDRESS(0x801e87d0, 0xb4)
 void area_update_map_object_socket(void)
 {
-    Object44 *obj = DAT_8018fb3c.unk8858;
+    Object44 *obj = map_objects_slots.unk8858;
     Object44 *other;
     s32 i;
 
     if (obj->unk4 != 0xa7) {
         return;
     }
-    if (map_object_step_offset_motion(obj, &DAT_8018fb3c.objects[380 + obj->arg.b.unk39], &DAT_801e8908,
-                                      &DAT_801e8910, 0, 20) == 0) {
+    if (map_object_step_offset_motion(obj, &map_objects_slots.objects[380 + obj->arg.b.unk39],
+                                      &area_socket_motion_start_offset, &area_socket_motion_end_offset, 0,
+                                      20) == 0) {
         return;
     }
-    other = DAT_8018fb3c.objects;
+    other = map_objects_slots.objects;
     for (i = 0x18c; i != 0; i--, other++) {
         if (other->unk4 == 0xe8) {
             other->unk1 = 0x81;
             other->arg.b.unk40 = 0;
         }
     }
-    DAT_801ba984.unk0 = 1;
+    cur_evt_state.unk0 = 1;
 }
 
 ADDRESS(0x801e8884, 0x8)
@@ -254,7 +255,7 @@ ADDRESS(0x801e88dc, 0x18)
 void area_talk_event_set_flag(Object88 *obj, s32 event)
 {
     if (event == 0) {
-        DAT_801ba984.unk2c[2] = 1;
+        cur_evt_state.unk2c[2] = 1;
     }
 }
 
@@ -262,5 +263,5 @@ void area_talk_event_set_flag(Object88 *obj, s32 event)
 ADDRESS(0x801e88f4, 0x14)
 void area_on_load_store_area_index(void)
 {
-    DAT_801ba984.unk84[5] = 7;
+    cur_evt_state.unk84[5] = 7;
 }

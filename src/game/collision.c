@@ -2,7 +2,7 @@
  * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records and its front ends
  * (WIP module after src/game/floor_select.c). They pick the map cell, run the
  * interpreter and the record searches, and leave their results in
- * DAT_801d4464 (+0x12000..+0x12050).
+ * map_world (+0x12000..+0x12050).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -37,7 +37,7 @@ s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     s16 *p;
     s32 count;
     s32 top;
-    s32 *heights; /* DAT_801d4464.unk1200c, unk12010 and unk12014 */
+    s32 *heights; /* map_world.unk1200c, unk12010 and unk12014 */
     s32 cell_x;
     s32 cell_z;
     s16 local_x; /* 16-bit copies for the stair, ramp and diagonal tests */
@@ -54,24 +54,24 @@ s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     locked = 0;
     unused = 0;
     second = 0;
-    DAT_801d4464.unk12010 = 100000;
-    DAT_801d4464.unk12014 = DAT_801d4464.unk1200c - 40000;
-    DAT_801d4464.unk12018[0] = 100000;
-    DAT_801d4464.unk12018[1] = 100000;
-    DAT_801d4464.unk12018[2] = 100000;
-    DAT_801d4464.unk12034 = 0;
-    DAT_801d4464.unk12038 = 0;
-    layer = (u8 *)DAT_801d4464.unk12000 + DAT_801d4464.unk1200a;
-    DAT_801d4464.unk12004 = layer;
+    map_world.unk12010 = 100000;
+    map_world.unk12014 = map_world.unk1200c - 40000;
+    map_world.unk12018[0] = 100000;
+    map_world.unk12018[1] = 100000;
+    map_world.unk12018[2] = 100000;
+    map_world.unk12034 = 0;
+    map_world.unk12038 = 0;
+    layer = (u8 *)map_world.unk12000 + map_world.unk1200a;
+    map_world.unk12004 = layer;
     flags = shape & 0xf0000000;
     shape &= 0x0fffffff;
 again:
-    p = (s16 *)(DAT_801d4464.unk10000 + ((u16 *)DAT_801d4464.unk10000)[layer[3]]);
+    p = (s16 *)(map_world.unk10000 + ((u16 *)map_world.unk10000)[layer[3]]);
     radius = radius * *p++ >> 12;
     top = y - shape;
     count = *p++;
     while (--count != -1) {
-        heights = &DAT_801d4464.unk1200c;
+        heights = &map_world.unk1200c;
         cell_x = x & 0x7ff;
         cell_z = z & 0x7ff;
         local_x = x & 0x7ff;
@@ -113,7 +113,7 @@ again:
                         break;
                     }
                 }
-                DAT_801d4464.unk12014 = lo;
+                map_world.unk12014 = lo;
             }
             break;
         }
@@ -371,8 +371,8 @@ again:
                     }
                 }
                 if (slope[5] < 64) {
-                    DAT_801d4464.unk12034 = (slope[4] << 7) / slope[5];
-                    DAT_801d4464.unk12038 = rot << 10;
+                    map_world.unk12034 = (slope[4] << 7) / slope[5];
+                    map_world.unk12038 = rot << 10;
                 }
                 break;
             case 1:
@@ -421,8 +421,8 @@ again:
                     }
                 }
                 if (q[3] < 64) {
-                    DAT_801d4464.unk12034 = (q[2] << 7) / q[3];
-                    DAT_801d4464.unk12038 = (rot << 10) + 512;
+                    map_world.unk12034 = (q[2] << 7) / q[3];
+                    map_world.unk12038 = (rot << 10) + 512;
                 }
                 break;
             case 1:
@@ -465,8 +465,8 @@ again:
                     }
                 }
                 if (q[3] < 64) {
-                    DAT_801d4464.unk12034 = (q[2] << 7) / q[3];
-                    DAT_801d4464.unk12038 = (rot << 10) + 512;
+                    map_world.unk12034 = (q[2] << 7) / q[3];
+                    map_world.unk12038 = (rot << 10) + 512;
                 }
                 break;
             case 1:
@@ -511,8 +511,8 @@ again:
                     }
                 }
                 if ((q[1] < n || n < q[2]) && q[5] < 64) {
-                    DAT_801d4464.unk12034 = (q[4] << 7) / q[5];
-                    DAT_801d4464.unk12038 = (rot << 10) - 512;
+                    map_world.unk12034 = (q[4] << 7) / q[5];
+                    map_world.unk12038 = (rot << 10) - 512;
                 }
                 break;
             case 1:
@@ -552,8 +552,8 @@ again:
                         }
                     }
                     if (slope[5] < 64) {
-                        DAT_801d4464.unk12034 = (slope[4] << 7) / slope[5];
-                        DAT_801d4464.unk12038 = rot << 10;
+                        map_world.unk12034 = (slope[4] << 7) / slope[5];
+                        map_world.unk12038 = rot << 10;
                     }
                 } else {
                     heights[2] = lo;
@@ -596,12 +596,12 @@ again:
                     if (distance < wall[0] + radius || wall[1] - radius < distance) {
                         break;
                     }
-                    DAT_801d4464.unk12010 = wall[2] + DAT_801d4464.unk1200c;
-                    DAT_801d4464.unk12014 = wall[3] + DAT_801d4464.unk1200c;
-                    if (top < DAT_801d4464.unk12014) {
+                    map_world.unk12010 = wall[2] + map_world.unk1200c;
+                    map_world.unk12014 = wall[3] + map_world.unk1200c;
+                    if (top < map_world.unk12014) {
                         hits |= 8;
                     }
-                    if (DAT_801d4464.unk12010 >= y) {
+                    if (map_world.unk12010 >= y) {
                         hits &= ~0x205;
                     }
                     break;
@@ -622,29 +622,29 @@ again:
                 return hits;
             }
             {
-                u16 *offset = &DAT_801d4464.unk1200a;
+                u16 *offset = &map_world.unk1200a;
 
                 *offset = *offset == 0 ? 5 : 0;
-                layer = (u8 *)DAT_801d4464.unk12000 + *offset;
+                layer = (u8 *)map_world.unk12000 + *offset;
             }
             second = 1;
-            DAT_801d4464.unk1200c = -layer[1] << 7;
+            map_world.unk1200c = -layer[1] << 7;
             goto again;
         case 0x18: {
             s16 *q;
             s32 f;
 
             q = p++;
-            DAT_801d4464.unk12018[0] = f = q[0] + DAT_801d4464.unk1200c;
+            map_world.unk12018[0] = f = q[0] + map_world.unk1200c;
             if (flags & 0x80000000) {
-                DAT_801d4464.unk12010 = f;
+                map_world.unk12010 = f;
                 if (f < y) {
                     hits |= 4;
                     locked = 1;
                 }
             }
             if (flags & 0x40000000) {
-                DAT_801d4464.unk12014 = f;
+                map_world.unk12014 = f;
                 if (f >= top) {
                     hits |= 8;
                 }
@@ -655,14 +655,14 @@ again:
             s16 *q;
 
             q = p++;
-            DAT_801d4464.unk12018[1] = q[0] + DAT_801d4464.unk1200c;
+            map_world.unk12018[1] = q[0] + map_world.unk1200c;
             break;
         }
         case 0x17: {
             s16 *q;
 
             q = p++;
-            DAT_801d4464.unk12018[2] = q[0] + DAT_801d4464.unk1200c;
+            map_world.unk12018[2] = q[0] + map_world.unk1200c;
             break;
         }
         }
@@ -676,7 +676,7 @@ s32 collision_probe_floor_height(s32 x, s32 y, s32 z, s32 radius, s32 shape)
 {
     collision_sample_map_cell_layer(x, y - 1280, z);
     collision_evaluate_shape_records(x, y, z, radius, shape);
-    return DAT_801d4464.unk12010;
+    return map_world.unk12010;
 }
 
 /* Floor height at (x, z) on the map cell's layer for area (2 the upper one). */
@@ -685,17 +685,17 @@ s32 collision_sample_map_layer_height(u8 area, s32 x, s32 z, s32 radius, s32 hei
 {
     MapCell *cell;
 
-    cell = &DAT_801d4464.cells[z >> 11][x >> 11];
+    cell = &map_world.cells[z >> 11][x >> 11];
     if (area == 2) {
-        DAT_801d4464.unk1200a = 5;
-        DAT_801d4464.unk1200c = -cell->layer[1].unk1 << 7;
+        map_world.unk1200a = 5;
+        map_world.unk1200c = -cell->layer[1].unk1 << 7;
     } else {
-        DAT_801d4464.unk1200a = 0;
-        DAT_801d4464.unk1200c = -cell->layer[0].unk1 << 7;
+        map_world.unk1200a = 0;
+        map_world.unk1200c = -cell->layer[0].unk1 << 7;
     }
-    DAT_801d4464.unk12000 = cell;
-    collision_evaluate_shape_records(x, DAT_801d4464.unk1200c, z, radius, height);
-    return DAT_801d4464.unk12010;
+    map_world.unk12000 = cell;
+    collision_evaluate_shape_records(x, map_world.unk1200c, z, radius, height);
+    return map_world.unk12010;
 }
 
 /* Adds count to the occupant count of every map cell a circle at (x, z) touches. */
@@ -717,7 +717,7 @@ void map_cell_add_layer_occupancy(s32 x, s32 z, s32 radius, s32 count)
     nx = ((x + radius) >> 11) - x0;
     z0 = (z - radius) >> 11;
     nz = ((z + radius) >> 11) - z0;
-    row = &DAT_801d4464.cells[z0][x0];
+    row = &map_world.cells[z0][x0];
     cz = z0;
     do {
         cell = row;
@@ -753,28 +753,28 @@ void collision_cache_load_hit_bounds(void)
     Object44 *carrier;
     Object44Def *def;
 
-    if (DAT_801d4464.unk12024 & 0x80) {
-        DAT_801d4464.unk1203c = DAT_801b24e4.pos;
-        DAT_801d4464.unk1204c = 800;
-        DAT_801d4464.unk1204e = 1700;
-    } else if (DAT_801d4464.unk12028 != -1) {
-        obj = &DAT_80185da8.objects[DAT_801d4464.unk12028];
-        DAT_801d4464.unk1203c = obj->pos;
-        DAT_801d4464.unk1204c = obj->unk1c;
-        DAT_801d4464.unk1204e = obj->unk1e;
-    } else if (DAT_801d4464.unk1202c != -1) {
-        carrier = &DAT_8018fb3c.objects[DAT_801d4464.unk1202c];
-        def = &DAT_8018fb3c.defs[carrier->unk6];
-        DAT_801d4464.unk1203c = carrier->pos;
+    if (map_world.unk12024 & 0x80) {
+        map_world.unk1203c = cur_avatar_status.pos;
+        map_world.unk1204c = 800;
+        map_world.unk1204e = 1700;
+    } else if (map_world.unk12028 != -1) {
+        obj = &actor_status.objects[map_world.unk12028];
+        map_world.unk1203c = obj->pos;
+        map_world.unk1204c = obj->unk1c;
+        map_world.unk1204e = obj->unk1e;
+    } else if (map_world.unk1202c != -1) {
+        carrier = &map_objects_slots.objects[map_world.unk1202c];
+        def = &map_objects_slots.defs[carrier->unk6];
+        map_world.unk1203c = carrier->pos;
         if (carrier->unk3 & 0x10) {
-            DAT_801d4464.unk1204c = def->unk4 * carrier->arg.b.unk38 >> 7;
+            map_world.unk1204c = def->unk4 * carrier->arg.b.unk38 >> 7;
         } else if (carrier->unk3 & 0x4) {
-            DAT_801d4464.unk12050 = def->arg.h.unke;
-            DAT_801d4464.unk1204c = def->arg.h.unk10;
+            map_world.unk12050 = def->arg.h.unke;
+            map_world.unk1204c = def->arg.h.unk10;
         } else {
-            DAT_801d4464.unk1204c = def->unk4;
+            map_world.unk1204c = def->unk4;
         }
-        DAT_801d4464.unk1204e = def->unk8;
+        map_world.unk1204e = def->unk8;
     }
 }
 
@@ -782,7 +782,7 @@ void collision_cache_load_hit_bounds(void)
  * Tests a shape at (x, y, z) against what mask selects: bit 0 the map, bit 1
  * the map's pits, bit 4 or 6 the Object88 records, bit 5 the Object44 records,
  * bit 7 the player. Returns the bits that hit. mask is a u16: callers pass
- * DAT_80185da8.unk9d04 (a word) with lhu.
+ * actor_status.unk9d04 (a word) with lhu.
  */
 ADDRESS(0x80033f38, 0x248)
 s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
@@ -792,36 +792,36 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
     hits = 0;
     if (mask & 1) {
         hits = collision_query_shapes_with_layer_sample(x, y, z, radius, shape);
-        if ((mask & 2) && (DAT_801d4464.unk12004[4] & 0x40)) {
-            DAT_801d4464.unk12010 = -100000;
+        if ((mask & 2) && (map_world.unk12004[4] & 0x40)) {
+            map_world.unk12010 = -100000;
             hits |= 1;
         }
     } else {
-        DAT_801d4464.unk12000 = &DAT_801d4464.cells[z >> 11][x >> 11];
+        map_world.unk12000 = &map_world.cells[z >> 11][x >> 11];
     }
     shape &= 0xfffffff;
-    if (DAT_801d4464.unk12000->layer[0].unk2 & 0xfc) {
+    if (map_world.unk12000->layer[0].unk2 & 0xfc) {
         if (mask & 0x10) {
-            DAT_801d4464.unk12028 = actor_find_overlap_excluding_target_type3(x, y, z, radius, shape);
-            if (DAT_801d4464.unk12028 != -1) {
+            map_world.unk12028 = actor_find_overlap_excluding_target_type3(x, y, z, radius, shape);
+            if (map_world.unk12028 != -1) {
                 hits |= 0x10;
             }
         } else {
             if (mask & 0x40) {
-                DAT_801d4464.unk12028 = actor_find_overlap(x, y, z, radius, shape);
-                if (DAT_801d4464.unk12028 != -1) {
+                map_world.unk12028 = actor_find_overlap(x, y, z, radius, shape);
+                if (map_world.unk12028 != -1) {
                     hits |= 0x10;
                 }
             }
-            DAT_801d4464.unk12028 = -1;
+            map_world.unk12028 = -1;
         }
         if (mask & 0x20) {
-            DAT_801d4464.unk1202c = map_object_find_collision_at_point(x, y, z, radius, shape);
-            if (DAT_801d4464.unk1202c != -1) {
+            map_world.unk1202c = map_object_find_collision_at_point(x, y, z, radius, shape);
+            if (map_world.unk1202c != -1) {
                 hits |= 0x20;
             }
         } else {
-            DAT_801d4464.unk1202c = -1;
+            map_world.unk1202c = -1;
         }
         if (mask & 0x80) {
             if (player_distance_to_point_with_margin(x, y, z, radius, shape) != -1) {
@@ -829,9 +829,9 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
             }
         }
     } else {
-        DAT_801d4464.unk12028 = -1;
-        DAT_801d4464.unk1202c = -1;
+        map_world.unk12028 = -1;
+        map_world.unk1202c = -1;
     }
-    DAT_801d4464.unk12024 = hits;
+    map_world.unk12024 = hits;
     return hits;
 }

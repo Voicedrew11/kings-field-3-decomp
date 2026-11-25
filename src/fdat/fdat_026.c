@@ -80,19 +80,19 @@ void area_update_respawn_actor_out_of_view(void)
 {
     s32 i;
 
-    if (DAT_801ba984.unk2c[4] != 1 || DAT_801ba984.unk32[0] != 0) {
+    if (cur_evt_state.unk2c[4] != 1 || cur_evt_state.unk32[0] != 0) {
         return;
     }
     i = 1;
-    if (DAT_80185da8.objects[i].unk9 == 1) {
+    if (actor_status.objects[i].unk9 == 1) {
         return;
     }
-    if (angle_within_tolerance(DAT_801b24e4.unk124.vy,
-                               vector_xz_to_angle(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
-                                                  DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
+    if (angle_within_tolerance(cur_avatar_status.unk124.vy,
+                               vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
+                                                  actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                600) == 0) {
-        DAT_80185da8.objects[i].unk9 = 0;
-        DAT_80185da8.objects[i].unk0 = 2;
+        actor_status.objects[i].unk9 = 0;
+        actor_status.objects[i].unk0 = 2;
     }
 }
 
@@ -105,7 +105,7 @@ void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item)
     if (item != 0x81) {
         return;
     }
-    if (DAT_801ba984.unk2c[4] != 0) {
+    if (cur_evt_state.unk2c[4] != 0) {
         return;
     }
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
@@ -113,9 +113,9 @@ void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item)
             color_overlay_transition(0x200, 0, 0, 0, 0x80, 0x80, 200);
             color_overlay_transition(0x200, 0x80, 0x80, 200, 0, 0, 0);
             set_accumulated_color_overlay(0, 0, 0, 0, 1);
-            DAT_801ba984.unk2c[4] = 1;
+            cur_evt_state.unk2c[4] = 1;
             game_counter_decrement(item);
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
         }
     }
 }
@@ -129,10 +129,10 @@ void area_adjust_actor_magic_damage_noop(void)
 ADDRESS(0x801e8780, 0x68)
 void area_on_actor_removed_disable_actor(Object88 *obj)
 {
-    if (obj - DAT_80185da8.objects == 1) {
-        if (DAT_801ba984.unk2c[4] == 1) {
-            DAT_801ba984.unk2c[4] = 2;
-            DAT_80185da8.objects[1].unk0 = 8;
+    if (obj - actor_status.objects == 1) {
+        if (cur_evt_state.unk2c[4] == 1) {
+            cur_evt_state.unk2c[4] = 2;
+            actor_status.objects[1].unk0 = 8;
         }
     }
 }
@@ -175,23 +175,23 @@ void area_talk_event_grant_magic(Object88 *record, s32 event)
     case 0:
         color_overlay_transition(0x200, 0, 0, 0, 0x80, 200, 0x80);
         color_overlay_transition(0x200, 0x80, 200, 0x80, 0, 0, 0);
-        DAT_801ba984.unk31 = 1;
-        DAT_801b77ec.unk0[54].unk0 = 1;
-        DAT_801b77ec.unk0[55].unk0 = 1;
-        DAT_801b77ec.unk0[66].unk0 = 1;
-        DAT_801b77ec.unk0[67].unk0 = 1;
-        DAT_801b77ec.unk0[68].unk0 = 1;
-        DAT_801b77ec.unk0[69].unk0 = 1;
-        DAT_801b77ec.unk0[70].unk0 = 1;
-        DAT_801b77ec.unk0[71].unk0 = 1;
-        DAT_801b77ec.unk0[72].unk0 = 1;
-        DAT_801b77ec.unk0[73].unk0 = 1;
-        DAT_801b77ec.unk0[74].unk0 = 1;
-        DAT_801b77ec.unk0[75].unk0 = 1;
+        cur_evt_state.unk31 = 1;
+        effect_status.unk0[54].unk0 = 1;
+        effect_status.unk0[55].unk0 = 1;
+        effect_status.unk0[66].unk0 = 1;
+        effect_status.unk0[67].unk0 = 1;
+        effect_status.unk0[68].unk0 = 1;
+        effect_status.unk0[69].unk0 = 1;
+        effect_status.unk0[70].unk0 = 1;
+        effect_status.unk0[71].unk0 = 1;
+        effect_status.unk0[72].unk0 = 1;
+        effect_status.unk0[73].unk0 = 1;
+        effect_status.unk0[74].unk0 = 1;
+        effect_status.unk0[75].unk0 = 1;
         break;
     case 1:
-        DAT_801ba984.unk32[0] = 1;
-        DAT_80185da8.objects[1].unk0 = 8;
+        cur_evt_state.unk32[0] = 1;
+        actor_status.objects[1].unk0 = 8;
         break;
     }
 }
@@ -200,21 +200,21 @@ void area_talk_event_grant_magic(Object88 *record, s32 event)
 ADDRESS(0x801e8918, 0xb0)
 void area_on_load_restore_actor_and_item_flags(void)
 {
-    if (DAT_801ba984.unk2c[4] != 0 && DAT_801ba984.unk32[0] == 0) {
-        DAT_80185da8.objects[1].unk0 = 1;
+    if (cur_evt_state.unk2c[4] != 0 && cur_evt_state.unk32[0] == 0) {
+        actor_status.objects[1].unk0 = 1;
     } else {
-        DAT_80185da8.objects[1].unk0 = 8;
+        actor_status.objects[1].unk0 = 8;
     }
     if (game_counter_is_nonzero(0x85) > 0) {
-        DAT_801ba984.unk32[1] = 1;
+        cur_evt_state.unk32[1] = 1;
     } else {
-        DAT_801ba984.unk32[1] = 0;
+        cur_evt_state.unk32[1] = 0;
     }
     if (game_counter_is_nonzero(0x10) > 0) {
-        DAT_801ba984.unk32[2] = 1;
+        cur_evt_state.unk32[2] = 1;
     }
     if (game_counter_is_nonzero(0x7d) > 0) {
-        DAT_801ba984.unk32[3] = 1;
+        cur_evt_state.unk32[3] = 1;
     }
-    DAT_801ba984.unk84[5] = 8;
+    cur_evt_state.unk84[5] = 8;
 }

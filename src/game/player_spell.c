@@ -26,81 +26,81 @@ void player_select_magic_action(s32 id)
     Record18 *r;
     s32 cost;
 
-    if (DAT_801b24e4.unk105 != 0xff) {
+    if (cur_avatar_status.unk105 != 0xff) {
         return;
     }
     if (id == 0xff) {
         return;
     }
-    r = &DAT_801b77ec.unk0[id];
+    r = &effect_status.unk0[id];
     cost = r->unk16;
-    if (DAT_801b24e4.unkf0 == 0x26) {
+    if (cur_avatar_status.unkf0 == 0x26) {
         cost <<= 1;
     }
-    if (DAT_801b24e4.unkf1 == 0x2e) {
+    if (cur_avatar_status.unkf1 == 0x2e) {
         cost >>= 1;
     }
-    if (DAT_801b24e4.unk1c < cost) {
+    if (cur_avatar_status.unk1c < cost) {
         notify_enqueue(9);
         return;
     }
-    if (DAT_801b24e4.unkcb == 0x1f) {
+    if (cur_avatar_status.unkcb == 0x1f) {
         return;
     }
     switch (id) {
     case 26:
-        if (DAT_801b24e4.unk86 != 0) {
+        if (cur_avatar_status.unk86 != 0) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 27:
-        if (DAT_801b24e4.unk88 != 0) {
+        if (cur_avatar_status.unk88 != 0) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 28:
-        if (DAT_801b24e4.unk8a != 0) {
+        if (cur_avatar_status.unk8a != 0) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 25:
-        if (DAT_801b24e4.unk78 == 0) {
+        if (cur_avatar_status.unk78 == 0) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 23:
-        if (DAT_801b24e4.hp == DAT_801b24e4.hp_max) {
+        if (cur_avatar_status.hp == cur_avatar_status.hp_max) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 29:
-        if (DAT_801b24e4.unk8e != 0) {
+        if (cur_avatar_status.unk8e != 0) {
             return;
         }
-        DAT_801b24e4.unk8e = 900;
-        DAT_801b24e4.unk1c -= cost;
+        cur_avatar_status.unk8e = 900;
+        cur_avatar_status.unk1c -= cost;
         player_increment_magic_training(r);
         return;
     case 30:
-        if (DAT_801b24e4.hp == DAT_801b24e4.hp_max && DAT_801b24e4.unk7a == 0 && DAT_801b24e4.unk7e == 0
-            && DAT_801b24e4.unk82 == 0 && DAT_801b24e4.unk84 == 0) {
+        if (cur_avatar_status.hp == cur_avatar_status.hp_max && cur_avatar_status.unk7a == 0 && cur_avatar_status.unk7e == 0
+            && cur_avatar_status.unk82 == 0 && cur_avatar_status.unk84 == 0) {
             return;
         }
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     }
-    if (DAT_801b24e4.unk22 < 5000) {
+    if (cur_avatar_status.unk22 < 5000) {
         return;
     }
     switch (id) {
@@ -113,19 +113,19 @@ void player_select_magic_action(s32 id)
         player_increment_magic_training(r);
         break;
     }
-    DAT_801b24e4.unk14c.vx = -200;
-    DAT_801b24e4.unk14c.vy = 200;
-    DAT_801b24e4.unk14c.vz = 400;
-    DAT_801b24e4.unk22 = 0;
-    DAT_801b24e4.unkf = 0;
-    DAT_801b24e4.unk105 = id;
-    DAT_801b24e4.unk108 = 1;
-    DAT_801b24e4.unk1c -= cost;
+    cur_avatar_status.unk14c.vx = -200;
+    cur_avatar_status.unk14c.vy = 200;
+    cur_avatar_status.unk14c.vz = 400;
+    cur_avatar_status.unk22 = 0;
+    cur_avatar_status.unkf = 0;
+    cur_avatar_status.unk105 = id;
+    cur_avatar_status.unk108 = 1;
+    cur_avatar_status.unk1c -= cost;
     switch (id) {
     case 4:
-        DAT_801b24e4.unk14c.vy = -512;
-        DAT_801b24e4.unk14c.vx = 0;
-        DAT_801b24e4.unk14c.vz = 2000;
+        cur_avatar_status.unk14c.vy = -512;
+        cur_avatar_status.unk14c.vx = 0;
+        cur_avatar_status.unk14c.vz = 2000;
         /* fall through */
     case 0:
     case 5:
@@ -147,82 +147,82 @@ void player_select_magic_action(s32 id)
     case 72:
     case 73:
     case 75:
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 76:
-        DAT_801b24e4.unk14c.vz = 600;
-        DAT_801b24e4.unk14c.vx = 0;
-        DAT_801b24e4.unk14c.vy = 0;
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk14c.vz = 600;
+        cur_avatar_status.unk14c.vx = 0;
+        cur_avatar_status.unk14c.vy = 0;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 1:
-        DAT_801b24e4.unk14c.vx = -2000;
-        DAT_801b24e4.unk14c.vy = 1600;
-        DAT_801b24e4.unk14c.vz = 1000;
-        DAT_801b24e4.unk106 = 5;
-        DAT_801b24e4.unk107 = 3;
+        cur_avatar_status.unk14c.vx = -2000;
+        cur_avatar_status.unk14c.vy = 1600;
+        cur_avatar_status.unk14c.vz = 1000;
+        cur_avatar_status.unk106 = 5;
+        cur_avatar_status.unk107 = 3;
         break;
     case 56:
-        DAT_801b24e4.unk14c.vy = 500;
-        DAT_801b24e4.unk106 = 3;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk14c.vy = 500;
+        cur_avatar_status.unk106 = 3;
+        cur_avatar_status.unk107 = 1;
         break;
     case 13:
-        DAT_801b24e4.unk14c.vy = 500;
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk14c.vy = 500;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 64:
-        DAT_801b24e4.unk106 = 3;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 3;
+        cur_avatar_status.unk107 = 1;
         break;
     case 66:
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 9:
-        DAT_801b24e4.unk14c.vy = -400;
-        DAT_801b24e4.unk14c.vz = 400;
-        DAT_801b24e4.unk14c.vx = 0;
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk14c.vy = -400;
+        cur_avatar_status.unk14c.vz = 400;
+        cur_avatar_status.unk14c.vx = 0;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 17:
-        DAT_801b24e4.unk14c.vz = 600;
-        DAT_801b24e4.unk14c.vy = -600;
-        DAT_801b24e4.unk14c.vx = 0;
-        DAT_801b24e4.unk106 = 1;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk14c.vz = 600;
+        cur_avatar_status.unk14c.vy = -600;
+        cur_avatar_status.unk14c.vx = 0;
+        cur_avatar_status.unk106 = 1;
+        cur_avatar_status.unk107 = 1;
         break;
     case 20:
     case 71:
-        DAT_801b24e4.unk14c.vx = -200;
-        DAT_801b24e4.unk106 = 5;
-        DAT_801b24e4.unk107 = 2;
+        cur_avatar_status.unk14c.vx = -200;
+        cur_avatar_status.unk106 = 5;
+        cur_avatar_status.unk107 = 2;
         break;
     case 2:
-        DAT_801b24e4.unk106 = 3;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 3;
+        cur_avatar_status.unk107 = 1;
         break;
     case 11:
-        DAT_801b24e4.unk106 = 12;
-        DAT_801b24e4.unk107 = 1;
+        cur_avatar_status.unk106 = 12;
+        cur_avatar_status.unk107 = 1;
         break;
     case 7:
-        DAT_801b24e4.unk106 = 2;
-        DAT_801b24e4.unk107 = 1;
-        DAT_801b24e4.unk14c.vz = 0;
-        DAT_801b24e4.unk14c.vy = 0;
-        DAT_801b24e4.unk14c.vx = 0;
+        cur_avatar_status.unk106 = 2;
+        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.unk14c.vz = 0;
+        cur_avatar_status.unk14c.vy = 0;
+        cur_avatar_status.unk14c.vx = 0;
         break;
     case 8:
-        DAT_801b24e4.unk106 = 4;
-        DAT_801b24e4.unk107 = 2;
+        cur_avatar_status.unk106 = 4;
+        cur_avatar_status.unk107 = 2;
         break;
     }
-    DAT_801b24e4.unkac = r;
+    cur_avatar_status.unkac = r;
 }
 
 /*
@@ -266,17 +266,17 @@ s32 player_move_horizontal(s32 angle, s32 speed)
     dx0 = dx;
     dz0 = dz;
 retry:
-    p.vx = dx + DAT_801b24e4.pos.vx;
-    p.vz = dz + DAT_801b24e4.pos.vz;
-    hit = collision_query_world(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31);
+    p.vx = dx + cur_avatar_status.pos.vx;
+    p.vz = dz + cur_avatar_status.pos.vz;
+    hit = collision_query_world(p.vx, cur_avatar_status.pos.vy, p.vz, 800, 1700, 0x31);
     if (hit == 0) {
     free:
-        if (DAT_801d4464.unk12034 >= 64) {
+        if (map_world.unk12034 >= 64) {
             s32 px;
             s32 pz;
 
-            px = rcos(-DAT_801d4464.unk12038 - 1024) * DAT_801d4464.unk12034 >> 12;
-            pz = rsin(-DAT_801d4464.unk12038 - 1024) * DAT_801d4464.unk12034 >> 12;
+            px = rcos(-map_world.unk12038 - 1024) * map_world.unk12034 >> 12;
+            pz = rsin(-map_world.unk12038 - 1024) * map_world.unk12034 >> 12;
             if (!pushed) {
                 pushed = 1;
                 dx += px;
@@ -285,23 +285,23 @@ retry:
             }
         }
         moved = 1;
-        DAT_801b24e4.pos.vx = p.vx;
-        DAT_801b24e4.pos.vz = p.vz;
-        DAT_801b24e4.unk160 = DAT_801d4464.unk1200a;
+        cur_avatar_status.pos.vx = p.vx;
+        cur_avatar_status.pos.vz = p.vz;
+        cur_avatar_status.unk160 = map_world.unk1200a;
         goto done;
     }
     blocked = 0;
     if (!(hit & ~0x207)) {
-        if (DAT_801d4464.unk12010 + 1280 >= DAT_801b24e4.pos.vy && DAT_801b24e4.unk101 == 0
-            && DAT_801d4464.unk12014 - DAT_801d4464.unk12010 < -1700) {
+        if (map_world.unk12010 + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.unk101 == 0
+            && map_world.unk12014 - map_world.unk12010 < -1700) {
             goto free;
         }
         if (!(hit & 2)) {
             blocked = 1;
         }
     }
-    if (DAT_801d4464.unk1202c != -1) {
-        obj = &DAT_8018fb3c.objects[DAT_801d4464.unk1202c];
+    if (map_world.unk1202c != -1) {
+        obj = &map_objects_slots.objects[map_world.unk1202c];
         if (obj->unk3 & 4) {
             tries++;
             lz = speed;
@@ -377,25 +377,25 @@ retry:
             goto done;
         }
         collision_cache_load_hit_bounds();
-        wx = DAT_801d4464.unk1203c.vx - DAT_801b24e4.pos.vx;
-        wz = DAT_801d4464.unk1203c.vz - DAT_801b24e4.pos.vz;
+        wx = map_world.unk1203c.vx - cur_avatar_status.pos.vx;
+        wz = map_world.unk1203c.vz - cur_avatar_status.pos.vz;
         a = ratan2(dz - wz, dx - wx);
-        r = DAT_801d4464.unk1204c + 880;
+        r = map_world.unk1204c + 880;
         dx = rcos(a) * r / 4096;
         dz = rsin(a) * r / 4096;
-        p.vx = dx + DAT_801d4464.unk1203c.vx;
-        dx = p.vx - DAT_801b24e4.pos.vx;
-        p.vz = dz + DAT_801d4464.unk1203c.vz;
-        dz = p.vz - DAT_801b24e4.pos.vz;
+        p.vx = dx + map_world.unk1203c.vx;
+        dx = p.vx - cur_avatar_status.pos.vx;
+        p.vz = dz + map_world.unk1203c.vz;
+        dz = p.vz - cur_avatar_status.pos.vz;
         goto retry;
     }
     if (!stepped) {
         for (step = speed - 22; step >= 0; step -= 22) {
-            p.vx = DAT_801b24e4.pos.vx + rcos(angle) * step / 4096;
-            p.vz = DAT_801b24e4.pos.vz + rsin(angle) * step / 4096;
-            if (collision_query_world(p.vx, DAT_801b24e4.pos.vy, p.vz, 800, 1700, 0x31) == 0) {
-                DAT_801b24e4.pos.vx = p.vx;
-                DAT_801b24e4.pos.vz = p.vz;
+            p.vx = cur_avatar_status.pos.vx + rcos(angle) * step / 4096;
+            p.vz = cur_avatar_status.pos.vz + rsin(angle) * step / 4096;
+            if (collision_query_world(p.vx, cur_avatar_status.pos.vy, p.vz, 800, 1700, 0x31) == 0) {
+                cur_avatar_status.pos.vx = p.vx;
+                cur_avatar_status.pos.vz = p.vz;
                 break;
             }
         }
@@ -419,7 +419,7 @@ retry:
         if (cornered) {
             goto slide;
         }
-        slope = DAT_801d4464.unk12004[2] & 3;
+        slope = map_world.unk12004[2] & 3;
         if (slope == 0 || slope == 2) {
             dz = (dx0 + dz0) >> 1;
             dx = dz;
@@ -433,7 +433,7 @@ retry:
     }
     moved = 0;
 done:
-    DAT_801b24e4.unk11c.vx = dx;
-    DAT_801b24e4.unk11c.vz = dz;
+    cur_avatar_status.unk11c.vx = dx;
+    cur_avatar_status.unk11c.vz = dz;
     return moved;
 }

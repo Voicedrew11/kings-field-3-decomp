@@ -105,11 +105,11 @@ void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
         return;
     }
     if (player_camera_within_map_region(0x24, 0x32, 3, 3, 0x8000) != 0) {
-        if (DAT_801b24e4.unk10a != 0) {
+        if (cur_avatar_status.unk10a != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
         }
     } else {
-        DAT_801b24e4.unk10a = 0;
+        cur_avatar_status.unk10a = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
     }
 }
@@ -148,8 +148,8 @@ void area_talk_event_give_item_and_set_flag(Object88 *record, s32 event)
         event_map_object_interact(NULL, 0x90);
         break;
     case 1:
-        if (DAT_801ba984.unk32[0xb] == 0) {
-            DAT_801ba984.unk32[0xb] = 1;
+        if (cur_evt_state.unk32[0xb] == 0) {
+            cur_evt_state.unk32[0xb] = 1;
         }
         break;
     }
@@ -163,51 +163,51 @@ void area_on_load_restore_actor_groups_and_doors(void)
     s32 i;
     s32 k;
 
-    if (DAT_801ba984.unk32[0xa] == 0) {
-        DAT_801ba984.unk32[0xa] = 1;
+    if (cur_evt_state.unk32[0xa] == 0) {
+        cur_evt_state.unk32[0xa] = 1;
     }
-    if (DAT_801ba984.unk32[0xb] == 0) {
-        Object88 *record = &DAT_80185da8.objects[29];
+    if (cur_evt_state.unk32[0xb] == 0) {
+        Object88 *record = &actor_status.objects[29];
 
         record->unk0 = 1;
-        door = &DAT_8018fb3c.objects[253];
+        door = &map_objects_slots.objects[253];
         door->unk0 = 0;
         k = 253;
-        DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
+        map_objects_slots.objects[k].arg.b.unk38 = 0;
         map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-        door = &DAT_8018fb3c.objects[90];
+        door = &map_objects_slots.objects[90];
         door->unk0 = 0;
         k = 90;
-        DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0;
+        map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         {
-            Object88 *records = DAT_80185da8.objects;
+            Object88 *records = actor_status.objects;
 
             for (i = 14, k = 0; i != -1; i--, k++) {
                 records[k].unk0 = 1;
             }
         }
         {
-            Object88 *records = DAT_80185da8.objects;
+            Object88 *records = actor_status.objects;
 
             for (i = 13, k = 15; i != -1; i--, k++) {
                 records[k].unk0 = 8;
             }
         }
-    } else if (DAT_801ba984.unk84[5] != 10) {
+    } else if (cur_evt_state.unk84[5] != 10) {
         map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-        DAT_8018fb3c.objects[90].unk0 = 2;
-        DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
+        map_objects_slots.objects[90].unk0 = 2;
+        map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
         {
-            Object88 *records = DAT_80185da8.objects;
+            Object88 *records = actor_status.objects;
 
             for (i = 14, k = 0; i != -1; i--, k++) {
                 records[k].unk0 = 8;
             }
         }
-        if (DAT_801ba984.unk32[0xc] == 0) {
-            DAT_801ba984.unk32[0xc] = 1;
+        if (cur_evt_state.unk32[0xc] == 0) {
+            cur_evt_state.unk32[0xc] = 1;
             {
-                Object88 *records = DAT_80185da8.objects;
+                Object88 *records = actor_status.objects;
 
                 for (i = 13, k = 15; i != -1; i--, k++) {
                     records[k].unk0 = 1;
@@ -215,28 +215,28 @@ void area_on_load_restore_actor_groups_and_doors(void)
             }
         }
     } else {
-        if (DAT_801ba984.unk32[0xc] == 0) {
-            Object88 *record = &DAT_80185da8.objects[29];
+        if (cur_evt_state.unk32[0xc] == 0) {
+            Object88 *record = &actor_status.objects[29];
 
             record->unk0 = 1;
-            door = &DAT_8018fb3c.objects[253];
+            door = &map_objects_slots.objects[253];
             door->unk0 = 0;
             k = 253;
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0;
+            map_objects_slots.objects[k].arg.b.unk38 = 0;
             map_cell_copy_rotated_fields(2, 0x48, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-            door = &DAT_8018fb3c.objects[90];
+            door = &map_objects_slots.objects[90];
             door->unk0 = 0;
             k = 90;
-            DAT_8018fb3c.objects[k].arg.b.unk3d[1] = 0;
+            map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
             {
-                Object88 *records = DAT_80185da8.objects;
+                Object88 *records = actor_status.objects;
 
                 for (i = 14, k = 0; i != -1; i--, k++) {
                     records[k].unk0 = 1;
                 }
             }
             {
-                Object88 *records = DAT_80185da8.objects;
+                Object88 *records = actor_status.objects;
 
                 for (i = 13, k = 15; i != -1; i--, k++) {
                     records[k].unk0 = 8;
@@ -244,10 +244,10 @@ void area_on_load_restore_actor_groups_and_doors(void)
             }
         } else {
             map_cell_copy_rotated_fields(2, 0x47, 5, 0x41, 0x31, 1, 1, 0, 0x2f);
-            DAT_8018fb3c.objects[90].unk0 = 2;
-            DAT_8018fb3c.objects[90].arg.b.unk3d[1] = 0xff;
+            map_objects_slots.objects[90].unk0 = 2;
+            map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
             {
-                Object88 *records = DAT_80185da8.objects;
+                Object88 *records = actor_status.objects;
 
                 for (i = 14, k = 0; i != -1; i--, k++) {
                     records[k].unk0 = 8;
@@ -255,13 +255,13 @@ void area_on_load_restore_actor_groups_and_doors(void)
             }
         }
     }
-    if (DAT_801ba984.unk32[0xc] != 0) {
-        if (DAT_801ba984.unk32[0xc] == 1) {
-            DAT_8018fb3c.objects[253].unk0 = 2;
-            DAT_8018fb3c.objects[253].arg.b.unk38 = 0xff;
-            DAT_801ba984.unk32[0xc] = 2;
+    if (cur_evt_state.unk32[0xc] != 0) {
+        if (cur_evt_state.unk32[0xc] == 1) {
+            map_objects_slots.objects[253].unk0 = 2;
+            map_objects_slots.objects[253].arg.b.unk38 = 0xff;
+            cur_evt_state.unk32[0xc] = 2;
         }
-        DAT_80185da8.objects[29].unk0 = 8;
+        actor_status.objects[29].unk0 = 8;
     }
-    DAT_801ba984.unk84[5] = 10;
+    cur_evt_state.unk84[5] = 10;
 }

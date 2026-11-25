@@ -102,8 +102,8 @@ void area_fade_out_object_pair(s32 a, s32 b)
     Object44 *second;
     s32 i;
 
-    first = &DAT_8018fb3c.objects[a];
-    second = &DAT_8018fb3c.objects[b];
+    first = &map_objects_slots.objects[a];
+    second = &map_objects_slots.objects[b];
     first->unk5 = 0x32;
     second->unk5 = 0x32;
     first->unk2 = 5;
@@ -133,17 +133,17 @@ void area_fade_out_object_pair(s32 a, s32 b)
 ADDRESS(0x801e870c, 0xcc)
 void area_on_actor_removed_fade_object_pair(Object88 *obj)
 {
-    switch (obj - DAT_80185da8.objects) {
+    switch (obj - actor_status.objects) {
     case 3:
-        if (DAT_801ba984.unk32[0x1b] == 0) {
-            DAT_801ba984.unk32[0x1b] = 1;
+        if (cur_evt_state.unk32[0x1b] == 0) {
+            cur_evt_state.unk32[0x1b] = 1;
             area_disable_actor_range(4, 2);
             area_fade_out_object_pair(0x73, 0x74);
         }
         break;
     case 40:
-        if (DAT_801ba984.unk32[0x1c] == 0) {
-            DAT_801ba984.unk32[0x1c] = 1;
+        if (cur_evt_state.unk32[0x1c] == 0) {
+            cur_evt_state.unk32[0x1c] = 1;
             area_disable_actor_range(10, 2);
             area_fade_out_object_pair(0x75, 0x76);
         }
@@ -190,15 +190,15 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e8810, 0x80)
 void area_on_load_restore_removed_objects(void)
 {
-    if (DAT_801ba984.unk32[0x1b] != 0) {
+    if (cur_evt_state.unk32[0x1b] != 0) {
         area_disable_actor_range(4, 2);
-        DAT_8018fb3c.objects[0x73].unk6 = 0xff;
-        DAT_8018fb3c.objects[0x74].unk6 = 0xff;
+        map_objects_slots.objects[0x73].unk6 = 0xff;
+        map_objects_slots.objects[0x74].unk6 = 0xff;
     }
-    if (DAT_801ba984.unk32[0x1c] != 0) {
+    if (cur_evt_state.unk32[0x1c] != 0) {
         area_disable_actor_range(10, 2);
-        DAT_8018fb3c.objects[0x75].unk6 = 0xff;
-        DAT_8018fb3c.objects[0x76].unk6 = 0xff;
+        map_objects_slots.objects[0x75].unk6 = 0xff;
+        map_objects_slots.objects[0x76].unk6 = 0xff;
     }
-    DAT_801ba984.unk84[5] = 0xf;
+    cur_evt_state.unk84[5] = 0xf;
 }

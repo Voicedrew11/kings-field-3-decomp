@@ -90,10 +90,10 @@ void area_adjust_actor_magic_damage_noop(void)
 ADDRESS(0x801e85b8, 0x60)
 void area_on_actor_removed_show_object(Object88 *obj)
 {
-    if (obj - DAT_80185da8.objects == 20) {
-        DAT_801ba984.unk32[0x27] = 1;
-        DAT_8018fb3c.objects[85].arg.b.unk3f = 0xff;
-        DAT_8018fb3c.objects[85].unk0 = 2;
+    if (obj - actor_status.objects == 20) {
+        cur_evt_state.unk32[0x27] = 1;
+        map_objects_slots.objects[85].arg.b.unk3f = 0xff;
+        map_objects_slots.objects[85].unk0 = 2;
     }
 }
 
@@ -136,17 +136,17 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e8650, 0x74)
 void area_on_load_restore_actor_and_object(void)
 {
-    if (DAT_801ba984.unk32[0x2b] != 0) {
-        DAT_80185da8.objects[17].unk0 = 8;
+    if (cur_evt_state.unk32[0x2b] != 0) {
+        actor_status.objects[17].unk0 = 8;
     } else {
-        DAT_80185da8.objects[17].unk0 = 1;
+        actor_status.objects[17].unk0 = 1;
     }
-    if (DAT_801ba984.unk32[0x27] != 0) {
-        DAT_8018fb3c.objects[85].arg.b.unk3f = 0xff;
-        DAT_8018fb3c.objects[85].unk0 = 2;
+    if (cur_evt_state.unk32[0x27] != 0) {
+        map_objects_slots.objects[85].arg.b.unk3f = 0xff;
+        map_objects_slots.objects[85].unk0 = 2;
     } else {
-        DAT_8018fb3c.objects[85].arg.b.unk3f = 0;
-        DAT_8018fb3c.objects[85].unk0 = 0;
+        map_objects_slots.objects[85].arg.b.unk3f = 0;
+        map_objects_slots.objects[85].unk0 = 0;
     }
-    DAT_801ba984.unk84[5] = 0x13;
+    cur_evt_state.unk84[5] = 0x13;
 }

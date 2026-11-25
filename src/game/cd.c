@@ -35,7 +35,7 @@ RODATA(0x8001108c, 0x21)
 SDATA(0x8009c220, 0xb)
 
 DATA(0x801c12e4, 0x4c0, ".bss")
-CdState DAT_801c12e4;
+CdState cdrom_ctl;
 
 void cd_vsync_handler(void);
 void cd_complete_handler(void);
@@ -58,21 +58,21 @@ void cd_request_yield(void)
 ADDRESS(0x80019570, 0xa4)
 void cd_vsync_handler(void)
 {
-    DAT_801c12e4.frames++;
-    DAT_801c12e4.frame_gate++;
-    DAT_801c12e4.unkc++;
-    if (DAT_801c12e4.frames % FRAMES_PER_MINUTE == 0) {
-        DAT_801b24e4.play_minutes++;
+    cdrom_ctl.frames++;
+    cdrom_ctl.frame_gate++;
+    cdrom_ctl.unkc++;
+    if (cdrom_ctl.frames % FRAMES_PER_MINUTE == 0) {
+        cur_avatar_status.play_minutes++;
     }
 }
 
 ADDRESS(0x80019614, 0x68)
 void cd_wait_four_vsyncs(void)
 {
-    while (DAT_801c12e4.frame_gate < 4) {
+    while (cdrom_ctl.frame_gate < 4) {
         VSync(0);
     }
-    DAT_801c12e4.frame_gate = 0;
+    cdrom_ctl.frame_gate = 0;
 }
 
 ADDRESS(0x8001967c, 0x6c)
@@ -81,10 +81,10 @@ void cd_request_advance(CdRequest *request)
     request->kind = CD_REQUEST_FREE;
     request->issued = 0;
     request++;
-    if (request == &DAT_801c12e4.requests[24]) {
+    if (request == &cdrom_ctl.requests[24]) {
         request -= 24;
     }
-    DAT_801c12e4.read = request;
+    cdrom_ctl.read = request;
     if (request->kind != CD_REQUEST_FREE) {
         CdSeekL(&request->pos);
     } else {
@@ -95,7 +95,7 @@ void cd_request_advance(CdRequest *request)
 ADDRESS(0x800196e8, 0x160)
 void cd_complete_handler(void)
 {
-    CdRequest *request = DAT_801c12e4.read;
+    CdRequest *request = cdrom_ctl.read;
 
     switch (request->kind) {
     case CD_REQUEST_FREE:
@@ -140,7 +140,7 @@ void cd_complete_handler(void)
 ADDRESS(0x80019848, 0x88)
 void cd_data_ready_handler(void)
 {
-    CdRequest *request = DAT_801c12e4.read;
+    CdRequest *request = cdrom_ctl.read;
 
     switch (request->kind) {
     case CD_REQUEST_FREE:
@@ -204,7 +204,7 @@ void cd_location_add(CdlLOC *pos, s32 offset, CdlLOC *out)
 ADDRESS(0x80019ab4, 0x68)
 void cd_request_wait_idle(void)
 {
-    while (DAT_801c12e4.read != DAT_801c12e4.write || DAT_801c12e4.read->kind != CD_REQUEST_FREE) {
+    while (cdrom_ctl.read != cdrom_ctl.write || cdrom_ctl.read->kind != CD_REQUEST_FREE) {
         cd_request_yield();
     }
 }
@@ -234,7 +234,7 @@ s32 cd_sectors_corrupt(u8 *buffer, s32 sectors)
 ADDRESS(0x80019bbc, 0x108)
 CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCallback callback)
 {
-    CdRequest *request = DAT_801c12e4.write;
+    CdRequest *request = cdrom_ctl.write;
 
     cd_request_wait_done(request);
     request->kind = kind;
@@ -244,10 +244,10 @@ CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCa
     request->buffer = buffer;
     request->count = (bytes + 2047) >> 11;
     request->callback = callback;
-    if (++DAT_801c12e4.write == &DAT_801c12e4.requests[24]) {
-        DAT_801c12e4.write = DAT_801c12e4.requests;
+    if (++cdrom_ctl.write == &cdrom_ctl.requests[24]) {
+        cdrom_ctl.write = cdrom_ctl.requests;
     }
-    if (DAT_801c12e4.read == request) {
+    if (cdrom_ctl.read == request) {
         CdSeekL(pos);
     }
     return request;
@@ -256,7 +256,7 @@ CdRequest *cd_request_enqueue(s32 kind, CdlLOC *pos, u32 bytes, u8 *buffer, CdCa
 ADDRESS(0x80019cc4, 0x84)
 s32 cd_archive_entry_extent(s32 file, s32 entry, CdlLOC *pos)
 {
-    CdFile *f = &DAT_801c12e4.files[file];
+    CdFile *f = &cdrom_ctl.files[file];
     s32 first = f->sectors[entry];
 
     if (pos) {
@@ -297,7 +297,7 @@ ADDRESS(0x80019e48, 0xcc)
 void cd_archive_read_chunked(u16 file, u16 entry, u8 *buffer, CdCallback callback)
 {
     CdlLOC pos;
-    CdRequest *request = DAT_801c12e4.write;
+    CdRequest *request = cdrom_ctl.write;
     u32 bytes;
 
     cd_request_wait_done(request);
@@ -322,8 +322,8 @@ s32 cd_archive_entry_size(int file_in, int entry_in)
     u16 entry = entry_in;
     s32 first;
 
-    first = DAT_801c12e4.files[file].sectors[entry];
-    return (DAT_801c12e4.files[file].sectors[entry + 1] - first) << 11;
+    first = cdrom_ctl.files[file].sectors[entry];
+    return (cdrom_ctl.files[file].sectors[entry + 1] - first) << 11;
 }
 
 ADDRESS(0x80019f58, 0x8)
@@ -340,9 +340,9 @@ void cd_read_sectors(CdlLOC *pos, u8 *buffer, s32 sectors)
     s32 status;
 
     cd_request_wait_idle();
-    DisableEvent(DAT_801c12e4.error_event);
-    DisableEvent(DAT_801c12e4.complete_event);
-    DisableEvent(DAT_801c12e4.ready_event);
+    DisableEvent(cdrom_ctl.error_event);
+    DisableEvent(cdrom_ctl.complete_event);
+    DisableEvent(cdrom_ctl.ready_event);
     tries = 0;
     failed = 1;
     CdControl(CdlPause, 0, 0);
@@ -362,9 +362,9 @@ void cd_read_sectors(CdlLOC *pos, u8 *buffer, s32 sectors)
         }
         tries++;
     } while (tries < 3);
-    EnableEvent(DAT_801c12e4.error_event);
-    EnableEvent(DAT_801c12e4.complete_event);
-    EnableEvent(DAT_801c12e4.ready_event);
+    EnableEvent(cdrom_ctl.error_event);
+    EnableEvent(cdrom_ctl.complete_event);
+    EnableEvent(cdrom_ctl.ready_event);
     if (failed == 1) {
         cd_report_error(1);
     }
@@ -395,7 +395,7 @@ void cd_archive_read(int file_in, int entry_in, u8 *buffer)
     u16 file = file_in;
     u16 entry = entry_in;
     CdlLOC pos;
-    CdFile *f = &DAT_801c12e4.files[file];
+    CdFile *f = &cdrom_ctl.files[file];
     s32 first = f->sectors[entry];
     s32 sectors = f->sectors[entry + 1] - first;
 
@@ -455,7 +455,7 @@ void cd_archive_open(int index_in, char *name)
     char unused[64]; /* the frame keeps 64 unused bytes here */
     CdlFILE file;
     char path[64];
-    CdFile *f = &DAT_801c12e4.files[index];
+    CdFile *f = &cdrom_ctl.files[index];
 
     strcpy(path, "\\CD\\");
     strcat(path, name);
@@ -477,12 +477,12 @@ void cd_initialize(void)
     s32 i;
 
     EnterCriticalSection();
-    DAT_801c12e4.vsync_event = OpenEvent(RCNT_VSYNC, EvSpINT, EvMdINTR, cd_vsync_handler);
-    EnableEvent(DAT_801c12e4.vsync_event);
+    cdrom_ctl.vsync_event = OpenEvent(RCNT_VSYNC, EvSpINT, EvMdINTR, cd_vsync_handler);
+    EnableEvent(cdrom_ctl.vsync_event);
     SetRCnt(RCNT_VSYNC, 60000, RCntMdINTR);
     StartRCnt(RCNT_VSYNC);
-    DAT_801c12e4.frames = DAT_801c12e4.frame_gate = DAT_801c12e4.unkc = 0;
-    request = DAT_801c12e4.requests;
+    cdrom_ctl.frames = cdrom_ctl.frame_gate = cdrom_ctl.unkc = 0;
+    request = cdrom_ctl.requests;
     i = 0;
     while (i < 24) {
         i++;
@@ -490,14 +490,14 @@ void cd_initialize(void)
         request->issued = 0;
         request++;
     }
-    DAT_801c12e4.write = DAT_801c12e4.requests;
-    DAT_801c12e4.read = DAT_801c12e4.requests;
-    DAT_801c12e4.error_event = OpenEvent(HwCdRom, EvSpERROR, EvMdINTR, cd_error_handler);
-    DAT_801c12e4.complete_event = OpenEvent(HwCdRom, EvSpCOMP, EvMdINTR, cd_complete_handler);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
-    EnableEvent(DAT_801c12e4.error_event);
-    EnableEvent(DAT_801c12e4.complete_event);
-    EnableEvent(DAT_801c12e4.ready_event);
+    cdrom_ctl.write = cdrom_ctl.requests;
+    cdrom_ctl.read = cdrom_ctl.requests;
+    cdrom_ctl.error_event = OpenEvent(HwCdRom, EvSpERROR, EvMdINTR, cd_error_handler);
+    cdrom_ctl.complete_event = OpenEvent(HwCdRom, EvSpCOMP, EvMdINTR, cd_complete_handler);
+    cdrom_ctl.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
+    EnableEvent(cdrom_ctl.error_event);
+    EnableEvent(cdrom_ctl.complete_event);
+    EnableEvent(cdrom_ctl.ready_event);
     ExitCriticalSection();
 }
 
@@ -505,10 +505,10 @@ ADDRESS(0x8001a5c0, 0x6c)
 void cd_close_events(void)
 {
     EnterCriticalSection();
-    CloseEvent(DAT_801c12e4.vsync_event);
-    CloseEvent(DAT_801c12e4.error_event);
-    CloseEvent(DAT_801c12e4.complete_event);
-    CloseEvent(DAT_801c12e4.ready_event);
+    CloseEvent(cdrom_ctl.vsync_event);
+    CloseEvent(cdrom_ctl.error_event);
+    CloseEvent(cdrom_ctl.complete_event);
+    CloseEvent(cdrom_ctl.ready_event);
     ExitCriticalSection();
 }
 

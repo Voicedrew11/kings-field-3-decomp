@@ -18,12 +18,12 @@ typedef struct MapPatch {
 
 /* Patch lists map_object_initialize_from_placements applies (.data, owner unit unknown): [def * 2 + side] of
  * four records each, and five lists of three. */
-extern MapPatch DAT_8008288c[2][4];
-extern MapPatch DAT_800828dc[3];
-extern MapPatch DAT_800828fc[3];
-extern MapPatch DAT_8008291c[3];
-extern MapPatch DAT_8008293c[3];
-extern MapPatch DAT_8008295c[3];
+extern MapPatch map_object_cell_patterns[2][4];
+extern MapPatch map_object_door_shape_pattern[3];
+extern MapPatch map_object_door3_object_pattern[3];
+extern MapPatch map_object_door4_object_pattern[3];
+extern MapPatch map_object_door5_shape_pattern[3];
+extern MapPatch map_object_door5_object_pattern[3];
 
 void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapPatch *rec, s32 index, s32 flags);
 void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,

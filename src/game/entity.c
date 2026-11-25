@@ -21,7 +21,7 @@ Object88 *actor_pool_find_free(void)
     Object88 *obj;
     s32 i;
 
-    obj = &DAT_80185da8.objects[190];
+    obj = &actor_status.objects[190];
     for (i = 9; i != -1; i--) {
         if (obj->unk0 == OBJECT88_FREE) {
             return obj;
@@ -43,7 +43,7 @@ void actor_set_home_position(Object88 *obj)
         obj->pos.vy = 0;
     }
     if (obj->unk28 & 0x400) {
-        obj->pos.vy = DAT_801d4464.unk1200c;
+        obj->pos.vy = map_world.unk1200c;
     }
     if (!(obj->unk28 & 0x10)) {
         obj->pos.vy += obj->unk26;
@@ -55,7 +55,7 @@ void actor_copy_group_defaults(Object88 *obj)
 {
     Object78 *def;
 
-    def = &DAT_80185da8.defs[obj->unk2];
+    def = &actor_status.defs[obj->unk2];
     obj->unk1 = def->unk0;
     obj->unk1a = def->unk1a;
     obj->unk1c = def->unk12;
@@ -108,11 +108,11 @@ void actor_disable_type3_transition_actors(void)
     Object88 *obj;
     s32 i;
 
-    obj = DAT_80185da8.objects;
+    obj = actor_status.objects;
     for (i = 199; i != -1; i--) {
         if (obj->unk0 == 1 && obj->unk9 == 1 && obj->unke == 3 && obj->unkf == 0xf0) {
             if (obj->unk70 != 0 || obj->unk18 > 0x800) {
-                ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
+                ((void (*)(Object88 *))asset_status.handlers[19])(obj);
                 actor_set_lifecycle_and_home_position(obj);
             }
         }
@@ -136,7 +136,7 @@ void actor_prepare_and_initialize(Object88 *obj)
 ADDRESS(0x8004b8c4, 0x38)
 void actor_prepare_and_initialize_by_index(u16 index)
 {
-    actor_prepare_and_initialize(&DAT_80185da8.objects[index]);
+    actor_prepare_and_initialize(&actor_status.objects[index]);
 }
 
 ADDRESS(0x8004b8fc, 0x50)
@@ -145,8 +145,8 @@ void actor_pool_clear(void)
     Object88 *obj;
     u16 i;
 
-    DAT_80185da8.unk9d24 = 0;
-    obj = DAT_80185da8.objects;
+    actor_status.unk9d24 = 0;
+    obj = actor_status.objects;
     i = 0;
     while (i < 200) {
         i++;
@@ -155,7 +155,7 @@ void actor_pool_clear(void)
         obj->unk5c = 0;
         obj++;
     }
-    DAT_80185da8.unk9d00 = 0;
+    actor_status.unk9d00 = 0;
 }
 
 /* Starts a script record (0 stops the script). */

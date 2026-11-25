@@ -3,9 +3,9 @@
 
 /*
  * GAME.EXE Object4c records (src/game/object4c*.c, WIP names): the 128
- * records of DAT_801b77ec.objects, made by effect_construct_record from an id that
- * indexes the Record18 records at the start of DAT_801b77ec, then moved,
- * tested for hits and drawn. DAT_801b77ec.unk2f04 names the record being
+ * records of effect_status.objects, made by effect_construct_record from an id that
+ * indexes the Record18 records at the start of effect_status, then moved,
+ * tested for hits and drawn. effect_status.unk2f04 names the record being
  * updated and unk2f00 its Record18 record.
  */
 #include <kf/lib/types.h>
@@ -57,7 +57,7 @@ void effect_pool_reset(void);
 void magic_load_records(u32 *src);
 void effect_pool_sweep(void);
 
-extern SVECTOR DAT_8009c33c;
-extern Object4cTrail DAT_801e7594[4][24];
+extern SVECTOR effect_zero_direction;
+extern Object4cTrail effect_trails_table[4][24];
 
 #endif

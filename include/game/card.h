@@ -21,14 +21,14 @@
  * from the globals each comment names and card_payload_restore_game_state copies it back.
  */
 typedef struct SaveData {
-    u8 area[5];             /* +0x0000: DAT_8018fad4.area */
+    u8 area[5];             /* +0x0000: asset_status.area */
     u8 unk5[3];
-    u8 unk8[0x100];         /* +0x0008: DAT_801ba984 from unk4 (the script bytes) */
-    u8 unk108[0x5000];      /* +0x0108: DAT_801ba984.unk104, the block arena */
-    u16 unk5108[32];        /* +0x5108: DAT_801ba984.unk5104 */
-    u8 unk5148[0x3c0];      /* +0x5148: DAT_801983a8.unk1e0, the slot runs */
-    u8 unk5508[2][150];     /* +0x5508: DAT_800c85e8, the item counts */
-    u8 unk5634[96];         /* +0x5634: DAT_801b77ec.unk0[n].unk0 */
+    u8 unk8[0x100];         /* +0x0008: cur_evt_state from unk4 (the script bytes) */
+    u8 unk108[0x5000];      /* +0x0108: cur_evt_state.unk104, the block arena */
+    u16 unk5108[32];        /* +0x5108: cur_evt_state.unk5104 */
+    u8 unk5148[0x3c0];      /* +0x5148: conversation_records.unk1e0, the slot runs */
+    u8 unk5508[2][150];     /* +0x5508: event_item_counters_table, the item counts */
+    u8 unk5634[96];         /* +0x5634: effect_status.unk0[n].unk0 */
     VECTOR pos;             /* +0x5694: Data801b24e4.pos */
     SVECTOR unk56a4;        /* +0x56a4: Data801b24e4.unk12c */
     u32 play_minutes;       /* +0x56ac */
@@ -60,10 +60,10 @@ typedef struct SaveData {
     u8 bgm_volume;          /* +0x5714 */
     u8 unk5715[8];          /* +0x5715: Data801b24e4.unkf9..unk100 */
     u8 unk571d;
-    u8 unk571e[32][20];     /* +0x571e: DAT_801b56cc, the rooms seen */
-    u8 unk599e[150];        /* +0x599e: DAT_80081780 */
-    u8 unk5a34[150];        /* +0x5a34: DAT_80080718[0], the first shop's stock */
-    u8 unk5aca[4];          /* +0x5aca: the menu list cursors DAT_8009c22c..DAT_8009c22f */
+    u8 unk571e[32][20];     /* +0x571e: map_revealed_rects, the rooms seen */
+    u8 unk599e[150];        /* +0x599e: item_guide_level */
+    u8 unk5a34[150];        /* +0x5a34: menu_shop_stock_pages[0], the first shop's stock */
+    u8 unk5aca[4];          /* +0x5aca: the menu list cursors menu_item_list_cursor..menu_take_out_list_cursor */
     u8 unk5ace[0x132];
 } SaveData;
 

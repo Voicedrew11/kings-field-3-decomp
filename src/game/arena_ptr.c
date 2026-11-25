@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: the DAT_801ba984 block arena's 32 saved pointers (WIP module):
+ * GAME.EXE: the cur_evt_state block arena's 32 saved pointers (WIP module):
  * pointers to and from arena offsets, moving the blocks' owner pointers by
  * a delta, and saving and restoring an area's object states in its block
  * (event_world_state_save_slot/event_world_state_restore_slot). The .rdata is their two jump tables.
@@ -26,13 +26,13 @@ void event_saved_offsets_decode(u8 **out)
     u16 o;
     s32 i;
 
-    off = DAT_801ba984.unk5104;
+    off = cur_evt_state.unk5104;
     for (i = 31; i != -1; i--) {
         o = *off++;
         if (o == 0xffff) {
             *out = NULL;
         } else {
-            *out = DAT_801ba984.unk104 + o;
+            *out = cur_evt_state.unk104 + o;
         }
         out++;
     }
@@ -45,7 +45,7 @@ void event_arena_owner_pointers_add_delta(s32 delta)
     HeapBlock *block;
     s32 state;
 
-    block = (HeapBlock *)DAT_801ba984.unk104;
+    block = (HeapBlock *)cur_evt_state.unk104;
     while (block->state != HEAP_END) {
         state = block->state;
         if (state < 4 && state != HEAP_FREE) {
@@ -63,13 +63,13 @@ void event_saved_offsets_encode(u8 **in)
     u8 *p;
     s32 i;
 
-    off = DAT_801ba984.unk5104;
+    off = cur_evt_state.unk5104;
     for (i = 31; i != -1; i--) {
         p = *in++;
         if (p == NULL) {
             *off = 0xffff;
         } else {
-            *off = p - DAT_801ba984.unk104;
+            *off = p - cur_evt_state.unk104;
         }
         off++;
     }
@@ -82,7 +82,7 @@ void event_arena_owner_pointers_subtract_delta(s32 delta)
     HeapBlock *block;
     s32 state;
 
-    block = (HeapBlock *)DAT_801ba984.unk104;
+    block = (HeapBlock *)cur_evt_state.unk104;
     while (block->state != HEAP_END) {
         state = block->state;
         if (state < 4 && state != HEAP_FREE) {
@@ -111,7 +111,7 @@ void event_world_state_save_slot(s32 area)
     s32 i;
 
     p = buf;
-    obj = DAT_80185da8.objects;
+    obj = actor_status.objects;
     for (i = 0; i < 200; i++) {
         if (obj->unk0 != 0xff && obj->unk0 == 1) {
             *p++ = i;
@@ -125,7 +125,7 @@ void event_world_state_save_slot(s32 area)
         obj++;
     }
     *p++ = 0xff;
-    def = DAT_80185da8.defs;
+    def = actor_status.defs;
     for (i = 0; i < 40; i++) {
         if (def->unk0 == 0xff) {
             break;
@@ -139,12 +139,12 @@ void event_world_state_save_slot(s32 area)
         }
     }
     *p++ = 0xff;
-    rec = DAT_8018fb3c.objects;
+    rec = map_objects_slots.objects;
     for (i = 0; i < 396; i++) {
         if (rec->unk6 == 0xff) {
             *p++ = 0xff;
         } else {
-            switch (DAT_8018fb3c.defs[rec->unk6].unk0) {
+            switch (map_objects_slots.defs[rec->unk6].unk0) {
             case 0x40:
                 switch (rec->unk4) {
                 case 0x60:
@@ -249,7 +249,7 @@ void event_world_state_save_slot(s32 area)
         memory_block_release(block);
     }
     size = (p - buf + 3) & ~3;
-    block = memory_arena_allocate_block((HeapBlock *)DAT_801ba984.unk104, size, &ptrs[area]);
+    block = memory_arena_allocate_block((HeapBlock *)cur_evt_state.unk104, size, &ptrs[area]);
     if (block != NULL) {
         resource_copy_words((u32 *)block, (u32 *)buf, size >> 2);
         event_saved_offsets_encode(ptrs);
@@ -281,7 +281,7 @@ void event_world_state_restore_slot(s32 area)
         if (n == 0xff) {
             break;
         }
-        (DAT_80185da8.objects + n)->unk9 = *p++;
+        (actor_status.objects + n)->unk9 = *p++;
     }
     for (;;) {
         s32 n = *p++;
@@ -289,11 +289,11 @@ void event_world_state_restore_slot(s32 area)
         if (n == 0xff) {
             break;
         }
-        script = (DAT_80185da8.defs + n)->scripts[0];
+        script = (actor_status.defs + n)->scripts[0];
         script[16] = *p++;
         script[19] = *p++;
     }
-    rec = DAT_8018fb3c.objects;
+    rec = map_objects_slots.objects;
     for (i = 0; i < 396; i++) {
         switch (*p++) {
         case 0xff:
@@ -322,7 +322,7 @@ void event_world_state_restore_slot(s32 area)
             rec->pos.vy = y;
             rec->unk8 = 99;
             collision_sample_map_cell_layer(rec->pos.vx, rec->pos.vy, rec->pos.vz);
-            rec->unk0 = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+            rec->unk0 = map_world.unk1200a == 0 ? 1 : 2;
             rec->arg.b.unk38 = 0xff;
             break;
         case 0xf1:

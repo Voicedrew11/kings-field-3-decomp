@@ -97,9 +97,9 @@ typedef struct Data801b24e4 {
     u32 unk9c;      /* +0x9c: frame counter (player_apply_equipment_hp_tick periods) */
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
-    u16 *unka8;     /* +0xa8: next pad bit of the DAT_8009c3cc sequence (player_update_actions_and_charge) */
-    struct Record18 *unkac; /* +0xac: &DAT_801b77ec.unk0[id] (player_dispatch_weapon_magic) */
-    struct Record44 *unkb0; /* +0xb0: &DAT_801d37a4[unkcb] */
+    u16 *unka8;     /* +0xa8: next pad bit of the player_magic_attack_masks sequence (player_update_actions_and_charge) */
+    struct Record18 *unkac; /* +0xac: &effect_status.unk0[id] (player_dispatch_weapon_magic) */
+    struct Record44 *unkb0; /* +0xb0: &weapon_table[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
     struct Object4c *unkbc; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
@@ -118,7 +118,7 @@ typedef struct Data801b24e4 {
     u8 unkcf;
     u8 unkd0;
     u8 unkd1[0x3];
-    struct Record20 *unkd4; /* +0xd4..+0xec: &DAT_801d4464.unk11c14[] of unkf0..unkf6 */
+    struct Record20 *unkd4; /* +0xd4..+0xec: &map_world.unk11c14[] of unkf0..unkf6 */
     struct Record20 *unkd8;
     struct Record20 *unkdc;
     struct Record20 *unke0;
@@ -184,7 +184,7 @@ typedef struct Data801b24e4 {
     s16 unk172;
     s16 unk174;
     s16 unk176;
-    u16 unk178;     /* +0x178: pad bits held (DAT_80081868) */
+    u16 unk178;     /* +0x178: pad bits held (action_button_masks) */
     u16 unk17a;     /* +0x17a: pad bits held the frame before */
     u8 unk17c[0x4];
     s32 unk180;
@@ -256,7 +256,7 @@ typedef struct MapLayer {
 } MapLayer;
 
 /*
- * One 2048-unit square of the area map (80 x 80 of them start DAT_801d4464,
+ * One 2048-unit square of the area map (80 x 80 of them start map_world,
  * indexed [z >> 11][x >> 11]): layer 0 for area 1, layer 1 for area 2.
  */
 typedef struct MapCell {
@@ -294,7 +294,7 @@ typedef struct Data801d4464 {
     u8 unk12052[2];
 } Data801d4464;
 
-/* An in-game movie record (WIP: 52 bytes; DAT_801e7edc holds 16, indexed by movie id). */
+/* An in-game movie record (WIP: 52 bytes; movie_state holds 16, indexed by movie id). */
 typedef struct MovieRec {
     u8 file;        /* +0x00: STR file number; 16 and up: a random DRM file */
     u8 flag;        /* +0x01: script flag that skips the movie when set (0x80: when clear),
@@ -674,7 +674,7 @@ typedef struct Object88 {
 } Object88;
 
 /*
- * The record an Object88 is made from (its unk2 indexes DAT_80185da8.defs);
+ * The record an Object88 is made from (its unk2 indexes actor_status.defs);
  * player_probe_view_target_and_vectors hands one to actor_find_target_of_type.
  */
 typedef struct Object78 {
@@ -721,7 +721,7 @@ typedef struct Data80185da8 {
     Object88 *unk9d28;      /* +0x9d28: player_probe_view_target_and_vectors keeps its last object here */
 } Data80185da8;
 
-/* 0x18-byte records at the start of DAT_801b77ec (WIP). */
+/* 0x18-byte records at the start of effect_status (WIP). */
 typedef struct Record18 {
     u8 unk0;        /* +0x00: player_learn_element_magic sets it to 1 */
     u8 unk1;
@@ -749,7 +749,7 @@ typedef struct Data801b77ec {
     s32 unk2f08;            /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
 } Data801b77ec;
 
-/* 12-byte level records (DAT_8009f114, one per level). */
+/* 12-byte level records (player_lv_grow_list, one per level). */
 typedef struct Record0c {
     u16 unk0;       /* new Data801b24e4.hp_max */
     u16 unk2;       /* new Data801b24e4.unk1a */
@@ -847,38 +847,38 @@ typedef struct Data8018fb3c {
  * FDAT window words in the load image (owner unit unknown): [2] the window
  * base, [4] the end of the loaded module, [5] the heap base main stores.
  */
-extern u32 DAT_800136e8[6];
+extern u32 fdat_window_bounds[6];
 
 /* Arena memory_arena_initialize_blocks formats with a 0x4d800-byte free block. */
-extern u8 DAT_800c8954[0x4d800];
+extern u8 resource_space[0x4d800];
 
-extern Data80185da8 DAT_80185da8;
-extern Data8018fad4 DAT_8018fad4;
-extern Data8018fb3c DAT_8018fb3c;
-extern Data801b24e4 DAT_801b24e4;
+extern Data80185da8 actor_status;
+extern Data8018fad4 asset_status;
+extern Data8018fb3c map_objects_slots;
+extern Data801b24e4 cur_avatar_status;
 /* Area map bits: rooms seen per area (32 areas x 160 bits) and the 80 x 80 grid of
  * visited cells map_reveal_visited_rects marks rooms from. */
-extern u8 DAT_801b56cc[32][20];
-extern u8 DAT_801b594c[80][10];
-extern Data801b77ec DAT_801b77ec;
+extern u8 map_revealed_rects[32][20];
+extern u8 map_visited_cells[80][10];
+extern Data801b77ec effect_status;
 
-/* A record of the table resource_initialize_game_assets copies in (DAT_801983a8.unk0). */
+/* A record of the table resource_initialize_game_assets copies in (conversation_records.unk0). */
 typedef struct Record04 {
     u8 id;          /* 0xff ends the table */
-    u8 count;       /* slots in its run of DAT_801983a8.unk1e0 */
+    u8 count;       /* slots in its run of conversation_records.unk1e0 */
     u16 unk2;
 } Record04;
 
-/* A record conversation_records_initialize builds from a Record04 (DAT_801983a8.unkc0). */
+/* A record conversation_records_initialize builds from a Record04 (conversation_records.unkc0). */
 typedef struct Record06 {
     u8 id;          /* 0xff ends the table */
     u8 unk1;
     u16 unk2;       /* Record04.unk2 */
-    u16 offset;     /* start of its run in DAT_801983a8.unk1e0, 0xffff for none */
+    u16 offset;     /* start of its run in conversation_records.unk1e0, 0xffff for none */
 } Record06;
 
 /*
- * Slot tables (WIP extent, up to DAT_80199148): the copied records, the
+ * Slot tables (WIP extent, up to actor_animation_shift_target): the copied records, the
  * records conversation_records_initialize builds from them and their runs of slot bytes
  * (bits 0-1 set: in use; 0xff: free or the end of a run). The save code
  * copies the 0x3c0 run bytes with word-aligned block moves, so the object
@@ -890,27 +890,27 @@ typedef struct Data801983a8 {
     u8 unk1e0[0x3c0];    /* +0x1e0: the runs (SaveData.unk5148) */
     u32 unk5a0[0x200];   /* +0x5a0 */
 } Data801983a8;
-extern Data801983a8 DAT_801983a8;
-extern Data801ba984 DAT_801ba984;
+extern Data801983a8 conversation_records;
+extern Data801ba984 cur_evt_state;
 /* Two counts per item id (0..149; game_counter_increment caps each at 99), cleared by
  * event_state_initialize. */
-extern u8 DAT_800c85e8[2][150];
-extern Data801d4464 DAT_801d4464;
-extern Data801e7edc DAT_801e7edc;
+extern u8 event_item_counters_table[2][150];
+extern Data801d4464 map_world;
+extern Data801e7edc movie_state;
 
 /*
  * Tables resource_initialize_game_assets copies out of the first FDAT.T entry: the level
- * records (one per level; 100 fill the gap to DAT_8009f5c4), the 0x44-byte
- * records (48 fill the gap to DAT_801d4464), and the rest (WIP extents).
+ * records (one per level; 100 fill the gap to player_weapon_asset_bufs), the 0x44-byte
+ * records (48 fill the gap to map_world), and the rest (WIP extents).
  */
-extern Record0c DAT_8009f114[100];
-extern Record44 DAT_801d37a4[48];
-extern u32 DAT_800aedc4[];
-extern u32 DAT_80116154[];
-extern u32 DAT_801e64b8[];
-extern u8 DAT_8014f164[];
+extern Record0c player_lv_grow_list[100];
+extern Record44 weapon_table[48];
+extern u32 tmd_archive_28_buffer[];
+extern u32 tmd_0_buffer[];
+extern u32 item_gear_recs[];
+extern u8 resource_tmd_arc_work[];
 
 /* What game_initialize_session points Data801b24e4.unkb4 at (WIP extent). */
-extern u8 DAT_8009f5c4[];
+extern u8 player_weapon_asset_bufs[];
 
 #endif

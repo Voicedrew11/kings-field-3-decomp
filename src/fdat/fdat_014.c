@@ -75,7 +75,7 @@ const FdatHeader fdat_header = {
 #include "shared/light_blend_records.inc"
 
 DATA(0x801e8e74, 0x30, ".data")
-static Record30 DAT_801e8e74 = {
+static Record30 area_light_blend_from = {
     {{{3000, 800, -1500}, {-2000, 1500, -3400}, {-1300, -2000, 1024}}, 0},
     {{{128, 128, 128}, {128, 128, 128}, {128, 128, 128}}, 0},
     {0x50, 0x50, 0x50, 0},
@@ -83,7 +83,7 @@ static Record30 DAT_801e8e74 = {
     12000,
 };
 DATA(0x801e8ea4, 0x30, ".data")
-static Record30 DAT_801e8ea4 = {
+static Record30 area_light_blend_to = {
     {{{3000, -1500, 1500}, {-3000, -1500, -1500}, {0, 3000, 0}}, 0},
     {{{2048, 2304, 3072}, {2048, 2304, 3072}, {2048, 2304, 3072}}, 0},
     {0x80, 0x80, 0x80, 0},
@@ -101,7 +101,7 @@ void area_set_light_blend(u8 n)
     for (i = 0, t = 0; i < n; i++) {
         t += 256;
     }
-    light_blend_records(&DAT_801e8e74, &DAT_801e8ea4, &DAT_80081c8c[47], t);
+    light_blend_records(&area_light_blend_from, &area_light_blend_to, &light_default_records[47], t);
 }
 
 ADDRESS(0x801e84e0, 0x8)
@@ -119,9 +119,9 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -148,7 +148,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
@@ -185,7 +185,7 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
     s32 j;
     s32 k;
 
-    if (item != 0x7b || DAT_801ba984.unke[0xf] == 1) {
+    if (item != 0x7b || cur_evt_state.unke[0xf] == 1) {
         return;
     }
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
@@ -193,11 +193,11 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
             continue;
         }
         game_counter_decrement(0x7b);
-        obj = &DAT_8018fb3c.objects[0x8d];
-        DAT_80185da8.objects[7].unk0 = 8;
-        DAT_80185da8.objects[26].unk0 = 1;
-        DAT_8018fb3c.objects[0x8d].unk2 = 5;
-        DAT_8018fb3c.objects[0x8d].unk10 = 0xfff;
+        obj = &map_objects_slots.objects[0x8d];
+        actor_status.objects[7].unk0 = 8;
+        actor_status.objects[26].unk0 = 1;
+        map_objects_slots.objects[0x8d].unk2 = 5;
+        map_objects_slots.objects[0x8d].unk10 = 0xfff;
         for (j = 15; j != -1; j--) {
             if ((s16)(obj->unk10 -= 256) < 0) {
                 obj->unk10 = 0;
@@ -228,14 +228,14 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
         obj->unk6 = 0xff;
         obj->unk4 = 0xff;
         obj->unk0 = 0;
-        DAT_8018fb3c.objects[159].unk6 = 0xff;
+        map_objects_slots.objects[159].unk6 = 0xff;
         k = 74;
-        if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+        if (map_objects_slots.objects[k].arg.b.unk38 < 253) {
+            map_objects_slots.objects[k].arg.b.unk38 = 0xff;
             notify_enqueue(0x18);
         }
-        DAT_801ba984.unke[0xf] = 1;
-        DAT_801ba984.unk0 = 1;
+        cur_evt_state.unke[0xf] = 1;
+        cur_evt_state.unk0 = 1;
     }
 }
 
@@ -258,20 +258,20 @@ void area_region_trigger_move_object_and_warp_cells(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (DAT_801ba984.unke[0xf] == 0) {
-            DAT_8018fb3c.objects[115].pos.vx = obj->pos.vx - 1024;
+        if (cur_evt_state.unke[0xf] == 0) {
+            map_objects_slots.objects[115].pos.vx = obj->pos.vx - 1024;
         }
         break;
     case 1:
-        DAT_8018fb3c.objects[115].pos.vx = obj->pos.vx + 1023;
+        map_objects_slots.objects[115].pos.vx = obj->pos.vx + 1023;
         break;
     case 10:
         if (player_camera_within_map_region(0x37, 0xc, 3, 3, 0x8000) != 0) {
-            if (DAT_801b24e4.unk10a != 0) {
+            if (cur_avatar_status.unk10a != 0) {
                 map_cell_copy_rotated_fields(2, 0x4a, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
             }
         } else {
-            DAT_801b24e4.unk10a = 0;
+            cur_avatar_status.unk10a = 0;
             map_cell_copy_rotated_fields(2, 0x4d, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
         }
         break;
@@ -308,7 +308,7 @@ ADDRESS(0x801e8b10, 0x20)
 void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 12) {
-        DAT_801ba984.unk71[0] = 1;
+        cur_evt_state.unk71[0] = 1;
     }
 }
 
@@ -324,12 +324,12 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     Object44 *obj;
     s32 i;
 
-    DAT_801b24e4.unk34[0] += 20;
+    cur_avatar_status.unk34[0] += 20;
     player_learn_element_magic(0);
     player_recalculate_combat_stats();
-    obj = &DAT_8018fb3c.objects[55];
-    DAT_8018fb3c.objects[55].unk5 = 0x32;
-    DAT_8018fb3c.objects[55].unk2 = 5;
+    obj = &map_objects_slots.objects[55];
+    map_objects_slots.objects[55].unk5 = 0x32;
+    map_objects_slots.objects[55].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -342,9 +342,9 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         render_game_frame(&pos, &angle);
     }
     obj->unk6 = 0xff;
-    obj = &DAT_8018fb3c.objects[148];
-    DAT_8018fb3c.objects[148].unk5 = 0x32;
-    DAT_8018fb3c.objects[148].unk2 = 5;
+    obj = &map_objects_slots.objects[148];
+    map_objects_slots.objects[148].unk5 = 0x32;
+    map_objects_slots.objects[148].unk2 = 5;
     for (i = 15; i != -1; i--) {
         obj->unk10 += 256;
         if (obj->unk10 >= 4095) {
@@ -367,27 +367,27 @@ void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
-        if (DAT_801ba984.unke[0xd] != 1) {
-            DAT_801ba984.unke[0xd] = 1;
+        if (cur_evt_state.unke[0xd] != 1) {
+            cur_evt_state.unke[0xd] = 1;
             event_map_object_interact(NULL, 0x7b);
         }
         break;
     case 1:
-        if (DAT_801ba984.unke[0xe] != 1) {
-            DAT_801ba984.unke[0xe] = 1;
+        if (cur_evt_state.unke[0xe] != 1) {
+            cur_evt_state.unke[0xe] = 1;
             event_map_object_interact(NULL, 0x5f);
         }
         break;
     case 2:
         if (game_counter_is_nonzero(0x84) > 0) {
-            DAT_801ba984.unke[0x10] = 1;
+            cur_evt_state.unke[0x10] = 1;
         }
         break;
     case 3:
-        DAT_80185da8.objects[8].unk0 = 8;
+        actor_status.objects[8].unk0 = 8;
         break;
     case 4:
-        DAT_801ba984.unke[0xc] = 1;
+        cur_evt_state.unke[0xc] = 1;
         break;
     }
 }
@@ -398,24 +398,24 @@ void area_on_load_restore_objects_and_light(void)
 {
     s32 k;
 
-    if (DAT_801ba984.unke[0xf] != 0) {
-        DAT_80185da8.objects[7].unk0 = 8;
-        DAT_80185da8.objects[26].unk0 = 1;
-        DAT_8018fb3c.objects[0x8d].unk6 = 0xff;
-        DAT_8018fb3c.objects[159].unk6 = 0xff;
+    if (cur_evt_state.unke[0xf] != 0) {
+        actor_status.objects[7].unk0 = 8;
+        actor_status.objects[26].unk0 = 1;
+        map_objects_slots.objects[0x8d].unk6 = 0xff;
+        map_objects_slots.objects[159].unk6 = 0xff;
         k = 74;
-        if (DAT_8018fb3c.objects[k].arg.b.unk38 < 253) {
-            DAT_8018fb3c.objects[k].arg.b.unk38 = 0xff;
+        if (map_objects_slots.objects[k].arg.b.unk38 < 253) {
+            map_objects_slots.objects[k].arg.b.unk38 = 0xff;
         }
         area_set_light_blend(16);
     } else {
-        DAT_80185da8.objects[7].unk0 = 1;
-        DAT_80185da8.objects[26].unk0 = 8;
+        actor_status.objects[7].unk0 = 1;
+        actor_status.objects[26].unk0 = 8;
         area_set_light_blend(0);
     }
-    if (DAT_801ba984.unk7f[0] != 0) {
-        DAT_8018fb3c.objects[55].unk6 = 0xff;
-        DAT_8018fb3c.objects[148].unk6 = 0xff;
+    if (cur_evt_state.unk7f[0] != 0) {
+        map_objects_slots.objects[55].unk6 = 0xff;
+        map_objects_slots.objects[148].unk6 = 0xff;
     }
-    DAT_801ba984.unk84[5] = 4;
+    cur_evt_state.unk84[5] = 4;
 }

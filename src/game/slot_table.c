@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: the slot tables of DAT_801983a8 (WIP module): building the
+ * GAME.EXE: the slot tables of conversation_records (WIP module): building the
  * Record06 records and their runs of slot bytes from the copied Record04
  * table, marking a slot used, and the searches and counts over the runs.
  * movie_play_stream (the in-game movie player) follows.
@@ -20,16 +20,16 @@ void conversation_records_initialize(void)
     s32 i;
     s32 n;
 
-    p = DAT_801983a8.unk1e0;
-    dst = DAT_801983a8.unkc0;
-    src = DAT_801983a8.unk0;
+    p = conversation_records.unk1e0;
+    dst = conversation_records.unkc0;
+    src = conversation_records.unk0;
     for (i = 47; i != -1; i--) {
         if (src->id == 0xff) {
             break;
         }
         dst->id = src->id;
         dst->unk2 = src->unk2;
-        dst->offset = p - DAT_801983a8.unk1e0;
+        dst->offset = p - conversation_records.unk1e0;
         n = src->count;
         while (--n != -1) {
             *p++ = 0xff;
@@ -55,7 +55,7 @@ void conversation_record_mark_page(u8 id, u8 slot)
     u8 k;
     u8 c;
 
-    t = DAT_801983a8.unkc0;
+    t = conversation_records.unkc0;
     n = 48;
     if (id == 1 || id == 2) {
         id = 1;
@@ -74,7 +74,7 @@ void conversation_record_mark_page(u8 id, u8 slot)
             return;
         }
         if (t->id == id) {
-            p = DAT_801983a8.unk1e0 + t->offset + slot;
+            p = conversation_records.unk1e0 + t->offset + slot;
             *p = 3;
             if (slot == 0) {
                 return;
@@ -100,17 +100,17 @@ u16 conversation_record_page_entry(u8 n, u8 slot)
     Record06 *t;
     u8 *p;
 
-    t = &DAT_801983a8.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
+    t = &conversation_records.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id == 0xff) {
         return 0xfffe;
     }
     if (t->offset != 0xffff) {
-        p = DAT_801983a8.unk1e0 + t->offset;
+        p = conversation_records.unk1e0 + t->offset;
         if (*p != 0xff) {
             do {
                 if ((*p & 2) && (*p & 1)) {
                     if (slot == 0) {
-                        return t->unk2 + (p - DAT_801983a8.unk1e0 - t->offset);
+                        return t->unk2 + (p - conversation_records.unk1e0 - t->offset);
                     }
                 } else if (slot == 0) {
                     return 0xfffd;
@@ -133,11 +133,11 @@ u8 conversation_records_count_characters(void)
     u8 n;
 
     n = 0;
-    for (t = DAT_801983a8.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
         if (t->offset == 0xffff) {
             continue;
         }
-        p = DAT_801983a8.unk1e0 + t->offset;
+        p = conversation_records.unk1e0 + t->offset;
         while (*p++ != 0xff) {
             if ((*p & 2) && (*p & 1)) {
                 n++;
@@ -157,9 +157,9 @@ u8 conversation_record_count_pages(u8 n)
     u8 count;
 
     count = 0;
-    t = &DAT_801983a8.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
+    t = &conversation_records.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id != 0xff && t->offset != 0xffff) {
-        p = DAT_801983a8.unk1e0 + t->offset;
+        p = conversation_records.unk1e0 + t->offset;
         while (*p++ != 0xff) {
             if ((*p & 2) && (*p & 1)) {
                 count++;
@@ -178,9 +178,9 @@ u8 conversation_records_nth_character(u8 n)
     u8 none;
 
     none = 0xff;
-    for (t = DAT_801983a8.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
         if (t->offset != 0xffff) {
-            p = DAT_801983a8.unk1e0 + t->offset;
+            p = conversation_records.unk1e0 + t->offset;
             if (*p != 0xff) {
                 if (n == 0) {
                     return t->id;
@@ -200,7 +200,7 @@ u8 conversation_records_find_character(u8 id)
     u8 i;
 
     i = 0;
-    for (t = DAT_801983a8.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
         if (t->id == id) {
             return i;
         }

@@ -25,9 +25,9 @@ void scene_position_from_camera_offset(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, 
     v.vz = z + dz;
     rotation.vy = yaw;
     vector_rotate_yxz(&rotation, &v, out);
-    out->vx += DAT_801b24e4.pos.vx;
-    out->vy += DAT_801b24e4.pos.vy + dy - 1600;
-    out->vz += DAT_801b24e4.pos.vz;
+    out->vx += cur_avatar_status.pos.vx;
+    out->vy += cur_avatar_status.pos.vy + dy - 1600;
+    out->vz += cur_avatar_status.pos.vz;
 }
 
 /* Moves obj between two positions and two angles by t (either pair may be NULL). */

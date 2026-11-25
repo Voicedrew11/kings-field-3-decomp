@@ -22,7 +22,7 @@ RODATA(0x80012ebc, 0x234)
 
 /* Zero velocity for the records effect_spawn_zero_direction spawns. */
 DATA(0x8009c33c, 0x8, ".sdata")
-SVECTOR DAT_8009c33c = {0, 0, 0, 0};
+SVECTOR effect_zero_direction = {0, 0, 0, 0};
 
 /* dir's x and z scaled by scale and turned by yaw into out. */
 ADDRESS(0x80055b4c, 0x8c)
@@ -49,7 +49,7 @@ s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel
     Object4c *obj;
     s32 speed;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     vector3s_scale_shift12(scale, accel);
     obj->vel.vx += accel->vx;
     obj->vel.vy += accel->vy;
@@ -85,7 +85,7 @@ s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s3
     s32 dist;
     Object88 *found;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     if (obj->unk0 & 0x40) {
         found = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 24000, cone, cone, &dist, 0);
         if (found != NULL) {
@@ -101,9 +101,9 @@ s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s3
     } else {
         dist = player_distance_to_point_in_cone(&obj->pos, obj->angle.vy, 24000, 0x1000);
         if (dist != -1) {
-            target.vx = DAT_801b24e4.pos.vx;
-            target.vy = DAT_801b24e4.pos.vy - 1600;
-            target.vz = DAT_801b24e4.pos.vz;
+            target.vx = cur_avatar_status.pos.vx;
+            target.vy = cur_avatar_status.pos.vy - 1600;
+            target.vz = cur_avatar_status.pos.vz;
             goto aim;
         }
     }
@@ -123,7 +123,7 @@ s32 effect_target_motion(VECTOR *target, s32 max, s32 scale, s32 slow, s32 near,
     SVECTOR accel;
     s32 dist;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     d.vx = target->vx - obj->pos.vx;
     d.vy = target->vy - obj->pos.vy;
     d.vz = target->vz - obj->pos.vz;
@@ -149,7 +149,7 @@ void effect_scale_step(s32 rate, s32 limit, s32 grow, s32 falloff, s32 mode)
     Object4c *obj;
     s32 r;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     obj->scale.vy = obj->scale.vz = obj->scale.vx += grow;
     r = rate * obj->scale.vx >> 12;
     effect_apply_radial_magic_damage(&obj->pos, r - (rate * grow >> 12), r - 1, mode, falloff, 0x1000);
@@ -170,7 +170,7 @@ void effect_spawn_zero_direction(Object4c *obj, s32 vertex)
     angle.vx = obj->angle.vx;
     angle.vy = obj->angle.vy + (rand() >> 7) - 128;
     angle.vz = obj->angle.vz;
-    made = effect_construct_record(10, obj->unk0, 0x6e, &pos, &DAT_8009c33c, &angle);
+    made = effect_construct_record(10, obj->unk0, 0x6e, &pos, &effect_zero_direction, &angle);
     if (made != NULL) {
         made->unk7 = 2;
     }
@@ -184,7 +184,7 @@ s32 effect_spawn_at_lower_bound(VECTOR *pos, s32 a1, s32 a2, s32 height)
     SVECTOR v;
     s32 floor;
 
-    floor = DAT_801d4464.unk12018[0];
+    floor = map_world.unk12018[0];
     if (pos->vy < floor) {
         return 0;
     }
@@ -266,12 +266,12 @@ s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a
 
     dx = 0;
     dz = 0;
-    floor = DAT_801d4464.unk12018[0];
+    floor = map_world.unk12018[0];
     if (pos->vy >= floor && floor + 500 >= pos->vy) {
         while (--count != -1) {
             p.vx = dx + pos->vx;
             p.vz = dz + pos->vz;
-            p.vy = DAT_801d4464.unk12018[0];
+            p.vy = map_world.unk12018[0];
             r = random_centered_triangular_scaled(range) + 4096;
             effect_construct_record(10, 0, 0x70, &p, &v, a3 * r >> 12, a4 * r >> 12);
             dx = (rand() * spread >> 14) - spread;
@@ -290,7 +290,7 @@ s32 effect_collision_step(s32 radius, s32 height, s32 spin)
     VECTOR p;
     s32 hit;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     obj->pos.vx += obj->vel.vx;
     obj->pos.vy += obj->vel.vy;
     obj->pos.vz += obj->vel.vz;
@@ -301,7 +301,7 @@ s32 effect_collision_step(s32 radius, s32 height, s32 spin)
         p.vz = obj->pos.vz - (obj->vel.vz >> 1);
         hit = effect_probe_collision_by_type(&p, radius, height);
     }
-    obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+    obj->unka = map_world.unk1200a == 0 ? 1 : 2;
     obj->angle.vz = (obj->angle.vz - spin) & 0xfff;
     return hit;
 }
@@ -312,7 +312,7 @@ void effect_collision_backtrack(void)
 {
     Object4c *obj;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     obj->pos.vx -= obj->vel.vx;
     obj->pos.vy -= obj->vel.vy;
     obj->pos.vz -= obj->vel.vz;
@@ -324,14 +324,14 @@ void effect_collision_backtrack_half(void)
 {
     Object4c *obj;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     obj->pos.vx -= obj->vel.vx / 2;
     obj->pos.vy -= obj->vel.vy / 2;
     obj->pos.vz -= obj->vel.vz / 2;
 }
 
 /*
- * Per-frame update of the current Object4c record (DAT_801b77ec.unk2f04),
+ * Per-frame update of the current Object4c record (effect_status.unk2f04),
  * switched on its id; obj->unk7 is the phase of the multi-step ids. Most
  * ids move the record, test it for hits and leave a particle trail through
  * effect_construct_record; a record is freed by setting unk0 to OBJECT4C_FREE.
@@ -354,7 +354,7 @@ void effect_update_dispatch(void)
     VECTOR p;
     VECTOR spare;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     id = obj->unk1;
     phase = obj->unk7;
     switch (id) {
@@ -369,7 +369,7 @@ void effect_update_dispatch(void)
             }
             effect_scatter_lower_bound(&obj->pos, 3, 400, 0x2000, 0x2000, 0x400);
             /* XOR, not a square: the retail code takes the root of dx ^ 2. */
-            if (SquareRoot0((obj->pos.vx - DAT_801b24e4.pos.vx) ^ 2) < 1024U) {
+            if (SquareRoot0((obj->pos.vx - cur_avatar_status.pos.vx) ^ 2) < 1024U) {
                 effect_collision_backtrack_half();
                 goto hit86b;
             }
@@ -539,7 +539,7 @@ void effect_update_dispatch(void)
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+            obj->unka = map_world.unk1200a == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 82:
@@ -581,7 +581,7 @@ void effect_update_dispatch(void)
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            obj->unka = DAT_801d4464.unk1200a == 0 ? 1 : 2;
+            obj->unka = map_world.unk1200a == 0 ? 1 : 2;
             vector_displacement_to_pitch_yaw(obj->vel.vx, obj->pos.vy - y, obj->vel.vz, &obj->angle);
             break;
     case 86:
@@ -615,7 +615,7 @@ void effect_update_dispatch(void)
             VECTOR *b;
             VECTOR *pos;
 
-            o = &DAT_80185da8.objects[obj->arg.s.unk44];
+            o = &actor_status.objects[obj->arg.s.unk44];
             if (o->unk9 != 1) {
                 obj->unk0 = OBJECT4C_FREE;
                 break;
@@ -644,7 +644,7 @@ void effect_update_dispatch(void)
                 break;
             }
             effect_play_spatial_sound(obj, 0x33);
-            actor_compute_target_direction(o, &DAT_801b24e4.pos, 650, pos, &obj->vel, -1, 0x400, 5);
+            actor_compute_target_direction(o, &cur_avatar_status.pos, 650, pos, &obj->vel, -1, 0x400, 5);
             obj->unk7 = 0;
             obj->unk10 = 50;
             break;
@@ -833,11 +833,11 @@ void effect_update_dispatch(void)
     case 12:
         if (obj->arg.s.unk44 == 0) {
             collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 0x400, obj->scale.vx, 0x30);
-            if (DAT_801d4464.unk12024 == 0x10) {
+            if (map_world.unk12024 == 0x10) {
                 effect_apply_current_magic(0x10010, 5000, NULL);
             }
             obj->arg.s.unk44++;
-            effect_construct_record(10, 0, 0x65, &obj->pos, NULL, DAT_801d4464.unk12028);
+            effect_construct_record(10, 0, 0x65, &obj->pos, NULL, map_world.unk12028);
             obj->arg.s.unk48 = 0;
             obj->arg.s.unk4a = 0;
         }
@@ -855,7 +855,7 @@ void effect_update_dispatch(void)
                 if (obj->arg.s.unk46 != -1) {
                     Object88 *t;
 
-                    t = &DAT_80185da8.objects[obj->arg.s.unk46];
+                    t = &actor_status.objects[obj->arg.s.unk46];
                     t->unk28 &= ~0x800;
                 }
             }
@@ -1047,14 +1047,14 @@ void effect_update_dispatch(void)
 
             obj->pos.vx += obj->vel.vx;
             obj->pos.vz += obj->vel.vz;
-            link = &DAT_801b77ec.objects[obj->arg.c.unk45];
+            link = &effect_status.objects[obj->arg.c.unk45];
             switch (obj->arg.c.unk44) {
             case 0:
                 effect_apply_current_magic_backstep(
                     collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, obj->scale.vy, 0x30));
                 collision_probe_floor_height(obj->pos.vx, link->pos.vy, obj->pos.vz, 0, 0);
-                obj->pos.vy = DAT_801d4464.unk12010;
-                d = DAT_801d4464.unk12010 - DAT_801d4464.unk12014;
+                obj->pos.vy = map_world.unk12010;
+                d = map_world.unk12010 - map_world.unk12014;
                 obj->scale.vy = d > 0x7fff ? 0x4000 : d >> 1;
                 if (link->unk0 == OBJECT4C_FREE) {
                     obj->arg.c.unk44 = 1;
@@ -1109,18 +1109,18 @@ void effect_update_dispatch(void)
             p.vz = obj->pos.vz;
             n = actor_find_overlap_excluding_target_type3(p.vx, p.vy, p.vz, 100, 10000);
             if (n != -1) {
-                o = &DAT_80185da8.objects[n];
+                o = &actor_status.objects[n];
                 effect_play_spatial_sound(obj, 0x27);
                 effect_construct_record(10, obj->unk0, 0x44, &o->pos, NULL, 1260);
             } else {
                 collision_query_world(p.vx, p.vy, p.vz, 100, 10000, 0xb0);
-                if (DAT_801d4464.unk12024 == 0x80) {
+                if (map_world.unk12024 == 0x80) {
                     VECTOR q;
 
-                    q = DAT_801b24e4.pos;
+                    q = cur_avatar_status.pos;
                     q.vy -= 1700;
                     effect_play_spatial_sound(obj, 0x27);
-                    effect_construct_record(obj->unk6, obj->unk0, 0x44, &DAT_801b24e4.pos, NULL, 1260);
+                    effect_construct_record(obj->unk6, obj->unk0, 0x44, &cur_avatar_status.pos, NULL, 1260);
                 }
             }
             effect_spawn_at_lower_bound(&p, 0x2000, 0x7fff, 10000);
@@ -1268,10 +1268,10 @@ void effect_update_dispatch(void)
                     } else {
                         effect_collision_backtrack();
                         collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, 50, 0);
-                        if (DAT_801d4464.unk12010 < DAT_801d4464.unk12018[0]) {
-                            at.vy = DAT_801d4464.unk12010;
+                        if (map_world.unk12010 < map_world.unk12018[0]) {
+                            at.vy = map_world.unk12010;
                         } else {
-                            at.vy = DAT_801d4464.unk12018[0];
+                            at.vy = map_world.unk12018[0];
                         }
                         d = at.vy - obj->pos.vy;
                         goto burst;
@@ -1283,10 +1283,10 @@ void effect_update_dispatch(void)
                 obj->vel.vy -= 70;
                 obj->vel.vx = fixed_lerp_q12(0, obj->vel.vx, 3000);
                 obj->vel.vz = fixed_lerp_q12(0, obj->vel.vz, 3000);
-                if (DAT_801d4464.unk12010 < DAT_801d4464.unk12018[0]) {
-                    at.vy = DAT_801d4464.unk12010;
+                if (map_world.unk12010 < map_world.unk12018[0]) {
+                    at.vy = map_world.unk12010;
                 } else {
-                    at.vy = DAT_801d4464.unk12018[0];
+                    at.vy = map_world.unk12018[0];
                 }
                 d = at.vy - obj->pos.vy;
                 if (d >= 7000) {
@@ -1349,8 +1349,9 @@ void effect_update_dispatch(void)
             }
             obj->unk4 = (phase & 1) - 128;
             if (obj->unk7 < 9) {
-                d = fixed_vector3_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vy - obj->pos.vy,
-                                         DAT_801b24e4.pos.vz - obj->pos.vz);
+                d = fixed_vector3_length(cur_avatar_status.pos.vx - obj->pos.vx,
+                                         cur_avatar_status.pos.vy - obj->pos.vy,
+                                         cur_avatar_status.pos.vz - obj->pos.vz);
                 if (d <= 32000) {
                     d = ((rsin(obj->unk7 << 8) >> 1) + 1024) * (32000 - d) / 32000;
                     light_interpolate_color_and_fog(200, 180, 160, 0, 32000, d);
@@ -1558,14 +1559,14 @@ void effect_update_dispatch(void)
             Object88 *o;
 
             if (obj->arg.b.unk44 == 0xfe) {
-                p.vx = DAT_801b24e4.pos.vx;
-                p.vy = DAT_801b24e4.pos.vy - 1600;
-                p.vz = DAT_801b24e4.pos.vz;
+                p.vx = cur_avatar_status.pos.vx;
+                p.vy = cur_avatar_status.pos.vy - 1600;
+                p.vz = cur_avatar_status.pos.vz;
                 hit = effect_target_motion(&p, 500, 60, 3000, 0, 10, 0x80000000);
             } else if (obj->arg.b.unk44 == 0xff) {
                 goto fall2;
             } else {
-                o = &DAT_80185da8.objects[obj->arg.b.unk44];
+                o = &actor_status.objects[obj->arg.b.unk44];
                 p.vx = o->pos.vx;
                 p.vy = o->pos.vy - (o->unk1e >> 1);
                 p.vz = o->pos.vz;
@@ -1576,7 +1577,7 @@ void effect_update_dispatch(void)
             }
             {
             boom2:
-                effect_apply_current_magic_backstep(DAT_801d4464.unk12024);
+                effect_apply_current_magic_backstep(map_world.unk12024);
                 for (i = 5; i != -1; i--) {
                     v.vx = (rand() * 400 >> 15) - 200;
                     v.vz = (rand() * 400 >> 15) - 200;
@@ -1707,7 +1708,7 @@ void effect_update_dispatch(void)
                 obj->unk14 = (obj->unk14 + 128) & 0xfff;
                 if (obj->arg.b.unk45 != 0) {
                     effect_sample_world_vertex(obj, 0, &a, &obj->scale);
-                    o = &DAT_80185da8.objects[obj->arg.b.unk44];
+                    o = &actor_status.objects[obj->arg.b.unk44];
                     t.vx = o->pos.vx;
                     t.vy = o->pos.vy - (o->unk1e >> 1);
                     t.vz = o->pos.vz;
@@ -1718,7 +1719,7 @@ void effect_update_dispatch(void)
                     o = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 25000, 800, 800,
                                                 &dist, 0x200);
                     if (o != NULL) {
-                        obj->arg.b.unk44 = o - DAT_80185da8.objects;
+                        obj->arg.b.unk44 = o - actor_status.objects;
                         obj->arg.b.unk45 = 5;
                     }
                 }
@@ -1757,7 +1758,7 @@ void effect_update_dispatch(void)
                         if (i == 0) {
                             made->unk3 = 0x10;
                         }
-                        made->arg.b.unk44 = DAT_801b77ec.unk2f08;
+                        made->arg.b.unk44 = effect_status.unk2f08;
                         made->arg.b.unk45 = i;
                     }
                     made->unk3 = 0x12;
@@ -1773,12 +1774,12 @@ void effect_update_dispatch(void)
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
-                    if (DAT_801d4464.unk12024 != 0x10) {
+                    if (map_world.unk12024 != 0x10) {
                         goto fail16;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = DAT_801d4464.unk12028;
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    obj->arg.b.unk4a = map_world.unk12028;
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     if (o->unke != 2 && o->unke != 3) {
                         goto fail16;
                     }
@@ -1812,7 +1813,7 @@ void effect_update_dispatch(void)
                     s32 d;
                     u32 k;
 
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     o->unk28 |= 0x800;
                     n = o->unk1c;
                     if (++obj->arg.b.unk48 >= 24) {
@@ -1867,7 +1868,7 @@ void effect_update_dispatch(void)
                         effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 1500, -128, 9, 0x30, 0, 1, 0);
                     }
                 release16:
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     o->unk28 &= ~0x800;
                     obj->unk0 = OBJECT4C_FREE;
                 }
@@ -1892,7 +1893,7 @@ void effect_update_dispatch(void)
                         if (i == 0) {
                             made->unk3 = 0x10;
                         }
-                        made->arg.b.unk44 = DAT_801b77ec.unk2f08;
+                        made->arg.b.unk44 = effect_status.unk2f08;
                         made->arg.b.unk45 = i;
                     }
                     made->unk3 = 0x12;
@@ -1908,12 +1909,12 @@ void effect_update_dispatch(void)
                 }
                 if (effect_aim_and_move(250, 25, 32, 200, 0, 0x400, 100, 0x800) == -1) {
                     obj->unk10 = -1;
-                    if (DAT_801d4464.unk12024 != 0x10) {
+                    if (map_world.unk12024 != 0x10) {
                         goto fail5;
                     }
                     effect_apply_current_magic(0x10010, 5000, NULL);
-                    obj->arg.b.unk4a = DAT_801d4464.unk12028;
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    obj->arg.b.unk4a = map_world.unk12028;
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     if (o->unke != 2 && o->unke != 3) {
                         goto fail5;
                     }
@@ -1950,7 +1951,7 @@ void effect_update_dispatch(void)
                     s32 d;
                     u32 k;
 
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     o->unk28 |= 0x800;
                     v.vx = rand() * 100 / 32767 - 50;
                     v.vy = -(rand() * 160 / 32767) - 200;
@@ -2004,7 +2005,7 @@ void effect_update_dispatch(void)
                         effect_construct_record(10, 0, 0x6f, &obj->pos, &v, 0x1000, 0, 5, 0x1c, 10, 1, 1);
                     }
                 release5:
-                    o = &DAT_80185da8.objects[obj->arg.b.unk4a];
+                    o = &actor_status.objects[obj->arg.b.unk4a];
                     o->unk28 &= ~0x800;
                     obj->unk0 = OBJECT4C_FREE;
                 }
@@ -2017,7 +2018,7 @@ void effect_update_dispatch(void)
             Object4cTrail *t;
             s32 k;
 
-            link = &DAT_801b77ec.objects[obj->arg.b.unk44];
+            link = &effect_status.objects[obj->arg.b.unk44];
             if (phase == 0 && link->unk7 >= 3) {
                 obj->unk7 = 1;
                 obj->unk10 = obj->arg.b.unk45 * 3;
@@ -2041,7 +2042,7 @@ void effect_update_dispatch(void)
             SVECTOR v;
             s32 k;
 
-            link = &DAT_801b77ec.objects[obj->arg.b.unk44];
+            link = &effect_status.objects[obj->arg.b.unk44];
             if (obj->unk10 < 188) {
                 v.vx = (rand() * 100 >> 15) - 50;
                 v.vz = (rand() * 100 >> 15) - 50;
@@ -2099,28 +2100,28 @@ void effect_update_dispatch(void)
         }
         break;
     case 26:
-        if (DAT_801b24e4.unk86 == 0) {
+        if (cur_avatar_status.unk86 == 0) {
             obj->unk0 = OBJECT4C_FREE;
         }
         obj->angle.vy += 64;
         break;
     case 27:
-        if (DAT_801b24e4.unk88 == 0) {
+        if (cur_avatar_status.unk88 == 0) {
             obj->unk0 = OBJECT4C_FREE;
         }
         obj->angle.vy -= 256;
         break;
     case 28:
-        if (DAT_801b24e4.unk8a == 0) {
+        if (cur_avatar_status.unk8a == 0) {
             obj->unk0 = OBJECT4C_FREE;
         }
         obj->angle.vy -= 64;
         break;
     case 23:
         if (obj->unk10 == 4) {
-            DAT_801b24e4.hp += 80;
-            if (DAT_801b24e4.hp > DAT_801b24e4.hp_max) {
-                DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            cur_avatar_status.hp += 80;
+            if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
+                cur_avatar_status.hp = cur_avatar_status.hp_max;
             }
         }
         light_interpolate_color_and_fog(230, 200, 160, 0, 23000, rsin(obj->unk10 << 8));
@@ -2132,7 +2133,7 @@ void effect_update_dispatch(void)
             Object4c *made;
 
             if (obj->unk10 == 12) {
-                DAT_801b24e4.unk78 = 0;
+                cur_avatar_status.unk78 = 0;
             }
             p.vx = (rand() >> 5) - 512;
             p.vy = (rand() >> 8) + 200;
@@ -2152,9 +2153,9 @@ void effect_update_dispatch(void)
             Object4c *made;
 
             if (obj->unk10 == 12) {
-                DAT_801b24e4.hp += 200;
-                if (DAT_801b24e4.hp > DAT_801b24e4.hp_max) {
-                    DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+                cur_avatar_status.hp += 200;
+                if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
+                    cur_avatar_status.hp = cur_avatar_status.hp_max;
                 }
                 player_cap_status_components(7);
             }
@@ -2188,10 +2189,10 @@ void effect_update_dispatch(void)
             hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, 10, 10, 0xb0);
             if (hit == 0) {
                 collision_probe_floor_height(obj->pos.vx, obj->arg.w.unk48, obj->pos.vz, 0, 0);
-                if (obj->pos.vy < DAT_801d4464.unk12010) {
+                if (obj->pos.vy < map_world.unk12010) {
                     goto fly95;
                 }
-                obj->pos.vy = DAT_801d4464.unk12010;
+                obj->pos.vy = map_world.unk12010;
             }
             p = obj->pos;
             v.vx = 0;

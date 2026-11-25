@@ -20,13 +20,13 @@
 
 RODATA(0x80012cb4, 0x208)
 
-/* Index of the DAT_801e7594 trail set the next id 5 or 16 record takes. */
+/* Index of the effect_trails_table trail set the next id 5 or 16 record takes. */
 DATA(0x8009c338, 0x4, ".sdata")
-static s32 DAT_8009c338 = 0;
+static s32 effect_trail_next_slot = 0;
 
-/* Frame before which id 112 does not refresh it (DAT_801c12e4.frames). */
+/* Frame before which id 112 does not refresh it (cdrom_ctl.frames). */
 DATA(0x8009c3f0, 0x4, ".sbss")
-static s32 DAT_8009c3f0;
+static s32 effect_sound_cooldown_time;
 
 /* Plays sound effect se at the record. */
 ADDRESS(0x800532d4, 0x3c)
@@ -43,7 +43,7 @@ s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
     s32 y;
     s32 mask;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     if (obj->unkb == 0) {
         y = pos->vy + ((height & 0xfff) >> 1);
         switch (obj->unk0 & 7) {
@@ -100,8 +100,8 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in,
     if (flags == 0x80) {
         player_apply_damage(a6, a7, a8, a9, a10, a11, a12, a13, a14, a3, a5, target);
     } else if (flags == 0x10) {
-        obj = &DAT_80185da8.objects[DAT_801d4464.unk12028];
-        def = &DAT_80185da8.defs[obj->unk2];
+        obj = &actor_status.objects[map_world.unk12028];
+        def = &actor_status.defs[obj->unk2];
         if (target != NULL &&
             !angle_within_tolerance(obj->angle.vy,
                                     vector_xz_to_angle(obj->pos.vx - target->vx,
@@ -115,7 +115,7 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in,
         } else {
             kind |= 0x20;
         }
-        actor_apply_magic_to_actor(DAT_801d4464.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind,
+        actor_apply_magic_to_actor(map_world.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind,
                                    rec, target);
         if (mode & 0x10000) {
             obj->unk28 |= 0x800;
@@ -137,13 +137,13 @@ u16 effect_magic_power(Object4c *obj)
     if (obj->unk0 & 0x40) {
         bit = 0x10;
         n = 0;
-        bits = DAT_801b77ec.unk0[obj->unk1].unk5;
+        bits = effect_status.unk0[obj->unk1].unk5;
         for (i = 4; i != -1; i--) {
             if (!(bits & bit)) {
                 bit >>= 1;
             } else {
                 n++;
-                sum += DAT_801b24e4.unk42[i];
+                sum += cur_avatar_status.unk42[i];
                 bit >>= 1;
             }
         }
@@ -162,8 +162,8 @@ void effect_apply_current_magic(s32 flags, s32 a1, VECTOR *target)
     Object4c *obj;
     Record18 *rec;
 
-    obj = DAT_801b77ec.unk2f04;
-    rec = DAT_801b77ec.unk2f00;
+    obj = effect_status.unk2f04;
+    rec = effect_status.unk2f00;
     effect_dispatch_magic_impact(flags, obj->unk0, rec, a1, effect_magic_power(obj), obj->unk6, rec->unk6,
                                  rec->unk8, rec->unka, rec->unk4, rec->unkc, rec->unke, rec->unk10,
                                  rec->unk12, rec->unk14, target);
@@ -176,7 +176,7 @@ void effect_apply_current_magic_backstep(s32 flags)
     Object4c *obj;
     VECTOR pos;
 
-    obj = DAT_801b77ec.unk2f04;
+    obj = effect_status.unk2f04;
     pos.vx = obj->pos.vx - obj->vel.vx * 8;
     pos.vy = obj->pos.vy - obj->vel.vy * 8;
     pos.vz = obj->pos.vz - obj->vel.vz * 8;
@@ -194,8 +194,8 @@ void effect_apply_radial_magic_damage(VECTOR *pos, s32 reach, s32 radius, s32 mo
     Object4c *obj;
     Record18 *rec;
 
-    obj = DAT_801b77ec.unk2f04;
-    rec = DAT_801b77ec.unk2f00;
+    obj = effect_status.unk2f04;
+    rec = effect_status.unk2f00;
     if (obj->unk0 & 1) {
         player_apply_radial_damage(pos, reach, radius, mode, falloff, rec->unk6, rec->unk8, rec->unka,
                                    rec->unk4, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
@@ -242,7 +242,7 @@ Object4c *effect_pool_find_free(void)
     Object4c *obj;
     u16 i;
 
-    obj = DAT_801b77ec.objects;
+    obj = effect_status.objects;
     i = 128;
     do {
         if (obj->unk0 == OBJECT4C_FREE) {
@@ -341,7 +341,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
     obj->unk14 = 0;
     obj->unk5 = 0;
     obj->unk8 = 1;
-    if ((obj->unk0 & 0x40) && DAT_801b24e4.unk101 == 1) {
+    if ((obj->unk0 & 0x40) && cur_avatar_status.unk101 == 1) {
         obj->unkb = 8;
     } else {
         obj->unkb = 1;
@@ -468,7 +468,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         break;
     case 75:
         effect_pool_initialize_scaled_world(obj, 0x44, 0x1400, 5);
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->unkd = 1;
         obj->unk10 = 100;
         obj->unkb = 5;
@@ -579,7 +579,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unk10 = 45;
         obj->arg.b.unk44 = 0;
         obj->unkd = 1;
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->scale.vx = 0x1800;
         obj->scale.vy = 0x1000;
         obj->angle.vx = 0;
@@ -594,7 +594,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unk10 = 40;
         obj->arg.b.unk44 = 0;
         obj->unkd = 0;
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->unke = 0x40;
         break;
     case 55:
@@ -624,7 +624,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unk10 = 60;
         obj->unkd = 1;
         obj->unkb = 3;
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->arg.h.unk44 = 0;
         obj->arg.h.unk46 = args[1];
         obj->unke = 0x100;
@@ -652,7 +652,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->scale.vy = 0x800;
         obj->scale.vz = 100;
         obj->unk10 = 45;
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->vel.vy = -30;
         obj->angle.vx = 0;
         obj->angle.vz = 0;
@@ -876,7 +876,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->vel.vy = 0;
         obj->unk10 = 150;
         obj->arg.h.unk44 = 0;
-        obj->arg.h.unk46 = DAT_801b24e4.unk124.vy;
+        obj->arg.h.unk46 = cur_avatar_status.unk124.vy;
         obj->unke = 0;
         effect_play_spatial_sound(obj, 0x92);
         break;
@@ -906,9 +906,9 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unk3 = 0;
         obj->unk12 = 0x800;
         obj->angle = *(SVECTOR *)args[1];
-        obj->arg.w.unk44 = DAT_801e7594[DAT_8009c338];
+        obj->arg.w.unk44 = effect_trails_table[effect_trail_next_slot];
         trail = obj->arg.w.unk44;
-        DAT_8009c338 = (DAT_8009c338 + 1) & 3;
+        effect_trail_next_slot = (effect_trail_next_slot + 1) & 3;
         for (i = 23; i != -1; i--) {
             trail->pos = obj->pos;
             trail->angle = obj->angle;
@@ -930,9 +930,9 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unk3 = 0;
         obj->unk12 = 0x800;
         obj->angle = *(SVECTOR *)args[1];
-        obj->arg.w.unk44 = DAT_801e7594[DAT_8009c338];
+        obj->arg.w.unk44 = effect_trails_table[effect_trail_next_slot];
         trail = obj->arg.w.unk44;
-        DAT_8009c338 = (DAT_8009c338 + 1) & 3;
+        effect_trail_next_slot = (effect_trail_next_slot + 1) & 3;
         for (i = 23; i != -1; i--) {
             trail->pos = obj->pos;
             trail->angle = obj->angle;
@@ -1136,7 +1136,7 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->unkc = 0x34;
         obj->unk12 = 0x1000;
         obj->unk10 = 50;
-        obj->angle = DAT_801b24e4.unk124;
+        obj->angle = cur_avatar_status.unk124;
         obj->scale.vx = 350;
         obj->scale.vy = 0x2000;
         obj->scale.vz = 350;
@@ -1181,8 +1181,8 @@ Object4c *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *
         obj->scale.vy = 0;
         obj->scale.vx = obj->scale.vz = args[1];
         obj->arg.h.unk44 = args[2];
-        if (DAT_8009c3f0 - (s32)DAT_801c12e4.frames < 0) {
-            DAT_8009c3f0 = DAT_801c12e4.frames + 30;
+        if (effect_sound_cooldown_time - (s32)cdrom_ctl.frames < 0) {
+            effect_sound_cooldown_time = cdrom_ctl.frames + 30;
             /* A volume that nothing uses any more: retail keeps the multiply. */
             i = (s16)obj->arg.h.unk44 / 45;
             if (i > 0x7f) {

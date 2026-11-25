@@ -10,12 +10,12 @@
 #include <game/data.h>
 
 /* The loaded FDAT module's handler table and the FDAT window base. */
-extern u32 DAT_8009c3fc;
-extern u32 DAT_8009c400[];
+extern u32 fdat_window_handlers;
+extern u32 fdat_window_base[];
 
 /* Handler table installed while an FDAT module loads: 32 copies of the empty
  * resource_noop_callback (.data, owner unit unknown). */
-extern FdatHandler DAT_8007e4e4[32];
+extern FdatHandler callback_default_table[32];
 
 void resource_initialize_game_assets(void);
 void resource_run_initial_transition(void);

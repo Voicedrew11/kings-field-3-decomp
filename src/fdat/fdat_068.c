@@ -81,9 +81,9 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -110,7 +110,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
@@ -183,10 +183,10 @@ void area_talk_event_set_flags(Object88 *record, s32 event)
 {
     switch (event) {
     case 0:
-        DAT_801ba984.unk32[0x2d] = 1;
+        cur_evt_state.unk32[0x2d] = 1;
         break;
     case 1:
-        DAT_801ba984.unk32[0x2e] = 1;
+        cur_evt_state.unk32[0x2e] = 1;
         break;
     }
 }
@@ -195,16 +195,16 @@ void area_talk_event_set_flags(Object88 *record, s32 event)
 ADDRESS(0x801e8680, 0x7c)
 void area_on_load_restore_actor_and_door(void)
 {
-    if (DAT_801ba984.unk32[0x2e] == 0) {
-        DAT_80185da8.objects[25].unk0 = 1;
-        DAT_8018fb3c.objects[28].unk0 = 0;
-        DAT_8018fb3c.objects[28].arg.b.unk3c = 0;
-        DAT_8018fb3c.objects[95].arg.b.unk3d[1] = 0;
+    if (cur_evt_state.unk32[0x2e] == 0) {
+        actor_status.objects[25].unk0 = 1;
+        map_objects_slots.objects[28].unk0 = 0;
+        map_objects_slots.objects[28].arg.b.unk3c = 0;
+        map_objects_slots.objects[95].arg.b.unk3d[1] = 0;
     } else {
-        DAT_80185da8.objects[25].unk0 = 8;
-        DAT_8018fb3c.objects[28].unk0 = 2;
-        DAT_8018fb3c.objects[28].arg.b.unk3c = 0xff;
-        DAT_8018fb3c.objects[95].arg.b.unk3d[1] = 0xff;
+        actor_status.objects[25].unk0 = 8;
+        map_objects_slots.objects[28].unk0 = 2;
+        map_objects_slots.objects[28].arg.b.unk3c = 0xff;
+        map_objects_slots.objects[95].arg.b.unk3d[1] = 0xff;
     }
-    DAT_801ba984.unk84[5] = 0x16;
+    cur_evt_state.unk84[5] = 0x16;
 }

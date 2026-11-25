@@ -22,24 +22,24 @@ s32 actor_move_with_collision(SVECTOR *vel)
     VECTOR pos;
     s32 hit;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     pos.vx = vel->vx + obj->pos.vx;
     pos.vy = vel->vy + obj->pos.vy;
     pos.vz = vel->vz + obj->pos.vz;
     hit = collision_query_world(pos.vx, pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                DAT_80185da8.unk9d04);
+                                actor_status.unk9d04);
     if (hit == 0) {
         obj->pos.vx = pos.vx;
         obj->pos.vy = pos.vy;
         obj->pos.vz = pos.vz;
     } else if (collision_query_world(pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     DAT_80185da8.unk9d04)) {
+                                     actor_status.unk9d04)) {
         vel->vx = -vel->vx;
     } else if (collision_query_world(obj->pos.vx, pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     DAT_80185da8.unk9d04)) {
+                                     actor_status.unk9d04)) {
         vel->vy = -vel->vy;
     } else if (collision_query_world(obj->pos.vx, obj->pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     DAT_80185da8.unk9d04)) {
+                                     actor_status.unk9d04)) {
         vel->vz = -vel->vz;
     }
     return hit;
@@ -52,7 +52,7 @@ s32 actor_start_ballistic_motion(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32
     Object88 *obj;
     s16 time;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     if (trajectory_solve_motion_between_points(high, obj->pos.vx, obj->pos.vy, obj->pos.vz, x, y, z, gravity,
                                                speed, &time, &obj->unk68, &obj->unk6a) != 0) {
         return -1;
@@ -67,27 +67,27 @@ s32 actor_start_ballistic_motion(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32
 ADDRESS(0x8004e31c, 0x14)
 void actor_suspend_vertical_motion(void)
 {
-    DAT_80185da8.current->unkd = 0x60;
+    actor_status.current->unkd = 0x60;
 }
 
 /* Falls, lands and jumps the current record (unkd 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
 ADDRESS(0x8004e330, 0x3c8)
 void actor_update_vertical_motion(void)
 {
-    Object88 *obj = DAT_80185da8.current;
-    Object78 *def = DAT_80185da8.def;
-    u16 *wet = &DAT_801d4464.unk1200a;
+    Object88 *obj = actor_status.current;
+    Object78 *def = actor_status.def;
+    u16 *wet = &map_world.unk1200a;
 
     collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
     obj->unk3 = *wet == 0 ? 1 : 2;
     if (obj->unk28 & 0x400) {
-        DAT_801d4464.unk12010 = DAT_801d4464.unk1200c;
+        map_world.unk12010 = map_world.unk1200c;
     }
     switch (obj->unkd) {
     case 0: {
         s32 dy;
 
-        dy = DAT_801d4464.unk12010 - obj->pos.vy;
+        dy = map_world.unk12010 - obj->pos.vy;
         if (dy < 0) {
             obj->unkd = 0x20;
             obj->vel.vy = -100;
@@ -103,7 +103,7 @@ void actor_update_vertical_motion(void)
 
         y = obj->pos.vy + obj->vel.vy;
         hit = collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                    DAT_80185da8.unk9d04);
+                                    actor_status.unk9d04);
         if (hit == 0) {
         fall:
             obj->pos.vy = y;
@@ -115,14 +115,14 @@ void actor_update_vertical_motion(void)
         }
         if (hit & 4) {
             if (obj->unk28 & 0x400) {
-                s32 floor = DAT_801d4464.unk1200c;
+                s32 floor = map_world.unk1200c;
 
                 if (obj->pos.vy < floor) {
                     goto fall;
                 }
                 obj->pos.vy = floor;
             } else {
-                obj->pos.vy = DAT_801d4464.unk12010;
+                obj->pos.vy = map_world.unk12010;
             }
             obj->vel.vy = 0;
             goto idle;
@@ -135,10 +135,10 @@ void actor_update_vertical_motion(void)
     case 0x20:
         obj->pos.vy += obj->vel.vy;
         obj->vel.vy += 5;
-        if (DAT_801d4464.unk12010 < obj->pos.vy && obj->vel.vy < 0) {
+        if (map_world.unk12010 < obj->pos.vy && obj->vel.vy < 0) {
             return;
         }
-        obj->pos.vy = DAT_801d4464.unk12010;
+        obj->pos.vy = map_world.unk12010;
     idle:
         obj->unkd = 0;
         return;
@@ -148,7 +148,7 @@ void actor_update_vertical_motion(void)
 
         jump_y = obj->unk3c - obj->unk6a * obj->vel.vy + ((obj->unk6c * obj->vel.vy * obj->vel.vy) >> 1);
         jump_hit = collision_query_world(obj->pos.vx, jump_y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                         DAT_80185da8.unk9d04);
+                                         actor_status.unk9d04);
         if (jump_hit == 0) {
             obj->pos.vy = jump_y;
             obj->vel.vy++;
@@ -174,7 +174,7 @@ s32 actor_damp_horizontal_motion(s32 speed, s32 mode)
     Object88 *obj;
     s32 length;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     if (obj->unkd == 0) {
         length = SquareRoot0(obj->vel.vx * obj->vel.vx + obj->vel.vz * obj->vel.vz);
         if (length == 0) {
@@ -195,7 +195,7 @@ s32 actor_move_along_heading(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
         s32 v[2];
     } target, step;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     angle_to_forward_xz(angle, target.v);
     step = target;
     vector2i_scale_shift11(scale_x, target.v);
@@ -271,7 +271,7 @@ s32 actor_turn_and_move_along_heading(s16 target, s32 scale_x, s32 max, s32 scal
 {
     Object88 *obj;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     actor_turn_toward_angle(obj, target, max, accel);
     return actor_move_along_heading(obj->angle.vy, scale_x, scale_z, mode);
 }
@@ -281,7 +281,7 @@ ADDRESS(0x8004eaf0, 0x118)
 s32 actor_turn_and_move_toward_point(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel,
                                      s32 mode)
 {
-    Object88 *obj = DAT_80185da8.current;
+    Object88 *obj = actor_status.current;
     s32 dx = x - obj->pos.vx;
     s32 dz = z - obj->pos.vz;
     s32 angle = vector_xz_to_angle(dx, dz);
@@ -304,7 +304,7 @@ s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 
     s32 r;
     s32 y;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     pitch_yaw_to_forward_vector(angle, &target);
     step = target;
     vector3s_scale_shift12(scale_a, &target);
@@ -315,7 +315,7 @@ s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 
     r = actor_move_horizontal_with_collision(&obj->vel, mode) != 0;
     y = obj->vel.vy + obj->pos.vy;
     if (collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                              DAT_80185da8.unk9d04) == 0) {
+                              actor_status.unk9d04) == 0) {
         obj->pos.vy = y;
     } else {
         r |= 2;
@@ -330,7 +330,7 @@ s32 actor_turn_and_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 max,
 {
     Object88 *obj;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     actor_turn_toward_angle(obj, angle->vy, max, accel);
     obj->angle.vx = angle_approach(obj->angle.vx, angle->vx, 8);
     return actor_move_along_euler_angles(&obj->angle, scale_a, scale_b, mode);
@@ -369,13 +369,13 @@ VECTOR *actor_resolve_group_position(Object88 *obj, VECTOR *out)
     case 0:
         return &obj->pos;
     case 1:
-        def = &DAT_80185da8.defs[obj->unk2];
+        def = &actor_status.defs[obj->unk2];
         out->vx = obj->pos.vx + def->unkc;
         out->vy = obj->pos.vy + def->unke;
         out->vz = obj->pos.vz + def->unk10;
         return out;
     case 2:
-        def = &DAT_80185da8.defs[obj->unk2];
+        def = &actor_status.defs[obj->unk2];
         vector_rotate_yxz(&obj->angle, (SVECTOR *)&def->unkc, out);
         out->vx += obj->pos.vx;
         out->vy += obj->pos.vy;
@@ -395,7 +395,7 @@ void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 do
     s32 anim;
     s32 turn;
 
-    obj = DAT_80185da8.current;
+    obj = actor_status.current;
     anim = idle;
     turn = 0;
     if (obj->unk58 > 0) {
@@ -492,7 +492,7 @@ s32 actor_compute_target_direction(Object88 *obj, VECTOR *from, s32 speed, VECTO
         if (--steps == 0) {
             break;
         }
-        vector_add_scaled_delta(from, &DAT_801b24e4.unk11c,
+        vector_add_scaled_delta(from, &cur_avatar_status.unk11c,
                                 fixed_vector3_length(target->vx - at.vx, target->vy - at.vy,
                                                      target->vz - at.vz) / speed, &at);
     }

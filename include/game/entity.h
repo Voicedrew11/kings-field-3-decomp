@@ -3,9 +3,9 @@
 
 /*
  * GAME.EXE Object88 records (src/game/entity*.c, WIP names): the 200
- * records of DAT_80185da8 made from its Object78 records, their placement
+ * records of actor_status made from its Object78 records, their placement
  * on the map, the script records each runs, their movement and the searches
- * over them. DAT_80185da8.current and .def name the record being updated.
+ * over them. actor_status.current and .def name the record being updated.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -44,8 +44,8 @@ typedef struct Object88Place {
     s16 unke;       /* height; -1 takes Object78.unk1c */
 } Object88Place;
 
-extern Object88 *DAT_80199148;
-extern u8 DAT_80199150;
+extern Object88 *actor_animation_shift_target;
+extern u8 actor_animation_shift_enabled;
 
 Object88 *actor_pool_find_free(void);
 void actor_set_home_position(Object88 *obj);

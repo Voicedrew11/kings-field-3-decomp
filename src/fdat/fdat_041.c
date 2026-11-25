@@ -94,16 +94,16 @@ void area_adjust_actor_magic_damage_noop(void)
 ADDRESS(0x801e85b8, 0x8c)
 void area_on_actor_removed_track_group(Object88 *obj)
 {
-    s32 index = obj - DAT_80185da8.objects;
+    s32 index = obj - actor_status.objects;
     s32 bit;
 
     if (index >= 0 && index < 13) {
         bit = 1 << index;
-        DAT_801ba984.unk32[0x16] |= bit;
-        DAT_801ba984.unk32[0x17] |= bit >> 8;
+        cur_evt_state.unk32[0x16] |= bit;
+        cur_evt_state.unk32[0x17] |= bit >> 8;
     }
-    if (*(u16 *)&DAT_801ba984.unk32[0x16] == 0x1fff) {
-        DAT_801ba984.unk32[0x18] = 1;
+    if (*(u16 *)&cur_evt_state.unk32[0x16] == 0x1fff) {
+        cur_evt_state.unk32[0x18] = 1;
     }
 }
 
@@ -142,14 +142,14 @@ ADDRESS(0x801e8674, 0x64)
 void area_on_movie_start_unlock_element_and_remove_actor(u8 id)
 {
     if (id == 4) {
-        if (DAT_801ba984.unk32[0x14] != 0) {
-            DAT_8018fb3c.objects[20].unk6 = 0xff;
-            DAT_80185da8.objects[30].unk0 = 8;
-            DAT_80185da8.objects[30].unk9 = 3;
+        if (cur_evt_state.unk32[0x14] != 0) {
+            map_objects_slots.objects[20].unk6 = 0xff;
+            actor_status.objects[30].unk0 = 8;
+            actor_status.objects[30].unk9 = 3;
         }
     }
     if (id == 13) {
-        DAT_801ba984.unk71[1] = 1;
+        cur_evt_state.unk71[1] = 1;
     }
 }
 
@@ -166,12 +166,12 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     s32 i;
 
     if (id == 13) {
-        DAT_801b24e4.unk34[1] += 20;
+        cur_avatar_status.unk34[1] += 20;
         player_learn_element_magic(1);
         player_recalculate_combat_stats();
-        obj = &DAT_8018fb3c.objects[15];
-        DAT_8018fb3c.objects[15].unk5 = 0x32;
-        DAT_8018fb3c.objects[15].unk2 = 5;
+        obj = &map_objects_slots.objects[15];
+        map_objects_slots.objects[15].unk5 = 0x32;
+        map_objects_slots.objects[15].unk2 = 5;
         for (i = 15; i != -1; i--) {
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {
@@ -184,9 +184,9 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
             render_game_frame(&pos, &angle);
         }
         obj->unk6 = 0xff;
-        obj = &DAT_8018fb3c.objects[86];
-        DAT_8018fb3c.objects[86].unk5 = 0x32;
-        DAT_8018fb3c.objects[86].unk2 = 5;
+        obj = &map_objects_slots.objects[86];
+        map_objects_slots.objects[86].unk5 = 0x32;
+        map_objects_slots.objects[86].unk2 = 5;
         for (i = 15; i != -1; i--) {
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {
@@ -203,7 +203,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
         conversation_record_mark_page(0xb, 1);
     }
     if (id == 4) {
-        DAT_801ba984.unk32[0x15] = 1;
+        cur_evt_state.unk32[0x15] = 1;
     }
 }
 
@@ -212,9 +212,9 @@ ADDRESS(0x801e88a0, 0x34)
 void area_talk_event_set_flag(Object88 *record, s32 event)
 {
     if (event == 0) {
-        if (DAT_801ba984.unk32[0x14] == 0) {
-            DAT_801ba984.unk32[0x14] = 1;
-            DAT_801ba984.unk32[0x15] = 0;
+        if (cur_evt_state.unk32[0x14] == 0) {
+            cur_evt_state.unk32[0x14] = 1;
+            cur_evt_state.unk32[0x15] = 0;
         }
     }
 }
@@ -223,17 +223,17 @@ void area_talk_event_set_flag(Object88 *record, s32 event)
 ADDRESS(0x801e88d4, 0x84)
 void area_on_load_restore_objects_and_actor(void)
 {
-    DAT_801ba984.unk32[0x19] = 1;
-    if (DAT_801ba984.unk7f[1] != 0) {
-        DAT_8018fb3c.objects[15].unk6 = 0xff;
-        DAT_8018fb3c.objects[86].unk6 = 0xff;
+    cur_evt_state.unk32[0x19] = 1;
+    if (cur_evt_state.unk7f[1] != 0) {
+        map_objects_slots.objects[15].unk6 = 0xff;
+        map_objects_slots.objects[86].unk6 = 0xff;
     }
-    if (DAT_801ba984.unk32[0x14] == 0) {
-        DAT_801ba984.unk32[0x15] = 1;
+    if (cur_evt_state.unk32[0x14] == 0) {
+        cur_evt_state.unk32[0x15] = 1;
     } else {
-        DAT_8018fb3c.objects[20].unk6 = 0xff;
-        DAT_80185da8.objects[30].unk0 = 8;
-        DAT_80185da8.objects[30].unk9 = 3;
+        map_objects_slots.objects[20].unk6 = 0xff;
+        actor_status.objects[30].unk0 = 8;
+        actor_status.objects[30].unk9 = 3;
     }
-    DAT_801ba984.unk84[5] = 0xd;
+    cur_evt_state.unk84[5] = 0xd;
 }

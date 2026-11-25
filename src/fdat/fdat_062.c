@@ -91,19 +91,19 @@ void area_use_item_with_item_held(VECTOR *pos, SVECTOR *angle, s32 item)
         return;
     }
     if (game_counter_is_nonzero(0x7d) > 0) {
-        if (DAT_801ba984.unk32[0x28] != 0) {
+        if (cur_evt_state.unk32[0x28] != 0) {
             return;
         }
-        DAT_801ba984.unk32[0x28] = 1;
-        DAT_801ba984.unk32[0x29] = 0;
+        cur_evt_state.unk32[0x28] = 1;
+        cur_evt_state.unk32[0x29] = 0;
         game_counter_decrement(0x7e);
     } else {
-        if (DAT_801ba984.unk32[0x28] != 0) {
+        if (cur_evt_state.unk32[0x28] != 0) {
             return;
         }
         notify_enqueue(0x10);
     }
-    DAT_801ba984.unk0 = 1;
+    cur_evt_state.unk0 = 1;
 }
 
 ADDRESS(0x801e8658, 0x8)
@@ -157,7 +157,7 @@ void area_on_movie_start_copy_cells_and_trade_item(u8 id)
         if (game_counter_is_nonzero(0x7d) > 0) {
             game_counter_decrement(0x7d);
             game_counter_increment(0x10);
-            DAT_801ba984.unk32[0x2b] = 1;
+            cur_evt_state.unk32[0x2b] = 1;
         }
     }
 }
@@ -175,13 +175,13 @@ void area_on_movie_end_fade_object(u8 id)
     s32 i;
 
     if (id == 5) {
-        DAT_801ba984.unk32[0x29] = 1;
+        cur_evt_state.unk32[0x29] = 1;
     }
     if (id == 10) {
-        obj = &DAT_8018fb3c.objects[2];
-        DAT_801ba984.unk32[0x2a] = 1;
-        DAT_8018fb3c.objects[2].unk5 = 0x32;
-        DAT_8018fb3c.objects[2].unk2 = 5;
+        obj = &map_objects_slots.objects[2];
+        cur_evt_state.unk32[0x2a] = 1;
+        map_objects_slots.objects[2].unk5 = 0x32;
+        map_objects_slots.objects[2].unk2 = 5;
         for (i = 15; i != -1; i--) {
             obj->unk10 += 256;
             if (obj->unk10 >= 4095) {
@@ -206,16 +206,16 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e8830, 0xa8)
 void area_on_load_restore_cells_and_flags(void)
 {
-    DAT_801ba984.unk32[0x29] = 1;
-    if (DAT_801ba984.unk32[0x28] == 0) {
+    cur_evt_state.unk32[0x29] = 1;
+    if (cur_evt_state.unk32[0x28] == 0) {
         map_cell_copy_rotated_fields(2, 0x4a, 0, 0x26, 12, 3, 5, 0, 0x2f);
     } else {
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x26, 12, 3, 5, 0, 0x2f);
     }
     if (game_counter_is_nonzero(0x7d) > 0) {
-        DAT_801ba984.unk32[0x2a] = 0;
+        cur_evt_state.unk32[0x2a] = 0;
     } else {
-        DAT_801ba984.unk32[0x2a] = 1;
+        cur_evt_state.unk32[0x2a] = 1;
     }
-    DAT_801ba984.unk84[5] = 0x14;
+    cur_evt_state.unk84[5] = 0x14;
 }

@@ -19,44 +19,44 @@ void actor_update_frame(void)
     Object88 *obj;
     Object44 *carrier;
 
-    obj = DAT_80185da8.objects;
-    DAT_80185da8.unk9d20 = 0;
-    DAT_80185da8.unk9d18 = 0;
+    obj = actor_status.objects;
+    actor_status.unk9d20 = 0;
+    actor_status.unk9d18 = 0;
     do {
         if (obj->unk0 != OBJECT88_FREE) {
             actor_bind_current(obj);
-            if ((DAT_80185da8.unk9d24 & 3) == (DAT_80185da8.unk9d18 & 3) || DAT_801b24e4.unke != 0 ||
-                DAT_801b24e4.unk101 == 1) {
+            if ((actor_status.unk9d24 & 3) == (actor_status.unk9d18 & 3) || cur_avatar_status.unke != 0 ||
+                cur_avatar_status.unk101 == 1) {
                 actor_update_lifecycle_for_player_range();
             }
             if (obj->unk9 == 1) {
-                if ((DAT_80185da8.unk9d24 & 3) == (DAT_80185da8.unk9d20 & 3)) {
+                if ((actor_status.unk9d24 & 3) == (actor_status.unk9d20 & 3)) {
                     actor_select_target_for_player_distance();
                 }
                 actor_update_behavior();
-                DAT_80185da8.unk9d20++;
+                actor_status.unk9d20++;
             }
-            if (DAT_80185da8.def->unk34 & 0x10000) {
-                carrier = &DAT_8018fb3c.objects[obj->unk22];
+            if (actor_status.def->unk34 & 0x10000) {
+                carrier = &map_objects_slots.objects[obj->unk22];
                 obj->pos.vx = carrier->pos.vx;
                 obj->pos.vy = carrier->pos.vy - 500;
                 obj->pos.vz = carrier->pos.vz;
                 if (obj->unk9 == 1) {
-                    obj->angle.vy = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                                       DAT_801b24e4.pos.vz - obj->pos.vz);
+                    obj->angle.vy = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                       cur_avatar_status.pos.vz - obj->pos.vz);
                 }
             }
             if (obj->unk1 == 0x6e) {
-                if (DAT_801b24e4.unkf5 != 0x5c && DAT_801b24e4.unkf6 != 0x5c) {
+                if (cur_avatar_status.unkf5 != 0x5c && cur_avatar_status.unkf6 != 0x5c) {
                     obj->unk3 = 0;
-                } else if (DAT_801b24e4.unk1c == 0) {
+                } else if (cur_avatar_status.unk1c == 0) {
                     obj->unk3 = 0;
                 }
             }
         }
         obj++;
-    } while (++DAT_80185da8.unk9d18 < 200);
-    DAT_80185da8.unk9d24++;
+    } while (++actor_status.unk9d18 < 200);
+    actor_status.unk9d24++;
     actor_bind_current(NULL);
 }
 
@@ -69,7 +69,7 @@ void actor_fixup_group_targets(void)
     s32 i;
     s32 j;
 
-    def = DAT_80185da8.defs;
+    def = actor_status.defs;
     for (i = 0; i < 40; i++, def++) {
         if (def->unk0 == 0xff) {
             return;
@@ -79,7 +79,7 @@ void actor_fixup_group_targets(void)
             if ((s32)*scripts == -1) {
                 *scripts = NULL;
             } else {
-                *scripts = DAT_80185da8.unk7d00 + (s32)*scripts;
+                *scripts = actor_status.unk7d00 + (s32)*scripts;
             }
         }
     }
@@ -93,7 +93,7 @@ void actor_load_records(Object88Place *place)
     Object78 *def;
     u16 i;
 
-    obj = DAT_80185da8.objects;
+    obj = actor_status.objects;
     i = 200;
     while (i--) {
         obj->unk0 = place->unk0;
@@ -114,7 +114,7 @@ void actor_load_records(Object88Place *place)
             obj->unke = 0;
             obj->unkf = 0xff;
             obj->unk60 = NULL;
-            def = &DAT_80185da8.defs[obj->unk2];
+            def = &actor_status.defs[obj->unk2];
             actor_copy_group_defaults(obj);
             actor_set_home_position(obj);
             obj->unk15 = def->unk9;

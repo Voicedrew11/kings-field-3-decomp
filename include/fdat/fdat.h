@@ -4,7 +4,7 @@
 /*
  * The FDAT.T area modules: GAME.EXE loads one code entry whole at
  * 0x801e8308 and calls through the handler table at its +4
- * (DAT_8018fad4.handlers). A module calls GAME.EXE's functions and reads its
+ * (asset_status.handlers). A module calls GAME.EXE's functions and reads its
  * data in place, so it spells them with their GAME.EXE identities.
  *
  * A body that several modules repeat is one fragment under src/fdat/shared/,
@@ -36,12 +36,12 @@
 /* The table at the module's first byte (WIP layout). */
 typedef struct FdatHeader {
     s32 id;                 /* +0x00: 5, 6, ... 0x20, one per module */
-    FdatHandler handlers[32]; /* +0x04: DAT_8018fad4.handlers points here */
+    FdatHandler handlers[32]; /* +0x04: asset_status.handlers points here */
     s32 unk84;              /* +0x84: id + 0x20 in every module */
 } FdatHeader;
 
 /* GAME.EXE .sdata word ($gp+0x8, owner unit unknown): FDAT_002's light-flicker step. */
-extern s32 DAT_8009c21c;
+extern s32 light_flicker_step;
 
 /*
  * GAME.EXE function the modules call (game.item_count; no GAME header

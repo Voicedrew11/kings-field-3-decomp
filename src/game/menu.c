@@ -35,81 +35,81 @@ SDATA(0x8009c280, 0x3e)
 
 /* Saved list cursors of four menu lists. */
 DATA(0x8009c22c, 0x1, ".sdata")
-u8 DAT_8009c22c = 0;
+u8 menu_item_list_cursor = 0;
 DATA(0x8009c22d, 0x1, ".sdata")
-u8 DAT_8009c22d = 0;
+u8 menu_magic_list_cursor = 0;
 DATA(0x8009c22e, 0x1, ".sdata")
-u8 DAT_8009c22e = 0;
+u8 menu_store_list_cursor = 0;
 DATA(0x8009c22f, 0x1, ".sdata")
-u8 DAT_8009c22f = 0;
+u8 menu_take_out_list_cursor = 0;
 
 /* Menu state words (WIP). */
 DATA(0x8009c230, 0x4, ".sdata")
-s32 DAT_8009c230 = 0;
+s32 menu_cd_read_state = 0;
 DATA(0x8009c234, 0x4, ".sdata")
-s32 DAT_8009c234 = 0;
+s32 menu_cd_sectors_left = 0;
 DATA(0x8009c238, 0x4, ".sdata")
-s32 DAT_8009c238 = 0;
+s32 menu_item_model_registered = 0;
 DATA(0x8009c23c, 0x4, ".sdata")
-s32 DAT_8009c23c = -1;
+s32 menu_item_model_request = -1;
 DATA(0x8009c240, 0x4, ".sdata")
-s32 DAT_8009c240 = 0;
+s32 menu_item_model_read_sectors = 0;
 DATA(0x8009c244, 0x4, ".sdata")
-s32 DAT_8009c244 = 0;
+s32 menu_item_model_read_id = 0;
 DATA(0x8009c248, 0x4, ".sdata")
-s32 DAT_8009c248 = 0;
+s32 input_press_pending = 0;
 DATA(0x8009c24c, 0x4, ".sdata")
-s32 DAT_8009c24c = 0x20;
+s32 menu_confirm_button = 0x20;
 DATA(0x8009c250, 0x4, ".sdata")
-s32 DAT_8009c250 = 0x40;
+s32 menu_cancel_button = 0x40;
 DATA(0x8009c254, 0x4, ".sdata")
-s32 DAT_8009c254 = 1;
+s32 menu_confirm_button_icon = 1;
 DATA(0x8009c258, 0x4, ".sdata")
-s32 DAT_8009c258 = 3;
+s32 menu_cancel_button_icon = 3;
 DATA(0x8009c25c, 0x4, ".sdata")
-s32 DAT_8009c25c = 1;
+s32 menu_item_quantity = 1;
 DATA(0x8009c260, 0x4, ".sdata")
-s32 DAT_8009c260 = 0;
+s32 menu_cursor_animation_frame = 0;
 DATA(0x8009c264, 0x4, ".sdata")
-s32 DAT_8009c264 = 0;
+s32 menu_option_pulse_frame = 0;
 DATA(0x8009c268, 0x4, ".sdata")
-s32 DAT_8009c268 = 0;
+s32 menu_cursor_animation_state = 0;
 DATA(0x8009c26c, 0x4, ".sdata")
-s32 DAT_8009c26c = 0x57;
+s32 menu_sprite_shade = 0x57;
 DATA(0x8009c270, 0x4, ".sdata")
-s32 DAT_8009c270 = 0x30;
+s32 menu_text_red = 0x30;
 DATA(0x8009c274, 0x4, ".sdata")
-s32 DAT_8009c274 = 0x30;
+s32 menu_text_green = 0x30;
 DATA(0x8009c278, 0x4, ".sdata")
-s32 DAT_8009c278 = 0x30;
+s32 menu_text_blue = 0x30;
 DATA(0x8009c27c, 0x4, ".sdata")
-s32 DAT_8009c27c = 0x80;
+s32 menu_text_shadow_shade = 0x80;
 
 /* Menu primitives, the loaded picture and the screen copy (WIP). */
 DATA(0x8009c374, 0x4, ".sbss")
-static POLY_FT4 *DAT_8009c374;
+static POLY_FT4 *current_poly_ft4;
 DATA(0x8009c378, 0x4, ".sbss")
-static SPRT *DAT_8009c378;
+static SPRT *current_sprt;
 DATA(0x8009c37c, 0x4, ".sbss")
-static u8 *DAT_8009c37c;
+static u8 *menu_cd_read_buffer;
 DATA(0x8009c380, 0x4, ".sbss")
-static u8 *DAT_8009c380;
+static u8 *menu_cd_read_cursor;
 DATA(0x8009c384, 0x1, ".sbss")
-static u8 DAT_8009c384;
+static u8 menu_saved_bgm_volume;
 /* The screen copy the menu draws over (menu_enter_display_state stores it, the
  * present loads it back each frame) and where it lies in VRAM. */
 DATA(0x8009c388, 0x4, ".sbss")
-static u8 *DAT_8009c388;
+static u8 *menu_frame_upload_pixels;
 DATA(0x8009c38c, 0x8, ".sbss")
-static RECT DAT_8009c38c;
+static RECT menu_frame_upload_rect;
 /* The rotating item preview: its translation (vz the distance), its rotation
  * and the spin added to rotation.vy each frame (debug pad edits them). */
 DATA(0x8009c394, 0x8, ".sbss")
-static SVECTOR DAT_8009c394;
+static SVECTOR menu_item_preview_translation;
 DATA(0x8009c39c, 0x8, ".sbss")
-static SVECTOR DAT_8009c39c;
+static SVECTOR menu_item_preview_rotation;
 DATA(0x8009c3a4, 0x4, ".sbss")
-static s32 DAT_8009c3a4;
+static s32 menu_item_preview_rotation_step;
 
 ADDRESS(0x8001a634, 0x140)
 void menu_run_pause_screen(void)
@@ -118,8 +118,8 @@ void menu_run_pause_screen(void)
     s32 i;
 
     menu_enter_display_state();
-    if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqPause(DAT_801b09fc.seq_id);
+    if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqPause(sound_status.seq_id);
     }
     menu_play_sound_cue(0xc);
     input_wait_release();
@@ -129,15 +129,15 @@ void menu_run_pause_screen(void)
     do {
         for (i = 0; i < 2; i++) {
             menu_frame_begin();
-            menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &text);
+            menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &text);
             menu_draw_ascii_string(0x8c, 0x74, "pause", 1, 0);
             menu_present_frame();
         }
-    } while (!(input_read_mark_active() & DAT_80081868[13]));
+    } while (!(input_read_mark_active() & action_button_masks[13]));
     menu_play_sound_cue(0xc);
     input_wait_release();
-    if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqReplay(DAT_801b09fc.seq_id);
+    if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqReplay(sound_status.seq_id);
     }
     menu_exit_display_state(0);
 }
@@ -228,14 +228,14 @@ ADDRESS(0x8001a9dc, 0xa8)
 void menu_draw_location_number(void)
 {
     MenuText text;
-    s32 x = DAT_801b24e4.pos.vx >> 11;
-    s32 z = DAT_801b24e4.pos.vz >> 11;
+    s32 x = cur_avatar_status.pos.vx >> 11;
+    s32 z = cur_avatar_status.pos.vz >> 11;
 
     text.x = 0xf7;
     text.y = 0xd2;
-    menu_format_number(DAT_8018fad4.unk9 * 10000 + x * 100 + z,
+    menu_format_number(asset_status.unk9 * 10000 + x * 100 + z,
                        6, 1, 0, text.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
 }
 
 ADDRESS(0x8001aa84, 0x420)
@@ -255,12 +255,12 @@ s32 menu_item_selection_controller(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_masked_item_rows(DAT_800c85e8[0], entries, counts, ids, 0x5f, 0x95);
+    n = menu_collect_masked_item_rows(event_item_counters_table[0], entries, counts, ids, 0x5f, 0x95);
     menu_list_init(&list, 0, 0);
     list.count = n;
     list.entries = entries;
     list.counts = counts;
-    menu_list_set_cursor(&list, DAT_8009c22c);
+    menu_list_set_cursor(&list, menu_item_list_cursor);
     menu_cd_install_data_ready_handler();
     pad = 0;
     if (list.count != 0) {
@@ -285,7 +285,7 @@ s32 menu_item_selection_controller(void)
             menu_show_item_guide(&list, 0, item);
         }
         pad = menu_update_list_input(&list, ids, &confirmed, &result, 0);
-        DAT_8009c22c = list.cursor;
+        menu_item_list_cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
             menu_play_sound_cue(0xd);
@@ -301,10 +301,10 @@ s32 menu_item_selection_controller(void)
                 menu_request_item_model(item);
                 confirmed = 0;
             } else if (item == 0x85) {
-                if (DAT_8018fad4.unk9 != 0x19 && DAT_8018fad4.unk9 != 0x1b
-                    && (DAT_8018fad4.unk9 != 7
-                        || !(DAT_801b24e4.pos.vx / 2048 >= 62 && DAT_801b24e4.pos.vx / 2048 <= 70
-                             && DAT_801b24e4.pos.vz / 2048 < 12))) {
+                if (asset_status.unk9 != 0x19 && asset_status.unk9 != 0x1b
+                    && (asset_status.unk9 != 7
+                        || !(cur_avatar_status.pos.vx / 2048 >= 62 && cur_avatar_status.pos.vx / 2048 <= 70
+                             && cur_avatar_status.pos.vz / 2048 < 12))) {
                     menu_wait_async_read();
                     menu_release_item_model();
                     picked = menu_choose_warp_destination();
@@ -329,9 +329,9 @@ s32 menu_item_selection_controller(void)
     }
     menu_cd_restore_data_ready_handler();
     if (result >= 104 && result <= 120) {
-        if (DAT_8018fad4.unk9 == 2
-            && DAT_801b24e4.pos.vx / 2048 >= 10 && DAT_801b24e4.pos.vx / 2048 <= 13
-            && DAT_801b24e4.pos.vz / 2048 >= 38 && DAT_801b24e4.pos.vz / 2048 <= 42) {
+        if (asset_status.unk9 == 2
+            && cur_avatar_status.pos.vx / 2048 >= 10 && cur_avatar_status.pos.vx / 2048 <= 13
+            && cur_avatar_status.pos.vz / 2048 >= 38 && cur_avatar_status.pos.vz / 2048 <= 42) {
             if (!(result == 104 || result == 107 || result == 108 || result == 109)) {
                 menu_apply_item_effect(result);
             }
@@ -346,7 +346,7 @@ ADDRESS(0x8001aea4, 0xe4)
 s32 menu_collect_masked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &DAT_8007f620[first];
+    MenuEntry *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
@@ -366,7 +366,7 @@ ADDRESS(0x8001af88, 0x1c8)
 s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &DAT_8007f620[first];
+    MenuEntry *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
@@ -374,12 +374,12 @@ s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8
     for (i = first; i < last; count++, i++, src++) {
         if (*count != 0) {
             *counts = *count;
-            if (i == DAT_801b24e4.unkcb || i == DAT_801b24e4.unkf0 || i == DAT_801b24e4.unkf1
-                || i == DAT_801b24e4.unkf2 || i == DAT_801b24e4.unkf3
-                || i == DAT_801b24e4.unkf4 || i == DAT_801b24e4.unkf5
-                || i == DAT_801b24e4.unkf6 || i == DAT_801b24e4.unkc9) {
+            if (i == cur_avatar_status.unkcb || i == cur_avatar_status.unkf0 || i == cur_avatar_status.unkf1
+                || i == cur_avatar_status.unkf2 || i == cur_avatar_status.unkf3
+                || i == cur_avatar_status.unkf4 || i == cur_avatar_status.unkf5
+                || i == cur_avatar_status.unkf6 || i == cur_avatar_status.unkc9) {
                 (*counts)--;
-                if (i == DAT_801b24e4.unkf5 && i == DAT_801b24e4.unkf6) {
+                if (i == cur_avatar_status.unkf5 && i == cur_avatar_status.unkf6) {
                     (*counts)--;
                 }
             }
@@ -400,13 +400,13 @@ ADDRESS(0x8001b150, 0x104)
 s32 menu_collect_guide_locked_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8 *ids, s32 first, s32 last)
 {
     s32 n = 0;
-    MenuEntry *src = &DAT_8007f620[first];
+    MenuEntry *src = &menu_item_names[first];
     u8 *count = &bag[first];
     s32 i;
 
     last++;
     for (i = first; i < last; count++, i++, src++) {
-        if (*count != 0 && DAT_80081780[i] == 5) {
+        if (*count != 0 && item_guide_level[i] == 5) {
             *entries++ = *src;
             *counts++ = *count;
             n++;
@@ -423,49 +423,49 @@ void menu_apply_item_effect(s32 item)
         || item == 118) {
         return;
     }
-    if (DAT_800c85e8[0][item] == 0) {
+    if (event_item_counters_table[0][item] == 0) {
         return;
     }
     if (item == 104) {
-        DAT_801b24e4.hp += 50;
+        cur_avatar_status.hp += 50;
     } else if (item == 105) {
-        DAT_801b24e4.hp += 15;
-        DAT_801b24e4.unk78 = 0;
+        cur_avatar_status.hp += 15;
+        cur_avatar_status.unk78 = 0;
     } else if (item == 106) {
-        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+        cur_avatar_status.hp = cur_avatar_status.hp_max;
     } else if (item == 107) {
-        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
-        DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
+        cur_avatar_status.hp = cur_avatar_status.hp_max;
+        cur_avatar_status.unk1c = cur_avatar_status.unk1a;
         player_clear_and_cap_status_effects();
     } else if (item == 108) {
-        if (DAT_801b24e4.unk84 > 0) {
-            DAT_801b24e4.unk84 = 0;
+        if (cur_avatar_status.unk84 > 0) {
+            cur_avatar_status.unk84 = 0;
         }
-        if (DAT_801b24e4.unk82 > 64) {
-            DAT_801b24e4.unk82 = 64;
+        if (cur_avatar_status.unk82 > 64) {
+            cur_avatar_status.unk82 = 64;
         }
         player_cap_curse_strength();
         player_cap_darkness_phase();
     } else if (item == 109) {
-        DAT_801b24e4.unk1c += 40;
+        cur_avatar_status.unk1c += 40;
     } else if (item == 111) {
     } else if (item == 112) {
     } else if (item == 119) {
-        DAT_801b24e4.hp += 100;
+        cur_avatar_status.hp += 100;
     } else if (item == 120) {
-        DAT_801b24e4.hp += 200;
-        DAT_801b24e4.unk1c += 100;
+        cur_avatar_status.hp += 200;
+        cur_avatar_status.unk1c += 100;
         player_clear_and_cap_status_effects();
     }
-    if (DAT_801b24e4.hp > DAT_801b24e4.hp_max) {
-        DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+    if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
+        cur_avatar_status.hp = cur_avatar_status.hp_max;
     }
-    if (DAT_801b24e4.unk1c > DAT_801b24e4.unk1a) {
-        DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
+    if (cur_avatar_status.unk1c > cur_avatar_status.unk1a) {
+        cur_avatar_status.unk1c = cur_avatar_status.unk1a;
     }
-    DAT_800c85e8[0][item]--;
+    event_item_counters_table[0][item]--;
     if (item == 119 || item == 120) {
-        DAT_800c85e8[0][118]++;
+        event_item_counters_table[0][118]++;
     }
     menu_play_sound_cue(9);
 }
@@ -473,13 +473,13 @@ void menu_apply_item_effect(s32 item)
 ADDRESS(0x8001b4f8, 0x6c)
 void player_clear_and_cap_status_effects(void)
 {
-    if (DAT_801b24e4.unk84 > 0) {
-        DAT_801b24e4.unk84 = 0;
+    if (cur_avatar_status.unk84 > 0) {
+        cur_avatar_status.unk84 = 0;
     }
-    if (DAT_801b24e4.unk82 > 64) {
-        DAT_801b24e4.unk82 = 64;
+    if (cur_avatar_status.unk82 > 64) {
+        cur_avatar_status.unk82 = 64;
     }
-    DAT_801b24e4.unk78 = 0;
+    cur_avatar_status.unk78 = 0;
     player_cap_curse_strength();
     player_cap_darkness_phase();
 }
@@ -487,18 +487,18 @@ void player_clear_and_cap_status_effects(void)
 ADDRESS(0x8001b564, 0x30)
 void player_cap_darkness_phase(void)
 {
-    if (DAT_801b24e4.unk7e > 64) {
-        DAT_801b24e4.unk7e = 64;
-        DAT_801b24e4.unk80 = 0;
+    if (cur_avatar_status.unk7e > 64) {
+        cur_avatar_status.unk7e = 64;
+        cur_avatar_status.unk80 = 0;
     }
 }
 
 ADDRESS(0x8001b594, 0x30)
 void player_cap_curse_strength(void)
 {
-    if (DAT_801b24e4.unk7a > 64) {
-        DAT_801b24e4.unk7a = 64;
-        DAT_801b24e4.unk7c = 0;
+    if (cur_avatar_status.unk7a > 64) {
+        cur_avatar_status.unk7a = 64;
+        cur_avatar_status.unk7c = 0;
     }
 }
 
@@ -524,44 +524,44 @@ void menu_show_item_picture(u8 item)
         n = 0x2f3;
     }
     bytes = cd_archive_entry_extent(6, n, 0);
-    DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
+    menu_cd_sectors_left = (bytes + 2047) >> 11;
+    menu_cd_read_cursor = menu_cd_read_buffer = (u8 *)memory_allocate(bytes);
     cd_archive_start_async_read(6, n);
-    DAT_8009c230 = 1;
+    menu_cd_read_state = 1;
     do {
         VSync(2);
-    } while (DAT_8009c230 == 1);
+    } while (menu_cd_read_state == 1);
     i = 0;
-    tim_upload_images(DAT_8009c37c);
+    tim_upload_images(menu_cd_read_buffer);
     DrawSync(0);
-    memory_free((void *)DAT_8009c37c);
-    DAT_8009c230 = 0;
+    memory_free((void *)menu_cd_read_buffer);
+    menu_cd_read_state = 0;
     input_wait_release();
     do {
     again:
         menu_frame_begin();
         menu_draw_item_picture(item);
-        if (DAT_8018fad4.unk9 < 12 && item == 0x5f) {
+        if (asset_status.unk9 < 12 && item == 0x5f) {
             primitive_buffer_begin_poly_ft4();
-            if (DAT_8009c260 < 48) {
-                n = DAT_8009c260;
+            if (menu_cursor_animation_frame < 48) {
+                n = menu_cursor_animation_frame;
             } else {
-                n = 0x60 - DAT_8009c260;
+                n = 0x60 - menu_cursor_animation_frame;
             }
-            setRGB0(DAT_8009c374, n - 128, n - 128, n - 128);
-            DAT_8009c374->tpage = 0x1e;
-            DAT_8009c374->clut = 0x7e45;
-            n = ((DAT_801b24e4.unk124.vy & 0xfff) + 256) >> 9;
+            setRGB0(current_poly_ft4, n - 128, n - 128, n - 128);
+            current_poly_ft4->tpage = 0x1e;
+            current_poly_ft4->clut = 0x7e45;
+            n = ((cur_avatar_status.unk124.vy & 0xfff) + 256) >> 9;
             if (n == 8) {
                 n = 0;
             }
-            area = DAT_8018fad4.unk9;
-            primitive_set_poly_ft4_rect((area & 3) * 56 + DAT_801b24e4.pos.vx / 2560 + 40,
-                                        0xbc - DAT_801b24e4.pos.vz / 2560 - (area >> 2) * 56,
+            area = asset_status.unk9;
+            primitive_set_poly_ft4_rect((area & 3) * 56 + cur_avatar_status.pos.vx / 2560 + 40,
+                                        0xbc - cur_avatar_status.pos.vz / 2560 - (area >> 2) * 56,
                                         15, 15, n * 16 + 128, 0x90, 15, 15);
             primitive_buffer_commit_poly_ft4(0x1c);
         }
-        menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+        menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
         menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
         menu_present_frame();
         i++;
@@ -579,13 +579,13 @@ void menu_draw_item_picture(s32 item)
     s32 shade = 0;
 
     primitive_buffer_begin_poly_ft4();
-    if (DAT_801b24e4.unkfd > 128) {
-        shade = (DAT_801b24e4.unkfd - 128) / 4;
+    if (cur_avatar_status.unkfd > 128) {
+        shade = (cur_avatar_status.unkfd - 128) / 4;
     }
-    setRGB0(DAT_8009c374, shade + 64, shade + 64, shade + 64);
-    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
-    DAT_8009c374->tpage = GetTPage(0, 0, 0x3c0, 0x100);
-    DAT_8009c374->clut = 0x7806;
+    setRGB0(current_poly_ft4, shade + 64, shade + 64, shade + 64);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    current_poly_ft4->tpage = GetTPage(0, 0, 0x3c0, 0x100);
+    current_poly_ft4->clut = 0x7806;
     if (item == 0x5f) {
         primitive_set_poly_ft4_rect(0x2b, 0x17, 0xea, 0xb2, 0, 0, 0xea, 0xb2);
     } else if (item == 0x63) {
@@ -595,10 +595,10 @@ void menu_draw_item_picture(s32 item)
     }
     primitive_buffer_commit_poly_ft4(0x1e);
     primitive_buffer_begin_poly_ft4();
-    SetSemiTrans((void *)DAT_8009c374, 1);
-    setRGB0(DAT_8009c374, shade + 64, shade + 64, shade + 64);
-    DAT_8009c374->tpage = GetTPage(0, 1, 0x3c0, 0x100);
-    DAT_8009c374->clut = 0x7806;
+    SetSemiTrans((void *)current_poly_ft4, 1);
+    setRGB0(current_poly_ft4, shade + 64, shade + 64, shade + 64);
+    current_poly_ft4->tpage = GetTPage(0, 1, 0x3c0, 0x100);
+    current_poly_ft4->clut = 0x7806;
     if (item == 0x5f) {
         primitive_set_poly_ft4_rect(0x2b, 0x17, 0xea, 0xb2, 0, 0, 0xea, 0xb2);
     } else if (item == 0x63) {
@@ -617,20 +617,20 @@ void menu_show_area_map(void)
     s32 bytes;
     s32 size = 15;
 
-    n = DAT_8018fad4.unk9 + 721;
+    n = asset_status.unk9 + 721;
     bytes = cd_archive_entry_extent(6, n, 0);
-    DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
+    menu_cd_sectors_left = (bytes + 2047) >> 11;
+    menu_cd_read_cursor = menu_cd_read_buffer = (u8 *)memory_allocate(bytes);
     cd_archive_start_async_read(6, n);
-    DAT_8009c230 = 1;
+    menu_cd_read_state = 1;
     do {
         VSync(2);
-    } while (DAT_8009c230 == 1);
+    } while (menu_cd_read_state == 1);
     i = 0;
-    tim_upload_images(DAT_8009c37c);
+    tim_upload_images(menu_cd_read_buffer);
     DrawSync(0);
-    memory_free((void *)DAT_8009c37c);
-    DAT_8009c230 = 0;
+    memory_free((void *)menu_cd_read_buffer);
+    menu_cd_read_state = 0;
     map_reveal_visited_rects();
     input_wait_release();
     do {
@@ -638,28 +638,28 @@ void menu_show_area_map(void)
             menu_frame_begin();
             menu_draw_revealed_map_rects();
             primitive_buffer_begin_poly_ft4();
-            if (DAT_8009c260 < 48) {
-                n = DAT_8009c260;
+            if (menu_cursor_animation_frame < 48) {
+                n = menu_cursor_animation_frame;
             } else {
-                n = 0x60 - DAT_8009c260;
+                n = 0x60 - menu_cursor_animation_frame;
             }
-            setRGB0(DAT_8009c374, n - 128, n - 128, n - 128);
-            DAT_8009c374->tpage = 0x1e;
-            DAT_8009c374->clut = 0x7e45;
-            n = ((DAT_801b24e4.unk124.vy & 0xfff) + 256) >> 9;
+            setRGB0(current_poly_ft4, n - 128, n - 128, n - 128);
+            current_poly_ft4->tpage = 0x1e;
+            current_poly_ft4->clut = 0x7e45;
+            n = ((cur_avatar_status.unk124.vy & 0xfff) + 256) >> 9;
             if (n == 8) {
                 n = 0;
             }
-            if (DAT_8018fad4.unk9 == 0x19 || DAT_8018fad4.unk9 == 0x1b) {
+            if (asset_status.unk9 == 0x19 || asset_status.unk9 == 0x1b) {
                 primitive_set_poly_ft4_rect(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, size, size);
             } else {
-                primitive_set_poly_ft4_rect(DAT_801b24e4.pos.vx / 1024 + 72,
-                                            0xbc - DAT_801b24e4.pos.vz / 1024, 15, 15, n * 16 + 128, 0x90,
-                                            size, size);
+                primitive_set_poly_ft4_rect(cur_avatar_status.pos.vx / 1024 + 72,
+                                            0xbc - cur_avatar_status.pos.vz / 1024, 15, 15, n * 16 + 128,
+                                            0x90, size, size);
             }
             primitive_buffer_commit_poly_ft4(0x1d);
             menu_draw_backdrop(0x32, 0x1a, 0xdc, 0xb4);
-            menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
             menu_present_frame();
             i++;
@@ -677,12 +677,12 @@ void menu_draw_revealed_map_rects(void)
     s32 bit;
 
     for (i = 159; i != -1; i--) {
-        rect = DAT_801ba6fc + i;
-        if (DAT_801b56cc[DAT_8018fad4.unk9][i / 8] & (bit = 1 << (7 - i % 8))) {
+        rect = map_rects + i;
+        if (map_revealed_rects[asset_status.unk9][i / 8] & (bit = 1 << (7 - i % 8))) {
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, 0x7f, 0x7f, 0x7f);
-            DAT_8009c374->tpage = GetTPage(0, 0, 0x3c0, 0x100);
-            DAT_8009c374->clut = 0x7806;
+            setRGB0(current_poly_ft4, 0x7f, 0x7f, 0x7f);
+            current_poly_ft4->tpage = GetTPage(0, 0, 0x3c0, 0x100);
+            current_poly_ft4->clut = 0x7806;
             primitive_set_poly_ft4_rect(rect->x + 80, 0xc4 - rect->y - rect->h, rect->w, rect->h,
                                         rect->x, 0xa0 - rect->y - rect->h, rect->w, rect->h);
             primitive_buffer_commit_poly_ft4(0x1e);
@@ -704,16 +704,16 @@ void map_reveal_visited_rects(void)
     s32 bit;
 
     for (i = 159; i != -1; i--) {
-        rect = DAT_801ba6fc + i;
-        if (!(DAT_801b56cc[DAT_8018fad4.unk9][i / 8] & (bit = 1 << (7 - i % 8)))) {
+        rect = map_rects + i;
+        if (!(map_revealed_rects[asset_status.unk9][i / 8] & (bit = 1 << (7 - i % 8)))) {
             x0 = rect->x / 2;
             y0 = rect->y / 2;
             x1 = x0 + rect->w / 2;
             y1 = y0 + rect->h / 2;
             for (x = x0; x < x1; x++) {
                 for (y = y0; y < y1; y++) {
-                    if (DAT_801b594c[x][y / 8] & (bit = 1 << (7 - y % 8))) {
-                        DAT_801b56cc[DAT_8018fad4.unk9][i / 8] |= 1 << (7 - i % 8);
+                    if (map_visited_cells[x][y / 8] & (bit = 1 << (7 - y % 8))) {
+                        map_revealed_rects[asset_status.unk9][i / 8] |= 1 << (7 - i % 8);
                         x = x1;
                         y = y1;
                     }
@@ -734,42 +734,42 @@ s32 menu_choose_warp_destination(void)
     s32 n;
     u32 pad;
 
-    if (DAT_8018fad4.unk9 < 12 && DAT_8018fad4.unk9 != 8) {
-        selected = DAT_8018fad4.unk9;
+    if (asset_status.unk9 < 12 && asset_status.unk9 != 8) {
+        selected = asset_status.unk9;
     }
     bytes = cd_archive_entry_extent(6, 0x2f1, 0);
-    DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(bytes);
+    menu_cd_sectors_left = (bytes + 2047) >> 11;
+    menu_cd_read_cursor = menu_cd_read_buffer = (u8 *)memory_allocate(bytes);
     cd_archive_start_async_read(6, 0x2f1);
-    DAT_8009c230 = 1;
+    menu_cd_read_state = 1;
     do {
         VSync(2);
-    } while (DAT_8009c230 == 1);
-    tim_upload_images(DAT_8009c37c);
+    } while (menu_cd_read_state == 1);
+    tim_upload_images(menu_cd_read_buffer);
     DrawSync(0);
-    memory_free((void *)DAT_8009c37c);
-    DAT_8009c230 = 0;
+    memory_free((void *)menu_cd_read_buffer);
+    menu_cd_read_state = 0;
     input_wait_release();
     for (;;) {
         for (i = 0; i < 2; i++) {
             menu_frame_begin();
             menu_draw_item_picture(0x5f);
             primitive_buffer_begin_poly_ft4();
-            if (DAT_8009c260 < 48) {
-                n = DAT_8009c260;
+            if (menu_cursor_animation_frame < 48) {
+                n = menu_cursor_animation_frame;
             } else {
-                n = 0x60 - DAT_8009c260;
+                n = 0x60 - menu_cursor_animation_frame;
             }
-            setRGB0(DAT_8009c374, n - 96, n - 96, n / 2 - 96);
-            DAT_8009c374->tpage = 0x1e;
-            DAT_8009c374->clut = 0x7d85;
+            setRGB0(current_poly_ft4, n - 96, n - 96, n / 2 - 96);
+            current_poly_ft4->tpage = 0x1e;
+            current_poly_ft4->clut = 0x7d85;
             primitive_set_poly_ft4_rect(selected % 4 * 56 + 40 + xs[selected] * 4 / 5,
                                         0xbc - selected / 4 * 56 - ys[selected] * 4 / 5, 16, 16, 0xa0, 0x80,
                                         16, 16);
             primitive_buffer_commit_poly_ft4(0x1c);
-            menu_draw_button_icon(0x5f, 0xd6, DAT_8009c254);
+            menu_draw_button_icon(0x5f, 0xd6, menu_confirm_button_icon);
             menu_draw_ascii_string(0x69, 0xd6, "select", 0, 0);
-            menu_draw_button_icon(0xa0, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0xa0, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0xaa, 0xd6, "return", 0, 0);
             menu_present_frame();
         }
@@ -809,10 +809,10 @@ s32 menu_choose_warp_destination(void)
             } else {
                 selected--;
             }
-        } else if (pad == DAT_8009c24c) {
+        } else if (pad == menu_confirm_button) {
             menu_play_sound_cue(0xd);
             break;
-        } else if (pad == DAT_8009c250) {
+        } else if (pad == menu_cancel_button) {
             selected = -1;
             menu_play_sound_cue(0xe);
             break;
@@ -838,14 +838,14 @@ s32 menu_choose_magic_action(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_magic_rows(DAT_801b77ec.unk0, entries, values, ids, 0x17, 0x1e);
+    n = menu_collect_available_magic_rows(effect_status.unk0, entries, values, ids, 0x17, 0x1e);
     menu_list_init(&list, 0, 1);
     list.rows = 4;
     list.count = n;
     list.entries = entries;
     list.values = values;
     list.y = 0x83;
-    menu_list_set_cursor(&list, DAT_8009c22d);
+    menu_list_set_cursor(&list, menu_magic_list_cursor);
     menu_cd_install_data_ready_handler();
     for (;;) {
         if (confirmed != 0 || result != MENU_NONE) {
@@ -866,7 +866,7 @@ s32 menu_choose_magic_action(void)
             menu_show_item_guide(&list, 1, ids[list.cursor]);
         }
         pad = menu_update_list_input(&list, 0, &confirmed, &result, 0);
-        DAT_8009c22d = list.cursor;
+        menu_magic_list_cursor = list.cursor;
         if (confirmed == 1) {
             menu_play_sound_cue(0xd);
         }
@@ -887,7 +887,7 @@ ADDRESS(0x8001c6c0, 0xe8)
 s32 menu_collect_available_magic_rows(Record18 *spells, MenuEntry *entries, u32 *values, u8 *ids, s32 first,
                                       s32 last)
 {
-    MenuEntry *src = &DAT_80080430[first];
+    MenuEntry *src = &menu_magic_names[first];
     Record18 *spell = &spells[first];
     s32 n = 0;
     s32 i;
@@ -916,7 +916,7 @@ void menu_equipment_list_controller(void)
 
     confirmed = 0;
     result = MENU_NONE;
-    memcpy((void *)labels, (const void *)DAT_8007f230, sizeof(labels));
+    memcpy((void *)labels, (const void *)menu_label_rows, sizeof(labels));
     menu_build_equipped_label_rows(names);
     menu_list_init(&list, 0, 2);
     list.count = 10;
@@ -962,27 +962,27 @@ void menu_build_equipped_label_rows(MenuEntry *out)
     s32 i;
     u8 *slot;
 
-    slots[0] = DAT_801b24e4.unkcb;
-    slots[1] = DAT_801b24e4.unkc7;
-    slots[2] = DAT_801b24e4.unkf2;
-    slots[3] = DAT_801b24e4.unkf0;
-    slots[4] = DAT_801b24e4.unkf1;
-    slots[5] = DAT_801b24e4.unkf3;
-    slots[6] = DAT_801b24e4.unkf4;
-    slots[7] = DAT_801b24e4.unkf5;
-    slots[8] = DAT_801b24e4.unkf6;
-    if (DAT_801b24e4.unkc8 == 0xff) {
-        slots[9] = DAT_801b24e4.unkc9;
+    slots[0] = cur_avatar_status.unkcb;
+    slots[1] = cur_avatar_status.unkc7;
+    slots[2] = cur_avatar_status.unkf2;
+    slots[3] = cur_avatar_status.unkf0;
+    slots[4] = cur_avatar_status.unkf1;
+    slots[5] = cur_avatar_status.unkf3;
+    slots[6] = cur_avatar_status.unkf4;
+    slots[7] = cur_avatar_status.unkf5;
+    slots[8] = cur_avatar_status.unkf6;
+    if (cur_avatar_status.unkc8 == 0xff) {
+        slots[9] = cur_avatar_status.unkc9;
     } else {
-        slots[9] = DAT_801b24e4.unkc8;
+        slots[9] = cur_avatar_status.unkc8;
     }
     slot = slots;
     for (i = 0; i < 10; i++) {
         if (*slot != 0xff) {
-            if (i == 1 || (i == 9 && DAT_801b24e4.unkc8 != 0xff)) {
-                *out = DAT_80080430[*slot];
+            if (i == 1 || (i == 9 && cur_avatar_status.unkc8 != 0xff)) {
+                *out = menu_magic_names[*slot];
             } else {
-                *out = DAT_8007f620[*slot];
+                *out = menu_item_names[*slot];
             }
         } else {
             out->text[0] = 0xff;
@@ -1016,55 +1016,55 @@ void menu_equipment_category_controller(s32 slot)
     switch (slot) {
     case 0:
         first = 0;
-        equipped = DAT_801b24e4.unkcb;
+        equipped = cur_avatar_status.unkcb;
         last = 0x21;
         break;
     case 2:
         first = 0x33;
-        equipped = DAT_801b24e4.unkf2;
+        equipped = cur_avatar_status.unkf2;
         last = 0x3e;
         break;
     case 3:
         first = 0x22;
-        equipped = DAT_801b24e4.unkf0;
+        equipped = cur_avatar_status.unkf0;
         last = 0x29;
         break;
     case 4:
         first = 0x2a;
-        equipped = DAT_801b24e4.unkf1;
+        equipped = cur_avatar_status.unkf1;
         last = 0x32;
         break;
     case 5:
         first = 0x3f;
-        equipped = DAT_801b24e4.unkf3;
+        equipped = cur_avatar_status.unkf3;
         last = 0x47;
         break;
     case 6:
         first = 0x48;
-        equipped = DAT_801b24e4.unkf4;
+        equipped = cur_avatar_status.unkf4;
         last = 0x50;
         break;
     case 7:
     case 8:
         if (slot == 7) {
-            equipped = DAT_801b24e4.unkf5;
+            equipped = cur_avatar_status.unkf5;
         } else {
-            equipped = DAT_801b24e4.unkf6;
+            equipped = cur_avatar_status.unkf6;
         }
         if (slot == 7) {
-            other = DAT_801b24e4.unkf6;
+            other = cur_avatar_status.unkf6;
         } else {
-            other = DAT_801b24e4.unkf5;
+            other = cur_avatar_status.unkf5;
         }
         first = 0x51;
         if (other != 0xff) {
-            DAT_800c85e8[0][other]--;
+            event_item_counters_table[0][other]--;
         }
         last = 0x5e;
         break;
     }
-    n = menu_collect_masked_item_rows(DAT_800c85e8[0], entries, counts, ids, first, last);
-    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 10);
+    n = menu_collect_masked_item_rows(event_item_counters_table[0], entries, counts, ids, first, last);
+    memcpy((void *)&entries[n], (const void *)&menu_label_rows[11], 10);
     counts[n] = 0xff;
     ids[n] = 0xff;
     n++;
@@ -1146,7 +1146,7 @@ void menu_equipment_category_controller(s32 slot)
         }
     }
     if ((slot == 7 || slot == 8) && other != 0xff) {
-        DAT_800c85e8[0][other]++;
+        event_item_counters_table[0][other]++;
     }
 }
 
@@ -1165,8 +1165,8 @@ void menu_choose_primary_magic_shortcut(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_magic_rows(DAT_801b77ec.unk0, entries, values, ids, 0, 0x16);
-    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 12);
+    n = menu_collect_available_magic_rows(effect_status.unk0, entries, values, ids, 0, 0x16);
+    memcpy((void *)&entries[n], (const void *)&menu_label_rows[11], 12);
     values[n] = -1;
     ids[n] = 0xff;
     n++;
@@ -1177,7 +1177,7 @@ void menu_choose_primary_magic_shortcut(void)
     list.values = values;
     list.y = 0x83;
     for (i = 0; i < n - 1; i++) {
-        if (ids[i] == DAT_801b24e4.unkc7) {
+        if (ids[i] == cur_avatar_status.unkc7) {
             menu_list_set_cursor(&list, i);
             i = 32;
         }
@@ -1243,26 +1243,26 @@ void menu_item_magic_controller(void)
         ids[i] = 0xff;
         spells[i] = 0xff;
     }
-    saved = DAT_800c85e8[0][0x85];
-    DAT_800c85e8[0][0x85] = 0;
-    n = menu_collect_masked_item_rows(DAT_800c85e8[0], entries, counts, ids, 0x65, 0x92);
-    DAT_800c85e8[0][0x85] = saved;
-    n += menu_collect_available_magic_rows(DAT_801b77ec.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
-    memcpy((void *)&entries[n], (const void *)&DAT_8007f230[11], 12);
+    saved = event_item_counters_table[0][0x85];
+    event_item_counters_table[0][0x85] = 0;
+    n = menu_collect_masked_item_rows(event_item_counters_table[0], entries, counts, ids, 0x65, 0x92);
+    event_item_counters_table[0][0x85] = saved;
+    n += menu_collect_available_magic_rows(effect_status.unk0, &entries[n], &values[n], &spells[n], 0, 0x1e);
+    memcpy((void *)&entries[n], (const void *)&menu_label_rows[11], 12);
     n++;
     menu_list_init(&list, 0, 2);
     list.count = n;
     list.entries = entries;
     list.counts = counts;
     list.values = values;
-    if (DAT_801b24e4.unkc8 != 0xff || DAT_801b24e4.unkc9 != 0xff) {
+    if (cur_avatar_status.unkc8 != 0xff || cur_avatar_status.unkc9 != 0xff) {
         for (i = 0; i < 88; i++) {
-            if (DAT_801b24e4.unkc8 == 0xff) {
-                if (ids[i] == DAT_801b24e4.unkc9) {
+            if (cur_avatar_status.unkc8 == 0xff) {
+                if (ids[i] == cur_avatar_status.unkc9) {
                     menu_list_set_cursor(&list, i);
                     i = 88;
                 }
-            } else if (spells[i] == DAT_801b24e4.unkc8) {
+            } else if (spells[i] == cur_avatar_status.unkc8) {
                 menu_list_set_cursor(&list, i);
                 i = 88;
             }
@@ -1419,7 +1419,7 @@ void menu_conversation_records_controller(void)
         }
         input_wait_brief_release();
         pad = input_read_mark_active();
-        if (pad & DAT_8009c250) {
+        if (pad & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = -1;
         } else if (pad & PADLup) {
@@ -1563,12 +1563,12 @@ void menu_storage_store_controller(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_item_rows(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
+    n = menu_collect_available_item_rows(event_item_counters_table[0], entries, counts, ids, 0, 0x95);
     menu_list_init(&list, 2, 0);
     list.count = n;
     list.entries = entries;
     list.counts = counts;
-    menu_list_set_cursor(&list, DAT_8009c22e);
+    menu_list_set_cursor(&list, menu_store_list_cursor);
     pad = 0;
     if (list.count != 0) {
         menu_request_item_model(ids[list.cursor]);
@@ -1592,10 +1592,10 @@ void menu_storage_store_controller(void)
             menu_show_item_guide(&list, 0, item);
         }
         pad = menu_update_list_input(&list, ids, &confirmed, &result, 2);
-        DAT_8009c22e = list.cursor;
+        menu_store_list_cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[1][item] + DAT_8009c25c >= 100) {
+            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[1][item] + menu_item_quantity >= 100) {
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
             } else {
@@ -1612,8 +1612,8 @@ void menu_storage_store_controller(void)
         }
     }
     if (result != -1) {
-        DAT_800c85e8[0][result] -= DAT_8009c25c;
-        DAT_800c85e8[1][result] += DAT_8009c25c;
+        event_item_counters_table[0][result] -= menu_item_quantity;
+        event_item_counters_table[1][result] += menu_item_quantity;
     }
 }
 
@@ -1633,12 +1633,12 @@ void menu_storage_take_out_controller(void)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_masked_item_rows(DAT_800c85e8[1], entries, counts, ids, 0, 0x95);
+    n = menu_collect_masked_item_rows(event_item_counters_table[1], entries, counts, ids, 0, 0x95);
     menu_list_init(&list, 2, 1);
     list.count = n;
     list.entries = entries;
     list.counts = counts;
-    menu_list_set_cursor(&list, DAT_8009c22f);
+    menu_list_set_cursor(&list, menu_take_out_list_cursor);
     pad = 0;
     if (list.count != 0) {
         menu_request_item_model(ids[list.cursor]);
@@ -1662,10 +1662,10 @@ void menu_storage_take_out_controller(void)
             menu_show_item_guide(&list, 0, item);
         }
         pad = menu_update_list_input(&list, ids, &confirmed, &result, 2);
-        DAT_8009c22f = list.cursor;
+        menu_take_out_list_cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < DAT_8009c25c || DAT_800c85e8[0][item] + DAT_8009c25c >= 100) {
+            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[0][item] + menu_item_quantity >= 100) {
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
             } else {
@@ -1682,8 +1682,8 @@ void menu_storage_take_out_controller(void)
         }
     }
     if (result != -1) {
-        DAT_800c85e8[0][result] += DAT_8009c25c;
-        DAT_800c85e8[1][result] -= DAT_8009c25c;
+        event_item_counters_table[0][result] += menu_item_quantity;
+        event_item_counters_table[1][result] -= menu_item_quantity;
     }
 }
 
@@ -1759,13 +1759,13 @@ s32 menu_run_system_choice(void)
         text.text[9] = 8;
         text.text[10] = 0x13;
         text.text[11] = 0xff;
-        volume = DAT_801b24e4.bgm_volume;
+        volume = cur_avatar_status.bgm_volume;
         for (i = 0x59; i != -1; i--) {
             if (volume > 0) {
                 volume--;
             }
             menu_show_dialog_panel(7, &text, 1, 0x46, 0x57, 0xb2, 0x42, 0);
-            SsSeqSetVol(DAT_801b09fc.seq_id, volume, volume);
+            SsSeqSetVol(sound_status.seq_id, volume, volume);
         }
     }
     return result;
@@ -1790,8 +1790,8 @@ s32 menu_card_load_browser(void)
 
     confirmed = 0;
     result = MENU_NONE;
-    if (DAT_8009c384 != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqPause(DAT_801b09fc.seq_id);
+    if (menu_saved_bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqPause(sound_status.seq_id);
     }
     cd_request_wait_idle();
     menu_prepare_card_browser_rows(text);
@@ -1852,8 +1852,8 @@ s32 menu_card_load_browser(void)
         }
     }
     memory_card_stop();
-    if (DAT_8009c384 != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqReplay(DAT_801b09fc.seq_id);
+    if (menu_saved_bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqReplay(sound_status.seq_id);
     }
     return result;
 }
@@ -1896,17 +1896,17 @@ void menu_show_dialog_panel(s32 message, MenuText *lines, s32 count, s32 x, s32 
     for (i = 0; i < 2; i++) {
         menu_frame_begin();
         if (message < 8) {
-            menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &DAT_8007e660[message + 28]);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &DAT_8007e660[message + 28]);
+            menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &menu_window_layouts[message + 28]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &menu_window_layouts[message + 28]);
         }
         line = lines;
         for (j = 0; j < count; j++) {
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], line);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], line);
             line++;
         }
         menu_draw_nine_slice_panel(x, y, w, h);
         if (back == 1) {
-            menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
         }
         menu_present_frame();
@@ -1923,13 +1923,13 @@ void menu_volume_brightness_controller(void)
     u32 pad;
     s32 i;
 
-    levels[0] = DAT_801b24e4.se_volume;
-    if (DAT_801b24e4.bgm_volume == 0) {
+    levels[0] = cur_avatar_status.se_volume;
+    if (cur_avatar_status.bgm_volume == 0) {
         levels[1] = 0;
     } else {
-        levels[1] = DAT_801b24e4.bgm_volume + 1;
+        levels[1] = cur_avatar_status.bgm_volume + 1;
     }
-    levels[2] = DAT_801b24e4.unkfd + 192;
+    levels[2] = cur_avatar_status.unkfd + 192;
     for (;;) {
         if (result != MENU_NONE) {
             input_wait_release();
@@ -1938,7 +1938,7 @@ void menu_volume_brightness_controller(void)
         input_wait_brief_release();
         pad = input_read_mark_active();
         if (pad & PADLup) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             if (row == 0) {
                 row = last;
@@ -1946,7 +1946,7 @@ void menu_volume_brightness_controller(void)
                 row--;
             }
         } else if (pad & PADLdown) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             if (row == last) {
                 row = 0;
@@ -1964,24 +1964,24 @@ void menu_volume_brightness_controller(void)
             } else if (levels[row] != 0) {
                 levels[row] = 0;
             }
-        } else if (pad & DAT_8009c250) {
+        } else if (pad & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = -1;
         }
         if ((pad & PADselect) || (pad & PADstart)) {
-            DAT_8009c248 = 0;
+            input_press_pending = 0;
             VSync(0);
         }
         if ((pad & PADLright) || (pad & PADLleft)) {
             if (row == 0) {
-                DAT_801b24e4.se_volume = levels[0];
+                cur_avatar_status.se_volume = levels[0];
                 audio_key_on(0xc, 0x80, 0x80, 0);
-                DAT_801b24e4.se_volume = levels[0];
+                cur_avatar_status.se_volume = levels[0];
             } else if (row == 1) {
-                if (DAT_8009c384 == 0) {
-                    DAT_801b24e4.se_volume = levels[1];
+                if (menu_saved_bgm_volume == 0) {
+                    cur_avatar_status.se_volume = levels[1];
                     audio_key_on(0xc, 0x80, 0x80, 0);
-                    DAT_801b24e4.se_volume = levels[0];
+                    cur_avatar_status.se_volume = levels[0];
                 } else {
                     if (levels[1] == 0) {
                         i = 0;
@@ -1990,7 +1990,7 @@ void menu_volume_brightness_controller(void)
                     } else {
                         i = levels[1] - 1;
                     }
-                    SsSeqSetVol(DAT_801b09fc.seq_id, i, i);
+                    SsSeqSetVol(sound_status.seq_id, i, i);
                 }
             } else {
                 menu_play_sound_cue(0xc);
@@ -2003,17 +2003,17 @@ void menu_volume_brightness_controller(void)
             menu_present_frame();
         }
     }
-    DAT_801b24e4.se_volume = levels[0];
+    cur_avatar_status.se_volume = levels[0];
     if (levels[1] == 0) {
-        DAT_801b24e4.bgm_volume = levels[1];
+        cur_avatar_status.bgm_volume = levels[1];
     } else {
-        DAT_801b24e4.bgm_volume = levels[1] - 1;
+        cur_avatar_status.bgm_volume = levels[1] - 1;
     }
-    DAT_801b24e4.unkfd = levels[2] + 64;
-    if (DAT_801b24e4.unk100 == 1) {
-        DAT_8009c270 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
-        DAT_8009c274 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
-        DAT_8009c278 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
+    cur_avatar_status.unkfd = levels[2] + 64;
+    if (cur_avatar_status.unk100 == 1) {
+        menu_text_red = (cur_avatar_status.unkfd - 128) / 2 + 128;
+        menu_text_green = (cur_avatar_status.unkfd - 128) / 2 + 128;
+        menu_text_blue = (cur_avatar_status.unkfd - 128) / 2 + 128;
     }
 }
 
@@ -2027,11 +2027,11 @@ void menu_display_options_controller(void)
     u32 pad;
     s32 i;
 
-    options[0] = DAT_801b24e4.unkf9;
-    options[1] = DAT_801b24e4.unkfa;
-    options[2] = DAT_801b24e4.unkfb;
-    options[3] = DAT_801b24e4.unkfc;
-    options[4] = DAT_801b24e4.unk100;
+    options[0] = cur_avatar_status.unkf9;
+    options[1] = cur_avatar_status.unkfa;
+    options[2] = cur_avatar_status.unkfb;
+    options[3] = cur_avatar_status.unkfc;
+    options[4] = cur_avatar_status.unk100;
     for (;;) {
         if (result != MENU_NONE) {
             input_wait_release();
@@ -2040,7 +2040,7 @@ void menu_display_options_controller(void)
         input_wait_brief_release();
         pad = input_read_mark_active();
         if (pad & PADLup) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             if (row == 0) {
                 row = last;
@@ -2048,18 +2048,18 @@ void menu_display_options_controller(void)
                 row--;
             }
         } else if (pad & PADLdown) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             if (row == last) {
                 row = 0;
             } else {
                 row++;
             }
-        } else if ((pad & DAT_8009c24c) || (pad & PADLright) || (pad & PADLleft)) {
+        } else if ((pad & menu_confirm_button) || (pad & PADLright) || (pad & PADLleft)) {
             menu_play_sound_cue(0xd);
             if (row >= 2) {
                 options[row] = !options[row];
-            } else if ((pad & DAT_8009c24c) || (pad & PADLright)) {
+            } else if ((pad & menu_confirm_button) || (pad & PADLright)) {
                 if (options[row] == 0) {
                     options[row] = 2;
                 } else {
@@ -2072,7 +2072,7 @@ void menu_display_options_controller(void)
                     options[row]++;
                 }
             }
-        } else if (pad & DAT_8009c250) {
+        } else if (pad & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = -1;
         }
@@ -2083,11 +2083,11 @@ void menu_display_options_controller(void)
             menu_present_frame();
         }
     }
-    DAT_801b24e4.unkf9 = options[0];
-    DAT_801b24e4.unkfa = options[1];
-    DAT_801b24e4.unkfb = options[2];
-    DAT_801b24e4.unkfc = options[3];
-    DAT_801b24e4.unk100 = options[4];
+    cur_avatar_status.unkf9 = options[0];
+    cur_avatar_status.unkfa = options[1];
+    cur_avatar_status.unkfb = options[2];
+    cur_avatar_status.unkfc = options[3];
+    cur_avatar_status.unk100 = options[4];
     menu_apply_display_colors();
 }
 
@@ -2096,31 +2096,31 @@ void menu_apply_display_colors(void)
 {
     s32 shade;
 
-    if (DAT_801b24e4.unk100 == 0) {
-        if (DAT_801b24e4.unkfd > 128) {
-            shade = 0x30 - (DAT_801b24e4.unkfd - 128) / 2;
+    if (cur_avatar_status.unk100 == 0) {
+        if (cur_avatar_status.unkfd > 128) {
+            shade = 0x30 - (cur_avatar_status.unkfd - 128) / 2;
         } else {
             shade = 0x30;
         }
-        DAT_8009c26c = 0x57;
-        DAT_8009c270 = shade;
-        DAT_8009c274 = shade;
-        DAT_8009c278 = shade;
-        DAT_8009c27c = 0x80;
+        menu_sprite_shade = 0x57;
+        menu_text_red = shade;
+        menu_text_green = shade;
+        menu_text_blue = shade;
+        menu_text_shadow_shade = 0x80;
     } else {
-        DAT_8009c26c = 0x78;
-        DAT_8009c27c = 0x30;
-        DAT_8009c270 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
-        DAT_8009c274 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
-        DAT_8009c278 = (DAT_801b24e4.unkfd - 128) / 2 + 128;
+        menu_sprite_shade = 0x78;
+        menu_text_shadow_shade = 0x30;
+        menu_text_red = (cur_avatar_status.unkfd - 128) / 2 + 128;
+        menu_text_green = (cur_avatar_status.unkfd - 128) / 2 + 128;
+        menu_text_blue = (cur_avatar_status.unkfd - 128) / 2 + 128;
     }
 }
 
 ADDRESS(0x8001f31c, 0x1a4)
 void menu_button_config_controller(void)
 {
-    u8 style = DAT_801b24e4.unkfe;
-    u8 layout = DAT_801b24e4.unkff;
+    u8 style = cur_avatar_status.unkfe;
+    u8 layout = cur_avatar_status.unkff;
     s32 row = 0;
     s32 result = MENU_NONE;
     u32 pad;
@@ -2133,7 +2133,7 @@ void menu_button_config_controller(void)
         }
         input_wait_brief_release();
         pad = input_read_mark_active();
-        if (pad & DAT_8009c250) {
+        if (pad & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = -1;
         } else if ((pad & PADLup) || (pad & PADLdown)) {
@@ -2168,122 +2168,122 @@ void menu_button_config_controller(void)
             menu_present_frame();
         }
     }
-    DAT_801b24e4.unkfe = style;
-    DAT_801b24e4.unkff = layout;
+    cur_avatar_status.unkfe = style;
+    cur_avatar_status.unkff = layout;
     menu_apply_button_config();
 }
 
 ADDRESS(0x8001f4c0, 0x3f4)
 void menu_apply_button_config(void)
 {
-    switch (DAT_801b24e4.unkfe) {
+    switch (cur_avatar_status.unkfe) {
     case 0:
-        DAT_80081868[4] = PADRup;
-        DAT_80081868[6] = PADRleft;
-        DAT_80081868[7] = PADRright;
-        DAT_80081868[5] = PADRdown;
+        action_button_masks[4] = PADRup;
+        action_button_masks[6] = PADRleft;
+        action_button_masks[7] = PADRright;
+        action_button_masks[5] = PADRdown;
         break;
     case 1:
-        DAT_80081868[4] = PADRleft;
-        DAT_80081868[6] = PADRup;
-        DAT_80081868[7] = PADRright;
-        DAT_80081868[5] = PADRdown;
+        action_button_masks[4] = PADRleft;
+        action_button_masks[6] = PADRup;
+        action_button_masks[7] = PADRright;
+        action_button_masks[5] = PADRdown;
         break;
     case 2:
-        DAT_80081868[4] = PADRup;
-        DAT_80081868[6] = PADRleft;
-        DAT_80081868[7] = PADRdown;
-        DAT_80081868[5] = PADRright;
+        action_button_masks[4] = PADRup;
+        action_button_masks[6] = PADRleft;
+        action_button_masks[7] = PADRdown;
+        action_button_masks[5] = PADRright;
         break;
     case 3:
-        DAT_80081868[4] = PADRleft;
-        DAT_80081868[6] = PADRup;
-        DAT_80081868[7] = PADRdown;
-        DAT_80081868[5] = PADRright;
+        action_button_masks[4] = PADRleft;
+        action_button_masks[6] = PADRup;
+        action_button_masks[7] = PADRdown;
+        action_button_masks[5] = PADRright;
         break;
     }
-    switch (DAT_801b24e4.unkff) {
+    switch (cur_avatar_status.unkff) {
     case 0:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADLleft;
-        DAT_80081868[3] = PADLright;
-        DAT_80081868[8] = PADL1;
-        DAT_80081868[9] = PADL2;
-        DAT_80081868[10] = PADR1;
-        DAT_80081868[11] = PADR2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADLleft;
+        action_button_masks[3] = PADLright;
+        action_button_masks[8] = PADL1;
+        action_button_masks[9] = PADL2;
+        action_button_masks[10] = PADR1;
+        action_button_masks[11] = PADR2;
         break;
     case 1:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADLleft;
-        DAT_80081868[3] = PADLright;
-        DAT_80081868[8] = PADR1;
-        DAT_80081868[9] = PADL1;
-        DAT_80081868[10] = PADR2;
-        DAT_80081868[11] = PADL2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADLleft;
+        action_button_masks[3] = PADLright;
+        action_button_masks[8] = PADR1;
+        action_button_masks[9] = PADL1;
+        action_button_masks[10] = PADR2;
+        action_button_masks[11] = PADL2;
         break;
     case 2:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADLleft;
-        DAT_80081868[3] = PADLright;
-        DAT_80081868[8] = PADL1;
-        DAT_80081868[9] = PADR1;
-        DAT_80081868[10] = PADL2;
-        DAT_80081868[11] = PADR2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADLleft;
+        action_button_masks[3] = PADLright;
+        action_button_masks[8] = PADL1;
+        action_button_masks[9] = PADR1;
+        action_button_masks[10] = PADL2;
+        action_button_masks[11] = PADR2;
         break;
     case 3:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADL1;
-        DAT_80081868[3] = PADR1;
-        DAT_80081868[8] = PADLleft;
-        DAT_80081868[9] = PADL2;
-        DAT_80081868[10] = PADLright;
-        DAT_80081868[11] = PADR2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADL1;
+        action_button_masks[3] = PADR1;
+        action_button_masks[8] = PADLleft;
+        action_button_masks[9] = PADL2;
+        action_button_masks[10] = PADLright;
+        action_button_masks[11] = PADR2;
         break;
     case 4:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADR1;
-        DAT_80081868[3] = PADR2;
-        DAT_80081868[8] = PADLleft;
-        DAT_80081868[9] = PADL1;
-        DAT_80081868[10] = PADLright;
-        DAT_80081868[11] = PADL2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADR1;
+        action_button_masks[3] = PADR2;
+        action_button_masks[8] = PADLleft;
+        action_button_masks[9] = PADL1;
+        action_button_masks[10] = PADLright;
+        action_button_masks[11] = PADL2;
         break;
     case 5:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADL1;
-        DAT_80081868[3] = PADL2;
-        DAT_80081868[8] = PADLleft;
-        DAT_80081868[9] = PADR1;
-        DAT_80081868[10] = PADLright;
-        DAT_80081868[11] = PADR2;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADL1;
+        action_button_masks[3] = PADL2;
+        action_button_masks[8] = PADLleft;
+        action_button_masks[9] = PADR1;
+        action_button_masks[10] = PADLright;
+        action_button_masks[11] = PADR2;
         break;
     case 6:
-        DAT_80081868[0] = PADLup;
-        DAT_80081868[1] = PADLdown;
-        DAT_80081868[2] = PADLleft;
-        DAT_80081868[3] = PADLright;
-        DAT_80081868[8] = PADL2;
-        DAT_80081868[9] = PADR1;
-        DAT_80081868[10] = PADR2;
-        DAT_80081868[11] = PADL1;
+        action_button_masks[0] = PADLup;
+        action_button_masks[1] = PADLdown;
+        action_button_masks[2] = PADLleft;
+        action_button_masks[3] = PADLright;
+        action_button_masks[8] = PADL2;
+        action_button_masks[9] = PADR1;
+        action_button_masks[10] = PADR2;
+        action_button_masks[11] = PADL1;
         break;
     }
-    if (DAT_801b24e4.unkfe < 2) {
-        DAT_8009c24c = PADRright;
-        DAT_8009c250 = PADRdown;
-        DAT_8009c254 = 1;
-        DAT_8009c258 = 3;
+    if (cur_avatar_status.unkfe < 2) {
+        menu_confirm_button = PADRright;
+        menu_cancel_button = PADRdown;
+        menu_confirm_button_icon = 1;
+        menu_cancel_button_icon = 3;
     } else {
-        DAT_8009c24c = PADRdown;
-        DAT_8009c250 = PADRright;
-        DAT_8009c254 = 3;
-        DAT_8009c258 = 1;
+        menu_confirm_button = PADRdown;
+        menu_cancel_button = PADRright;
+        menu_confirm_button_icon = 3;
+        menu_cancel_button_icon = 1;
     }
 }
 
@@ -2316,11 +2316,11 @@ s32 menu_prompt_quit_game(void)
         input_wait_brief_release();
         pad = input_read_mark_active();
         if ((pad & PADLright) || (pad & PADLleft) || (pad & PADLup) || (pad & PADLdown)) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             choice = choice == 0;
-        } else if (pad & DAT_8009c24c) {
-            DAT_8009c268 = 0;
+        } else if (pad & menu_confirm_button) {
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xd);
             if (choice == 0) {
                 *mailbox = 1;
@@ -2328,8 +2328,8 @@ s32 menu_prompt_quit_game(void)
             } else {
                 result = -1;
             }
-        } else if (pad & DAT_8009c250) {
-            DAT_8009c268 = 0;
+        } else if (pad & menu_cancel_button) {
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xe);
             result = -1;
         }
@@ -2469,11 +2469,11 @@ void menu_build_card_probe_error_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[25], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[25], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[26], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[26], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8001ff94, 0xf8)
@@ -2481,11 +2481,11 @@ void menu_build_card_full_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[28], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[28], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[29], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[29], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8002008c, 0x33c)
@@ -2508,8 +2508,8 @@ void menu_card_save_browser(void)
     confirmed = 0;
     result = MENU_NONE;
     menu_enter_display_state();
-    if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqPause(DAT_801b09fc.seq_id);
+    if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqPause(sound_status.seq_id);
     }
     cd_request_wait_idle();
     menu_prepare_card_browser_rows(text);
@@ -2574,8 +2574,8 @@ void menu_card_save_browser(void)
     }
     memory_card_stop();
     menu_exit_display_state(0);
-    if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqReplay(DAT_801b09fc.seq_id);
+    if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqReplay(sound_status.seq_id);
     }
 }
 
@@ -2649,18 +2649,18 @@ s32 menu_confirm_card_format(void)
     labels[1].text[1] = 0x0e;
     labels[1].text[2] = 0xff;
     lines[0].x = 0x4c;
-    labels[0].x = DAT_8007e660[10].x;
-    labels[0].y = DAT_8007e660[10].y;
-    labels[1].x = DAT_8007e660[11].x;
-    labels[1].y = DAT_8007e660[11].y;
+    labels[0].x = menu_window_layouts[10].x;
+    labels[0].y = menu_window_layouts[10].y;
+    labels[1].x = menu_window_layouts[11].x;
+    labels[1].y = menu_window_layouts[11].y;
     lines[0].y = 0x7a;
-    memcpy((void *)lines[0].text, (const void *)&DAT_8007f230[36], sizeof(MenuEntry));
+    memcpy((void *)lines[0].text, (const void *)&menu_label_rows[36], sizeof(MenuEntry));
     lines[1].x = 0x4c;
     lines[1].y = 0x89;
-    memcpy((void *)lines[1].text, (const void *)&DAT_8007f230[30], sizeof(MenuEntry));
+    memcpy((void *)lines[1].text, (const void *)&menu_label_rows[30], sizeof(MenuEntry));
     lines[2].x = 0x4c;
     lines[2].y = 0x98;
-    memcpy((void *)lines[2].text, (const void *)&DAT_8007f230[31], sizeof(MenuEntry));
+    memcpy((void *)lines[2].text, (const void *)&menu_label_rows[31], sizeof(MenuEntry));
     for (;;) {
         if (chosen != -1 || result != MENU_NONE) {
             input_wait_release();
@@ -2680,15 +2680,15 @@ s32 menu_confirm_card_format(void)
         for (i = 0; i < 2; i++) {
             menu_frame_begin();
             menu_draw_two_option(&labels[0], &labels[1], selected);
-            menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &DAT_8007e660[33]);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &DAT_8007e660[33]);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &lines[0]);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &lines[1]);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &lines[2]);
+            menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &menu_window_layouts[33]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &menu_window_layouts[33]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &lines[0]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &lines[1]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &lines[2]);
             menu_draw_nine_slice_panel(0x32, 0x68, 0xdc, 0x51);
-            menu_draw_button_icon(0x5f, 0xd6, DAT_8009c254);
+            menu_draw_button_icon(0x5f, 0xd6, menu_confirm_button_icon);
             menu_draw_ascii_string(0x69, 0xd6, "select", 0, 0);
-            menu_draw_button_icon(0xa0, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0xa0, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0xaa, 0xd6, "return", 0, 0);
             menu_present_frame();
         }
@@ -2701,7 +2701,7 @@ void menu_prepare_card_browser_rows(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&DAT_8007f230[24], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[24], sizeof(MenuEntry));
 }
 
 ADDRESS(0x8002098c, 0xf8)
@@ -2709,11 +2709,11 @@ void menu_prepare_card_not_inserted_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[36], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[36], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[38], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[38], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020a84, 0xf8)
@@ -2721,11 +2721,11 @@ void menu_prepare_card_io_error_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[33], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[33], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020b7c, 0xf8)
@@ -2733,11 +2733,11 @@ void menu_prepare_card_format_declined_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[32], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[32], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[39], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[39], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020c74, 0xf8)
@@ -2745,11 +2745,11 @@ void menu_prepare_card_write_full_rows(MenuText *lines)
 {
     lines->x = 0x4c;
     lines->y = 0x69;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[40], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[40], sizeof(MenuEntry));
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[41], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[41], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020d6c, 0x80)
@@ -2757,7 +2757,7 @@ void menu_prepare_card_write_rows(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&DAT_8007f230[10], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[10], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020dec, 0x80)
@@ -2765,7 +2765,7 @@ void menu_prepare_card_read_row(MenuText *line)
 {
     line->x = 0x4c;
     line->y = 0x70;
-    memcpy((void *)line->text, (const void *)&DAT_8007f230[37], sizeof(MenuEntry));
+    memcpy((void *)line->text, (const void *)&menu_label_rows[37], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020e6c, 0x17c)
@@ -2774,14 +2774,14 @@ void menu_prepare_card_read_failure_rows(MenuText *lines, s32 error)
     lines->x = 0x4c;
     lines->y = 0x69;
     if (error == 1) {
-        memcpy((void *)lines->text, (const void *)&DAT_8007f230[34], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&menu_label_rows[34], sizeof(MenuEntry));
     } else {
-        memcpy((void *)lines->text, (const void *)&DAT_8007f230[35], sizeof(MenuEntry));
+        memcpy((void *)lines->text, (const void *)&menu_label_rows[35], sizeof(MenuEntry));
     }
     lines++;
     lines->x = 0x4c;
     lines->y = 0x78;
-    memcpy((void *)lines->text, (const void *)&DAT_8007f230[27], sizeof(MenuEntry));
+    memcpy((void *)lines->text, (const void *)&menu_label_rows[27], sizeof(MenuEntry));
 }
 
 ADDRESS(0x80020fe8, 0x12c)
@@ -2794,15 +2794,15 @@ void menu_draw_card_dialog_rows(MenuText *lines, s32 count, s32 x, s32 y, s32 w,
     for (i = 0; i < 2; i++) {
         menu_frame_begin();
         line = lines;
-        menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &DAT_8007e660[33]);
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &DAT_8007e660[33]);
+        menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &menu_window_layouts[33]);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &menu_window_layouts[33]);
         for (j = 0; j < count; j++) {
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], line);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], line);
             line++;
         }
         menu_draw_nine_slice_panel(x, y, w, h);
         if (back == 1) {
-            menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
         }
         menu_present_frame();
@@ -2870,7 +2870,7 @@ void menu_item_buy_controller(s32 shop)
     s32 mode;
     u8 cursors[5] = {0, 0xb, 7, 2, 0};
     s32 kind;
-    u8 *bag = DAT_800c85e8[0];
+    u8 *bag = event_item_counters_table[0];
     s32 n;
     s32 i;
     u8 item;
@@ -2880,7 +2880,7 @@ void menu_item_buy_controller(s32 shop)
         kind = 0xd;
     }
     mode = shop != 0;
-    n = menu_collect_masked_item_rows(DAT_80080718[shop], entries, counts, ids, 0, 0x95);
+    n = menu_collect_masked_item_rows(menu_shop_stock_pages[shop], entries, counts, ids, 0, 0x95);
     menu_fill_item_counts_and_prices(bag, counts, prices, ids, 0, n, shop);
     menu_list_init(&list, 6, 0);
     list.count = n;
@@ -2911,11 +2911,11 @@ void menu_item_buy_controller(s32 shop)
         item = ids[list.cursor];
         if (confirmed == 1) {
             if (shop == 0) {
-                if ((u32)DAT_801b24e4.unk50 < list.values[list.cursor] || bag[item] + 1 >= 100) {
+                if ((u32)cur_avatar_status.unk50 < list.values[list.cursor] || bag[item] + 1 >= 100) {
                     goto refuse;
                 }
-            } else if ((u32)DAT_801b24e4.unk50 < list.values[list.cursor] * DAT_8009c25c
-                       || bag[item] + DAT_8009c25c >= 100) {
+            } else if ((u32)cur_avatar_status.unk50 < list.values[list.cursor] * menu_item_quantity
+                       || bag[item] + menu_item_quantity >= 100) {
             refuse:
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
@@ -2935,12 +2935,12 @@ void menu_item_buy_controller(s32 shop)
     }
     if (result != -1) {
         if (shop == 0) {
-            DAT_8009c25c = 1;
+            menu_item_quantity = 1;
         }
-        DAT_801b24e4.unk50 -= list.values[list.cursor] * DAT_8009c25c;
-        bag[result] += DAT_8009c25c;
+        cur_avatar_status.unk50 -= list.values[list.cursor] * menu_item_quantity;
+        bag[result] += menu_item_quantity;
         if (shop == 0 && result != 0x6b) {
-            DAT_80080718[0][result] -= 1;
+            menu_shop_stock_pages[0][result] -= 1;
         }
     }
 }
@@ -2950,7 +2950,7 @@ void menu_fill_item_counts_and_prices(u8 *bag, u8 *counts, u32 *prices, u8 *ids,
 {
     for (; first < end; first++) {
         *counts++ = bag[*ids];
-        *prices++ = DAT_80080a9c[shop][*ids];
+        *prices++ = menu_shop_buy_prices[shop][*ids];
         ids++;
     }
 }
@@ -2973,7 +2973,7 @@ void menu_item_sell_controller(s32 shop)
 
     result = MENU_NONE;
     confirmed = 0;
-    n = menu_collect_available_item_rows(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
+    n = menu_collect_available_item_rows(event_item_counters_table[0], entries, counts, ids, 0, 0x95);
     menu_fill_item_prices(prices, ids, 0, n, shop);
     menu_list_init(&list, 6, 1);
     list.count = n;
@@ -3007,7 +3007,7 @@ void menu_item_sell_controller(s32 shop)
         cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < DAT_8009c25c) {
+            if (counts[list.cursor] < menu_item_quantity) {
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
             } else {
@@ -3024,11 +3024,11 @@ void menu_item_sell_controller(s32 shop)
         }
     }
     if (result != -1) {
-        DAT_801b24e4.unk50 += list.values[list.cursor] * DAT_8009c25c;
-        DAT_800c85e8[0][result] -= DAT_8009c25c;
-        DAT_80080718[0][result] += DAT_8009c25c;
-        if (DAT_80080718[0][result] >= 100) {
-            DAT_80080718[0][result] = 99;
+        cur_avatar_status.unk50 += list.values[list.cursor] * menu_item_quantity;
+        event_item_counters_table[0][result] -= menu_item_quantity;
+        menu_shop_stock_pages[0][result] += menu_item_quantity;
+        if (menu_shop_stock_pages[0][result] >= 100) {
+            menu_shop_stock_pages[0][result] = 99;
         }
     }
 }
@@ -3037,7 +3037,7 @@ ADDRESS(0x80021a4c, 0x60)
 void menu_fill_item_prices(u32 *prices, u8 *ids, s32 first, s32 end, s32 shop)
 {
     for (; first < end; first++) {
-        *prices++ = DAT_800811a4[shop][*ids];
+        *prices++ = menu_shop_sell_prices[shop][*ids];
         ids++;
     }
 }
@@ -3058,7 +3058,7 @@ s32 menu_intellectual_choose_item(void)
     confirmed = 0;
     result = MENU_NONE;
     menu_enter_display_state();
-    n = menu_collect_guide_locked_item_rows(DAT_800c85e8[0], entries, counts, ids, 0, 0x95);
+    n = menu_collect_guide_locked_item_rows(event_item_counters_table[0], entries, counts, ids, 0, 0x95);
     menu_list_init(&list, 8, 0);
     list.count = n;
     list.entries = entries;
@@ -3104,7 +3104,7 @@ s32 menu_intellectual_choose_item(void)
     }
     menu_cd_restore_data_ready_handler();
     if (result != -1) {
-        DAT_80081780[result] = 4;
+        item_guide_level[result] = 4;
     }
     switch (result) {
     case 2:
@@ -3186,11 +3186,11 @@ s32 menu_blacksmith_make_item(void)
     confirmed = 0;
     result = MENU_NONE;
     menu_enter_display_state();
-    saved = DAT_801b24e4.unkfb;
-    DAT_801b24e4.unkfb = 0;
-    n = menu_collect_masked_item_rows(DAT_80080718[5], entries, counts, ids, 0, 0x95);
+    saved = cur_avatar_status.unkfb;
+    cur_avatar_status.unkfb = 0;
+    n = menu_collect_masked_item_rows(menu_shop_stock_pages[5], entries, counts, ids, 0, 0x95);
     for (i = 0; i < 5; i++) {
-        counts[i] = DAT_800c85e8[0][ids[i]] + DAT_800c85e8[1][ids[i]];
+        counts[i] = event_item_counters_table[0][ids[i]] + event_item_counters_table[1][ids[i]];
     }
     menu_list_init(&list, 8, 1);
     list.count = n;
@@ -3228,13 +3228,13 @@ s32 menu_blacksmith_make_item(void)
         }
     }
     if (result != -1) {
-        if (DAT_800c85e8[0][0x7c] != 0) {
-            DAT_800c85e8[0][0x7c]--;
-        } else if (DAT_800c85e8[1][0x7c] != 0) {
-            DAT_800c85e8[1][0x7c]--;
+        if (event_item_counters_table[0][0x7c] != 0) {
+            event_item_counters_table[0][0x7c]--;
+        } else if (event_item_counters_table[1][0x7c] != 0) {
+            event_item_counters_table[1][0x7c]--;
         }
     }
-    DAT_801b24e4.unkfb = saved;
+    cur_avatar_status.unkfb = saved;
     menu_exit_display_state(0);
     return result;
 }
@@ -3271,8 +3271,8 @@ s32 menu_prompt_stay(s32 mode)
         }
         if (chosen == 0) {
             if (mode == 0) {
-                if ((u32)DAT_801b24e4.unk50 >= 150) {
-                    DAT_801b24e4.unk50 -= 150;
+                if ((u32)cur_avatar_status.unk50 >= 150) {
+                    cur_avatar_status.unk50 -= 150;
                     paid = 0;
                     break;
                 }
@@ -3311,7 +3311,7 @@ s32 menu_poll_choice_input(s32 selected, s32 last, s32 *chosen, s32 *confirmed, 
     input_wait_brief_release();
     pad = input_read_mark_active();
     if (pad & PADLup) {
-        DAT_8009c268 = 0;
+        menu_cursor_animation_state = 0;
         menu_play_sound_cue(0xc);
         if (selected == 0) {
             selected = last;
@@ -3319,18 +3319,18 @@ s32 menu_poll_choice_input(s32 selected, s32 last, s32 *chosen, s32 *confirmed, 
             selected--;
         }
     } else if (pad & PADLdown) {
-        DAT_8009c268 = 0;
+        menu_cursor_animation_state = 0;
         menu_play_sound_cue(0xc);
         if (selected == last) {
             selected = 0;
         } else {
             selected++;
         }
-    } else if (pad & DAT_8009c24c) {
+    } else if (pad & menu_confirm_button) {
         menu_play_sound_cue(0xd);
         *confirmed = 1;
         *chosen = selected;
-    } else if (pad & DAT_8009c250) {
+    } else if (pad & menu_cancel_button) {
         menu_play_sound_cue(0xe);
         *result = -1;
     }
@@ -3400,76 +3400,76 @@ u32 menu_update_list_input(MenuList *list, u8 *ids, s32 *confirmed, s32 *result,
         }
     } else if (pad & PADLright) {
         if (mode == 1) {
-            if ((u32)DAT_801b24e4.unk50 < (DAT_8009c25c + 1) * price
-                || (next = count + 1) + DAT_8009c25c >= 100) {
+            if ((u32)cur_avatar_status.unk50 < (menu_item_quantity + 1) * price
+                || (next = count + 1) + menu_item_quantity >= 100) {
                 goto refuse;
             }
         } else if (mode == 2) {
-            if (count < DAT_8009c25c + 1) {
+            if (count < menu_item_quantity + 1) {
                 goto refuse;
             }
         } else {
             goto debug;
         }
         menu_play_sound_cue(0xc);
-        DAT_8009c25c++;
+        menu_item_quantity++;
         goto debug;
     refuse:
         menu_play_sound_cue(0xe);
     } else if (pad & PADLleft) {
-        if (mode != 0 && DAT_8009c25c >= 2) {
+        if (mode != 0 && menu_item_quantity >= 2) {
             menu_play_sound_cue(0xc);
-            DAT_8009c25c--;
+            menu_item_quantity--;
         }
-    } else if (pad & DAT_8009c24c) {
+    } else if (pad & menu_confirm_button) {
         *confirmed = 1;
-    } else if (pad & DAT_8009c250) {
+    } else if (pad & menu_cancel_button) {
         menu_play_sound_cue(0xe);
         *result = -1;
     }
 debug:
     if (pad & PADselect) {
         if (pad & PADR1) {
-            DAT_8009c39c.vx += 32;
+            menu_item_preview_rotation.vx += 32;
         }
         if (pad & PADR2) {
-            DAT_8009c39c.vx -= 32;
+            menu_item_preview_rotation.vx -= 32;
         }
         if (pad & PADL1) {
-            DAT_8009c39c.vz += 32;
+            menu_item_preview_rotation.vz += 32;
         }
         if (pad & PADL2) {
-            DAT_8009c39c.vz -= 32;
+            menu_item_preview_rotation.vz -= 32;
         }
         if (pad & PADRup) {
-            DAT_8009c3a4++;
+            menu_item_preview_rotation_step++;
         }
         if (pad & PADRleft) {
-            DAT_8009c3a4--;
+            menu_item_preview_rotation_step--;
         }
     }
     if (pad & PADstart) {
         if (pad & PADR1) {
-            DAT_8009c394.vx += 32;
+            menu_item_preview_translation.vx += 32;
         }
         if (pad & PADR2) {
-            DAT_8009c394.vx -= 32;
+            menu_item_preview_translation.vx -= 32;
         }
         if (pad & PADL1) {
-            DAT_8009c394.vy += 32;
+            menu_item_preview_translation.vy += 32;
         }
         if (pad & PADL2) {
-            DAT_8009c394.vy -= 32;
+            menu_item_preview_translation.vy -= 32;
         }
         if (pad & PADRup) {
-            DAT_8009c394.vz += 32;
+            menu_item_preview_translation.vz += 32;
         }
-        if ((pad & PADRleft) && DAT_8009c394.vz > 640) {
-            DAT_8009c394.vz -= 32;
+        if ((pad & PADRleft) && menu_item_preview_translation.vz > 640) {
+            menu_item_preview_translation.vz -= 32;
         }
     }
     if ((pad & PADselect) || (pad & PADstart)) {
-        DAT_8009c248 = 0;
+        input_press_pending = 0;
         VSync(2);
     }
     return pad;
@@ -3484,48 +3484,48 @@ void menu_draw_player_status(void)
 
     label.x = 0xa3;
     label.y = 0x24;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[12], 20);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[12], 20);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.experience, 7, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.experience, 7, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.y += 17;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[13], 20);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[13], 20);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y += 17;
-    menu_format_number(DAT_801b24e4.level, 7, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.level, 7, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 7;
     label.text[1] = 0xf;
     label.text[2] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 63;
     number.y += 17;
-    menu_format_number(DAT_801b24e4.hp, 4, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.hp, 4, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.text[0] = 0x14;
     number.text[1] = 0xff;
     number.x += 28;
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.x += 7;
-    menu_format_number(DAT_801b24e4.hp_max, 4, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.hp_max, 4, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 0xc;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 63;
     number.y += 17;
-    menu_format_number(DAT_801b24e4.unk1c, 4, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk1c, 4, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.text[0] = 0x14;
     number.text[1] = 0xff;
     number.x += 28;
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.x += 7;
-    menu_format_number(DAT_801b24e4.unk1a, 4, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk1a, 4, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 0xf;
     label.text[1] = 0x16;
     label.text[2] = 0x11;
@@ -3535,113 +3535,113 @@ void menu_draw_player_status(void)
     label.text[6] = 0x12;
     label.text[7] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 70;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk40, 5, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk40, 5, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.x = label.x + 98;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk4c + 1, 4, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk4c + 1, 4, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 0x3b;
     label.text[1] = 0xff;
     label.x += 105;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     label.x = 0xa3;
     label.text[0] = 0xc;
     label.text[1] = 0;
     label.text[2] = 6;
     label.text[3] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     label.x += 35;
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
-    DAT_8009c374->tpage = 0x1d;
-    DAT_8009c374->clut = 0x7d04;
+    setRGB0(current_poly_ft4, 0x80, 0x80, 0x80);
+    current_poly_ft4->tpage = 0x1d;
+    current_poly_ft4->clut = 0x7d04;
     primitive_set_poly_ft4_rect(label.x, label.y - 1, 14, 14, 0, 0xc0, 14, 14);
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk42[4], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk42[4], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x += 49;
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
-    DAT_8009c374->tpage = 0x1d;
-    DAT_8009c374->clut = 0x7d44;
+    setRGB0(current_poly_ft4, 0x80, 0x80, 0x80);
+    current_poly_ft4->tpage = 0x1d;
+    current_poly_ft4->clut = 0x7d44;
     primitive_set_poly_ft4_rect(label.x, label.y - 1, 14, 14, 0x10, 0xc0, 14, 14);
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk42[0], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk42[0], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 15;
     label.x += 35;
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
-    DAT_8009c374->tpage = 0x1d;
-    DAT_8009c374->clut = 0x7d84;
+    setRGB0(current_poly_ft4, 0x80, 0x80, 0x80);
+    current_poly_ft4->tpage = 0x1d;
+    current_poly_ft4->clut = 0x7d84;
     primitive_set_poly_ft4_rect(label.x, label.y - 1, 14, 14, 0x20, 0xc0, 14, 14);
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk42[1], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk42[1], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x += 49;
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
-    DAT_8009c374->tpage = 0x1d;
-    DAT_8009c374->clut = 0x7dc4;
+    setRGB0(current_poly_ft4, 0x80, 0x80, 0x80);
+    current_poly_ft4->tpage = 0x1d;
+    current_poly_ft4->clut = 0x7dc4;
     primitive_set_poly_ft4_rect(label.x, label.y - 1, 14, 14, 0x30, 0xc0, 14, 14);
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk42[3], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk42[3], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 15;
     label.x += 35;
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x80, 0x80, 0x80);
-    DAT_8009c374->tpage = 0x1d;
-    DAT_8009c374->clut = 0x7e04;
+    setRGB0(current_poly_ft4, 0x80, 0x80, 0x80);
+    current_poly_ft4->tpage = 0x1d;
+    current_poly_ft4->clut = 0x7e04;
     primitive_set_poly_ft4_rect(label.x, label.y - 1, 14, 14, 0x40, 0xc0, 14, 14);
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk42[2], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk42[2], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 17;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[16], 12);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[16], 12);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     dy = 17;
     number.x = label.x + 56;
     number.y += 17;
-    if (DAT_801b24e4.unk84 != 0) {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[17], 12);
-    } else if (DAT_801b24e4.unk7a != 0) {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[18], 12);
-    } else if (DAT_801b24e4.unk82 != 0) {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[19], 12);
-    } else if (DAT_801b24e4.unk78 != 0) {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[20], 12);
-    } else if (DAT_801b24e4.unk7e != 0) {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[21], 12);
+    if (cur_avatar_status.unk84 != 0) {
+        memcpy((void *)number.text, (const void *)&menu_label_rows[17], 12);
+    } else if (cur_avatar_status.unk7a != 0) {
+        memcpy((void *)number.text, (const void *)&menu_label_rows[18], 12);
+    } else if (cur_avatar_status.unk82 != 0) {
+        memcpy((void *)number.text, (const void *)&menu_label_rows[19], 12);
+    } else if (cur_avatar_status.unk78 != 0) {
+        memcpy((void *)number.text, (const void *)&menu_label_rows[20], 12);
+    } else if (cur_avatar_status.unk7e != 0) {
+        memcpy((void *)number.text, (const void *)&menu_label_rows[21], 12);
     } else {
-        memcpy((void *)number.text, (const void *)&DAT_8007f230[22], 12);
+        memcpy((void *)number.text, (const void *)&menu_label_rows[22], 12);
     }
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &number);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &number);
     label.y += dy;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[23], 10);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[23], 10);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y += dy;
-    menu_format_number(DAT_801b24e4.unk50, 7, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk50, 7, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     menu_draw_nine_slice_panel(0x9b, 0x1a, 0x8d, 0xb4);
 }
 
@@ -3653,8 +3653,8 @@ void menu_draw_combat_attributes(void)
 
     label.x = 0x1e;
     label.y = 0x22;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[14], 10);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[14], 10);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     label.text[0] = 0x7f;
     label.text[1] = 0x7f;
     label.text[2] = 0x12;
@@ -3664,31 +3664,31 @@ void menu_draw_combat_attributes(void)
     label.text[6] = 0x7;
     label.text[7] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[0], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[0], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x1;
     label.text[3] = 0xb;
     label.text[4] = 0xe;
     label.text[5] = 0x16;
     label.text[6] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[1], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[1], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x12;
     label.text[3] = 0x13;
     label.text[4] = 0;
     label.text[5] = 0x1;
     label.text[6] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[2], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[2], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x7;
     label.text[3] = 0xe;
     label.text[4] = 0xb;
@@ -3701,10 +3701,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[3], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[3], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x5;
     label.text[3] = 0x8;
     label.text[4] = 0x11;
@@ -3717,10 +3717,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[4], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[4], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x4;
     label.text[3] = 0;
     label.text[4] = 0x11;
@@ -3734,10 +3734,10 @@ void menu_draw_combat_attributes(void)
     label.text[12] = 0x2;
     label.text[13] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[5], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[5], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0x8;
     label.text[4] = 0xd;
@@ -3750,10 +3750,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk54[6], 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk54[6], 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0;
     label.text[4] = 0x13;
@@ -3767,14 +3767,14 @@ void menu_draw_combat_attributes(void)
     label.text[12] = 0x2;
     label.text[13] = 0xff;
     label.y += 16;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk62, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk62, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa4;
     label.y = 0x22;
-    memcpy((void *)label.text, (const void *)&DAT_8007f230[15], 12);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    memcpy((void *)label.text, (const void *)&menu_label_rows[15], 12);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     label.text[0] = 0x7f;
     label.text[1] = 0x7f;
     label.text[2] = 0x12;
@@ -3784,31 +3784,31 @@ void menu_draw_combat_attributes(void)
     label.text[6] = 0x7;
     label.text[7] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk66, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk66, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x1;
     label.text[3] = 0xb;
     label.text[4] = 0xe;
     label.text[5] = 0x16;
     label.text[6] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk68, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk68, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x12;
     label.text[3] = 0x13;
     label.text[4] = 0;
     label.text[5] = 0x1;
     label.text[6] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk6a, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk6a, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0xf;
     label.text[3] = 0xe;
     label.text[4] = 0x8;
@@ -3817,10 +3817,10 @@ void menu_draw_combat_attributes(void)
     label.text[7] = 0xd;
     label.text[8] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk76, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk76, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x3;
     label.text[3] = 0;
     label.text[4] = 0x11;
@@ -3833,10 +3833,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk6c, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk6c, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x5;
     label.text[3] = 0x8;
     label.text[4] = 0x11;
@@ -3849,10 +3849,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk6e, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk6e, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x4;
     label.text[3] = 0;
     label.text[4] = 0x11;
@@ -3866,10 +3866,10 @@ void menu_draw_combat_attributes(void)
     label.text[12] = 0x2;
     label.text[13] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk70, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk70, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0x8;
     label.text[4] = 0xd;
@@ -3882,10 +3882,10 @@ void menu_draw_combat_attributes(void)
     label.text[11] = 0x2;
     label.text[12] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk72, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk72, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0;
     label.text[4] = 0x13;
@@ -3899,12 +3899,12 @@ void menu_draw_combat_attributes(void)
     label.text[12] = 0x2;
     label.text[13] = 0xff;
     label.y += 17;
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk74, 6, 0, 0, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk74, 6, 0, 0, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     menu_draw_nine_slice_panel(0x14, 0x1a, 0x114, 0xb4);
-    menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+    menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
     menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
 }
 
@@ -3924,26 +3924,26 @@ void menu_draw_conversation_page(s32 page)
     menu_draw_ascii_string(0x8c, 0xbf, "talk", 1, 0);
     menu_draw_button_icon(0xb2, 0xbe, 9);
     menu_draw_ascii_string(0xc1, 0xbf, "character", 1, 0);
-    menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+    menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
     menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
     if (page != -1) {
         primitive_buffer_begin_poly_ft4();
-        DAT_8009c374->tpage = 0x1f;
-        DAT_8009c374->clut = 0x7806;
+        current_poly_ft4->tpage = 0x1f;
+        current_poly_ft4->clut = 0x7806;
         primitive_set_poly_ft4_rect(0x2c, 0x24, 0xf8, 0xc8, 0, 0, 0xf8, 0xc8);
         primitive_buffer_commit_poly_ft4(0x1e);
-        if (DAT_801b24e4.unk100 == 1) {
+        if (cur_avatar_status.unk100 == 1) {
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, 0x10, 0x10, 0x10);
-            DAT_8009c374->tpage = 0x1f;
-            DAT_8009c374->clut = 0x7806;
+            setRGB0(current_poly_ft4, 0x10, 0x10, 0x10);
+            current_poly_ft4->tpage = 0x1f;
+            current_poly_ft4->clut = 0x7806;
             primitive_set_poly_ft4_rect(0x2d, 0x25, 0xf8, 0xc8, 0, 0, 0xf8, 0xc8);
             primitive_buffer_commit_poly_ft4(0x1f);
         }
         primitive_buffer_begin_poly_ft4();
-        setRGB0(DAT_8009c374, 0x60, 0x60, 0x60);
-        DAT_8009c374->tpage = GetTPage(1, 1, 0x3c0, 0x100);
-        DAT_8009c374->clut = 0x7f80;
+        setRGB0(current_poly_ft4, 0x60, 0x60, 0x60);
+        current_poly_ft4->tpage = GetTPage(1, 1, 0x3c0, 0x100);
+        current_poly_ft4->clut = 0x7f80;
         primitive_set_poly_ft4_rect(0x28, 0x98, 0x40, 0x2f, 0, 0xd0, 0x40, 0x2f);
         primitive_buffer_commit_poly_ft4(0x1e);
         menu_draw_ascii_string(0x6b, 0x9a, names[page], 1, 0);
@@ -4058,30 +4058,32 @@ void menu_draw_button_config(u8 style, u8 layout, s32 row)
     menu_draw_ascii_string(0x3a, 0x40, types[style], 1, 0);
     menu_draw_ascii_string(0x32, 0x70, "move", 1, 0);
     menu_draw_ascii_string(0x3a, 0x7e, types[layout], 1, 0);
-    if (DAT_8009c260 < 48) {
-        bright = DAT_8009c260 + DAT_8009c26c;
-        blue = DAT_8009c260 / 2 + DAT_8009c26c;
+    if (menu_cursor_animation_frame < 48) {
+        bright = menu_cursor_animation_frame + menu_sprite_shade;
+        blue = menu_cursor_animation_frame / 2 + menu_sprite_shade;
     } else {
-        bright = 95 - DAT_8009c260 + DAT_8009c26c;
-        blue = 47 - DAT_8009c260 / 2 + DAT_8009c26c;
+        bright = 95 - menu_cursor_animation_frame + menu_sprite_shade;
+        blue = 47 - menu_cursor_animation_frame / 2 + menu_sprite_shade;
     }
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, bright, bright, blue);
-    DAT_8009c374->tpage = DAT_8007e564[11].unk0;
-    DAT_8009c374->clut = DAT_8007e564[11].unk2;
+    setRGB0(current_poly_ft4, bright, bright, blue);
+    current_poly_ft4->tpage = menu_sprite_defs[11].unk0;
+    current_poly_ft4->clut = menu_sprite_defs[11].unk2;
     if (row == 0) {
-        primitive_set_poly_ft4_rect(0x37, 0x3c, 0x35, 0xf, DAT_8007e564[11].unk4, DAT_8007e564[11].unk6,
-                                    DAT_8007e564[11].unk8, DAT_8007e564[11].unka);
+        primitive_set_poly_ft4_rect(0x37, 0x3c, 0x35, 0xf, menu_sprite_defs[11].unk4,
+                                    menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
+                                    menu_sprite_defs[11].unka);
     } else {
-        primitive_set_poly_ft4_rect(0x37, 0x7a, 0x35, 0xf, DAT_8007e564[11].unk4, DAT_8007e564[11].unk6,
-                                    DAT_8007e564[11].unk8, DAT_8007e564[11].unka);
+        primitive_set_poly_ft4_rect(0x37, 0x7a, 0x35, 0xf, menu_sprite_defs[11].unk4,
+                                    menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
+                                    menu_sprite_defs[11].unka);
     }
-    SetSemiTrans((void *)DAT_8009c374, 1);
+    SetSemiTrans((void *)current_poly_ft4, 1);
     primitive_buffer_commit_poly_ft4(0x31);
     menu_draw_nine_slice_panel(0x1f, 0x20, 0x102, 0xb0);
     menu_draw_button_icon(0x5b, 0xd6, 9);
     menu_draw_ascii_string(0x69, 0xd6, "select", 0, 0);
-    menu_draw_button_icon(0xa0, 0xd6, DAT_8009c258);
+    menu_draw_button_icon(0xa0, 0xd6, menu_cancel_button_icon);
     menu_draw_ascii_string(0xaa, 0xd6, "return", 0, 0);
 }
 
@@ -4105,35 +4107,35 @@ void menu_draw_options_rows(u8 *options)
     t[2].text[1] = 0xff;
     for (i = 0; i < 2; i++) {
         if (*options == 2) {
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[8], &t[0], DAT_8009c264);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[8], &t[0], menu_option_pulse_frame);
             t[0].x += 4;
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &t[0]);
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[1]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &t[0]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[1]);
             t[1].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[1]);
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[2]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[1]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[2]);
             t[2].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[2]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[2]);
         } else if (*options == 1) {
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[0]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[0]);
             t[0].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[0]);
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[8], &t[1], DAT_8009c264);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[0]);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[8], &t[1], menu_option_pulse_frame);
             t[1].x += 4;
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &t[1]);
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[2]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &t[1]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[2]);
             t[2].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[2]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[2]);
         } else {
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[0]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[0]);
             t[0].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[0]);
-            menu_blit_panel_sprite(&DAT_8007e564[8], &t[1]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[0]);
+            menu_blit_panel_sprite(&menu_sprite_defs[8], &t[1]);
             t[1].x += 4;
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[1]);
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[8], &t[2], DAT_8009c264);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[1]);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[8], &t[2], menu_option_pulse_frame);
             t[2].x += 4;
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &t[2]);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &t[2]);
         }
         options++;
         t[0].x = 0xab;
@@ -4172,15 +4174,15 @@ void menu_draw_options_rows(u8 *options)
             t[1].text[5] = 0xff;
         }
         if (*options == 1) {
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[4], &t[0], DAT_8009c264);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &t[0]);
-            menu_blit_panel_sprite(&DAT_8007e564[4], &t[1]);
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[1]);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[4], &t[0], menu_option_pulse_frame);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &t[0]);
+            menu_blit_panel_sprite(&menu_sprite_defs[4], &t[1]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[1]);
         } else {
-            menu_blit_panel_sprite(&DAT_8007e564[4], &t[0]);
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], &t[0]);
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[4], &t[1], DAT_8009c264);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &t[1]);
+            menu_blit_panel_sprite(&menu_sprite_defs[4], &t[0]);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], &t[0]);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[4], &t[1], menu_option_pulse_frame);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &t[1]);
         }
         options++;
         t[0].y += 26;
@@ -4195,30 +4197,30 @@ void menu_draw_volume_brightness_sliders(u8 *levels)
     s32 i;
     s32 k;
 
-    primitive_buffer_add_draw_mode(0x32, DAT_8007e564[10].unk0);
+    primitive_buffer_add_draw_mode(0x32, menu_sprite_defs[10].unk0);
     for (i = 0; i < 3; i++) {
         primitive_buffer_begin_sprt();
-        setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
+        setRGB0(current_sprt, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
         k = 10;
-        DAT_8009c378->clut = DAT_8007e564[k].unk2;
-        DAT_8009c378->x0 = 0xa5;
-        DAT_8009c378->y0 = i * 26 + 0x34;
-        DAT_8009c378->w = DAT_8007e564[k].unk8;
-        DAT_8009c378->h = DAT_8007e564[k].unka;
-        DAT_8009c378->u0 = DAT_8007e564[k].unk4;
-        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
-        SetSemiTrans((void *)DAT_8009c378, DAT_801b24e4.unk100);
+        current_sprt->clut = menu_sprite_defs[k].unk2;
+        current_sprt->x0 = 0xa5;
+        current_sprt->y0 = i * 26 + 0x34;
+        current_sprt->w = menu_sprite_defs[k].unk8;
+        current_sprt->h = menu_sprite_defs[k].unka;
+        current_sprt->u0 = menu_sprite_defs[k].unk4;
+        current_sprt->v0 = menu_sprite_defs[k].unk6;
+        SetSemiTrans((void *)current_sprt, cur_avatar_status.unk100);
         primitive_buffer_commit_sprt(0x32);
         primitive_buffer_begin_sprt();
-        setRGB0(DAT_8009c378, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
+        setRGB0(current_sprt, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
         k = 9;
-        DAT_8009c378->clut = DAT_8007e564[k].unk2;
-        DAT_8009c378->x0 = *levels * 96 / 128 + 172;
-        DAT_8009c378->y0 = i * 26 + 0x3c;
-        DAT_8009c378->w = DAT_8007e564[k].unk8;
-        DAT_8009c378->h = DAT_8007e564[k].unka;
-        DAT_8009c378->u0 = DAT_8007e564[k].unk4 + DAT_801b24e4.unk100 * 16;
-        DAT_8009c378->v0 = DAT_8007e564[k].unk6;
+        current_sprt->clut = menu_sprite_defs[k].unk2;
+        current_sprt->x0 = *levels * 96 / 128 + 172;
+        current_sprt->y0 = i * 26 + 0x3c;
+        current_sprt->w = menu_sprite_defs[k].unk8;
+        current_sprt->h = menu_sprite_defs[k].unka;
+        current_sprt->u0 = menu_sprite_defs[k].unk4 + cur_avatar_status.unk100 * 16;
+        current_sprt->v0 = menu_sprite_defs[k].unk6;
         primitive_buffer_commit_sprt(0x31);
         levels++;
     }
@@ -4233,10 +4235,10 @@ s32 menu_preview_choice(MenuList *list, s32 kind, s32 flags, u8 item)
     s32 pad;
     s32 i;
 
-    labels[0].x = DAT_8007e660[10].x;
-    labels[0].y = DAT_8007e660[10].y;
-    labels[1].x = DAT_8007e660[11].x;
-    labels[1].y = DAT_8007e660[11].y;
+    labels[0].x = menu_window_layouts[10].x;
+    labels[0].y = menu_window_layouts[10].y;
+    labels[1].x = menu_window_layouts[11].x;
+    labels[1].y = menu_window_layouts[11].y;
     choice = 0;
     result = MENU_NONE;
     flags |= 0x8000;
@@ -4298,17 +4300,17 @@ s32 menu_preview_choice(MenuList *list, s32 kind, s32 flags, u8 item)
         input_wait_brief_release();
         pad = input_read_mark_active();
         if ((pad & 0x1000) || (pad & 0x4000)) {
-            DAT_8009c268 = 0;
+            menu_cursor_animation_state = 0;
             menu_play_sound_cue(0xc);
             if (choice == 0) {
                 choice = 1;
             } else {
                 choice = 0;
             }
-        } else if (pad & DAT_8009c24c) {
+        } else if (pad & menu_confirm_button) {
             menu_play_sound_cue(0xd);
             result = -choice;
-        } else if (pad & DAT_8009c250) {
+        } else if (pad & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = MENU_CANCEL;
         }
@@ -4346,7 +4348,7 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
     ClearImage(&rect, 0, 0, 0);
     if (mode == 0) {
         entry = item + 390;
-        if (DAT_80081780[item] > DAT_801b24e4.unk4c) {
+        if (item_guide_level[item] > cur_avatar_status.unk4c) {
             entry = item + 540;
         }
     } else if (mode == 1) {
@@ -4355,22 +4357,22 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
         entry = item + 390;
     } else {
         entry = item + 390;
-        DAT_80081780[item] = 4;
+        item_guide_level[item] = 4;
     }
-    saved = DAT_8009c230;
+    saved = menu_cd_read_state;
     size = cd_archive_entry_extent(6, entry, 0);
-    DAT_8009c234 = (size + 2047) >> 11;
+    menu_cd_sectors_left = (size + 2047) >> 11;
     buffer = (u8 *)memory_allocate(size);
-    DAT_8009c380 = buffer;
+    menu_cd_read_cursor = buffer;
     cd_archive_start_async_read(6, entry);
-    DAT_8009c230 = 1;
+    menu_cd_read_state = 1;
     do {
         VSync(2);
-    } while (DAT_8009c230 == 1);
+    } while (menu_cd_read_state == 1);
     tim_upload_images(buffer);
     DrawSync(0);
     memory_free((void *)buffer);
-    DAT_8009c230 = saved;
+    menu_cd_read_state = saved;
     input_wait_release();
     for (;;) {
         if (result != MENU_NONE) {
@@ -4378,32 +4380,32 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
             break;
         }
         input_wait_brief_release();
-        if (input_read_mark_active() & DAT_8009c250) {
+        if (input_read_mark_active() & menu_cancel_button) {
             menu_play_sound_cue(0xe);
             result = MENU_CANCEL;
         }
         for (i = 0; i < 2; i++) {
             menu_frame_begin();
             if (list->unk0 != 0) {
-                menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], (MenuText *)list);
-                menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], (MenuText *)list);
+                menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuText *)list);
+                menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuText *)list);
             }
             if (mode != 1) {
                 menu_update_item_preview(item);
             }
             menu_draw_nine_slice_panel(0x1b, 0x70, 0x10a, 0x5f);
             primitive_buffer_begin_poly_ft4();
-            DAT_8009c374->tpage = 0x1f;
-            DAT_8009c374->clut = 0x7806;
+            current_poly_ft4->tpage = 0x1f;
+            current_poly_ft4->clut = 0x7806;
             primitive_set_poly_ft4_rect(0x20, 0x76, 0xfe, 0x50, 0, 0, 0xfe, 0x50);
             primitive_buffer_commit_poly_ft4(0x1d);
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, DAT_8009c27c, DAT_8009c27c, DAT_8009c27c);
-            DAT_8009c374->tpage = 0x1f;
-            DAT_8009c374->clut = 0x7806;
+            setRGB0(current_poly_ft4, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
+            current_poly_ft4->tpage = 0x1f;
+            current_poly_ft4->clut = 0x7806;
             primitive_set_poly_ft4_rect(0x21, 0x77, 0xfe, 0x50, 0, 0, 0xfe, 0x50);
             primitive_buffer_commit_poly_ft4(0x1e);
-            menu_draw_button_icon(0x80, 0xd6, DAT_8009c258);
+            menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
             menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
             menu_present_frame();
         }
@@ -4417,29 +4419,30 @@ void menu_draw_window(s32 page, s32 count, s32 selected, s32 flags)
     MenuText *line;
     s32 i;
 
-    title = &DAT_8007e660[page * 9];
+    title = &menu_window_layouts[page * 9];
     line = title + 1;
     if (title->x != 0) {
-        menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], title);
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], title);
+        menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], title);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], title);
     }
     for (i = 0; i < count; i++) {
         if (i == selected) {
-            menu_blit_panel_sprite_pulsing(&DAT_8007e564[MENU_FONT_FRAME], line, DAT_8009c260);
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], line);
+            menu_blit_panel_sprite_pulsing(&menu_sprite_defs[MENU_FONT_FRAME], line,
+                                           menu_cursor_animation_frame);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], line);
         } else {
-            menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], line);
-            menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], line);
+            menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], line);
+            menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], line);
         }
         line++;
     }
     if (flags == 0) {
-        menu_draw_button_icon(0x5f, 0xd6, DAT_8009c254);
+        menu_draw_button_icon(0x5f, 0xd6, menu_confirm_button_icon);
     } else if (flags == 1) {
         menu_draw_button_icon(0x5b, 0xd6, 9);
     }
     menu_draw_ascii_string(0x69, 0xd6, "select", 0, 0);
-    menu_draw_button_icon(0xa0, 0xd6, DAT_8009c258);
+    menu_draw_button_icon(0xa0, 0xd6, menu_cancel_button_icon);
     menu_draw_ascii_string(0xaa, 0xd6, "return", 0, 0);
 }
 
@@ -4465,8 +4468,8 @@ void menu_render_list(MenuList *list, s32 flags)
     counts = list->counts;
     flags &= 0xfff;
     if (list->unk0 != 0) {
-        menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], (MenuText *)list);
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], (MenuText *)list);
+        menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], (MenuText *)list);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], (MenuText *)list);
     }
     names += list->first * list->unk23;
     second += list->first * 24;
@@ -4482,77 +4485,78 @@ void menu_render_list(MenuList *list, s32 flags)
         for (j = 0; j < list->unk23; j++) {
             text.text[j] = *names++;
         }
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &text);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         if (flags == 3) {
             text.x += 84;
             for (j = 0; j < 24; j++) {
                 text.text[j] = *second++;
             }
             text.text[j] = 0xff;
-            menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &text);
+            menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         }
         if (flags >= 10 && flags < 16 && flags != 12) {
             text.x += 161;
             menu_format_number(*values++, 6, 0, 2, text.text);
-            menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+            menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
         }
         if (flags == 2 || flags == 4) {
             if (*values++ != -1) {
                 text.x += 206;
                 menu_format_number(values[-1], 3, 0, 3, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
         if (stock) {
             if (*values++ != -1) {
                 text.x += 115;
                 menu_format_number(values[-1], 7, 0, 4, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
             if (*counts++ != 0xff) {
                 text.x += 91;
                 menu_format_number(counts[-1], 3, 0, 5, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
         if (!(flags == 2 || flags == 3 || flags == 4 || stock || flags == 16)) {
             if (*counts++ != 0xff) {
                 text.x = list->x + 233;
                 menu_format_number(counts[-1], 2, 0, 1, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
         if (flags == 16) {
             if (*counts++ != 0xff) {
                 text.x += 220;
                 menu_format_number(counts[-1], 2, 0, 1, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
             if (*values++ != -1) {
                 text.x += 206;
                 menu_format_number(values[-1], 3, 0, 3, text.text);
-                menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &text);
+                menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
     }
     menu_draw_nine_slice_panel(list->x, list->y, 0x10a, list->rows * 16 + 12);
     for (i = 0; i < list->rows; i++) {
         if (i == list->row) {
-            if (DAT_8009c260 < 48) {
-                bright = DAT_8009c260 + DAT_8009c26c;
-                blue = DAT_8009c260 / 2 + DAT_8009c26c;
+            if (menu_cursor_animation_frame < 48) {
+                bright = menu_cursor_animation_frame + menu_sprite_shade;
+                blue = menu_cursor_animation_frame / 2 + menu_sprite_shade;
             } else {
-                bright = DAT_8009c26c + 95 - DAT_8009c260;
-                blue = DAT_8009c26c + 47 - DAT_8009c260 / 2;
+                bright = menu_sprite_shade + 95 - menu_cursor_animation_frame;
+                blue = menu_sprite_shade + 47 - menu_cursor_animation_frame / 2;
             }
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, bright, bright, blue);
-            DAT_8009c374->tpage = DAT_8007e564[11].unk0;
-            DAT_8009c374->clut = DAT_8007e564[11].unk2;
-            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, DAT_8007e564[11].unk8,
-                                        DAT_8007e564[11].unka, DAT_8007e564[11].unk4, DAT_8007e564[11].unk6,
-                                        DAT_8007e564[11].unk8, DAT_8007e564[11].unka);
-            SetSemiTrans((void *)DAT_8009c374, 1);
+            setRGB0(current_poly_ft4, bright, bright, blue);
+            current_poly_ft4->tpage = menu_sprite_defs[11].unk0;
+            current_poly_ft4->clut = menu_sprite_defs[11].unk2;
+            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, menu_sprite_defs[11].unk8,
+                                        menu_sprite_defs[11].unka, menu_sprite_defs[11].unk4,
+                                        menu_sprite_defs[11].unk6, menu_sprite_defs[11].unk8,
+                                        menu_sprite_defs[11].unka);
+            SetSemiTrans((void *)current_poly_ft4, 1);
             primitive_buffer_commit_poly_ft4(0x31);
         }
     }
@@ -4566,16 +4570,16 @@ void menu_render_list(MenuList *list, s32 flags)
         menu_draw_gold();
     }
     if (flags == 3 || flags == 8 || flags == 9 || flags == 12 || hide != 0) {
-        menu_draw_button_icon(0x5f, 0xd6, DAT_8009c254);
+        menu_draw_button_icon(0x5f, 0xd6, menu_confirm_button_icon);
         menu_draw_ascii_string(0x69, 0xd6, "select", 0, 0);
-        menu_draw_button_icon(0xa0, 0xd6, DAT_8009c258);
+        menu_draw_button_icon(0xa0, 0xd6, menu_cancel_button_icon);
         menu_draw_ascii_string(0xaa, 0xd6, "return", 0, 0);
     } else {
-        menu_draw_button_icon(0x42, 0xd6, DAT_8009c254);
+        menu_draw_button_icon(0x42, 0xd6, menu_confirm_button_icon);
         menu_draw_ascii_string(0x4c, 0xd6, "select", 0, 0);
         menu_draw_button_icon(0x83, 0xd6, 0);
         menu_draw_ascii_string(0x8d, 0xd6, "guide", 0, 0);
-        menu_draw_button_icon(0xbc, 0xd6, DAT_8009c258);
+        menu_draw_button_icon(0xbc, 0xd6, menu_cancel_button_icon);
         menu_draw_ascii_string(0xc6, 0xd6, "return", 0, 0);
     }
 }
@@ -4584,15 +4588,15 @@ ADDRESS(0x80025b24, 0xc4)
 void menu_draw_two_option(MenuText *yes, MenuText *no, s32 choice)
 {
     if (choice == 0) {
-        menu_blit_panel_sprite_pulsing(&DAT_8007e564[4], yes, DAT_8009c260);
-        menu_blit_panel_sprite(&DAT_8007e564[4], no);
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], yes);
-        menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], no);
+        menu_blit_panel_sprite_pulsing(&menu_sprite_defs[4], yes, menu_cursor_animation_frame);
+        menu_blit_panel_sprite(&menu_sprite_defs[4], no);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], yes);
+        menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], no);
     } else {
-        menu_blit_panel_sprite(&DAT_8007e564[4], yes);
-        menu_blit_panel_sprite_pulsing(&DAT_8007e564[4], no, DAT_8009c260);
-        menu_draw_string_dimmed(&DAT_8007e564[MENU_FONT_TEXT], yes);
-        menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], no);
+        menu_blit_panel_sprite(&menu_sprite_defs[4], yes);
+        menu_blit_panel_sprite_pulsing(&menu_sprite_defs[4], no, menu_cursor_animation_frame);
+        menu_draw_string_dimmed(&menu_sprite_defs[MENU_FONT_TEXT], yes);
+        menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], no);
     }
 }
 
@@ -4605,31 +4609,31 @@ void menu_update_item_preview(u8 item)
     MATRIX lights;
     MATRIX color;
 
-    if (DAT_801b24e4.unkfb != 0 && item != 0xff && DAT_8009c230 != 1) {
-        if (DAT_8009c23c != -1 && DAT_8009c23c != 0xff) {
+    if (cur_avatar_status.unkfb != 0 && item != 0xff && menu_cd_read_state != 1) {
+        if (menu_item_model_request != -1 && menu_item_model_request != 0xff) {
             menu_start_item_model_read();
             return;
         }
-        if (DAT_8009c240 != 0) {
+        if (menu_item_model_read_sectors != 0) {
             CdControl(CdlPause, 0, 0);
-            if (cd_sectors_corrupt(DAT_8009c37c, DAT_8009c240) == 0) {
-                DAT_8009c244 = -1;
+            if (cd_sectors_corrupt(menu_cd_read_buffer, menu_item_model_read_sectors) == 0) {
+                menu_item_model_read_id = -1;
             }
-            DAT_8009c240 = 0;
+            menu_item_model_read_sectors = 0;
         }
-        if (DAT_8009c244 == -1) {
-            if (DAT_8009c238 == 0) {
-                tmd_register(3, DAT_8009c37c);
-                DAT_8009c238 = 1;
+        if (menu_item_model_read_id == -1) {
+            if (menu_item_model_registered == 0) {
+                tmd_register(3, menu_cd_read_buffer);
+                menu_item_model_registered = 1;
             }
-            m.t[0] = DAT_8009c394.vx;
-            m.t[1] = DAT_8009c394.vy;
-            m.t[2] = DAT_8009c394.vz;
-            DAT_8009c39c.vy += DAT_8009c3a4;
-            DAT_8009c39c.vx &= 0xfff;
-            DAT_8009c39c.vy &= 0xfff;
-            DAT_8009c39c.vz &= 0xfff;
-            RotMatrix(&DAT_8009c39c, &m);
+            m.t[0] = menu_item_preview_translation.vx;
+            m.t[1] = menu_item_preview_translation.vy;
+            m.t[2] = menu_item_preview_translation.vz;
+            menu_item_preview_rotation.vy += menu_item_preview_rotation_step;
+            menu_item_preview_rotation.vx &= 0xfff;
+            menu_item_preview_rotation.vy &= 0xfff;
+            menu_item_preview_rotation.vz &= 0xfff;
+            RotMatrix(&menu_item_preview_rotation, &m);
             light.m[0][0] = 0x800;
             light.m[0][1] = 0x800;
             light.m[0][2] = -0x800;
@@ -4677,12 +4681,12 @@ void menu_draw_quantity(s32 big)
     label.text[1] = 0x13;
     label.text[2] = 0x18;
     label.text[3] = 0xff;
-    menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &label);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 84;
     number.y = label.y;
-    menu_format_number(DAT_8009c25c, 2, 0, 1, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(menu_item_quantity, 2, 0, 1, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
 }
 
 ADDRESS(0x80025e80, 0xb8)
@@ -4698,24 +4702,24 @@ void menu_draw_gold(void)
     label.text[2] = 0xb;
     label.text[3] = 3;
     label.text[4] = 0xff;
-    menu_blit_panel_sprite(&DAT_8007e564[MENU_FONT_FRAME], &label);
-    menu_draw_string(&DAT_8007e564[MENU_FONT_TEXT], &label);
+    menu_blit_panel_sprite(&menu_sprite_defs[MENU_FONT_FRAME], &label);
+    menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 49;
     number.y = label.y;
-    menu_format_number(DAT_801b24e4.unk50, 7, 0, 2, number.text);
-    menu_draw_number(&DAT_8007e564[MENU_FONT_NUMBER], &number);
+    menu_format_number(cur_avatar_status.unk50, 7, 0, 2, number.text);
+    menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
 }
 
 ADDRESS(0x80025f38, 0xe8)
 void menu_blit_panel_sprite(MenuFont *frame, MenuText *text)
 {
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-    DAT_8009c374->tpage = frame->unk0;
-    DAT_8009c374->clut = frame->unk2;
+    setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
+    current_poly_ft4->tpage = frame->unk0;
+    current_poly_ft4->clut = frame->unk2;
     primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
                                 frame->unk8, frame->unka);
-    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
@@ -4726,19 +4730,19 @@ void menu_blit_panel_sprite_pulsing(MenuFont *frame, MenuText *text, s32 shade)
     s32 blue;
 
     if (shade < 48) {
-        bright = shade + DAT_8009c26c;
-        blue = shade / 2 + DAT_8009c26c;
+        bright = shade + menu_sprite_shade;
+        blue = shade / 2 + menu_sprite_shade;
     } else {
-        bright = 95 - shade + DAT_8009c26c;
-        blue = 47 - shade / 2 + DAT_8009c26c;
+        bright = 95 - shade + menu_sprite_shade;
+        blue = 47 - shade / 2 + menu_sprite_shade;
     }
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, bright, bright, blue);
-    DAT_8009c374->tpage = frame->unk0;
-    DAT_8009c374->clut = frame->unk2;
+    setRGB0(current_poly_ft4, bright, bright, blue);
+    current_poly_ft4->tpage = frame->unk0;
+    current_poly_ft4->clut = frame->unk2;
     primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
                                 frame->unk8, frame->unka);
-    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
@@ -4749,21 +4753,21 @@ void menu_draw_string_dimmed(MenuFont *font, MenuText *text)
     s32 g;
     s32 b;
 
-    r = DAT_8009c270;
-    g = DAT_8009c274;
-    b = DAT_8009c278;
-    if (DAT_801b24e4.unk100 == 0) {
-        DAT_8009c270 = 0x47;
-        DAT_8009c274 = 0x47;
-        DAT_8009c278 = 0x57;
+    r = menu_text_red;
+    g = menu_text_green;
+    b = menu_text_blue;
+    if (cur_avatar_status.unk100 == 0) {
+        menu_text_red = 0x47;
+        menu_text_green = 0x47;
+        menu_text_blue = 0x57;
     } else {
-        DAT_8009c270 = 0x57;
-        DAT_8009c274 = 0x57;
+        menu_text_red = 0x57;
+        menu_text_green = 0x57;
     }
     menu_draw_string(font, text);
-    DAT_8009c270 = r;
-    DAT_8009c274 = g;
-    DAT_8009c278 = b;
+    menu_text_red = r;
+    menu_text_green = g;
+    menu_text_blue = b;
 }
 
 ADDRESS(0x800261dc, 0x190)
@@ -4783,27 +4787,27 @@ void menu_draw_string(MenuFont *font, MenuText *text)
     dx = 0;
     do {
         primitive_buffer_begin_sprt();
-        DAT_8009c378->clut = font->unk2;
-        DAT_8009c378->x0 = text->x + dx - 1;
-        DAT_8009c378->y0 = text->y - 1;
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
+        current_sprt->clut = font->unk2;
+        current_sprt->x0 = text->x + dx - 1;
+        current_sprt->y0 = text->y - 1;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
         ch = *c;
         u = (ch & 0xf) * 8;
         v = (ch >> 4) * 15;
-        DAT_8009c378->u0 = u;
-        DAT_8009c378->v0 = v;
+        current_sprt->u0 = u;
+        current_sprt->v0 = v;
         primitive_buffer_commit_sprt(2);
         c++;
         primitive_buffer_begin_sprt();
-        setRGB0(DAT_8009c378, DAT_8009c27c, DAT_8009c27c, DAT_8009c27c);
-        DAT_8009c378->clut = font->unk2;
-        DAT_8009c378->x0 = text->x + dx;
-        DAT_8009c378->y0 = text->y;
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
-        DAT_8009c378->u0 = u;
-        DAT_8009c378->v0 = v;
+        setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
+        current_sprt->clut = font->unk2;
+        current_sprt->x0 = text->x + dx;
+        current_sprt->y0 = text->y;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
+        current_sprt->u0 = u;
+        current_sprt->v0 = v;
         primitive_buffer_commit_sprt(3);
         dx += 7;
     } while (*c != 0xff);
@@ -4823,32 +4827,32 @@ void menu_draw_number(MenuFont *font, MenuText *text)
     dx = 0;
     do {
         primitive_buffer_begin_sprt();
-        DAT_8009c378->clut = font->unk2;
-        DAT_8009c378->x0 = text->x + dx - 1;
-        DAT_8009c378->y0 = text->y - 1;
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
+        current_sprt->clut = font->unk2;
+        current_sprt->x0 = text->x + dx - 1;
+        current_sprt->y0 = text->y - 1;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
         if (*c < 11) {
-            DAT_8009c378->u0 = font->unk4;
-            DAT_8009c378->v0 = *c * 15;
+            current_sprt->u0 = font->unk4;
+            current_sprt->v0 = *c * 15;
         } else {
-            DAT_8009c378->u0 = font->unk4 + 7;
-            DAT_8009c378->v0 = (*c - 11) * 15;
+            current_sprt->u0 = font->unk4 + 7;
+            current_sprt->v0 = (*c - 11) * 15;
         }
         primitive_buffer_commit_sprt(2);
         primitive_buffer_begin_sprt();
-        setRGB0(DAT_8009c378, DAT_8009c27c, DAT_8009c27c, DAT_8009c27c);
-        DAT_8009c378->clut = font->unk2;
-        DAT_8009c378->x0 = text->x + dx;
-        DAT_8009c378->y0 = text->y;
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
+        setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
+        current_sprt->clut = font->unk2;
+        current_sprt->x0 = text->x + dx;
+        current_sprt->y0 = text->y;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
         if (*c < 11) {
-            DAT_8009c378->u0 = font->unk4;
-            DAT_8009c378->v0 = *c * 15;
+            current_sprt->u0 = font->unk4;
+            current_sprt->v0 = *c * 15;
         } else {
-            DAT_8009c378->u0 = font->unk4 + 7;
-            DAT_8009c378->v0 = (*c - 11) * 15;
+            current_sprt->u0 = font->unk4 + 7;
+            current_sprt->v0 = (*c - 11) * 15;
         }
         primitive_buffer_commit_sprt(3);
         c++;
@@ -4868,12 +4872,12 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
     s32 shade;
     s32 v;
 
-    font = &DAT_8007e564[2];
+    font = &menu_sprite_defs[2];
     v = row != 0 ? 16 : 0;
     level = 0;
     primitive_buffer_add_draw_mode(6, font->unk0);
-    if (DAT_801b24e4.unkfd > 128) {
-        level = (DAT_801b24e4.unkfd - 128) / 2;
+    if (cur_avatar_status.unkfd > 128) {
+        level = (cur_avatar_status.unkfd - 128) / 2;
     }
     shade = level + 112;
     for (;;) {
@@ -4882,31 +4886,31 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
         }
         primitive_buffer_begin_sprt();
         if (shadow == 0) {
-            setRGB0(DAT_8009c378, shade, shade, shade);
+            setRGB0(current_sprt, shade, shade, shade);
         }
-        DAT_8009c378->clut = font->unk2;
+        current_sprt->clut = font->unk2;
         if (shadow == 0) {
-            DAT_8009c378->x0 = x;
-            DAT_8009c378->y0 = y;
+            current_sprt->x0 = x;
+            current_sprt->y0 = y;
         } else {
-            DAT_8009c378->x0 = x - 1;
-            DAT_8009c378->y0 = y - 1;
+            current_sprt->x0 = x - 1;
+            current_sprt->y0 = y - 1;
         }
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
-        DAT_8009c378->u0 = font->unk4 + (*text - 'a') * font->unk8;
-        DAT_8009c378->v0 = font->unk6 + v;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
+        current_sprt->u0 = font->unk4 + (*text - 'a') * font->unk8;
+        current_sprt->v0 = font->unk6 + v;
         primitive_buffer_commit_sprt(5);
         if (shadow != 0) {
             primitive_buffer_begin_sprt();
-            setRGB0(DAT_8009c378, DAT_8009c27c, DAT_8009c27c, DAT_8009c27c);
-            DAT_8009c378->clut = font->unk2;
-            DAT_8009c378->x0 = x;
-            DAT_8009c378->y0 = y;
-            DAT_8009c378->w = font->unk8;
-            DAT_8009c378->h = font->unka;
-            DAT_8009c378->u0 = font->unk4 + (*text - 'a') * font->unk8;
-            DAT_8009c378->v0 = font->unk6 + v;
+            setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
+            current_sprt->clut = font->unk2;
+            current_sprt->x0 = x;
+            current_sprt->y0 = y;
+            current_sprt->w = font->unk8;
+            current_sprt->h = font->unka;
+            current_sprt->u0 = font->unk4 + (*text - 'a') * font->unk8;
+            current_sprt->v0 = font->unk6 + v;
             primitive_buffer_commit_sprt(6);
         }
         text++;
@@ -4924,11 +4928,11 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
     s32 dx;
     s32 shade;
 
-    font = &DAT_8007e564[2];
+    font = &menu_sprite_defs[2];
     level = 0;
     primitive_buffer_add_draw_mode(6, font->unk0);
-    if (DAT_801b24e4.unkfd > 128) {
-        level = (DAT_801b24e4.unkfd - 128) / 2;
+    if (cur_avatar_status.unkfd > 128) {
+        level = (cur_avatar_status.unkfd - 128) / 2;
     }
     c = text->text;
     if (*c == 0xff) {
@@ -4939,31 +4943,31 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
     do {
         primitive_buffer_begin_sprt();
         if (shadow == 0) {
-            setRGB0(DAT_8009c378, shade, shade, shade);
+            setRGB0(current_sprt, shade, shade, shade);
         }
-        DAT_8009c378->clut = font->unk2;
+        current_sprt->clut = font->unk2;
         if (shadow == 0) {
-            DAT_8009c378->x0 = text->x + dx;
-            DAT_8009c378->y0 = text->y;
+            current_sprt->x0 = text->x + dx;
+            current_sprt->y0 = text->y;
         } else {
-            DAT_8009c378->x0 = text->x + dx - 1;
-            DAT_8009c378->y0 = text->y - 1;
+            current_sprt->x0 = text->x + dx - 1;
+            current_sprt->y0 = text->y - 1;
         }
-        DAT_8009c378->w = font->unk8;
-        DAT_8009c378->h = font->unka;
-        DAT_8009c378->u0 = font->unk4 + *c * 8;
-        DAT_8009c378->v0 = font->unk6 + 8;
+        current_sprt->w = font->unk8;
+        current_sprt->h = font->unka;
+        current_sprt->u0 = font->unk4 + *c * 8;
+        current_sprt->v0 = font->unk6 + 8;
         primitive_buffer_commit_sprt(5);
         if (shadow != 0) {
             primitive_buffer_begin_sprt();
-            setRGB0(DAT_8009c378, DAT_8009c27c, DAT_8009c27c, DAT_8009c27c);
-            DAT_8009c378->clut = font->unk2;
-            DAT_8009c378->x0 = text->x + dx;
-            DAT_8009c378->y0 = text->y;
-            DAT_8009c378->w = font->unk8;
-            DAT_8009c378->h = font->unka;
-            DAT_8009c378->u0 = font->unk4 + *c * 8;
-            DAT_8009c378->v0 = font->unk6 + 8;
+            setRGB0(current_sprt, menu_text_shadow_shade, menu_text_shadow_shade, menu_text_shadow_shade);
+            current_sprt->clut = font->unk2;
+            current_sprt->x0 = text->x + dx;
+            current_sprt->y0 = text->y;
+            current_sprt->w = font->unk8;
+            current_sprt->h = font->unka;
+            current_sprt->u0 = font->unk4 + *c * 8;
+            current_sprt->v0 = font->unk6 + 8;
             primitive_buffer_commit_sprt(6);
         }
         c++;
@@ -4976,20 +4980,20 @@ void menu_draw_button_icon(s32 x, s32 y, s32 value)
 {
     s32 shade;
 
-    primitive_buffer_add_draw_mode(6, DAT_8007e564[6].unk0);
+    primitive_buffer_add_draw_mode(6, menu_sprite_defs[6].unk0);
     shade = 0;
     primitive_buffer_begin_sprt();
-    if (DAT_801b24e4.unkfd > 128) {
-        shade = (DAT_801b24e4.unkfd - 128) / 2;
+    if (cur_avatar_status.unkfd > 128) {
+        shade = (cur_avatar_status.unkfd - 128) / 2;
     }
-    setRGB0(DAT_8009c378, shade + 112, shade + 112, shade + 112);
-    DAT_8009c378->clut = DAT_8007e564[6].unk2;
-    DAT_8009c378->x0 = x;
-    DAT_8009c378->y0 = y;
-    DAT_8009c378->w = DAT_8007e564[6].unk8;
-    DAT_8009c378->h = DAT_8007e564[6].unka;
-    DAT_8009c378->u0 = DAT_8007e564[6].unk4 + value * 16;
-    DAT_8009c378->v0 = DAT_8007e564[6].unk6;
+    setRGB0(current_sprt, shade + 112, shade + 112, shade + 112);
+    current_sprt->clut = menu_sprite_defs[6].unk2;
+    current_sprt->x0 = x;
+    current_sprt->y0 = y;
+    current_sprt->w = menu_sprite_defs[6].unk8;
+    current_sprt->h = menu_sprite_defs[6].unka;
+    current_sprt->u0 = menu_sprite_defs[6].unk4 + value * 16;
+    current_sprt->v0 = menu_sprite_defs[6].unk6;
     primitive_buffer_commit_sprt(6);
 }
 
@@ -5025,7 +5029,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             }
             wrem = w - 66;
         }
-        f = &DAT_8007e564[k + 3];
+        f = &menu_sprite_defs[k + 3];
         if (i >= 3 && hrem < 0) {
             hh = h - 33;
             v = f->unk6 + 66 - h;
@@ -5036,10 +5040,10 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
         ww = f->unk8;
         for (;;) {
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-            SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
-            DAT_8009c374->tpage = f->unk0;
-            DAT_8009c374->clut = f->unk2;
+            setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
+            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+            current_poly_ft4->tpage = f->unk0;
+            current_poly_ft4->clut = f->unk2;
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, v, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
@@ -5061,7 +5065,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     i = 11;
     while (!done) {
         i++;
-        f = &DAT_8007e564[i + 3];
+        f = &menu_sprite_defs[i + 3];
         hh = f->unka;
         ww = f->unk8;
         end = 0;
@@ -5071,10 +5075,10 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
         wrem = w - 66;
         do {
             primitive_buffer_begin_poly_ft4();
-            setRGB0(DAT_8009c374, DAT_8009c26c, DAT_8009c26c, DAT_8009c26c);
-            SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
-            DAT_8009c374->tpage = f->unk0;
-            DAT_8009c374->clut = f->unk2;
+            setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
+            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+            current_poly_ft4->tpage = f->unk0;
+            current_poly_ft4->clut = f->unk2;
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, f->unk6, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
@@ -5104,17 +5108,17 @@ ADDRESS(0x80026e4c, 0x198)
 void menu_draw_backdrop(s32 x, s32 y, s32 w, s32 h)
 {
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x40, 0x40, 0x40);
-    SetSemiTrans((void *)DAT_8009c374, DAT_801b24e4.unk100);
-    DAT_8009c374->tpage = 0x1c;
-    DAT_8009c374->clut = 0x7b05;
+    setRGB0(current_poly_ft4, 0x40, 0x40, 0x40);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    current_poly_ft4->tpage = 0x1c;
+    current_poly_ft4->clut = 0x7b05;
     primitive_set_poly_ft4_rect(x, y, w, h, 0, 0x30, 0x80, 0xc8);
     primitive_buffer_commit_poly_ft4(0x32);
     primitive_buffer_begin_poly_ft4();
-    setRGB0(DAT_8009c374, 0x40, 0x40, 0x40);
-    SetSemiTrans((void *)DAT_8009c374, 1);
-    DAT_8009c374->tpage = GetTPage(0, 1, 0x300, 0x100);
-    DAT_8009c374->clut = 0x7b05;
+    setRGB0(current_poly_ft4, 0x40, 0x40, 0x40);
+    SetSemiTrans((void *)current_poly_ft4, 1);
+    current_poly_ft4->tpage = GetTPage(0, 1, 0x300, 0x100);
+    current_poly_ft4->clut = 0x7b05;
     primitive_set_poly_ft4_rect(x, y, w, h, 0, 0x30, 0x80, 0xc8);
     primitive_buffer_commit_poly_ft4(0x31);
 }
@@ -5122,27 +5126,27 @@ void menu_draw_backdrop(s32 x, s32 y, s32 w, s32 h)
 ADDRESS(0x80026fe4, 0x114)
 void menu_frame_begin(void)
 {
-    DAT_80199154.frame = DAT_80199154.frame == 0;
-    DAT_80199154.pool = &DAT_80199154.pools[DAT_80199154.frame];
-    DAT_80199154.ot = DAT_80199154.ot_buffer[DAT_80199154.frame];
-    ClearOTagR(DAT_80199154.ot, OT_LENGTH);
-    DAT_80199154.pool->next = DAT_80199154.pool->base;
-    if (DAT_80199154.frame == 1) {
-        DAT_8009c38c.x = 0;
-        DAT_8009c38c.y = 0xf0;
+    scene_display_sys.frame = scene_display_sys.frame == 0;
+    scene_display_sys.pool = &scene_display_sys.pools[scene_display_sys.frame];
+    scene_display_sys.ot = scene_display_sys.ot_buffer[scene_display_sys.frame];
+    ClearOTagR(scene_display_sys.ot, OT_LENGTH);
+    scene_display_sys.pool->next = scene_display_sys.pool->base;
+    if (scene_display_sys.frame == 1) {
+        menu_frame_upload_rect.x = 0;
+        menu_frame_upload_rect.y = 0xf0;
     } else {
-        DAT_8009c38c.x = 0;
-        DAT_8009c38c.y = 0;
+        menu_frame_upload_rect.x = 0;
+        menu_frame_upload_rect.y = 0;
     }
-    if (++DAT_8009c260 == 0x60) {
-        DAT_8009c260 = 0;
+    if (++menu_cursor_animation_frame == 0x60) {
+        menu_cursor_animation_frame = 0;
     }
-    if (DAT_8009c268 == 0) {
-        DAT_8009c260 = 0x30;
-        DAT_8009c268 = -1;
+    if (menu_cursor_animation_state == 0) {
+        menu_cursor_animation_frame = 0x30;
+        menu_cursor_animation_state = -1;
     }
-    if (++DAT_8009c264 == 0x60) {
-        DAT_8009c264 = 0;
+    if (++menu_option_pulse_frame == 0x60) {
+        menu_option_pulse_frame = 0;
     }
 }
 
@@ -5151,10 +5155,10 @@ void menu_present_frame(void)
 {
     DrawSync(0);
     VSync(0);
-    PutDispEnv(&DAT_80199154.disp[DAT_80199154.frame]);
-    PutDrawEnv(&DAT_80199154.draw[DAT_80199154.frame]);
-    LoadImage(&DAT_8009c38c, (u_long *)DAT_8009c388);
-    DrawOTag(DAT_80199154.ot + OT_LENGTH - 1);
+    PutDispEnv(&scene_display_sys.disp[scene_display_sys.frame]);
+    PutDrawEnv(&scene_display_sys.draw[scene_display_sys.frame]);
+    LoadImage(&menu_frame_upload_rect, (u_long *)menu_frame_upload_pixels);
+    DrawOTag(scene_display_sys.ot + OT_LENGTH - 1);
 }
 
 ADDRESS(0x80027198, 0x178)
@@ -5163,54 +5167,54 @@ void menu_enter_display_state(void)
     RECT rect;
 
     pool_release_all();
-    DAT_80199154.draw[0].isbg = 0;
-    DAT_80199154.draw[0].dfe = 0;
-    DAT_80199154.draw[1].isbg = 0;
-    DAT_80199154.draw[1].dfe = 0;
-    DAT_8009c404 = DAT_80199154.pools[0];
-    DAT_8009c410 = DAT_80199154.pools[1];
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
-    DAT_8009c388 = DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x7400;
-    if (DAT_80199154.frame == 1) {
-        DAT_8009c38c.x = 0;
-        DAT_8009c38c.y = 0xf0;
+    scene_display_sys.draw[0].isbg = 0;
+    scene_display_sys.draw[0].dfe = 0;
+    scene_display_sys.draw[1].isbg = 0;
+    scene_display_sys.draw[1].dfe = 0;
+    menu_saved_primitive_buffer_0 = scene_display_sys.pools[0];
+    menu_saved_primitive_buffer_1 = scene_display_sys.pools[1];
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    menu_frame_upload_pixels = scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x7400;
+    if (scene_display_sys.frame == 1) {
+        menu_frame_upload_rect.x = 0;
+        menu_frame_upload_rect.y = 0xf0;
     } else {
-        DAT_8009c38c.x = 0;
-        DAT_8009c38c.y = 0;
+        menu_frame_upload_rect.x = 0;
+        menu_frame_upload_rect.y = 0;
     }
-    DAT_8009c38c.w = 0x140;
-    DAT_8009c38c.h = 0xf0;
-    StoreImage(&DAT_8009c38c, (u_long *)DAT_8009c388);
+    menu_frame_upload_rect.w = 0x140;
+    menu_frame_upload_rect.h = 0xf0;
+    StoreImage(&menu_frame_upload_rect, (u_long *)menu_frame_upload_pixels);
     DrawSync(0);
-    DAT_8009c384 = DAT_801b24e4.bgm_volume;
+    menu_saved_bgm_volume = cur_avatar_status.bgm_volume;
     menu_apply_display_colors();
-    if (DAT_801b24e4.unkfe < 2) {
-        DAT_8009c24c = 0x20;
-        DAT_8009c250 = 0x40;
-        DAT_8009c254 = 1;
-        DAT_8009c258 = 3;
+    if (cur_avatar_status.unkfe < 2) {
+        menu_confirm_button = 0x20;
+        menu_cancel_button = 0x40;
+        menu_confirm_button_icon = 1;
+        menu_cancel_button_icon = 3;
     } else {
-        DAT_8009c24c = 0x40;
-        DAT_8009c250 = 0x20;
-        DAT_8009c254 = 3;
-        DAT_8009c258 = 1;
+        menu_confirm_button = 0x40;
+        menu_cancel_button = 0x20;
+        menu_confirm_button_icon = 3;
+        menu_cancel_button_icon = 1;
     }
 }
 
 ADDRESS(0x80027310, 0x104)
 void menu_exit_display_state(s32 mode)
 {
-    DAT_80199154.pools[0] = DAT_8009c404;
-    DAT_80199154.pools[1] = DAT_8009c410;
-    DAT_80199154.draw[0].isbg = 1;
-    DAT_80199154.draw[0].dfe = 1;
-    DAT_80199154.draw[1].isbg = 1;
-    DAT_80199154.draw[1].dfe = 1;
+    scene_display_sys.pools[0] = menu_saved_primitive_buffer_0;
+    scene_display_sys.pools[1] = menu_saved_primitive_buffer_1;
+    scene_display_sys.draw[0].isbg = 1;
+    scene_display_sys.draw[0].dfe = 1;
+    scene_display_sys.draw[1].isbg = 1;
+    scene_display_sys.draw[1].dfe = 1;
     if (mode == 1) {
         audio_stop_sequence();
-    } else if ((DAT_801b24e4.bgm_volume != 0 && DAT_8009c384 == 0) ||
-               (DAT_801b24e4.bgm_volume == 0 && DAT_8009c384 != 0)) {
-        if (DAT_801b24e4.bgm_volume == 0) {
+    } else if ((cur_avatar_status.bgm_volume != 0 && menu_saved_bgm_volume == 0) ||
+               (cur_avatar_status.bgm_volume == 0 && menu_saved_bgm_volume != 0)) {
+        if (cur_avatar_status.bgm_volume == 0) {
             audio_stop_sequence();
         } else {
             audio_start_sequence();
@@ -5221,38 +5225,38 @@ void menu_exit_display_state(s32 mode)
 ADDRESS(0x80027414, 0x80)
 void primitive_buffer_begin_poly_ft4(void)
 {
-    DAT_8009c374 = (POLY_FT4 *)DAT_80199154.pool->next;
-    SetPolyFT4(DAT_8009c374);
-    setRGB0(DAT_8009c374, DAT_8009c270, DAT_8009c274, DAT_8009c278);
-    DAT_80199154.pool->next += sizeof(POLY_FT4);
+    current_poly_ft4 = (POLY_FT4 *)scene_display_sys.pool->next;
+    SetPolyFT4(current_poly_ft4);
+    setRGB0(current_poly_ft4, menu_text_red, menu_text_green, menu_text_blue);
+    scene_display_sys.pool->next += sizeof(POLY_FT4);
 }
 
 ADDRESS(0x80027494, 0x9c)
 void primitive_set_poly_ft4_rect(s16 x, s16 y, s16 w, s16 h, s16 u, s16 v, s16 uw, s16 vh)
 {
-    setXY4(DAT_8009c374, x, y, x + w, y, x, y + h, x + w, y + h);
-    setUV4(DAT_8009c374, u, v, u + uw, v, u, v + vh, u + uw, v + vh);
+    setXY4(current_poly_ft4, x, y, x + w, y, x, y + h, x + w, y + h);
+    setUV4(current_poly_ft4, u, v, u + uw, v, u, v + vh, u + uw, v + vh);
 }
 
 ADDRESS(0x80027530, 0x30)
 void primitive_buffer_commit_poly_ft4(s32 depth)
 {
-    AddPrim((void *)(DAT_80199154.ot + depth), (void *)DAT_8009c374);
+    AddPrim((void *)(scene_display_sys.ot + depth), (void *)current_poly_ft4);
 }
 
 ADDRESS(0x80027560, 0x80)
 void primitive_buffer_begin_sprt(void)
 {
-    DAT_8009c378 = (SPRT *)DAT_80199154.pool->next;
-    SetSprt(DAT_8009c378);
-    setRGB0(DAT_8009c378, DAT_8009c270, DAT_8009c274, DAT_8009c278);
-    DAT_80199154.pool->next += sizeof(SPRT);
+    current_sprt = (SPRT *)scene_display_sys.pool->next;
+    SetSprt(current_sprt);
+    setRGB0(current_sprt, menu_text_red, menu_text_green, menu_text_blue);
+    scene_display_sys.pool->next += sizeof(SPRT);
 }
 
 ADDRESS(0x800275e0, 0x30)
 void primitive_buffer_commit_sprt(s32 depth)
 {
-    AddPrim((void *)(DAT_80199154.ot + depth), (void *)DAT_8009c378);
+    AddPrim((void *)(scene_display_sys.ot + depth), (void *)current_sprt);
 }
 
 ADDRESS(0x80027610, 0x78)
@@ -5260,10 +5264,10 @@ void primitive_buffer_add_draw_mode(s32 depth, s16 tpage)
 {
     DR_MODE *mode;
 
-    mode = (DR_MODE *)DAT_80199154.pool->next;
-    DAT_80199154.pool->next += sizeof(DR_MODE);
+    mode = (DR_MODE *)scene_display_sys.pool->next;
+    scene_display_sys.pool->next += sizeof(DR_MODE);
     SetDrawMode(mode, 0, 0, tpage, 0);
-    AddPrim((void *)(DAT_80199154.ot + depth + 1), (void *)mode);
+    AddPrim((void *)(scene_display_sys.ot + depth + 1), (void *)mode);
 }
 
 ADDRESS(0x80027688, 0xa0)
@@ -5274,7 +5278,7 @@ void menu_list_init(MenuList *list, s32 page, s32 button)
     s32 i;
 
     dst = list->title;
-    src = (&DAT_8007e660[page * 9])[button + 1].text;
+    src = (&menu_window_layouts[page * 9])[button + 1].text;
     list->unk0 = 0x1f;
     list->unk2 = 0x20;
     for (i = 0; i < 16; i++) {
@@ -5288,7 +5292,7 @@ void menu_list_init(MenuList *list, s32 page, s32 button)
     list->cursor = 0;
     list->row = 0;
     list->unk23 = 0x18;
-    DAT_8009c25c = 1;
+    menu_item_quantity = 1;
 }
 
 ADDRESS(0x80027728, 0x98)
@@ -5387,7 +5391,7 @@ s32 input_read_mark_active(void)
 
     pad = PadRead(1);
     if (pad != 0) {
-        DAT_8009c248 = 1;
+        input_press_pending = 1;
     }
     return pad;
 }
@@ -5398,13 +5402,13 @@ void input_wait_brief_release(void)
     s32 i;
 
     i = 0;
-    if (DAT_8009c248 == 1) {
-        DAT_8009c248 = 0;
+    if (input_press_pending == 1) {
+        input_press_pending = 0;
         while ((u16)PadRead(1) != 0) {
             if (i++ < 8) {
                 VSync(0);
             } else {
-                DAT_8009c260 = 0;
+                menu_cursor_animation_frame = 0;
                 break;
             }
         }
@@ -5414,7 +5418,7 @@ void input_wait_brief_release(void)
 ADDRESS(0x80027a40, 0x30)
 void input_wait_release(void)
 {
-    DAT_8009c248 = 0;
+    input_press_pending = 0;
     while ((u16)PadRead(1) != 0) {
     }
 }
@@ -5429,9 +5433,9 @@ void input_wait_press(void)
 ADDRESS(0x80027a9c, 0x24)
 void menu_request_item_model(u8 item)
 {
-    DAT_8009c25c = 1;
-    if (DAT_801b24e4.unkfb != 0) {
-        DAT_8009c23c = item;
+    menu_item_quantity = 1;
+    if (cur_avatar_status.unkfb != 0) {
+        menu_item_model_request = item;
     }
 }
 
@@ -5441,32 +5445,32 @@ void menu_start_item_model_read(void)
     u32 size;
 
     menu_release_item_model();
-    size = cd_archive_entry_extent(6, DAT_8009c23c, 0);
-    DAT_8009c234 = (size + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = (u8 *)memory_allocate(size);
-    DAT_8009c240 = cd_archive_start_async_read(6, DAT_8009c23c);
-    DAT_8009c230 = 1;
-    DAT_8009c244 = DAT_8009c23c;
-    DAT_8009c23c = -1;
-    DAT_8009c394.vz = 1000;
-    DAT_8009c394.vx = 0;
-    DAT_8009c394.vy = 0;
-    DAT_8009c39c.vx = 0;
-    DAT_8009c39c.vy = 0;
-    DAT_8009c39c.vz = 0;
-    DAT_8009c3a4 = 4;
+    size = cd_archive_entry_extent(6, menu_item_model_request, 0);
+    menu_cd_sectors_left = (size + 2047) >> 11;
+    menu_cd_read_cursor = menu_cd_read_buffer = (u8 *)memory_allocate(size);
+    menu_item_model_read_sectors = cd_archive_start_async_read(6, menu_item_model_request);
+    menu_cd_read_state = 1;
+    menu_item_model_read_id = menu_item_model_request;
+    menu_item_model_request = -1;
+    menu_item_preview_translation.vz = 1000;
+    menu_item_preview_translation.vx = 0;
+    menu_item_preview_translation.vy = 0;
+    menu_item_preview_rotation.vx = 0;
+    menu_item_preview_rotation.vy = 0;
+    menu_item_preview_rotation.vz = 0;
+    menu_item_preview_rotation_step = 4;
 }
 
 ADDRESS(0x80027b5c, 0x58)
 void menu_release_item_model(void)
 {
-    if (DAT_8009c238 == 1) {
-        memory_free((void *)DAT_80199154.unk10148[3]);
-    } else if (DAT_8009c230 != 0) {
-        memory_free((void *)DAT_8009c37c);
+    if (menu_item_model_registered == 1) {
+        memory_free((void *)scene_display_sys.unk10148[3]);
+    } else if (menu_cd_read_state != 0) {
+        memory_free((void *)menu_cd_read_buffer);
     }
-    DAT_8009c230 = 0;
-    DAT_8009c238 = 0;
+    menu_cd_read_state = 0;
+    menu_item_model_registered = 0;
 }
 
 ADDRESS(0x80027bb4, 0xd8)
@@ -5474,14 +5478,14 @@ void menu_cd_install_data_ready_handler(void)
 {
     cd_request_wait_idle();
     EnterCriticalSection();
-    DisableEvent(DAT_801c12e4.error_event);
-    DisableEvent(DAT_801c12e4.complete_event);
-    DisableEvent(DAT_801c12e4.ready_event);
-    CloseEvent(DAT_801c12e4.ready_event);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR,
-                                         (void (*)(void))menu_cd_data_ready_handler);
-    EnableEvent(DAT_801c12e4.ready_event);
-    EnableEvent(DAT_801c12e4.error_event);
+    DisableEvent(cdrom_ctl.error_event);
+    DisableEvent(cdrom_ctl.complete_event);
+    DisableEvent(cdrom_ctl.ready_event);
+    CloseEvent(cdrom_ctl.ready_event);
+    cdrom_ctl.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR,
+                                      (void (*)(void))menu_cd_data_ready_handler);
+    EnableEvent(cdrom_ctl.ready_event);
+    EnableEvent(cdrom_ctl.error_event);
     CdReadyCallback((void (*)(void))menu_cd_data_ready_handler);
     ExitCriticalSection();
     VSync(4);
@@ -5493,15 +5497,15 @@ void menu_cd_restore_data_ready_handler(void)
 {
     menu_wait_async_read();
     menu_release_item_model();
-    DAT_8009c23c = -1;
+    menu_item_model_request = -1;
     EnterCriticalSection();
-    DisableEvent(DAT_801c12e4.error_event);
-    DisableEvent(DAT_801c12e4.ready_event);
-    CloseEvent(DAT_801c12e4.ready_event);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
-    EnableEvent(DAT_801c12e4.error_event);
-    EnableEvent(DAT_801c12e4.complete_event);
-    EnableEvent(DAT_801c12e4.ready_event);
+    DisableEvent(cdrom_ctl.error_event);
+    DisableEvent(cdrom_ctl.ready_event);
+    CloseEvent(cdrom_ctl.ready_event);
+    cdrom_ctl.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, cd_data_ready_handler);
+    EnableEvent(cdrom_ctl.error_event);
+    EnableEvent(cdrom_ctl.complete_event);
+    EnableEvent(cdrom_ctl.ready_event);
     CdReadyCallback(cd_data_ready_handler);
     ExitCriticalSection();
     CdControl(CdlPause, 0, 0);
@@ -5518,7 +5522,7 @@ s32 cd_archive_start_async_read(u16 file, u16 entry)
     CdFile *f;
     s32 size;
 
-    f = &DAT_801c12e4.files[file];
+    f = &cdrom_ctl.files[file];
     size = f->sectors[entry + 1] - f->sectors[entry];
     cd_location_add(&f->extent.pos, f->sectors[entry], &pos);
     CdControl(CdlPause, 0, 0);
@@ -5535,10 +5539,10 @@ s32 cd_archive_start_async_read(u16 file, u16 entry)
 ADDRESS(0x80027e60, 0x48)
 void menu_wait_async_read(void)
 {
-    if (DAT_8009c230 == 1) {
+    if (menu_cd_read_state == 1) {
         do {
             VSync(2);
-        } while (DAT_8009c230 == 1);
+        } while (menu_cd_read_state == 1);
     }
 }
 
@@ -5547,15 +5551,15 @@ void menu_cd_data_ready_handler(u8 status, u8 *data)
 {
     u8 result[8];
 
-    if (DAT_8009c230 == 1 && DAT_8009c234 > 0) {
+    if (menu_cd_read_state == 1 && menu_cd_sectors_left > 0) {
         if (CdReady(1, result) == CdlDiskError) {
-            DAT_8009c234 = 0;
-            DAT_8009c230 = 3;
+            menu_cd_sectors_left = 0;
+            menu_cd_read_state = 3;
         } else {
-            CdGetSector((void *)DAT_8009c380, 0x200);
-            DAT_8009c380 += 2048;
-            if (--DAT_8009c234 == 0) {
-                DAT_8009c230 = 2;
+            CdGetSector((void *)menu_cd_read_cursor, 0x200);
+            menu_cd_read_cursor += 2048;
+            if (--menu_cd_sectors_left == 0) {
+                menu_cd_read_state = 2;
             }
         }
     }

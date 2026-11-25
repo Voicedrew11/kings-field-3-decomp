@@ -55,8 +55,8 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
     u16 n;
 
     args = &vertex;
-    target = &DAT_801b24e4.pos;
-    obj = DAT_80185da8.current;
+    target = &cur_avatar_status.pos;
+    obj = actor_status.current;
     if (vertex == -1) {
         rot.vx = args[1];
         rot.vy = args[2];
@@ -68,9 +68,9 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         actor_sample_rotated_animation_vertex(obj, args[2], &off);
         args += 3;
         speed = args[0];
-        aim.vx = fixed_lerp_q12(DAT_801b24e4.pos.vx, ((off.vx - from.vx) << 8) + obj->pos.vx, speed);
-        aim.vy = fixed_lerp_q12(DAT_801b24e4.pos.vy, ((off.vy - from.vy) << 8) + obj->pos.vy, speed);
-        aim.vz = fixed_lerp_q12(DAT_801b24e4.pos.vz, ((off.vz - from.vz) << 8) + obj->pos.vz, speed);
+        aim.vx = fixed_lerp_q12(cur_avatar_status.pos.vx, ((off.vx - from.vx) << 8) + obj->pos.vx, speed);
+        aim.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, ((off.vy - from.vy) << 8) + obj->pos.vy, speed);
+        aim.vz = fixed_lerp_q12(cur_avatar_status.pos.vz, ((off.vz - from.vz) << 8) + obj->pos.vz, speed);
         target = &aim;
     } else {
         actor_sample_rotated_animation_vertex(obj, vertex, &off);
@@ -95,7 +95,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 1);
         break;
     case 0x27:
-        if (DAT_801b24e4.unk84 != 0) {
+        if (cur_avatar_status.unk84 != 0) {
             obj->unk28 |= 0x100;
         }
     case 0x26:
@@ -197,7 +197,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
         break;
     case 0x55:
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, DAT_80185da8.unk9d18, vertex,
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, actor_status.unk9d18, vertex,
                                 SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
@@ -249,7 +249,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         o->unk5 = 0;
         o->unk3 = obj->unk6;
         o->unk9 = 1;
-        def = &DAT_80185da8.defs[n];
+        def = &actor_status.defs[n];
         o->unk28 = def->unk34;
         o->unk15 = def->unk9;
         o->pos.vx = pos.vx;
@@ -272,7 +272,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
             if (--i == 0) {
                 break;
             }
-            vector_add_scaled_delta(target, &DAT_801b24e4.unk11c, time >> 6, &p);
+            vector_add_scaled_delta(target, &cur_avatar_status.unk11c, time >> 6, &p);
         }
         sv.vy = actor_compute_target_direction(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
         sv.vx = pitch;
@@ -317,7 +317,7 @@ void actor_play_target_sound(Object88 *obj)
 }
 
 /*
- * Runs one frame of the current record's script record (DAT_80185da8.current
+ * Runs one frame of the current record's script record (actor_status.current
  * and .def): its sound and light fade first, then the record's behaviour by
  * script id (Object88.unke; unkf 0 starts it), FDAT slot 17 for the ids this
  * module does not know, and last the ride on its target record (flag 0x10).
@@ -336,13 +336,13 @@ void actor_update_behavior(void)
     SVECTOR target;
     SVECTOR step;
 
-    obj = DAT_80185da8.current;
-    def = DAT_80185da8.def;
+    obj = actor_status.current;
+    def = actor_status.def;
     script = obj->unk60;
     if (obj->unk28 & 4) {
-        DAT_80185da8.unk9d04 = 3;
+        actor_status.unk9d04 = 3;
     } else {
-        DAT_80185da8.unk9d04 = 0x93;
+        actor_status.unk9d04 = 0x93;
     }
     map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
     if (script[4] != 0xff) {
@@ -363,8 +363,8 @@ void actor_update_behavior(void)
                 }
                 break;
             case 0x4000:
-                slot = n * DAT_80185da8.unk9d18 / 3 % n;
-                if (DAT_80185da8.unk9d24 % n == slot) {
+                slot = n * actor_status.unk9d18 / 3 % n;
+                if (actor_status.unk9d24 % n == slot) {
                     actor_play_target_sound(obj);
                 }
                 break;
@@ -550,7 +550,7 @@ void actor_update_behavior(void)
                         obj->unk16 = 0x1000;
                     }
                 } else {
-                    ((void (*)(Object88 *))DAT_8018fad4.handlers[19])(obj);
+                    ((void (*)(Object88 *))asset_status.handlers[19])(obj);
                     if (obj->unk0 == 1) {
                         actor_set_lifecycle_and_home_position(obj);
                     } else if (obj->unk0 == 2) {
@@ -663,14 +663,16 @@ void actor_update_behavior(void)
             OBJECT88_B71(obj) = 0;
         }
         if (rand() < 6000) {
-            dist = fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+            dist = fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
+                                        cur_avatar_status.pos.vz - obj->pos.vz);
             if (dist >= SCRIPT_U16(script, 22)) {
                 OBJECT88_B70(obj) = 0;
             } else if (dist <= SCRIPT_U16(script, 20)) {
                 OBJECT88_B70(obj) = 1;
             }
         }
-        obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+        obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                        cur_avatar_status.pos.vz - obj->pos.vz);
         mode = 0x21;
         if (OBJECT88_B71(obj) == 0) {
             mode = 5;
@@ -714,9 +716,9 @@ void actor_update_behavior(void)
             actor_set_animation_if_changed(script[1]);
             obj->unk70 = 0;
         }
-        dx = DAT_801b24e4.pos.vx - obj->pos.vx;
-        dy = DAT_801b24e4.pos.vy - obj->pos.vy - 1600;
-        dz = DAT_801b24e4.pos.vz - obj->pos.vz;
+        dx = cur_avatar_status.pos.vx - obj->pos.vx;
+        dy = cur_avatar_status.pos.vy - obj->pos.vy - 1600;
+        dz = cur_avatar_status.pos.vz - obj->pos.vz;
         dist = fixed_vector3_length(dx, dy, dz);
         vector_displacement_to_pitch_yaw(dx, dy, dz, &obj->unk72);
         if (obj->unk72.vx > 0xe00) {
@@ -760,8 +762,8 @@ void actor_update_behavior(void)
             if (actor_move_along_heading((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 18), def->unk1[2],
                                          5) == 0) {
                 actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
-                if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                         DAT_801b24e4.pos.vz - obj->pos.vz) <
+                if (fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
+                                         cur_avatar_status.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 14)) {
                     break;
                 }
@@ -775,8 +777,8 @@ void actor_update_behavior(void)
                 actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
                 break;
             }
-            if ((s16)actor_start_ballistic_motion(1, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy - 500,
-                                                  DAT_801b24e4.pos.vz, script[23],
+            if ((s16)actor_start_ballistic_motion(1, cur_avatar_status.pos.vx, cur_avatar_status.pos.vy - 500,
+                                                  cur_avatar_status.pos.vz, script[23],
                                                   SCRIPT_U16(script, 16)) > 0) {
                 obj->unk70 = 2;
                 actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
@@ -900,8 +902,8 @@ void actor_update_behavior(void)
             at.vx += obj->pos.vx;
             at.vy += obj->pos.vy;
             at.vz += obj->pos.vz;
-            if (vector_distance_to_point(&at, DAT_801b24e4.pos.vx, DAT_801b24e4.pos.vy, DAT_801b24e4.pos.vz,
-                                         script[14], script[15], 0x6a4) != -1) {
+            if (vector_distance_to_point(&at, cur_avatar_status.pos.vx, cur_avatar_status.pos.vy,
+                                         cur_avatar_status.pos.vz, script[14], script[15], 0x6a4) != -1) {
                 time = obj->unk18;
                 obj->unk18 -= obj->unk66 << 2;
                 if ((s16)obj->unk18 < 0) {
@@ -985,7 +987,8 @@ void actor_update_behavior(void)
             speed = SCRIPT_U16(script, 28);
             turn = script[13];
         }
-        obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+        obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                        cur_avatar_status.pos.vz - obj->pos.vz);
         actor_turn_and_move_along_heading(obj->unk64, speed, SCRIPT_U16(script, 30), turn, def->unk1[3], 4);
         if (actor_animation_crossed_phase(obj, SCRIPT_U16(script, 24))) {
             actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
@@ -1010,9 +1013,9 @@ void actor_update_behavior(void)
         case 0:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             if (obj->unk18 >= 4095) {
-                vector_displacement_to_pitch_yaw(DAT_801b24e4.pos.vx - obj->pos.vx,
-                                                 DAT_801b24e4.pos.vy - obj->pos.vy,
-                                                 DAT_801b24e4.pos.vz - obj->pos.vz, &dir);
+                vector_displacement_to_pitch_yaw(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                 cur_avatar_status.pos.vy - obj->pos.vy,
+                                                 cur_avatar_status.pos.vz - obj->pos.vz, &dir);
                 pitch_yaw_to_forward_vector(&dir, &obj->unk72);
                 obj->unk70 = 1;
             }
@@ -1065,9 +1068,9 @@ void actor_update_behavior(void)
             obj->unkf = 0xf0;
             actor_set_animation_if_changed(script[1]);
         }
-        dx = DAT_801b24e4.pos.vx - obj->pos.vx;
-        dy = DAT_801b24e4.pos.vy - obj->pos.vy - 1600;
-        dz = DAT_801b24e4.pos.vz - obj->pos.vz;
+        dx = cur_avatar_status.pos.vx - obj->pos.vx;
+        dy = cur_avatar_status.pos.vy - obj->pos.vy - 1600;
+        dz = cur_avatar_status.pos.vz - obj->pos.vz;
         fixed_vector3_length(dx, dy, dz);
         vector_displacement_to_pitch_yaw(dx, dy, dz, &obj->unk72);
         actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 28), SCRIPT_U16(script, 30),
@@ -1085,7 +1088,7 @@ void actor_update_behavior(void)
     case 14: {
         Object88 *target;
 
-        target = DAT_80185da8.target;
+        target = actor_status.target;
         if (obj->unkf == 0) {
             obj->unkf = 0xf1;
             obj->unk70 = 0;
@@ -1149,7 +1152,7 @@ void actor_update_behavior(void)
             }
             break;
         case 16:
-            if (DAT_801b24e4.unkc0 == -1) {
+            if (cur_avatar_status.unkc0 == -1) {
                 obj->unk70 = 32;
             }
             break;
@@ -1200,7 +1203,8 @@ void actor_update_behavior(void)
         }
         switch (obj->unk70) {
         case 0:
-            if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
+            if (fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
+                                     cur_avatar_status.pos.vz - obj->pos.vz) <
                 SCRIPT_U16(script, 12)) {
                 obj->unk70 = 2;
             }
@@ -1217,20 +1221,20 @@ void actor_update_behavior(void)
                 actor_set_animation(script[24]);
             }
             if (obj->unk18 >= SCRIPT_U16(script, 18)) {
-                mask = DAT_80185da8.unk9d04;
-                DAT_80185da8.unk9d04 = mask & ~0x20;
+                mask = actor_status.unk9d04;
+                actor_status.unk9d04 = mask & ~0x20;
                 actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
-                DAT_80185da8.unk9d04 = mask;
+                actor_status.unk9d04 = mask;
             }
             break;
         case 3:
-            mask = DAT_80185da8.unk9d04;
-            DAT_80185da8.unk9d04 = mask & ~0x20;
+            mask = actor_status.unk9d04;
+            actor_status.unk9d04 = mask & ~0x20;
             actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
                 actor_reset_target_and_reselect();
             }
-            DAT_80185da8.unk9d04 = mask;
+            actor_status.unk9d04 = mask;
             actor_advance_animation_wrapped(obj, script[25]);
             break;
         }
@@ -1252,7 +1256,8 @@ void actor_update_behavior(void)
         switch (obj->unk70) {
         case 0:
             actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
-            if (fixed_vector2_length(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz) <
+            if (fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
+                                     cur_avatar_status.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 12) &&
                 obj->unk18 >= 0xfff - SCRIPT_U16(script, 8)) {
                 obj->unk70 = 2;
@@ -1276,20 +1281,20 @@ void actor_update_behavior(void)
                 obj->unk70 = 3;
                 obj->unk72.vx = SCRIPT_U16(script, 18);
             } else if (obj->unk18 >= SCRIPT_U16(script, 20)) {
-                mask = DAT_80185da8.unk9d04;
-                DAT_80185da8.unk9d04 = mask & ~0x20;
+                mask = actor_status.unk9d04;
+                actor_status.unk9d04 = mask & ~0x20;
                 actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
-                DAT_80185da8.unk9d04 = mask;
+                actor_status.unk9d04 = mask;
             }
             break;
         case 3:
-            mask = DAT_80185da8.unk9d04;
-            DAT_80185da8.unk9d04 = mask & ~0x20;
+            mask = actor_status.unk9d04;
+            actor_status.unk9d04 = mask & ~0x20;
             actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
                 actor_reset_target_and_reselect();
             }
-            DAT_80185da8.unk9d04 = mask;
+            actor_status.unk9d04 = mask;
             actor_advance_animation_clamped(obj, script[27]);
             break;
         }
@@ -1308,7 +1313,7 @@ void actor_update_behavior(void)
         }
         switch (obj->unk70) {
         case 0:
-            door = &DAT_8018fb3c.objects[obj->unk20];
+            door = &map_objects_slots.objects[obj->unk20];
             if (door->unk8 < 2 || door->angle.vx == 0 || door->angle.vx >= 3072) {
                 break;
             }
@@ -1507,7 +1512,7 @@ void actor_update_behavior(void)
         next.vy = obj->vel.vy + obj->pos.vy;
         next.vz = obj->vel.vz + obj->pos.vz;
         hit = collision_query_world(next.vx, next.vy, next.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                    DAT_80185da8.unk9d04);
+                                    actor_status.unk9d04);
         if (hit == 0) {
         move:
             obj->pos.vx = next.vx;
@@ -1533,7 +1538,7 @@ void actor_update_behavior(void)
         phase = obj->unk80;
         if (phase == 0 && SCRIPT_U16(script, 14) != 0) {
             obj->unk80++;
-            obj->angle.vy = DAT_801b24e4.unk124.vy + 2048;
+            obj->angle.vy = cur_avatar_status.unk124.vy + 2048;
             actor_select_target_type_in_own_group(obj, 0x19);
         } else {
             obj->unk28 &= ~0x1000000;
@@ -1569,7 +1574,7 @@ void actor_update_behavior(void)
         actor_suspend_vertical_motion();
         break;
     default:
-        DAT_8018fad4.handlers[17]();
+        asset_status.handlers[17]();
         break;
     }
     if (obj->unk28 & 0x10) {
@@ -1579,7 +1584,7 @@ void actor_update_behavior(void)
         VECTOR to;
         s32 hit;
 
-        target = DAT_80185da8.target;
+        target = actor_status.target;
         if (obj->unk0 == 3) {
             obj->unk3 = 0;
             if (target->unk9 != 1) {

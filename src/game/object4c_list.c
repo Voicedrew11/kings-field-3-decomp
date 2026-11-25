@@ -16,7 +16,7 @@ void effect_pool_reset(void)
     Object4c *obj;
     u16 i;
 
-    obj = DAT_801b77ec.objects;
+    obj = effect_status.objects;
     for (i = 0; i < 128; i++) {
         obj->unk0 = OBJECT4C_FREE;
         obj++;
@@ -30,7 +30,7 @@ void magic_load_records(u32 *src)
     u32 *dst;
     s32 i;
 
-    dst = (u32 *)DAT_801b77ec.unk0;
+    dst = (u32 *)effect_status.unk0;
     i = 0x240;
     do {
         *dst++ = *src++;
@@ -43,12 +43,12 @@ void effect_pool_sweep(void)
 {
     Object4c *obj;
 
-    obj = DAT_801b77ec.objects;
-    DAT_801b77ec.unk2f08 = 0;
+    obj = effect_status.objects;
+    effect_status.unk2f08 = 0;
     do {
         if (obj->unk0 != OBJECT4C_FREE) {
-            DAT_801b77ec.unk2f04 = obj;
-            DAT_801b77ec.unk2f00 = &DAT_801b77ec.unk0[obj->unk1];
+            effect_status.unk2f04 = obj;
+            effect_status.unk2f00 = &effect_status.unk0[obj->unk1];
             if (--obj->unk10 == -1) {
                 obj->unk0 = OBJECT4C_FREE;
             } else {
@@ -56,5 +56,5 @@ void effect_pool_sweep(void)
             }
         }
         obj++;
-    } while (++DAT_801b77ec.unk2f08 < 128);
+    } while (++effect_status.unk2f08 < 128);
 }

@@ -81,9 +81,9 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     Object44Def *def;
 
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         if ((def->unk0 == 9 || def->unk0 == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -106,7 +106,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                     }
                 }
             } else {
-                link = &DAT_8018fb3c.objects[obj->arg.b.unk3a.index];
+                link = &map_objects_slots.objects[obj->arg.b.unk3a.index];
                 if (link->unk6 == 0xff) {
                     goto message;
                 }
@@ -196,9 +196,9 @@ void area_on_load_restore_by_visit_count(void)
 {
     s32 state;
 
-    if (DAT_801ba984.unke[0xa] >= 2) {
-        DAT_8018fb3c.objects[7].unk6 = 0xff;
-        DAT_8018fb3c.objects[49].unk6 = 0xff;
+    if (cur_evt_state.unke[0xa] >= 2) {
+        map_objects_slots.objects[7].unk6 = 0xff;
+        map_objects_slots.objects[49].unk6 = 0xff;
         map_cell_copy_rotated_fields(2, 0x4e, 0, 0x21, 2, 2, 3, 0, 0x2f);
         map_cell_copy_rotated_fields(2, 0x4e, 3, 12, 0x48, 2, 3, 0, 0x2f);
         state = 8;
@@ -207,9 +207,9 @@ void area_on_load_restore_by_visit_count(void)
         map_cell_copy_rotated_fields(2, 0x4c, 3, 12, 0x48, 2, 3, 0, 0x2f);
         state = 1;
     }
-    DAT_80185da8.objects[66].unk0 = state;
-    DAT_80185da8.objects[70].unk0 = state;
-    DAT_80185da8.objects[24].unk0 = state;
-    DAT_80185da8.objects[43].unk0 = state;
-    DAT_801ba984.unk84[5] = 0xe;
+    actor_status.objects[66].unk0 = state;
+    actor_status.objects[70].unk0 = state;
+    actor_status.objects[24].unk0 = state;
+    actor_status.objects[43].unk0 = state;
+    cur_evt_state.unk84[5] = 0xe;
 }

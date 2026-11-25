@@ -36,7 +36,7 @@ void cd_map_stream_read(int file_in, int entry_in)
     u16 file = file_in;
     u16 entry = entry_in;
 
-    cd_archive_read_chunked(file, entry, DAT_801c17a4, (CdCallback)cd_stream_mark_complete);
+    cd_archive_read_chunked(file, entry, stream_work_buffer, (CdCallback)cd_stream_mark_complete);
 }
 
 ADDRESS(0x80018c94, 0x3c)
@@ -65,7 +65,7 @@ void cd_request_service_stream(void)
     CdlLOC *pos;
 
     EnterCriticalSection();
-    request = DAT_801c12e4.read;
+    request = cdrom_ctl.read;
     if (request->kind != CD_REQUEST_IMAGE || request->state != 1) {
         goto leave;
     }

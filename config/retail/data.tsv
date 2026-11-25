@@ -19,7 +19,7 @@ PSX.EXE	0x80010268	0xa68	0x4	unclassified	coverage-gap			payload-complement	may 
 PSX.EXE	0x8001026c	0xa6c	0x3c	bss	proven	program_header	struct EXEC	asm;src/psx/main.c psx.main	Load()/Exec() header; .bss 0x8001026c..0x800102a8
 PSX.EXE	0x800102a8	0xaa8	0x558	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80011000	0x800	0x26e8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800136e8	0x2ee8	0x18	defined	supported	DAT_800136e8	u32[6]	asm;band A relocs (main)	FDAT window words; main reads [2] and [4] and stores the heap base at [5]
+GAME.EXE	0x800136e8	0x2ee8	0x18	defined	supported	fdat_window_bounds	u32[6]	asm;band A relocs (main)	FDAT window words; main reads [2] and [4] and stores the heap base at [5]
 GAME.EXE	0x80013700	0x2f00	0xdf0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80061bf0	0x513f0	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80061c00	0x51400	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -78,92 +78,105 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x20	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	DAT_8007e4e4	FdatHandler[32]	asm;game-big relocs (resource_advance_transition)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
-GAME.EXE	0x8007e564	0x6dd64	0x32b4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081818	0x71018	0xd	defined	supported	DAT_80081818	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
+GAME.EXE	0x8007e4c4	0x6dcc4	0x20	defined	supported	render_world_identity_matrix	MATRIX	asm;src/game/render.c game.render	.data; identity MATRIX (0x1000 diagonal, zero translation); the view matrix of the placed-model and effect draws
+GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	callback_default_table	FdatHandler[32]	asm;game-big relocs (resource_advance_transition)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
+GAME.EXE	0x8007e564	0x6dd64	0xfc	defined	supported	menu_sprite_defs	MenuFont[21]	asm;src/game/menu.c game.menu	.data; 12-byte sprite rows (tpage, clut, u, v, w, h): the menu glyph sets and frame sprites
+GAME.EXE	0x8007e660	0x6de60	0xbd0	defined	supported	menu_window_layouts	MenuText[108]	asm;src/game/menu.c game.menu	.data; 0x1c-byte rows (x, y, 24 glyphs): 9 rows per button page; yes/no at [10]/[11]; message titles from [28]
+GAME.EXE	0x8007f230	0x6ea30	0x3f0	defined	supported	menu_label_rows	MenuEntry[42]	asm;src/game/menu.c game.menu	.data; 24-glyph label rows: equipment list labels [0..9], the none-option row [11], status and card message rows up to [41]; the header still declares [10]
+GAME.EXE	0x8007f620	0x6ee20	0xe10	defined	supported	menu_item_names	MenuEntry[150]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per item id
+GAME.EXE	0x80080430	0x6fc30	0x2e8	defined	supported	menu_magic_names	MenuEntry[31]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per magic id
+GAME.EXE	0x80080718	0x6ff18	0x384	defined	supported	menu_shop_stock_pages	u8[6][150]	asm;src/game/menu.c game.menu;src/game/save_data.c game.save_data	.data; per shop page and item id: [0] the first shop's live stock (saved with the game), [5] the blacksmith list; also masks for menu_collect_masked_item_rows
+GAME.EXE	0x80080a9c	0x7029c	0x708	defined	supported	menu_shop_buy_prices	u16[6][150]	asm;src/game/menu.c game.menu	.data; buy price per shop and item id
+GAME.EXE	0x800811a4	0x709a4	0x5dc	defined	supported	menu_shop_sell_prices	u16[5][150]	asm;src/game/menu.c game.menu	.data; sell price per shop and item id
+GAME.EXE	0x80081780	0x70f80	0x96	defined	supported	item_guide_level	u8[150]	asm;src/game/menu.c game.menu;src/game/save_data.c game.save_data	.data; per item id 0..5: the player value (+0x4c) the full item-guide entry needs; saved with the game
+GAME.EXE	0x80081816	0x71016	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x80081818	0x71018	0xd	defined	supported	memory_card_file_prefix	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
 GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	DAT_80081828	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
+GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	memory_card_title	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
 GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	DAT_80081868	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
-GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	DAT_80081884	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
-GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	DAT_800818c0	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
+GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	action_button_masks	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
+GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	magic_element_learn_levels	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
+GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	magic_element_learn_ids	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
 GAME.EXE	0x800818e3	0x710e3	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800818e4	0x710e4	0x28	defined	supported	DAT_800818e4	SVECTOR[5]	asm;src/game/player.c game.player	.data; unk14c offsets of the five shots of spells 72..74
-GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	DAT_8008190c	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record collision_sample_map_cell_layer selects outside the map
+GAME.EXE	0x800818e4	0x710e4	0x28	defined	supported	player_magic_spawn_offsets	SVECTOR[5]	asm;src/game/player.c game.player	.data; unk14c offsets of the five shots of spells 72..74
+GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	collision_default_cell	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record collision_sample_map_cell_layer selects outside the map
 GAME.EXE	0x80081916	0x71116	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	DAT_80081928	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
-GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	DAT_800819b4	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; render_game_frame rewrites their positions and texture cells every frame; visible 0xff ends the list
-GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	DAT_80081c20	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); render_game_frame shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
-GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	DAT_80081c8c	Record30[64]	asm;band C/H relocs;FDAT_080 area_refresh_lamp_effects_and_light	light records (render.h); resource_initialize_game_assets copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
-GAME.EXE	0x8008288c	0x7208c	0x50	defined	supported	DAT_8008288c	MapPatch[2][4]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): side 0/1 per Object44Def +0xe byte (map_object_initialize_from_placements type 84)
-GAME.EXE	0x800828dc	0x720dc	0x1e	defined	supported	DAT_800828dc	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements types 3 and 4
+GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	notification_quads	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
+GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	hud_sprites	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; render_game_frame rewrites their positions and texture cells every frame; visible 0xff ends the list
+GAME.EXE	0x80081c20	0x71420	0x6c	defined	proven	render_model_rows	Data80081c20[3]	asm;game-b hud relocs	compass needle records (0x24 bytes); render_game_frame shows them by the bits of the player's +0xfa and eases their angle; visible 0xff ends the list
+GAME.EXE	0x80081c8c	0x7148c	0xc00	defined	supported	light_default_records	Record30[64]	asm;band C/H relocs;FDAT_080 area_refresh_lamp_effects_and_light	light records (render.h); resource_initialize_game_assets copies them out of the first FDAT.T entry; FDAT_080 blends into [41]; WIP extent 64 records
+GAME.EXE	0x8008288c	0x7208c	0x50	defined	supported	map_object_cell_patterns	MapPatch[2][4]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): side 0/1 per Object44Def +0xe byte (map_object_initialize_from_placements type 84)
+GAME.EXE	0x800828dc	0x720dc	0x1e	defined	supported	map_object_door_shape_pattern	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements types 3 and 4
 GAME.EXE	0x800828fa	0x720fa	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800828fc	0x720fc	0x1e	defined	supported	DAT_800828fc	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 3
+GAME.EXE	0x800828fc	0x720fc	0x1e	defined	supported	map_object_door3_object_pattern	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 3
 GAME.EXE	0x8008291a	0x7211a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8008291c	0x7211c	0x1e	defined	supported	DAT_8008291c	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 4
+GAME.EXE	0x8008291c	0x7211c	0x1e	defined	supported	map_object_door4_object_pattern	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 4
 GAME.EXE	0x8008293a	0x7213a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8008293c	0x7213c	0x1e	defined	supported	DAT_8008293c	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 5
+GAME.EXE	0x8008293c	0x7213c	0x1e	defined	supported	map_object_door5_shape_pattern	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 5
 GAME.EXE	0x8008295a	0x7215a	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8008295c	0x7215c	0x1e	defined	supported	DAT_8008295c	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 5
+GAME.EXE	0x8008295c	0x7215c	0x1e	defined	supported	map_object_door5_object_pattern	MapPatch[3]	asm;game-big relocs (map_object_initialize_from_placements)	.data; map patch list (10-byte records, 0xff ends): map_object_initialize_from_placements type 5
 GAME.EXE	0x8008297a	0x7217a	0x198a2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	DAT_8009c21c	s32	asm;FDAT_002 area_update_light_flicker_and_actor_swap relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it to reverse object 158's light flicker (owner unit unknown)
+GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	light_flicker_step	s32	asm;FDAT_002 area_update_light_flicker_and_actor_swap relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it to reverse object 158's light flicker (owner unit unknown)
 GAME.EXE	0x8009c220	0x8ba20	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	DAT_8009c22c	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
-GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	DAT_8009c22d	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
-GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	DAT_8009c22e	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
-GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	DAT_8009c22f	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
-GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	DAT_8009c230	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	DAT_8009c234	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	DAT_8009c238	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	DAT_8009c23c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
-GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	DAT_8009c240	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	DAT_8009c244	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	DAT_8009c248	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	DAT_8009c24c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
-GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	DAT_8009c250	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
-GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	DAT_8009c254	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
-GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	DAT_8009c258	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
-GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	DAT_8009c25c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
-GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	DAT_8009c260	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	DAT_8009c264	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	DAT_8009c268	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	DAT_8009c26c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
-GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	DAT_8009c270	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	DAT_8009c274	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	DAT_8009c278	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	DAT_8009c27c	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
+GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	menu_item_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
+GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	menu_magic_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
+GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	menu_store_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
+GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	menu_take_out_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
+GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	menu_cd_read_state	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	menu_cd_sectors_left	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	menu_item_model_registered	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	menu_item_model_request	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
+GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	menu_item_model_read_sectors	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	menu_item_model_read_id	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	input_press_pending	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	menu_confirm_button	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
+GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	menu_cancel_button	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
+GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	menu_confirm_button_icon	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	menu_cancel_button_icon	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
+GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	menu_item_quantity	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	menu_cursor_animation_frame	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	menu_option_pulse_frame	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	menu_cursor_animation_state	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	menu_sprite_shade	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
+GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	menu_text_red	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	menu_text_green	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	menu_text_blue	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	menu_text_shadow_shade	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
 GAME.EXE	0x8009c280	0x8ba80	0x40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	DAT_8009c2c0	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
+GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	memory_card_loaded_slot	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2c1	0x8bac1	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	DAT_8009c2d0	RECT	asm;src/game/render.c game.render	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
-GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	DAT_8009c2d8	RECT	asm;src/game/render.c game.render	.sdata; {960, 256, 64, 240}: the picture area menu_show_transition_image clears before loading a TIM into it
-GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	DAT_8009c2e0	CVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; render_game_frame copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
+GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	menu_transition_rect	RECT	asm;src/game/render.c game.render	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
+GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	menu_transition_image_rect	RECT	asm;src/game/render.c game.render	.sdata; {960, 256, 64, 240}: the picture area menu_show_transition_image clears before loading a TIM into it
+GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	map_textured_primitive_color	CVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; render_game_frame copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
 GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
-GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	DAT_8009c2ec	s32	asm;src/game/render.c game.render	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
+GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	render_model_yaw_smoothing_accumulator	s32	asm;src/game/render.c game.render	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
 GAME.EXE	0x8009c2f0	0x8baf0	0x48	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c338	0x8bb38	0x4	defined	proven	DAT_8009c338	s32	asm;src/game/object4c.c game.object4c	.sdata ($gp+0x124); 0: index of the next DAT_801e7594 trail set (effect_construct_record)
-GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	DAT_8009c33c	SVECTOR	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity effect_spawn_zero_direction passes to effect_construct_record
+GAME.EXE	0x8009c338	0x8bb38	0x4	defined	proven	effect_trail_next_slot	s32	asm;src/game/object4c.c game.object4c	.sdata ($gp+0x124); 0: index of the next effect_trails_table trail set (effect_construct_record)
+GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	effect_zero_direction	SVECTOR	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity effect_spawn_zero_direction passes to effect_construct_record
 GAME.EXE	0x8009c344	0x8bb44	0x64	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	DAT_8009c3a8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
-GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	DAT_8009c3ac	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
-GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	DAT_8009c3b0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event
-GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	DAT_8009c3b4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a0; card error event
-GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	DAT_8009c3b8	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a4; never referenced
-GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	DAT_8009c3bc	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a8; never referenced
-GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	DAT_8009c3c0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
-GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	DAT_8009c3c4	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
-GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	DAT_8009c3c8	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
-GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	DAT_8009c3cc	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through Data801b24e4.unka8
-GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	DAT_8009c3d4	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c0; door kind 0x1b start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	memory_card_io_end_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
+GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	memory_card_timeout_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
+GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	memory_card_new_device_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event
+GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	memory_card_error_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a0; card error event
+GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	memory_card_unreferenced_word_0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a4; never referenced
+GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	memory_card_unreferenced_word_1	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a8; never referenced
+GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	memory_card_unreferenced_word_2	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
+GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	memory_card_unreferenced_word_3	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
+GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	memory_card_buffer	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
+GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	player_magic_attack_masks	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through Data801b24e4.unka8
+GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	map_object_door1b_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c0; door kind 0x1b start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3d6	0x8bbd6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	DAT_8009c3d8	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c4; door kind 0 start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	map_object_door0_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c4; door kind 0 start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3da	0x8bbda	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3dc	0x8bbdc	0x2	bss	supported	DAT_8009c3dc	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c8; door kind 1 start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3dc	0x8bbdc	0x2	bss	supported	map_object_door1_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c8; door kind 1 start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3de	0x8bbde	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3e0	0x8bbe0	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	DAT_8009c3f0	s32	asm;src/game/object4c.c game.object4c	.sbss; $gp+0x1dc; id 112 rate limit frame (effect_construct_record)
-GAME.EXE	0x8009c3f4	0x8bbf4	0x40c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	effect_sound_cooldown_time	s32	asm;src/game/object4c.c game.object4c	.sbss; $gp+0x1dc; id 112 rate limit frame (effect_construct_record)
+GAME.EXE	0x8009c3f4	0x8bbf4	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
+GAME.EXE	0x8009c400	0x8bc00	0x4	bss	supported	fdat_window_base	u32[1]	asm;src/game/scene.c game.scene	address the area module loads to (set from fdat_window_bounds[2]); only [0] is used
+GAME.EXE	0x8009c404	0x8bc04	0xc	bss	supported	menu_saved_primitive_buffer_0	PrimPool	asm;src/game/menu.c game.menu	copy of scene_display_sys.pools[0] while the menu owns the display; restored on exit
+GAME.EXE	0x8009c410	0x8bc10	0xc	bss	supported	menu_saved_primitive_buffer_1	PrimPool	asm;src/game/menu.c game.menu	copy of scene_display_sys.pools[1] while the menu owns the display; restored on exit
+GAME.EXE	0x8009c41c	0x8bc1c	0x3e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b1c	0x431c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -273,25 +286,25 @@ FDAT_002.BIN	0x801e9104	0xdfc	0x204	unclassified	coverage-gap			payload-compleme
 FDAT_005.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_005.BIN	0x801e8b78	0x870	0x790	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_008.BIN	0x801e8308	0x0	0xb8	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_008.BIN	0x801e8f80	0xc78	0x44	defined	supported	DAT_801e8f80	u32[17]	asm;src/fdat/fdat_008.c	.data; per object 100..116 the settings (bits 0..5) that lower it
+FDAT_008.BIN	0x801e8f80	0xc78	0x44	defined	supported	area_dial_setting_masks	u32[17]	asm;src/fdat/fdat_008.c	.data; per object 100..116 the settings (bits 0..5) that lower it
 FDAT_008.BIN	0x801e8fc4	0xcbc	0x344	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_011.BIN	0x801e87e0	0x4d8	0x328	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_014.BIN	0x801e8308	0x0	0x9c	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_014.BIN	0x801e8e74	0xb6c	0x30	defined	supported	DAT_801e8e74	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends from
-FDAT_014.BIN	0x801e8ea4	0xb9c	0x30	defined	supported	DAT_801e8ea4	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends to
+FDAT_014.BIN	0x801e8e74	0xb6c	0x30	defined	supported	area_light_blend_from	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends from
+FDAT_014.BIN	0x801e8ea4	0xb9c	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_014.c	.data; light record the lamp helper blends to
 FDAT_014.BIN	0x801e8ed4	0xbcc	0x434	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_017.BIN	0x801e892c	0x624	0x1dc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_020.BIN	0x801e8308	0x0	0xa0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_020.BIN	0x801e8ce8	0x9e0	0x30	defined	supported	DAT_801e8ce8	Record30	asm;src/fdat/fdat_020.c	.data; light record 42 blends from it
-FDAT_020.BIN	0x801e8d18	0xa10	0x30	defined	supported	DAT_801e8d18	Record30	asm;src/fdat/fdat_020.c	.data; light record 43 blends from it
-FDAT_020.BIN	0x801e8d48	0xa40	0x30	defined	supported	DAT_801e8d48	Record30	asm;src/fdat/fdat_020.c	.data; light record 44 blends from it
-FDAT_020.BIN	0x801e8d78	0xa70	0x30	defined	supported	DAT_801e8d78	Record30	asm;src/fdat/fdat_020.c	.data; light record 42..44 blend to
+FDAT_020.BIN	0x801e8ce8	0x9e0	0x30	defined	supported	area_light_blend_from_42	Record30	asm;src/fdat/fdat_020.c	.data; light record 42 blends from it
+FDAT_020.BIN	0x801e8d18	0xa10	0x30	defined	supported	area_light_blend_from_43	Record30	asm;src/fdat/fdat_020.c	.data; light record 43 blends from it
+FDAT_020.BIN	0x801e8d48	0xa40	0x30	defined	supported	area_light_blend_from_44	Record30	asm;src/fdat/fdat_020.c	.data; light record 44 blends from it
+FDAT_020.BIN	0x801e8d78	0xa70	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_020.c	.data; light record 42..44 blend to
 FDAT_020.BIN	0x801e8da8	0xaa0	0x560	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_023.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	DAT_801e8908	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
-FDAT_023.BIN	0x801e8910	0x608	0x8	defined	supported	DAT_801e8910	SVECTOR	asm;src/fdat/fdat_023.c	.data; second slot 9 offset
+FDAT_023.BIN	0x801e8908	0x600	0x8	defined	supported	area_socket_motion_start_offset	SVECTOR	asm;src/fdat/fdat_023.c	.data; first slot 9 offset
+FDAT_023.BIN	0x801e8910	0x608	0x8	defined	supported	area_socket_motion_end_offset	SVECTOR	asm;src/fdat/fdat_023.c	.data; second slot 9 offset
 FDAT_023.BIN	0x801e8918	0x610	0x1f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_026.BIN	0x801e89c8	0x6c0	0x140	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
@@ -330,8 +343,8 @@ FDAT_074.BIN	0x801e8670	0x368	0x498	unclassified	coverage-gap			payload-compleme
 FDAT_077.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_077.BIN	0x801e8b14	0x80c	0x7f4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_080.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-FDAT_080.BIN	0x801e8bb8	0x8b0	0x30	defined	supported	DAT_801e8bb8	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends from
-FDAT_080.BIN	0x801e8be8	0x8e0	0x30	defined	supported	DAT_801e8be8	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends to
+FDAT_080.BIN	0x801e8bb8	0x8b0	0x30	defined	supported	area_light_blend_from	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends from
+FDAT_080.BIN	0x801e8be8	0x8e0	0x30	defined	supported	area_light_blend_to	Record30	asm;src/fdat/fdat_080.c	.data; light record the lamp count blends to
 FDAT_080.BIN	0x801e8c18	0x910	0x6f0	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8308	0x0	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 FDAT_083.BIN	0x801e8a80	0x778	0x88	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

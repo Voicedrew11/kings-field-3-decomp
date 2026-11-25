@@ -20,13 +20,13 @@
 ADDRESS(0x80034180, 0x68)
 void render_reset_color_overlays(void)
 {
-    DAT_80199154.sum[0].mode = 1;
-    DAT_80199154.sum[1].mode = 1;
-    DAT_80199154.sum[0].count = DAT_80199154.sum[0].r = DAT_80199154.sum[0].g =
-        DAT_80199154.sum[0].b = 0;
-    DAT_80199154.sum[1].count = DAT_80199154.sum[1].r = DAT_80199154.sum[1].g =
-        DAT_80199154.sum[1].b = 0;
-    DAT_80199154.tint.mode = 0xff;
+    scene_display_sys.sum[0].mode = 1;
+    scene_display_sys.sum[1].mode = 1;
+    scene_display_sys.sum[0].count = scene_display_sys.sum[0].r = scene_display_sys.sum[0].g =
+        scene_display_sys.sum[0].b = 0;
+    scene_display_sys.sum[1].count = scene_display_sys.sum[1].r = scene_display_sys.sum[1].g =
+        scene_display_sys.sum[1].b = 0;
+    scene_display_sys.tint.mode = 0xff;
 }
 
 /* Copies the area's light records into the working set. */
@@ -37,8 +37,8 @@ void light_reset_records(void)
     Record6c *dst;
     s32 i;
 
-    src = DAT_80081c8c;
-    dst = DAT_80199154.unk15da8;
+    src = light_default_records;
+    dst = scene_display_sys.unk15da8;
     for (i = 63; i != -1; i--) {
         dst->unk50 = src->unk14;
         dst->unk0[0] = src->unk0;
@@ -48,7 +48,7 @@ void light_reset_records(void)
         src++;
         dst++;
     }
-    DAT_80199154.unk15da4 = 1;
+    scene_display_sys.unk15da4 = 1;
 }
 
 /* Rebuilds the quarter turns of every working light record when asked to. */
@@ -58,15 +58,15 @@ void light_refresh_record_rotations(void)
     Record6c *light;
     s32 i;
 
-    if (DAT_80199154.unk15da4 != 0) {
-        light = DAT_80199154.unk15da8;
+    if (scene_display_sys.unk15da4 != 0) {
+        light = scene_display_sys.unk15da8;
         for (i = 63; i != -1; i--) {
             matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[1], 1);
             matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[2], 2);
             matrix_rotate_quarter_turns((MATRIX *)&light->unk0[0], (MATRIX *)&light->unk0[3], 3);
             light++;
         }
-        DAT_80199154.unk15da4 = 0;
+        scene_display_sys.unk15da4 = 0;
     }
 }
 
@@ -107,13 +107,13 @@ void light_interpolate_records(s32 flags, Record30 *src, s32 t)
     Record6c *light;
     s32 i;
 
-    light = DAT_80199154.unk15da8;
+    light = scene_display_sys.unk15da8;
     for (i = 0; i < 48; i++) {
         light_interpolate_record_fields(flags, src, light, t);
         light++;
     }
     if (flags & 1) {
-        DAT_80199154.unk15da4 = 1;
+        scene_display_sys.unk15da4 = 1;
     }
 }
 
@@ -173,10 +173,11 @@ void view_grid_occlude_walls_ascending(void)
             x = SCRATCH->u.view.x;
             for (i = 24; i != 0; i--) {
                 if (x < 80 && *p != 0) {
-                    cell = &DAT_801d4464.cells[z][x];
+                    cell = &map_world.cells[z][x];
                     if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
                         cell->layer[1].unk0 == 0xfd) {
-                        angle = vector_xz_to_angle(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
+                        angle = vector_xz_to_angle(x - scene_display_sys.unk15b10,
+                                                   z - scene_display_sys.unk15b14);
                         q = p;
                         if (angle < 256 || angle >= 3840) {
                             do {
@@ -260,10 +261,11 @@ void view_grid_occlude_walls_descending(void)
             x = SCRATCH->u.view.x + 24;
             for (i = 24; i != 0; i--) {
                 if (x > 0 && *p != 0) {
-                    cell = &DAT_801d4464.cells[z][x];
+                    cell = &map_world.cells[z][x];
                     if (cell->layer[1].unk0 == 0xff || cell->layer[1].unk0 == 0xfe ||
                         cell->layer[1].unk0 == 0xfd) {
-                        angle = vector_xz_to_angle(x - DAT_80199154.unk15b10, z - DAT_80199154.unk15b14);
+                        angle = vector_xz_to_angle(x - scene_display_sys.unk15b10,
+                                                   z - scene_display_sys.unk15b14);
                         q = p;
                         if (angle < 256 || angle >= 3840) {
                             do {
@@ -362,8 +364,8 @@ void view_build_visibility_grid(void)
     s32 left;
     s32 right;
 
-    half = DAT_80199154.unk15b08.vx & 0xfff;
-    yaw = DAT_80199154.unk15b08.vy + 1024;
+    half = scene_display_sys.unk15b08.vx & 0xfff;
+    yaw = scene_display_sys.unk15b08.vy + 1024;
     if (half > 2048) {
         half = 4096 - half;
     }
@@ -389,9 +391,9 @@ void view_build_visibility_grid(void)
     kr = -drz * back_x + drx * back_z;
     kl = -dlz * back_x + dlx * back_z;
     if (half < 600) {
-        range = DAT_80199154.unk15995 * DAT_80199154.unk15995;
+        range = scene_display_sys.unk15995 * scene_display_sys.unk15995;
     } else {
-        range = DAT_80199154.unk15995 * DAT_80199154.unk15995 * rcos(half >> 1) >> 12;
+        range = scene_display_sys.unk15995 * scene_display_sys.unk15995 * rcos(half >> 1) >> 12;
     }
     row = 0;
     col = 0;
@@ -438,26 +440,26 @@ void view_build_visibility_grid(void)
     SCRATCH->u.view.grid[eye_z][eye_x] = 30;
     SCRATCH->u.view.grid[eye_z][eye_x + 1] = 30;
     SCRATCH->u.view.grid[eye_z + 1][eye_x] = 30;
-    if (DAT_801b24e4.unk101 != 0x11) {
+    if (cur_avatar_status.unk101 != 0x11) {
         SCRATCH->u.view.grid[back_z - 1][back_x] = 0;
         SCRATCH->u.view.grid[back_z][back_x - 1] = 0;
         SCRATCH->u.view.grid[back_z][back_x] = 0;
         SCRATCH->u.view.grid[back_z][back_x + 1] = 0;
         SCRATCH->u.view.grid[back_z + 1][back_x] = 0;
     }
-    DAT_80199154.grid_z = eye_z - DAT_80199154.unk15b14;
-    DAT_80199154.unk15b24 = -DAT_80199154.grid_z;
-    DAT_80199154.grid_x = eye_x - DAT_80199154.unk15b10;
-    DAT_80199154.unk15b20 = -DAT_80199154.grid_x;
-    SCRATCH->u.view.x = DAT_80199154.unk15b20;
-    SCRATCH->u.view.z = DAT_80199154.unk15b24;
+    scene_display_sys.grid_z = eye_z - scene_display_sys.unk15b14;
+    scene_display_sys.unk15b24 = -scene_display_sys.grid_z;
+    scene_display_sys.grid_x = eye_x - scene_display_sys.unk15b10;
+    scene_display_sys.unk15b20 = -scene_display_sys.grid_x;
+    SCRATCH->u.view.x = scene_display_sys.unk15b20;
+    SCRATCH->u.view.z = scene_display_sys.unk15b24;
     if ((yaw & 0xfff) < 2048) {
         view_grid_occlude_walls_ascending();
     } else {
         view_grid_occlude_walls_descending();
     }
-    resource_copy_words((u32 *)DAT_80199154.grid, (u32 *)SCRATCH->u.view.grid,
-                        sizeof(DAT_80199154.grid) / 4);
+    resource_copy_words((u32 *)scene_display_sys.grid, (u32 *)SCRATCH->u.view.grid,
+                        sizeof(scene_display_sys.grid) / 4);
 }
 
 /* A free VRAM scroll record, or NULL. */
@@ -467,7 +469,7 @@ ScrollRec *vram_scroll_find_free(void)
     ScrollRec *scroll;
     s32 i;
 
-    scroll = DAT_80199154.scroll;
+    scroll = scene_display_sys.scroll;
     i = 2;
     do {
         if (scroll->mode == 0xff) {
@@ -519,7 +521,7 @@ void vram_scroll_update(void)
     s32 step;
     s32 y;
 
-    scroll = DAT_80199154.scroll;
+    scroll = scene_display_sys.scroll;
     for (i = 1; i != -1; i--) {
         if (scroll->unk2 == 0) {
             rect = scroll->unk10;
@@ -551,8 +553,8 @@ void vram_scroll_update(void)
 ADDRESS(0x80035358, 0x3c)
 void fog_set_range(s32 near, s32 far)
 {
-    DAT_80199154.unk15b28 = near;
-    DAT_80199154.unk15b2c = far;
+    scene_display_sys.unk15b28 = near;
+    scene_display_sys.unk15b2c = far;
     if (near == far) {
         near = 0xffff;
     }
@@ -577,59 +579,59 @@ void display_initialize(void)
     h = 240;
     gte_SetGeomOffset(160, 120);
     gte_SetGeomScreen(200);
-    SetDefDrawEnv(&DAT_80199154.draw[0], 0, 0, 320, h);
-    SetDefDispEnv(&DAT_80199154.disp[0], 0, 240, 320, h);
-    SetDefDrawEnv(&DAT_80199154.draw[1], 0, 240, 320, h);
-    SetDefDispEnv(&DAT_80199154.disp[1], 0, 0, 320, h);
-    DAT_80199154.draw[0].dtd = 1;
-    DAT_80199154.draw[1].dtd = 1;
-    DAT_80199154.draw[0].isbg = 1;
-    DAT_80199154.draw[1].isbg = 1;
-    setRGB0(&DAT_80199154.draw[0], 0, 0, 0);
-    setRGB0(&DAT_80199154.draw[1], 0, 0, 0);
-    PutDispEnv(&DAT_80199154.disp[0]);
-    PutDrawEnv(&DAT_80199154.draw[0]);
+    SetDefDrawEnv(&scene_display_sys.draw[0], 0, 0, 320, h);
+    SetDefDispEnv(&scene_display_sys.disp[0], 0, 240, 320, h);
+    SetDefDrawEnv(&scene_display_sys.draw[1], 0, 240, 320, h);
+    SetDefDispEnv(&scene_display_sys.disp[1], 0, 0, 320, h);
+    scene_display_sys.draw[0].dtd = 1;
+    scene_display_sys.draw[1].dtd = 1;
+    scene_display_sys.draw[0].isbg = 1;
+    scene_display_sys.draw[1].isbg = 1;
+    setRGB0(&scene_display_sys.draw[0], 0, 0, 0);
+    setRGB0(&scene_display_sys.draw[1], 0, 0, 0);
+    PutDispEnv(&scene_display_sys.disp[0]);
+    PutDrawEnv(&scene_display_sys.draw[0]);
     gte_SetGeomScreen(200);
     gte_SetBackColor(80, 80, 80);
     gte_SetFarColor(5, 5, 5);
     fog_set_range(20000, 24000);
-    DAT_80199154.frame = 0xff;
-    DAT_80199154.buffer = DAT_80116954;
-    DAT_80199154.pools[0].base = DAT_80116954;
-    DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x1a000;
-    DAT_80199154.message_state = 0;
-    DAT_80199154.message_tail = 0;
-    DAT_80199154.message_head = 0;
-    queue = DAT_80199154.message_queue;
+    scene_display_sys.frame = 0xff;
+    scene_display_sys.buffer = ot_packet_memory;
+    scene_display_sys.pools[0].base = ot_packet_memory;
+    scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x1a000;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x1a000;
+    scene_display_sys.message_state = 0;
+    scene_display_sys.message_tail = 0;
+    scene_display_sys.message_head = 0;
+    queue = scene_display_sys.message_queue;
     for (i = 7; i != -1; i--) {
         *queue++ = 0xff;
     }
-    scroll = DAT_80199154.scroll;
+    scroll = scene_display_sys.scroll;
     for (i = 1; i != -1; i--) {
         scroll->mode = 0xff;
         scroll++;
     }
-    DAT_80199154.tint.mode = 0xff;
-    DAT_80182964 = 0;
+    scene_display_sys.tint.mode = 0xff;
+    map_placed_frame_counter = 0;
     pool_reset();
-    DAT_80199154.unk15995 = 13;
-    DAT_80199154.unk15996 = 1;
+    scene_display_sys.unk15995 = 13;
+    scene_display_sys.unk15996 = 1;
 }
 
 /* Starts a frame: flips the buffers and clears both ordering tables. */
 ADDRESS(0x80035630, 0xd0)
 void display_begin_frame(void)
 {
-    DAT_80199154.frame = !DAT_80199154.frame;
-    DAT_80199154.pool = &DAT_80199154.pools[DAT_80199154.frame];
-    DAT_80199154.ot = DAT_80199154.ot_buffer[DAT_80199154.frame];
-    ClearOTagR(DAT_80199154.ot, OT_LENGTH);
-    DAT_80199154.ot2 = DAT_80199154.ot2_buffer[DAT_80199154.frame];
-    ClearOTagR(DAT_80199154.ot2, 8);
-    DAT_80199154.pool->next = DAT_80199154.pool->base;
-    DAT_80199154.unk159bc = DAT_80199154.ot_count = DAT_80199154.prim_count = 0;
+    scene_display_sys.frame = !scene_display_sys.frame;
+    scene_display_sys.pool = &scene_display_sys.pools[scene_display_sys.frame];
+    scene_display_sys.ot = scene_display_sys.ot_buffer[scene_display_sys.frame];
+    ClearOTagR(scene_display_sys.ot, OT_LENGTH);
+    scene_display_sys.ot2 = scene_display_sys.ot2_buffer[scene_display_sys.frame];
+    ClearOTagR(scene_display_sys.ot2, 8);
+    scene_display_sys.pool->next = scene_display_sys.pool->base;
+    scene_display_sys.unk159bc = scene_display_sys.ot_count = scene_display_sys.prim_count = 0;
 }
 
 /* Ends a frame: shows the finished buffer and draws ot2 then ot. */
@@ -638,10 +640,10 @@ void display_present_frame(void)
 {
     DrawSync(0);
     VSync(0);
-    PutDispEnv(&DAT_80199154.disp[DAT_80199154.frame]);
-    PutDrawEnv(&DAT_80199154.draw[DAT_80199154.frame]);
-    addPrims(DAT_80199154.ot + OT_LENGTH - 2, DAT_80199154.ot2 + 7, DAT_80199154.ot2);
-    DrawOTag(DAT_80199154.ot + OT_LENGTH - 1);
+    PutDispEnv(&scene_display_sys.disp[scene_display_sys.frame]);
+    PutDrawEnv(&scene_display_sys.draw[scene_display_sys.frame]);
+    addPrims(scene_display_sys.ot + OT_LENGTH - 2, scene_display_sys.ot2 + 7, scene_display_sys.ot2);
+    DrawOTag(scene_display_sys.ot + OT_LENGTH - 1);
 }
 
 /* Sets the viewer (either may be NULL to keep it) and rebuilds the view matrices. */
@@ -652,20 +654,20 @@ void display_set_view_transform(VECTOR *pos, SVECTOR *angle)
     VECTOR unused;
 
     if (pos) {
-        DAT_80199154.unk15af8 = *pos;
-        DAT_80199154.unk15b10 = DAT_80199154.unk15af8.vx >> 11;
-        DAT_80199154.unk15b14 = DAT_80199154.unk15af8.vz >> 11;
+        scene_display_sys.unk15af8 = *pos;
+        scene_display_sys.unk15b10 = scene_display_sys.unk15af8.vx >> 11;
+        scene_display_sys.unk15b14 = scene_display_sys.unk15af8.vz >> 11;
     }
     if (angle) {
-        DAT_80199154.unk15b08 = *angle;
+        scene_display_sys.unk15b08 = *angle;
     }
-    rotation.vx = DAT_80199154.unk15b08.vx;
-    rotation.vz = DAT_80199154.unk15b08.vz;
-    rotation.vy = DAT_80199154.unk15b08.vy;
-    RotMatrix(&rotation, &DAT_80199154.unk159f8);
-    matrix_set_rotation_x(rotation.vx, &DAT_80199154.unk15ab8);
-    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[0], 0);
-    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[1], 1);
-    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[2], 2);
-    matrix_rotate_quarter_turns(&DAT_80199154.unk159f8, &DAT_80199154.unk15a38[3], 3);
+    rotation.vx = scene_display_sys.unk15b08.vx;
+    rotation.vz = scene_display_sys.unk15b08.vz;
+    rotation.vy = scene_display_sys.unk15b08.vy;
+    RotMatrix(&rotation, &scene_display_sys.unk159f8);
+    matrix_set_rotation_x(rotation.vx, &scene_display_sys.unk15ab8);
+    matrix_rotate_quarter_turns(&scene_display_sys.unk159f8, &scene_display_sys.unk15a38[0], 0);
+    matrix_rotate_quarter_turns(&scene_display_sys.unk159f8, &scene_display_sys.unk15a38[1], 1);
+    matrix_rotate_quarter_turns(&scene_display_sys.unk159f8, &scene_display_sys.unk15a38[2], 2);
+    matrix_rotate_quarter_turns(&scene_display_sys.unk159f8, &scene_display_sys.unk15a38[3], 3);
 }

@@ -21,8 +21,8 @@ void area_update_actor_target_fade_approach(void)
     s32 range;
     s32 mode;
 
-    obj = DAT_80185da8.current;
-    def = DAT_80185da8.def;
+    obj = actor_status.current;
+    def = actor_status.def;
     script = obj->unk60;
     if (obj->unke != 0x85) {
         return;
@@ -37,12 +37,13 @@ void area_update_actor_target_fade_approach(void)
         obj->unk13 = 7;
         actor_set_animation(script[1]);
     }
-    dx = DAT_801b24e4.pos.vx - obj->pos.vx;
-    dz = DAT_801b24e4.pos.vz - obj->pos.vz;
+    dx = cur_avatar_status.pos.vx - obj->pos.vx;
+    dz = cur_avatar_status.pos.vz - obj->pos.vz;
     angle = ratan2(dz, dx);
     step_x = ((u16 *)script)[6] * rcos(angle) >> 12;
     step_z = ((u16 *)script)[6] * rsin(angle) >> 12;
-    obj->unk64 = vector_xz_to_angle(DAT_801b24e4.pos.vx - obj->pos.vx, DAT_801b24e4.pos.vz - obj->pos.vz);
+    obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                    cur_avatar_status.pos.vz - obj->pos.vz);
     mode = 5;
     if (obj->unk72.vy == 0) {
         turned = actor_turn_and_move_along_heading(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7],

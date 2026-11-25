@@ -94,7 +94,7 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
     if (i == -1) {
         return;
     }
-    obj = &DAT_8018fb3c.objects[i];
+    obj = &map_objects_slots.objects[i];
     if (obj->unk4 != 0x53) {
         return;
     }
@@ -106,7 +106,7 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
     }
     if (obj->unka == 0 || obj->unka >= 4095) {
         obj->unk8 = 1;
-        DAT_801ba984.unk0 = 1;
+        cur_evt_state.unk0 = 1;
     }
 }
 
@@ -132,11 +132,11 @@ void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
         return;
     }
     if (player_camera_within_map_region(0x1c, 0x1e, 3, 4, 0x8000) != 0) {
-        if (DAT_801b24e4.unk10a != 0) {
+        if (cur_avatar_status.unk10a != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
         }
     } else {
-        DAT_801b24e4.unk10a = 0;
+        cur_avatar_status.unk10a = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
     }
 }
@@ -175,7 +175,7 @@ void area_talk_event_clear_objects_and_give_items(Object88 *record, s32 event)
 
     switch (event) {
     case 0:
-        obj = DAT_8018fb3c.objects;
+        obj = map_objects_slots.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
             if (obj->unk4 == 0x56) {
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -188,12 +188,12 @@ void area_talk_event_clear_objects_and_give_items(Object88 *record, s32 event)
             game_counter_decrement(0x66);
         }
         event_map_object_interact(NULL, 0x82);
-        DAT_801ba984.unke[0x14] = 1;
+        cur_evt_state.unke[0x14] = 1;
         break;
     case 1:
-        if (DAT_801ba984.unke[0x13] == 0) {
+        if (cur_evt_state.unke[0x13] == 0) {
             event_map_object_interact(NULL, 0x60);
-            DAT_801ba984.unke[0x13] = 1;
+            cur_evt_state.unke[0x13] = 1;
         }
         break;
     case 2:
@@ -209,14 +209,14 @@ void area_on_load_restore_cleared_objects(void)
     Object44 *obj;
     s32 i;
 
-    if (DAT_801ba984.unke[0x12] == 0) {
-        DAT_801ba984.unke[0x12] = 1;
+    if (cur_evt_state.unke[0x12] == 0) {
+        cur_evt_state.unke[0x12] = 1;
     }
-    if (DAT_801ba984.unke[0] != 0) {
-        DAT_801ba984.unke[0x16] = 1;
+    if (cur_evt_state.unke[0] != 0) {
+        cur_evt_state.unke[0x16] = 1;
     }
-    if (DAT_801ba984.unke[0x14] != 0) {
-        obj = DAT_8018fb3c.objects;
+    if (cur_evt_state.unke[0x14] != 0) {
+        obj = map_objects_slots.objects;
         for (i = 0x18c; i != 0; i--, obj++) {
             if (obj->unk4 == 0x56) {
                 obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
@@ -226,5 +226,5 @@ void area_on_load_restore_cleared_objects(void)
             }
         }
     }
-    DAT_801ba984.unk84[5] = 5;
+    cur_evt_state.unk84[5] = 5;
 }

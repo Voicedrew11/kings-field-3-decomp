@@ -102,8 +102,8 @@ typedef struct CdState {
     CdFile files[10];           /* +0x448 */
 } CdState;
 
-extern CdState DAT_801c12e4;
-extern u8 DAT_801c17a4[];
+extern CdState cdrom_ctl;
+extern u8 stream_work_buffer[];
 
 void cd_request_yield(void);
 void cd_wait_four_vsyncs(void);

@@ -85,16 +85,16 @@ void area_update_respawn_actor_out_of_view(void)
 {
     s32 i = 15;
 
-    if (DAT_801ba984.unk32[0x23] == 1 && DAT_80185da8.objects[i].unk9 != 1) {
-        if (angle_within_tolerance(DAT_801b24e4.unk124.vy,
-                                   vector_xz_to_angle(DAT_80185da8.objects[i].pos.vx - DAT_801b24e4.pos.vx,
-                                                      DAT_80185da8.objects[i].pos.vz - DAT_801b24e4.pos.vz),
+    if (cur_evt_state.unk32[0x23] == 1 && actor_status.objects[i].unk9 != 1) {
+        if (angle_within_tolerance(cur_avatar_status.unk124.vy,
+                                   vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
+                                                      actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                    600) == 0) {
-            DAT_80185da8.objects[i].unk9 = 0;
-            DAT_80185da8.objects[i].unk0 = 2;
+            actor_status.objects[i].unk9 = 0;
+            actor_status.objects[i].unk0 = 2;
         }
     }
-    DAT_80185da8.objects[56].unk3 = 0;
+    actor_status.objects[56].unk3 = 0;
 }
 
 /*
@@ -112,17 +112,17 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
     s32 t;
     u16 id;
 
-    if (item != 0x8f || DAT_801ba984.unk32[0x25] != 0) {
+    if (item != 0x8f || cur_evt_state.unk32[0x25] != 0) {
         return;
     }
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 0x6a4, angle->vy, 0x200)) != -1; i++) {
         if (i != 11) {
             continue;
         }
-        target = &DAT_8018fb3c.objects[11];
-        obj = map_object_effect_pool_acquire(0x15e, 10, DAT_8018fb3c.unk885e);
+        target = &map_objects_slots.objects[11];
+        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.unk885e);
         map_object_reset(obj);
-        id = DAT_8018fb3c.unk885e++;
+        id = map_objects_slots.unk885e++;
         obj->unke = -100;
         obj->unk0 = 2;
         obj->arg.h.unk3c = id;
@@ -130,8 +130,8 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
         obj->unk4 = 0xff;
         obj->angle.vz = 0;
         obj->angle.vx = 0;
-        obj->angle.vy = DAT_8018fb3c.objects[i].angle.vy;
-        from = DAT_801b24e4.pos;
+        obj->angle.vy = map_objects_slots.objects[i].angle.vy;
+        from = cur_avatar_status.pos;
         obj->pos = from;
         obj->pos.vy -= 1330;
         obj->arg.b.unk38 = 0;
@@ -143,10 +143,10 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
             cd_request_service_stream();
             render_game_frame(NULL, NULL);
         }
-        DAT_801ba984.unk32[0x25] = 1;
-        DAT_801ba984.unk32[0x26] = 0;
+        cur_evt_state.unk32[0x25] = 1;
+        cur_evt_state.unk32[0x26] = 0;
         game_counter_decrement(item);
-        DAT_801ba984.unk0 = 1;
+        cur_evt_state.unk0 = 1;
     }
 }
 
@@ -165,12 +165,12 @@ void area_set_cell_toggle(s32 index, s32 state)
 
     switch (state) {
     case 0:
-        obj = &DAT_8018fb3c.objects[index];
+        obj = &map_objects_slots.objects[index];
         obj->arg.b.unk3f = 0;
         obj->unk8 = 1;
         break;
     case 1:
-        obj = &DAT_8018fb3c.objects[index];
+        obj = &map_objects_slots.objects[index];
         obj->arg.b.unk3f = 1;
         obj->unk8 = 1;
         break;
@@ -184,37 +184,37 @@ void area_set_cell_toggle(s32 index, s32 state)
 ADDRESS(0x801e89c0, 0x150)
 void area_on_actor_removed_set_toggles(Object88 *obj)
 {
-    switch (obj - DAT_80185da8.objects) {
+    switch (obj - actor_status.objects) {
     case 11:
-        if (DAT_801ba984.unk32[0x20] == 0) {
-            DAT_801ba984.unk32[0x20] = 1;
+        if (cur_evt_state.unk32[0x20] == 0) {
+            cur_evt_state.unk32[0x20] = 1;
             area_disable_actor_range(0x10, 1);
             area_set_cell_toggle(0x50, 1);
         }
         break;
     case 12:
-        if (DAT_801ba984.unk32[0x21] == 0) {
-            DAT_801ba984.unk32[0x21] = 1;
+        if (cur_evt_state.unk32[0x21] == 0) {
+            cur_evt_state.unk32[0x21] = 1;
             area_disable_actor_range(0x37, 1);
             area_set_cell_toggle(0x51, 1);
         }
         break;
     case 13:
-        if (DAT_801ba984.unk32[0x22] == 0) {
-            DAT_801ba984.unk32[0x22] = 1;
+        if (cur_evt_state.unk32[0x22] == 0) {
+            cur_evt_state.unk32[0x22] = 1;
             area_disable_actor_range(0x2e, 1);
             area_set_cell_toggle(5, 1);
         }
         break;
     case 15:
-        if (DAT_801ba984.unk32[0x23] == 1) {
-            DAT_801ba984.unk32[0x23] = 2;
-            DAT_80185da8.objects[15].unk0 = 8;
+        if (cur_evt_state.unk32[0x23] == 1) {
+            cur_evt_state.unk32[0x23] = 2;
+            actor_status.objects[15].unk0 = 8;
         }
         break;
     case 56:
-        DAT_80185da8.objects[56].unk0 = 1;
-        DAT_80185da8.objects[56].unk3 = 0;
+        actor_status.objects[56].unk0 = 1;
+        actor_status.objects[56].unk3 = 0;
         break;
     }
 }
@@ -228,14 +228,14 @@ void area_region_trigger_trade_item_and_damage(Object44 *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (DAT_801ba984.unk32[0x23] == 0) {
-            DAT_801ba984.unk32[0x23] = 1;
+        if (cur_evt_state.unk32[0x23] == 0) {
+            cur_evt_state.unk32[0x23] = 1;
         }
         break;
     case 1:
         if (game_counter_is_nonzero(0x38) > 0) {
             color_overlay_transition(0x200, 0, 0, 0, 100, 100, 100);
-            if (DAT_801b24e4.unkf2 == 0x38) {
+            if (cur_avatar_status.unkf2 == 0x38) {
                 player_set_equipment_slot(0x39, 4);
             }
             game_counter_decrement(0x38);
@@ -244,18 +244,18 @@ void area_region_trigger_trade_item_and_damage(Object44 *obj)
         }
         break;
     case 0x61:
-        if (DAT_801ba984.unk32[0x20] == 0) {
+        if (cur_evt_state.unk32[0x20] == 0) {
             player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
-        if (DAT_801ba984.unk32[0x21] == 0) {
+        if (cur_evt_state.unk32[0x21] == 0) {
             player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
-        if (DAT_801ba984.unk32[0x22] == 0) {
+        if (cur_evt_state.unk32[0x22] == 0) {
             player_apply_damage(0, 0, 0, 0x40, 0, 0x63, 0, 0, 0, 0, 0, NULL);
         }
         break;
     case 0x63:
-        player_apply_damage(0, 0, 0, 0x43, 0, 0, 0, 0, 0, 0, 0, &DAT_801b24e4.pos);
+        player_apply_damage(0, 0, 0, 0x43, 0, 0, 0, 0, 0, 0, 0, &cur_avatar_status.pos);
         break;
     }
 }
@@ -296,7 +296,7 @@ void area_on_movie_start_show_objects_and_wake_actor(u8 id)
     s32 i;
 
     if (id == 9) {
-        obj = &DAT_8018fb3c.objects[50];
+        obj = &map_objects_slots.objects[50];
         obj->unk0 = 0;
         obj += 2;
         for (i = 9; i != -1; i--) {
@@ -304,8 +304,8 @@ void area_on_movie_start_show_objects_and_wake_actor(u8 id)
             obj++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        DAT_80185da8.objects[56].unk9 = 0;
-        DAT_80185da8.objects[56].unk0 = 2;
+        actor_status.objects[56].unk9 = 0;
+        actor_status.objects[56].unk0 = 2;
     }
 }
 
@@ -314,7 +314,7 @@ ADDRESS(0x801e8de8, 0x20)
 void area_on_movie_end_set_flag(u8 id)
 {
     if (id == 9) {
-        DAT_801ba984.unk32[0x26] = 1;
+        cur_evt_state.unk32[0x26] = 1;
     }
 }
 
@@ -324,8 +324,8 @@ void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 even
 {
     switch (event) {
     case 0:
-        if (DAT_801ba984.unk32[0x24] != 1) {
-            DAT_801ba984.unk32[0x24] = 1;
+        if (cur_evt_state.unk32[0x24] != 1) {
+            cur_evt_state.unk32[0x24] = 1;
             event_map_object_interact(NULL, 0x29);
             player_set_equipment_slot(0x29, 0);
             event_map_object_interact(NULL, 0x31);
@@ -336,20 +336,20 @@ void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 even
             player_set_equipment_slot(0x4f, 3);
             event_map_object_interact(NULL, 0x3c);
             player_set_equipment_slot(0x3c, 4);
-            DAT_8018fb3c.objects[63].unk0 = 2;
-            DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
+            map_objects_slots.objects[63].unk0 = 2;
+            map_objects_slots.objects[63].arg.b.unk3f = 0xff;
         }
         break;
     case 1:
-        if (DAT_801ba984.unk32[0x25] == 1) {
-            DAT_801ba984.unk32[0x25] = 2;
+        if (cur_evt_state.unk32[0x25] == 1) {
+            cur_evt_state.unk32[0x25] = 2;
             color_overlay_transition(0x200, 0, 0, 0, 200, 200, 200);
             color_overlay_transition(0x200, 200, 200, 200, 0, 0, 0);
-            DAT_801b24e4.unk34[4] += 30;
+            cur_avatar_status.unk34[4] += 30;
             player_learn_element_magic(4);
             player_recalculate_combat_stats();
-            DAT_80185da8.objects[56].unk0 = 8;
-            DAT_80185da8.objects[56].unk3 = 0;
+            actor_status.objects[56].unk0 = 8;
+            actor_status.objects[56].unk3 = 0;
         }
         break;
     }
@@ -364,34 +364,34 @@ void area_on_load_restore_objects_and_actors(void)
     s32 i;
     u16 id;
 
-    if (DAT_801ba984.unk32[0x20] != 0) {
+    if (cur_evt_state.unk32[0x20] != 0) {
         area_disable_actor_range(0x10, 1);
         area_set_cell_toggle(0x50, 1);
     } else {
         area_set_cell_toggle(0x50, 0);
     }
-    if (DAT_801ba984.unk32[0x21] != 0) {
+    if (cur_evt_state.unk32[0x21] != 0) {
         area_disable_actor_range(0x37, 1);
         area_set_cell_toggle(0x51, 1);
     } else {
         area_set_cell_toggle(0x51, 0);
     }
-    if (DAT_801ba984.unk32[0x22] != 0) {
+    if (cur_evt_state.unk32[0x22] != 0) {
         area_disable_actor_range(0x2e, 1);
         area_set_cell_toggle(5, 1);
     } else {
         area_set_cell_toggle(5, 0);
     }
-    DAT_80185da8.objects[15].unk0 = 8;
-    if (DAT_801ba984.unk32[0x24] != 0) {
-        DAT_8018fb3c.objects[63].unk0 = 2;
-        DAT_8018fb3c.objects[63].arg.b.unk3f = 0xff;
+    actor_status.objects[15].unk0 = 8;
+    if (cur_evt_state.unk32[0x24] != 0) {
+        map_objects_slots.objects[63].unk0 = 2;
+        map_objects_slots.objects[63].arg.b.unk3f = 0xff;
     } else {
-        DAT_8018fb3c.objects[63].unk0 = 0;
-        DAT_8018fb3c.objects[63].arg.b.unk3f = 0;
+        map_objects_slots.objects[63].unk0 = 0;
+        map_objects_slots.objects[63].arg.b.unk3f = 0;
     }
-    if (DAT_801ba984.unk32[0x25] == 0) {
-        p = &DAT_8018fb3c.objects[50];
+    if (cur_evt_state.unk32[0x25] == 0) {
+        p = &map_objects_slots.objects[50];
         p->unk0 = 2;
         p += 2;
         for (i = 9; i != -1; i--) {
@@ -399,11 +399,11 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        DAT_80185da8.objects[56].unk0 = 8;
-        DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0 = 2;
-    } else if (DAT_801ba984.unk32[0x25] == 1) {
-        p = &DAT_8018fb3c.objects[50];
+        actor_status.objects[56].unk0 = 8;
+        actor_status.objects[56].unk3 = 0;
+        map_objects_slots.objects[11].unk0 = 2;
+    } else if (cur_evt_state.unk32[0x25] == 1) {
+        p = &map_objects_slots.objects[50];
         p->unk0 = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
@@ -411,12 +411,12 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        DAT_80185da8.objects[56].unk0 = 1;
-        DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0 = 2;
-        obj = map_object_effect_pool_acquire(0x15e, 10, DAT_8018fb3c.unk885e);
+        actor_status.objects[56].unk0 = 1;
+        actor_status.objects[56].unk3 = 0;
+        map_objects_slots.objects[11].unk0 = 2;
+        obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.unk885e);
         map_object_reset(obj);
-        id = DAT_8018fb3c.unk885e++;
+        id = map_objects_slots.unk885e++;
         obj->unke = -100;
         obj->unk6 = 0x8f;
         obj->arg.h.unk3c = id;
@@ -424,13 +424,13 @@ void area_on_load_restore_objects_and_actors(void)
         obj->unk4 = 0xff;
         obj->angle.vz = 0;
         obj->angle.vx = 0;
-        obj->angle.vy = DAT_8018fb3c.objects[11].angle.vy;
+        obj->angle.vy = map_objects_slots.objects[11].angle.vy;
         obj->arg.b.unk38 = 0;
-        obj->pos.vx = DAT_8018fb3c.objects[11].pos.vx;
-        obj->pos.vy = DAT_8018fb3c.objects[11].pos.vy - 50;
-        obj->pos.vz = DAT_8018fb3c.objects[11].pos.vz;
+        obj->pos.vx = map_objects_slots.objects[11].pos.vx;
+        obj->pos.vy = map_objects_slots.objects[11].pos.vy - 50;
+        obj->pos.vz = map_objects_slots.objects[11].pos.vz;
     } else {
-        p = &DAT_8018fb3c.objects[50];
+        p = &map_objects_slots.objects[50];
         p->unk0 = 0;
         p += 2;
         for (i = 9; i != -1; i--) {
@@ -438,10 +438,10 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        DAT_80185da8.objects[56].unk0 = 8;
-        DAT_80185da8.objects[56].unk3 = 0;
-        DAT_8018fb3c.objects[11].unk0 = 0;
+        actor_status.objects[56].unk0 = 8;
+        actor_status.objects[56].unk3 = 0;
+        map_objects_slots.objects[11].unk0 = 0;
     }
-    DAT_801ba984.unk32[0x26] = 1;
-    DAT_801ba984.unk84[5] = 0x11;
+    cur_evt_state.unk32[0x26] = 1;
+    cur_evt_state.unk84[5] = 0x11;
 }

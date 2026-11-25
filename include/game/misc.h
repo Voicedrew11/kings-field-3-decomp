@@ -70,6 +70,6 @@ void movie_state_reset(void);
 void movie_play(void);
 
 /* Game loop exit word (defined in src/game/main.c). */
-extern s32 DAT_8009c3f8;
+extern s32 main_end_flag;
 
 #endif

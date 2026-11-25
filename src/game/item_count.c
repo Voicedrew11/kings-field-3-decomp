@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: item counts (WIP module): the two counts per id in
- * DAT_800c85e8, a timed screen tint fade and a brightening loop, and the
+ * event_item_counters_table, a timed screen tint fade and a brightening loop, and the
  * item pick-up shown in front of the viewer.
  */
 #include <kf/lib/address.h>
@@ -28,8 +28,8 @@
 ADDRESS(0x8005d7bc, 0x3c)
 s32 game_counter_is_nonzero(s32 id)
 {
-    if (DAT_800c85e8[0][id] == 0) {
-        return DAT_800c85e8[1][id] != 0;
+    if (event_item_counters_table[0][id] == 0) {
+        return event_item_counters_table[1][id] != 0;
     }
     return 1;
 }
@@ -38,14 +38,14 @@ s32 game_counter_is_nonzero(s32 id)
 ADDRESS(0x8005d7f8, 0xa0)
 s32 game_counter_decrement(s32 id)
 {
-    if (DAT_800c85e8[0][id] != 0) {
-        DAT_800c85e8[0][id]--;
-    } else if (DAT_800c85e8[1][id] != 0) {
-        DAT_800c85e8[1][id]--;
+    if (event_item_counters_table[0][id] != 0) {
+        event_item_counters_table[0][id]--;
+    } else if (event_item_counters_table[1][id] != 0) {
+        event_item_counters_table[1][id]--;
     } else {
         return 1;
     }
-    DAT_8018fad4.handlers[11]();
+    asset_status.handlers[11]();
     return 0;
 }
 
@@ -53,15 +53,15 @@ s32 game_counter_decrement(s32 id)
 ADDRESS(0x8005d898, 0xb0)
 s32 game_counter_increment(s32 id)
 {
-    if (DAT_800c85e8[0][id] < 99) {
-        DAT_800c85e8[0][id]++;
-    } else if (DAT_800c85e8[1][id] < 99) {
-        DAT_800c85e8[1][id]++;
+    if (event_item_counters_table[0][id] < 99) {
+        event_item_counters_table[0][id]++;
+    } else if (event_item_counters_table[1][id] < 99) {
+        event_item_counters_table[1][id]++;
     } else {
         notify_enqueue(11);
         return 1;
     }
-    DAT_8018fad4.handlers[6]();
+    asset_status.handlers[6]();
     return 0;
 }
 
@@ -93,7 +93,7 @@ void color_overlay_transition(s32 step, s32 r0, s32 g0, s32 b0, s32 r1, s32 g1, 
     render_game_frame(NULL, NULL);
 }
 
-/* Brightens the screen over 33 frames, then sets DAT_8009c3f8 to 1. */
+/* Brightens the screen over 33 frames, then sets main_end_flag to 1. */
 ADDRESS(0x8005da94, 0x9c)
 void func_8005da94(void)
 {
@@ -118,12 +118,12 @@ void func_8005da94(void)
         }
         i += 128;
     }
-    DAT_8009c3f8 = 1;
+    main_end_flag = 1;
 }
 
 /*
  * Picks up obj: lifts it in front of the viewer (levelling the view pitch)
- * and spins it until a button press; the pick-up button (DAT_80081868[7]) or
+ * and spins it until a button press; the pick-up button (action_button_masks[7]) or
  * a forced id adds it to the item counts, else it turns back and returns to
  * its place. obj NULL spawns a record for the def id given after it.
  * pad doubles as the taken flag after the press. This module passes
@@ -158,7 +158,7 @@ void event_map_object_interact(Object44 *obj, ...)
         va_start(args, obj);
         id = va_arg(args, s32);
         va_end(args);
-        obj = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+        obj = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
         map_object_reset(obj);
         obj->unk6 = id;
         obj->unk0 = 2;
@@ -167,12 +167,12 @@ void event_map_object_interact(Object44 *obj, ...)
         obj->angle.vy = 0;
         obj->angle.vx = 0;
         obj->arg.b.unk38 = 0xff;
-        obj->pos = DAT_801b24e4.pos;
-        obj->pos.vx += rcos(DAT_80199154.unk15b08.vy - 3072) * 1024 >> 12;
-        obj->pos.vz += rsin(DAT_80199154.unk15b08.vy - 3072) * 1024 >> 12;
+        obj->pos = cur_avatar_status.pos;
+        obj->pos.vx += rcos(scene_display_sys.unk15b08.vy - 3072) * 1024 >> 12;
+        obj->pos.vz += rsin(scene_display_sys.unk15b08.vy - 3072) * 1024 >> 12;
         obj->pos.vy -= 1024;
     }
-    def = &DAT_8018fb3c.defs[obj->unk6];
+    def = &map_objects_slots.defs[obj->unk6];
     spin = obj->unke;
     if (obj->arg.b.unk38 != 0xff) {
         return;
@@ -180,33 +180,33 @@ void event_map_object_interact(Object44 *obj, ...)
     if (def->unk1 == 0x20) {
         notify_enqueue(25, obj->arg.h.unk3a);
         obj->unk6 = 0xff;
-        DAT_801b24e4.unk50 += obj->arg.h.unk3a;
+        cur_avatar_status.unk50 += obj->arg.h.unk3a;
         return;
     }
     if (obj->unk4 == 0x70 && obj->unk6 == 0x86) {
-        driver = &DAT_8018fb3c.objects[obj->arg.h.unk40];
-        link = &DAT_8018fb3c.objects[driver->arg.b.unk3a.bytes[1]];
+        driver = &map_objects_slots.objects[obj->arg.h.unk40];
+        link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
         if (link->unk4 == 2 && link->unk8 != 0) {
             return;
         }
     } else if (obj->unk4 == 0x70 && obj->unk6 == 0x8d) {
-        driver = &DAT_8018fb3c.objects[obj->arg.h.unk40];
-        link = &DAT_8018fb3c.objects[driver->arg.b.unk3a.bytes[1]];
+        driver = &map_objects_slots.objects[obj->arg.h.unk40];
+        link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
         if (link->unk4 == 2 && link->unk8 != 0) {
             return;
         }
     } else if (obj->unk4 == 0x70 && obj->unk6 == 0x88) {
-        driver = &DAT_8018fb3c.objects[obj->arg.h.unk40];
-        link = &DAT_8018fb3c.objects[driver->arg.b.unk3a.bytes[1]];
+        driver = &map_objects_slots.objects[obj->arg.h.unk40];
+        link = &map_objects_slots.objects[driver->arg.b.unk3a.bytes[1]];
         if (link->unk4 == 2 && link->unk8 != 0) {
             return;
         }
-    } else if (obj->unk6 == 0x85 && DAT_8018fad4.area[0] == 7) {
-        if (!angle_within_tolerance(DAT_801b24e4.unk12c.vy + 2048, obj->angle.vy, 256)) {
+    } else if (obj->unk6 == 0x85 && asset_status.area[0] == 7) {
+        if (!angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 256)) {
             return;
         }
     }
-    pitch = DAT_801b24e4.unk124.vx & 0xfff;
+    pitch = cur_avatar_status.unk124.vx & 0xfff;
     start = pitch;
     if (pitch < 2048) {
         if (pitch > 0) {
@@ -219,17 +219,17 @@ void event_map_object_interact(Object44 *obj, ...)
     held = def->arg.sh.unk10;
     angle_from = obj->angle;
     from = obj->pos;
-    scene_position_from_camera_offset(0, 500, 1500, pitch, DAT_801b24e4.unk124.vy, def->arg.sh.unkc,
+    scene_position_from_camera_offset(0, 500, 1500, pitch, cur_avatar_status.unk124.vy, def->arg.sh.unkc,
                                       def->arg.sh.unke, &to);
     angle_to.vz = 0;
     angle_to.vx = 0;
-    angle_to.vy = (DAT_801b24e4.unk124.vy + 2048) & 0xfff;
+    angle_to.vy = (cur_avatar_status.unk124.vy + 2048) & 0xfff;
     model_id = map_object_asset_index(obj->unk6);
     resource_registry_get(model_id, &model);
     while (model == NULL) {
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &cur_avatar_status.unk124);
         resource_registry_get(model_id, &model);
     }
     for (t = 0; t <= 4096; t += 512) {
@@ -240,10 +240,10 @@ void event_map_object_interact(Object44 *obj, ...)
         prev = pad;
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
         obj->unke = value_approach(spin, held, t >> 4);
-        DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &cur_avatar_status.unk124);
     }
     obj->unke = held;
     for (;;) {
@@ -255,26 +255,26 @@ void event_map_object_interact(Object44 *obj, ...)
         obj->angle.vy += 64;
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &cur_avatar_status.unk124);
     }
 pressed:
-    if ((pad & DAT_80081868[7]) || id != -1) {
+    if ((pad & action_button_masks[7]) || id != -1) {
         if (game_counter_increment(obj->unk6) == 0) {
             switch (obj->unk6) {
             case 0x93:
                 n = (rand() * 6 >> 15) + 4;
-                if (DAT_800c85e8[0][0x93] < 99 - n) {
-                    DAT_800c85e8[0][0x93] += n;
+                if (event_item_counters_table[0][0x93] < 99 - n) {
+                    event_item_counters_table[0][0x93] += n;
                 } else {
-                    DAT_800c85e8[0][0x93] = 99;
+                    event_item_counters_table[0][0x93] = 99;
                 }
                 break;
             case 0x94:
-                DAT_800c85e8[0][0x94] = DAT_800c85e8[0][0x94] < 95 ? DAT_800c85e8[0][0x94] + 4 : 99;
+                event_item_counters_table[0][0x94] = event_item_counters_table[0][0x94] < 95 ? event_item_counters_table[0][0x94] + 4 : 99;
                 break;
             }
             pad = 1;
-            scene_position_from_camera_offset(-500, 500, 0, pitch, DAT_801b24e4.unk124.vy, 0, 0, &from);
+            scene_position_from_camera_offset(-500, 500, 0, pitch, cur_avatar_status.unk124.vy, 0, 0, &from);
             angle_from = obj->angle;
             spin = 0;
             goto back;
@@ -287,22 +287,22 @@ pressed:
     }
     pad = 0;
     for (;;) {
-        if (angle_within_tolerance(obj->angle.vy, (DAT_801b24e4.unk124.vy + 2048) & 0xfff, 128)) {
-            obj->angle.vy = (DAT_801b24e4.unk124.vy + 2048) & 0xfff;
+        if (angle_within_tolerance(obj->angle.vy, (cur_avatar_status.unk124.vy + 2048) & 0xfff, 128)) {
+            obj->angle.vy = (cur_avatar_status.unk124.vy + 2048) & 0xfff;
             break;
         }
         obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
-        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &cur_avatar_status.unk124);
     }
 back:
     angle_to = obj->angle;
-    pitch = DAT_801b24e4.unk124.vx;
+    pitch = cur_avatar_status.unk124.vx;
     to = obj->pos;
     for (t = 4096; t >= 0; t -= 512) {
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
-        DAT_801b24e4.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         obj->unke = value_approach(spin, held, t >> 4);
-        render_game_frame(NULL, &DAT_801b24e4.unk124);
+        render_game_frame(NULL, &cur_avatar_status.unk124);
     }
     if (pad) {
         obj->unk6 = 0xff;
@@ -332,19 +332,19 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
     p.vx = pos->vx;
     p.vy = pos->vy + 500;
     p.vz = pos->vz;
-    DAT_801ba984.unk0 = 0;
+    cur_evt_state.unk0 = 0;
     i = actor_find_overlap_excluding_target_type3(p.vx, p.vy, p.vz, 1400, 3200);
     if (i != -1) {
-        o88 = &DAT_80185da8.objects[i];
+        o88 = &actor_status.objects[i];
         if (angle_within_tolerance(angle->vy, vector_xz_to_angle(o88->pos.vx - p.vx, o88->pos.vz - p.vz),
                                    300)) {
             event_target_stream_execute(o88);
         }
     }
     for (i = 0; (i = map_object_find_interaction_target(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
-        obj = &DAT_8018fb3c.objects[i];
-        def = &DAT_8018fb3c.defs[obj->unk6];
-        DAT_801ba984.unk0 = 1;
+        obj = &map_objects_slots.objects[i];
+        def = &map_objects_slots.defs[obj->unk6];
+        cur_evt_state.unk0 = 1;
         switch (def->unk0) {
         case 0xa5:
         case 0xff:
@@ -460,7 +460,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                 missing:
                     notify_enqueue(0x1a);
                 } else {
-                    link = &DAT_8018fb3c.objects[obj->arg.h.unk3a];
+                    link = &map_objects_slots.objects[obj->arg.h.unk3a];
                     if (link->unk6 == 0xff) {
                         goto missing;
                     }
@@ -493,13 +493,13 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                 break;
             }
             color_overlay_transition(512, 0, 0, 0, 128, 200, 255);
-            DAT_801b24e4.hp = DAT_801b24e4.hp_max;
-            if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
-                DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            cur_avatar_status.hp = cur_avatar_status.hp_max;
+            if (cur_avatar_status.hp_max < cur_avatar_status.hp) {
+                cur_avatar_status.hp = cur_avatar_status.hp_max;
             }
-            DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
-            if (DAT_801b24e4.unk1a < DAT_801b24e4.unk1c) {
-                DAT_801b24e4.unk1c = DAT_801b24e4.unk1a;
+            cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+            if (cur_avatar_status.unk1a < cur_avatar_status.unk1c) {
+                cur_avatar_status.unk1c = cur_avatar_status.unk1a;
             }
             player_cap_status_components(7);
             color_overlay_transition(512, 128, 200, 255, 0, 0, 0);
@@ -514,19 +514,19 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                 break;
             }
             color_overlay_transition(512, 0, 0, 0, 128, 128, 200);
-            DAT_801b24e4.hp = DAT_801b24e4.hp_max;
-            if (DAT_801b24e4.hp_max < DAT_801b24e4.hp) {
-                DAT_801b24e4.hp = DAT_801b24e4.hp_max;
+            cur_avatar_status.hp = cur_avatar_status.hp_max;
+            if (cur_avatar_status.hp_max < cur_avatar_status.hp) {
+                cur_avatar_status.hp = cur_avatar_status.hp_max;
             }
             color_overlay_transition(512, 128, 128, 200, 0, 0, 0);
             player_clear_motion();
             break;
         case 0xe:
-            if ((s16)DAT_8018fad4.loading != 1) {
+            if ((s16)asset_status.loading != 1) {
                 cd_request_wait_idle();
                 map_reveal_visited_rects();
-                repeat_store_word((u32 *)DAT_801b594c, 0, 200);
-                event_world_state_save_slot(DAT_8018fad4.area[0]);
+                repeat_store_word((u32 *)map_visited_cells, 0, 200);
+                event_world_state_save_slot(asset_status.area[0]);
                 player_render_frame_and_release_pool();
                 menu_card_save_browser();
             }
@@ -534,5 +534,5 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
         }
     }
 done:
-    ((void (*)(VECTOR *, SVECTOR *))DAT_8018fad4.handlers[0])(&p, angle);
+    ((void (*)(VECTOR *, SVECTOR *))asset_status.handlers[0])(&p, angle);
 }

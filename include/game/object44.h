@@ -3,7 +3,7 @@
 
 /*
  * GAME.EXE Object44 records (src/game/object44.c, WIP): the 396 records of
- * DAT_8018fb3c.objects and their Object44Def table.
+ * map_objects_slots.objects and their Object44Def table.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

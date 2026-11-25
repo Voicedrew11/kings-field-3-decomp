@@ -40,7 +40,7 @@
 /* Top of the heap main hands to InitHeap. */
 #define HEAP_END 0x801fc000
 
-/* DAT_8009c3f8 values that end the game loop. */
+/* main_end_flag values that end the game loop. */
 #define EXIT_TITLE 2
 #define EXIT_ENDING_A 3
 #define EXIT_ENDING_B 4
@@ -50,7 +50,7 @@ SDATA(0x8009c214, 0x8)
 
 /* Read by the game loop; other modules set it to end the game. */
 DATA(0x8009c3f8, 0x4, ".sbss")
-s32 DAT_8009c3f8;
+s32 main_end_flag;
 
 void game_main_loop(void);
 void game_shutdown(void);
@@ -58,8 +58,8 @@ void game_shutdown(void);
 ADDRESS(0x80014b48, 0x8c)
 int main(void)
 {
-    DAT_800136e8[5] = ((DAT_800136e8[4] - DAT_800136e8[2] + 2047) & ~2047) + DAT_800136e8[2];
-    InitHeap((unsigned long *)DAT_800136e8[5], HEAP_END - DAT_800136e8[5]);
+    fdat_window_bounds[5] = ((fdat_window_bounds[4] - fdat_window_bounds[2] + 2047) & ~2047) + fdat_window_bounds[2];
+    InitHeap((unsigned long *)fdat_window_bounds[5], HEAP_END - fdat_window_bounds[5]);
     CdInit();
     PadInit(0);
     InitCARD(1);
@@ -77,18 +77,18 @@ void game_main_loop(void)
     s32 continued = 0;
     s32 exit;
 
-    repeat_store_word((u32 *)&DAT_8018fad4, 0, sizeof(DAT_8018fad4) / 4);
-    repeat_store_word((u32 *)&DAT_80199154, 0, sizeof(DAT_80199154) / 4);
-    repeat_store_word((u32 *)&DAT_801b24e4, 0, sizeof(DAT_801b24e4) / 4);
-    repeat_store_word((u32 *)&DAT_801ba984, 0, sizeof(DAT_801ba984) / 4);
-    repeat_store_word((u32 *)&DAT_801d4464, 0, sizeof(DAT_801d4464) / 4);
-    repeat_store_word((u32 *)&DAT_8018fb3c, 0, sizeof(DAT_8018fb3c) / 4);
-    repeat_store_word((u32 *)&DAT_80185da8, 0, sizeof(DAT_80185da8) / 4);
-    repeat_store_word((u32 *)&DAT_801b77ec, 0, sizeof(DAT_801b77ec) / 4);
-    repeat_store_word((u32 *)&DAT_801b09fc, 0, sizeof(DAT_801b09fc) / 4);
-    repeat_store_word((u32 *)&DAT_801e7edc, 0, sizeof(DAT_801e7edc) / 4);
-    repeat_store_word((u32 *)DAT_801b594c, 0, sizeof(DAT_801b594c) / 4);
-    repeat_store_word((u32 *)DAT_801b56cc, 0, sizeof(DAT_801b56cc) / 4);
+    repeat_store_word((u32 *)&asset_status, 0, sizeof(asset_status) / 4);
+    repeat_store_word((u32 *)&scene_display_sys, 0, sizeof(scene_display_sys) / 4);
+    repeat_store_word((u32 *)&cur_avatar_status, 0, sizeof(cur_avatar_status) / 4);
+    repeat_store_word((u32 *)&cur_evt_state, 0, sizeof(cur_evt_state) / 4);
+    repeat_store_word((u32 *)&map_world, 0, sizeof(map_world) / 4);
+    repeat_store_word((u32 *)&map_objects_slots, 0, sizeof(map_objects_slots) / 4);
+    repeat_store_word((u32 *)&actor_status, 0, sizeof(actor_status) / 4);
+    repeat_store_word((u32 *)&effect_status, 0, sizeof(effect_status) / 4);
+    repeat_store_word((u32 *)&sound_status, 0, sizeof(sound_status) / 4);
+    repeat_store_word((u32 *)&movie_state, 0, sizeof(movie_state) / 4);
+    repeat_store_word((u32 *)map_visited_cells, 0, sizeof(map_visited_cells) / 4);
+    repeat_store_word((u32 *)map_revealed_rects, 0, sizeof(map_revealed_rects) / 4);
     cd_initialize();
     display_initialize();
     loading_screen_show();
@@ -115,29 +115,29 @@ void game_main_loop(void)
         continued = 1;
     }
     resource_run_initial_transition();
-    if (continued && DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == 1) {
-        SsSeqPause(DAT_801b09fc.seq_id);
+    if (continued && cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
+        SsSeqPause(sound_status.seq_id);
     }
     player_sync_position_to_map();
     vram_scroll_start(&rect, 0, 1, 1);
-    memory_arena_initialize_blocks((void *)DAT_800c8954, sizeof(DAT_800c8954));
+    memory_arena_initialize_blocks((void *)resource_space, sizeof(resource_space));
     if (continued == 1) {
-        DAT_801e7edc.unk384 = 3;
-        DAT_801e7edc.unk380 = &DAT_801e7edc.movies[3];
+        movie_state.unk384 = 3;
+        movie_state.unk380 = &movie_state.movies[3];
         movie_play();
-        DAT_801e7edc.unk372 = -1;
-        DAT_801e7edc.unk370 = 0;
-        DAT_801e7edc.unk384 = 0xff;
-        DAT_801ba984.unkd = 1;
+        movie_state.unk372 = -1;
+        movie_state.unk370 = 0;
+        movie_state.unk384 = 0xff;
+        cur_evt_state.unkd = 1;
         SsSetMVol(127, 127);
-        if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_playing == continued) {
-            SsSeqReplay(DAT_801b09fc.seq_id);
+        if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == continued) {
+            SsSeqReplay(sound_status.seq_id);
         }
     }
     render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
     cd_request_wait_idle();
     render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
-    DAT_8009c3f8 = 0;
+    main_end_flag = 0;
     for (;;) {
         light_reset_records();
         render_reset_color_overlays();
@@ -145,7 +145,7 @@ void game_main_loop(void)
         player_update_frame();
         actor_update_frame();
         effect_pool_sweep();
-        DAT_801b24e4.unke = 0;
+        cur_avatar_status.unke = 0;
         game_update_ending();
         resource_advance_transition();
         movie_update_state();
@@ -155,7 +155,7 @@ void game_main_loop(void)
         cd_request_service_stream();
         cd_request_service_vab();
         render_game_frame(&pos, &angle);
-        exit = DAT_8009c3f8;
+        exit = main_end_flag;
         if (exit == 0) {
             continue;
         }

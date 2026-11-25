@@ -123,11 +123,11 @@ void area_region_trigger_update_warp_arrival_cells(Object44 *obj)
         return;
     }
     if (player_camera_within_map_region(6, 0x1e, 3, 4, 0x8000) != 0) {
-        if (DAT_801b24e4.unk10a != 0) {
+        if (cur_avatar_status.unk10a != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 0, 6, 0x21, 3, 1, 0, 0x2f);
         }
     } else {
-        DAT_801b24e4.unk10a = 0;
+        cur_avatar_status.unk10a = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 0, 6, 0x21, 3, 1, 0, 0x2f);
     }
 }
@@ -166,26 +166,26 @@ void area_talk_event_blacksmith(Object88 *obj, s32 event)
     switch (event) {
     case 0:
         if (game_counter_is_nonzero(0x7c) > 0) {
-            DAT_801ba984.unk76[5] = 1;
+            cur_evt_state.unk76[5] = 1;
         } else {
-            DAT_801ba984.unk76[5] = 0;
+            cur_evt_state.unk76[5] = 0;
         }
         break;
     case 1:
         player_render_frame_and_release_pool();
         result = menu_blacksmith_make_item();
-        DAT_801b24e4.unk178 = ~DAT_80081868[7];
+        cur_avatar_status.unk178 = ~action_button_masks[7];
         if (result < 0) {
-            DAT_801ba984.unk76[2] = 0;
-            DAT_801ba984.unk76[0] = 0x68;
+            cur_evt_state.unk76[2] = 0;
+            cur_evt_state.unk76[0] = 0x68;
         } else {
-            DAT_801ba984.unk76[3] = 0;
-            DAT_801ba984.unk76[2] = 1;
-            DAT_801ba984.unk76[0] = result;
+            cur_evt_state.unk76[3] = 0;
+            cur_evt_state.unk76[2] = 1;
+            cur_evt_state.unk76[0] = result;
         }
         break;
     case 2:
-        event_map_object_interact(NULL, DAT_801ba984.unk76[0]);
+        event_map_object_interact(NULL, cur_evt_state.unk76[0]);
         break;
     }
 }
@@ -194,6 +194,6 @@ void area_talk_event_blacksmith(Object88 *obj, s32 event)
 ADDRESS(0x801e87c0, 0x20)
 void area_on_load_reset_blacksmith(void)
 {
-    DAT_801ba984.unk76[3] = 1;
-    DAT_801ba984.unk84[5] = 3;
+    cur_evt_state.unk76[3] = 1;
+    cur_evt_state.unk84[5] = 3;
 }

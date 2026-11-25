@@ -90,14 +90,14 @@ void area_on_actor_removed_start_ending(Object88 *obj)
     s32 volume;
     s32 i;
 
-    if (obj - DAT_80185da8.objects != 0) {
+    if (obj - actor_status.objects != 0) {
         return;
     }
-    if (DAT_801ba984.unk32[0x39] != 0) {
+    if (cur_evt_state.unk32[0x39] != 0) {
         return;
     }
-    DAT_801ba984.unk32[0x39] = 1;
-    DAT_801b24e4.unkc0 = -1;
+    cur_evt_state.unk32[0x39] = 1;
+    cur_avatar_status.unkc0 = -1;
     light_reset_records();
     render_reset_color_overlays();
     light_refresh_record_rotations();
@@ -114,13 +114,13 @@ void area_on_actor_removed_start_ending(Object88 *obj)
         VSync(0);
     }
     SsSetMVol(0, 0);
-    if (DAT_801b09fc.seq_playing == 1) {
-        SsSeqSetVol(DAT_801b09fc.seq_id, 0, 0);
-        SsSeqStop(DAT_801b09fc.seq_id);
-        SsSeqClose(DAT_801b09fc.seq_id);
-        DAT_801b09fc.seq_playing = 0;
+    if (sound_status.seq_playing == 1) {
+        SsSeqSetVol(sound_status.seq_id, 0, 0);
+        SsSeqStop(sound_status.seq_id);
+        SsSeqClose(sound_status.seq_id);
+        sound_status.seq_playing = 0;
     }
-    DAT_8009c3f8 = 3;
+    main_end_flag = 3;
     render_frames_with_color_overlay(0x82, 0, 0x1000, 0x40);
 }
 
@@ -157,5 +157,5 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e8b00, 0x14)
 void area_on_load_store_area_index(void)
 {
-    DAT_801ba984.unk84[5] = 0x19;
+    cur_evt_state.unk84[5] = 0x19;
 }

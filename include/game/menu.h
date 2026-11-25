@@ -48,7 +48,7 @@ typedef struct MapRect {
     u8 h;
 } MapRect;
 
-/* One row of a menu list: the item name record copied out of DAT_8007f620. */
+/* One row of a menu list: the item name record copied out of menu_item_names. */
 typedef struct MenuEntry {
     u8 text[24];
 } MenuEntry;
@@ -197,50 +197,50 @@ void menu_start_item_model_read(void);
 void menu_blit_panel_sprite_pulsing(MenuFont *font, MenuText *text, s32 shade);
 void menu_draw_string_dimmed(MenuFont *font, MenuText *text);
 
-extern MenuFont DAT_8007e564[];
+extern MenuFont menu_sprite_defs[];
 /* The menu's text records (MenuText, 0x1c bytes): button page titles from [0],
  * yes/no positions [10] and [11], message titles from [28]. */
-extern MenuText DAT_8007e660[];
-extern MenuEntry DAT_8007f620[];
-extern MenuEntry DAT_8007f230[10];
-extern MenuEntry DAT_80080430[];
-extern u8 DAT_80081780[];
+extern MenuText menu_window_layouts[];
+extern MenuEntry menu_item_names[];
+extern MenuEntry menu_label_rows[10];
+extern MenuEntry menu_magic_names[];
+extern u8 item_guide_level[];
 /* Shop stock counts per shop and item id, buy prices and sell prices. */
-extern u8 DAT_80080718[6][150];
-extern u16 DAT_80080a9c[6][150];
-extern u16 DAT_800811a4[5][150];
-extern MapRect DAT_801ba6fc[160];
+extern u8 menu_shop_stock_pages[6][150];
+extern u16 menu_shop_buy_prices[6][150];
+extern u16 menu_shop_sell_prices[5][150];
+extern MapRect map_rects[160];
 
-/* The two frame packet pools (DAT_80199154.pools) as the menu saved them on
+/* The two frame packet pools (scene_display_sys.pools) as the menu saved them on
  * opening (menu_enter_display_state); menu_exit_display_state puts them back. */
-extern PrimPool DAT_8009c404;
-extern PrimPool DAT_8009c410;
+extern PrimPool menu_saved_primitive_buffer_0;
+extern PrimPool menu_saved_primitive_buffer_1;
 
 /* menu .sdata */
-extern u8 DAT_8009c22c;
-extern u8 DAT_8009c22d;
-extern u8 DAT_8009c22e;
-extern u8 DAT_8009c22f;
-extern s32 DAT_8009c230;
-extern s32 DAT_8009c234;
-extern s32 DAT_8009c24c;
-extern s32 DAT_8009c250;
-extern s32 DAT_8009c254;
-extern s32 DAT_8009c248;
-extern s32 DAT_8009c268;
-extern s32 DAT_8009c26c;
-extern s32 DAT_8009c270;
-extern s32 DAT_8009c274;
-extern s32 DAT_8009c278;
-extern s32 DAT_8009c27c;
-extern s32 DAT_8009c258;
-extern s32 DAT_8009c25c;
-extern s32 DAT_8009c260;
-extern s32 DAT_8009c238;
-extern s32 DAT_8009c23c;
-extern s32 DAT_8009c240;
-extern s32 DAT_8009c244;
-extern s32 DAT_8009c264;
+extern u8 menu_item_list_cursor;
+extern u8 menu_magic_list_cursor;
+extern u8 menu_store_list_cursor;
+extern u8 menu_take_out_list_cursor;
+extern s32 menu_cd_read_state;
+extern s32 menu_cd_sectors_left;
+extern s32 menu_confirm_button;
+extern s32 menu_cancel_button;
+extern s32 menu_confirm_button_icon;
+extern s32 input_press_pending;
+extern s32 menu_cursor_animation_state;
+extern s32 menu_sprite_shade;
+extern s32 menu_text_red;
+extern s32 menu_text_green;
+extern s32 menu_text_blue;
+extern s32 menu_text_shadow_shade;
+extern s32 menu_cancel_button_icon;
+extern s32 menu_item_quantity;
+extern s32 menu_cursor_animation_frame;
+extern s32 menu_item_model_registered;
+extern s32 menu_item_model_request;
+extern s32 menu_item_model_read_sectors;
+extern s32 menu_item_model_read_id;
+extern s32 menu_option_pulse_frame;
 
 /* The menu .sbss words (0x8009c374..0x8009c3a7) are statics of menu.c. */
 

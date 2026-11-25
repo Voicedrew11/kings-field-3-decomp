@@ -131,10 +131,10 @@ void area_talk_event_noop(void)
 ADDRESS(0x801e85f8, 0x70)
 void area_on_load_restore_cells(void)
 {
-    if (DAT_801ba984.unk32[0x24] == 0) {
+    if (cur_evt_state.unk32[0x24] == 0) {
         map_cell_copy_rotated_fields(2, 0x13, 0, 12, 1, 1, 3, 0, 0x2f);
     } else {
         map_cell_copy_rotated_fields(2, 0x14, 0, 12, 1, 1, 3, 0, 0x2f);
     }
-    DAT_801ba984.unk84[5] = 0x10;
+    cur_evt_state.unk84[5] = 0x10;
 }

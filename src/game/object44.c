@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: Object44 records (WIP module): the 396 records after the
- * Object44Def table in DAT_8018fb3c, their set-up, per-kind state and the map
+ * Object44Def table in map_objects_slots, their set-up, per-kind state and the map
  * cell bytes some kinds keep in step with their state.
  */
 #include <kf/lib/address.h>
@@ -33,14 +33,14 @@ void map_object_pool_reset(void)
     Object44 *obj;
     u16 i;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     i = 396;
     while (i--) {
         obj->unk4 = obj->unk6 = 0xff;
         obj->arg.w.unk34 = obj->arg.w.unk38 = obj->arg.w.unk3c = 0;
         obj++;
     }
-    DAT_8018fb3c.unk885e = DAT_8018fb3c.unk8860 = DAT_8018fb3c.unk8862 = 0;
+    map_objects_slots.unk885e = map_objects_slots.unk8860 = map_objects_slots.unk8862 = 0;
 }
 
 /* Resets a record's state, angle and scale. */
@@ -75,8 +75,8 @@ void map_object_set_property(s32 id, s32 mode, ...)
     if (id == 0xffff) {
         return;
     }
-    obj = &DAT_8018fb3c.objects[id];
-    def = &DAT_8018fb3c.defs[obj->unk6];
+    obj = &map_objects_slots.objects[id];
+    def = &map_objects_slots.defs[obj->unk6];
     switch (mode) {
     case 0:
         switch (def->unk0) {
@@ -160,9 +160,9 @@ void map_object_set_cell_marker(Object44 *obj, s32 mode, u8 value)
     MapCell *cell;
     MapLayer *layer;
 
-    if (mode == 0 && DAT_801b24e4.unk90 == 0) {
+    if (mode == 0 && cur_avatar_status.unk90 == 0) {
         {
-            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+            MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
             cell = &row[obj->pos.vx >> 11];
         }
@@ -174,7 +174,7 @@ void map_object_set_cell_marker(Object44 *obj, s32 mode, u8 value)
         obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
     } else {
         {
-            MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+            MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
             cell = &row[obj->pos.vx >> 11];
         }
@@ -195,25 +195,25 @@ void map_object_refresh_cell_markers(s32 mode)
     Object44Def *def;
     s32 i;
 
-    obj = DAT_8018fb3c.objects;
+    obj = map_objects_slots.objects;
     for (i = 396; i != 0; i--) {
         switch (obj->unk4) {
         case 0x51:
             if (obj->arg.b.unk3a.bytes[1] != 0xff) {
-                def = &DAT_8018fb3c.defs[obj->unk6];
+                def = &map_objects_slots.defs[obj->unk6];
                 map_object_set_cell_marker(obj, mode, def->arg.b.unk17);
             }
             break;
         case 0x52:
             if (obj->arg.b.unk3d[0] != 0xff) {
-                def = &DAT_8018fb3c.defs[obj->unk6];
+                def = &map_objects_slots.defs[obj->unk6];
                 map_object_set_cell_marker(obj, mode, def->arg.b.unk17);
             }
             break;
         case 7:
             if (obj->arg.b.unk38 != 0xfe) {
                 map_object_set_property(obj->arg.h.unk3a, mode, obj->unk0);
-                def = &DAT_8018fb3c.defs[obj->unk6];
+                def = &map_objects_slots.defs[obj->unk6];
                 if (def->arg.b.unkc != 0xff) {
                     map_object_set_cell_marker(obj, mode, def->arg.b.unkc);
                 }
@@ -242,8 +242,8 @@ void map_object_initialize_from_placements(Object44Place *place)
     s32 i;
     u32 frames;
 
-    frames = DAT_801c12e4.frames;
-    obj = DAT_8018fb3c.objects;
+    frames = cdrom_ctl.frames;
+    obj = map_objects_slots.objects;
     for (i = 349; i != -1; place++, obj++, i--) {
         if (place->unk4 == 0xffff) {
             obj->unk6 = 0xff;
@@ -254,7 +254,7 @@ void map_object_initialize_from_placements(Object44Place *place)
         if (obj->unk6 == 0xff) {
             continue;
         }
-        def = &DAT_8018fb3c.defs[obj->unk6];
+        def = &map_objects_slots.defs[obj->unk6];
         obj->unk8 = 0;
         obj->unk1 = 0x80;
         obj->unka = 0;
@@ -280,7 +280,7 @@ void map_object_initialize_from_placements(Object44Place *place)
         obj->pos.vx = (place->unk2 << 11) + place->unka;
         obj->pos.vz = (place->unk1 << 11) + place->unk8;
         {
-            MapCell *row = DAT_801d4464.cells[place->unk1];
+            MapCell *row = map_world.cells[place->unk1];
             MapLayer *layer = row[place->unk2].layer;
 
             if (obj->unk0 != 1) {
@@ -338,28 +338,28 @@ void map_object_initialize_from_placements(Object44Place *place)
         case 3:
             obj->unk4 = 3;
             obj->unk1 = 0;
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc,
-                                           0, 0xff);
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828fc,
-                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door_shape_pattern, 0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door3_object_pattern, 0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 4:
             obj->unk4 = 4;
             obj->unk1 = 0;
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_800828dc,
-                                           0, 0xff);
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008291c,
-                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door_shape_pattern, 0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door4_object_pattern, 0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 5:
             obj->unk4 = 5;
             obj->unk1 = 0;
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008293c,
-                                           0, 0xff);
-            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy, DAT_8008295c,
-                                           0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door5_shape_pattern, 0, 0xff);
+            map_cell_apply_rotated_pattern(obj->unk0, obj->pos.vx, obj->pos.vz, obj->angle.vy,
+                                           map_object_door5_object_pattern, 0, 0xff);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
         case 2:
@@ -406,7 +406,7 @@ void map_object_initialize_from_placements(Object44Place *place)
             obj->unk0 = 2;
             obj->unk4 = 0x54;
             map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                           DAT_8008288c[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0,
+                                           map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0,
                                            0);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;
@@ -525,8 +525,8 @@ void map_object_initialize_from_placements(Object44Place *place)
             obj->unk4 = 0xe3;
             if (player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                 obj->arg.b.unk39, 0x8000) != 0) {
-                DAT_80199154.unk15995 = obj->arg.b.unk3a.bytes[0];
-                DAT_80199154.unk15996 = obj->arg.b.unk3a.bytes[1];
+                scene_display_sys.unk15995 = obj->arg.b.unk3a.bytes[0];
+                scene_display_sys.unk15996 = obj->arg.b.unk3a.bytes[1];
             }
             break;
         case 228:
@@ -585,7 +585,7 @@ void map_object_initialize_from_placements(Object44Place *place)
             obj->unk2 = (obj->unk2 & 0xf8) | 5;
             obj->pos.vy += 256;
             {
-                MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+                MapCell *row = map_world.cells[obj->pos.vz >> 11];
                 MapLayer *layer = row[obj->pos.vx >> 11].layer;
 
                 if (obj->unk0 != 1) {
@@ -652,7 +652,7 @@ void map_object_initialize_from_placements(Object44Place *place)
             obj->arg.w.unk40 = frames + 30;
             break;
         default:
-            ((void (*)(Object44 *, Object44Def *))DAT_8018fad4.handlers[8])(obj, def);
+            ((void (*)(Object44 *, Object44Def *))asset_status.handlers[8])(obj, def);
             break;
         case 33:
         case 255:

@@ -1,8 +1,8 @@
 /*
  * GAME.EXE: the in-game movie player's Sony movie-sample stream functions
  * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
- * decode environment lives in DAT_801e7edc.dec, the ring buffer is
- * DAT_801c17a4, and the display swaps through DAT_80199154. The decode
+ * decode environment lives in movie_state.dec, the ring buffer is
+ * stream_work_buffer, and the display swaps through scene_display_sys. The decode
  * set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream precedes
  * it. movie_update_state steps the movie state; its jump table is this unit's .rdata
  * (after movie_play_stream's file names, so the TU starts at or before it).
@@ -33,7 +33,7 @@ RODATA(0x80013680, 0x64)
 #define STREAM_MODE (0x100 | CdlModeSpeed | CdlModeRT)
 
 /*
- * Plays movie DAT_801e7edc.unk380: releases the area's model blocks, takes
+ * Plays movie movie_state.unk380: releases the area's model blocks, takes
  * three arena blocks for the VLC and slice buffers, shrinks the packet pools
  * to 0x7400 bytes and streams the movie's STR file (a random DRM file for
  * file numbers from 16) until its last frame, fading the music back in.
@@ -53,32 +53,32 @@ void movie_play_stream(void)
     cd_request_wait_idle();
     player_clear_motion();
     for (i = 127, j = 128; i != -1; i--, j++) {
-        if ((p = DAT_80199154.models[j]) != NULL) {
+        if ((p = scene_display_sys.models[j]) != NULL) {
             while (memory_block_kind(p) == 3)
                 ;
             memory_block_set_kind(p, 1);
         }
     }
     for (i = 299, j = 256; i != -1; i--, j++) {
-        if ((p = DAT_80199154.models[j]) != NULL) {
+        if ((p = scene_display_sys.models[j]) != NULL) {
             while (memory_block_kind(p) == 3)
                 ;
             memory_block_set_kind(p, 1);
         }
     }
-    for (i = 31, j = 556 + DAT_8018fad4.area[0] * 32; i != -1; i--, j++) {
-        if ((p = DAT_80199154.models[j]) != NULL) {
+    for (i = 31, j = 556 + asset_status.area[0] * 32; i != -1; i--, j++) {
+        if ((p = scene_display_sys.models[j]) != NULL) {
             while (memory_block_kind(p) == 3)
                 ;
             memory_block_set_kind(p, 1);
         }
     }
     DrawSync(0);
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x7400;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x7400;
-    if ((p = DAT_80199154.models[0x629]) == NULL) {
-        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x10000,
-                                             &DAT_80199154.models[0x629])) == NULL) {
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x7400;
+    if ((p = scene_display_sys.models[0x629]) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x10000,
+                                             &scene_display_sys.models[0x629])) == NULL) {
             return;
         }
         memory_block_set_kind(p, 2);
@@ -86,10 +86,10 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    DAT_801e7edc.unk374[0] = (u_long *)p;
-    if ((p = DAT_80199154.models[0x62a]) == NULL) {
-        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x10000,
-                                             &DAT_80199154.models[0x62a])) == NULL) {
+    movie_state.unk374[0] = (u_long *)p;
+    if ((p = scene_display_sys.models[0x62a]) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x10000,
+                                             &scene_display_sys.models[0x62a])) == NULL) {
             return;
         }
         memory_block_set_kind(p, 2);
@@ -97,10 +97,10 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    DAT_801e7edc.unk374[1] = (u_long *)p;
-    if ((p = DAT_80199154.models[0x62b]) == NULL) {
-        if ((p = memory_arena_allocate_block((HeapBlock *)DAT_800c8954, 0x3c00,
-                                             &DAT_80199154.models[0x62b])) == NULL) {
+    movie_state.unk374[1] = (u_long *)p;
+    if ((p = scene_display_sys.models[0x62b]) == NULL) {
+        if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x3c00,
+                                             &scene_display_sys.models[0x62b])) == NULL) {
             return;
         }
         memory_block_set_kind(p, 2);
@@ -108,11 +108,11 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    DAT_801e7edc.unk37c = (u_long *)p;
-    if (DAT_801e7edc.unk380->file < 16) {
+    movie_state.unk37c = (u_long *)p;
+    if (movie_state.unk380->file < 16) {
         strcpy(name, "\\STR\\SXX.S;1");
-        name[6] = DAT_801e7edc.unk380->file / 10 + '0';
-        name[7] = DAT_801e7edc.unk380->file % 10 + '0';
+        name[6] = movie_state.unk380->file / 10 + '0';
+        name[7] = movie_state.unk380->file % 10 + '0';
         CdSearchFile(&file, name);
     } else {
         n = rand() * 18 >> 15;
@@ -125,23 +125,23 @@ void movie_play_stream(void)
         CdSearchFile(&file, name);
     }
     SsSetMVol(0, 0);
-    SsSeqSetVol(DAT_801b09fc.seq_id, 0, 0);
-    SsSetSerialVol(SS_SERIAL_A, DAT_801b24e4.bgm_volume, DAT_801b24e4.bgm_volume);
+    SsSeqSetVol(sound_status.seq_id, 0, 0);
+    SsSetSerialVol(SS_SERIAL_A, cur_avatar_status.bgm_volume, cur_avatar_status.bgm_volume);
     strSetDefDecEnv();
     strInit(&file.pos);
     strNextVlc();
     for (;;) {
         movie_swap_display_buffer();
-        DecDCTin(DAT_801e7edc.dec.vlcbuf[DAT_801e7edc.dec.vlcid], 2);
+        DecDCTin(movie_state.dec.vlcbuf[movie_state.dec.vlcid], 2);
         DrawSync(0);
-        DecDCTout(DAT_801e7edc.dec.imgbuf, DAT_801e7edc.dec.slice.w * DAT_801e7edc.dec.slice.h / 2);
+        DecDCTout(movie_state.dec.imgbuf, movie_state.dec.slice.w * movie_state.dec.slice.h / 2);
         strNextVlc();
-        strSync(&DAT_801e7edc.dec);
+        strSync(&movie_state.dec);
         movie_present_frame();
-        if (DAT_801e7edc.unk372 == 99) {
+        if (movie_state.unk372 == 99) {
             break;
         }
-        if (DAT_801e7edc.unk380->last < DAT_801e7edc.unk388) {
+        if (movie_state.unk380->last < movie_state.unk388) {
             break;
         }
         if (vol < 127) {
@@ -155,7 +155,7 @@ void movie_play_stream(void)
     DrawSync(0);
     SsSetMVol(0, 0);
     SsSetSerialVol(SS_SERIAL_A, 0, 0);
-    SsSeqSetVol(DAT_801b09fc.seq_id, DAT_801b24e4.bgm_volume, DAT_801b24e4.bgm_volume);
+    SsSeqSetVol(sound_status.seq_id, cur_avatar_status.bgm_volume, cur_avatar_status.bgm_volume);
     param[0] = CdlModeSpeed;
     CdControlB(CdlSetmode, param, 0);
     EnterCriticalSection();
@@ -165,42 +165,42 @@ void movie_play_stream(void)
     CdReadyCallback(0);
     ExitCriticalSection();
     CdControlB(CdlPause, 0, 0);
-    memory_block_set_kind(DAT_80199154.models[0x629], 1);
-    memory_block_set_kind(DAT_80199154.models[0x62a], 1);
-    memory_block_set_kind(DAT_80199154.models[0x62b], 1);
-    DAT_80199154.pools[1].base = DAT_80199154.pools[0].end = DAT_80199154.pools[0].base + 0x1a000;
-    DAT_80199154.pools[1].end = DAT_80199154.pools[1].base + 0x1a000;
+    memory_block_set_kind(scene_display_sys.models[0x629], 1);
+    memory_block_set_kind(scene_display_sys.models[0x62a], 1);
+    memory_block_set_kind(scene_display_sys.models[0x62b], 1);
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x1a000;
+    scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x1a000;
 }
 
 /* Sets up the decode environment for a 320x240 movie drawn into the display buffer not shown. */
 ADDRESS(0x80061364, 0x170)
 void strSetDefDecEnv(void)
 {
-    u_long **buf = DAT_801e7edc.unk374;
-    DECENV *dec = &DAT_801e7edc.dec;
+    u_long **buf = movie_state.unk374;
+    DECENV *dec = &movie_state.dec;
 
     dec->vlcbuf[0] = buf[0];
     dec->vlcbuf[1] = buf[1];
     dec->vlcid = 0;
-    dec->imgbuf = DAT_801e7edc.unk37c;
+    dec->imgbuf = movie_state.unk37c;
     dec->rectid = 0;
     dec->isdone = 0;
-    setRECT(&dec->rect[DAT_80199154.frame & 1], 0, 0, 320, 240);
-    setRECT(&dec->rect[(DAT_80199154.frame + 1) & 1], 0, 240, 320, 240);
-    if (DAT_80199154.frame) {
-        setRECT(&DAT_801e7edc.dec.slice, 0, 240, 16, 240);
+    setRECT(&dec->rect[scene_display_sys.frame & 1], 0, 0, 320, 240);
+    setRECT(&dec->rect[(scene_display_sys.frame + 1) & 1], 0, 240, 320, 240);
+    if (scene_display_sys.frame) {
+        setRECT(&movie_state.dec.slice, 0, 240, 16, 240);
     } else {
-        setRECT(&DAT_801e7edc.dec.slice, 0, 0, 16, 240);
+        setRECT(&movie_state.dec.slice, 0, 0, 16, 240);
     }
 }
 
 ADDRESS(0x800614d4, 0x7c)
 void strInit(CdlLOC *loc)
 {
-    DAT_801e7edc.unk372 = 0;
+    movie_state.unk372 = 0;
     EnterCriticalSection();
     DecDCToutCallback(strCallback);
-    StSetRing((u_long *)DAT_801c17a4, RING_SIZE);
+    StSetRing((u_long *)stream_work_buffer, RING_SIZE);
     StSetStream(0, 1, 0x0fffffff, 0, 0);
     ExitCriticalSection();
     strKickCD(loc);
@@ -210,7 +210,7 @@ void strInit(CdlLOC *loc)
 ADDRESS(0x80061550, 0x100)
 void strCallback(void)
 {
-    DECENV *dec = &DAT_801e7edc.dec;
+    DECENV *dec = &movie_state.dec;
     RECT *rect;
 
     LoadImage(&dec->slice, dec->imgbuf);
@@ -232,7 +232,7 @@ ADDRESS(0x80061650, 0x8c)
 s32 strNextVlc(void)
 {
     int cnt = WAIT_TIME;
-    DECENV *dec = &DAT_801e7edc.dec;
+    DECENV *dec = &movie_state.dec;
     u_long *next;
 
     while ((next = strNext(dec)) == 0) {
@@ -263,9 +263,9 @@ u_long *strNext(DECENV *dec)
         StFreeRing(addr);
         return 0;
     }
-    DAT_801e7edc.unk388 = sector->frameCount;
-    if (DAT_801e7edc.unk380->last < sector->frameCount) {
-        DAT_801e7edc.unk372 = 99;
+    movie_state.unk388 = sector->frameCount;
+    if (movie_state.unk380->last < sector->frameCount) {
+        movie_state.unk372 = 99;
     }
     return addr;
 }
@@ -301,7 +301,7 @@ void strKickCD(CdlLOC *loc)
 ADDRESS(0x80061878, 0x1c)
 void movie_swap_display_buffer(void)
 {
-    DAT_80199154.frame = DAT_80199154.frame ? 0 : 1;
+    scene_display_sys.frame = scene_display_sys.frame ? 0 : 1;
 }
 
 /* Shows the current display buffer. */
@@ -310,8 +310,8 @@ void movie_present_frame(void)
 {
     DrawSync(0);
     VSync(0);
-    PutDispEnv(&DAT_80199154.disp[DAT_80199154.frame]);
-    PutDrawEnv(&DAT_80199154.draw[DAT_80199154.frame]);
+    PutDispEnv(&scene_display_sys.disp[scene_display_sys.frame]);
+    PutDrawEnv(&scene_display_sys.draw[scene_display_sys.frame]);
     SetDispMask(1);
 }
 
@@ -319,9 +319,9 @@ void movie_present_frame(void)
 ADDRESS(0x80061918, 0x28)
 void movie_state_reset(void)
 {
-    DAT_801e7edc.unk372 = -1;
-    DAT_801e7edc.unk370 = 0;
-    DAT_801e7edc.unk384 = 0xff;
+    movie_state.unk372 = -1;
+    movie_state.unk370 = 0;
+    movie_state.unk384 = 0xff;
 }
 
 /* Steps the in-game movie state (unk370) of movie unk384. */
@@ -331,62 +331,63 @@ void movie_update_state(void)
     u8 id;
     u8 flag;
 
-    if (DAT_801e7edc.unk384 == 0xff) {
+    if (movie_state.unk384 == 0xff) {
         return;
     }
-    id = DAT_801e7edc.unk384;
-    DAT_801e7edc.unk380 = &DAT_801e7edc.movies[id];
-    switch (DAT_801e7edc.unk370) {
+    id = movie_state.unk384;
+    movie_state.unk380 = &movie_state.movies[id];
+    switch (movie_state.unk370) {
     case 0:
         break;
     case 1:
-        if (DAT_801e7edc.unk380->flag != 0xff) {
-            flag = DAT_801e7edc.unk380->flag;
+        if (movie_state.unk380->flag != 0xff) {
+            flag = movie_state.unk380->flag;
             if (flag & 0x80) {
-                if (DAT_801ba984.unk4[flag & 0x7f] == 0) {
-                    DAT_801e7edc.unk370 = 0x10;
+                if (cur_evt_state.unk4[flag & 0x7f] == 0) {
+                    movie_state.unk370 = 0x10;
                     break;
                 }
-            } else if (DAT_801ba984.unk4[flag & 0x7f] != 0) {
-                DAT_801e7edc.unk370 = 0x10;
+            } else if (cur_evt_state.unk4[flag & 0x7f] != 0) {
+                movie_state.unk370 = 0x10;
                 break;
             }
         }
-        DAT_801e7edc.unk370 = 2;
+        movie_state.unk370 = 2;
         player_begin_movie_approach(id);
         break;
     case 2:
-        if (DAT_801e7edc.unk372 == 1) {
-            DAT_801e7edc.unk370 = 4;
+        if (movie_state.unk372 == 1) {
+            movie_state.unk370 = 4;
         }
-        DAT_801e7edc.unk372 = 0;
+        movie_state.unk372 = 0;
         break;
     case 4:
-        ((void (*)(u8))DAT_8018fad4.handlers[10])(id);
+        ((void (*)(u8))asset_status.handlers[10])(id);
         movie_play_stream();
-        if (DAT_801ba984.unk61 == 1) {
-            DAT_801ba984.unk61 = 2;
-            DAT_801e7edc.unk372 = 1;
-            DAT_801e7edc.unk370 = 0;
-            DAT_801e7edc.unk384 = 0xff;
+        if (cur_evt_state.unk61 == 1) {
+            cur_evt_state.unk61 = 2;
+            movie_state.unk372 = 1;
+            movie_state.unk370 = 0;
+            movie_state.unk384 = 0xff;
             player_reset_reaction_state();
-            MoveImage(&DAT_80199154.disp[DAT_80199154.frame].disp, DAT_80199154.draw[DAT_80199154.frame].clip.x,
-                      DAT_80199154.draw[DAT_80199154.frame].clip.y);
+            MoveImage(&scene_display_sys.disp[scene_display_sys.frame].disp,
+                      scene_display_sys.draw[scene_display_sys.frame].clip.x,
+                      scene_display_sys.draw[scene_display_sys.frame].clip.y);
             DrawSync(0);
             player_warp_to_destination(12);
         }
-        DAT_801e7edc.unk370 = 8;
+        movie_state.unk370 = 8;
         player_begin_movie_return(id);
         break;
     case 8:
-        if (DAT_801e7edc.unk372 == 1) {
-            DAT_801e7edc.unk370 = 0;
-            ((void (*)(u8))DAT_8018fad4.handlers[7])(id);
+        if (movie_state.unk372 == 1) {
+            movie_state.unk370 = 0;
+            ((void (*)(u8))asset_status.handlers[7])(id);
         }
-        DAT_801e7edc.unk372 = 0;
+        movie_state.unk372 = 0;
         break;
     case 16:
-        DAT_801e7edc.unk370 = 1;
+        movie_state.unk370 = 1;
         break;
     }
 }

@@ -121,11 +121,11 @@ typedef struct EffectSpawn {
 } EffectSpawn;
 
 /* Counter the effect code keeps ahead of the records (WIP). */
-extern s32 DAT_80182964;
-extern Effect DAT_80182968[128];
+extern s32 map_placed_frame_counter;
+extern Effect map_placed_entries[128];
 
 /* Heap the frame packet pools and the 2D quad buffer are carved from (WIP extent). */
-extern u8 DAT_80116954[];
+extern u8 ot_packet_memory[];
 
 /* A 3x3 4.12 matrix without MATRIX's translation (20 bytes, 2-aligned). */
 typedef struct Matrix3x3 {
@@ -133,7 +133,7 @@ typedef struct Matrix3x3 {
     s16 unk12;
 } Matrix3x3;
 
-/* 48-byte light records of the area tables (DAT_80081c8c, WIP names). */
+/* 48-byte light records of the area tables (light_default_records, WIP names). */
 typedef struct Record30 {
     Matrix3x3 unk0;     /* fixed_lerp_nine_halfwords_q12 blends it into Record6c.unk0[0] */
     Matrix3x3 unk14;    /* into Record6c.unk50 */
@@ -143,7 +143,7 @@ typedef struct Record30 {
 } Record30;
 
 /* The area's light records (resource_initialize_game_assets copies them out of the first FDAT.T entry). */
-extern Record30 DAT_80081c8c[64];
+extern Record30 light_default_records[64];
 
 /* The working copy of a Record30: unk0[0] and its three quarter turns. */
 typedef struct Record6c {
@@ -237,7 +237,7 @@ typedef struct Data80199154 {
     Record6c unk15da8[64];          /* +0x15da8 */
 } Data80199154;
 
-extern Data80199154 DAT_80199154;
+extern Data80199154 scene_display_sys;
 
 /* Scratchpad words from +0x100 while the map layers are drawn (render_map_cell_layers). */
 typedef struct ScratchLayer {
@@ -378,8 +378,8 @@ typedef struct SpriteRec {
 } SpriteRec;
 
 /* The message strip sprites (6 and the terminator) and the status overlay. */
-extern SpriteRec DAT_80081928[7];
-extern SpriteRec DAT_800819b4[31];
+extern SpriteRec notification_quads[7];
+extern SpriteRec hud_sprites[31];
 
 /* A 3D overlay record (compass needles); the list ends with visible == 0xff. */
 typedef struct Data80081c20 {
@@ -395,26 +395,26 @@ typedef struct Data80081c20 {
     AnimSlot *slot; /* +0x20 */
 } Data80081c20;
 
-extern Data80081c20 DAT_80081c20[3];
+extern Data80081c20 render_model_rows[3];
 
 /*
  * View matrix render_scene_and_update_resources hands the model front ends for the objects drawn
  * without the view rotation (load-image .data; owner unit unknown).
  */
-extern MATRIX DAT_8007e4c4;
+extern MATRIX render_world_identity_matrix;
 
-extern RECT DAT_8009c2d0;
-extern CVECTOR DAT_8009c2e0;
+extern RECT menu_transition_rect;
+extern CVECTOR map_textured_primitive_color;
 extern SVECTOR DAT_8009c2e4;
-extern s32 DAT_8009c2ec;
+extern s32 render_model_yaw_smoothing_accumulator;
 
 /* Links p at depth z when z is inside the ordering table. */
 #define LINK_PRIM(z, p)                                         \
     {                                                           \
         s32 depth = (z);                                        \
         if (depth > 0 && (u32)depth < OT_LENGTH) {              \
-            addPrim(DAT_80199154.ot + depth, (p));              \
-            DAT_80199154.ot_count++;                            \
+            addPrim(scene_display_sys.ot + depth, (p));              \
+            scene_display_sys.ot_count++;                            \
         }                                                       \
     }
 

@@ -19,7 +19,7 @@
 #include <game/funcs.h>
 
 DATA(0x801b09fc, 0x1ae8, ".bss")
-SoundState DAT_801b09fc;
+SoundState sound_status;
 
 ADDRESS(0x8001509c, 0x1a4)
 void audio_initialize_runtime(void)
@@ -31,60 +31,60 @@ void audio_initialize_runtime(void)
 
     SsInit();
     SsSetMVol(0, 0);
-    SsSetTableSize(DAT_800c8768, 2, 1);
+    SsSetTableSize(ss_sep_area, 2, 1);
     SsSetTickMode(SS_TICK60);
     SsStart2();
     SsUtSetReverbType(SS_REV_TYPE_STUDIO_C);
     SsUtReverbOn();
     SsUtSetReverbDepth(40, 40);
     SsSetSerialAttr(SS_SERIAL_A, SS_MIX, SS_SON);
-    DAT_801b09fc.bank_select = 0;
-    DAT_801b09fc.seq_data = DAT_801b268c;
-    DAT_801b09fc.seq_playing = 0;
-    DAT_801b09fc.seq_ready = 0;
-    bank = DAT_801b09fc.banks;
+    sound_status.bank_select = 0;
+    sound_status.seq_buffer = seq_data;
+    sound_status.seq_playing = 0;
+    sound_status.seq_ready = 0;
+    bank = sound_status.banks;
     for (i = 0xb2; i != -1; i--) {
         bank->vab_id = SOUND_VAB_NONE;
         bank->slot = 0;
         bank++;
     }
-    unk = DAT_801b09fc.unk5c8;
+    unk = sound_status.unk5c8;
     for (i = 9; i != -1; i--) {
         unk->unk0 = -1;
         unk++;
     }
-    slot = &DAT_801b09fc.slots[0];
+    slot = &sound_status.slots[0];
     for (i = 0; i < 2; i++) {
         slot->state = 0;
-        slot->buffer = DAT_8014a958[i];
+        slot->buffer = sound_magic_vab_buffers[i];
         slot++;
     }
-    slot = &DAT_801b09fc.slots[2];
+    slot = &sound_status.slots[2];
     for (i = 0; i < 4; i++) {
         slot->state = 0;
-        slot->buffer = DAT_8017d964[i];
+        slot->buffer = sound_actor_vab_buffers[i];
         slot++;
     }
-    slot = &DAT_801b09fc.slots[6];
+    slot = &sound_status.slots[6];
     for (i = 0; i < 2; i++) {
         slot->state = 0;
-        slot->buffer = DAT_8017b964[i];
+        slot->buffer = sound_map_object_vab_buffers[i];
         slot++;
     }
-    DAT_801b09fc.slots[8].buffer = DAT_80183568;
-    DAT_801b09fc.slots[9].buffer = DAT_8014c958;
-    DAT_801b09fc.slots[10].buffer = DAT_80181964;
+    sound_status.slots[8].buffer = sound_weapon_vab_buffer;
+    sound_status.slots[9].buffer = sound_sequence_vab_buffer;
+    sound_status.slots[10].buffer = sound_main_vab_buffer;
 }
 
 ADDRESS(0x80015240, 0xb8)
 void audio_start_sequence(void)
 {
-    if (DAT_801b24e4.bgm_volume != 0 && DAT_801b09fc.seq_ready != 0
-        && DAT_801b09fc.banks[1].vab_id != SOUND_VAB_NONE) {
-        DAT_801b09fc.seq_id = SsSeqOpen(DAT_801b09fc.seq_data, DAT_801b09fc.banks[1].vab_id);
-        SsSeqSetVol(DAT_801b09fc.seq_id, DAT_801b24e4.bgm_volume, DAT_801b24e4.bgm_volume);
-        SsSeqPlay(DAT_801b09fc.seq_id, SSPLAY_PLAY, SSPLAY_INFINITY);
-        DAT_801b09fc.seq_playing = 1;
+    if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_ready != 0
+        && sound_status.banks[1].vab_id != SOUND_VAB_NONE) {
+        sound_status.seq_id = SsSeqOpen(sound_status.seq_buffer, sound_status.banks[1].vab_id);
+        SsSeqSetVol(sound_status.seq_id, cur_avatar_status.bgm_volume, cur_avatar_status.bgm_volume);
+        SsSeqPlay(sound_status.seq_id, SSPLAY_PLAY, SSPLAY_INFINITY);
+        sound_status.seq_playing = 1;
         SsSetMVol(127, 127);
     }
 }
@@ -92,10 +92,10 @@ void audio_start_sequence(void)
 ADDRESS(0x800152f8, 0x5c)
 void audio_stop_sequence(void)
 {
-    if (DAT_801b09fc.seq_playing == 1) {
-        SsSeqStop(DAT_801b09fc.seq_id);
-        SsSeqClose(DAT_801b09fc.seq_id);
-        DAT_801b09fc.seq_playing = 0;
+    if (sound_status.seq_playing == 1) {
+        SsSeqStop(sound_status.seq_id);
+        SsSeqClose(sound_status.seq_id);
+        sound_status.seq_playing = 0;
     }
 }
 
@@ -106,12 +106,12 @@ void audio_shutdown(void)
     s32 i;
 
     SsSetMVol(0, 0);
-    if (DAT_801b09fc.seq_playing == 1) {
-        SsSeqSetVol(DAT_801b09fc.seq_id, 0, 0);
-        SsSeqStop(DAT_801b09fc.seq_id);
-        SsSeqClose(DAT_801b09fc.seq_id);
+    if (sound_status.seq_playing == 1) {
+        SsSeqSetVol(sound_status.seq_id, 0, 0);
+        SsSeqStop(sound_status.seq_id);
+        SsSeqClose(sound_status.seq_id);
     }
-    bank = DAT_801b09fc.banks;
+    bank = sound_status.banks;
     for (i = 0xb2; i != -1; i--) {
         if (bank->vab_id != SOUND_VAB_NONE) {
             SsVabClose(bank->vab_id);
@@ -131,9 +131,9 @@ void audio_shutdown(void)
 ADDRESS(0x80015410, 0x244)
 s32 audio_play_spatial(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, s32 note)
 {
-    s32 dx = (pos->vx - DAT_801b09fc.listener.vx) >> 3;
-    s32 dy = (pos->vy - DAT_801b09fc.listener.vy) >> 3;
-    s32 dz = (pos->vz - DAT_801b09fc.listener.vz) >> 3;
+    s32 dx = (pos->vx - sound_status.listener.vx) >> 3;
+    s32 dy = (pos->vy - sound_status.listener.vy) >> 3;
+    s32 dz = (pos->vz - sound_status.listener.vz) >> 3;
     s32 near = se & 0x8000;
     s32 distance;
     s32 volume;
@@ -163,8 +163,8 @@ s32 audio_play_spatial(s32 se, VECTOR *pos, s32 unused, s32 range, s32 falloff, 
             left = 127;
         }
     }
-    angle = vector_xz_to_angle(pos->vx - DAT_801b09fc.listener.vx, pos->vz - DAT_801b09fc.listener.vz)
-         - DAT_801b09fc.listener_angle.vy;
+    angle = vector_xz_to_angle(pos->vx - sound_status.listener.vx, pos->vz - sound_status.listener.vz)
+         - sound_status.listener_angle.vy;
     angle = angle < 0 ? angle + 0x1000 : angle;
     right = left;
     if (angle < 2048) {
@@ -192,12 +192,12 @@ ADDRESS(0x800156bc, 0xb0)
 void audio_update_listener(VECTOR *listener, SVECTOR *angle)
 {
     if (listener != 0) {
-        DAT_801b09fc.listener = *listener;
+        sound_status.listener = *listener;
         collision_sample_map_cell_layer(listener->vx, listener->vy, listener->vz);
-        DAT_801b09fc.unk24 = DAT_801d4464.unk1200a;
+        sound_status.unk24 = map_world.unk1200a;
     }
     if (angle != 0) {
-        DAT_801b09fc.listener_angle = *angle;
+        sound_status.listener_angle = *angle;
     }
 }
 
@@ -218,24 +218,24 @@ void audio_key_on(s32 se, s32 left, s32 right, s32 note)
     if (se == 0xff) {
         return;
     }
-    if (DAT_801b24e4.se_volume == 0) {
+    if (cur_avatar_status.se_volume == 0) {
         return;
     }
     se &= 0x3ff;
-    effect = &DAT_801b09fc.effects[se];
+    effect = &sound_status.effects[se];
     if (effect->bank == SOUND_VAB_NONE) {
         return;
     }
     if (se >= 96 && se < 144) {
-        bank = &DAT_801b09fc.banks[2];
+        bank = &sound_status.banks[2];
     } else {
-        bank = &DAT_801b09fc.banks[effect->bank];
+        bank = &sound_status.banks[effect->bank];
     }
     if (bank->vab_id == SOUND_VAB_NONE || bank->vab_id == SOUND_VAB_LOADING) {
         return;
     }
-    left = left * DAT_801b24e4.se_volume >> 7;
-    right = right * DAT_801b24e4.se_volume >> 7;
+    left = left * cur_avatar_status.se_volume >> 7;
+    right = right * cur_avatar_status.se_volume >> 7;
     note += effect->note;
     if (note < 0) {
         note = 0;
@@ -258,7 +258,7 @@ void audio_vab_stream_callback(CdRequest *request)
 
     switch (request->state) {
     case 0:
-        bank = &DAT_801b09fc.banks[request->u.sound.bank];
+        bank = &sound_status.banks[request->u.sound.bank];
         if (cd_sectors_corrupt(request->u.sound.slot->buffer, request->count)) {
             request->issued = 0;
             CdSeekL(&request->retry_pos);
@@ -275,7 +275,7 @@ void audio_vab_stream_callback(CdRequest *request)
         }
         cd_location_add(&request->pos, request->count, &request->pos);
         request->state = 1;
-        request->buffer = DAT_801c17a4;
+        request->buffer = stream_work_buffer;
         request->issued = 0;
         request->count = 20;
         CdSeekL(&request->pos);
@@ -294,10 +294,10 @@ void cd_request_service_vab(void)
     SoundBank *bank;
 
     EnterCriticalSection();
-    request = DAT_801c12e4.read;
+    request = cdrom_ctl.read;
     if (request->kind == 0x30 && request->state == 2) {
         ExitCriticalSection();
-        bank = &DAT_801b09fc.banks[request->u.sound.bank];
+        bank = &sound_status.banks[request->u.sound.bank];
         for (;;) {
             id = SsVabTransBodyPartly(request->buffer, 0xa000, bank->vab_id);
             if (id == -1) {
@@ -331,7 +331,7 @@ SoundSlot *audio_acquire_vab_stream_slot(s32 first_bank, s32 bank_count, s32 fir
                                          s32 *index)
 {
     s32 i = 0;
-    SoundSlot *slot = &DAT_801b09fc.slots[first_slot];
+    SoundSlot *slot = &sound_status.slots[first_slot];
     SoundBank *bank;
     s32 n;
     s32 j;
@@ -345,10 +345,10 @@ SoundSlot *audio_acquire_vab_stream_slot(s32 first_bank, s32 bank_count, s32 fir
         slot++;
     }
     i = 0;
-    slot = &DAT_801b09fc.slots[first_slot];
+    slot = &sound_status.slots[first_slot];
     for (n = slot_count - 1; n != -1; n--) {
         if (slot->state == 2) {
-            bank = &DAT_801b09fc.banks[first_bank];
+            bank = &sound_status.banks[first_bank];
             for (j = bank_count - 1; j != -1; j--) {
                 if (bank->vab_id != SOUND_VAB_NONE && bank->slot == slot) {
                     SsVabClose(bank->vab_id);
@@ -375,7 +375,7 @@ SoundSlot *audio_acquire_vab_stream_slot(s32 first_bank, s32 bank_count, s32 fir
 ADDRESS(0x80015ce0, 0x238)
 void audio_queue_vab_stream(s32 file, s32 sector, s32 index)
 {
-    SoundBank *bank = &DAT_801b09fc.banks[index];
+    SoundBank *bank = &sound_status.banks[index];
     SoundBank *other;
     SoundSlot *slot;
     CdRequest *request;
@@ -385,28 +385,28 @@ void audio_queue_vab_stream(s32 file, s32 sector, s32 index)
 
     switch (index) {
     case 2:
-        slot = &DAT_801b09fc.slots[8];
+        slot = &sound_status.slots[8];
         spu_addr = 0x41800;
         break;
     case 1:
-        slot = &DAT_801b09fc.slots[9];
+        slot = &sound_status.slots[9];
         spu_addr = 0x19800;
         break;
     case 0:
-        slot = &DAT_801b09fc.slots[10];
+        slot = &sound_status.slots[10];
         spu_addr = 0x1000;
         break;
     default:
         if (index < 51) {
-            if (DAT_801b09fc.bank_select == 0) {
-                slot = &DAT_801b09fc.slots[0];
+            if (sound_status.bank_select == 0) {
+                slot = &sound_status.slots[0];
                 spu_addr = 0x44800;
             } else {
-                slot = &DAT_801b09fc.slots[1];
+                slot = &sound_status.slots[1];
                 spu_addr = 0x47800;
             }
             if (slot->state != 0) {
-                other = &DAT_801b09fc.banks[3];
+                other = &sound_status.banks[3];
                 for (i = 47; i != -1; i--) {
                     if (other->vab_id != SOUND_VAB_NONE && other->slot == slot) {
                         SsVabClose(other->vab_id);
@@ -433,7 +433,7 @@ void audio_queue_vab_stream(s32 file, s32 sector, s32 index)
     }
     bank->slot = slot;
     slot->state = 3;
-    request = DAT_801c12e4.write;
+    request = cdrom_ctl.write;
     cd_request_wait_done(request);
     request->state = 0;
     request->u.sound.slot = slot;

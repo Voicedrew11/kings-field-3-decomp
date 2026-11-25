@@ -40,7 +40,7 @@ void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapPatch *
     while (rec->bytes[0][0] != 0xff) {
         px = ((rec->dx * c - rec->dz * s) >> 12) + x;
         pz = ((rec->dz * c + rec->dx * s) >> 12) + z;
-        cell = &DAT_801d4464.cells[pz][px];
+        cell = &map_world.cells[pz][px];
         bytes = rec->bytes[index];
         own = (MapLayer *)((u8 *)cell + near);
         other = (MapLayer *)((u8 *)cell + far);
@@ -111,8 +111,8 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
         break;
     }
     copy = flags & 2;
-    src_row = &DAT_801d4464.cells[sz][sx];
-    dst_row = &DAT_801d4464.cells[dz][dx];
+    src_row = &map_world.cells[sz][sx];
+    dst_row = &map_world.cells[dz][dx];
     for (i = h - 1; i != -1; i--) {
         src = src_row;
         dst = dst_row;

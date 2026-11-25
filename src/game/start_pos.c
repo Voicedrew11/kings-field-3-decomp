@@ -39,7 +39,7 @@ void event_target_stream_execute(Object88 *obj)
     s32 n;
     u8 back;
 
-    def = &DAT_80185da8.defs[obj->unk2];
+    def = &actor_status.defs[obj->unk2];
     script = def->scripts[0];
     if (script == NULL || script[0] != 0x70) {
         return;
@@ -47,10 +47,10 @@ void event_target_stream_execute(Object88 *obj)
     posed = 0;
     repeat = 0;
     if (script[16] == 0) {
-        DAT_801ba984.unkaa = obj->unk1;
+        cur_evt_state.unkaa = obj->unk1;
     }
     p = event_target_stream_resolve_cursor(obj);
-    if (DAT_801ba984.unkaa != obj->unk1 && script[19] == 1) {
+    if (cur_evt_state.unkaa != obj->unk1 && script[19] == 1) {
         while (*p++ != 0xf0)
             ;
         p++;
@@ -67,7 +67,7 @@ void event_target_stream_execute(Object88 *obj)
             p -= back;
             continue;
         case 0xf9:
-            if (DAT_801ba984.unk4[p[1]] == p[2]) {
+            if (cur_evt_state.unk4[p[1]] == p[2]) {
                 script[16] = event_target_stream_find_marker(script, p[3]);
                 p = script + (script[16] + 20);
             } else {
@@ -82,7 +82,7 @@ void event_target_stream_execute(Object88 *obj)
         case 0xf4:
             script[16]++;
             p++;
-            ((void (*)(Object88 *, u8))DAT_8018fad4.handlers[4])(obj, *p);
+            ((void (*)(Object88 *, u8))asset_status.handlers[4])(obj, *p);
             break;
         case 0xf5:
             script[16]++;
@@ -90,13 +90,13 @@ void event_target_stream_execute(Object88 *obj)
             repeat = *p;
             break;
         case 0xf6:
-            DAT_801ba984.unkaa = obj->unk1;
+            cur_evt_state.unkaa = obj->unk1;
             p++;
             script[19] = 0;
             script[16]++;
             continue;
         case 0xf7:
-            DAT_801ba984.unk4[p[1]] = p[2];
+            cur_evt_state.unk4[p[1]] = p[2];
             p += 2;
             script[16] += 2;
             break;
@@ -118,7 +118,7 @@ void event_target_stream_execute(Object88 *obj)
             }
             render_game_frame(NULL, NULL);
             menu_show_transition_image(7, *(u16 *)(script + 12) + *p);
-            if ((DAT_801b24e4.unk178 & DAT_80081868[7]) && script[18] == 0xff) {
+            if ((cur_avatar_status.unk178 & action_button_masks[7]) && script[18] == 0xff) {
                 repeat++;
             }
             break;
@@ -141,7 +141,7 @@ end:
         player_render_frame_and_release_pool();
         break;
     case 0x30:
-        if (DAT_801b24e4.unk4c == 4) {
+        if (cur_avatar_status.unk4c == 4) {
             player_render_frame_and_release_pool();
             n = menu_intellectual_choose_item();
             if (n != -1) {
@@ -153,18 +153,18 @@ end:
     case 0x40:
         player_render_frame_and_release_pool();
         if (menu_prompt_stay(script[18] & 0xf) != -1) {
-            DAT_801e7edc.unk370 = 1;
-            DAT_801e7edc.unk384 = script[18] & 3;
+            movie_state.unk370 = 1;
+            movie_state.unk384 = script[18] & 3;
         }
         break;
     }
-    DAT_801ba984.unkaa = obj->unk1;
+    cur_evt_state.unkaa = obj->unk1;
     if (posed && script[17] != 0xff) {
         actor_animation_seek_phase(obj, script[17], 0, 0xfff, *(u16 *)(script + 14));
         obj->unkc = anim;
     }
     player_clear_motion();
-    DAT_801ba984.unk0 = 1;
+    cur_evt_state.unk0 = 1;
 }
 
 /* Spawns Object44 0x17c and links obj to it (its index - 124). */
@@ -175,7 +175,7 @@ void event_spawn_effect_object(Object44 *obj, s32 id)
     s32 i;
 
     made = map_object_effect_pool_acquire(0x17c, 0x10, -1);
-    obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 124;
+    obj->arg.b.unk39 = made - map_objects_slots.objects - 124;
     made->unk6 = id;
     made->arg.b.unk38 = 0;
 }
@@ -215,30 +215,30 @@ void player_warp_to_destination(s32 n)
     do {
         cd_request_yield();
         resource_advance_transition();
-    } while ((s16)DAT_8018fad4.loading != 0);
-    if (rec->area != DAT_8018fad4.area[0]) {
+    } while ((s16)asset_status.loading != 0);
+    if (rec->area != asset_status.area[0]) {
         resource_request_transition(rec->area, rec->area, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
     } else {
         resource_request_transition(0xff, 0xff, rec->area, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
-        DAT_801b24e4.unke = 1;
+        cur_avatar_status.unke = 1;
     }
     do {
         cd_request_yield();
         resource_advance_transition();
-    } while ((s16)DAT_8018fad4.loading != 0);
-    DAT_801b24e4.unk101 = 0;
-    DAT_801b24e4.unk13c = DAT_801b24e4.unk13e = DAT_801b24e4.unk140 = 0;
-    DAT_801b24e4.unk124 = DAT_801b24e4.unk12c;
-    DAT_801b24e4.pos.vx = (rec->x << 11) + 1024;
+    } while ((s16)asset_status.loading != 0);
+    cur_avatar_status.unk101 = 0;
+    cur_avatar_status.unk13c = cur_avatar_status.unk13e = cur_avatar_status.unk140 = 0;
+    cur_avatar_status.unk124 = cur_avatar_status.unk12c;
+    cur_avatar_status.pos.vx = (rec->x << 11) + 1024;
     z = rec->z << 11;
-    DAT_801b24e4.pos.vz = z + 1024;
-    DAT_801b24e4.pos.vy = -(rec->y << 7);
+    cur_avatar_status.pos.vz = z + 1024;
+    cur_avatar_status.pos.vy = -(rec->y << 7);
     yaw = -rec->yaw;
-    DAT_801b24e4.unk124.vy = DAT_801b24e4.unk12c.vy = yaw;
+    cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy = yaw;
     if (n == 13) {
-        DAT_801b24e4.unk124.vx = DAT_801b24e4.unk12c.vx = DAT_801b24e4.unk124.vz =
-            DAT_801b24e4.unk12c.vz = 0;
-        DAT_801b24e4.pos.vz = z + 2000;
+        cur_avatar_status.unk124.vx = cur_avatar_status.unk12c.vx = cur_avatar_status.unk124.vz =
+            cur_avatar_status.unk12c.vz = 0;
+        cur_avatar_status.pos.vz = z + 2000;
     } else {
         render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
         cd_request_wait_idle();
@@ -249,11 +249,11 @@ void player_warp_to_destination(s32 n)
         resource_request_transition(0xff, 0xff, 0xff, rec->area3, rec->area4, 0x7f, 0x7f, 0x7f);
     }
     if (n < 12) {
-        DAT_801b24e4.unk10a = 1;
-        DAT_801ba984.unk0 = 1;
+        cur_avatar_status.unk10a = 1;
+        cur_evt_state.unk0 = 1;
         player_recalculate_combat_stats();
     }
-    DAT_801b24e4.unk134 = DAT_801b24e4.unk136 = DAT_801b24e4.unk138 = 0;
+    cur_avatar_status.unk134 = cur_avatar_status.unk136 = cur_avatar_status.unk138 = 0;
 }
 
 /* Uses item id at pos/angle (stat raises, objects near the player, start-position moves),
@@ -277,7 +277,7 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
     s32 k;
     s32 j;
 
-    DAT_801ba984.unk0 = 0;
+    cur_evt_state.unk0 = 0;
     switch (id) {
     case 113:
         element = 0;
@@ -296,14 +296,14 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
     raise:
         game_counter_decrement(id);
         for (j = 2; j != -1; j--) {
-            DAT_801b24e4.unk34[element]++;
-            if (DAT_801b24e4.unk34[element] >= 1000) {
-                DAT_801b24e4.unk34[element] = 999;
+            cur_avatar_status.unk34[element]++;
+            if (cur_avatar_status.unk34[element] >= 1000) {
+                cur_avatar_status.unk34[element] = 999;
             } else {
                 player_learn_element_magic(element);
                 player_recalculate_combat_stats();
-                if (DAT_801ba984.unk0 == 0) {
-                    DAT_801ba984.unk0 = 1;
+                if (cur_evt_state.unk0 == 0) {
+                    cur_evt_state.unk0 = 1;
                     notify_enqueue(element + 18);
                 }
             }
@@ -312,14 +312,14 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
     case 110:
         game_counter_decrement(id);
         for (i = 4; i != -1; i--) {
-            DAT_801b24e4.unk34[i]++;
-            if (DAT_801b24e4.unk34[i] >= 1000) {
-                DAT_801b24e4.unk34[i] = 999;
+            cur_avatar_status.unk34[i]++;
+            if (cur_avatar_status.unk34[i] >= 1000) {
+                cur_avatar_status.unk34[i] = 999;
             } else {
                 player_learn_element_magic(i);
                 player_recalculate_combat_stats();
-                if (DAT_801ba984.unk0 == 0) {
-                    DAT_801ba984.unk0 = 1;
+                if (cur_evt_state.unk0 == 0) {
+                    cur_evt_state.unk0 = 1;
                     notify_enqueue(13);
                 }
             }
@@ -327,32 +327,32 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         break;
     case 111:
         for (j = 2; j != -1; j--) {
-            DAT_801b24e4.unk32++;
-            if (DAT_801b24e4.unk32 >= 1000) {
-                DAT_801b24e4.unk32 = 999;
+            cur_avatar_status.unk32++;
+            if (cur_avatar_status.unk32 >= 1000) {
+                cur_avatar_status.unk32 = 999;
             } else {
                 player_recalculate_combat_stats();
-                if (DAT_801ba984.unk0 == 0) {
-                    DAT_801ba984.unk0 = 1;
+                if (cur_evt_state.unk0 == 0) {
+                    cur_evt_state.unk0 = 1;
                     notify_enqueue(1);
                 }
             }
         }
         break;
     case 112:
-        DAT_801b24e4.unk4c++;
-        if (DAT_801b24e4.unk4c >= 5) {
-            DAT_801b24e4.unk4c = 4;
+        cur_avatar_status.unk4c++;
+        if (cur_avatar_status.unk4c >= 5) {
+            cur_avatar_status.unk4c = 4;
             break;
         }
         player_recalculate_combat_stats();
-        if (DAT_801ba984.unk0 == 0) {
-            DAT_801ba984.unk0 = 1;
+        if (cur_evt_state.unk0 == 0) {
+            cur_evt_state.unk0 = 1;
             notify_enqueue(2);
         }
         break;
     case 128:
-        if (DAT_8018fad4.area[0] == 6) {
+        if (asset_status.area[0] == 6) {
             k = 0;
             for (;;) {
                 k = map_object_find_interaction_target(k, pos, 800, 1700, angle->vy, 512);
@@ -360,11 +360,11 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     break;
                 }
                 if (k == 0x5b) {
-                    DAT_801ba984.unk0 = 1;
+                    cur_evt_state.unk0 = 1;
                     game_counter_decrement(0x80);
-                    obj2 = &DAT_8018fb3c.objects[0x5b];
+                    obj2 = &map_objects_slots.objects[0x5b];
                     i = 16;
-                    o88 = &DAT_80185da8.objects[3];
+                    o88 = &actor_status.objects[3];
                     o88->unk9 = 0;
                     o88->unk0 = 2;
                     while (o88->unk9 == 0) {
@@ -397,17 +397,17 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     o88->unk13 = 0;
                     o88->unk0 = 1;
                     obj2->unk6 = 0xff;
-                    DAT_801ba984.unke[0x19] = 1;
+                    cur_evt_state.unke[0x19] = 1;
                     break;
                 }
                 if (k == 0x53) {
-                    DAT_801ba984.unk0 = 1;
+                    cur_evt_state.unk0 = 1;
                     game_counter_decrement(0x80);
-                    o88b = &DAT_80185da8.objects[58];
+                    o88b = &actor_status.objects[58];
                     o88b->unk9 = 0;
                     o88b->unk0 = 2;
                     actor_select_target_type_in_own_group(o88b, 0x15);
-                    obj2b = &DAT_8018fb3c.objects[0x53];
+                    obj2b = &map_objects_slots.objects[0x53];
                     i = 16;
                     while (o88b->unk9 == 0) {
                         actor_update_frame();
@@ -440,16 +440,16 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     o88b->unk13 = 0;
                     o88b->unk0 = 1;
                     obj2b->unk6 = 0xff;
-                    DAT_801ba984.unk2c[0] = 1;
+                    cur_evt_state.unk2c[0] = 1;
                     break;
                 }
                 k++;
             }
         }
-        if (DAT_801ba984.unk0 == 0) {
+        if (cur_evt_state.unk0 == 0) {
             game_counter_decrement(id);
-            DAT_801b24e4.unk94 = 900;
-            DAT_801ba984.unk0 = 1;
+            cur_avatar_status.unk94 = 900;
+            cur_evt_state.unk0 = 1;
             player_recalculate_combat_stats();
         }
         break;
@@ -466,20 +466,20 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             if (i == -1) {
                 goto done;
             }
-            switch (map_object_check_and_consume_marker(&DAT_8018fb3c.objects[i], id)) {
+            switch (map_object_check_and_consume_marker(&map_objects_slots.objects[i], id)) {
             case 0:
                 break;
             case 1:
                 audio_play_sound_16();
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
                 goto done;
             case 3:
                 notify_enqueue(7);
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
                 goto done;
             case 4:
                 notify_enqueue(7);
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
                 goto done;
             }
             i++;
@@ -489,18 +489,18 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         if (i == -1) {
             break;
         }
-        made = &DAT_8018fb3c.objects[i];
+        made = &map_objects_slots.objects[i];
         if (made->unk6 == 0x101) {
             if (made->arg.b.unk38 == 0xff) {
                 made->arg.b.unk38 = id;
                 made->unk8 = 0;
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
                 game_counter_decrement(id);
                 event_spawn_effect_object(made, id);
             }
         } else if (map_object_check_and_consume_marker(made, id) == 3) {
             notify_enqueue(7);
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
         }
         break;
     case 136:
@@ -510,11 +510,11 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             if (i == -1) {
                 break;
             }
-            obj = &DAT_8018fb3c.objects[i];
+            obj = &map_objects_slots.objects[i];
             if (obj->unk6 == 0xa2) {
                 if (obj->arg.b.unk38 == 0x88) {
                     obj->arg.b.unk38 = 0xfe;
-                    DAT_801ba984.unk0 = 1;
+                    cur_evt_state.unk0 = 1;
                     game_counter_decrement(id);
                 }
             } else if (obj->unk6 == 0x102) {
@@ -523,18 +523,18 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
 
                     obj->arg.b.unk38 = id;
                     obj->unk8 = 0;
-                    DAT_801ba984.unk0 = 1;
+                    cur_evt_state.unk0 = 1;
                     game_counter_decrement(id);
-                    made = map_object_effect_pool_acquire(350, 10, DAT_8018fb3c.unk885e);
+                    made = map_object_effect_pool_acquire(350, 10, map_objects_slots.unk885e);
                     map_object_reset(made);
-                    made->arg.h.unk3c = DAT_8018fb3c.unk885e++;
+                    made->arg.h.unk3c = map_objects_slots.unk885e++;
                     made->unk6 = id;
                     made->arg.b.unk38 = 0;
-                    obj->arg.b.unk39 = made - DAT_8018fb3c.objects - 94;
+                    obj->arg.b.unk39 = made - map_objects_slots.objects - 94;
                 }
             } else if (map_object_check_and_consume_marker(obj, id) == 3) {
                 notify_enqueue(7);
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
             }
             i++;
         }
@@ -544,18 +544,18 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         if (i == -1) {
             break;
         }
-        if (DAT_8018fb3c.objects[i].unk6 == 0xfe) {
+        if (map_objects_slots.objects[i].unk6 == 0xfe) {
             if (game_counter_increment(0x77) == 0) {
                 notify_enqueue(12);
                 game_counter_decrement(id);
             }
-            DAT_801ba984.unk0 = 1;
-        } else if (DAT_8018fb3c.objects[i].unk6 == 0xfb) {
+            cur_evt_state.unk0 = 1;
+        } else if (map_objects_slots.objects[i].unk6 == 0xfb) {
             if (game_counter_increment(0x78) == 0) {
                 notify_enqueue(12);
                 game_counter_decrement(id);
             }
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
         }
         break;
     case 130:
@@ -584,12 +584,12 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             break;
         }
     start:
-        if (DAT_8018fad4.area[0] == 25 || DAT_8018fad4.area[0] == 27) {
+        if (asset_status.area[0] == 25 || asset_status.area[0] == 27) {
             k = 0;
             break;
         }
-        if ((s16)DAT_8018fad4.loading == 1
-            && (DAT_8018fad4.previous[0] == 25 || DAT_8018fad4.previous[0] == 27)) {
+        if ((s16)asset_status.loading == 1
+            && (asset_status.previous[0] == 25 || asset_status.previous[0] == 27)) {
             break;
         }
         player_warp_to_destination(k);
@@ -602,33 +602,33 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
     case 109:
     case 119:
     case 120:
-        DAT_801ba984.unk0 = 1;
+        cur_evt_state.unk0 = 1;
         break;
     case 101:
         flag = 2;
-        if (DAT_801b24e4.unk160 == 0) {
+        if (cur_avatar_status.unk160 == 0) {
             flag = 1;
         }
         target = actor_find_best_in_cone(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
         if (target != NULL && target->unk3 == flag) {
             menu_show_transition_image(6, target->unk1 + 270);
-            DAT_801ba984.unk0 = 1;
+            cur_evt_state.unk0 = 1;
         } else {
             n = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
-            if (n != -1 && DAT_8018fb3c.objects[n].unk0 != 0 && n == 11 && DAT_8018fad4.area[0] == 17) {
+            if (n != -1 && map_objects_slots.objects[n].unk0 != 0 && n == 11 && asset_status.area[0] == 17) {
                 menu_show_transition_image(6, 305);
-                DAT_801ba984.unk0 = 1;
+                cur_evt_state.unk0 = 1;
             }
         }
-        if (DAT_801ba984.unk0 == 0) {
-            obj = DAT_8018fb3c.objects;
+        if (cur_evt_state.unk0 == 0) {
+            obj = map_objects_slots.objects;
             for (i = 395; i != -1; i--, obj++) {
-                if (DAT_8018fb3c.defs[obj->unk6].unk0 == 0xe2 && obj->arg.b.unk40 == flag
+                if (map_objects_slots.defs[obj->unk6].unk0 == 0xe2 && obj->arg.b.unk40 == flag
                     && player_camera_within_map_region(obj->pos.vx >> 11, obj->pos.vz >> 11, obj->arg.b.unk38,
                                                        obj->arg.b.unk39,
                                                        0x8000) != 0) {
                     menu_show_transition_image(6, obj->arg.h.unk3a + 810);
-                    DAT_801ba984.unk0 = 1;
+                    cur_evt_state.unk0 = 1;
                     break;
                 }
             }
@@ -636,8 +636,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
         break;
     }
 done:
-    ((void (*)(VECTOR *, SVECTOR *, s32))DAT_8018fad4.handlers[2])(pos, angle, id);
-    if (DAT_801ba984.unk0 == 0) {
+    ((void (*)(VECTOR *, SVECTOR *, s32))asset_status.handlers[2])(pos, angle, id);
+    if (cur_evt_state.unk0 == 0) {
         notify_enqueue(10);
     }
     player_clear_motion();

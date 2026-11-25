@@ -103,7 +103,7 @@ used throughout:
   directly after another table's end cannot share its `.rdata` and starts a
   new TU (`0x8003260c` begins the TU after the player's).
 - **`$gp` merges TUs.** `0x8003c35c`, `0x8003df50` and `0x800400ac` read
-  `DAT_8009c2e0`, a datum of the hud code (`..0x8004290c`), as `$gp+0xcc`:
+  `map_textured_primitive_color`, a datum of the hud code (`..0x8004290c`), as `$gp+0xcc`:
   screen, objects and hud are one TU (`game.render`).
 - **Unreferenced statics and globals are emitted.** `RODATA`/`SDATA` claims
   are the object's real extent, without a trailing alignment pad.
@@ -214,7 +214,7 @@ insn gives it (`block_alloc` tries operands in order).
   register, which loop.c can hoist; `base[n].field` folds the offset into the
   constant (`0x8005f444`).
 - **The address taken first becomes the base.** `u_long **buf =
-  DAT_801e7edc.unk374;` before `dec` makes `dec` `buf - 52` (`0x80061364`);
+  movie_state.unk374;` before `dec` makes `dec` `buf - 52` (`0x80061364`);
   `find_best_addr` prefers `(plus base off)` to a register at equal cost
   (`0x8002e3f8`).
 - **No rehash on a register's first quantity.** `insert_regs` does not call
@@ -250,7 +250,7 @@ insn gives it (`block_alloc` tries operands in order).
 
   ```c
   {
-      MapCell *row = DAT_801d4464.cells[obj->pos.vz >> 11];
+      MapCell *row = map_world.cells[obj->pos.vz >> 11];
 
       cell = &row[obj->pos.vx >> 11];
   }
