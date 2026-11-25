@@ -92,7 +92,7 @@ void area_on_actor_removed_trade_item(Actor *obj)
     if (obj - actor_status.objects != 0) {
         return;
     }
-    if (cur_avatar_status.unk101 == 0x11) {
+    if (cur_avatar_status.reaction_mode == 0x11) {
         return;
     }
     cur_evt_state.unk32[0x37] = 1;
@@ -102,7 +102,7 @@ void area_on_actor_removed_trade_item(Actor *obj)
     cur_evt_state.unk32[0x38] = 1;
     game_counter_decrement(0x10);
     game_counter_increment(0x11);
-    if (cur_avatar_status.unkcb == 0x10) {
+    if (cur_avatar_status.equipped_weapon_id == 0x10) {
         player_equip_weapon(0x11);
     }
 }

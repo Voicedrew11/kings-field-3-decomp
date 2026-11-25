@@ -137,7 +137,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -209,7 +209,7 @@ void area_region_trigger_worn_item_cells_and_warp_cells(MapObject *obj)
 {
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (cur_avatar_status.unkf4 == 0x4b) {
+        if (cur_avatar_status.equipped_leg_id == 0x4b) {
             map_cell_copy_rotated_fields(2, 0x4a, 5, 0x3a, 0x35, 6, 2, 0, 0x2f);
         } else {
             map_cell_copy_rotated_fields(2, 0x44, 5, 0x3a, 0x35, 6, 2, 0, 0x2f);
@@ -217,11 +217,11 @@ void area_region_trigger_worn_item_cells_and_warp_cells(MapObject *obj)
         break;
     case 10:
         if (player_camera_within_map_region(0x1f, 0x41, 7, 0xc, 0x8000) != 0) {
-            if (cur_avatar_status.unk10a != 0) {
+            if (cur_avatar_status.warp_arrived != 0) {
                 map_cell_copy_rotated_fields(2, 0x4a, 4, 0x21, 0x41, 3, 1, 0, 0x2f);
             }
         } else {
-            cur_avatar_status.unk10a = 0;
+            cur_avatar_status.warp_arrived = 0;
             map_cell_copy_rotated_fields(2, 0x4d, 4, 0x21, 0x41, 3, 1, 0, 0x2f);
         }
         break;
@@ -301,8 +301,8 @@ void area_on_load_restore_actors_doors_and_light(void)
     MapObject *obj44;
     s32 i;
 
-    if (cur_avatar_status.unk32 >= 50 && cur_avatar_status.unk34[0] >= 50 && cur_avatar_status.unk34[1] >= 50 &&
-        cur_avatar_status.unk34[2] >= 50 && cur_avatar_status.unk34[3] >= 50 && cur_avatar_status.unk34[4] >= 50) {
+    if (cur_avatar_status.base_physical_power >= 50 && cur_avatar_status.base_magic[0] >= 50 && cur_avatar_status.base_magic[1] >= 50 &&
+        cur_avatar_status.base_magic[2] >= 50 && cur_avatar_status.base_magic[3] >= 50 && cur_avatar_status.base_magic[4] >= 50) {
         cur_evt_state.unke[0x1c] = 1;
     }
     if (cur_evt_state.unke[0x19] == 0) {

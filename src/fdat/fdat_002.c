@@ -101,7 +101,7 @@ void area_update_light_flicker_and_actor_swap(void)
             map_objects_slots.objects[k].lighting_blend = 0;
         }
     }
-    if (cur_evt_state.unk4[1] != 0 && cur_evt_state.unk4[2] != 0 && cur_evt_state.unk4[7] == 0) {
+    if (cur_evt_state.flags[1] != 0 && cur_evt_state.flags[2] != 0 && cur_evt_state.flags[7] == 0) {
         dx = (actor_status.objects[1].pos.vx - cur_avatar_status.pos.vx) / 2048;
         dz = (actor_status.objects[1].pos.vz - cur_avatar_status.pos.vz) / 2048;
         /* ^ is exclusive or here, as written. */
@@ -135,8 +135,8 @@ void area_on_actor_removed_unlock_door(Actor *obj)
     s32 k;
 
     if (obj - actor_status.objects == 32) {
-        if (cur_evt_state.unk4[8] == 0) {
-            cur_evt_state.unk4[8] = 1;
+        if (cur_evt_state.flags[8] == 0) {
+            cur_evt_state.flags[8] = 1;
             k = 344;
             if (map_objects_slots.objects[k].arg.b.unk38 == 0xf1) {
                 map_objects_slots.objects[k].arg.b.unk38 = 0xff;
@@ -157,8 +157,8 @@ void area_region_trigger_set_doors_and_warp_cells(MapObject *obj)
 
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
-        if (cur_evt_state.unk4[6] == 1) {
-            if (cur_evt_state.unk4[7] == 0) {
+        if (cur_evt_state.flags[6] == 1) {
+            if (cur_evt_state.flags[7] == 0) {
                 actor_status.objects[0].slot_state = 8;
                 actor_status.objects[1].slot_state = 8;
                 actor_status.objects[2].slot_state = 8;
@@ -185,11 +185,11 @@ void area_region_trigger_set_doors_and_warp_cells(MapObject *obj)
         }
     case 10:
         if (player_camera_within_map_region(9, 0x37, 3, 3, 0x8000) != 0) {
-            if (cur_avatar_status.unk10a != 0) {
+            if (cur_avatar_status.warp_arrived != 0) {
                 map_cell_copy_rotated_fields(2, 0x4a, 0, 9, 0x37, 3, 1, 0, 0x2f);
             }
         } else {
-            cur_avatar_status.unk10a = 0;
+            cur_avatar_status.warp_arrived = 0;
             map_cell_copy_rotated_fields(2, 0x4d, 0, 9, 0x37, 3, 1, 0, 0x2f);
         }
         break;
@@ -222,7 +222,7 @@ void area_on_item_added_check_items_held(void)
 {
     if (game_counter_is_nonzero(0) > 0 && game_counter_is_nonzero(0x85) > 0 &&
         game_counter_is_nonzero(0x64) > 0) {
-        cur_evt_state.unk4[7] = 1;
+        cur_evt_state.flags[7] = 1;
     }
 }
 
@@ -237,9 +237,9 @@ void area_on_movie_end_restore_hp_and_mp(u8 id)
 {
     if (id == 0) {
         cur_avatar_status.hp = cur_avatar_status.hp_max;
-        cur_avatar_status.unk1c += 30;
-        if (cur_avatar_status.unk1c > cur_avatar_status.unk1a) {
-            cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+        cur_avatar_status.mp += 30;
+        if (cur_avatar_status.mp > cur_avatar_status.mp_max) {
+            cur_avatar_status.mp = cur_avatar_status.mp_max;
         }
     }
 }
@@ -254,48 +254,48 @@ void area_talk_event_collect_items_and_wait(Actor *record, s32 event)
     case 0:
         if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 &&
             game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
-            cur_evt_state.unk4[3] = 1;
+            cur_evt_state.flags[3] = 1;
         } else {
-            cur_evt_state.unk4[3] = 0;
+            cur_evt_state.flags[3] = 0;
         }
         break;
     case 1:
         if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
             game_counter_is_nonzero(0x84) > 0 && game_counter_is_nonzero(2) > 0) {
-            cur_evt_state.unk4[1] = 1;
-            cur_evt_state.unk0 = 1;
+            cur_evt_state.flags[1] = 1;
+            cur_evt_state.interaction_handled = 1;
             game_counter_decrement(0x82);
             game_counter_decrement(0x83);
             game_counter_decrement(0x84);
             game_counter_decrement(2);
-            if (cur_avatar_status.unkcb == 2) {
+            if (cur_avatar_status.equipped_weapon_id == 2) {
                 player_equip_weapon(0xff);
             }
         }
         break;
     case 2:
-        cur_evt_state.unk4[2] = 1;
+        cur_evt_state.flags[2] = 1;
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 1;
-        cur_evt_state.unk4[4] = cur_avatar_status.play_minutes % 60;
-        cur_evt_state.unk4[5] = cur_avatar_status.experience % 10000 / 100;
+        cur_evt_state.flags[4] = cur_avatar_status.play_minutes % 60;
+        cur_evt_state.flags[5] = cur_avatar_status.experience % 10000 / 100;
         break;
     case 4:
-        if (cur_avatar_status.play_minutes % 60 < cur_evt_state.unk4[4] ||
-            cur_avatar_status.play_minutes % 60 >= cur_evt_state.unk4[4] + 10) {
-            cur_evt_state.unk4[6] = 1;
+        if (cur_avatar_status.play_minutes % 60 < cur_evt_state.flags[4] ||
+            cur_avatar_status.play_minutes % 60 >= cur_evt_state.flags[4] + 10) {
+            cur_evt_state.flags[6] = 1;
         }
         hundreds = cur_avatar_status.experience % 10000 / 100;
-        if (hundreds < cur_evt_state.unk4[5] || hundreds >= cur_evt_state.unk4[5] + 10) {
-            cur_evt_state.unk4[6] = 1;
+        if (hundreds < cur_evt_state.flags[5] || hundreds >= cur_evt_state.flags[5] + 10) {
+            cur_evt_state.flags[6] = 1;
         }
         break;
     case 5:
         if (game_counter_is_nonzero(0x82) > 0 && game_counter_is_nonzero(0x83) > 0 &&
             game_counter_is_nonzero(0x84) > 0) {
-            cur_evt_state.unk4[1] = 1;
+            cur_evt_state.flags[1] = 1;
         } else {
-            cur_evt_state.unk4[1] = 0;
+            cur_evt_state.flags[1] = 0;
         }
         break;
     }
@@ -350,7 +350,7 @@ void area_on_load_restore_actors_and_doors(void)
         door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
-    } else if (cur_evt_state.unk4[2] == 0) {
+    } else if (cur_evt_state.flags[2] == 0) {
         actor_status.objects[0].slot_state = 8;
         actor_status.objects[1].slot_state = 1;
         actor_status.objects[2].slot_state = 8;
@@ -378,7 +378,7 @@ void area_on_load_restore_actors_and_doors(void)
         door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
-    } else if (cur_evt_state.unk4[6] == 0) {
+    } else if (cur_evt_state.flags[6] == 0) {
         actor_status.objects[0].slot_state = 8;
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 1;
@@ -406,7 +406,7 @@ void area_on_load_restore_actors_and_doors(void)
         door->layer_mask = 0;
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
-    } else if (cur_evt_state.unk4[7] == 0) {
+    } else if (cur_evt_state.flags[7] == 0) {
         actor_status.objects[0].slot_state = 8;
         actor_status.objects[1].slot_state = 8;
         actor_status.objects[2].slot_state = 8;
@@ -465,11 +465,11 @@ void area_on_load_restore_actors_and_doors(void)
     }
     if (game_counter_is_nonzero(2) > 0 && game_counter_is_nonzero(0x82) > 0 &&
         game_counter_is_nonzero(0x83) > 0 && game_counter_is_nonzero(0x84) > 0) {
-        cur_evt_state.unk4[3] = 1;
+        cur_evt_state.flags[3] = 1;
     } else {
-        cur_evt_state.unk4[3] = 0;
+        cur_evt_state.flags[3] = 0;
     }
-    if (cur_evt_state.unk4[8] != 0) {
+    if (cur_evt_state.flags[8] != 0) {
         k = 344;
         if (map_objects_slots.objects[k].arg.b.unk38 == 0xf1) {
             map_objects_slots.objects[k].arg.b.unk38 = 0xff;

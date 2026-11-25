@@ -97,7 +97,7 @@ void area_on_actor_removed_start_ending(Actor *obj)
         return;
     }
     cur_evt_state.unk32[0x39] = 1;
-    cur_avatar_status.unkc0 = -1;
+    cur_avatar_status.weapon_attack_phase = -1;
     light_reset_records();
     render_reset_color_overlays();
     light_refresh_record_rotations();

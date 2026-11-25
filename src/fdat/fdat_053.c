@@ -86,7 +86,7 @@ void area_update_respawn_actor_out_of_view(void)
     s32 i = 15;
 
     if (cur_evt_state.unk32[0x23] == 1 && actor_status.objects[i].lifecycle != 1) {
-        if (angle_within_tolerance(cur_avatar_status.unk124.vy,
+        if (angle_within_tolerance(cur_avatar_status.camera_rotation.vy,
                                    vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
                                                       actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                    600) == 0) {
@@ -146,7 +146,7 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
         cur_evt_state.unk32[0x25] = 1;
         cur_evt_state.unk32[0x26] = 0;
         game_counter_decrement(item);
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
     }
 }
 
@@ -235,7 +235,7 @@ void area_region_trigger_trade_item_and_damage(MapObject *obj)
     case 1:
         if (game_counter_is_nonzero(0x38) > 0) {
             color_overlay_transition(0x200, 0, 0, 0, 100, 100, 100);
-            if (cur_avatar_status.unkf2 == 0x38) {
+            if (cur_avatar_status.equipped_shield_id == 0x38) {
                 player_set_equipment_slot(0x39, 4);
             }
             game_counter_decrement(0x38);
@@ -345,7 +345,7 @@ void area_talk_event_give_equipment_and_raise_element(Actor *record, s32 event)
             cur_evt_state.unk32[0x25] = 2;
             color_overlay_transition(0x200, 0, 0, 0, 200, 200, 200);
             color_overlay_transition(0x200, 200, 200, 200, 0, 0, 0);
-            cur_avatar_status.unk34[4] += 30;
+            cur_avatar_status.base_magic[4] += 30;
             player_learn_element_magic(4);
             player_recalculate_combat_stats();
             actor_status.objects[56].slot_state = 8;

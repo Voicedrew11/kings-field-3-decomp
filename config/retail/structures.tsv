@@ -15,14 +15,11 @@ CdRequestUnion	0xc	supported	asm;sound and image requests share CdRequest+0x4..0
 CdSoundRequest	0xc	supported	asm;band A sound accesses at CdRequest+0x4..0xf	WIP (game-c)
 CdState	0x4c0	supported	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
 ColorSum	0x8	supported	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field names; untouched ranges opaque
+ConversationRecord	0x6	supported	asm;conversation_records_initialize/conversation_record_mark_page 6-byte stride at conversation_records+0xc0	WIP (game-i)
+ConversationRecords	0xda0	supported	asm;conversation_records_initialize relates the three parts to one base (+0xc0, +0x1e0); card_payload_capture_game_state/card_payload_restore_game_state copy 0x3c0 bytes from +0x1e0 with word-aligned block moves; WIP extent up to actor_animation_shift_target	WIP (game-i)
+ConversationSource	0x4	supported	asm;conversation_records_initialize 4-byte stride at conversation_records	WIP (game-i)
 Data80081c20	0x24	supported	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20	WIP field names; untouched ranges opaque
-Data8018fad4	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
-Data801983a8	0xda0	supported	asm;conversation_records_initialize relates the three parts to one base (+0xc0, +0x1e0); card_payload_capture_game_state/card_payload_restore_game_state copy 0x3c0 bytes from +0x1e0 with word-aligned block moves; WIP extent up to actor_animation_shift_target	WIP (game-i)
 Data80199154	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
-Data801b24e4	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (translate_active_world_positions/cd_vsync_handler), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
-Data801b24e4Mode	0x10	supported	asm;player_begin_moving_damage_reaction/player_begin_movie_approach/player_begin_actor_overlap_bob views of +0x188	WIP (game-j)
-Data801ba984	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
-Data801e7edc	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
 Effect	0x4c	supported	asm;translate_active_world_positions 76-byte stride, 128 records;band G src/game/object4c*.c field accesses	WIP (game-c)
 EffectArg	0x8	supported	asm;effect_construct_record stores Effect+0x44..+0x4b as bytes, halfwords and words by id	WIP (game-sw)
 EffectBytes	0x8	supported	asm;effect_construct_record sb to Effect+0x44/+0x45/+0x48/+0x49 by id	WIP (game-sw)
@@ -33,6 +30,7 @@ EffectState	0x2f0c	supported	asm;game loop word-count clear;player_learn_element
 EffectTrailRow	0x18	supported	asm;effect_construct_record copies pos (16 bytes) and angle (8 bytes) into 24-byte records of effect_trails_table	WIP (game-sw)
 EffectWords	0x8	supported	asm;effect_construct_record sw trail pointer to Effect+0x44 (ids 5, 16) and pos.vy to +0x48 (id 95)	WIP (game-sw)
 EquipmentRecord	0x20	supported	asm;player_add_equipment_bonuses/player_set_equipment_slot 32-byte stride at map_world+0x11c14	WIP (game-d)
+EventState	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 MagicRecord	0x18	supported	asm;player_learn_element_magic/player_set_primary_magic_shortcut_id 24-byte stride at effect_status;game-e menu_collect_available_magic_rows u16 at +0x16	WIP (game-d)
@@ -41,7 +39,7 @@ MapCellPattern	0xa	supported	asm;map_cell_apply_rotated_pattern 10-byte records:
 MapLayer	0x5	supported	asm;render_map_cell_layers passes &cell+0 and &cell+5 to render_map_cell_object (5-byte layers);collision_sample_map_layer_height/map_cell_add_layer_occupancy/view_grid_occlude_walls_ascending field accesses	WIP (game-h)
 MapObject	0x44	supported	asm;translate_active_world_positions 68-byte stride, 0x18c records	WIP (game-c)
 MapObjectAmbientSound	0x10	supported	asm;render_scene_and_update_resources kind 0x1f: player_camera_within_map_region sizes lbu +0x38/+0x39, effect lbu +0x3a (+496), volume +0x3b, range +0x3c, flags +0x3d, lhu +0x3e * 6, next frame lw/sw +0x40	WIP (render-tu)
-MapObjectAnimated	0x10	supported	asm;render_scene_and_update_resources kind 0xf0 / Data8018fad4+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c	WIP (render-tu)
+MapObjectAnimated	0x10	supported	asm;render_scene_and_update_resources kind 0xf0 / ResourceState+0x24: AnimSlot pointer +0x34, ranges lbu +0x38/+0x39, render_animated_object depth/light/shade lbu +0x3a/+0x3b/+0x3c	WIP (render-tu)
 MapObjectArg	0x10	supported	asm;MapObject+0x34..+0x43 read as bytes, halfwords and words by kind (map_object_set_property, map_object_effect_pool_acquire, map_object_pool_reset, FDAT slot 0)	WIP (game-k)
 MapObjectBytes	0x10	supported	asm;map_object_set_property/map_object_apply_marker_signal/map_object_check_and_consume_marker byte accesses at MapObject+0x38..+0x40 by kind	WIP (game-k)
 MapObjectDef	0x18	supported	asm;collision_cache_load_hit_bounds &map_objects_slots + MapObject.unk6 * 24 field reads	WIP (game-h)
@@ -69,17 +67,18 @@ MenuText	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and menu_win
 ModelData	0x28	supported	asm;animation_prepare_asset_vertices, animation_sample_vertex, asset_vertex_count	WIP field names; untouched ranges opaque
 ModelFile	0x14	supported	asm;asset_registry_select, animation_select_keyframe, animation_prepare_asset_vertices header offsets	WIP field names; untouched ranges opaque
 ModelPart	0x1c	supported	asm;render_enqueue_textured_tmd/render_enqueue_tmd_fixed_depth 28-byte parts at model data + 12: +0x04 vertex count (menu_render_item_model), +0x08 normals, +0x10 prims, +0x14 prim count	WIP field names; untouched ranges opaque
-MovieRec	0x34	supported	asm;movie_update_state 52-byte stride from movie_state (unk380 = &movies[id]); movie_play_stream file byte; strNext last frame;player_update_frame modes 7/8/9 fields +0x4..+0x2c	WIP (game-top)
+MovieRecord	0x34	supported	asm;movie_update_state 52-byte stride from movie_state (unk380 = &movies[id]); movie_play_stream file byte; strNext last frame;player_update_frame modes 7/8/9 fields +0x4..+0x2c	WIP (game-top)
+MovieState	0x38c	supported	asm;game loop word-count clear;band A field accesses	WIP extent; fields band A does not touch are opaque
+PlayerDamageReaction	0x10	supported	asm;player_begin_moving_damage_reaction/player_update_reaction_rotation_offsets 8-byte copies to +0x188/+0x190	WIP (game-j)
+PlayerLevelGrowth	0xc	supported	asm;player_add_experience/player_initialize_state 12-byte stride at player_lv_grow_list	WIP (game-d)
+PlayerMovieReaction	0xa	supported	asm;player_begin_movie_approach/player_begin_movie_return (u8 id, u8 0, unk12c copy at +0x18a)	WIP (game-j)
+PlayerReaction	0x10	supported	asm;player_begin_moving_damage_reaction/player_begin_movie_approach/player_begin_actor_overlap_bob views of +0x188	WIP (game-j)
+PlayerState	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (translate_active_world_positions/cd_vsync_handler), game-b, game-d (player module) and game-f (src/game/entity*.c) field accesses	WIP field names; untouched ranges opaque
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
 PrimTag	0x4	supported	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code)	WIP (game-gte)
-Record04	0x4	supported	asm;conversation_records_initialize 4-byte stride at conversation_records	WIP (game-i)
-Record06	0x6	supported	asm;conversation_records_initialize/conversation_record_mark_page 6-byte stride at conversation_records+0xc0	WIP (game-i)
-Record08	0x8	supported	asm;player_warp_to_destination local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
-Record0a	0xa	supported	asm;player_begin_movie_approach/player_begin_movie_return (u8 id, u8 0, unk12c copy at +0x18a)	WIP (game-j)
-Record0c	0xc	supported	asm;player_add_experience/player_initialize_state 12-byte stride at player_lv_grow_list	WIP (game-d)
-Record10	0x10	supported	asm;player_begin_moving_damage_reaction/player_update_reaction_rotation_offsets 8-byte copies to +0x188/+0x190	WIP (game-j)
 Record30	0x30	supported	asm;light_reset_records 48-byte stride source records at light_default_records;light_interpolate_color_and_fog builds one on the stack	WIP (game-h)
 Record6c	0x6c	supported	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at Data80199154+0x15da8;render_map_cell_object field reads	WIP (game-h)
+ResourceState	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
 SaveData	0x5c00	supported	asm;card_payload_capture_game_state/card_payload_restore_game_state copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it	WIP (game-top2)
 SaveHeader	0x280	supported	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 ScratchCount	0x20	supported	asm;menu_render_item_model/render_player_weapon/render_animated_object copy Data80199154+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084	WIP (game-gte)
@@ -101,4 +100,5 @@ SoundSlot	0x8	supported	asm;sound init and audio_acquire_vab_stream_slot (8-byte
 SoundState	0x1ae8	supported	asm;band A field accesses;game loop clears 0x6ba words	WIP field names
 SoundUnk5c8	0x4	supported	asm;sound init loop (4-byte stride, 10 entries)	WIP extent; fields band A does not touch are opaque
 SpriteRec	0x14	supported	asm;render_sprite_record field accesses;20-byte stride of the .data sprite lists	WIP field names; untouched ranges opaque
+WarpDestination	0x8	supported	asm;player_warp_to_destination local table of 14 8-byte records (.rdata 0x800130f0)	WIP (game-i)
 WeaponRecord	0x44	supported	asm;player_recalculate_combat_stats/player_equip_weapon/player_begin_weapon_attack 68-byte stride at weapon_table;player_update_frame +0x16/+0x18 periods	WIP (game-d)

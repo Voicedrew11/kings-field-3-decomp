@@ -122,12 +122,12 @@ void game_main_loop(void)
     vram_scroll_start(&rect, 0, 1, 1);
     memory_arena_initialize_blocks((void *)resource_space, sizeof(resource_space));
     if (continued == 1) {
-        movie_state.unk384 = 3;
-        movie_state.unk380 = &movie_state.movies[3];
+        movie_state.movie_id = 3;
+        movie_state.current_movie = &movie_state.movies[3];
         movie_play();
-        movie_state.unk372 = -1;
-        movie_state.unk370 = 0;
-        movie_state.unk384 = 0xff;
+        movie_state.stream_status = -1;
+        movie_state.state = 0;
+        movie_state.movie_id = 0xff;
         cur_evt_state.unkd = 1;
         SsSetMVol(127, 127);
         if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == continued) {
@@ -145,7 +145,7 @@ void game_main_loop(void)
         player_update_frame();
         actor_update_frame();
         effect_pool_sweep();
-        cur_avatar_status.unke = 0;
+        cur_avatar_status.force_actor_lifecycle_refresh = 0;
         game_update_ending();
         resource_advance_transition();
         movie_update_state();

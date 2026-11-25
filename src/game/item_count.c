@@ -180,7 +180,7 @@ void event_map_object_interact(MapObject *obj, ...)
     if (def->kind == 0x20) {
         notify_enqueue(25, obj->arg.h.unk3a);
         obj->object_id = 0xff;
-        cur_avatar_status.unk50 += obj->arg.h.unk3a;
+        cur_avatar_status.gold += obj->arg.h.unk3a;
         return;
     }
     if (obj->action == 0x70 && obj->object_id == 0x86) {
@@ -201,12 +201,12 @@ void event_map_object_interact(MapObject *obj, ...)
         if (link->action == 2 && link->action_state != 0) {
             return;
         }
-    } else if (obj->object_id == 0x85 && asset_status.area[0] == 7) {
-        if (!angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 256)) {
+    } else if (obj->object_id == 0x85 && asset_status.active_resource_ids[0] == 7) {
+        if (!angle_within_tolerance(cur_avatar_status.camera_rotation_target.vy + 2048, obj->angle.vy, 256)) {
             return;
         }
     }
-    pitch = cur_avatar_status.unk124.vx & 0xfff;
+    pitch = cur_avatar_status.camera_rotation.vx & 0xfff;
     start = pitch;
     if (pitch < 2048) {
         if (pitch > 0) {
@@ -219,17 +219,17 @@ void event_map_object_interact(MapObject *obj, ...)
     held = def->arg.sh.held_depth_offset;
     angle_from = obj->angle;
     from = obj->pos;
-    scene_position_from_camera_offset(0, 500, 1500, pitch, cur_avatar_status.unk124.vy,
+    scene_position_from_camera_offset(0, 500, 1500, pitch, cur_avatar_status.camera_rotation.vy,
                                       def->arg.sh.height_offset, def->arg.sh.depth_offset, &to);
     angle_to.vz = 0;
     angle_to.vx = 0;
-    angle_to.vy = (cur_avatar_status.unk124.vy + 2048) & 0xfff;
+    angle_to.vy = (cur_avatar_status.camera_rotation.vy + 2048) & 0xfff;
     model_id = map_object_asset_index(obj->object_id);
     resource_registry_get(model_id, &model);
     while (model == NULL) {
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &cur_avatar_status.unk124);
+        render_game_frame(NULL, &cur_avatar_status.camera_rotation);
         resource_registry_get(model_id, &model);
     }
     for (t = 0; t <= 4096; t += 512) {
@@ -240,10 +240,10 @@ void event_map_object_interact(MapObject *obj, ...)
         prev = pad;
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
         obj->render_depth_offset = value_approach(spin, held, t >> 4);
-        cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        cur_avatar_status.camera_rotation.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &cur_avatar_status.unk124);
+        render_game_frame(NULL, &cur_avatar_status.camera_rotation);
     }
     obj->render_depth_offset = held;
     for (;;) {
@@ -255,7 +255,7 @@ void event_map_object_interact(MapObject *obj, ...)
         obj->angle.vy += 64;
         cd_request_service_vab();
         cd_request_service_stream();
-        render_game_frame(NULL, &cur_avatar_status.unk124);
+        render_game_frame(NULL, &cur_avatar_status.camera_rotation);
     }
 pressed:
     if ((pad & action_button_masks[7]) || id != -1) {
@@ -274,7 +274,8 @@ pressed:
                 break;
             }
             pad = 1;
-            scene_position_from_camera_offset(-500, 500, 0, pitch, cur_avatar_status.unk124.vy, 0, 0, &from);
+            scene_position_from_camera_offset(-500, 500, 0, pitch, cur_avatar_status.camera_rotation.vy, 0, 0,
+                                              &from);
             angle_from = obj->angle;
             spin = 0;
             goto back;
@@ -287,22 +288,23 @@ pressed:
     }
     pad = 0;
     for (;;) {
-        if (angle_within_tolerance(obj->angle.vy, (cur_avatar_status.unk124.vy + 2048) & 0xfff, 128)) {
-            obj->angle.vy = (cur_avatar_status.unk124.vy + 2048) & 0xfff;
+        if (angle_within_tolerance(obj->angle.vy, (cur_avatar_status.camera_rotation.vy + 2048) & 0xfff,
+                                   128)) {
+            obj->angle.vy = (cur_avatar_status.camera_rotation.vy + 2048) & 0xfff;
             break;
         }
         obj->angle.vy = (obj->angle.vy + 256) & 0xfff;
-        render_game_frame(NULL, &cur_avatar_status.unk124);
+        render_game_frame(NULL, &cur_avatar_status.camera_rotation);
     }
 back:
     angle_to = obj->angle;
-    pitch = cur_avatar_status.unk124.vx;
+    pitch = cur_avatar_status.camera_rotation.vx;
     to = obj->pos;
     for (t = 4096; t >= 0; t -= 512) {
         scene_pose_interpolate(obj, &from, &to, &angle_from, &angle_to, t);
-        cur_avatar_status.unk124.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
+        cur_avatar_status.camera_rotation.vx = angle_lerp_shortest_q12((s16)start, (s16)pitch, t);
         obj->render_depth_offset = value_approach(spin, held, t >> 4);
-        render_game_frame(NULL, &cur_avatar_status.unk124);
+        render_game_frame(NULL, &cur_avatar_status.camera_rotation);
     }
     if (pad) {
         obj->object_id = 0xff;
@@ -332,7 +334,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
     p.vx = pos->vx;
     p.vy = pos->vy + 500;
     p.vz = pos->vz;
-    cur_evt_state.unk0 = 0;
+    cur_evt_state.interaction_handled = 0;
     i = actor_find_overlap_excluding_target_type3(p.vx, p.vy, p.vz, 1400, 3200);
     if (i != -1) {
         o88 = &actor_status.objects[i];
@@ -344,7 +346,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, &p, 800, 2500, angle->vy, 512)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         switch (def->action) {
         case 0xa5:
         case 0xff:
@@ -497,9 +499,9 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
             if (cur_avatar_status.hp_max < cur_avatar_status.hp) {
                 cur_avatar_status.hp = cur_avatar_status.hp_max;
             }
-            cur_avatar_status.unk1c = cur_avatar_status.unk1a;
-            if (cur_avatar_status.unk1a < cur_avatar_status.unk1c) {
-                cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+            cur_avatar_status.mp = cur_avatar_status.mp_max;
+            if (cur_avatar_status.mp_max < cur_avatar_status.mp) {
+                cur_avatar_status.mp = cur_avatar_status.mp_max;
             }
             player_cap_status_components(7);
             color_overlay_transition(512, 128, 200, 255, 0, 0, 0);
@@ -526,7 +528,7 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
                 cd_request_wait_idle();
                 map_reveal_visited_rects();
                 repeat_store_word((u32 *)map_visited_cells, 0, 200);
-                event_world_state_save_slot(asset_status.area[0]);
+                event_world_state_save_slot(asset_status.active_resource_ids[0]);
                 player_render_frame_and_release_pool();
                 menu_card_save_browser();
             }

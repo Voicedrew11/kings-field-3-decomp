@@ -65,17 +65,17 @@ void player_update_collision_bounds(void)
     s32 height1;
     s32 height2;
 
-    if ((cur_avatar_status.unk154 = height0 - (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170))
+    if ((cur_avatar_status.collision_lower_clearance = height0 - (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset))
         < -1000) {
         player_death_begin(0);
     }
     height1 = map_world.collision_bounds[1] + 1600;
-    if ((cur_avatar_status.unk158 = height1 - (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170))
+    if ((cur_avatar_status.collision_upper_clearance = height1 - (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset))
         <= 0) {
         player_death_begin(0);
     }
     height2 = map_world.collision_bounds[2] + 1600;
-    if ((cur_avatar_status.unk15c = height2 - (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170))
+    if ((cur_avatar_status.collision_second_upper_clearance = height2 - (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset))
         <= 0) {
         player_death_begin(0);
     }
@@ -90,47 +90,47 @@ s32 player_distance_to_point_with_margin(s32 x, s32 y, s32 z, s32 radius, s32 re
 ADDRESS(0x80028e9c, 0xf4)
 void player_reset_view(void)
 {
-    cur_avatar_status.unk16c = 0;
-    cur_avatar_status.unk16e = 0;
-    cur_avatar_status.unk170 = 0;
-    cur_avatar_status.unk104 = 0;
-    cur_avatar_status.unk172 = 0;
-    cur_avatar_status.unk101 = 0;
-    cur_avatar_status.unk148 = 0;
-    cur_avatar_status.unk146 = 0;
-    cur_avatar_status.unk144 = 0;
-    cur_avatar_status.unk140 = 0;
-    cur_avatar_status.unk13e = 0;
-    cur_avatar_status.unk13c = 0;
-    cur_avatar_status.unk138 = 0;
-    cur_avatar_status.unk136 = 0;
-    cur_avatar_status.unk134 = 0;
-    cur_avatar_status.unk124 = cur_avatar_status.unk12c;
-    cur_avatar_status.unk14 = 0x1000;
-    cur_avatar_status.unk105 = 0xff;
-    cur_avatar_status.unk12 = 0;
-    cur_avatar_status.unk11 = 0;
-    cur_avatar_status.unk154 = 10000;
-    cur_avatar_status.unk158 = 10000;
-    cur_avatar_status.unk15c = 10000;
+    cur_avatar_status.camera_vertical_offset = 0;
+    cur_avatar_status.walking_bob_phase = 0;
+    cur_avatar_status.landing_vertical_offset = 0;
+    cur_avatar_status.vertical_motion_state = 0;
+    cur_avatar_status.vertical_velocity = 0;
+    cur_avatar_status.reaction_mode = 0;
+    cur_avatar_status.camera_roll_offset = 0;
+    cur_avatar_status.camera_yaw_offset = 0;
+    cur_avatar_status.vertical_motion_pitch_offset = 0;
+    cur_avatar_status.view_rotation_offset_z = 0;
+    cur_avatar_status.view_rotation_offset_y = 0;
+    cur_avatar_status.view_rotation_offset_x = 0;
+    cur_avatar_status.reaction_rotation_offset_z = 0;
+    cur_avatar_status.reaction_rotation_offset_y = 0;
+    cur_avatar_status.reaction_rotation_offset_x = 0;
+    cur_avatar_status.camera_rotation = cur_avatar_status.camera_rotation_target;
+    cur_avatar_status.damage_scale = 0x1000;
+    cur_avatar_status.queued_magic_id = 0xff;
+    cur_avatar_status.movement_speed_adjustment_q12 = 0;
+    cur_avatar_status.movement_speed_adjustment_decay_latch = 0;
+    cur_avatar_status.collision_lower_clearance = 10000;
+    cur_avatar_status.collision_upper_clearance = 10000;
+    cur_avatar_status.collision_second_upper_clearance = 10000;
 }
 
 ADDRESS(0x80028f90, 0x148)
 void player_restore_equipment_effects(void)
 {
     player_set_equipment_slot(0xff, 0xff);
-    player_equip_weapon(cur_avatar_status.unkcb);
-    player_set_primary_magic_shortcut_id(cur_avatar_status.unkc7);
-    player_set_secondary_magic_shortcut_id(cur_avatar_status.unkc8);
+    player_equip_weapon(cur_avatar_status.equipped_weapon_id);
+    player_set_primary_magic_shortcut_id(cur_avatar_status.primary_magic_shortcut_id);
+    player_set_secondary_magic_shortcut_id(cur_avatar_status.secondary_magic_shortcut_id);
     player_reset_view();
-    if (cur_avatar_status.unk86 != 0) {
+    if (cur_avatar_status.fire_defense_boost_timer != 0) {
         effect_construct_record(10, 64, 26, &cur_avatar_status.pos, 0, 0);
         effect_construct_record(10, 64, 26, &cur_avatar_status.pos, 0, 1);
     }
-    if (cur_avatar_status.unk88 != 0) {
+    if (cur_avatar_status.damage_immunity_timer != 0) {
         effect_construct_record(10, 64, 27, &cur_avatar_status.pos, 0);
     }
-    if (cur_avatar_status.unk8a != 0) {
+    if (cur_avatar_status.physical_defense_boost_timer != 0) {
         effect_construct_record(10, 64, 28, &cur_avatar_status.pos, 0, 0);
         effect_construct_record(10, 64, 28, &cur_avatar_status.pos, 0, 1);
     }
@@ -165,12 +165,12 @@ void player_reload_map_resources(s32 area0, s32 area1, s32 area2, s32 area3, s32
         cd_request_yield();
         resource_advance_transition();
     } while ((s16)asset_status.loading != 0);
-    resource_mark_area_models_reclaimable(asset_status.area[0]);
-    asset_status.area[0] = 99;
-    asset_status.area[1] = 99;
-    asset_status.area[2] = 99;
-    asset_status.area[3] = 99;
-    asset_status.area[4] = 99;
+    resource_mark_area_models_reclaimable(asset_status.active_resource_ids[0]);
+    asset_status.active_resource_ids[0] = 99;
+    asset_status.active_resource_ids[1] = 99;
+    asset_status.active_resource_ids[2] = 99;
+    asset_status.active_resource_ids[3] = 99;
+    asset_status.active_resource_ids[4] = 99;
     resource_request_transition(area0, area1, area2, 0xff, 0xff, 0x7f, 0x7f, 0x7f);
     do {
         cd_request_yield();
@@ -217,15 +217,15 @@ void player_add_equipment_bonuses(s32 id)
         return;
     }
     r = &map_world.equipment_records[id];
-    cur_avatar_status.unk66 += r->defense_slash;
-    cur_avatar_status.unk68 += r->defense_blow;
-    cur_avatar_status.unk6a += r->defense_stab;
-    cur_avatar_status.unk6c += r->defense_holy;
-    cur_avatar_status.unk6e += r->defense_fire;
-    cur_avatar_status.unk70 += r->defense_earth;
-    cur_avatar_status.unk72 += r->defense_wind;
-    cur_avatar_status.unk74 += r->defense_water;
-    cur_avatar_status.unk76 += r->poison_resistance;
+    cur_avatar_status.defense_slash += r->defense_slash;
+    cur_avatar_status.defense_blow += r->defense_blow;
+    cur_avatar_status.defense_stab += r->defense_stab;
+    cur_avatar_status.defense_holy += r->defense_holy;
+    cur_avatar_status.defense_fire += r->defense_fire;
+    cur_avatar_status.defense_earth += r->defense_earth;
+    cur_avatar_status.defense_wind += r->defense_wind;
+    cur_avatar_status.defense_water += r->defense_water;
+    cur_avatar_status.poison_resistance += r->poison_resistance;
 }
 
 ADDRESS(0x80029500, 0xa1c)
@@ -234,207 +234,207 @@ void player_recalculate_combat_stats(void)
     s32 i;
     s32 v;
 
-    cur_avatar_status.unk54[0] = 0;
-    cur_avatar_status.unk54[1] = 0;
-    cur_avatar_status.unk54[2] = 0;
-    cur_avatar_status.unk54[3] = 0;
-    cur_avatar_status.unk54[4] = 0;
-    cur_avatar_status.unk54[5] = 0;
-    cur_avatar_status.unk54[6] = 0;
-    cur_avatar_status.unk62 = 0;
-    cur_avatar_status.unk66 = 0;
-    cur_avatar_status.unk68 = 0;
-    cur_avatar_status.unk6a = 0;
-    cur_avatar_status.unk6c = 0;
-    cur_avatar_status.unk6e = 0;
-    cur_avatar_status.unk70 = 0;
-    cur_avatar_status.unk72 = 0;
-    cur_avatar_status.unk74 = 0;
-    cur_avatar_status.unk76 = 0;
-    cur_avatar_status.unk40 = cur_avatar_status.unk32;
+    cur_avatar_status.attack_components[0] = 0;
+    cur_avatar_status.attack_components[1] = 0;
+    cur_avatar_status.attack_components[2] = 0;
+    cur_avatar_status.attack_components[3] = 0;
+    cur_avatar_status.attack_components[4] = 0;
+    cur_avatar_status.attack_components[5] = 0;
+    cur_avatar_status.attack_components[6] = 0;
+    cur_avatar_status.attack_water = 0;
+    cur_avatar_status.defense_slash = 0;
+    cur_avatar_status.defense_blow = 0;
+    cur_avatar_status.defense_stab = 0;
+    cur_avatar_status.defense_holy = 0;
+    cur_avatar_status.defense_fire = 0;
+    cur_avatar_status.defense_earth = 0;
+    cur_avatar_status.defense_wind = 0;
+    cur_avatar_status.defense_water = 0;
+    cur_avatar_status.poison_resistance = 0;
+    cur_avatar_status.physical_power = cur_avatar_status.base_physical_power;
     for (i = 4; i != -1; i--) {
-        cur_avatar_status.unk42[i] = cur_avatar_status.unk34[i];
+        cur_avatar_status.magic[i] = cur_avatar_status.base_magic[i];
     }
-    if (cur_avatar_status.unk7a != 0) {
-        v = cur_avatar_status.unk40 >> 1;
+    if (cur_avatar_status.curse_strength != 0) {
+        v = cur_avatar_status.physical_power >> 1;
         if (v < 0) {
             v = 0;
         }
-        cur_avatar_status.unk40 = v;
+        cur_avatar_status.physical_power = v;
         for (i = 4; i != -1; i--) {
-            v = cur_avatar_status.unk42[i] >> 1;
-            cur_avatar_status.unk42[i] = v < 0 ? 0 : v;
+            v = cur_avatar_status.magic[i] >> 1;
+            cur_avatar_status.magic[i] = v < 0 ? 0 : v;
         }
     }
-    if (cur_avatar_status.unkcb != 0xff) {
-        WeaponRecord *w = &weapon_table[cur_avatar_status.unkcb];
+    if (cur_avatar_status.equipped_weapon_id != 0xff) {
+        WeaponRecord *w = &weapon_table[cur_avatar_status.equipped_weapon_id];
 
-        cur_avatar_status.unk54[0] += w->attack_components[0];
-        cur_avatar_status.unk54[1] += w->attack_components[1];
-        cur_avatar_status.unk54[2] += w->attack_components[2];
-        cur_avatar_status.unk54[3] += w->attack_components[3];
-        cur_avatar_status.unk54[4] += w->attack_components[4];
-        cur_avatar_status.unk54[5] += w->attack_components[5];
-        cur_avatar_status.unk54[6] += w->attack_components[6];
-        cur_avatar_status.unk62 += w->attack_components[7];
+        cur_avatar_status.attack_components[0] += w->attack_components[0];
+        cur_avatar_status.attack_components[1] += w->attack_components[1];
+        cur_avatar_status.attack_components[2] += w->attack_components[2];
+        cur_avatar_status.attack_components[3] += w->attack_components[3];
+        cur_avatar_status.attack_components[4] += w->attack_components[4];
+        cur_avatar_status.attack_components[5] += w->attack_components[5];
+        cur_avatar_status.attack_components[6] += w->attack_components[6];
+        cur_avatar_status.attack_water += w->attack_components[7];
     }
-    player_add_equipment_bonuses(cur_avatar_status.unkf0);
-    player_add_equipment_bonuses(cur_avatar_status.unkf1);
-    player_add_equipment_bonuses(cur_avatar_status.unkf2);
-    player_add_equipment_bonuses(cur_avatar_status.unkf3);
-    player_add_equipment_bonuses(cur_avatar_status.unkf4);
-    player_add_equipment_bonuses(cur_avatar_status.unkf5);
-    player_add_equipment_bonuses(cur_avatar_status.unkf6);
-    if (cur_avatar_status.unk86 != 0) {
-        cur_avatar_status.unk6e += 50;
+    player_add_equipment_bonuses(cur_avatar_status.equipped_head_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_body_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_shield_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_arm_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_leg_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_accessory_id);
+    player_add_equipment_bonuses(cur_avatar_status.equipped_extra_id);
+    if (cur_avatar_status.fire_defense_boost_timer != 0) {
+        cur_avatar_status.defense_fire += 50;
     }
-    if (cur_avatar_status.unk8a != 0) {
-        cur_avatar_status.unk66 += 30;
-        cur_avatar_status.unk68 += 30;
-        cur_avatar_status.unk6a += 30;
+    if (cur_avatar_status.physical_defense_boost_timer != 0) {
+        cur_avatar_status.defense_slash += 30;
+        cur_avatar_status.defense_blow += 30;
+        cur_avatar_status.defense_stab += 30;
     }
-    if (cur_avatar_status.unk94 != 0) {
+    if (cur_avatar_status.magic_boost_timer != 0) {
         for (i = 4; i != -1; i--) {
-            cur_avatar_status.unk42[i] += 5;
+            cur_avatar_status.magic[i] += 5;
         }
     }
     if (cur_avatar_status.unka0 != 0) {
         cdrom_ctl.unkc = cur_avatar_status.unka0;
     }
-    if (cur_avatar_status.unkcb == 0x20) {
-        cur_avatar_status.unk42[2] += 20;
+    if (cur_avatar_status.equipped_weapon_id == 0x20) {
+        cur_avatar_status.magic[2] += 20;
     }
-    if (cur_avatar_status.unkcb == 0x21) {
-        cur_avatar_status.unk42[0] += 20;
+    if (cur_avatar_status.equipped_weapon_id == 0x21) {
+        cur_avatar_status.magic[0] += 20;
     }
-    if (cur_avatar_status.unkf0 == 0x26) {
-        cur_avatar_status.unk40 += 20;
+    if (cur_avatar_status.equipped_head_id == 0x26) {
+        cur_avatar_status.physical_power += 20;
     }
-    if (cur_avatar_status.unkf0 == 0x29) {
-        cur_avatar_status.unk42[4] += 20;
+    if (cur_avatar_status.equipped_head_id == 0x29) {
+        cur_avatar_status.magic[4] += 20;
     }
-    if (cur_avatar_status.unkf1 == 0x31) {
-        cur_avatar_status.unk42[1] += 20;
+    if (cur_avatar_status.equipped_body_id == 0x31) {
+        cur_avatar_status.magic[1] += 20;
     }
-    if (cur_avatar_status.unkf2 == 0x39) {
-        cur_avatar_status.unk42[4] += 30;
+    if (cur_avatar_status.equipped_shield_id == 0x39) {
+        cur_avatar_status.magic[4] += 30;
     }
-    if (cur_avatar_status.unkf2 == 0x3c) {
-        cur_avatar_status.unk42[2] += 20;
+    if (cur_avatar_status.equipped_shield_id == 0x3c) {
+        cur_avatar_status.magic[2] += 20;
     }
-    if (cur_avatar_status.unkf3 == 0x43) {
-        cur_avatar_status.unk54[4] += 20;
+    if (cur_avatar_status.equipped_arm_id == 0x43) {
+        cur_avatar_status.attack_components[4] += 20;
     }
-    if (cur_avatar_status.unkf3 == 0x44) {
-        cur_avatar_status.unk54[0] += 10;
-        cur_avatar_status.unk54[1] += 10;
-        cur_avatar_status.unk54[2] += 10;
-        cur_avatar_status.unk54[4] += 10;
-        cur_avatar_status.unk54[5] += 10;
-        cur_avatar_status.unk54[6] += 10;
-        cur_avatar_status.unk62 += 10;
-        cur_avatar_status.unk54[3] += 10;
+    if (cur_avatar_status.equipped_arm_id == 0x44) {
+        cur_avatar_status.attack_components[0] += 10;
+        cur_avatar_status.attack_components[1] += 10;
+        cur_avatar_status.attack_components[2] += 10;
+        cur_avatar_status.attack_components[4] += 10;
+        cur_avatar_status.attack_components[5] += 10;
+        cur_avatar_status.attack_components[6] += 10;
+        cur_avatar_status.attack_water += 10;
+        cur_avatar_status.attack_components[3] += 10;
     }
-    if (cur_avatar_status.unkf3 == 0x46) {
-        cur_avatar_status.unk42[0] += 20;
+    if (cur_avatar_status.equipped_arm_id == 0x46) {
+        cur_avatar_status.magic[0] += 20;
     }
-    if (cur_avatar_status.unkf4 == 0x4f) {
-        cur_avatar_status.unk42[3] += 20;
+    if (cur_avatar_status.equipped_leg_id == 0x4f) {
+        cur_avatar_status.magic[3] += 20;
     }
-    if (cur_avatar_status.unkf5 == 0x51) {
-        cur_avatar_status.unk40 += 5;
+    if (cur_avatar_status.equipped_accessory_id == 0x51) {
+        cur_avatar_status.physical_power += 5;
     }
-    if (cur_avatar_status.unkf6 == 0x51) {
-        cur_avatar_status.unk40 += 5;
+    if (cur_avatar_status.equipped_extra_id == 0x51) {
+        cur_avatar_status.physical_power += 5;
     }
-    if (cur_avatar_status.unkf5 == 0x52 || cur_avatar_status.unkf6 == 0x52) {
-        cur_avatar_status.unk42[0] += 8;
-        cur_avatar_status.unk42[1] += 8;
-        cur_avatar_status.unk42[2] += 8;
-        cur_avatar_status.unk42[3] += 8;
-        cur_avatar_status.unk42[4] += 8;
-        cur_avatar_status.unk40 -= 30;
+    if (cur_avatar_status.equipped_accessory_id == 0x52 || cur_avatar_status.equipped_extra_id == 0x52) {
+        cur_avatar_status.magic[0] += 8;
+        cur_avatar_status.magic[1] += 8;
+        cur_avatar_status.magic[2] += 8;
+        cur_avatar_status.magic[3] += 8;
+        cur_avatar_status.magic[4] += 8;
+        cur_avatar_status.physical_power -= 30;
     }
-    if (cur_avatar_status.unkf5 == 0x55 || cur_avatar_status.unkf6 == 0x55) {
-        cur_avatar_status.unk54[4] += 12;
-        cur_avatar_status.unk54[5] += 12;
-        cur_avatar_status.unk54[6] += 12;
-        cur_avatar_status.unk62 += 12;
+    if (cur_avatar_status.equipped_accessory_id == 0x55 || cur_avatar_status.equipped_extra_id == 0x55) {
+        cur_avatar_status.attack_components[4] += 12;
+        cur_avatar_status.attack_components[5] += 12;
+        cur_avatar_status.attack_components[6] += 12;
+        cur_avatar_status.attack_water += 12;
     }
-    if (cur_avatar_status.unkf5 == 0x59 || cur_avatar_status.unkf6 == 0x59) {
-        cur_avatar_status.unk42[3] += 20;
+    if (cur_avatar_status.equipped_accessory_id == 0x59 || cur_avatar_status.equipped_extra_id == 0x59) {
+        cur_avatar_status.magic[3] += 20;
     }
-    if (cur_avatar_status.unkf5 == 0x5a || cur_avatar_status.unkf6 == 0x5a) {
-        cur_avatar_status.unk42[1] += 20;
+    if (cur_avatar_status.equipped_accessory_id == 0x5a || cur_avatar_status.equipped_extra_id == 0x5a) {
+        cur_avatar_status.magic[1] += 20;
     }
-    if (cur_avatar_status.unkf5 == 0x5b || cur_avatar_status.unkf6 == 0x5b) {
-        cur_avatar_status.unk42[4] += 20;
+    if (cur_avatar_status.equipped_accessory_id == 0x5b || cur_avatar_status.equipped_extra_id == 0x5b) {
+        cur_avatar_status.magic[4] += 20;
     }
-    if (cur_evt_state.unk65 == 1 && asset_status.area[0] == 0x1a) {
-        cur_avatar_status.unk42[3] += 50;
+    if (cur_evt_state.unk65 == 1 && asset_status.active_resource_ids[0] == 0x1a) {
+        cur_avatar_status.magic[3] += 50;
     }
-    if (cur_avatar_status.unk40 > 0x7fff) {
-        cur_avatar_status.unk40 = 0;
-    } else if (cur_avatar_status.unk40 >= 1000) {
-        cur_avatar_status.unk40 = 999;
+    if (cur_avatar_status.physical_power > 0x7fff) {
+        cur_avatar_status.physical_power = 0;
+    } else if (cur_avatar_status.physical_power >= 1000) {
+        cur_avatar_status.physical_power = 999;
     }
     for (i = 4; i != -1; i--) {
-        if (cur_avatar_status.unk42[i] > 0x7fff) {
-            cur_avatar_status.unk42[i] = 0;
-        } else if (cur_avatar_status.unk42[i] >= 1000) {
-            cur_avatar_status.unk42[i] = 999;
+        if (cur_avatar_status.magic[i] > 0x7fff) {
+            cur_avatar_status.magic[i] = 0;
+        } else if (cur_avatar_status.magic[i] >= 1000) {
+            cur_avatar_status.magic[i] = 999;
         }
     }
-    if (cur_avatar_status.unk54[0] >= 0x8000) {
-        cur_avatar_status.unk54[0] = 0;
+    if (cur_avatar_status.attack_components[0] >= 0x8000) {
+        cur_avatar_status.attack_components[0] = 0;
     }
-    if (cur_avatar_status.unk54[1] >= 0x8000) {
-        cur_avatar_status.unk54[1] = 0;
+    if (cur_avatar_status.attack_components[1] >= 0x8000) {
+        cur_avatar_status.attack_components[1] = 0;
     }
-    if (cur_avatar_status.unk54[2] >= 0x8000) {
-        cur_avatar_status.unk54[2] = 0;
+    if (cur_avatar_status.attack_components[2] >= 0x8000) {
+        cur_avatar_status.attack_components[2] = 0;
     }
-    if (cur_avatar_status.unk54[3] >= 0x8000) {
-        cur_avatar_status.unk54[3] = 0;
+    if (cur_avatar_status.attack_components[3] >= 0x8000) {
+        cur_avatar_status.attack_components[3] = 0;
     }
-    if (cur_avatar_status.unk54[4] >= 0x8000) {
-        cur_avatar_status.unk54[4] = 0;
+    if (cur_avatar_status.attack_components[4] >= 0x8000) {
+        cur_avatar_status.attack_components[4] = 0;
     }
-    if (cur_avatar_status.unk54[5] >= 0x8000) {
-        cur_avatar_status.unk54[5] = 0;
+    if (cur_avatar_status.attack_components[5] >= 0x8000) {
+        cur_avatar_status.attack_components[5] = 0;
     }
-    if (cur_avatar_status.unk54[6] >= 0x8000) {
-        cur_avatar_status.unk54[6] = 0;
+    if (cur_avatar_status.attack_components[6] >= 0x8000) {
+        cur_avatar_status.attack_components[6] = 0;
     }
-    if (cur_avatar_status.unk62 > 0x7fff) {
-        cur_avatar_status.unk62 = 0;
+    if (cur_avatar_status.attack_water > 0x7fff) {
+        cur_avatar_status.attack_water = 0;
     }
-    if (cur_avatar_status.unk66 > 0x7fff) {
-        cur_avatar_status.unk66 = 0;
+    if (cur_avatar_status.defense_slash > 0x7fff) {
+        cur_avatar_status.defense_slash = 0;
     }
-    if (cur_avatar_status.unk68 > 0x7fff) {
-        cur_avatar_status.unk68 = 0;
+    if (cur_avatar_status.defense_blow > 0x7fff) {
+        cur_avatar_status.defense_blow = 0;
     }
-    if (cur_avatar_status.unk6a > 0x7fff) {
-        cur_avatar_status.unk6a = 0;
+    if (cur_avatar_status.defense_stab > 0x7fff) {
+        cur_avatar_status.defense_stab = 0;
     }
-    if (cur_avatar_status.unk6c > 0x7fff) {
-        cur_avatar_status.unk6c = 0;
+    if (cur_avatar_status.defense_holy > 0x7fff) {
+        cur_avatar_status.defense_holy = 0;
     }
-    if (cur_avatar_status.unk6e > 0x7fff) {
-        cur_avatar_status.unk6e = 0;
+    if (cur_avatar_status.defense_fire > 0x7fff) {
+        cur_avatar_status.defense_fire = 0;
     }
-    if (cur_avatar_status.unk70 > 0x7fff) {
-        cur_avatar_status.unk70 = 0;
+    if (cur_avatar_status.defense_earth > 0x7fff) {
+        cur_avatar_status.defense_earth = 0;
     }
-    if (cur_avatar_status.unk72 > 0x7fff) {
-        cur_avatar_status.unk72 = 0;
+    if (cur_avatar_status.defense_wind > 0x7fff) {
+        cur_avatar_status.defense_wind = 0;
     }
-    if (cur_avatar_status.unk74 > 0x7fff) {
-        cur_avatar_status.unk74 = 0;
+    if (cur_avatar_status.defense_water > 0x7fff) {
+        cur_avatar_status.defense_water = 0;
     }
-    if (cur_avatar_status.unk76 > 0x7fff) {
-        cur_avatar_status.unk76 = 0;
+    if (cur_avatar_status.poison_resistance > 0x7fff) {
+        cur_avatar_status.poison_resistance = 0;
     }
 }
 
@@ -452,19 +452,19 @@ void player_learn_element_magic(u32 element)
     if (element >= 5) {
         return;
     }
-    if (element != 4 && cur_evt_state.unk71[element] == 0) {
+    if (element != 4 && cur_evt_state.element_unlocked[element] == 0) {
         return;
     }
     n = 0;
     threshold = magic_element_learn_levels[element];
-    magic = &cur_avatar_status.unk34[element];
+    magic = &cur_avatar_status.base_magic[element];
     goto check;
 
 learn:
     r->menu_available = 1;
     notify_enqueue(3);
-    cur_evt_state.unk0 = 1;
-    cur_evt_state.unk7f[element] = 1;
+    cur_evt_state.interaction_handled = 1;
+    cur_evt_state.element_magic_learned[element] = 1;
     goto advance;
 
 next:
@@ -493,12 +493,12 @@ check:
 ADDRESS(0x8002a074, 0x98)
 void player_increment_physical_power_training(void)
 {
-    cur_avatar_status.unk24++;
-    if (cur_avatar_status.unk24 >= 100) {
-        cur_avatar_status.unk32++;
-        cur_avatar_status.unk24 = 0;
-        if (cur_avatar_status.unk32 >= 1000) {
-            cur_avatar_status.unk32 = 999;
+    cur_avatar_status.physical_power_training++;
+    if (cur_avatar_status.physical_power_training >= 100) {
+        cur_avatar_status.base_physical_power++;
+        cur_avatar_status.physical_power_training = 0;
+        if (cur_avatar_status.base_physical_power >= 1000) {
+            cur_avatar_status.base_physical_power = 999;
         } else {
             notify_enqueue(1);
         }
@@ -518,12 +518,12 @@ void player_increment_magic_training(MagicRecord *spell)
     }
     for (i = 4; i != -1; mask >>= 1, i--) {
         if (elements & mask) {
-            cur_avatar_status.unk26[i] += spell->training_gain;
-            if (cur_avatar_status.unk26[i] >= 400) {
-                cur_avatar_status.unk26[i] = 0;
-                cur_avatar_status.unk34[i]++;
-                if (cur_avatar_status.unk34[i] >= 1000) {
-                    cur_avatar_status.unk34[i] = 999;
+            cur_avatar_status.magic_training[i] += spell->training_gain;
+            if (cur_avatar_status.magic_training[i] >= 400) {
+                cur_avatar_status.magic_training[i] = 0;
+                cur_avatar_status.base_magic[i]++;
+                if (cur_avatar_status.base_magic[i] >= 1000) {
+                    cur_avatar_status.base_magic[i] = 999;
                 } else {
                     notify_enqueue(i + 18);
                 }
@@ -538,11 +538,11 @@ ADDRESS(0x8002a210, 0x100)
 void player_grow_weapon_with_experience(void)
 {
     if (game_counter_is_nonzero(0) > 0 || game_counter_is_nonzero(1) > 0) {
-        if (cur_avatar_status.unk8 == -1) {
-            cur_avatar_status.unk8 = cur_avatar_status.experience;
-        } else if (cur_avatar_status.unk8 + 13000 < cur_avatar_status.experience) {
-            if (cur_avatar_status.unkcb < 2) {
-                player_equip_weapon(cur_avatar_status.unkcb + 1);
+        if (cur_avatar_status.weapon_growth_experience == -1) {
+            cur_avatar_status.weapon_growth_experience = cur_avatar_status.experience;
+        } else if (cur_avatar_status.weapon_growth_experience + 13000 < cur_avatar_status.experience) {
+            if (cur_avatar_status.equipped_weapon_id < 2) {
+                player_equip_weapon(cur_avatar_status.equipped_weapon_id + 1);
             }
             if (game_counter_is_nonzero(1) > 0) {
                 game_counter_decrement(1);
@@ -553,10 +553,10 @@ void player_grow_weapon_with_experience(void)
                 game_counter_increment(1);
             }
             notify_enqueue(4);
-            cur_avatar_status.unk8 = -1;
+            cur_avatar_status.weapon_growth_experience = -1;
         }
     } else {
-        cur_avatar_status.unk8 = -1;
+        cur_avatar_status.weapon_growth_experience = -1;
     }
 }
 
@@ -564,8 +564,8 @@ ADDRESS(0x8002a310, 0x2e8)
 void player_add_experience(int amount_in)
 {
     s16 amount = amount_in;
-    Record0c *r;
-    Record0c *prev;
+    PlayerLevelGrowth *r;
+    PlayerLevelGrowth *prev;
     s32 i;
     u8 level;
 
@@ -574,7 +574,7 @@ void player_add_experience(int amount_in)
     if (cur_avatar_status.experience > 999999) {
         cur_avatar_status.experience = 999999;
     }
-    while (cur_avatar_status.experience >= cur_avatar_status.unk4) {
+    while (cur_avatar_status.experience >= cur_avatar_status.next_level_experience) {
         level = cur_avatar_status.level;
         if (cur_avatar_status.level >= 255) {
             return;
@@ -582,42 +582,42 @@ void player_add_experience(int amount_in)
         cur_avatar_status.level++;
         if (level < 99) {
             r = &player_lv_grow_list[level];
-            cur_avatar_status.hp_max = r->unk0;
-            cur_avatar_status.unk1a = r->unk2;
-            cur_avatar_status.unk32 += r->unk4;
+            cur_avatar_status.hp_max = r->hp_max;
+            cur_avatar_status.mp_max = r->mp_max;
+            cur_avatar_status.base_physical_power += r->physical_power_step;
             for (i = 4; i != -1; i--) {
-                if (cur_avatar_status.unk34[i] != 0 && rand() < 26213) {
-                    cur_avatar_status.unk34[i]++;
+                if (cur_avatar_status.base_magic[i] != 0 && rand() < 26213) {
+                    cur_avatar_status.base_magic[i]++;
                 }
             }
-            cur_avatar_status.unk4 = r->unk8;
+            cur_avatar_status.next_level_experience = r->experience_threshold;
         } else {
             r = &player_lv_grow_list[99];
             prev = &player_lv_grow_list[98];
-            cur_avatar_status.hp_max += r->unk0 - prev->unk0;
-            cur_avatar_status.unk1a += player_lv_grow_list[99].unk2 - player_lv_grow_list[98].unk2;
-            cur_avatar_status.unk32 += player_lv_grow_list[99].unk4;
+            cur_avatar_status.hp_max += r->hp_max - prev->hp_max;
+            cur_avatar_status.mp_max += player_lv_grow_list[99].mp_max - player_lv_grow_list[98].mp_max;
+            cur_avatar_status.base_physical_power += player_lv_grow_list[99].physical_power_step;
             for (i = 4; i != -1; i--) {
-                if (cur_avatar_status.unk34[i] != 0 && rand() < 26213) {
-                    cur_avatar_status.unk34[i]++;
+                if (cur_avatar_status.base_magic[i] != 0 && rand() < 26213) {
+                    cur_avatar_status.base_magic[i]++;
                 }
             }
-            cur_avatar_status.unk4 += r->unk8 - prev->unk8;
+            cur_avatar_status.next_level_experience += r->experience_threshold - prev->experience_threshold;
         }
         notify_enqueue(0);
         if (cur_avatar_status.hp_max >= 1000) {
             cur_avatar_status.hp_max = 999;
         }
-        if (cur_avatar_status.unk1a >= 1000) {
-            cur_avatar_status.unk1a = 999;
+        if (cur_avatar_status.mp_max >= 1000) {
+            cur_avatar_status.mp_max = 999;
         }
-        if (cur_avatar_status.unk32 >= 1000) {
-            cur_avatar_status.unk32 = 999;
+        if (cur_avatar_status.base_physical_power >= 1000) {
+            cur_avatar_status.base_physical_power = 999;
         }
         for (i = 4; i != -1; i--) {
             player_learn_element_magic(i);
-            if (cur_avatar_status.unk34[i] >= 1000) {
-                cur_avatar_status.unk34[i] = 999;
+            if (cur_avatar_status.base_magic[i] >= 1000) {
+                cur_avatar_status.base_magic[i] = 999;
             }
         }
         player_recalculate_combat_stats();
@@ -630,7 +630,7 @@ s32 player_calculate_damage_component(s32 power, s32 defense, s32 attack)
     s32 resisted;
     s32 left;
 
-    resisted = power * cur_avatar_status.unk14 >> 8;
+    resisted = power * cur_avatar_status.damage_scale >> 8;
     attack <<= 4;
     defense <<= 4;
     if (attack == 0) {
@@ -674,7 +674,7 @@ void player_apply_damage_reaction(VECTOR *from, s32 damage, s32 flags)
     s32 y;
     s16 lift;
 
-    if (cur_avatar_status.unk101 == 0x11) {
+    if (cur_avatar_status.reaction_mode == 0x11) {
         return;
     }
     if (damage == 0) {
@@ -723,11 +723,11 @@ void player_apply_damage_reaction(VECTOR *from, s32 damage, s32 flags)
     }
     if (hp == 0) {
         player_death_begin(&dir);
-        cur_avatar_status.unk174 = 3500;
-        cur_avatar_status.unk176 = lift;
+        cur_avatar_status.damage_red_overlay_scale = 3500;
+        cur_avatar_status.damage_red_overlay_decay = lift;
     } else if (from == NULL) {
-        cur_avatar_status.unk174 = 3500;
-        cur_avatar_status.unk176 = lift;
+        cur_avatar_status.damage_red_overlay_scale = 3500;
+        cur_avatar_status.damage_red_overlay_decay = lift;
     } else {
         ratio = SquareRoot0(ratio << 2);
         if (ratio < 16) {
@@ -748,7 +748,7 @@ void player_apply_damage_reaction(VECTOR *from, s32 damage, s32 flags)
             push.vy = 0;
             player_begin_rotation_only_damage_reaction(&dir, &push, lift);
         } else {
-            switch ((push.vy - cur_avatar_status.unk124.vy + 256) >> 9 & 7) {
+            switch ((push.vy - cur_avatar_status.camera_rotation.vy + 256) >> 9 & 7) {
             case 0:
                 push.vx = -ratio;
                 push.vz = 0;
@@ -792,27 +792,27 @@ ADDRESS(0x8002aa54, 0xc4)
 void player_cap_status_components(s32 flags)
 {
     if (flags & 1) {
-        if (cur_avatar_status.unk7a > 64) {
-            cur_avatar_status.unk7a = 64;
+        if (cur_avatar_status.curse_strength > 64) {
+            cur_avatar_status.curse_strength = 64;
         }
-        cur_avatar_status.unk7c = 0;
+        cur_avatar_status.curse_phase_limit = 0;
     }
     if (flags & 2) {
-        if (cur_avatar_status.unk7e > 64) {
-            cur_avatar_status.unk7e = 64;
+        if (cur_avatar_status.darkness_phase > 64) {
+            cur_avatar_status.darkness_phase = 64;
         }
-        cur_avatar_status.unk80 = 0;
+        cur_avatar_status.darkness_phase_limit = 0;
     }
     if (flags & 3) {
-        cur_avatar_status.unk78 = 0;
+        cur_avatar_status.poison_timer = 0;
     }
     if (flags & 5) {
-        if (cur_avatar_status.unk82 > 64) {
-            cur_avatar_status.unk82 = 64;
+        if (cur_avatar_status.slow_timer > 64) {
+            cur_avatar_status.slow_timer = 64;
         }
     }
     if (flags & 4) {
-        cur_avatar_status.unk84 = 0;
+        cur_avatar_status.paralysis_timer = 0;
     }
 }
 
@@ -829,10 +829,10 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, 
     s32 damage;
     s32 v;
 
-    if (cur_avatar_status.unkd0 != 0) {
+    if (cur_avatar_status.weapon_guard_active != 0) {
         return;
     }
-    if (cur_avatar_status.unk88 != 0) {
+    if (cur_avatar_status.damage_immunity_timer != 0) {
         return;
     }
     time2 = 1350;
@@ -840,81 +840,81 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, 
     time4 = 900;
     time5 = 200;
     time6 = 450;
-    if (cur_avatar_status.unkf3 == 0x41) {
+    if (cur_avatar_status.equipped_arm_id == 0x41) {
         time5 = 150;
     }
-    if (cur_avatar_status.unkf4 == 0x4a) {
+    if (cur_avatar_status.equipped_leg_id == 0x4a) {
         time4 = 675;
     }
-    if (cur_avatar_status.unkf4 == 0x4c) {
+    if (cur_avatar_status.equipped_leg_id == 0x4c) {
         time5 >>= 1;
         time3 = 1350;
         time2 = 675;
         time6 = 225;
     }
-    if (cur_avatar_status.unkf5 == 0x53 || cur_avatar_status.unkf6 == 0x53) {
+    if (cur_avatar_status.equipped_accessory_id == 0x53 || cur_avatar_status.equipped_extra_id == 0x53) {
         time4 >>= 2;
     }
-    if (cur_avatar_status.unkf5 == 0x56 || cur_avatar_status.unkf6 == 0x56) {
+    if (cur_avatar_status.equipped_accessory_id == 0x56 || cur_avatar_status.equipped_extra_id == 0x56) {
         time5 >>= 2;
     }
-    if (cur_avatar_status.unkf5 == 0x58 || cur_avatar_status.unkf6 == 0x58) {
+    if (cur_avatar_status.equipped_accessory_id == 0x58 || cur_avatar_status.equipped_extra_id == 0x58) {
         time3 >>= 1;
         time2 >>= 1;
         time6 >>= 1;
     }
-    if (cur_avatar_status.unkf5 == 0x5b || cur_avatar_status.unkf6 == 0x5b) {
+    if (cur_avatar_status.equipped_accessory_id == 0x5b || cur_avatar_status.equipped_extra_id == 0x5b) {
         time3 >>= 2;
         time2 >>= 2;
         time6 >>= 2;
     }
-    if (cur_avatar_status.unkf0 == 0x29) {
+    if (cur_avatar_status.equipped_head_id == 0x29) {
         time3 >>= 2;
         time2 >>= 2;
         time6 >>= 2;
     }
-    if (cur_avatar_status.unkf4 == 0x4f) {
+    if (cur_avatar_status.equipped_leg_id == 0x4f) {
         time5 >>= 2;
         time4 >>= 2;
     }
-    if (cur_avatar_status.unkf1 == 0x2d) {
+    if (cur_avatar_status.equipped_body_id == 0x2d) {
         element1 = 0;
     }
-    if (cur_avatar_status.unkf0 == 0x27 && rand() < 8192) {
+    if (cur_avatar_status.equipped_head_id == 0x27 && rand() < 8192) {
         slash = 0;
         blow = 0;
         stab = 0;
     }
-    if (*(u32 *)&cur_avatar_status.unkf0 == 0x453b2f28 && cur_avatar_status.unkf4 == 0x4e) {
+    if (*(u32 *)&cur_avatar_status.equipped_head_id == 0x453b2f28 && cur_avatar_status.equipped_leg_id == 0x4e) {
         slash = 0;
         blow = 0;
         stab = 0;
     }
-    if (cur_avatar_status.unkf1 == 0x30 && rand() < 8192) {
+    if (cur_avatar_status.equipped_body_id == 0x30 && rand() < 8192) {
         slash = 0;
         blow = 0;
         stab = 0;
     }
-    if (cur_avatar_status.unkf1 == 0x31 && rand() < 8192) {
+    if (cur_avatar_status.equipped_body_id == 0x31 && rand() < 8192) {
         slash = 0;
         blow = 0;
         stab = 0;
     }
-    if (cur_avatar_status.unkf2 == 0x3a && rand() < 8192) {
-        element1 = 0;
-        element0 = 0;
-        element2 = 0;
-        element3 = 0;
-        element4 = 0;
-    }
-    if (cur_avatar_status.unkf2 == 0x3c && rand() < 8192) {
+    if (cur_avatar_status.equipped_shield_id == 0x3a && rand() < 8192) {
         element1 = 0;
         element0 = 0;
         element2 = 0;
         element3 = 0;
         element4 = 0;
     }
-    if ((cur_avatar_status.unkf5 == 0x55 || cur_avatar_status.unkf6 == 0x55) && rand() < 16384) {
+    if (cur_avatar_status.equipped_shield_id == 0x3c && rand() < 8192) {
+        element1 = 0;
+        element0 = 0;
+        element2 = 0;
+        element3 = 0;
+        element4 = 0;
+    }
+    if ((cur_avatar_status.equipped_accessory_id == 0x55 || cur_avatar_status.equipped_extra_id == 0x55) && rand() < 16384) {
         element1 = 0;
         element0 = 0;
         element2 = 0;
@@ -923,45 +923,53 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, 
     }
     switch (type & 0xf) {
     case 1:
-        cur_avatar_status.unk7c = time2;
-        cur_avatar_status.unk7a = 1;
+        cur_avatar_status.curse_phase_limit = time2;
+        cur_avatar_status.curse_strength = 1;
         player_recalculate_combat_stats();
         break;
     case 2:
-        cur_avatar_status.unk80 = time3;
-        cur_avatar_status.unk8e = 0;
+        cur_avatar_status.darkness_phase_limit = time3;
+        cur_avatar_status.magic_tint_phase_limit = 0;
         break;
     case 3:
-        if (cur_avatar_status.unk76 < rand() * 100 >> 15) {
-            cur_avatar_status.unk78 = time4;
+        if (cur_avatar_status.poison_resistance < rand() * 100 >> 15) {
+            cur_avatar_status.poison_timer = time4;
         }
         break;
     case 4:
-        cur_avatar_status.unk84 = time5;
+        cur_avatar_status.paralysis_timer = time5;
         break;
     case 5:
-        cur_avatar_status.unk82 = time6;
+        cur_avatar_status.slow_timer = time6;
         break;
     case 7:
-        cur_avatar_status.unk78 = 0;
+        cur_avatar_status.poison_timer = 0;
         break;
     case 6:
-        v = cur_avatar_status.unk1a >> 4;
-        if (v < cur_avatar_status.unk1c) {
-            cur_avatar_status.unk1c -= v;
+        v = cur_avatar_status.mp_max >> 4;
+        if (v < cur_avatar_status.mp) {
+            cur_avatar_status.mp -= v;
         } else {
-            cur_avatar_status.unk1c = 0;
+            cur_avatar_status.mp = 0;
         }
         break;
     }
-    damage = player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk66, slash);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk68, blow);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk6a, stab);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk6c, element0);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk6e, element1);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk70, element2);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk72, element3);
-    damage += player_calculate_damage_component(cur_avatar_status.unk40, cur_avatar_status.unk74, element4);
+    damage = player_calculate_damage_component(cur_avatar_status.physical_power,
+                                               cur_avatar_status.defense_slash, slash);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_blow, blow);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_stab, stab);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_holy, element0);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_fire, element1);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_earth, element2);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_wind, element3);
+    damage += player_calculate_damage_component(cur_avatar_status.physical_power,
+                                                cur_avatar_status.defense_water, element4);
     damage = scale * damage + 0x8000 >> 16;
     player_apply_damage_reaction(from, knockback * damage / 10, type);
 }
@@ -1014,33 +1022,33 @@ void player_get_camera_pose(VECTOR *pos, SVECTOR *angle)
 {
     pos->vx = cur_avatar_status.pos.vx;
     pos->vz = cur_avatar_status.pos.vz;
-    pos->vy = cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170 - 1600;
-    angle->vx = cur_avatar_status.unk124.vx;
-    angle->vy = cur_avatar_status.unk124.vy;
-    angle->vz = cur_avatar_status.unk124.vz;
+    pos->vy = cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset - 1600;
+    angle->vx = cur_avatar_status.camera_rotation.vx;
+    angle->vy = cur_avatar_status.camera_rotation.vy;
+    angle->vz = cur_avatar_status.camera_rotation.vz;
 }
 
 ADDRESS(0x8002b3a8, 0xc0)
 void player_reset_status(void)
 {
-    cur_avatar_status.unk94 = 0;
-    cur_avatar_status.unk92 = 0;
-    cur_avatar_status.unk90 = 0;
-    cur_avatar_status.unk8e = 0;
-    cur_avatar_status.unk8c = 0;
-    cur_avatar_status.unk8a = 0;
-    cur_avatar_status.unk88 = 0;
-    cur_avatar_status.unk86 = 0;
-    cur_avatar_status.unk84 = 0;
-    cur_avatar_status.unk82 = 0;
-    cur_avatar_status.unk80 = 0;
-    cur_avatar_status.unk7e = 0;
-    cur_avatar_status.unk7c = 0;
-    cur_avatar_status.unk7a = 0;
-    cur_avatar_status.unk78 = 0;
-    cur_avatar_status.unk109 = 0;
+    cur_avatar_status.magic_boost_timer = 0;
+    cur_avatar_status.full_mp_timer = 0;
+    cur_avatar_status.map_marker_visual_effect_timer = 0;
+    cur_avatar_status.magic_tint_phase_limit = 0;
+    cur_avatar_status.magic_tint_phase = 0;
+    cur_avatar_status.physical_defense_boost_timer = 0;
+    cur_avatar_status.damage_immunity_timer = 0;
+    cur_avatar_status.fire_defense_boost_timer = 0;
+    cur_avatar_status.paralysis_timer = 0;
+    cur_avatar_status.slow_timer = 0;
+    cur_avatar_status.darkness_phase_limit = 0;
+    cur_avatar_status.darkness_phase = 0;
+    cur_avatar_status.curse_phase_limit = 0;
+    cur_avatar_status.curse_strength = 0;
+    cur_avatar_status.poison_timer = 0;
+    cur_avatar_status.fatal_fall_latch = 0;
     cur_avatar_status.hp = cur_avatar_status.hp_max;
-    cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+    cur_avatar_status.mp = cur_avatar_status.mp_max;
     player_reset_view();
 }
 
@@ -1051,31 +1059,31 @@ void player_initialize_state(void)
     s32 i;
 
     cur_avatar_status.experience = 0;
-    cur_avatar_status.unk8 = -1;
+    cur_avatar_status.weapon_growth_experience = -1;
     cur_avatar_status.level = 1;
-    cur_avatar_status.hp_max = player_lv_grow_list[0].unk0;
-    cur_avatar_status.unk1a = player_lv_grow_list[0].unk2;
-    cur_avatar_status.unk32 = player_lv_grow_list[0].unk4;
+    cur_avatar_status.hp_max = player_lv_grow_list[0].hp_max;
+    cur_avatar_status.mp_max = player_lv_grow_list[0].mp_max;
+    cur_avatar_status.base_physical_power = player_lv_grow_list[0].physical_power_step;
     for (i = 4; i != -1; i--) {
-        cur_avatar_status.unk34[i] = player_lv_grow_list[0].unk6;
+        cur_avatar_status.base_magic[i] = player_lv_grow_list[0].magic_step;
     }
-    cur_avatar_status.unk4c = 0;
+    cur_avatar_status.wisdom = 0;
     cur_avatar_status.unk3e = 0;
-    cur_avatar_status.unk50 = 0;
-    cur_avatar_status.unk174 = 0;
-    cur_avatar_status.unk176 = 0;
+    cur_avatar_status.gold = 0;
+    cur_avatar_status.damage_red_overlay_scale = 0;
+    cur_avatar_status.damage_red_overlay_decay = 0;
     cur_avatar_status.play_minutes = 0;
-    cur_avatar_status.unkf0 = 0xff;
-    cur_avatar_status.unkf1 = 0xff;
-    cur_avatar_status.unkf3 = 0xff;
-    cur_avatar_status.unkf4 = 0xff;
-    cur_avatar_status.unkf2 = 0xff;
-    cur_avatar_status.unkf5 = 0xff;
-    cur_avatar_status.unkf6 = 0xff;
-    cur_avatar_status.unk4 = player_lv_grow_list[0].unk8;
-    cur_avatar_status.unk34[4] += 10;
+    cur_avatar_status.equipped_head_id = 0xff;
+    cur_avatar_status.equipped_body_id = 0xff;
+    cur_avatar_status.equipped_arm_id = 0xff;
+    cur_avatar_status.equipped_leg_id = 0xff;
+    cur_avatar_status.equipped_shield_id = 0xff;
+    cur_avatar_status.equipped_accessory_id = 0xff;
+    cur_avatar_status.equipped_extra_id = 0xff;
+    cur_avatar_status.next_level_experience = player_lv_grow_list[0].experience_threshold;
+    cur_avatar_status.base_magic[4] += 10;
     player_set_equipment_slot(0xff, 0xff);
-    cur_avatar_status.unkac = 0;
+    cur_avatar_status.selected_magic_record = 0;
     player_set_primary_magic_shortcut_id(0xff);
     player_equip_weapon(0);
     player_set_equipment_slot(0x2a, 1);
@@ -1083,11 +1091,11 @@ void player_initialize_state(void)
     player_set_secondary_item_shortcut_id(0xff);
     cur_avatar_status.pos.vy = -15360;
     cur_avatar_status.pos.vz = 0x4000;
-    cur_avatar_status.unk12c.vx = 0;
-    cur_avatar_status.unk12c.vy = 0;
-    cur_avatar_status.unk12c.vz = 0;
+    cur_avatar_status.camera_rotation_target.vx = 0;
+    cur_avatar_status.camera_rotation_target.vy = 0;
+    cur_avatar_status.camera_rotation_target.vz = 0;
     cur_avatar_status.pos.vx = 0x1f000;
-    cur_avatar_status.unk160 = 5;
+    cur_avatar_status.map_layer_offset = 5;
     r = effect_status.magic_records;
     for (i = 95; i != -1; i--) {
         r->menu_available = 0;
@@ -1100,45 +1108,45 @@ void player_initialize_state(void)
 ADDRESS(0x8002b64c, 0xa4)
 void game_initialize_session(void)
 {
-    cur_avatar_status.unkb4 = player_weapon_asset_bufs;
+    cur_avatar_status.weapon_asset_buffer = player_weapon_asset_bufs;
     player_initialize_state();
     cur_avatar_status.se_volume = 0x80;
     cur_avatar_status.bgm_volume = 0x50;
-    cur_avatar_status.unkf9 = 2;
-    cur_avatar_status.unkfa = 2;
-    cur_avatar_status.unkfb = 1;
-    cur_avatar_status.unkfc = 1;
-    cur_avatar_status.unkfd = 0x80;
-    cur_avatar_status.unkfe = 3;
-    cur_avatar_status.unkff = 0;
-    cur_avatar_status.unk100 = 1;
+    cur_avatar_status.vitals_display = 2;
+    cur_avatar_status.compass_display = 2;
+    cur_avatar_status.item_preview_enabled = 1;
+    cur_avatar_status.walking_bob_enabled = 1;
+    cur_avatar_status.brightness = 0x80;
+    cur_avatar_status.button_style = 3;
+    cur_avatar_status.button_layout = 0;
+    cur_avatar_status.panel_translucent = 1;
     menu_apply_button_config();
-    cur_avatar_status.unke = 0;
+    cur_avatar_status.force_actor_lifecycle_refresh = 0;
 }
 
 ADDRESS(0x8002b6f0, 0x70)
 void player_clear_motion(void)
 {
-    cur_avatar_status.unk168 = 0;
-    cur_avatar_status.unk16a = 0;
-    cur_avatar_status.unk166 = 0;
-    cur_avatar_status.unk164 = 0;
-    cur_avatar_status.unk162 = 0;
-    cur_avatar_status.unk178 &= action_button_masks[7] | action_button_masks[4] | action_button_masks[6] | action_button_masks[12];
+    cur_avatar_status.yaw_step = 0;
+    cur_avatar_status.pitch_step = 0;
+    cur_avatar_status.movement_speed = 0;
+    cur_avatar_status.forward_velocity = 0;
+    cur_avatar_status.strafe_velocity = 0;
+    cur_avatar_status.pad_buttons &= action_button_masks[7] | action_button_masks[4] | action_button_masks[6] | action_button_masks[12];
 }
 
 ADDRESS(0x8002b760, 0xac)
 void player_sync_position_to_map(void)
 {
-    cur_avatar_status.unk9c = 0;
-    cur_avatar_status.pos.vy = collision_sample_map_layer_height(cur_avatar_status.unk160 == 0 ? 1 : 2,
+    cur_avatar_status.equipment_effect_ticks = 0;
+    cur_avatar_status.pos.vy = collision_sample_map_layer_height(cur_avatar_status.map_layer_offset == 0 ? 1 : 2,
                                                                  cur_avatar_status.pos.vx,
                                                                  cur_avatar_status.pos.vz, 800, 1700);
     player_update_collision_bounds();
-    cur_avatar_status.unke = 1;
-    cur_avatar_status.unk104 = 0;
-    cur_avatar_status.unk172 = 0;
-    cur_avatar_status.unk101 = 0;
+    cur_avatar_status.force_actor_lifecycle_refresh = 1;
+    cur_avatar_status.vertical_motion_state = 0;
+    cur_avatar_status.vertical_velocity = 0;
+    cur_avatar_status.reaction_mode = 0;
     player_clear_motion();
     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
 }
@@ -1183,9 +1191,9 @@ void player_set_primary_magic_shortcut_id(u8 id)
     SoundEffect *effect;
 
     sound_status.bank_select = 0;
-    cur_avatar_status.unkc7 = id;
-    if (cur_avatar_status.unkc7 != 0xff) {
-        r = &effect_status.magic_records[cur_avatar_status.unkc7];
+    cur_avatar_status.primary_magic_shortcut_id = id;
+    if (cur_avatar_status.primary_magic_shortcut_id != 0xff) {
+        r = &effect_status.magic_records[cur_avatar_status.primary_magic_shortcut_id];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             effect = &sound_status.effects[se];
@@ -1216,9 +1224,9 @@ void player_set_secondary_magic_shortcut_id(u8 id)
     SoundEffect *effect;
 
     sound_status.bank_select = 1;
-    cur_avatar_status.unkc8 = id;
-    if (cur_avatar_status.unkc8 != 0xff) {
-        r = &effect_status.magic_records[cur_avatar_status.unkc8];
+    cur_avatar_status.secondary_magic_shortcut_id = id;
+    if (cur_avatar_status.secondary_magic_shortcut_id != 0xff) {
+        r = &effect_status.magic_records[cur_avatar_status.secondary_magic_shortcut_id];
         if (r->sound_id != 0xff) {
             se = r->sound_id + 144;
             effect = &sound_status.effects[se];
@@ -1236,16 +1244,16 @@ void player_set_secondary_magic_shortcut_id(u8 id)
                 audio_queue_vab_stream(2, n + 94, n);
             }
         }
-        cur_avatar_status.unkc9 = 0xff;
+        cur_avatar_status.secondary_item_shortcut_id = 0xff;
     }
 }
 
 ADDRESS(0x8002bb5c, 0x28)
 void player_set_secondary_item_shortcut_id(u8 id)
 {
-    cur_avatar_status.unkc9 = id;
+    cur_avatar_status.secondary_item_shortcut_id = id;
     if (id != 0xff) {
-        cur_avatar_status.unkc8 = 0xff;
+        cur_avatar_status.secondary_magic_shortcut_id = 0xff;
     }
 }
 
@@ -1254,61 +1262,61 @@ void player_set_equipment_slot(u8 id, u8 slot)
 {
     switch (slot) {
     case 0:
-        cur_avatar_status.unkf0 = id;
+        cur_avatar_status.equipped_head_id = id;
         break;
     case 1:
-        cur_avatar_status.unkf1 = id;
+        cur_avatar_status.equipped_body_id = id;
         break;
     case 2:
-        cur_avatar_status.unkf3 = id;
+        cur_avatar_status.equipped_arm_id = id;
         break;
     case 3:
-        cur_avatar_status.unkf4 = id;
+        cur_avatar_status.equipped_leg_id = id;
         break;
     case 4:
-        cur_avatar_status.unkf2 = id;
+        cur_avatar_status.equipped_shield_id = id;
         break;
     case 5:
-        cur_avatar_status.unkf5 = id;
+        cur_avatar_status.equipped_accessory_id = id;
         break;
     case 6:
-        cur_avatar_status.unkf6 = id;
+        cur_avatar_status.equipped_extra_id = id;
         break;
     }
-    if (cur_avatar_status.unkf0 != 0xff) {
-        cur_avatar_status.unkd4 = &map_world.equipment_records[cur_avatar_status.unkf0];
+    if (cur_avatar_status.equipped_head_id != 0xff) {
+        cur_avatar_status.equipped_head_record = &map_world.equipment_records[cur_avatar_status.equipped_head_id];
     } else {
-        cur_avatar_status.unkd4 = NULL;
+        cur_avatar_status.equipped_head_record = NULL;
     }
-    if (cur_avatar_status.unkf1 != 0xff) {
-        cur_avatar_status.unkd8 = &map_world.equipment_records[cur_avatar_status.unkf1];
+    if (cur_avatar_status.equipped_body_id != 0xff) {
+        cur_avatar_status.equipped_body_record = &map_world.equipment_records[cur_avatar_status.equipped_body_id];
     } else {
-        cur_avatar_status.unkd8 = NULL;
+        cur_avatar_status.equipped_body_record = NULL;
     }
-    if (cur_avatar_status.unkf3 != 0xff) {
-        cur_avatar_status.unke0 = &map_world.equipment_records[cur_avatar_status.unkf3];
+    if (cur_avatar_status.equipped_arm_id != 0xff) {
+        cur_avatar_status.equipped_arm_record = &map_world.equipment_records[cur_avatar_status.equipped_arm_id];
     } else {
-        cur_avatar_status.unke0 = NULL;
+        cur_avatar_status.equipped_arm_record = NULL;
     }
-    if (cur_avatar_status.unkf4 != 0xff) {
-        cur_avatar_status.unke4 = &map_world.equipment_records[cur_avatar_status.unkf4];
+    if (cur_avatar_status.equipped_leg_id != 0xff) {
+        cur_avatar_status.equipped_leg_record = &map_world.equipment_records[cur_avatar_status.equipped_leg_id];
     } else {
-        cur_avatar_status.unke4 = NULL;
+        cur_avatar_status.equipped_leg_record = NULL;
     }
-    if (cur_avatar_status.unkf2 != 0xff) {
-        cur_avatar_status.unkdc = &map_world.equipment_records[cur_avatar_status.unkf2];
+    if (cur_avatar_status.equipped_shield_id != 0xff) {
+        cur_avatar_status.equipped_shield_record = &map_world.equipment_records[cur_avatar_status.equipped_shield_id];
     } else {
-        cur_avatar_status.unkdc = NULL;
+        cur_avatar_status.equipped_shield_record = NULL;
     }
-    if (cur_avatar_status.unkf5 != 0xff) {
-        cur_avatar_status.unke8 = &map_world.equipment_records[cur_avatar_status.unkf5];
+    if (cur_avatar_status.equipped_accessory_id != 0xff) {
+        cur_avatar_status.equipped_accessory_record = &map_world.equipment_records[cur_avatar_status.equipped_accessory_id];
     } else {
-        cur_avatar_status.unke8 = NULL;
+        cur_avatar_status.equipped_accessory_record = NULL;
     }
-    if (cur_avatar_status.unkf6 != 0xff) {
-        cur_avatar_status.unkec = &map_world.equipment_records[cur_avatar_status.unkf6];
+    if (cur_avatar_status.equipped_extra_id != 0xff) {
+        cur_avatar_status.equipped_extra_record = &map_world.equipment_records[cur_avatar_status.equipped_extra_id];
     } else {
-        cur_avatar_status.unkec = NULL;
+        cur_avatar_status.equipped_extra_record = NULL;
     }
     player_recalculate_combat_stats();
 }
@@ -1322,23 +1330,23 @@ void player_equip_weapon(u8 id)
         0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff,
     };
 
-    cur_avatar_status.unkf = 10;
-    cur_avatar_status.unk1e = 0;
-    cur_avatar_status.unk20 = 0;
-    cur_avatar_status.unkcb = id;
+    cur_avatar_status.weapon_charge_delay = 10;
+    cur_avatar_status.attack_charge_current = 0;
+    cur_avatar_status.attack_charge_committed = 0;
+    cur_avatar_status.equipped_weapon_id = id;
     if (id != 0xff) {
-        cur_avatar_status.unkb0 = &weapon_table[id];
-        cd_archive_read(4, id + 98, cur_avatar_status.unkb4);
-        asset_registry_set(0x20, cur_avatar_status.unkb4);
-        if (effect[cur_avatar_status.unkcb] != 0xff) {
-            audio_queue_vab_stream(2, sound_status.effects[effect[cur_avatar_status.unkcb] + 96].bank + 47,
+        cur_avatar_status.equipped_weapon_record = &weapon_table[id];
+        cd_archive_read(4, id + 98, cur_avatar_status.weapon_asset_buffer);
+        asset_registry_set(0x20, cur_avatar_status.weapon_asset_buffer);
+        if (effect[cur_avatar_status.equipped_weapon_id] != 0xff) {
+            audio_queue_vab_stream(2, sound_status.effects[effect[cur_avatar_status.equipped_weapon_id] + 96].bank + 47,
                                    2);
         }
     }
-    cur_avatar_status.unkc0 = -1;
-    cur_avatar_status.unkb8 = 0;
-    cur_avatar_status.unkc6 = 0;
-    cur_avatar_status.unkd0 = 0;
+    cur_avatar_status.weapon_attack_phase = -1;
+    cur_avatar_status.weapon_animation_cache = 0;
+    cur_avatar_status.weapon_magic_shots_remaining = 0;
+    cur_avatar_status.weapon_guard_active = 0;
     if (cur_evt_state.unk2b != 0) {
         effect_status.magic_records[56].menu_available = 1;
         effect_status.magic_records[58].menu_available = 1;
@@ -1367,32 +1375,32 @@ void player_equip_weapon(u8 id)
 ADDRESS(0x8002c040, 0x124)
 void player_begin_weapon_attack(s32 hand)
 {
-    if (cur_avatar_status.unkc0 != -1) {
+    if (cur_avatar_status.weapon_attack_phase != -1) {
         return;
     }
-    if (cur_avatar_status.unkcb == 0xff) {
+    if (cur_avatar_status.equipped_weapon_id == 0xff) {
         return;
     }
-    if (cur_avatar_status.unk84 != 0) {
+    if (cur_avatar_status.paralysis_timer != 0) {
         return;
     }
-    cur_avatar_status.unkca = hand;
-    cur_avatar_status.unkc0 = 0;
+    cur_avatar_status.weapon_attack_mode = hand;
+    cur_avatar_status.weapon_attack_phase = 0;
     if (hand == 0) {
-        cur_avatar_status.unkc2 = cur_avatar_status.unkb0->normal_attack_end_phase;
-        cur_avatar_status.unkc4 = cur_avatar_status.unkb0->normal_attack_sound_phase;
+        cur_avatar_status.weapon_attack_window = cur_avatar_status.equipped_weapon_record->normal_attack_end_phase;
+        cur_avatar_status.weapon_next_sound_phase = cur_avatar_status.equipped_weapon_record->normal_attack_sound_phase;
     } else {
-        cur_avatar_status.unkc2 = cur_avatar_status.unkb0->alternate_attack_window_start;
-        cur_avatar_status.unkc4 = cur_avatar_status.unkb0->alternate_attack_sound_start_phase;
+        cur_avatar_status.weapon_attack_window = cur_avatar_status.equipped_weapon_record->alternate_attack_window_start;
+        cur_avatar_status.weapon_next_sound_phase = cur_avatar_status.equipped_weapon_record->alternate_attack_sound_start_phase;
     }
-    cur_avatar_status.unk20 = cur_avatar_status.unk1e;
-    if (cur_avatar_status.unk1e == 5000 && cur_avatar_status.unk22 == cur_avatar_status.unk1e) {
-        cur_avatar_status.unkcf = 1;
-        cur_avatar_status.unkce = cur_avatar_status.unkb0->magic_shots;
+    cur_avatar_status.attack_charge_committed = cur_avatar_status.attack_charge_current;
+    if (cur_avatar_status.attack_charge_current == 5000 && cur_avatar_status.magic_charge == cur_avatar_status.attack_charge_current) {
+        cur_avatar_status.weapon_attack_fully_charged = 1;
+        cur_avatar_status.weapon_magic_shots_configured = cur_avatar_status.equipped_weapon_record->magic_shots;
     } else {
-        cur_avatar_status.unkcf = 0;
+        cur_avatar_status.weapon_attack_fully_charged = 0;
     }
-    cur_avatar_status.unk1e = 0;
+    cur_avatar_status.attack_charge_current = 0;
     cur_avatar_status.unkcc = 0;
 }
 
@@ -1405,17 +1413,17 @@ Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *
     s32 y;
 
     if (offset != NULL) {
-        rot.vx = -cur_avatar_status.unk124.vx;
-        rot.vy = cur_avatar_status.unk124.vy;
-        rot.vz = cur_avatar_status.unk124.vz;
-        vector_rotate_yxz(&rot, &cur_avatar_status.unk14c, offset);
+        rot.vx = -cur_avatar_status.camera_rotation.vx;
+        rot.vy = cur_avatar_status.camera_rotation.vy;
+        rot.vz = cur_avatar_status.camera_rotation.vz;
+        vector_rotate_yxz(&rot, &cur_avatar_status.magic_origin_offset, offset);
         offset->vx += cur_avatar_status.pos.vx;
         y = offset->vy - 1600;
         offset->vy = y + cur_avatar_status.pos.vy;
         offset->vz += cur_avatar_status.pos.vz;
     }
-    object = actor_find_best_in_cone(&cur_avatar_status.pos, cur_avatar_status.unk124.vy,
-                                     cur_avatar_status.unk124.vx, 0x55f0, 0x200, 0x200, dist, 0);
+    object = actor_find_best_in_cone(&cur_avatar_status.pos, cur_avatar_status.camera_rotation.vy,
+                                     cur_avatar_status.camera_rotation.vx, 0x55f0, 0x200, 0x200, dist, 0);
     actor_status.player_view_target = object;
     if (object != NULL && (found = actor_find_target_of_type(&actor_status.groups[object->group_index],
                                                              0x82)) != NULL
@@ -1423,9 +1431,9 @@ Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *
         actor_set_target(object, found);
     }
     if (dir != NULL) {
-        rot.vx = cur_avatar_status.unk124.vx;
-        rot.vy = cur_avatar_status.unk124.vy;
-        rot.vz = cur_avatar_status.unk124.vz;
+        rot.vx = cur_avatar_status.camera_rotation.vx;
+        rot.vy = cur_avatar_status.camera_rotation.vy;
+        rot.vz = cur_avatar_status.camera_rotation.vz;
         pitch_yaw_to_forward_vector(&rot, dir);
         vector3s_scale_shift12(speed, dir);
     }
@@ -1475,7 +1483,7 @@ void player_dispatch_magic_effect(s32 id, ...)
     case 54:
         for (i = 0; i < 4; i++) {
             k = 3 - i;
-            cur_avatar_status.unk14c.vz = k * 800;
+            cur_avatar_status.magic_origin_offset.vz = k * 800;
             player_probe_view_target_and_vectors(500, &off, &dir, &dist);
             effect_construct_record(10, 0x42, (u8)id, &off, &dir, k);
         }
@@ -1507,8 +1515,8 @@ void player_dispatch_magic_effect(s32 id, ...)
         player_probe_view_target_and_vectors(300, &off, &dir, &dist);
         off.vy += 1344;
         dir.vy = 0;
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124, 0);
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124, 1);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation, 0);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation, 1);
         break;
     case 7:
         effect_construct_record(10, 0x43, (u8)id, &cur_avatar_status.pos, 0, 0x1000, 0x100, 0x1000, 1);
@@ -1547,18 +1555,19 @@ void player_dispatch_magic_effect(s32 id, ...)
     case 56:
     case 57:
         player_probe_view_target_and_vectors(700, &off, &dir, &dist);
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation);
         break;
     case 13:
         player_probe_view_target_and_vectors(700, &off, &dir, &dist);
     spawn2:
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation);
         break;
     case 11:
         player_probe_view_target_and_vectors(260, &off, &dir, &dist);
         dir.vx += (rand() >> 10) - 16;
         dir.vy += (rand() >> 10) - 16;
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, 14 - cur_avatar_status.unk106);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir,
+                                14 - cur_avatar_status.queued_magic_casts_remaining);
         break;
     case 21:
         player_probe_view_target_and_vectors(260, &off, &dir, &dist);
@@ -1584,12 +1593,13 @@ void player_dispatch_magic_effect(s32 id, ...)
         } else {
             target = obj - actor_status.objects;
         }
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, target, cur_avatar_status.unk106);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, target,
+                                cur_avatar_status.queued_magic_casts_remaining);
         break;
     case 1:
         player_probe_view_target_and_vectors(570, &off, &dir, &dist);
-        effect_construct_record(10, 0x42, 1, &off, &dir, &cur_avatar_status.unk124);
-        cur_avatar_status.unk14c.vx += 1000;
+        effect_construct_record(10, 0x42, 1, &off, &dir, &cur_avatar_status.camera_rotation);
+        cur_avatar_status.magic_origin_offset.vx += 1000;
         break;
     case 4:
     case 9:
@@ -1606,27 +1616,27 @@ void player_dispatch_magic_effect(s32 id, ...)
     case 71: {
         SVECTOR unused2;
 
-        yaw = cur_avatar_status.unk124.vy;
-        cur_avatar_status.unk124.vy = yaw - (cur_avatar_status.unk14c.vx << 1);
+        yaw = cur_avatar_status.camera_rotation.vy;
+        cur_avatar_status.camera_rotation.vy = yaw - (cur_avatar_status.magic_origin_offset.vx << 1);
         player_probe_view_target_and_vectors(170, &off, &dir, &dist);
-        cur_avatar_status.unk14c.vx += 100;
-        cur_avatar_status.unk124.vy = yaw;
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124, 600, 60, 128, 140,
-                                160);
+        cur_avatar_status.magic_origin_offset.vx += 100;
+        cur_avatar_status.camera_rotation.vy = yaw;
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation, 600, 60,
+                                128, 140, 160);
         break;
     }
     case 73:
     case 74:
         id = 0x7a;
         row = player_magic_spawn_offsets;
-        cur_avatar_status.unk14c = *row;
+        cur_avatar_status.magic_origin_offset = *row;
         player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124);
+        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation);
         if (made != NULL) {
             index = made - effect_status.objects;
             row++;
             for (n = 3; n != -1; n--) {
-                cur_avatar_status.unk14c = *row;
+                cur_avatar_status.magic_origin_offset = *row;
                 player_probe_view_target_and_vectors(600, &off, &dir, &dist);
                 effect_construct_record(10, 0x42, 0x5d, &off, &dir, index);
                 row++;
@@ -1636,14 +1646,14 @@ void player_dispatch_magic_effect(s32 id, ...)
     case 72:
         id = 0x78;
         row = player_magic_spawn_offsets;
-        cur_avatar_status.unk14c = *row;
+        cur_avatar_status.magic_origin_offset = *row;
         player_probe_view_target_and_vectors(600, &off, &dir, &dist);
-        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124);
+        made = effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation);
         if (made != NULL) {
             index = made - effect_status.objects;
             row++;
             for (n = 3; n != -1; n--) {
-                cur_avatar_status.unk14c = *row;
+                cur_avatar_status.magic_origin_offset = *row;
                 player_probe_view_target_and_vectors(600, &off, &dir, &dist);
                 effect_construct_record(10, 0x42, 0x5c, &off, &dir, index);
                 row++;
@@ -1660,23 +1670,23 @@ void player_dispatch_magic_effect(s32 id, ...)
         goto spawn2;
     case 66:
         player_probe_view_target_and_vectors(900, &off, &dir, &dist);
-        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.unk124);
+        effect_construct_record(10, 0x42, (u8)id, &off, &dir, &cur_avatar_status.camera_rotation);
         break;
     case 26:
         effect_construct_record(10, 0x40, 0x1a, &cur_avatar_status.pos, &dir, 0);
         effect_construct_record(10, 0x40, 0x1a, &cur_avatar_status.pos, &dir, 1);
-        cur_avatar_status.unk86 = 1800;
+        cur_avatar_status.fire_defense_boost_timer = 1800;
         player_recalculate_combat_stats();
         break;
     case 28:
         effect_construct_record(10, 0x40, 0x1c, &cur_avatar_status.pos, &dir, 0);
         effect_construct_record(10, 0x40, 0x1c, &cur_avatar_status.pos, &dir, 1);
-        cur_avatar_status.unk8a = 1800;
+        cur_avatar_status.physical_defense_boost_timer = 1800;
         player_recalculate_combat_stats();
         break;
     case 27:
         effect_construct_record(10, 0x40, 0x1b, &cur_avatar_status.pos, &dir);
-        cur_avatar_status.unk88 = 200;
+        cur_avatar_status.damage_immunity_timer = 200;
         player_recalculate_combat_stats();
         break;
     case 25:

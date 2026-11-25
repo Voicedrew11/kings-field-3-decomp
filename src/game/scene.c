@@ -53,15 +53,15 @@ void resource_initialize_game_assets(void)
 {
     u32 *p = (u32 *)resource_space;
 
-    asset_status.area[1] = asset_status.area[2] = asset_status.area[3] = AREA_KEEP;
+    asset_status.active_resource_ids[1] = asset_status.active_resource_ids[2] = asset_status.active_resource_ids[3] = AREA_KEEP;
     asset_status.loading = 0;
     asset_status.step = 0;
-    asset_status.area[0] = 0;
-    asset_status.area[1] = 0;
-    asset_status.area[2] = 0;
-    asset_status.area[3] = 0;
-    asset_status.area[4] = 0;
-    asset_status.unk9 = 0;
+    asset_status.active_resource_ids[0] = 0;
+    asset_status.active_resource_ids[1] = 0;
+    asset_status.active_resource_ids[2] = 0;
+    asset_status.active_resource_ids[3] = 0;
+    asset_status.active_resource_ids[4] = 0;
+    asset_status.current_area = 0;
     fdat_window_handlers = fdat_window_bounds[2] + 4;
     fdat_window_base[0] = fdat_window_bounds[2];
     cd_archive_open(0, "COM\\MO.T");
@@ -107,16 +107,16 @@ void resource_run_initial_transition(void)
 {
     asset_status.loading = 1;
     asset_status.step = 0;
-    asset_status.previous[0] = asset_status.area[0];
-    asset_status.previous[1] = asset_status.area[1];
-    asset_status.previous[2] = asset_status.area[2];
-    asset_status.previous[3] = asset_status.area[3];
-    asset_status.previous[4] = asset_status.area[4];
-    asset_status.area[0] = AREA_RELOAD;
-    asset_status.area[1] = AREA_RELOAD;
-    asset_status.area[2] = AREA_RELOAD;
-    asset_status.area[3] = AREA_RELOAD;
-    asset_status.area[4] = AREA_RELOAD;
+    asset_status.requested_resource_ids[0] = asset_status.active_resource_ids[0];
+    asset_status.requested_resource_ids[1] = asset_status.active_resource_ids[1];
+    asset_status.requested_resource_ids[2] = asset_status.active_resource_ids[2];
+    asset_status.requested_resource_ids[3] = asset_status.active_resource_ids[3];
+    asset_status.requested_resource_ids[4] = asset_status.active_resource_ids[4];
+    asset_status.active_resource_ids[0] = AREA_RELOAD;
+    asset_status.active_resource_ids[1] = AREA_RELOAD;
+    asset_status.active_resource_ids[2] = AREA_RELOAD;
+    asset_status.active_resource_ids[3] = AREA_RELOAD;
+    asset_status.active_resource_ids[4] = AREA_RELOAD;
     asset_status.shift[0] = SHIFT_NONE;
     asset_status.shift[1] = SHIFT_NONE;
     asset_status.shift[2] = SHIFT_NONE;
@@ -215,29 +215,29 @@ void resource_request_transition(u8 area0, u8 area1, u8 area2, u8 area3, u8 area
         return;
     }
     if (area0 == AREA_KEEP) {
-        want0 = asset_status.area[0];
-        next0 = asset_status.previous[0];
+        want0 = asset_status.active_resource_ids[0];
+        next0 = asset_status.requested_resource_ids[0];
         if (area1 == AREA_KEEP) {
-            want1 = asset_status.area[1];
-            next1 = asset_status.previous[1];
+            want1 = asset_status.active_resource_ids[1];
+            next1 = asset_status.requested_resource_ids[1];
         } else {
             want1 = next1 = area1;
         }
         if (area2 == AREA_KEEP) {
-            want2 = asset_status.area[2];
-            next2 = asset_status.previous[2];
+            want2 = asset_status.active_resource_ids[2];
+            next2 = asset_status.requested_resource_ids[2];
         } else {
             want2 = next2 = area2;
         }
         if (area3 == AREA_KEEP) {
-            want3 = asset_status.area[3];
-            next3 = asset_status.previous[3];
+            want3 = asset_status.active_resource_ids[3];
+            next3 = asset_status.requested_resource_ids[3];
         } else {
             want3 = next3 = area3;
         }
         if (area4 == AREA_KEEP) {
-            want4 = asset_status.area[4];
-            next4 = asset_status.previous[4];
+            want4 = asset_status.active_resource_ids[4];
+            next4 = asset_status.requested_resource_ids[4];
         } else {
             want4 = next4 = area4;
         }
@@ -248,72 +248,72 @@ void resource_request_transition(u8 area0, u8 area1, u8 area2, u8 area3, u8 area
         next4 = area4;
         next0 = area0;
         want0 = area0;
-        want1 = asset_status.area[1];
-        want2 = asset_status.area[2];
-        want3 = asset_status.area[3];
-        want4 = asset_status.area[4];
+        want1 = asset_status.active_resource_ids[1];
+        want2 = asset_status.active_resource_ids[2];
+        want3 = asset_status.active_resource_ids[3];
+        want4 = asset_status.active_resource_ids[4];
     }
     if (asset_status.loading != 0) {
         goto busy;
     }
-    if (asset_status.area[0] == want0 && asset_status.area[1] == want1
-        && asset_status.area[2] == want2 && asset_status.area[3] == want3
-        && asset_status.area[4] == want4) {
+    if (asset_status.active_resource_ids[0] == want0 && asset_status.active_resource_ids[1] == want1
+        && asset_status.active_resource_ids[2] == want2 && asset_status.active_resource_ids[3] == want3
+        && asset_status.active_resource_ids[4] == want4) {
         return;
     }
 start:
-    if (asset_status.area[0] != AREA_RELOAD && asset_status.area[0] != want0) {
+    if (asset_status.active_resource_ids[0] != AREA_RELOAD && asset_status.active_resource_ids[0] != want0) {
         map_reveal_visited_rects();
         repeat_store_word((u32 *)map_visited_cells, 0, 200);
-        event_world_state_save_slot(asset_status.area[0]);
+        event_world_state_save_slot(asset_status.active_resource_ids[0]);
     }
-    if (cur_evt_state.unk4[0] < want0) {
-        cur_evt_state.unk4[0] = want0;
+    if (cur_evt_state.flags[0] < want0) {
+        cur_evt_state.flags[0] = want0;
     }
-    cur_evt_state.unk8a[want0] = 1;
+    cur_evt_state.area_visited[want0] = 1;
     asset_status.loading = 1;
     asset_status.step = 0;
-    asset_status.previous[0] = area0;
-    asset_status.previous[1] = area1;
-    asset_status.previous[2] = area2;
-    asset_status.previous[3] = area3;
-    asset_status.previous[4] = area4;
+    asset_status.requested_resource_ids[0] = area0;
+    asset_status.requested_resource_ids[1] = area1;
+    asset_status.requested_resource_ids[2] = area2;
+    asset_status.requested_resource_ids[3] = area3;
+    asset_status.requested_resource_ids[4] = area4;
     asset_status.shift[0] = shift0;
     asset_status.shift[1] = shift1;
     asset_status.shift[2] = shift2;
-    asset_status.unk15 = 0;
+    asset_status.world_shift_applied = 0;
     if (area1 == AREA_KEEP) {
-        asset_status.unk16 = 0;
+        asset_status.tmd_object_limit_active = 0;
     } else {
-        asset_status.unk16 = 1;
+        asset_status.tmd_object_limit_active = 1;
     }
     return;
 busy:
-    if (((s16)asset_status.loading != 1 || asset_status.previous[0] == next0)
-        && asset_status.previous[1] == next1 && asset_status.previous[2] == next2
-        && asset_status.previous[3] == next3 && asset_status.previous[4] == next4) {
+    if (((s16)asset_status.loading != 1 || asset_status.requested_resource_ids[0] == next0)
+        && asset_status.requested_resource_ids[1] == next1 && asset_status.requested_resource_ids[2] == next2
+        && asset_status.requested_resource_ids[3] == next3 && asset_status.requested_resource_ids[4] == next4) {
         return;
     }
-    if (asset_status.previous[0] == AREA_KEEP && asset_status.area[0] == want0) {
+    if (asset_status.requested_resource_ids[0] == AREA_KEEP && asset_status.active_resource_ids[0] == want0) {
         return;
     }
-    if (asset_status.previous[1] == AREA_KEEP && asset_status.area[1] == area1) {
+    if (asset_status.requested_resource_ids[1] == AREA_KEEP && asset_status.active_resource_ids[1] == area1) {
         return;
     }
-    if (asset_status.previous[2] == AREA_KEEP && asset_status.area[2] == area2) {
+    if (asset_status.requested_resource_ids[2] == AREA_KEEP && asset_status.active_resource_ids[2] == area2) {
         return;
     }
-    if (asset_status.previous[3] == AREA_KEEP && asset_status.area[3] == area3) {
+    if (asset_status.requested_resource_ids[3] == AREA_KEEP && asset_status.active_resource_ids[3] == area3) {
         return;
     }
-    if (asset_status.previous[4] == AREA_KEEP && asset_status.area[4] == area4) {
+    if (asset_status.requested_resource_ids[4] == AREA_KEEP && asset_status.active_resource_ids[4] == area4) {
         return;
     }
-    if ((asset_status.previous[0] != AREA_KEEP && area0 == AREA_KEEP)
-        || (asset_status.previous[1] != AREA_KEEP && area1 == AREA_KEEP)
-        || (asset_status.previous[2] != AREA_KEEP && area2 == AREA_KEEP)
-        || (asset_status.previous[3] != AREA_KEEP && area3 == AREA_KEEP)
-        || (asset_status.previous[4] != AREA_KEEP && area4 == AREA_KEEP)) {
+    if ((asset_status.requested_resource_ids[0] != AREA_KEEP && area0 == AREA_KEEP)
+        || (asset_status.requested_resource_ids[1] != AREA_KEEP && area1 == AREA_KEEP)
+        || (asset_status.requested_resource_ids[2] != AREA_KEEP && area2 == AREA_KEEP)
+        || (asset_status.requested_resource_ids[3] != AREA_KEEP && area3 == AREA_KEEP)
+        || (asset_status.requested_resource_ids[4] != AREA_KEEP && area4 == AREA_KEEP)) {
         while (asset_status.loading != 0) {
             cd_request_yield();
             resource_advance_transition();
@@ -324,8 +324,8 @@ busy:
         }
     }
     ExitCriticalSection();
-    if (asset_status.unk15 != 0 && area0 != AREA_KEEP && shift0 == SHIFT_NONE
-        && asset_status.previous[0] != area0) {
+    if (asset_status.world_shift_applied != 0 && area0 != AREA_KEEP && shift0 == SHIFT_NONE
+        && asset_status.requested_resource_ids[0] != area0) {
         shift0 = -asset_status.shift[0];
         shift2 = -asset_status.shift[2];
         shift1 = -asset_status.shift[1];
@@ -386,7 +386,7 @@ void resource_advance_transition(void)
     }
     switch (asset_status.step) {
     case 0:
-        if (asset_status.previous[0] == AREA_KEEP) {
+        if (asset_status.requested_resource_ids[0] == AREA_KEEP) {
             goto parts;
         }
         asset_status.step = STEP_WAIT;
@@ -395,39 +395,39 @@ void resource_advance_transition(void)
             obj44->action = 0xff;
             obj44++;
         }
-        cd_archive_queue_read(FILE_FDAT, asset_status.previous[0] * 3, stream_work_buffer,
+        cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3, stream_work_buffer,
                               resource_transition_set_phase_1);
         break;
     case 1:
         asset_status.step = STEP_WAIT;
         asset_status.handlers = callback_default_table;
-        cd_archive_queue_read(FILE_FDAT, asset_status.previous[0] * 3 + 2, (u8 *)fdat_window_base[0],
-                              resource_transition_set_phase_2);
+        cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3 + 2,
+                              (u8 *)fdat_window_base[0], resource_transition_set_phase_2);
         resource_copy_words((u32 *)map_world.cells, data + 1, 0x3e80);
         data = (u32 *)((u8 *)data + (*data + 4));
         resource_copy_words((u32 *)map_world.shape_bank, data + 1, 0x800);
         repeat_store_word((u32 *)map_visited_cells, 0, 200);
         if (asset_status.shift[0] != SHIFT_NONE) {
-            asset_status.unk15 = 1;
+            asset_status.world_shift_applied = 1;
             translate_active_world_positions(asset_status.shift[0] << 11, -(asset_status.shift[2] << 7),
                                              asset_status.shift[1] << 11);
         }
-        asset_status.unk9 = asset_status.previous[0];
+        asset_status.current_area = asset_status.requested_resource_ids[0];
         break;
     case 2:
         asset_status.step = STEP_WAIT;
-        cd_archive_queue_read(FILE_FDAT, asset_status.previous[0] * 3 + 1, stream_work_buffer,
+        cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3 + 1, stream_work_buffer,
                               resource_transition_set_phase_3);
         asset_status.handlers = (FdatHandler *)fdat_window_handlers;
         break;
     case 3:
     parts:
-        if (asset_status.previous[1] != AREA_KEEP) {
+        if (asset_status.requested_resource_ids[1] != AREA_KEEP) {
             asset_status.step = STEP_WAIT;
-            cd_archive_queue_read(5, asset_status.previous[1], resource_tmd_arc_work,
+            cd_archive_queue_read(5, asset_status.requested_resource_ids[1], resource_tmd_arc_work,
                                   resource_transition_set_phase_4);
         }
-        if (asset_status.previous[0] != AREA_KEEP) {
+        if (asset_status.requested_resource_ids[0] != AREA_KEEP) {
             part = (u32 *)stream_work_buffer;
             obj88 = actor_status.objects;
             for (i = 199; i != -1; i--) {
@@ -476,11 +476,11 @@ void resource_advance_transition(void)
             map_placed_expand_sources((MapPlacedSource *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)map_rects, part + 1, 0xa0);
-            event_world_state_restore_slot(asset_status.previous[0]);
+            event_world_state_restore_slot(asset_status.requested_resource_ids[0]);
             repeat_store_word((u32 *)map_visited_cells, 0, 200);
-            if (asset_status.area[0] != asset_status.previous[0]
-                && asset_status.area[0] != AREA_RELOAD) {
-                for (j = asset_status.area[0] * 32 + 556; j < asset_status.area[0] * 32 + 588;
+            if (asset_status.active_resource_ids[0] != asset_status.requested_resource_ids[0]
+                && asset_status.active_resource_ids[0] != AREA_RELOAD) {
+                for (j = asset_status.active_resource_ids[0] * 32 + 556; j < asset_status.active_resource_ids[0] * 32 + 588;
                      j++) {
                     block = scene_display_sys.models[j];
                     if (block != NULL && memory_block_kind(block) != 3) {
@@ -490,49 +490,50 @@ void resource_advance_transition(void)
             }
             movie_state_reset();
             asset_status.handlers[5]();
-            cur_avatar_status.unke = 1;
-            asset_status.unk17 = 1;
+            cur_avatar_status.force_actor_lifecycle_refresh = 1;
+            asset_status.area_records_loaded = 1;
         }
-        if (asset_status.previous[1] != AREA_KEEP) {
+        if (asset_status.requested_resource_ids[1] != AREA_KEEP) {
             break;
         }
     case 4:
-        if (asset_status.previous[2] != AREA_KEEP) {
-            cd_map_stream_read(3, asset_status.previous[2]);
+        if (asset_status.requested_resource_ids[2] != AREA_KEEP) {
+            cd_map_stream_read(3, asset_status.requested_resource_ids[2]);
         }
-        asset_status.unk16 = 0;
-        if (asset_status.previous[3] == AREA_KEEP && asset_status.previous[4] == AREA_KEEP) {
+        asset_status.tmd_object_limit_active = 0;
+        if (asset_status.requested_resource_ids[3] == AREA_KEEP && asset_status.requested_resource_ids[4] == AREA_KEEP) {
         done:
-            asset_status.unk17 = 0;
-            if (asset_status.previous[0] != AREA_KEEP) {
-                asset_status.area[0] = asset_status.previous[0];
+            asset_status.area_records_loaded = 0;
+            if (asset_status.requested_resource_ids[0] != AREA_KEEP) {
+                asset_status.active_resource_ids[0] = asset_status.requested_resource_ids[0];
             }
-            if (asset_status.previous[1] != AREA_KEEP) {
-                asset_status.area[1] = asset_status.previous[1];
+            if (asset_status.requested_resource_ids[1] != AREA_KEEP) {
+                asset_status.active_resource_ids[1] = asset_status.requested_resource_ids[1];
             }
-            if (asset_status.previous[2] != AREA_KEEP) {
-                asset_status.area[2] = asset_status.previous[2];
+            if (asset_status.requested_resource_ids[2] != AREA_KEEP) {
+                asset_status.active_resource_ids[2] = asset_status.requested_resource_ids[2];
             }
-            if (asset_status.previous[3] != AREA_KEEP) {
-                asset_status.area[3] = asset_status.previous[3];
+            if (asset_status.requested_resource_ids[3] != AREA_KEEP) {
+                asset_status.active_resource_ids[3] = asset_status.requested_resource_ids[3];
             }
-            if (asset_status.previous[4] != AREA_KEEP) {
-                asset_status.area[4] = asset_status.previous[4];
+            if (asset_status.requested_resource_ids[4] != AREA_KEEP) {
+                asset_status.active_resource_ids[4] = asset_status.requested_resource_ids[4];
             }
             asset_status.loading = 0;
             break;
         }
         asset_status.step = 5;
         sound_status.seq_ready = 0;
-        asset_status.unk1c = cur_avatar_status.bgm_volume;
+        asset_status.sequence_fade_volume = cur_avatar_status.bgm_volume;
     case 5:
         if (sound_status.seq_playing != 0) {
-            asset_status.unk1c -= 2;
-            if (asset_status.unk1c <= 0) {
-                asset_status.unk1c = 0;
+            asset_status.sequence_fade_volume -= 2;
+            if (asset_status.sequence_fade_volume <= 0) {
+                asset_status.sequence_fade_volume = 0;
             }
-            SsSeqSetVol(sound_status.seq_id, asset_status.unk1c, asset_status.unk1c);
-            if (asset_status.unk1c != 0) {
+            SsSeqSetVol(sound_status.seq_id, asset_status.sequence_fade_volume,
+                        asset_status.sequence_fade_volume);
+            if (asset_status.sequence_fade_volume != 0) {
                 break;
             }
             SsSeqStop(sound_status.seq_id);
@@ -542,18 +543,18 @@ void resource_advance_transition(void)
         if (sound_status.banks[1].vab_id != -1) {
             sound_status.banks[1].slot = NULL;
         }
-        if (asset_status.previous[3] != AREA_KEEP) {
-            audio_queue_vab_stream(2, asset_status.previous[3] + 1, 1);
+        if (asset_status.requested_resource_ids[3] != AREA_KEEP) {
+            audio_queue_vab_stream(2, asset_status.requested_resource_ids[3] + 1, 1);
         }
-        if (asset_status.previous[4] == AREA_KEEP) {
+        if (asset_status.requested_resource_ids[4] == AREA_KEEP) {
             goto done;
         }
-        cd_archive_queue_read(2, (u8)(asset_status.previous[4] % 100) + 546, (u8 *)sound_status.seq_buffer,
-                              resource_transition_set_phase_6);
+        cd_archive_queue_read(2, (u8)(asset_status.requested_resource_ids[4] % 100) + 546,
+                              (u8 *)sound_status.seq_buffer, resource_transition_set_phase_6);
         asset_status.step = STEP_WAIT;
         break;
     case 6:
-        if (asset_status.previous[4] < 100) {
+        if (asset_status.requested_resource_ids[4] < 100) {
             sound_status.seq_ready = 1;
             audio_start_sequence();
         }

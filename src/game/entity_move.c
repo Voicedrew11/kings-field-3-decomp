@@ -495,7 +495,7 @@ s32 actor_compute_target_direction(Actor *obj, VECTOR *from, s32 speed, VECTOR *
         if (--steps == 0) {
             break;
         }
-        vector_add_scaled_delta(from, &cur_avatar_status.unk11c,
+        vector_add_scaled_delta(from, &cur_avatar_status.frame_displacement,
                                 fixed_vector3_length(target->vx - at.vx, target->vy - at.vy,
                                                      target->vz - at.vz) / speed, &at);
     }

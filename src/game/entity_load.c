@@ -25,8 +25,8 @@ void actor_update_frame(void)
     do {
         if (obj->slot_state != ACTOR_FREE) {
             actor_bind_current(obj);
-            if ((actor_status.actor_update_frame_count & 3) == (actor_status.current_index & 3) || cur_avatar_status.unke != 0 ||
-                cur_avatar_status.unk101 == 1) {
+            if ((actor_status.actor_update_frame_count & 3) == (actor_status.current_index & 3) || cur_avatar_status.force_actor_lifecycle_refresh != 0 ||
+                cur_avatar_status.reaction_mode == 1) {
                 actor_update_lifecycle_for_player_range();
             }
             if (obj->lifecycle == 1) {
@@ -47,9 +47,9 @@ void actor_update_frame(void)
                 }
             }
             if (obj->definition_id == 0x6e) {
-                if (cur_avatar_status.unkf5 != 0x5c && cur_avatar_status.unkf6 != 0x5c) {
+                if (cur_avatar_status.equipped_accessory_id != 0x5c && cur_avatar_status.equipped_extra_id != 0x5c) {
                     obj->layer_mask = 0;
-                } else if (cur_avatar_status.unk1c == 0) {
+                } else if (cur_avatar_status.mp == 0) {
                     obj->layer_mask = 0;
                 }
             }

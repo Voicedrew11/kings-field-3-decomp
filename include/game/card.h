@@ -21,49 +21,49 @@
  * from the globals each comment names and card_payload_restore_game_state copies it back.
  */
 typedef struct SaveData {
-    u8 area[5];             /* +0x0000: asset_status.area */
+    u8 active_resource_ids[5]; /* +0x0000: asset_status.area */
     u8 unk5[3];
-    u8 unk8[0x100];         /* +0x0008: cur_evt_state from unk4 (the script bytes) */
-    u8 unk108[0x5000];      /* +0x0108: cur_evt_state.unk104, the block arena */
-    u16 unk5108[32];        /* +0x5108: cur_evt_state.unk5104 */
-    u8 unk5148[0x3c0];      /* +0x5148: conversation_records.unk1e0, the slot runs */
-    u8 unk5508[2][150];     /* +0x5508: event_item_counters_table, the item counts */
-    u8 unk5634[96];         /* +0x5634: effect_status.unk0[n].unk0 */
-    VECTOR pos;             /* +0x5694: Data801b24e4.pos */
-    SVECTOR unk56a4;        /* +0x56a4: Data801b24e4.unk12c */
+    u8 event_flags[0x100];  /* +0x0008: cur_evt_state from unk4 (the script bytes) */
+    u8 event_arena[0x5000]; /* +0x0108: cur_evt_state.unk104, the block arena */
+    u16 saved_event_offsets[32]; /* +0x5108: cur_evt_state.unk5104 */
+    u8 conversation_page_states[0x3c0]; /* +0x5148: conversation_records.unk1e0, the slot runs */
+    u8 game_counters[2][150]; /* +0x5508: event_item_counters_table, the item counts */
+    u8 magic_menu_available[96]; /* +0x5634: effect_status.unk0[n].unk0 */
+    VECTOR pos;             /* +0x5694: PlayerState.pos */
+    SVECTOR camera_rotation_target; /* +0x56a4: PlayerState.unk12c */
     u32 play_minutes;       /* +0x56ac */
     s32 experience;         /* +0x56b0 */
-    s32 unk56b4;            /* +0x56b4: Data801b24e4.unk4 */
-    s32 unk56b8;            /* +0x56b8: Data801b24e4.unk50 */
-    s32 unk56bc;            /* +0x56bc: Data801b24e4.unk8 */
-    u16 unk56c0;            /* +0x56c0: Data801b24e4.unk160 */
+    s32 next_level_experience; /* +0x56b4: PlayerState.unk4 */
+    s32 gold;               /* +0x56b8: PlayerState.unk50 */
+    s32 weapon_growth_experience; /* +0x56bc: PlayerState.unk8 */
+    u16 map_layer_offset;   /* +0x56c0: PlayerState.unk160 */
     u16 hp_max;             /* +0x56c2 */
     u16 hp;                 /* +0x56c4 */
-    u16 unk56c6;            /* +0x56c6: Data801b24e4.unk1a */
-    u16 unk56c8;            /* +0x56c8: Data801b24e4.unk1c */
-    u16 unk56ca;            /* +0x56ca: Data801b24e4.unk32 */
-    u16 unk56cc[5];         /* +0x56cc: Data801b24e4.unk34 */
-    s16 unk56d6;            /* +0x56d6: Data801b24e4.unk3e */
-    u16 unk56d8;            /* +0x56d8: Data801b24e4.unk4c */
-    u16 unk56da;            /* +0x56da: Data801b24e4.unk24 */
-    u16 unk56dc[5];         /* +0x56dc: Data801b24e4.unk26 */
-    s16 unk56e6;            /* +0x56e6: Data801b24e4.unk30 */
-    s16 unk56e8[15];        /* +0x56e8: Data801b24e4.unk78..unk94 */
+    u16 mp_max;             /* +0x56c6: PlayerState.unk1a */
+    u16 mp;                 /* +0x56c8: PlayerState.unk1c */
+    u16 base_physical_power; /* +0x56ca: PlayerState.unk32 */
+    u16 base_magic[5];      /* +0x56cc: PlayerState.unk34 */
+    s16 unk56d6;            /* +0x56d6: PlayerState.unk3e */
+    u16 wisdom;             /* +0x56d8: PlayerState.unk4c */
+    u16 physical_power_training; /* +0x56da: PlayerState.unk24 */
+    u16 magic_training[5];  /* +0x56dc: PlayerState.unk26 */
+    s16 unk56e6;            /* +0x56e6: PlayerState.unk30 */
+    s16 status_timers[15];  /* +0x56e8: PlayerState.unk78..unk94 */
     u8 level;               /* +0x5706 */
-    u8 unk5707;             /* +0x5707: Data801b24e4.unkd */
-    u8 unk5708[7];          /* +0x5708: Data801b24e4.unkf0..unkf6 */
-    u8 unk570f;             /* +0x570f: Data801b24e4.unkc7 */
-    u8 unk5710;             /* +0x5710: Data801b24e4.unkc8 */
-    u8 unk5711;             /* +0x5711: Data801b24e4.unkc9 */
-    u8 unk5712;             /* +0x5712: Data801b24e4.unkcb */
+    u8 unk5707;             /* +0x5707: PlayerState.unkd */
+    u8 equipped_ids[7];     /* +0x5708: PlayerState.unkf0..unkf6 */
+    u8 primary_magic_shortcut_id; /* +0x570f: PlayerState.unkc7 */
+    u8 secondary_magic_shortcut_id; /* +0x5710: PlayerState.unkc8 */
+    u8 secondary_item_shortcut_id; /* +0x5711: PlayerState.unkc9 */
+    u8 equipped_weapon_id;  /* +0x5712: PlayerState.unkcb */
     u8 se_volume;           /* +0x5713 */
     u8 bgm_volume;          /* +0x5714 */
-    u8 unk5715[8];          /* +0x5715: Data801b24e4.unkf9..unk100 */
+    u8 options[8];          /* +0x5715: PlayerState.unkf9..unk100 */
     u8 unk571d;
-    u8 unk571e[32][20];     /* +0x571e: map_revealed_rects, the rooms seen */
-    u8 unk599e[150];        /* +0x599e: item_guide_level */
-    u8 unk5a34[150];        /* +0x5a34: menu_shop_stock_pages[0], the first shop's stock */
-    u8 unk5aca[4];          /* +0x5aca: the menu list cursors menu_item_list_cursor..menu_take_out_list_cursor */
+    u8 revealed_map_rects[32][20]; /* +0x571e: map_revealed_rects, the rooms seen */
+    u8 item_guide_levels[150]; /* +0x599e: item_guide_level */
+    u8 shop_stock[150];     /* +0x5a34: menu_shop_stock_pages[0], the first shop's stock */
+    u8 menu_list_cursors[4]; /* +0x5aca: the menu list cursors menu_item_list_cursor..menu_take_out_list_cursor */
     u8 unk5ace[0x132];
 } SaveData;
 

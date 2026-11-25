@@ -103,7 +103,8 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
     if (i != -1) {
         obj = &map_objects_slots.objects[i];
         if (obj->object_id == 0x140) {
-            if (angle_within_tolerance(cur_avatar_status.unk12c.vy + 2048, obj->angle.vy, 0x100) == 0) {
+            if (angle_within_tolerance(cur_avatar_status.camera_rotation_target.vy + 2048, obj->angle.vy,
+                                       0x100) == 0) {
                 return;
             }
             if (obj->arg.b.unk38 != 0xff) {
@@ -111,15 +112,15 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
             }
             obj->arg.b.unk38 = item;
             obj->action_state = 0;
-            cur_evt_state.unk0 = 1;
+            cur_evt_state.interaction_handled = 1;
             game_counter_decrement(0x85);
             event_spawn_effect_object(obj, 0x85);
         } else if (map_object_check_and_consume_marker(obj, 0x85) == 3) {
             notify_enqueue(7);
-            cur_evt_state.unk0 = 1;
+            cur_evt_state.interaction_handled = 1;
         }
     } else {
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         notify_enqueue(0x23);
     }
 }
@@ -146,11 +147,11 @@ void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
         return;
     }
     if (player_camera_within_map_region(0x12, 0x1c, 3, 3, 0x8000) != 0) {
-        if (cur_avatar_status.unk10a != 0) {
+        if (cur_avatar_status.warp_arrived != 0) {
             map_cell_copy_rotated_fields(2, 0x15, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
         }
     } else {
-        cur_avatar_status.unk10a = 0;
+        cur_avatar_status.warp_arrived = 0;
         map_cell_copy_rotated_fields(2, 0x18, 0x4f, 0x12, 0x1e, 3, 1, 0, 0x2f);
     }
 }
@@ -192,7 +193,7 @@ void area_update_map_object_socket(void)
             other->arg.b.unk40 = 0;
         }
     }
-    cur_evt_state.unk0 = 1;
+    cur_evt_state.interaction_handled = 1;
 }
 
 ADDRESS(0x801e8884, 0x8)

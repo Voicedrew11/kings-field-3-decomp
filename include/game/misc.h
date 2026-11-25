@@ -27,15 +27,15 @@ u8 *event_target_stream_resolve_cursor(Actor *obj);
 void event_spawn_effect_object(MapObject *obj, s32 id);
 
 /* A start position of player_warp_to_destination's table: areas, map cell and height, yaw. */
-typedef struct Record08 {
+typedef struct WarpDestination {
     u8 area;        /* resource_request_transition's third area (0xff: none) */
-    u8 area3;
-    u8 area4;
+    u8 vab_id;
+    u8 sequence_id;
     u8 x;           /* map cell x */
     u8 z;           /* map cell z */
     u8 y;           /* height / 128 */
     u16 yaw;        /* negated */
-} Record08;
+} WarpDestination;
 
 void player_warp_to_destination(s32 n);
 s32 game_counter_is_nonzero(s32 id);

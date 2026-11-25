@@ -103,7 +103,7 @@ void area_use_item_with_item_held(VECTOR *pos, SVECTOR *angle, s32 item)
         }
         notify_enqueue(0x10);
     }
-    cur_evt_state.unk0 = 1;
+    cur_evt_state.interaction_handled = 1;
 }
 
 ADDRESS(0x801e8658, 0x8)

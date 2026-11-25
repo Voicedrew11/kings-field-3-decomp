@@ -80,12 +80,12 @@ u8 *event_target_stream_resolve_cursor(Actor *obj)
         found:
             return script + (script[16] + 20);
         case 0xf1:
-            if (cur_evt_state.unk4[p[1]] == p[2]) {
+            if (cur_evt_state.flags[p[1]] == p[2]) {
                 n = event_target_stream_find_marker(script, p[3]);
                 if (script[16] < n) {
                     script[16] = n;
                 }
-                cur_evt_state.unkaa = obj->definition_id;
+                cur_evt_state.stream_actor_definition_id = obj->definition_id;
                 script[19] = 0;
                 goto found;
             }

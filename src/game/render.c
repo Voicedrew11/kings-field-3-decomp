@@ -9,7 +9,7 @@
  * reads menu_transition_rect $gp-relative, which ASPSX emits only for .sdata defined
  * in the same file.
  */
-/* render_scene_and_update_resources reads Data8018fad4.step as volatile (see game/data.h). */
+/* render_scene_and_update_resources reads ResourceState.step as volatile (see game/data.h). */
 #define GAME_RENDER_MODULE
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -419,8 +419,8 @@ void render_sliding_panel_primary(void)
 {
     s32 y;
 
-    if (cur_avatar_status.unk154 < 240) {
-        y = cur_avatar_status.unk154 + 120;
+    if (cur_avatar_status.collision_lower_clearance < 240) {
+        y = cur_avatar_status.collision_lower_clearance + 120;
         if (y < 0) {
             y = 0;
         }
@@ -434,8 +434,8 @@ void render_sliding_panel_secondary(void)
 {
     s32 y;
 
-    if (cur_avatar_status.unk158 < 240) {
-        y = cur_avatar_status.unk158 + 120;
+    if (cur_avatar_status.collision_upper_clearance < 240) {
+        y = cur_avatar_status.collision_upper_clearance + 120;
         if (y < 0) {
             y = 0;
         }
@@ -448,8 +448,8 @@ void render_sliding_panel_tertiary(void)
 {
     s32 y;
 
-    if (cur_avatar_status.unk15c < 240) {
-        y = cur_avatar_status.unk15c + 120;
+    if (cur_avatar_status.collision_second_upper_clearance < 240) {
+        y = cur_avatar_status.collision_second_upper_clearance + 120;
         if (y < 0) {
             y = 0;
         }
@@ -689,28 +689,30 @@ void render_player_weapon(void)
     ScreenVertex *screen;
     s32 i;
 
-    if (cur_avatar_status.unkc0 == -1) {
+    if (cur_avatar_status.weapon_attack_phase == -1) {
         return;
     }
     scratch = SCRATCH;
     light = &scene_display_sys.unk15da8[((MapLayer *)((u8 *)&map_world.cells[cur_avatar_status.pos.vz >> 11]
                                                          [cur_avatar_status.pos.vx >> 11] +
-                                                cur_avatar_status.unk160))->lighting_index & 0x3f];
+                                                cur_avatar_status.map_layer_offset))->lighting_index & 0x3f];
     gte_SetColorMatrix(&light->unk50);
     gte_SetLightMatrix(&light->unk0[0]);
     fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    m.t[0] = (s16)cur_avatar_status.unkb0->position_offset_x;
-    m.t[1] = (s16)cur_avatar_status.unkb0->position_offset_y;
-    m.t[2] = (s16)cur_avatar_status.unkb0->position_offset_z;
-    RotMatrix((SVECTOR *)&cur_avatar_status.unkb0->rotation_offset_x, &m);
+    m.t[0] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_x;
+    m.t[1] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_y;
+    m.t[2] = (s16)cur_avatar_status.equipped_weapon_record->position_offset_z;
+    RotMatrix((SVECTOR *)&cur_avatar_status.equipped_weapon_record->rotation_offset_x, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     file = scene_display_sys.models[32];
     model = file + ((ModelFile *)file)->vertices;
     SCRATCH->model = model;
-    if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.unkb8, 32, cur_avatar_status.unkca,
-                                         cur_avatar_status.unkc0, ((ModelData *)model)->parts[0].unk4) == 0) {
+    if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.weapon_animation_cache, 32,
+                                         cur_avatar_status.weapon_attack_mode,
+                                         cur_avatar_status.weapon_attack_phase,
+                                         ((ModelData *)model)->parts[0].unk4) == 0) {
         return;
     }
     SCRATCH->ot = scene_display_sys.ot;
@@ -829,7 +831,7 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
         light = &scene_display_sys.unk15da8
             [((MapLayer *)((u8 *)&map_world.cells[scene_display_sys.unk15af8.vz >> 11]
                                                       [scene_display_sys.unk15af8.vx >> 11] +
-                           cur_avatar_status.unk160))->lighting_index & 0x3f];
+                           cur_avatar_status.map_layer_offset))->lighting_index & 0x3f];
     }
     if (mode & 0x80) {
         mode &= 0x7f;
@@ -1072,7 +1074,7 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
         delta.vy = pos->vy - scene_display_sys.unk15af8.vy;
         delta.vz = pos->vz - scene_display_sys.unk15af8.vz;
         turn = ratan2(delta.vz, delta.vx) - 1024;
-        angle = (cur_avatar_status.unk124.vy - turn) & 0xfff;
+        angle = (cur_avatar_status.camera_rotation.vy - turn) & 0xfff;
         if ((u32)(angle - 2048) < 1536 || (u32)(angle - 513) < 1536) {
             return;
         }
@@ -1309,10 +1311,10 @@ u16 map_object_asset_index(u16 id)
     if (id < 300) {
         return id + 256;
     }
-    if ((s16)asset_status.loading == 1 && asset_status.unk17 == 1 && asset_status.previous[0] != 0xff) {
-        return id + (asset_status.previous[0] * 32 + 256);
+    if ((s16)asset_status.loading == 1 && asset_status.area_records_loaded == 1 && asset_status.requested_resource_ids[0] != 0xff) {
+        return id + (asset_status.requested_resource_ids[0] * 32 + 256);
     }
-    return id + (asset_status.area[0] * 32 + 256);
+    return id + (asset_status.active_resource_ids[0] * 32 + 256);
 }
 
 ADDRESS(0x800405e8, 0x70)
@@ -1564,7 +1566,7 @@ void render_scene_and_update_resources(void)
     repeat_store_word((u32 *)scratch->u.load.models, 0, 0x53);
     repeat_store_word((u32 *)scratch->u.load.sounds, 0, 8);
     if (scene_display_sys.unk15996 == 0) {
-        asset_status.unk20 = NULL;
+        asset_status.animated_object = NULL;
     }
     scratch->draw.count.clut = 0;
     rec = map_objects_slots.objects;
@@ -1614,8 +1616,8 @@ void render_scene_and_update_resources(void)
                                        0x1fff - rec->arg.v.depth_code);
                 rec->flags |= 0x80;
             }
-            asset_status.unk24 = *rec;
-            asset_status.unk20 = &asset_status.unk24;
+            asset_status.animated_object_copy = *rec;
+            asset_status.animated_object = &asset_status.animated_object_copy;
             break;
         case 0x1f:
             if (player_camera_within_map_region(rec->pos.vx >> 11, rec->pos.vz >> 11, rec->arg.s.region_width,
@@ -1723,15 +1725,17 @@ void render_scene_and_update_resources(void)
     scratch->u.load.models[264] = 0;
     resource_tmd_update_range(0, 0x80, 0x100, 0x118);
     scratch->u.load.model_wanted = &scratch->u.load.models[300];
-    if ((s16)asset_status.loading == 1 && asset_status.unk17 == 1
-        && asset_status.previous[0] != 0xff) {
-        resource_tmd_update_range(1, asset_status.previous[0] * 32, asset_status.previous[0] * 32 + 556, 32);
+    if ((s16)asset_status.loading == 1 && asset_status.area_records_loaded == 1
+        && asset_status.requested_resource_ids[0] != 0xff) {
+        resource_tmd_update_range(1, asset_status.requested_resource_ids[0] * 32,
+                                  asset_status.requested_resource_ids[0] * 32 + 556, 32);
     } else {
-        resource_tmd_update_range(1, asset_status.area[0] * 32, asset_status.area[0] * 32 + 556, 32);
+        resource_tmd_update_range(1, asset_status.active_resource_ids[0] * 32,
+                                  asset_status.active_resource_ids[0] * 32 + 556, 32);
     }
     resource_vab_update_range(2, 0xf1, 0x93, 0x20);
     if ((s16)asset_status.loading == 1 && asset_status.step > 0
-        && (rec = asset_status.unk20) != NULL) {
+        && (rec = asset_status.animated_object) != NULL) {
         id = rec->object_id - 221;
         render_animated_object(id, &rec->angle, &rec->arg.v.animation_cache, rec->animation_id,
                                rec->animation_phase, rec->arg.v.blend_mode, rec->arg.v.lighting_index,
@@ -1825,7 +1829,7 @@ void render_sprite_record(SpriteRec *sprite, u16 mode, u8 *rgb)
         return;
     }
     scene_display_sys.prim_count++;
-    if (asset_status.area[0] == 10 && mode == 2) {
+    if (asset_status.active_resource_ids[0] == 10 && mode == 2) {
         p->x0 = sprite->x + 1;
         p->y0 = sprite->y + 1;
     } else {
@@ -1877,7 +1881,7 @@ void render_hud_sprites(void)
     u8 rgb[4];
 
     sprite = hud_sprites;
-    rgb[0] = rgb[1] = rgb[2] = cur_avatar_status.unkfd;
+    rgb[0] = rgb[1] = rgb[2] = cur_avatar_status.brightness;
     for (; sprite->visible != 0xff; sprite++) {
         if (sprite->visible != 0) {
             render_sprite_record(sprite, sprite->mode, rgb);
@@ -1981,7 +1985,7 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
 
-    map_textured_primitive_color.b = map_textured_primitive_color.g = map_textured_primitive_color.r = cur_avatar_status.unkfd;
+    map_textured_primitive_color.b = map_textured_primitive_color.g = map_textured_primitive_color.r = cur_avatar_status.brightness;
     display_set_view_transform(pos, angle);
     vram_scroll_update();
     notification_update();
@@ -1990,20 +1994,20 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
     pool_mark_allocated();
     render_player_weapon();
     hud_sprites[13].visible = hud_sprites[14].visible = 0;
-    render_model_rows[0].visible = cur_avatar_status.unkfa & 1;
-    render_model_rows[1].visible = (cur_avatar_status.unkfa & 2) >> 1;
+    render_model_rows[0].visible = cur_avatar_status.compass_display & 1;
+    render_model_rows[1].visible = (cur_avatar_status.compass_display & 2) >> 1;
     hud_sprites[0].visible = hud_sprites[1].visible = hud_sprites[2].visible =
         hud_sprites[3].visible = hud_sprites[4].visible = hud_sprites[5].visible =
             hud_sprites[6].visible = hud_sprites[7].visible = hud_sprites[8].visible =
                 hud_sprites[9].visible = hud_sprites[10].visible = hud_sprites[11].visible =
-                    hud_sprites[12].visible = cur_avatar_status.unkf9 & 1;
+                    hud_sprites[12].visible = cur_avatar_status.vitals_display & 1;
     hud_sprites[15].visible = hud_sprites[16].visible = hud_sprites[17].visible =
         hud_sprites[18].visible = hud_sprites[19].visible = hud_sprites[20].visible =
             hud_sprites[21].visible = hud_sprites[22].visible = hud_sprites[23].visible =
                 hud_sprites[24].visible = hud_sprites[25].visible = hud_sprites[26].visible =
                     hud_sprites[27].visible = hud_sprites[28].visible =
-                        hud_sprites[29].visible = (cur_avatar_status.unkf9 & 2) >> 1;
-    i = cur_avatar_status.unkfa - 1;
+                        hud_sprites[29].visible = (cur_avatar_status.vitals_display & 2) >> 1;
+    i = cur_avatar_status.compass_display - 1;
     if (i >= 0) {
         render_model_yaw_smoothing_accumulator += angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.unk15b08.vy);
         if (render_model_yaw_smoothing_accumulator > 0) {
@@ -2015,12 +2019,12 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
             render_model_rows[i].angle.vy + (render_model_yaw_smoothing_accumulator >> 6);
         render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx = scene_display_sys.unk15b08.vx;
     }
-    if (cur_avatar_status.unkf9 == 1) {
+    if (cur_avatar_status.vitals_display == 1) {
         hud_sprites[4].unka = hud_sprites[4].w = cur_avatar_status.hp * 48 / cur_avatar_status.hp_max;
-        hud_sprites[5].unka = hud_sprites[5].w = cur_avatar_status.unk1e * 48 / 5000;
-        hud_sprites[6].unka = hud_sprites[6].w = cur_avatar_status.unk1c * 48 / cur_avatar_status.unk1a;
-        hud_sprites[7].unka = hud_sprites[7].w = cur_avatar_status.unk22 * 48 / 5000;
-    } else if (cur_avatar_status.unkf9 == 2) {
+        hud_sprites[5].unka = hud_sprites[5].w = cur_avatar_status.attack_charge_current * 48 / 5000;
+        hud_sprites[6].unka = hud_sprites[6].w = cur_avatar_status.mp * 48 / cur_avatar_status.mp_max;
+        hud_sprites[7].unka = hud_sprites[7].w = cur_avatar_status.magic_charge * 48 / 5000;
+    } else if (cur_avatar_status.vitals_display == 2) {
         u16 hp;
         u16 mp;
         s32 n;
@@ -2030,13 +2034,13 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
         hud_sprites[17].u = n / 100 * 12 + 0x80;
         hud_sprites[18].u = n % 100 / 10 * 12 + 0x80;
         hud_sprites[19].u = n % 10 * 12 + 0x80;
-        mp = cur_avatar_status.unk1c % 1000;
+        mp = cur_avatar_status.mp % 1000;
         n = mp;
         hud_sprites[22].u = n / 100 * 12 + 0x80;
         hud_sprites[23].u = n % 100 / 10 * 12 + 0x80;
         hud_sprites[24].u = n % 10 * 12 + 0x80;
-        hud_sprites[25].unka = hud_sprites[25].w = cur_avatar_status.unk1e * 64 / 5000;
-        hud_sprites[26].unka = hud_sprites[26].w = cur_avatar_status.unk22 * 64 / 5000;
+        hud_sprites[25].unka = hud_sprites[25].w = cur_avatar_status.attack_charge_current * 64 / 5000;
+        hud_sprites[26].unka = hud_sprites[26].w = cur_avatar_status.magic_charge * 64 / 5000;
     }
     render_active_model_rows();
     render_hud_sprites();
@@ -2735,18 +2739,18 @@ s32 menu_fade_transition(s32 level, s32 step)
         } else if (pad != 0) {
             DrawSync(0);
             if (pad & action_button_masks[7]) {
-                cur_avatar_status.unk178 |= action_button_masks[7];
+                cur_avatar_status.pad_buttons |= action_button_masks[7];
             } else if (pad != 0) {
-                cur_avatar_status.unk178 &= ~action_button_masks[7];
+                cur_avatar_status.pad_buttons &= ~action_button_masks[7];
             }
             return level;
         }
     }
     DrawSync(0);
     if (pad & action_button_masks[7]) {
-        cur_avatar_status.unk178 |= action_button_masks[7];
+        cur_avatar_status.pad_buttons |= action_button_masks[7];
     } else if (pad != 0) {
-        cur_avatar_status.unk178 &= ~action_button_masks[7];
+        cur_avatar_status.pad_buttons &= ~action_button_masks[7];
     }
     return result;
 }
@@ -2787,9 +2791,9 @@ void menu_show_transition_image(u16 file, u16 entry)
             }
         }
         if (pad & action_button_masks[7]) {
-            cur_avatar_status.unk178 |= action_button_masks[7];
+            cur_avatar_status.pad_buttons |= action_button_masks[7];
         } else if (pad != 0) {
-            cur_avatar_status.unk178 &= ~action_button_masks[7];
+            cur_avatar_status.pad_buttons &= ~action_button_masks[7];
         }
         level = 80;
     }

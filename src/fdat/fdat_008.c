@@ -92,7 +92,7 @@ void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         switch (def->action) {
         case 9:
         case 0x15:
@@ -152,7 +152,7 @@ void area_update_cell_toggles_by_worn_item(void)
     MapObject *obj;
     s32 i;
 
-    if (cur_avatar_status.unkf4 != 0x4b) {
+    if (cur_avatar_status.equipped_leg_id != 0x4b) {
         gate = &map_objects_slots.objects[82];
         if (map_objects_slots.objects[82].arg.b.unk40 != 1) {
             for (obj = &map_objects_slots.objects[100], i = 16; i != -1; i--, obj++) {
@@ -205,7 +205,7 @@ void area_use_item_offer_items_in_order(VECTOR *pos, SVECTOR *angle, s32 item)
             game_counter_decrement(item);
             event_target_stream_execute(&actor_status.objects[i]);
             map_object_apply_marker_signal(0x9a);
-            cur_evt_state.unk0 = 1;
+            cur_evt_state.interaction_handled = 1;
         }
         break;
     }
@@ -253,11 +253,11 @@ void area_region_trigger_lock_door_and_warp_cells(MapObject *obj)
         break;
     case 10:
         if (player_camera_within_map_region(0x38, 0x23, 3, 3, 0x8000) != 0) {
-            if (cur_avatar_status.unk10a != 0) {
+            if (cur_avatar_status.warp_arrived != 0) {
                 map_cell_copy_rotated_fields(2, 0x4a, 0, 0x38, 0x25, 3, 1, 0, 0x2f);
             }
         } else {
-            cur_avatar_status.unk10a = 0;
+            cur_avatar_status.warp_arrived = 0;
             map_cell_copy_rotated_fields(2, 0x4d, 0, 0x38, 0x25, 3, 1, 0, 0x2f);
         }
         break;
@@ -370,7 +370,7 @@ ADDRESS(0x801e8c1c, 0x20)
 void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 15) {
-        cur_evt_state.unk71[2] = 1;
+        cur_evt_state.element_unlocked[2] = 1;
     }
 }
 
@@ -386,7 +386,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     MapObject *obj;
     s32 i;
 
-    cur_avatar_status.unk34[2] += 20;
+    cur_avatar_status.base_magic[2] += 20;
     player_learn_element_magic(2);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[70];
@@ -460,7 +460,7 @@ void area_on_load_restore_objects(void)
 {
     s32 k;
 
-    if (cur_evt_state.unk7f[2] != 0) {
+    if (cur_evt_state.element_magic_learned[2] != 0) {
         map_objects_slots.objects[70].object_id = 0xff;
         map_objects_slots.objects[91].object_id = 0xff;
         cur_evt_state.unke[8] = 1;

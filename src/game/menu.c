@@ -233,7 +233,7 @@ void menu_draw_location_number(void)
 
     text.x = 0xf7;
     text.y = 0xd2;
-    menu_format_number(asset_status.unk9 * 10000 + x * 100 + z,
+    menu_format_number(asset_status.current_area * 10000 + x * 100 + z,
                        6, 1, 0, text.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
 }
@@ -301,8 +301,8 @@ s32 menu_item_selection_controller(void)
                 menu_request_item_model(item);
                 confirmed = 0;
             } else if (item == 0x85) {
-                if (asset_status.unk9 != 0x19 && asset_status.unk9 != 0x1b
-                    && (asset_status.unk9 != 7
+                if (asset_status.current_area != 0x19 && asset_status.current_area != 0x1b
+                    && (asset_status.current_area != 7
                         || !(cur_avatar_status.pos.vx / 2048 >= 62 && cur_avatar_status.pos.vx / 2048 <= 70
                              && cur_avatar_status.pos.vz / 2048 < 12))) {
                     menu_wait_async_read();
@@ -329,7 +329,7 @@ s32 menu_item_selection_controller(void)
     }
     menu_cd_restore_data_ready_handler();
     if (result >= 104 && result <= 120) {
-        if (asset_status.unk9 == 2
+        if (asset_status.current_area == 2
             && cur_avatar_status.pos.vx / 2048 >= 10 && cur_avatar_status.pos.vx / 2048 <= 13
             && cur_avatar_status.pos.vz / 2048 >= 38 && cur_avatar_status.pos.vz / 2048 <= 42) {
             if (!(result == 104 || result == 107 || result == 108 || result == 109)) {
@@ -374,12 +374,12 @@ s32 menu_collect_available_item_rows(u8 *bag, MenuEntry *entries, u8 *counts, u8
     for (i = first; i < last; count++, i++, src++) {
         if (*count != 0) {
             *counts = *count;
-            if (i == cur_avatar_status.unkcb || i == cur_avatar_status.unkf0 || i == cur_avatar_status.unkf1
-                || i == cur_avatar_status.unkf2 || i == cur_avatar_status.unkf3
-                || i == cur_avatar_status.unkf4 || i == cur_avatar_status.unkf5
-                || i == cur_avatar_status.unkf6 || i == cur_avatar_status.unkc9) {
+            if (i == cur_avatar_status.equipped_weapon_id || i == cur_avatar_status.equipped_head_id || i == cur_avatar_status.equipped_body_id
+                || i == cur_avatar_status.equipped_shield_id || i == cur_avatar_status.equipped_arm_id
+                || i == cur_avatar_status.equipped_leg_id || i == cur_avatar_status.equipped_accessory_id
+                || i == cur_avatar_status.equipped_extra_id || i == cur_avatar_status.secondary_item_shortcut_id) {
                 (*counts)--;
-                if (i == cur_avatar_status.unkf5 && i == cur_avatar_status.unkf6) {
+                if (i == cur_avatar_status.equipped_accessory_id && i == cur_avatar_status.equipped_extra_id) {
                     (*counts)--;
                 }
             }
@@ -430,38 +430,38 @@ void menu_apply_item_effect(s32 item)
         cur_avatar_status.hp += 50;
     } else if (item == 105) {
         cur_avatar_status.hp += 15;
-        cur_avatar_status.unk78 = 0;
+        cur_avatar_status.poison_timer = 0;
     } else if (item == 106) {
         cur_avatar_status.hp = cur_avatar_status.hp_max;
     } else if (item == 107) {
         cur_avatar_status.hp = cur_avatar_status.hp_max;
-        cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+        cur_avatar_status.mp = cur_avatar_status.mp_max;
         player_clear_and_cap_status_effects();
     } else if (item == 108) {
-        if (cur_avatar_status.unk84 > 0) {
-            cur_avatar_status.unk84 = 0;
+        if (cur_avatar_status.paralysis_timer > 0) {
+            cur_avatar_status.paralysis_timer = 0;
         }
-        if (cur_avatar_status.unk82 > 64) {
-            cur_avatar_status.unk82 = 64;
+        if (cur_avatar_status.slow_timer > 64) {
+            cur_avatar_status.slow_timer = 64;
         }
         player_cap_curse_strength();
         player_cap_darkness_phase();
     } else if (item == 109) {
-        cur_avatar_status.unk1c += 40;
+        cur_avatar_status.mp += 40;
     } else if (item == 111) {
     } else if (item == 112) {
     } else if (item == 119) {
         cur_avatar_status.hp += 100;
     } else if (item == 120) {
         cur_avatar_status.hp += 200;
-        cur_avatar_status.unk1c += 100;
+        cur_avatar_status.mp += 100;
         player_clear_and_cap_status_effects();
     }
     if (cur_avatar_status.hp > cur_avatar_status.hp_max) {
         cur_avatar_status.hp = cur_avatar_status.hp_max;
     }
-    if (cur_avatar_status.unk1c > cur_avatar_status.unk1a) {
-        cur_avatar_status.unk1c = cur_avatar_status.unk1a;
+    if (cur_avatar_status.mp > cur_avatar_status.mp_max) {
+        cur_avatar_status.mp = cur_avatar_status.mp_max;
     }
     event_item_counters_table[0][item]--;
     if (item == 119 || item == 120) {
@@ -473,13 +473,13 @@ void menu_apply_item_effect(s32 item)
 ADDRESS(0x8001b4f8, 0x6c)
 void player_clear_and_cap_status_effects(void)
 {
-    if (cur_avatar_status.unk84 > 0) {
-        cur_avatar_status.unk84 = 0;
+    if (cur_avatar_status.paralysis_timer > 0) {
+        cur_avatar_status.paralysis_timer = 0;
     }
-    if (cur_avatar_status.unk82 > 64) {
-        cur_avatar_status.unk82 = 64;
+    if (cur_avatar_status.slow_timer > 64) {
+        cur_avatar_status.slow_timer = 64;
     }
-    cur_avatar_status.unk78 = 0;
+    cur_avatar_status.poison_timer = 0;
     player_cap_curse_strength();
     player_cap_darkness_phase();
 }
@@ -487,18 +487,18 @@ void player_clear_and_cap_status_effects(void)
 ADDRESS(0x8001b564, 0x30)
 void player_cap_darkness_phase(void)
 {
-    if (cur_avatar_status.unk7e > 64) {
-        cur_avatar_status.unk7e = 64;
-        cur_avatar_status.unk80 = 0;
+    if (cur_avatar_status.darkness_phase > 64) {
+        cur_avatar_status.darkness_phase = 64;
+        cur_avatar_status.darkness_phase_limit = 0;
     }
 }
 
 ADDRESS(0x8001b594, 0x30)
 void player_cap_curse_strength(void)
 {
-    if (cur_avatar_status.unk7a > 64) {
-        cur_avatar_status.unk7a = 64;
-        cur_avatar_status.unk7c = 0;
+    if (cur_avatar_status.curse_strength > 64) {
+        cur_avatar_status.curse_strength = 64;
+        cur_avatar_status.curse_phase_limit = 0;
     }
 }
 
@@ -541,7 +541,7 @@ void menu_show_item_picture(u8 item)
     again:
         menu_frame_begin();
         menu_draw_item_picture(item);
-        if (asset_status.unk9 < 12 && item == 0x5f) {
+        if (asset_status.current_area < 12 && item == 0x5f) {
             primitive_buffer_begin_poly_ft4();
             if (menu_cursor_animation_frame < 48) {
                 n = menu_cursor_animation_frame;
@@ -551,11 +551,11 @@ void menu_show_item_picture(u8 item)
             setRGB0(current_poly_ft4, n - 128, n - 128, n - 128);
             current_poly_ft4->tpage = 0x1e;
             current_poly_ft4->clut = 0x7e45;
-            n = ((cur_avatar_status.unk124.vy & 0xfff) + 256) >> 9;
+            n = ((cur_avatar_status.camera_rotation.vy & 0xfff) + 256) >> 9;
             if (n == 8) {
                 n = 0;
             }
-            area = asset_status.unk9;
+            area = asset_status.current_area;
             primitive_set_poly_ft4_rect((area & 3) * 56 + cur_avatar_status.pos.vx / 2560 + 40,
                                         0xbc - cur_avatar_status.pos.vz / 2560 - (area >> 2) * 56,
                                         15, 15, n * 16 + 128, 0x90, 15, 15);
@@ -579,11 +579,11 @@ void menu_draw_item_picture(s32 item)
     s32 shade = 0;
 
     primitive_buffer_begin_poly_ft4();
-    if (cur_avatar_status.unkfd > 128) {
-        shade = (cur_avatar_status.unkfd - 128) / 4;
+    if (cur_avatar_status.brightness > 128) {
+        shade = (cur_avatar_status.brightness - 128) / 4;
     }
     setRGB0(current_poly_ft4, shade + 64, shade + 64, shade + 64);
-    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     current_poly_ft4->tpage = GetTPage(0, 0, 0x3c0, 0x100);
     current_poly_ft4->clut = 0x7806;
     if (item == 0x5f) {
@@ -617,7 +617,7 @@ void menu_show_area_map(void)
     s32 bytes;
     s32 size = 15;
 
-    n = asset_status.unk9 + 721;
+    n = asset_status.current_area + 721;
     bytes = cd_archive_entry_extent(6, n, 0);
     menu_cd_sectors_left = (bytes + 2047) >> 11;
     menu_cd_read_cursor = menu_cd_read_buffer = (u8 *)memory_allocate(bytes);
@@ -646,11 +646,11 @@ void menu_show_area_map(void)
             setRGB0(current_poly_ft4, n - 128, n - 128, n - 128);
             current_poly_ft4->tpage = 0x1e;
             current_poly_ft4->clut = 0x7e45;
-            n = ((cur_avatar_status.unk124.vy & 0xfff) + 256) >> 9;
+            n = ((cur_avatar_status.camera_rotation.vy & 0xfff) + 256) >> 9;
             if (n == 8) {
                 n = 0;
             }
-            if (asset_status.unk9 == 0x19 || asset_status.unk9 == 0x1b) {
+            if (asset_status.current_area == 0x19 || asset_status.current_area == 0x1b) {
                 primitive_set_poly_ft4_rect(0x98, 0x70, 15, 15, n * 16 + 128, 0x90, size, size);
             } else {
                 primitive_set_poly_ft4_rect(cur_avatar_status.pos.vx / 1024 + 72,
@@ -678,7 +678,7 @@ void menu_draw_revealed_map_rects(void)
 
     for (i = 159; i != -1; i--) {
         rect = map_rects + i;
-        if (map_revealed_rects[asset_status.unk9][i / 8] & (bit = 1 << (7 - i % 8))) {
+        if (map_revealed_rects[asset_status.current_area][i / 8] & (bit = 1 << (7 - i % 8))) {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, 0x7f, 0x7f, 0x7f);
             current_poly_ft4->tpage = GetTPage(0, 0, 0x3c0, 0x100);
@@ -705,7 +705,7 @@ void map_reveal_visited_rects(void)
 
     for (i = 159; i != -1; i--) {
         rect = map_rects + i;
-        if (!(map_revealed_rects[asset_status.unk9][i / 8] & (bit = 1 << (7 - i % 8)))) {
+        if (!(map_revealed_rects[asset_status.current_area][i / 8] & (bit = 1 << (7 - i % 8)))) {
             x0 = rect->x / 2;
             y0 = rect->y / 2;
             x1 = x0 + rect->w / 2;
@@ -713,7 +713,7 @@ void map_reveal_visited_rects(void)
             for (x = x0; x < x1; x++) {
                 for (y = y0; y < y1; y++) {
                     if (map_visited_cells[x][y / 8] & (bit = 1 << (7 - y % 8))) {
-                        map_revealed_rects[asset_status.unk9][i / 8] |= 1 << (7 - i % 8);
+                        map_revealed_rects[asset_status.current_area][i / 8] |= 1 << (7 - i % 8);
                         x = x1;
                         y = y1;
                     }
@@ -734,8 +734,8 @@ s32 menu_choose_warp_destination(void)
     s32 n;
     u32 pad;
 
-    if (asset_status.unk9 < 12 && asset_status.unk9 != 8) {
-        selected = asset_status.unk9;
+    if (asset_status.current_area < 12 && asset_status.current_area != 8) {
+        selected = asset_status.current_area;
     }
     bytes = cd_archive_entry_extent(6, 0x2f1, 0);
     menu_cd_sectors_left = (bytes + 2047) >> 11;
@@ -962,24 +962,24 @@ void menu_build_equipped_label_rows(MenuEntry *out)
     s32 i;
     u8 *slot;
 
-    slots[0] = cur_avatar_status.unkcb;
-    slots[1] = cur_avatar_status.unkc7;
-    slots[2] = cur_avatar_status.unkf2;
-    slots[3] = cur_avatar_status.unkf0;
-    slots[4] = cur_avatar_status.unkf1;
-    slots[5] = cur_avatar_status.unkf3;
-    slots[6] = cur_avatar_status.unkf4;
-    slots[7] = cur_avatar_status.unkf5;
-    slots[8] = cur_avatar_status.unkf6;
-    if (cur_avatar_status.unkc8 == 0xff) {
-        slots[9] = cur_avatar_status.unkc9;
+    slots[0] = cur_avatar_status.equipped_weapon_id;
+    slots[1] = cur_avatar_status.primary_magic_shortcut_id;
+    slots[2] = cur_avatar_status.equipped_shield_id;
+    slots[3] = cur_avatar_status.equipped_head_id;
+    slots[4] = cur_avatar_status.equipped_body_id;
+    slots[5] = cur_avatar_status.equipped_arm_id;
+    slots[6] = cur_avatar_status.equipped_leg_id;
+    slots[7] = cur_avatar_status.equipped_accessory_id;
+    slots[8] = cur_avatar_status.equipped_extra_id;
+    if (cur_avatar_status.secondary_magic_shortcut_id == 0xff) {
+        slots[9] = cur_avatar_status.secondary_item_shortcut_id;
     } else {
-        slots[9] = cur_avatar_status.unkc8;
+        slots[9] = cur_avatar_status.secondary_magic_shortcut_id;
     }
     slot = slots;
     for (i = 0; i < 10; i++) {
         if (*slot != 0xff) {
-            if (i == 1 || (i == 9 && cur_avatar_status.unkc8 != 0xff)) {
+            if (i == 1 || (i == 9 && cur_avatar_status.secondary_magic_shortcut_id != 0xff)) {
                 *out = menu_magic_names[*slot];
             } else {
                 *out = menu_item_names[*slot];
@@ -1016,45 +1016,45 @@ void menu_equipment_category_controller(s32 slot)
     switch (slot) {
     case 0:
         first = 0;
-        equipped = cur_avatar_status.unkcb;
+        equipped = cur_avatar_status.equipped_weapon_id;
         last = 0x21;
         break;
     case 2:
         first = 0x33;
-        equipped = cur_avatar_status.unkf2;
+        equipped = cur_avatar_status.equipped_shield_id;
         last = 0x3e;
         break;
     case 3:
         first = 0x22;
-        equipped = cur_avatar_status.unkf0;
+        equipped = cur_avatar_status.equipped_head_id;
         last = 0x29;
         break;
     case 4:
         first = 0x2a;
-        equipped = cur_avatar_status.unkf1;
+        equipped = cur_avatar_status.equipped_body_id;
         last = 0x32;
         break;
     case 5:
         first = 0x3f;
-        equipped = cur_avatar_status.unkf3;
+        equipped = cur_avatar_status.equipped_arm_id;
         last = 0x47;
         break;
     case 6:
         first = 0x48;
-        equipped = cur_avatar_status.unkf4;
+        equipped = cur_avatar_status.equipped_leg_id;
         last = 0x50;
         break;
     case 7:
     case 8:
         if (slot == 7) {
-            equipped = cur_avatar_status.unkf5;
+            equipped = cur_avatar_status.equipped_accessory_id;
         } else {
-            equipped = cur_avatar_status.unkf6;
+            equipped = cur_avatar_status.equipped_extra_id;
         }
         if (slot == 7) {
-            other = cur_avatar_status.unkf6;
+            other = cur_avatar_status.equipped_extra_id;
         } else {
-            other = cur_avatar_status.unkf5;
+            other = cur_avatar_status.equipped_accessory_id;
         }
         first = 0x51;
         if (other != 0xff) {
@@ -1177,7 +1177,7 @@ void menu_choose_primary_magic_shortcut(void)
     list.values = values;
     list.y = 0x83;
     for (i = 0; i < n - 1; i++) {
-        if (ids[i] == cur_avatar_status.unkc7) {
+        if (ids[i] == cur_avatar_status.primary_magic_shortcut_id) {
             menu_list_set_cursor(&list, i);
             i = 32;
         }
@@ -1256,14 +1256,14 @@ void menu_item_magic_controller(void)
     list.entries = entries;
     list.counts = counts;
     list.values = values;
-    if (cur_avatar_status.unkc8 != 0xff || cur_avatar_status.unkc9 != 0xff) {
+    if (cur_avatar_status.secondary_magic_shortcut_id != 0xff || cur_avatar_status.secondary_item_shortcut_id != 0xff) {
         for (i = 0; i < 88; i++) {
-            if (cur_avatar_status.unkc8 == 0xff) {
-                if (ids[i] == cur_avatar_status.unkc9) {
+            if (cur_avatar_status.secondary_magic_shortcut_id == 0xff) {
+                if (ids[i] == cur_avatar_status.secondary_item_shortcut_id) {
                     menu_list_set_cursor(&list, i);
                     i = 88;
                 }
-            } else if (spells[i] == cur_avatar_status.unkc8) {
+            } else if (spells[i] == cur_avatar_status.secondary_magic_shortcut_id) {
                 menu_list_set_cursor(&list, i);
                 i = 88;
             }
@@ -1930,7 +1930,7 @@ void menu_volume_brightness_controller(void)
     } else {
         levels[1] = cur_avatar_status.bgm_volume + 1;
     }
-    levels[2] = cur_avatar_status.unkfd + 192;
+    levels[2] = cur_avatar_status.brightness + 192;
     for (;;) {
         if (result != MENU_NONE) {
             input_wait_release();
@@ -2010,11 +2010,11 @@ void menu_volume_brightness_controller(void)
     } else {
         cur_avatar_status.bgm_volume = levels[1] - 1;
     }
-    cur_avatar_status.unkfd = levels[2] + 64;
-    if (cur_avatar_status.unk100 == 1) {
-        menu_text_red = (cur_avatar_status.unkfd - 128) / 2 + 128;
-        menu_text_green = (cur_avatar_status.unkfd - 128) / 2 + 128;
-        menu_text_blue = (cur_avatar_status.unkfd - 128) / 2 + 128;
+    cur_avatar_status.brightness = levels[2] + 64;
+    if (cur_avatar_status.panel_translucent == 1) {
+        menu_text_red = (cur_avatar_status.brightness - 128) / 2 + 128;
+        menu_text_green = (cur_avatar_status.brightness - 128) / 2 + 128;
+        menu_text_blue = (cur_avatar_status.brightness - 128) / 2 + 128;
     }
 }
 
@@ -2028,11 +2028,11 @@ void menu_display_options_controller(void)
     u32 pad;
     s32 i;
 
-    options[0] = cur_avatar_status.unkf9;
-    options[1] = cur_avatar_status.unkfa;
-    options[2] = cur_avatar_status.unkfb;
-    options[3] = cur_avatar_status.unkfc;
-    options[4] = cur_avatar_status.unk100;
+    options[0] = cur_avatar_status.vitals_display;
+    options[1] = cur_avatar_status.compass_display;
+    options[2] = cur_avatar_status.item_preview_enabled;
+    options[3] = cur_avatar_status.walking_bob_enabled;
+    options[4] = cur_avatar_status.panel_translucent;
     for (;;) {
         if (result != MENU_NONE) {
             input_wait_release();
@@ -2084,11 +2084,11 @@ void menu_display_options_controller(void)
             menu_present_frame();
         }
     }
-    cur_avatar_status.unkf9 = options[0];
-    cur_avatar_status.unkfa = options[1];
-    cur_avatar_status.unkfb = options[2];
-    cur_avatar_status.unkfc = options[3];
-    cur_avatar_status.unk100 = options[4];
+    cur_avatar_status.vitals_display = options[0];
+    cur_avatar_status.compass_display = options[1];
+    cur_avatar_status.item_preview_enabled = options[2];
+    cur_avatar_status.walking_bob_enabled = options[3];
+    cur_avatar_status.panel_translucent = options[4];
     menu_apply_display_colors();
 }
 
@@ -2097,9 +2097,9 @@ void menu_apply_display_colors(void)
 {
     s32 shade;
 
-    if (cur_avatar_status.unk100 == 0) {
-        if (cur_avatar_status.unkfd > 128) {
-            shade = 0x30 - (cur_avatar_status.unkfd - 128) / 2;
+    if (cur_avatar_status.panel_translucent == 0) {
+        if (cur_avatar_status.brightness > 128) {
+            shade = 0x30 - (cur_avatar_status.brightness - 128) / 2;
         } else {
             shade = 0x30;
         }
@@ -2111,17 +2111,17 @@ void menu_apply_display_colors(void)
     } else {
         menu_sprite_shade = 0x78;
         menu_text_shadow_shade = 0x30;
-        menu_text_red = (cur_avatar_status.unkfd - 128) / 2 + 128;
-        menu_text_green = (cur_avatar_status.unkfd - 128) / 2 + 128;
-        menu_text_blue = (cur_avatar_status.unkfd - 128) / 2 + 128;
+        menu_text_red = (cur_avatar_status.brightness - 128) / 2 + 128;
+        menu_text_green = (cur_avatar_status.brightness - 128) / 2 + 128;
+        menu_text_blue = (cur_avatar_status.brightness - 128) / 2 + 128;
     }
 }
 
 ADDRESS(0x8001f31c, 0x1a4)
 void menu_button_config_controller(void)
 {
-    u8 style = cur_avatar_status.unkfe;
-    u8 layout = cur_avatar_status.unkff;
+    u8 style = cur_avatar_status.button_style;
+    u8 layout = cur_avatar_status.button_layout;
     s32 row = 0;
     s32 result = MENU_NONE;
     u32 pad;
@@ -2169,15 +2169,15 @@ void menu_button_config_controller(void)
             menu_present_frame();
         }
     }
-    cur_avatar_status.unkfe = style;
-    cur_avatar_status.unkff = layout;
+    cur_avatar_status.button_style = style;
+    cur_avatar_status.button_layout = layout;
     menu_apply_button_config();
 }
 
 ADDRESS(0x8001f4c0, 0x3f4)
 void menu_apply_button_config(void)
 {
-    switch (cur_avatar_status.unkfe) {
+    switch (cur_avatar_status.button_style) {
     case 0:
         action_button_masks[4] = PADRup;
         action_button_masks[6] = PADRleft;
@@ -2203,7 +2203,7 @@ void menu_apply_button_config(void)
         action_button_masks[5] = PADRright;
         break;
     }
-    switch (cur_avatar_status.unkff) {
+    switch (cur_avatar_status.button_layout) {
     case 0:
         action_button_masks[0] = PADLup;
         action_button_masks[1] = PADLdown;
@@ -2275,7 +2275,7 @@ void menu_apply_button_config(void)
         action_button_masks[11] = PADL1;
         break;
     }
-    if (cur_avatar_status.unkfe < 2) {
+    if (cur_avatar_status.button_style < 2) {
         menu_confirm_button = PADRright;
         menu_cancel_button = PADRdown;
         menu_confirm_button_icon = 1;
@@ -2912,10 +2912,10 @@ void menu_item_buy_controller(s32 shop)
         item = ids[list.cursor];
         if (confirmed == 1) {
             if (shop == 0) {
-                if ((u32)cur_avatar_status.unk50 < list.values[list.cursor] || bag[item] + 1 >= 100) {
+                if ((u32)cur_avatar_status.gold < list.values[list.cursor] || bag[item] + 1 >= 100) {
                     goto refuse;
                 }
-            } else if ((u32)cur_avatar_status.unk50 < list.values[list.cursor] * menu_item_quantity
+            } else if ((u32)cur_avatar_status.gold < list.values[list.cursor] * menu_item_quantity
                        || bag[item] + menu_item_quantity >= 100) {
             refuse:
                 menu_play_sound_cue(0xe);
@@ -2938,7 +2938,7 @@ void menu_item_buy_controller(s32 shop)
         if (shop == 0) {
             menu_item_quantity = 1;
         }
-        cur_avatar_status.unk50 -= list.values[list.cursor] * menu_item_quantity;
+        cur_avatar_status.gold -= list.values[list.cursor] * menu_item_quantity;
         bag[result] += menu_item_quantity;
         if (shop == 0 && result != 0x6b) {
             menu_shop_stock_pages[0][result] -= 1;
@@ -3025,7 +3025,7 @@ void menu_item_sell_controller(s32 shop)
         }
     }
     if (result != -1) {
-        cur_avatar_status.unk50 += list.values[list.cursor] * menu_item_quantity;
+        cur_avatar_status.gold += list.values[list.cursor] * menu_item_quantity;
         event_item_counters_table[0][result] -= menu_item_quantity;
         menu_shop_stock_pages[0][result] += menu_item_quantity;
         if (menu_shop_stock_pages[0][result] >= 100) {
@@ -3187,8 +3187,8 @@ s32 menu_blacksmith_make_item(void)
     confirmed = 0;
     result = MENU_NONE;
     menu_enter_display_state();
-    saved = cur_avatar_status.unkfb;
-    cur_avatar_status.unkfb = 0;
+    saved = cur_avatar_status.item_preview_enabled;
+    cur_avatar_status.item_preview_enabled = 0;
     n = menu_collect_masked_item_rows(menu_shop_stock_pages[5], entries, counts, ids, 0, 0x95);
     for (i = 0; i < 5; i++) {
         counts[i] = event_item_counters_table[0][ids[i]] + event_item_counters_table[1][ids[i]];
@@ -3235,7 +3235,7 @@ s32 menu_blacksmith_make_item(void)
             event_item_counters_table[1][0x7c]--;
         }
     }
-    cur_avatar_status.unkfb = saved;
+    cur_avatar_status.item_preview_enabled = saved;
     menu_exit_display_state(0);
     return result;
 }
@@ -3272,8 +3272,8 @@ s32 menu_prompt_stay(s32 mode)
         }
         if (chosen == 0) {
             if (mode == 0) {
-                if ((u32)cur_avatar_status.unk50 >= 150) {
-                    cur_avatar_status.unk50 -= 150;
+                if ((u32)cur_avatar_status.gold >= 150) {
+                    cur_avatar_status.gold -= 150;
                     paid = 0;
                     break;
                 }
@@ -3401,7 +3401,7 @@ u32 menu_update_list_input(MenuList *list, u8 *ids, s32 *confirmed, s32 *result,
         }
     } else if (pad & PADLright) {
         if (mode == 1) {
-            if ((u32)cur_avatar_status.unk50 < (menu_item_quantity + 1) * price
+            if ((u32)cur_avatar_status.gold < (menu_item_quantity + 1) * price
                 || (next = count + 1) + menu_item_quantity >= 100) {
                 goto refuse;
             }
@@ -3518,14 +3518,14 @@ void menu_draw_player_status(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 63;
     number.y += 17;
-    menu_format_number(cur_avatar_status.unk1c, 4, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.mp, 4, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.text[0] = 0x14;
     number.text[1] = 0xff;
     number.x += 28;
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.x += 7;
-    menu_format_number(cur_avatar_status.unk1a, 4, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.mp_max, 4, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 0xf;
     label.text[1] = 0x16;
@@ -3539,11 +3539,11 @@ void menu_draw_player_status(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 70;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk40, 5, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.physical_power, 5, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     number.x = label.x + 98;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk4c + 1, 4, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.wisdom + 1, 4, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[0] = 0x3b;
     label.text[1] = 0xff;
@@ -3565,7 +3565,7 @@ void menu_draw_player_status(void)
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk42[4], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.magic[4], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x += 49;
     primitive_buffer_begin_poly_ft4();
@@ -3576,7 +3576,7 @@ void menu_draw_player_status(void)
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk42[0], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.magic[0], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 15;
@@ -3589,7 +3589,7 @@ void menu_draw_player_status(void)
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk42[1], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.magic[1], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x += 49;
     primitive_buffer_begin_poly_ft4();
@@ -3600,7 +3600,7 @@ void menu_draw_player_status(void)
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk42[3], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.magic[3], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 15;
@@ -3613,7 +3613,7 @@ void menu_draw_player_status(void)
     primitive_buffer_commit_poly_ft4(0x1e);
     number.x = label.x;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk42[2], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.magic[2], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa3;
     label.y += 17;
@@ -3622,15 +3622,15 @@ void menu_draw_player_status(void)
     dy = 17;
     number.x = label.x + 56;
     number.y += 17;
-    if (cur_avatar_status.unk84 != 0) {
+    if (cur_avatar_status.paralysis_timer != 0) {
         memcpy((void *)number.text, (const void *)&menu_label_rows[17], 12);
-    } else if (cur_avatar_status.unk7a != 0) {
+    } else if (cur_avatar_status.curse_strength != 0) {
         memcpy((void *)number.text, (const void *)&menu_label_rows[18], 12);
-    } else if (cur_avatar_status.unk82 != 0) {
+    } else if (cur_avatar_status.slow_timer != 0) {
         memcpy((void *)number.text, (const void *)&menu_label_rows[19], 12);
-    } else if (cur_avatar_status.unk78 != 0) {
+    } else if (cur_avatar_status.poison_timer != 0) {
         memcpy((void *)number.text, (const void *)&menu_label_rows[20], 12);
-    } else if (cur_avatar_status.unk7e != 0) {
+    } else if (cur_avatar_status.darkness_phase != 0) {
         memcpy((void *)number.text, (const void *)&menu_label_rows[21], 12);
     } else {
         memcpy((void *)number.text, (const void *)&menu_label_rows[22], 12);
@@ -3641,7 +3641,7 @@ void menu_draw_player_status(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y += dy;
-    menu_format_number(cur_avatar_status.unk50, 7, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.gold, 7, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     menu_draw_nine_slice_panel(0x9b, 0x1a, 0x8d, 0xb4);
 }
@@ -3668,7 +3668,7 @@ void menu_draw_combat_attributes(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[0], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[0], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x1;
     label.text[3] = 0xb;
@@ -3678,7 +3678,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[1], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[1], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x12;
     label.text[3] = 0x13;
@@ -3688,7 +3688,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[2], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[2], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x7;
     label.text[3] = 0xe;
@@ -3704,7 +3704,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[3], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[3], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x5;
     label.text[3] = 0x8;
@@ -3720,7 +3720,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[4], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[4], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x4;
     label.text[3] = 0;
@@ -3737,7 +3737,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[5], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[5], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0x8;
@@ -3753,7 +3753,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk54[6], 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[6], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0;
@@ -3770,7 +3770,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk62, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_water, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa4;
     label.y = 0x22;
@@ -3788,7 +3788,7 @@ void menu_draw_combat_attributes(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 77;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk66, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_slash, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x1;
     label.text[3] = 0xb;
@@ -3798,7 +3798,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk68, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_blow, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x12;
     label.text[3] = 0x13;
@@ -3808,7 +3808,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk6a, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_stab, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0xf;
     label.text[3] = 0xe;
@@ -3820,7 +3820,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk76, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.poison_resistance, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x3;
     label.text[3] = 0;
@@ -3836,7 +3836,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk6c, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_holy, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x5;
     label.text[3] = 0x8;
@@ -3852,7 +3852,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk6e, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_fire, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x4;
     label.text[3] = 0;
@@ -3869,7 +3869,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk70, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_earth, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0x8;
@@ -3885,7 +3885,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk72, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_wind, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.text[2] = 0x16;
     label.text[3] = 0;
@@ -3902,7 +3902,7 @@ void menu_draw_combat_attributes(void)
     label.y += 17;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk74, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.defense_water, 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     menu_draw_nine_slice_panel(0x14, 0x1a, 0x114, 0xb4);
     menu_draw_button_icon(0x80, 0xd6, menu_cancel_button_icon);
@@ -3933,7 +3933,7 @@ void menu_draw_conversation_page(s32 page)
         current_poly_ft4->clut = 0x7806;
         primitive_set_poly_ft4_rect(0x2c, 0x24, 0xf8, 0xc8, 0, 0, 0xf8, 0xc8);
         primitive_buffer_commit_poly_ft4(0x1e);
-        if (cur_avatar_status.unk100 == 1) {
+        if (cur_avatar_status.panel_translucent == 1) {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, 0x10, 0x10, 0x10);
             current_poly_ft4->tpage = 0x1f;
@@ -4210,7 +4210,7 @@ void menu_draw_volume_brightness_sliders(u8 *levels)
         current_sprt->h = menu_sprite_defs[k].unka;
         current_sprt->u0 = menu_sprite_defs[k].unk4;
         current_sprt->v0 = menu_sprite_defs[k].unk6;
-        SetSemiTrans((void *)current_sprt, cur_avatar_status.unk100);
+        SetSemiTrans((void *)current_sprt, cur_avatar_status.panel_translucent);
         primitive_buffer_commit_sprt(0x32);
         primitive_buffer_begin_sprt();
         setRGB0(current_sprt, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
@@ -4220,7 +4220,7 @@ void menu_draw_volume_brightness_sliders(u8 *levels)
         current_sprt->y0 = i * 26 + 0x3c;
         current_sprt->w = menu_sprite_defs[k].unk8;
         current_sprt->h = menu_sprite_defs[k].unka;
-        current_sprt->u0 = menu_sprite_defs[k].unk4 + cur_avatar_status.unk100 * 16;
+        current_sprt->u0 = menu_sprite_defs[k].unk4 + cur_avatar_status.panel_translucent * 16;
         current_sprt->v0 = menu_sprite_defs[k].unk6;
         primitive_buffer_commit_sprt(0x31);
         levels++;
@@ -4349,7 +4349,7 @@ void menu_show_item_guide(MenuList *list, s32 mode, u8 item)
     ClearImage(&rect, 0, 0, 0);
     if (mode == 0) {
         entry = item + 390;
-        if (item_guide_level[item] > cur_avatar_status.unk4c) {
+        if (item_guide_level[item] > cur_avatar_status.wisdom) {
             entry = item + 540;
         }
     } else if (mode == 1) {
@@ -4610,7 +4610,7 @@ void menu_update_item_preview(u8 item)
     MATRIX lights;
     MATRIX color;
 
-    if (cur_avatar_status.unkfb != 0 && item != 0xff && menu_cd_read_state != 1) {
+    if (cur_avatar_status.item_preview_enabled != 0 && item != 0xff && menu_cd_read_state != 1) {
         if (menu_item_model_request != -1 && menu_item_model_request != 0xff) {
             menu_start_item_model_read();
             return;
@@ -4707,7 +4707,7 @@ void menu_draw_gold(void)
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.x = label.x + 49;
     number.y = label.y;
-    menu_format_number(cur_avatar_status.unk50, 7, 0, 2, number.text);
+    menu_format_number(cur_avatar_status.gold, 7, 0, 2, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
 }
 
@@ -4720,7 +4720,7 @@ void menu_blit_panel_sprite(MenuFont *frame, MenuText *text)
     current_poly_ft4->clut = frame->unk2;
     primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
                                 frame->unk8, frame->unka);
-    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
@@ -4743,7 +4743,7 @@ void menu_blit_panel_sprite_pulsing(MenuFont *frame, MenuText *text, s32 shade)
     current_poly_ft4->clut = frame->unk2;
     primitive_set_poly_ft4_rect(text->x - 6, text->y - 6, frame->unk8, frame->unka, frame->unk4, frame->unk6,
                                 frame->unk8, frame->unka);
-    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     primitive_buffer_commit_poly_ft4(0x32);
 }
 
@@ -4757,7 +4757,7 @@ void menu_draw_string_dimmed(MenuFont *font, MenuText *text)
     r = menu_text_red;
     g = menu_text_green;
     b = menu_text_blue;
-    if (cur_avatar_status.unk100 == 0) {
+    if (cur_avatar_status.panel_translucent == 0) {
         menu_text_red = 0x47;
         menu_text_green = 0x47;
         menu_text_blue = 0x57;
@@ -4877,8 +4877,8 @@ void menu_draw_ascii_string(s32 x, s32 y, char *text, s32 shadow, s32 row)
     v = row != 0 ? 16 : 0;
     level = 0;
     primitive_buffer_add_draw_mode(6, font->unk0);
-    if (cur_avatar_status.unkfd > 128) {
-        level = (cur_avatar_status.unkfd - 128) / 2;
+    if (cur_avatar_status.brightness > 128) {
+        level = (cur_avatar_status.brightness - 128) / 2;
     }
     shade = level + 112;
     for (;;) {
@@ -4932,8 +4932,8 @@ void menu_draw_small_glyph_string(MenuText *text, s32 shadow)
     font = &menu_sprite_defs[2];
     level = 0;
     primitive_buffer_add_draw_mode(6, font->unk0);
-    if (cur_avatar_status.unkfd > 128) {
-        level = (cur_avatar_status.unkfd - 128) / 2;
+    if (cur_avatar_status.brightness > 128) {
+        level = (cur_avatar_status.brightness - 128) / 2;
     }
     c = text->text;
     if (*c == 0xff) {
@@ -4984,8 +4984,8 @@ void menu_draw_button_icon(s32 x, s32 y, s32 value)
     primitive_buffer_add_draw_mode(6, menu_sprite_defs[6].unk0);
     shade = 0;
     primitive_buffer_begin_sprt();
-    if (cur_avatar_status.unkfd > 128) {
-        shade = (cur_avatar_status.unkfd - 128) / 2;
+    if (cur_avatar_status.brightness > 128) {
+        shade = (cur_avatar_status.brightness - 128) / 2;
     }
     setRGB0(current_sprt, shade + 112, shade + 112, shade + 112);
     current_sprt->clut = menu_sprite_defs[6].unk2;
@@ -5042,7 +5042,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
         for (;;) {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
-            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
             current_poly_ft4->tpage = f->unk0;
             current_poly_ft4->clut = f->unk2;
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, v, ww, hh);
@@ -5077,7 +5077,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
         do {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
-            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+            SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
             current_poly_ft4->tpage = f->unk0;
             current_poly_ft4->clut = f->unk2;
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->unk4, f->unk6, ww, hh);
@@ -5110,7 +5110,7 @@ void menu_draw_backdrop(s32 x, s32 y, s32 w, s32 h)
 {
     primitive_buffer_begin_poly_ft4();
     setRGB0(current_poly_ft4, 0x40, 0x40, 0x40);
-    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.unk100);
+    SetSemiTrans((void *)current_poly_ft4, cur_avatar_status.panel_translucent);
     current_poly_ft4->tpage = 0x1c;
     current_poly_ft4->clut = 0x7b05;
     primitive_set_poly_ft4_rect(x, y, w, h, 0, 0x30, 0x80, 0xc8);
@@ -5189,7 +5189,7 @@ void menu_enter_display_state(void)
     DrawSync(0);
     menu_saved_bgm_volume = cur_avatar_status.bgm_volume;
     menu_apply_display_colors();
-    if (cur_avatar_status.unkfe < 2) {
+    if (cur_avatar_status.button_style < 2) {
         menu_confirm_button = 0x20;
         menu_cancel_button = 0x40;
         menu_confirm_button_icon = 1;
@@ -5435,7 +5435,7 @@ ADDRESS(0x80027a9c, 0x24)
 void menu_request_item_model(u8 item)
 {
     menu_item_quantity = 1;
-    if (cur_avatar_status.unkfb != 0) {
+    if (cur_avatar_status.item_preview_enabled != 0) {
         menu_item_model_request = item;
     }
 }

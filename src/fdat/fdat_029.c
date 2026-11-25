@@ -96,7 +96,7 @@ void area_interact_item_containers_and_unlock(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -181,13 +181,13 @@ void area_region_trigger_damage_barrier_and_doors(MapObject *obj)
         break;
     case 1:
         if (cur_evt_state.unk32[7] == 0) {
-            if (cur_evt_state.unk7f[0] != 0 && cur_evt_state.unk7f[1] != 0 &&
-                cur_evt_state.unk7f[2] != 0 && cur_evt_state.unk7f[3] != 0) {
+            if (cur_evt_state.element_magic_learned[0] != 0 && cur_evt_state.element_magic_learned[1] != 0 &&
+                cur_evt_state.element_magic_learned[2] != 0 && cur_evt_state.element_magic_learned[3] != 0) {
                 cur_evt_state.unk32[7] = 1;
             }
             obj = &map_objects_slots.objects[58];
             obj->layer_mask = 2;
-            if (cur_avatar_status.unk101 == 0x10) {
+            if (cur_avatar_status.reaction_mode == 0x10) {
                 audio_play_spatial_default_range(0x28, &obj->pos, 0x78, 0);
             }
             player_apply_radial_damage(&obj->pos, 0, 0x1000, 0x8000, 0x1000, 0x40, 0x40, 0x40, 0x40, 0x40,
@@ -221,11 +221,11 @@ void area_region_trigger_damage_barrier_and_doors(MapObject *obj)
         break;
     case 10:
         if (player_camera_within_map_region(0x24, 0x36, 7, 0xc, 0x8000) != 0) {
-            if (cur_avatar_status.unk10a != 0) {
+            if (cur_avatar_status.warp_arrived != 0) {
                 map_cell_copy_rotated_fields(2, 0x2a, 0x4f, 0x26, 0x36, 3, 1, 0, 0x2f);
             }
         } else {
-            cur_avatar_status.unk10a = 0;
+            cur_avatar_status.warp_arrived = 0;
             map_cell_copy_rotated_fields(2, 0x2d, 0x4f, 0x26, 0x36, 3, 1, 0, 0x2f);
         }
         break;

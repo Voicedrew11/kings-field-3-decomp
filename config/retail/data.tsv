@@ -163,7 +163,7 @@ GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	memory_card_unreferenced_word_1	lo
 GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	memory_card_unreferenced_word_2	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
 GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	memory_card_unreferenced_word_3	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
 GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	memory_card_buffer	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
-GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	player_magic_attack_masks	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through Data801b24e4.unka8
+GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	player_magic_attack_masks	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through PlayerState.unka8
 GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	map_object_door1b_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c0; door kind 0x1b start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3d6	0x8bbd6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	map_object_door0_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c4; door kind 0 start yaw (map_object_update_actions)

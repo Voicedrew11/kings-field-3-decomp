@@ -440,7 +440,7 @@ void view_build_visibility_grid(void)
     SCRATCH->u.view.grid[eye_z][eye_x] = 30;
     SCRATCH->u.view.grid[eye_z][eye_x + 1] = 30;
     SCRATCH->u.view.grid[eye_z + 1][eye_x] = 30;
-    if (cur_avatar_status.unk101 != 0x11) {
+    if (cur_avatar_status.reaction_mode != 0x11) {
         SCRATCH->u.view.grid[back_z - 1][back_x] = 0;
         SCRATCH->u.view.grid[back_z][back_x - 1] = 0;
         SCRATCH->u.view.grid[back_z][back_x] = 0;

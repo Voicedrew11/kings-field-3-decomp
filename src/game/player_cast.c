@@ -26,18 +26,19 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
     SVECTOR rot;
     s32 y;
 
-    rot.vx = cur_avatar_status.unk124.vx - cur_avatar_status.unkb0->rotation_offset_x;
-    rot.vy = cur_avatar_status.unk124.vy - cur_avatar_status.unkb0->rotation_offset_y;
-    rot.vz = cur_avatar_status.unk124.vz + cur_avatar_status.unkb0->rotation_offset_z;
-    animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0, vertex, &v);
-    v.vx -= cur_avatar_status.unkb0->position_offset_x;
-    v.vy += cur_avatar_status.unkb0->position_offset_y;
-    v.vz -= cur_avatar_status.unkb0->position_offset_z;
+    rot.vx = cur_avatar_status.camera_rotation.vx - cur_avatar_status.equipped_weapon_record->rotation_offset_x;
+    rot.vy = cur_avatar_status.camera_rotation.vy - cur_avatar_status.equipped_weapon_record->rotation_offset_y;
+    rot.vz = cur_avatar_status.camera_rotation.vz + cur_avatar_status.equipped_weapon_record->rotation_offset_z;
+    animation_sample_vertex(0x20, cur_avatar_status.weapon_attack_mode, cur_avatar_status.weapon_attack_phase,
+                            vertex, &v);
+    v.vx -= cur_avatar_status.equipped_weapon_record->position_offset_x;
+    v.vy += cur_avatar_status.equipped_weapon_record->position_offset_y;
+    v.vz -= cur_avatar_status.equipped_weapon_record->position_offset_z;
     vector_rotate_yxz(&rot, &v, out);
     out->vx += cur_avatar_status.pos.vx;
     out->vz += cur_avatar_status.pos.vz;
     y = out->vy - 1600;
-    out->vy = y + (cur_avatar_status.unk16c + cur_avatar_status.pos.vy + cur_avatar_status.unk170);
+    out->vy = y + (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset);
 }
 
 /*
@@ -51,17 +52,17 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
     s32 n = 5;
     s32 low;
 
-    if (cur_avatar_status.unkcb != 0xff) {
-        if (hand == 0 && cur_avatar_status.unkb0->unk0[3] != 0xff
-            && effect_status.magic_records[cur_avatar_status.unkb0->unk0[3]].menu_available == 0) {
+    if (cur_avatar_status.equipped_weapon_id != 0xff) {
+        if (hand == 0 && cur_avatar_status.equipped_weapon_record->unk0[3] != 0xff
+            && effect_status.magic_records[cur_avatar_status.equipped_weapon_record->unk0[3]].menu_available == 0) {
             return 0;
         }
-        if (hand == 1 && cur_avatar_status.unkb0->alternate_magic_id != 0xff
-            && effect_status.magic_records[cur_avatar_status.unkb0->alternate_magic_id].menu_available == 0) {
+        if (hand == 1 && cur_avatar_status.equipped_weapon_record->alternate_magic_id != 0xff
+            && effect_status.magic_records[cur_avatar_status.equipped_weapon_record->alternate_magic_id].menu_available == 0) {
             return 0;
         }
     }
-    switch (cur_avatar_status.unkcb) {
+    switch (cur_avatar_status.equipped_weapon_id) {
     case 2:
     case 13:
     case 14:
@@ -72,11 +73,11 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
     }
     low = 999;
     while (--n != -1) {
-        if (cur_avatar_status.unk42[n] < low) {
-            low = cur_avatar_status.unk42[n];
+        if (cur_avatar_status.magic[n] < low) {
+            low = cur_avatar_status.magic[n];
         }
     }
-    return cur_avatar_status.unk40 >= 50 && low >= 50;
+    return cur_avatar_status.physical_power >= 50 && low >= 50;
 }
 
 /* Casts spell id (MagicRecord) along dir when unk1c covers its cost; pay takes the cost. */
@@ -86,14 +87,14 @@ void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
     VECTOR unused;
     MagicRecord *r = &effect_status.magic_records[id];
 
-    if (cur_avatar_status.unk1c < r->mp_cost) {
+    if (cur_avatar_status.mp < r->mp_cost) {
         return;
     }
-    cur_avatar_status.unkac = r;
+    cur_avatar_status.selected_magic_record = r;
     if (pay) {
-        cur_avatar_status.unk22 = 0;
-        cur_avatar_status.unk10 = 0;
-        cur_avatar_status.unk1c -= r->mp_cost;
+        cur_avatar_status.magic_charge = 0;
+        cur_avatar_status.magic_charge_delay = 0;
+        cur_avatar_status.mp -= r->mp_cost;
         if (id == 0x36) {
             audio_play_sound(0x63, 0x6e);
         }
@@ -101,22 +102,22 @@ void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
     switch (id) {
     case 0x42:
         dir <<= 9;
-        cur_avatar_status.unk14c.vx = rcos(dir) >> 3;
-        cur_avatar_status.unk14c.vy = rsin(dir) >> 3;
-        cur_avatar_status.unk14c.vz = 600;
+        cur_avatar_status.magic_origin_offset.vx = rcos(dir) >> 3;
+        cur_avatar_status.magic_origin_offset.vy = rsin(dir) >> 3;
+        cur_avatar_status.magic_origin_offset.vz = 600;
         player_dispatch_magic_effect(id);
         break;
     case 0x47:
         audio_play_sound(0x61, 0x6e);
-        cur_avatar_status.unk14c.vx = 0;
-        cur_avatar_status.unk14c.vy = dir * 300 - 300;
-        cur_avatar_status.unk14c.vz = 400;
+        cur_avatar_status.magic_origin_offset.vx = 0;
+        cur_avatar_status.magic_origin_offset.vy = dir * 300 - 300;
+        cur_avatar_status.magic_origin_offset.vz = 400;
         player_dispatch_magic_effect(id);
         break;
     default:
-        cur_avatar_status.unk14c.vx = 200;
-        cur_avatar_status.unk14c.vy = 200;
-        cur_avatar_status.unk14c.vz = 400;
+        cur_avatar_status.magic_origin_offset.vx = 200;
+        cur_avatar_status.magic_origin_offset.vy = 200;
+        cur_avatar_status.magic_origin_offset.vz = 400;
         player_dispatch_magic_effect(id);
         break;
     }
@@ -159,15 +160,15 @@ void player_update_weapon_attack(void)
     s32 found;
     s32 angle;
 
-    w = cur_avatar_status.unkb0;
-    switch (cur_avatar_status.unkcb) {
+    w = cur_avatar_status.equipped_weapon_record;
+    switch (cur_avatar_status.equipped_weapon_id) {
     case 27:
     case 28:
-        if (cur_avatar_status.unkc0 != -1) {
-        switch (cur_avatar_status.unkca) {
+        if (cur_avatar_status.weapon_attack_phase != -1) {
+        switch (cur_avatar_status.weapon_attack_mode) {
         case 0:
-            if (cur_avatar_status.unkc0 == 0) {
-                switch (cur_avatar_status.unkcb) {
+            if (cur_avatar_status.weapon_attack_phase == 0) {
+                switch (cur_avatar_status.equipped_weapon_id) {
                 case 27:
                     id = 0x51;
                     item = 0x93;
@@ -181,12 +182,12 @@ void player_update_weapon_attack(void)
                 if (count != 0) {
                     event_item_counters_table[0][item] = --count;
                     arrow = effect_construct_record(10, 0x42, id, &cur_avatar_status.pos, 0,
-                                                    &cur_avatar_status.unk124);
-                    cur_avatar_status.unkbc = arrow;
+                                                    &cur_avatar_status.camera_rotation);
+                    cur_avatar_status.weapon_effect = arrow;
                     if (arrow != NULL) {
                         arrow->phase = 99;
                     }
-                    if (cur_avatar_status.unkcb == 28) {
+                    if (cur_avatar_status.equipped_weapon_id == 28) {
                         d = (rand() * 5 >> 15) + 3;
                         if (d >= cur_avatar_status.hp) {
                             cur_avatar_status.hp = 0;
@@ -196,77 +197,77 @@ void player_update_weapon_attack(void)
                         }
                     }
                 } else {
-                    cur_avatar_status.unkbc = NULL;
+                    cur_avatar_status.weapon_effect = NULL;
                 }
             }
-            cur_avatar_status.unkc0 += w->attack_phase_step;
-            if (cur_avatar_status.unkc0 >= 4095) {
-                cur_avatar_status.unkc0 = 0xfff;
+            cur_avatar_status.weapon_attack_phase += w->attack_phase_step;
+            if (cur_avatar_status.weapon_attack_phase >= 4095) {
+                cur_avatar_status.weapon_attack_phase = 0xfff;
             }
-            if (cur_avatar_status.unkc0 >= w->normal_attack_end_phase) {
-                if (cur_avatar_status.unk1e == 0) {
+            if (cur_avatar_status.weapon_attack_phase >= w->normal_attack_end_phase) {
+                if (cur_avatar_status.attack_charge_current == 0) {
                     audio_play_sound(0x60, 0x6e);
                 }
-                cur_avatar_status.unk1e = (cur_avatar_status.unkc0 - w->normal_attack_end_phase) * 5000 / (0xfff - w->normal_attack_end_phase);
+                cur_avatar_status.attack_charge_current = (cur_avatar_status.weapon_attack_phase - w->normal_attack_end_phase) * 5000 / (0xfff - w->normal_attack_end_phase);
             } else {
-                cur_avatar_status.unk1e = 0;
+                cur_avatar_status.attack_charge_current = 0;
             }
-            arrow = cur_avatar_status.unkbc;
+            arrow = cur_avatar_status.weapon_effect;
             if (arrow != NULL) {
-                rot.vx = cur_avatar_status.unk124.vx - w->rotation_offset_x;
-                rot.vy = cur_avatar_status.unk124.vy - w->rotation_offset_y;
-                rot.vz = cur_avatar_status.unk124.vz + w->rotation_offset_z;
-                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0,
-                                        w->initial_vertex_index, &v);
+                rot.vx = cur_avatar_status.camera_rotation.vx - w->rotation_offset_x;
+                rot.vy = cur_avatar_status.camera_rotation.vy - w->rotation_offset_y;
+                rot.vz = cur_avatar_status.camera_rotation.vz + w->rotation_offset_z;
+                animation_sample_vertex(0x20, cur_avatar_status.weapon_attack_mode,
+                                        cur_avatar_status.weapon_attack_phase, w->initial_vertex_index, &v);
                 v.vx -= w->position_offset_x;
                 v.vy += w->position_offset_y;
                 v.vz -= w->position_offset_z;
                 vector_rotate_yxz(&rot, &v, &a);
                 arrow->pos.vx = cur_avatar_status.pos.vx + a.vx;
                 arrow->pos.vz = cur_avatar_status.pos.vz + a.vz;
-                arrow->pos.vy = cur_avatar_status.pos.vy + a.vy + cur_avatar_status.unk16c + cur_avatar_status.unk170 - 1600;
-                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0,
-                                        w->final_vertex_index, &v);
+                arrow->pos.vy = cur_avatar_status.pos.vy + a.vy + cur_avatar_status.camera_vertical_offset + cur_avatar_status.landing_vertical_offset - 1600;
+                animation_sample_vertex(0x20, cur_avatar_status.weapon_attack_mode,
+                                        cur_avatar_status.weapon_attack_phase, w->final_vertex_index, &v);
                 v.vx -= w->position_offset_x;
                 v.vy += w->position_offset_y;
                 v.vz -= w->position_offset_z;
                 vector_rotate_yxz(&rot, &v, &b);
                 vector_displacement_to_pitch_yaw(a.vx - b.vx, a.vy - b.vy, a.vz - b.vz, &arrow->angle);
             }
-            if (cur_avatar_status.unk178 & action_button_masks[4]) {
+            if (cur_avatar_status.pad_buttons & action_button_masks[4]) {
                 break;
             }
             if (arrow != NULL) {
                 arrow->phase = 0;
                 pitch_yaw_to_forward_vector(&arrow->angle, &arrow->vel);
-                vector3s_scale_shift12(cur_avatar_status.unk1e * 900 / 5000, &arrow->vel);
+                vector3s_scale_shift12(cur_avatar_status.attack_charge_current * 900 / 5000, &arrow->vel);
                 arrow->updates_remaining = 50;
                 arrow->arg.h.unk44 = arrow->pos.vy;
             }
-            cur_avatar_status.unkca = 1;
-            cur_avatar_status.unkc0 = 0;
+            cur_avatar_status.weapon_attack_mode = 1;
+            cur_avatar_status.weapon_attack_phase = 0;
             break;
         case 1:
-            cur_avatar_status.unkc0 += 400;
-            if (cur_avatar_status.unkc0 >= 4095) {
-                cur_avatar_status.unkc0 = -1;
-                cur_avatar_status.unk1e = 0;
+            cur_avatar_status.weapon_attack_phase += 400;
+            if (cur_avatar_status.weapon_attack_phase >= 4095) {
+                cur_avatar_status.weapon_attack_phase = -1;
+                cur_avatar_status.attack_charge_current = 0;
             }
             break;
         }
         } else {
-            cur_avatar_status.unk1e = 0;
-            cur_avatar_status.unkf = 0;
+            cur_avatar_status.attack_charge_current = 0;
+            cur_avatar_status.weapon_charge_delay = 0;
         }
         break;
     case 0xff:
         break;
     default:
-        if (cur_avatar_status.unkc0 != -1) {
+        if (cur_avatar_status.weapon_attack_phase != -1) {
             s32 scale;
 
             div = 0;
-            if (cur_avatar_status.unkca == 0) {
+            if (cur_avatar_status.weapon_attack_mode == 0) {
                 speed = w->attack_phase_step;
                 hit = w->normal_attack_end_phase;
                 limit = w->normal_attack_sound_phase;
@@ -278,67 +279,68 @@ void player_update_weapon_attack(void)
                 limit = w->alternate_attack_sound_end_phase;
                 add = w->alternate_attack_sound_phase_step;
             }
-            cur_avatar_status.unkc0 += speed;
-            if (cur_avatar_status.unkca == 0 && w->unk0[3] != 0xff && cur_avatar_status.unkcf != 0
+            cur_avatar_status.weapon_attack_phase += speed;
+            if (cur_avatar_status.weapon_attack_mode == 0 && w->unk0[3] != 0xff && cur_avatar_status.weapon_attack_fully_charged != 0
                 && player_meets_weapon_magic_requirement(0)
-                && (cur_avatar_status.unk178 & action_button_masks[6])) {
-                if (cur_avatar_status.unkc0 >= w->magic_window_start && cur_avatar_status.unkc0 <= w->magic_window_end) {
-                    if (cur_avatar_status.unkce != 0) {
-                        player_dispatch_weapon_magic(w->unk0[3], cur_avatar_status.unkce == w->magic_shots,
-                                                     cur_avatar_status.unkce);
-                        cur_avatar_status.unkce--;
+                && (cur_avatar_status.pad_buttons & action_button_masks[6])) {
+                if (cur_avatar_status.weapon_attack_phase >= w->magic_window_start && cur_avatar_status.weapon_attack_phase <= w->magic_window_end) {
+                    if (cur_avatar_status.weapon_magic_shots_configured != 0) {
+                        player_dispatch_weapon_magic(w->unk0[3], cur_avatar_status.weapon_magic_shots_configured == w->magic_shots,
+                                                     cur_avatar_status.weapon_magic_shots_configured);
+                        cur_avatar_status.weapon_magic_shots_configured--;
                     }
                 } else {
-                    cur_avatar_status.unkce = 0;
+                    cur_avatar_status.weapon_magic_shots_configured = 0;
                 }
             }
-            if (cur_avatar_status.unkc0 >= cur_avatar_status.unkc4 && cur_avatar_status.unkc0 < cur_avatar_status.unkc4 + speed) {
+            if (cur_avatar_status.weapon_attack_phase >= cur_avatar_status.weapon_next_sound_phase && cur_avatar_status.weapon_attack_phase < cur_avatar_status.weapon_next_sound_phase + speed) {
                 if (w->unk0[0] != 0xff) {
                     audio_play_sound(w->unk0[0], 0x50);
                 }
-                if (cur_avatar_status.unkc4 < limit) {
-                    cur_avatar_status.unkc4 += add;
+                if (cur_avatar_status.weapon_next_sound_phase < limit) {
+                    cur_avatar_status.weapon_next_sound_phase += add;
                 } else {
-                    cur_avatar_status.unkc4 = 5000;
+                    cur_avatar_status.weapon_next_sound_phase = 5000;
                 }
             }
-            if (cur_avatar_status.unkc0 >= cur_avatar_status.unkc2 && cur_avatar_status.unkc0 < cur_avatar_status.unkc2 + speed) {
-                if (cur_avatar_status.unkcb == 0x21 && cur_avatar_status.unk22 == 5000) {
-                    cur_avatar_status.unk14c.vx = -200;
-                    cur_avatar_status.unk14c.vy = 200;
-                    cur_avatar_status.unk14c.vz = 400;
+            if (cur_avatar_status.weapon_attack_phase >= cur_avatar_status.weapon_attack_window && cur_avatar_status.weapon_attack_phase < cur_avatar_status.weapon_attack_window + speed) {
+                if (cur_avatar_status.equipped_weapon_id == 0x21 && cur_avatar_status.magic_charge == 5000) {
+                    cur_avatar_status.magic_origin_offset.vx = -200;
+                    cur_avatar_status.magic_origin_offset.vy = 200;
+                    cur_avatar_status.magic_origin_offset.vz = 400;
                     player_probe_view_target_and_vectors(900, &probe, &dir, &dist);
                     effect_construct_record(10, 0x42, 0, &probe, &dir);
                 }
-                cur_avatar_status.unkd0 = 0;
-                if (cur_avatar_status.unkca == 1) {
-                    if (cur_avatar_status.unkcb == 13 && (cur_avatar_status.unk178 & action_button_masks[6])) {
-                        cur_avatar_status.unkd0 = 1;
-                        cur_avatar_status.unkc0 -= speed;
+                cur_avatar_status.weapon_guard_active = 0;
+                if (cur_avatar_status.weapon_attack_mode == 1) {
+                    if (cur_avatar_status.equipped_weapon_id == 13 && (cur_avatar_status.pad_buttons & action_button_masks[6])) {
+                        cur_avatar_status.weapon_guard_active = 1;
+                        cur_avatar_status.weapon_attack_phase -= speed;
                         break;
                     }
-                    player_dispatch_weapon_magic(w->alternate_magic_id, cur_avatar_status.unkc0 >= hit,
-                                                 (cur_avatar_status.unkc0 - w->alternate_attack_window_start) / div);
+                    player_dispatch_weapon_magic(w->alternate_magic_id,
+                                                 cur_avatar_status.weapon_attack_phase >= hit,
+                                                 (cur_avatar_status.weapon_attack_phase - w->alternate_attack_window_start) / div);
                 }
-                if (cur_avatar_status.unkc0 >= hit) {
+                if (cur_avatar_status.weapon_attack_phase >= hit) {
                     target = &from;
-                    scale = cur_avatar_status.unk20;
-                    cur_avatar_status.unkc2 = 5000;
-                    cur_avatar_status.unkf = 10;
-                    cur_avatar_status.unk1e = 0;
+                    scale = cur_avatar_status.attack_charge_committed;
+                    cur_avatar_status.weapon_attack_window = 5000;
+                    cur_avatar_status.weapon_charge_delay = 10;
+                    cur_avatar_status.attack_charge_current = 0;
                     from.vx = cur_avatar_status.pos.vx;
                     from.vy = cur_avatar_status.pos.vy - 1000;
                     from.vz = cur_avatar_status.pos.vz;
                 } else {
                     target = NULL;
-                    scale = cur_avatar_status.unk20 >> 2;
-                    cur_avatar_status.unkc2 += div;
+                    scale = cur_avatar_status.attack_charge_committed >> 2;
+                    cur_avatar_status.weapon_attack_window += div;
                 }
                 v.vx = 0;
                 v.vy = 0;
                 v.vz = w->attack_reach;
-                rot.vx = -cur_avatar_status.unk12c.vx;
-                rot.vy = cur_avatar_status.unk12c.vy;
+                rot.vx = -cur_avatar_status.camera_rotation_target.vx;
+                rot.vy = cur_avatar_status.camera_rotation_target.vy;
                 rot.vz = 0;
                 vector_rotate_yxz(&rot, &v, &step);
                 step.vy = (3600 - w->attack_reach) * step.vy / 1800;
@@ -358,43 +360,47 @@ void player_update_weapon_attack(void)
                         def = &actor_status.groups[obj->group_index];
                         angle = vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
                                                    obj->pos.vz - cur_avatar_status.pos.vz);
-                        if (angle_within_tolerance(cur_avatar_status.unk124.vy, angle,
+                        if (angle_within_tolerance(cur_avatar_status.camera_rotation.vy, angle,
                                                    def->player_facing_tolerance)
                             && angle_within_tolerance(obj->angle.vy, angle + 2048,
                                                       def->actor_facing_tolerance)) {
-                            actor_apply_magic_to_actor(found, cur_avatar_status.unk40,
-                                                       cur_avatar_status.unk54[0], cur_avatar_status.unk54[1],
-                                                       cur_avatar_status.unk54[2], cur_avatar_status.unk54[3],
-                                                       cur_avatar_status.unk54[4], cur_avatar_status.unk54[5],
-                                                       cur_avatar_status.unk54[6], cur_avatar_status.unk62,
-                                                       scale, 80, NULL, target);
+                            actor_apply_magic_to_actor(found, cur_avatar_status.physical_power,
+                                                       cur_avatar_status.attack_components[0],
+                                                       cur_avatar_status.attack_components[1],
+                                                       cur_avatar_status.attack_components[2],
+                                                       cur_avatar_status.attack_components[3],
+                                                       cur_avatar_status.attack_components[4],
+                                                       cur_avatar_status.attack_components[5],
+                                                       cur_avatar_status.attack_components[6],
+                                                       cur_avatar_status.attack_water, scale, 80, NULL,
+                                                       target);
                             break;
                         }
                     }
                 }
             }
-            if (cur_avatar_status.unkc0 >= 4096) {
-                cur_avatar_status.unkc0 = -1;
-                cur_avatar_status.unkce = 0;
+            if (cur_avatar_status.weapon_attack_phase >= 4096) {
+                cur_avatar_status.weapon_attack_phase = -1;
+                cur_avatar_status.weapon_magic_shots_configured = 0;
             }
-        } else if (!(cur_avatar_status.unk178 & action_button_masks[4])) {
-            if (cur_avatar_status.unkf == 0) {
+        } else if (!(cur_avatar_status.pad_buttons & action_button_masks[4])) {
+            if (cur_avatar_status.weapon_charge_delay == 0) {
                 weight = w->unk0[1];
-                if (cur_avatar_status.unkf3 == 0x42) {
+                if (cur_avatar_status.equipped_arm_id == 0x42) {
                     weight -= weight >> 2;
                 }
-                if (cur_avatar_status.unkf3 == 0x44) {
+                if (cur_avatar_status.equipped_arm_id == 0x44) {
                     weight += weight >> 1;
                 }
-                if (cur_avatar_status.unkf3 == 0x46) {
+                if (cur_avatar_status.equipped_arm_id == 0x46) {
                     weight >>= 1;
                 }
-                cur_avatar_status.unk1e += player_charge_gain_for_rank(cur_avatar_status.unk40, weight) * 2;
-                if (cur_avatar_status.unk1e > 5000) {
-                    cur_avatar_status.unk1e = 5000;
+                cur_avatar_status.attack_charge_current += player_charge_gain_for_rank(cur_avatar_status.physical_power, weight) * 2;
+                if (cur_avatar_status.attack_charge_current > 5000) {
+                    cur_avatar_status.attack_charge_current = 5000;
                 }
             } else {
-                cur_avatar_status.unkf--;
+                cur_avatar_status.weapon_charge_delay--;
             }
         }
         break;

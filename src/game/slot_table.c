@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: the slot tables of conversation_records (WIP module): building the
- * Record06 records and their runs of slot bytes from the copied Record04
+ * ConversationRecord records and their runs of slot bytes from the copied ConversationSource
  * table, marking a slot used, and the searches and counts over the runs.
  * movie_play_stream (the in-game movie player) follows.
  */
@@ -10,26 +10,26 @@
 #include <game/data.h>
 #include <game/misc.h>
 
-/* Builds the Record06 records and an empty run of count slots for each, then marks slots 0-3 of id 0x20. */
+/* Builds the ConversationRecord records and an empty run of count slots for each, then marks slots 0-3 of id 0x20. */
 ADDRESS(0x80060800, 0xec)
 void conversation_records_initialize(void)
 {
-    Record04 *src;
-    Record06 *dst;
+    ConversationSource *src;
+    ConversationRecord *dst;
     u8 *p;
     s32 i;
     s32 n;
 
-    p = conversation_records.unk1e0;
-    dst = conversation_records.unkc0;
-    src = conversation_records.unk0;
+    p = conversation_records.page_states;
+    dst = conversation_records.records;
+    src = conversation_records.sources;
     for (i = 47; i != -1; i--) {
         if (src->id == 0xff) {
             break;
         }
         dst->id = src->id;
-        dst->unk2 = src->unk2;
-        dst->offset = p - conversation_records.unk1e0;
+        dst->first_entry = src->first_entry;
+        dst->offset = p - conversation_records.page_states;
         n = src->count;
         while (--n != -1) {
             *p++ = 0xff;
@@ -49,13 +49,13 @@ void conversation_records_initialize(void)
 ADDRESS(0x800608ec, 0x124)
 void conversation_record_mark_page(u8 id, u8 slot)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 *p;
     s32 n;
     u8 k;
     u8 c;
 
-    t = conversation_records.unkc0;
+    t = conversation_records.records;
     n = 48;
     if (id == 1 || id == 2) {
         id = 1;
@@ -74,7 +74,7 @@ void conversation_record_mark_page(u8 id, u8 slot)
             return;
         }
         if (t->id == id) {
-            p = conversation_records.unk1e0 + t->offset + slot;
+            p = conversation_records.page_states + t->offset + slot;
             *p = 3;
             if (slot == 0) {
                 return;
@@ -97,20 +97,20 @@ void conversation_record_mark_page(u8 id, u8 slot)
 ADDRESS(0x80060a10, 0xfc)
 u16 conversation_record_page_entry(u8 n, u8 slot)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 *p;
 
-    t = &conversation_records.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
+    t = &conversation_records.records[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id == 0xff) {
         return 0xfffe;
     }
     if (t->offset != 0xffff) {
-        p = conversation_records.unk1e0 + t->offset;
+        p = conversation_records.page_states + t->offset;
         if (*p != 0xff) {
             do {
                 if ((*p & 2) && (*p & 1)) {
                     if (slot == 0) {
-                        return t->unk2 + (p - conversation_records.unk1e0 - t->offset);
+                        return t->first_entry + (p - conversation_records.page_states - t->offset);
                     }
                 } else if (slot == 0) {
                     return 0xfffd;
@@ -128,16 +128,16 @@ u16 conversation_record_page_entry(u8 n, u8 slot)
 ADDRESS(0x80060b0c, 0x9c)
 u8 conversation_records_count_characters(void)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 *p;
     u8 n;
 
     n = 0;
-    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.records; t->id != 0xff; t++) {
         if (t->offset == 0xffff) {
             continue;
         }
-        p = conversation_records.unk1e0 + t->offset;
+        p = conversation_records.page_states + t->offset;
         while (*p++ != 0xff) {
             if ((*p & 2) && (*p & 1)) {
                 n++;
@@ -152,14 +152,14 @@ u8 conversation_records_count_characters(void)
 ADDRESS(0x80060ba8, 0xac)
 u8 conversation_record_count_pages(u8 n)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 *p;
     u8 count;
 
     count = 0;
-    t = &conversation_records.unkc0[conversation_records_find_character(conversation_records_nth_character(n))];
+    t = &conversation_records.records[conversation_records_find_character(conversation_records_nth_character(n))];
     if (t->id != 0xff && t->offset != 0xffff) {
-        p = conversation_records.unk1e0 + t->offset;
+        p = conversation_records.page_states + t->offset;
         while (*p++ != 0xff) {
             if ((*p & 2) && (*p & 1)) {
                 count++;
@@ -173,14 +173,14 @@ u8 conversation_record_count_pages(u8 n)
 ADDRESS(0x80060c54, 0x7c)
 u8 conversation_records_nth_character(u8 n)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 *p;
     u8 none;
 
     none = 0xff;
-    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.records; t->id != 0xff; t++) {
         if (t->offset != 0xffff) {
-            p = conversation_records.unk1e0 + t->offset;
+            p = conversation_records.page_states + t->offset;
             if (*p != 0xff) {
                 if (n == 0) {
                     return t->id;
@@ -196,11 +196,11 @@ u8 conversation_records_nth_character(u8 n)
 ADDRESS(0x80060cd0, 0x50)
 u8 conversation_records_find_character(u8 id)
 {
-    Record06 *t;
+    ConversationRecord *t;
     u8 i;
 
     i = 0;
-    for (t = conversation_records.unkc0; t->id != 0xff; t++) {
+    for (t = conversation_records.records; t->id != 0xff; t++) {
         if (t->id == id) {
             return i;
         }

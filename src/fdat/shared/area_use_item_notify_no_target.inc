@@ -3,7 +3,7 @@ ADDRESS(0x801e85a8, 0x34)
 void area_use_item_notify_no_target(VECTOR *pos, SVECTOR *angle, s32 item)
 {
     if (item == 0x85) {
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         notify_enqueue(0x23);
     }
 }

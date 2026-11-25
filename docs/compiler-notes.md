@@ -531,7 +531,7 @@ The tree uses `volatile` in three places, each because retail shows it:
 - the CD state's VSync counter `frame_gate` (`CD_VSYNC_SHARED` in
   `include/game/cd.h`), set by the VSync callback and polled by the frame gate
   `0x80019614`;
-- `Data8018fad4.step` (`SCENE_STEP_SHARED` in `include/game/data.h`), set by
+- `ResourceState.step` (`SCENE_STEP_SHARED` in `include/game/data.h`), set by
   the CD callbacks and volatile only in the scene, render and floor-select
   modules;
 - the local wait counter `volatile u_long cnt` of the movie sample's decode

@@ -95,7 +95,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 1);
         break;
     case 0x27:
-        if (cur_avatar_status.unk84 != 0) {
+        if (cur_avatar_status.paralysis_timer != 0) {
             obj->flags |= 0x100;
         }
     case 0x26:
@@ -272,7 +272,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
             if (--i == 0) {
                 break;
             }
-            vector_add_scaled_delta(target, &cur_avatar_status.unk11c, time >> 6, &p);
+            vector_add_scaled_delta(target, &cur_avatar_status.frame_displacement, time >> 6, &p);
         }
         sv.vy = actor_compute_target_direction(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
         sv.vx = pitch;
@@ -1156,7 +1156,7 @@ void actor_update_behavior(void)
             }
             break;
         case 16:
-            if (cur_avatar_status.unkc0 == -1) {
+            if (cur_avatar_status.weapon_attack_phase == -1) {
                 obj->target_phase = 32;
             }
             break;
@@ -1549,7 +1549,7 @@ void actor_update_behavior(void)
         phase = obj->fade_out_phase;
         if (phase == 0 && SCRIPT_U16(script, 14) != 0) {
             obj->fade_out_phase++;
-            obj->angle.vy = cur_avatar_status.unk124.vy + 2048;
+            obj->angle.vy = cur_avatar_status.camera_rotation.vy + 2048;
             actor_select_target_type_in_own_group(obj, 0x19);
         } else {
             obj->flags &= ~0x1000000;

@@ -84,7 +84,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -172,11 +172,11 @@ void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
         return;
     }
     if (player_camera_within_map_region(0x39, 0x21, 3, 3, 0x8000) != 0) {
-        if (cur_avatar_status.unk10a != 0) {
+        if (cur_avatar_status.warp_arrived != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
         }
     } else {
-        cur_avatar_status.unk10a = 0;
+        cur_avatar_status.warp_arrived = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x39, 0x23, 3, 1, 0, 0x2f);
     }
 }

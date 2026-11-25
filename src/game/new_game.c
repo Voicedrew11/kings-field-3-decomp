@@ -24,10 +24,10 @@ void event_state_initialize(void)
     u16 *off;
     s32 i;
 
-    repeat_store_word((u32 *)cur_evt_state.unk4, 0, 0x40);
-    repeat_store_word((u32 *)cur_evt_state.unk104, 0, 0x1400);
-    memory_arena_initialize_blocks((void *)cur_evt_state.unk104, 0x5000);
-    off = cur_evt_state.unk5104;
+    repeat_store_word((u32 *)cur_evt_state.flags, 0, 0x40);
+    repeat_store_word((u32 *)cur_evt_state.arena, 0, 0x1400);
+    memory_arena_initialize_blocks((void *)cur_evt_state.arena, 0x5000);
+    off = cur_evt_state.saved_offsets;
     for (i = 31; i != -1; i--) {
         *off++ = 0xffff;
     }
@@ -51,11 +51,11 @@ void game_update_ending(void)
     s32 volume;
 
     asset_status.handlers[1]();
-    if (cur_evt_state.unk69 != 1) {
+    if (cur_evt_state.ending_state != 1) {
         return;
     }
-    cur_evt_state.unk69 = 2;
-    if (cur_evt_state.unk6a != 0) {
+    cur_evt_state.ending_state = 2;
+    if (cur_evt_state.ending_variant != 0) {
         player_warp_to_destination(13);
         n = cur_avatar_status.bgm_volume >> 1;
         volume = cur_avatar_status.bgm_volume;
@@ -74,12 +74,12 @@ void game_update_ending(void)
             cd_request_yield();
             resource_advance_transition();
         } while ((s16)asset_status.loading == 1);
-        movie_state.unk384 = 7;
-        movie_state.unk380 = &movie_state.movies[7];
+        movie_state.movie_id = 7;
+        movie_state.current_movie = &movie_state.movies[7];
         movie_play();
-        movie_state.unk372 = -1;
-        movie_state.unk370 = 0;
-        movie_state.unk384 = 0xff;
+        movie_state.stream_status = -1;
+        movie_state.state = 0;
+        movie_state.movie_id = 0xff;
         player_reset_reaction_state();
         SsSetMVol(127, 127);
         resource_request_transition(0xff, 0xff, 0xff, 9, 11, 0x7f, 0x7f, 0x7f);
@@ -110,12 +110,12 @@ void game_update_ending(void)
             sound_status.seq_playing = 0;
         }
         render_frames_with_color_overlay(1, 0, 0x1000, 0x100);
-        movie_state.unk384 = 8;
-        movie_state.unk380 = &movie_state.movies[8];
+        movie_state.movie_id = 8;
+        movie_state.current_movie = &movie_state.movies[8];
         movie_play();
-        movie_state.unk372 = -1;
-        movie_state.unk370 = 0;
-        movie_state.unk384 = 0xff;
+        movie_state.stream_status = -1;
+        movie_state.state = 0;
+        movie_state.movie_id = 0xff;
         main_end_flag = 4;
     }
 }

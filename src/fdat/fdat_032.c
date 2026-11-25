@@ -105,11 +105,11 @@ void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
         return;
     }
     if (player_camera_within_map_region(0x24, 0x32, 3, 3, 0x8000) != 0) {
-        if (cur_avatar_status.unk10a != 0) {
+        if (cur_avatar_status.warp_arrived != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
         }
     } else {
-        cur_avatar_status.unk10a = 0;
+        cur_avatar_status.warp_arrived = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 5, 0x24, 0x32, 3, 1, 0, 0x2f);
     }
 }

@@ -2104,19 +2104,19 @@ void effect_update_dispatch(void)
         }
         break;
     case 26:
-        if (cur_avatar_status.unk86 == 0) {
+        if (cur_avatar_status.fire_defense_boost_timer == 0) {
             obj->type = EFFECT_FREE;
         }
         obj->angle.vy += 64;
         break;
     case 27:
-        if (cur_avatar_status.unk88 == 0) {
+        if (cur_avatar_status.damage_immunity_timer == 0) {
             obj->type = EFFECT_FREE;
         }
         obj->angle.vy -= 256;
         break;
     case 28:
-        if (cur_avatar_status.unk8a == 0) {
+        if (cur_avatar_status.physical_defense_boost_timer == 0) {
             obj->type = EFFECT_FREE;
         }
         obj->angle.vy -= 64;
@@ -2137,7 +2137,7 @@ void effect_update_dispatch(void)
             Effect *made;
 
             if (obj->updates_remaining == 12) {
-                cur_avatar_status.unk78 = 0;
+                cur_avatar_status.poison_timer = 0;
             }
             p.vx = (rand() >> 5) - 512;
             p.vy = (rand() >> 8) + 200;

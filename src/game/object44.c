@@ -152,7 +152,7 @@ void map_object_set_property(s32 id, s32 mode, ...)
 
 /*
  * Writes the record's map cell byte for its area layer: value with no scale
- * when mode is 0 and Data801b24e4.unk90 is clear, else 0xfc with full scale.
+ * when mode is 0 and PlayerState.unk90 is clear, else 0xfc with full scale.
  */
 ADDRESS(0x80044b40, 0xf4)
 void map_object_set_cell_marker(MapObject *obj, s32 mode, u8 value)
@@ -160,7 +160,7 @@ void map_object_set_cell_marker(MapObject *obj, s32 mode, u8 value)
     MapCell *cell;
     MapLayer *layer;
 
-    if (mode == 0 && cur_avatar_status.unk90 == 0) {
+    if (mode == 0 && cur_avatar_status.map_marker_visual_effect_timer == 0) {
         {
             MapCell *row = map_world.cells[obj->pos.vz >> 11];
 

@@ -123,7 +123,7 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_
     }
 }
 
-/* Mean of the Data801b24e4.unk42 stats the record's MagicRecord.unk5 bits pick (5 without 0x40). */
+/* Mean of the PlayerState.unk42 stats the record's MagicRecord.unk5 bits pick (5 without 0x40). */
 ADDRESS(0x80053624, 0xd4)
 u16 effect_magic_power(Effect *obj)
 {
@@ -143,7 +143,7 @@ u16 effect_magic_power(Effect *obj)
                 bit >>= 1;
             } else {
                 n++;
-                sum += cur_avatar_status.unk42[i];
+                sum += cur_avatar_status.magic[i];
                 bit >>= 1;
             }
         }
@@ -345,7 +345,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
     obj->animation_phase = 0;
     obj->unk5 = 0;
     obj->render_flags = 1;
-    if ((obj->type & 0x40) && cur_avatar_status.unk101 == 1) {
+    if ((obj->type & 0x40) && cur_avatar_status.reaction_mode == 1) {
         obj->cooldown = 8;
     } else {
         obj->cooldown = 1;
@@ -472,7 +472,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         break;
     case 75:
         effect_pool_initialize_scaled_world(obj, 0x44, 0x1400, 5);
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->midpoint_collision_enabled = 1;
         obj->updates_remaining = 100;
         obj->cooldown = 5;
@@ -583,7 +583,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->updates_remaining = 45;
         obj->arg.b.unk44 = 0;
         obj->midpoint_collision_enabled = 1;
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->scale.vx = 0x1800;
         obj->scale.vy = 0x1000;
         obj->angle.vx = 0;
@@ -598,7 +598,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->updates_remaining = 40;
         obj->arg.b.unk44 = 0;
         obj->midpoint_collision_enabled = 0;
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->clut_offset = 0x40;
         break;
     case 55:
@@ -628,7 +628,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->updates_remaining = 60;
         obj->midpoint_collision_enabled = 1;
         obj->cooldown = 3;
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->arg.h.unk44 = 0;
         obj->arg.h.unk46 = args[1];
         obj->clut_offset = 0x100;
@@ -656,7 +656,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->scale.vy = 0x800;
         obj->scale.vz = 100;
         obj->updates_remaining = 45;
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->vel.vy = -30;
         obj->angle.vx = 0;
         obj->angle.vz = 0;
@@ -880,7 +880,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->vel.vy = 0;
         obj->updates_remaining = 150;
         obj->arg.h.unk44 = 0;
-        obj->arg.h.unk46 = cur_avatar_status.unk124.vy;
+        obj->arg.h.unk46 = cur_avatar_status.camera_rotation.vy;
         obj->clut_offset = 0;
         effect_play_spatial_sound(obj, 0x92);
         break;
@@ -1140,7 +1140,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
         obj->lighting_override_index = 0x34;
         obj->lighting_blend = 0x1000;
         obj->updates_remaining = 50;
-        obj->angle = cur_avatar_status.unk124;
+        obj->angle = cur_avatar_status.camera_rotation;
         obj->scale.vx = 350;
         obj->scale.vy = 0x2000;
         obj->scale.vz = 350;

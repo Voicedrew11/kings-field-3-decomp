@@ -1653,7 +1653,7 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
     gte_SetRotMatrix(&scene_display_sys.unk15a38[turn]);
     gte_SetTransMatrix(transform);
     part = layer->object_index;
-    if ((s16)asset_status.loading == 1 && asset_status.unk16 != 0 &&
+    if ((s16)asset_status.loading == 1 && asset_status.tmd_object_limit_active != 0 &&
         part >= ((ModelData *)SCRATCH->model)->unk4 >> 1) {
         return;
     }

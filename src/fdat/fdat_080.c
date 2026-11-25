@@ -85,7 +85,7 @@ void area_handler_noop(void)
 ADDRESS(0x801e8684, 0x38)
 void area_update_flag_on_element_stat(void)
 {
-    if (cur_avatar_status.unk34[3] != 0) {
+    if (cur_avatar_status.base_magic[3] != 0) {
         if (cur_evt_state.unk32[0x31] == 0) {
             cur_evt_state.unk32[0x31] = 1;
         }
@@ -225,7 +225,7 @@ ADDRESS(0x801e8938, 0x20)
 void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 14) {
-        cur_evt_state.unk71[3] = 1;
+        cur_evt_state.element_unlocked[3] = 1;
     }
 }
 
@@ -241,7 +241,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     MapObject *obj;
     s32 i;
 
-    cur_avatar_status.unk34[3] += 20;
+    cur_avatar_status.base_magic[3] += 20;
     player_learn_element_magic(3);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[6];
@@ -298,7 +298,7 @@ void area_on_load_restore_lamps_and_markers(void)
     if (cur_evt_state.unk32[0x32] != 0) {
         map_object_apply_marker_signal(0xf2);
     }
-    if (cur_evt_state.unk7f[3] != 0) {
+    if (cur_evt_state.element_magic_learned[3] != 0) {
         map_objects_slots.objects[6].object_id = 0xff;
         map_objects_slots.objects[87].object_id = 0xff;
     }

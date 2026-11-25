@@ -87,7 +87,7 @@ void area_update_respawn_actor_out_of_view(void)
     if (actor_status.objects[i].lifecycle == 1) {
         return;
     }
-    if (angle_within_tolerance(cur_avatar_status.unk124.vy,
+    if (angle_within_tolerance(cur_avatar_status.camera_rotation.vy,
                                vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
                                                   actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                600) == 0) {
@@ -115,7 +115,7 @@ void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item)
             set_accumulated_color_overlay(0, 0, 0, 0, 1);
             cur_evt_state.unk2c[4] = 1;
             game_counter_decrement(item);
-            cur_evt_state.unk0 = 1;
+            cur_evt_state.interaction_handled = 1;
         }
     }
 }

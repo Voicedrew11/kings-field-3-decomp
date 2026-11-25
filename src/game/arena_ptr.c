@@ -26,13 +26,13 @@ void event_saved_offsets_decode(u8 **out)
     u16 o;
     s32 i;
 
-    off = cur_evt_state.unk5104;
+    off = cur_evt_state.saved_offsets;
     for (i = 31; i != -1; i--) {
         o = *off++;
         if (o == 0xffff) {
             *out = NULL;
         } else {
-            *out = cur_evt_state.unk104 + o;
+            *out = cur_evt_state.arena + o;
         }
         out++;
     }
@@ -45,7 +45,7 @@ void event_arena_owner_pointers_add_delta(s32 delta)
     HeapBlock *block;
     s32 state;
 
-    block = (HeapBlock *)cur_evt_state.unk104;
+    block = (HeapBlock *)cur_evt_state.arena;
     while (block->state != HEAP_END) {
         state = block->state;
         if (state < 4 && state != HEAP_FREE) {
@@ -63,13 +63,13 @@ void event_saved_offsets_encode(u8 **in)
     u8 *p;
     s32 i;
 
-    off = cur_evt_state.unk5104;
+    off = cur_evt_state.saved_offsets;
     for (i = 31; i != -1; i--) {
         p = *in++;
         if (p == NULL) {
             *off = 0xffff;
         } else {
-            *off = p - cur_evt_state.unk104;
+            *off = p - cur_evt_state.arena;
         }
         off++;
     }
@@ -82,7 +82,7 @@ void event_arena_owner_pointers_subtract_delta(s32 delta)
     HeapBlock *block;
     s32 state;
 
-    block = (HeapBlock *)cur_evt_state.unk104;
+    block = (HeapBlock *)cur_evt_state.arena;
     while (block->state != HEAP_END) {
         state = block->state;
         if (state < 4 && state != HEAP_FREE) {
@@ -249,7 +249,7 @@ void event_world_state_save_slot(s32 area)
         memory_block_release(block);
     }
     size = (p - buf + 3) & ~3;
-    block = memory_arena_allocate_block((HeapBlock *)cur_evt_state.unk104, size, &ptrs[area]);
+    block = memory_arena_allocate_block((HeapBlock *)cur_evt_state.arena, size, &ptrs[area]);
     if (block != NULL) {
         resource_copy_words((u32 *)block, (u32 *)buf, size >> 2);
         event_saved_offsets_encode(ptrs);

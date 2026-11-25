@@ -26,7 +26,7 @@ void player_select_magic_action(s32 id)
     MagicRecord *r;
     s32 cost;
 
-    if (cur_avatar_status.unk105 != 0xff) {
+    if (cur_avatar_status.queued_magic_id != 0xff) {
         return;
     }
     if (id == 0xff) {
@@ -34,73 +34,73 @@ void player_select_magic_action(s32 id)
     }
     r = &effect_status.magic_records[id];
     cost = r->mp_cost;
-    if (cur_avatar_status.unkf0 == 0x26) {
+    if (cur_avatar_status.equipped_head_id == 0x26) {
         cost <<= 1;
     }
-    if (cur_avatar_status.unkf1 == 0x2e) {
+    if (cur_avatar_status.equipped_body_id == 0x2e) {
         cost >>= 1;
     }
-    if (cur_avatar_status.unk1c < cost) {
+    if (cur_avatar_status.mp < cost) {
         notify_enqueue(9);
         return;
     }
-    if (cur_avatar_status.unkcb == 0x1f) {
+    if (cur_avatar_status.equipped_weapon_id == 0x1f) {
         return;
     }
     switch (id) {
     case 26:
-        if (cur_avatar_status.unk86 != 0) {
+        if (cur_avatar_status.fire_defense_boost_timer != 0) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 27:
-        if (cur_avatar_status.unk88 != 0) {
+        if (cur_avatar_status.damage_immunity_timer != 0) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 28:
-        if (cur_avatar_status.unk8a != 0) {
+        if (cur_avatar_status.physical_defense_boost_timer != 0) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 25:
-        if (cur_avatar_status.unk78 == 0) {
+        if (cur_avatar_status.poison_timer == 0) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 23:
         if (cur_avatar_status.hp == cur_avatar_status.hp_max) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 29:
-        if (cur_avatar_status.unk8e != 0) {
+        if (cur_avatar_status.magic_tint_phase_limit != 0) {
             return;
         }
-        cur_avatar_status.unk8e = 900;
-        cur_avatar_status.unk1c -= cost;
+        cur_avatar_status.magic_tint_phase_limit = 900;
+        cur_avatar_status.mp -= cost;
         player_increment_magic_training(r);
         return;
     case 30:
-        if (cur_avatar_status.hp == cur_avatar_status.hp_max && cur_avatar_status.unk7a == 0 && cur_avatar_status.unk7e == 0
-            && cur_avatar_status.unk82 == 0 && cur_avatar_status.unk84 == 0) {
+        if (cur_avatar_status.hp == cur_avatar_status.hp_max && cur_avatar_status.curse_strength == 0 && cur_avatar_status.darkness_phase == 0
+            && cur_avatar_status.slow_timer == 0 && cur_avatar_status.paralysis_timer == 0) {
             return;
         }
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     }
-    if (cur_avatar_status.unk22 < 5000) {
+    if (cur_avatar_status.magic_charge < 5000) {
         return;
     }
     switch (id) {
@@ -113,19 +113,19 @@ void player_select_magic_action(s32 id)
         player_increment_magic_training(r);
         break;
     }
-    cur_avatar_status.unk14c.vx = -200;
-    cur_avatar_status.unk14c.vy = 200;
-    cur_avatar_status.unk14c.vz = 400;
-    cur_avatar_status.unk22 = 0;
-    cur_avatar_status.unkf = 0;
-    cur_avatar_status.unk105 = id;
-    cur_avatar_status.unk108 = 1;
-    cur_avatar_status.unk1c -= cost;
+    cur_avatar_status.magic_origin_offset.vx = -200;
+    cur_avatar_status.magic_origin_offset.vy = 200;
+    cur_avatar_status.magic_origin_offset.vz = 400;
+    cur_avatar_status.magic_charge = 0;
+    cur_avatar_status.weapon_charge_delay = 0;
+    cur_avatar_status.queued_magic_id = id;
+    cur_avatar_status.queued_magic_countdown = 1;
+    cur_avatar_status.mp -= cost;
     switch (id) {
     case 4:
-        cur_avatar_status.unk14c.vy = -512;
-        cur_avatar_status.unk14c.vx = 0;
-        cur_avatar_status.unk14c.vz = 2000;
+        cur_avatar_status.magic_origin_offset.vy = -512;
+        cur_avatar_status.magic_origin_offset.vx = 0;
+        cur_avatar_status.magic_origin_offset.vz = 2000;
         /* fall through */
     case 0:
     case 5:
@@ -147,82 +147,82 @@ void player_select_magic_action(s32 id)
     case 72:
     case 73:
     case 75:
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 76:
-        cur_avatar_status.unk14c.vz = 600;
-        cur_avatar_status.unk14c.vx = 0;
-        cur_avatar_status.unk14c.vy = 0;
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.magic_origin_offset.vz = 600;
+        cur_avatar_status.magic_origin_offset.vx = 0;
+        cur_avatar_status.magic_origin_offset.vy = 0;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 1:
-        cur_avatar_status.unk14c.vx = -2000;
-        cur_avatar_status.unk14c.vy = 1600;
-        cur_avatar_status.unk14c.vz = 1000;
-        cur_avatar_status.unk106 = 5;
-        cur_avatar_status.unk107 = 3;
+        cur_avatar_status.magic_origin_offset.vx = -2000;
+        cur_avatar_status.magic_origin_offset.vy = 1600;
+        cur_avatar_status.magic_origin_offset.vz = 1000;
+        cur_avatar_status.queued_magic_casts_remaining = 5;
+        cur_avatar_status.queued_magic_repeat_interval = 3;
         break;
     case 56:
-        cur_avatar_status.unk14c.vy = 500;
-        cur_avatar_status.unk106 = 3;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.magic_origin_offset.vy = 500;
+        cur_avatar_status.queued_magic_casts_remaining = 3;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 13:
-        cur_avatar_status.unk14c.vy = 500;
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.magic_origin_offset.vy = 500;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 64:
-        cur_avatar_status.unk106 = 3;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 3;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 66:
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 9:
-        cur_avatar_status.unk14c.vy = -400;
-        cur_avatar_status.unk14c.vz = 400;
-        cur_avatar_status.unk14c.vx = 0;
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.magic_origin_offset.vy = -400;
+        cur_avatar_status.magic_origin_offset.vz = 400;
+        cur_avatar_status.magic_origin_offset.vx = 0;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 17:
-        cur_avatar_status.unk14c.vz = 600;
-        cur_avatar_status.unk14c.vy = -600;
-        cur_avatar_status.unk14c.vx = 0;
-        cur_avatar_status.unk106 = 1;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.magic_origin_offset.vz = 600;
+        cur_avatar_status.magic_origin_offset.vy = -600;
+        cur_avatar_status.magic_origin_offset.vx = 0;
+        cur_avatar_status.queued_magic_casts_remaining = 1;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 20:
     case 71:
-        cur_avatar_status.unk14c.vx = -200;
-        cur_avatar_status.unk106 = 5;
-        cur_avatar_status.unk107 = 2;
+        cur_avatar_status.magic_origin_offset.vx = -200;
+        cur_avatar_status.queued_magic_casts_remaining = 5;
+        cur_avatar_status.queued_magic_repeat_interval = 2;
         break;
     case 2:
-        cur_avatar_status.unk106 = 3;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 3;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 11:
-        cur_avatar_status.unk106 = 12;
-        cur_avatar_status.unk107 = 1;
+        cur_avatar_status.queued_magic_casts_remaining = 12;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
         break;
     case 7:
-        cur_avatar_status.unk106 = 2;
-        cur_avatar_status.unk107 = 1;
-        cur_avatar_status.unk14c.vz = 0;
-        cur_avatar_status.unk14c.vy = 0;
-        cur_avatar_status.unk14c.vx = 0;
+        cur_avatar_status.queued_magic_casts_remaining = 2;
+        cur_avatar_status.queued_magic_repeat_interval = 1;
+        cur_avatar_status.magic_origin_offset.vz = 0;
+        cur_avatar_status.magic_origin_offset.vy = 0;
+        cur_avatar_status.magic_origin_offset.vx = 0;
         break;
     case 8:
-        cur_avatar_status.unk106 = 4;
-        cur_avatar_status.unk107 = 2;
+        cur_avatar_status.queued_magic_casts_remaining = 4;
+        cur_avatar_status.queued_magic_repeat_interval = 2;
         break;
     }
-    cur_avatar_status.unkac = r;
+    cur_avatar_status.selected_magic_record = r;
 }
 
 /*
@@ -287,12 +287,12 @@ retry:
         moved = 1;
         cur_avatar_status.pos.vx = p.vx;
         cur_avatar_status.pos.vz = p.vz;
-        cur_avatar_status.unk160 = map_world.collision_layer_offset;
+        cur_avatar_status.map_layer_offset = map_world.collision_layer_offset;
         goto done;
     }
     blocked = 0;
     if (!(hit & ~0x207)) {
-        if (map_world.collision_floor_height + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.unk101 == 0
+        if (map_world.collision_floor_height + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.reaction_mode == 0
             && map_world.collision_height_limit - map_world.collision_floor_height < -1700) {
             goto free;
         }
@@ -433,7 +433,7 @@ retry:
     }
     moved = 0;
 done:
-    cur_avatar_status.unk11c.vx = dx;
-    cur_avatar_status.unk11c.vz = dz;
+    cur_avatar_status.frame_displacement.vx = dx;
+    cur_avatar_status.frame_displacement.vz = dz;
     return moved;
 }

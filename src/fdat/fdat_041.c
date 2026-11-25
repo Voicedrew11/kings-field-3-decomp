@@ -149,7 +149,7 @@ void area_on_movie_start_unlock_element_and_remove_actor(u8 id)
         }
     }
     if (id == 13) {
-        cur_evt_state.unk71[1] = 1;
+        cur_evt_state.element_unlocked[1] = 1;
     }
 }
 
@@ -166,7 +166,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     s32 i;
 
     if (id == 13) {
-        cur_avatar_status.unk34[1] += 20;
+        cur_avatar_status.base_magic[1] += 20;
         player_learn_element_magic(1);
         player_recalculate_combat_stats();
         obj = &map_objects_slots.objects[15];
@@ -224,7 +224,7 @@ ADDRESS(0x801e88d4, 0x84)
 void area_on_load_restore_objects_and_actor(void)
 {
     cur_evt_state.unk32[0x19] = 1;
-    if (cur_evt_state.unk7f[1] != 0) {
+    if (cur_evt_state.element_magic_learned[1] != 0) {
         map_objects_slots.objects[15].object_id = 0xff;
         map_objects_slots.objects[86].object_id = 0xff;
     }

@@ -66,7 +66,7 @@ void movie_play_stream(void)
             memory_block_set_kind(p, 1);
         }
     }
-    for (i = 31, j = 556 + asset_status.area[0] * 32; i != -1; i--, j++) {
+    for (i = 31, j = 556 + asset_status.active_resource_ids[0] * 32; i != -1; i--, j++) {
         if ((p = scene_display_sys.models[j]) != NULL) {
             while (memory_block_kind(p) == 3)
                 ;
@@ -86,7 +86,7 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    movie_state.unk374[0] = (u_long *)p;
+    movie_state.vlc_buffers[0] = (u_long *)p;
     if ((p = scene_display_sys.models[0x62a]) == NULL) {
         if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x10000,
                                              &scene_display_sys.models[0x62a])) == NULL) {
@@ -97,7 +97,7 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    movie_state.unk374[1] = (u_long *)p;
+    movie_state.vlc_buffers[1] = (u_long *)p;
     if ((p = scene_display_sys.models[0x62b]) == NULL) {
         if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x3c00,
                                              &scene_display_sys.models[0x62b])) == NULL) {
@@ -108,11 +108,11 @@ void movie_play_stream(void)
     } else if (memory_block_kind(p) == 1) {
         memory_block_set_kind(p, 2);
     }
-    movie_state.unk37c = (u_long *)p;
-    if (movie_state.unk380->file < 16) {
+    movie_state.slice_buffer = (u_long *)p;
+    if (movie_state.current_movie->file < 16) {
         strcpy(name, "\\STR\\SXX.S;1");
-        name[6] = movie_state.unk380->file / 10 + '0';
-        name[7] = movie_state.unk380->file % 10 + '0';
+        name[6] = movie_state.current_movie->file / 10 + '0';
+        name[7] = movie_state.current_movie->file % 10 + '0';
         CdSearchFile(&file, name);
     } else {
         n = rand() * 18 >> 15;
@@ -138,10 +138,10 @@ void movie_play_stream(void)
         strNextVlc();
         strSync(&movie_state.dec);
         movie_present_frame();
-        if (movie_state.unk372 == 99) {
+        if (movie_state.stream_status == 99) {
             break;
         }
-        if (movie_state.unk380->last < movie_state.unk388) {
+        if (movie_state.current_movie->last_frame < movie_state.stream_frame) {
             break;
         }
         if (vol < 127) {
@@ -176,13 +176,13 @@ void movie_play_stream(void)
 ADDRESS(0x80061364, 0x170)
 void strSetDefDecEnv(void)
 {
-    u_long **buf = movie_state.unk374;
+    u_long **buf = movie_state.vlc_buffers;
     DECENV *dec = &movie_state.dec;
 
     dec->vlcbuf[0] = buf[0];
     dec->vlcbuf[1] = buf[1];
     dec->vlcid = 0;
-    dec->imgbuf = movie_state.unk37c;
+    dec->imgbuf = movie_state.slice_buffer;
     dec->rectid = 0;
     dec->isdone = 0;
     setRECT(&dec->rect[scene_display_sys.frame & 1], 0, 0, 320, 240);
@@ -197,7 +197,7 @@ void strSetDefDecEnv(void)
 ADDRESS(0x800614d4, 0x7c)
 void strInit(CdlLOC *loc)
 {
-    movie_state.unk372 = 0;
+    movie_state.stream_status = 0;
     EnterCriticalSection();
     DecDCToutCallback(strCallback);
     StSetRing((u_long *)stream_work_buffer, RING_SIZE);
@@ -263,9 +263,9 @@ u_long *strNext(DECENV *dec)
         StFreeRing(addr);
         return 0;
     }
-    movie_state.unk388 = sector->frameCount;
-    if (movie_state.unk380->last < sector->frameCount) {
-        movie_state.unk372 = 99;
+    movie_state.stream_frame = sector->frameCount;
+    if (movie_state.current_movie->last_frame < sector->frameCount) {
+        movie_state.stream_status = 99;
     }
     return addr;
 }
@@ -319,9 +319,9 @@ void movie_present_frame(void)
 ADDRESS(0x80061918, 0x28)
 void movie_state_reset(void)
 {
-    movie_state.unk372 = -1;
-    movie_state.unk370 = 0;
-    movie_state.unk384 = 0xff;
+    movie_state.stream_status = -1;
+    movie_state.state = 0;
+    movie_state.movie_id = 0xff;
 }
 
 /* Steps the in-game movie state (unk370) of movie unk384. */
@@ -331,44 +331,44 @@ void movie_update_state(void)
     u8 id;
     u8 flag;
 
-    if (movie_state.unk384 == 0xff) {
+    if (movie_state.movie_id == 0xff) {
         return;
     }
-    id = movie_state.unk384;
-    movie_state.unk380 = &movie_state.movies[id];
-    switch (movie_state.unk370) {
+    id = movie_state.movie_id;
+    movie_state.current_movie = &movie_state.movies[id];
+    switch (movie_state.state) {
     case 0:
         break;
     case 1:
-        if (movie_state.unk380->flag != 0xff) {
-            flag = movie_state.unk380->flag;
+        if (movie_state.current_movie->skip_flag != 0xff) {
+            flag = movie_state.current_movie->skip_flag;
             if (flag & 0x80) {
-                if (cur_evt_state.unk4[flag & 0x7f] == 0) {
-                    movie_state.unk370 = 0x10;
+                if (cur_evt_state.flags[flag & 0x7f] == 0) {
+                    movie_state.state = 0x10;
                     break;
                 }
-            } else if (cur_evt_state.unk4[flag & 0x7f] != 0) {
-                movie_state.unk370 = 0x10;
+            } else if (cur_evt_state.flags[flag & 0x7f] != 0) {
+                movie_state.state = 0x10;
                 break;
             }
         }
-        movie_state.unk370 = 2;
+        movie_state.state = 2;
         player_begin_movie_approach(id);
         break;
     case 2:
-        if (movie_state.unk372 == 1) {
-            movie_state.unk370 = 4;
+        if (movie_state.stream_status == 1) {
+            movie_state.state = 4;
         }
-        movie_state.unk372 = 0;
+        movie_state.stream_status = 0;
         break;
     case 4:
         ((void (*)(u8))asset_status.handlers[10])(id);
         movie_play_stream();
         if (cur_evt_state.unk61 == 1) {
             cur_evt_state.unk61 = 2;
-            movie_state.unk372 = 1;
-            movie_state.unk370 = 0;
-            movie_state.unk384 = 0xff;
+            movie_state.stream_status = 1;
+            movie_state.state = 0;
+            movie_state.movie_id = 0xff;
             player_reset_reaction_state();
             MoveImage(&scene_display_sys.disp[scene_display_sys.frame].disp,
                       scene_display_sys.draw[scene_display_sys.frame].clip.x,
@@ -376,18 +376,18 @@ void movie_update_state(void)
             DrawSync(0);
             player_warp_to_destination(12);
         }
-        movie_state.unk370 = 8;
+        movie_state.state = 8;
         player_begin_movie_return(id);
         break;
     case 8:
-        if (movie_state.unk372 == 1) {
-            movie_state.unk370 = 0;
+        if (movie_state.stream_status == 1) {
+            movie_state.state = 0;
             ((void (*)(u8))asset_status.handlers[7])(id);
         }
-        movie_state.unk372 = 0;
+        movie_state.stream_status = 0;
         break;
     case 16:
-        movie_state.unk370 = 1;
+        movie_state.state = 1;
         break;
     }
 }

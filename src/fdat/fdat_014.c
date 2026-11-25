@@ -121,7 +121,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -235,7 +235,7 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
             notify_enqueue(0x18);
         }
         cur_evt_state.unke[0xf] = 1;
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
     }
 }
 
@@ -267,11 +267,11 @@ void area_region_trigger_move_object_and_warp_cells(MapObject *obj)
         break;
     case 10:
         if (player_camera_within_map_region(0x37, 0xc, 3, 3, 0x8000) != 0) {
-            if (cur_avatar_status.unk10a != 0) {
+            if (cur_avatar_status.warp_arrived != 0) {
                 map_cell_copy_rotated_fields(2, 0x4a, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
             }
         } else {
-            cur_avatar_status.unk10a = 0;
+            cur_avatar_status.warp_arrived = 0;
             map_cell_copy_rotated_fields(2, 0x4d, 0, 0x37, 0xc, 3, 1, 0, 0x2f);
         }
         break;
@@ -308,7 +308,7 @@ ADDRESS(0x801e8b10, 0x20)
 void area_on_movie_start_unlock_element(u8 id)
 {
     if (id == 12) {
-        cur_evt_state.unk71[0] = 1;
+        cur_evt_state.element_unlocked[0] = 1;
     }
 }
 
@@ -324,7 +324,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     MapObject *obj;
     s32 i;
 
-    cur_avatar_status.unk34[0] += 20;
+    cur_avatar_status.base_magic[0] += 20;
     player_learn_element_magic(0);
     player_recalculate_combat_stats();
     obj = &map_objects_slots.objects[55];
@@ -413,7 +413,7 @@ void area_on_load_restore_objects_and_light(void)
         actor_status.objects[26].slot_state = 8;
         area_set_light_blend(0);
     }
-    if (cur_evt_state.unk7f[0] != 0) {
+    if (cur_evt_state.element_magic_learned[0] != 0) {
         map_objects_slots.objects[55].object_id = 0xff;
         map_objects_slots.objects[148].object_id = 0xff;
     }

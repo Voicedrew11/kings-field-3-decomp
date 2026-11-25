@@ -106,7 +106,7 @@ void area_use_item_operate_switch(VECTOR *pos, SVECTOR *angle, s32 item)
     }
     if (obj->animation_phase == 0 || obj->animation_phase >= 4095) {
         obj->action_state = 1;
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
     }
 }
 
@@ -132,11 +132,11 @@ void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
         return;
     }
     if (player_camera_within_map_region(0x1c, 0x1e, 3, 4, 0x8000) != 0) {
-        if (cur_avatar_status.unk10a != 0) {
+        if (cur_avatar_status.warp_arrived != 0) {
             map_cell_copy_rotated_fields(2, 0x4a, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
         }
     } else {
-        cur_avatar_status.unk10a = 0;
+        cur_avatar_status.warp_arrived = 0;
         map_cell_copy_rotated_fields(2, 0x4d, 0, 0x1c, 0x21, 3, 1, 0, 0x2f);
     }
 }

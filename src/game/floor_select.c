@@ -40,8 +40,8 @@ static MapCell collision_default_cell = { { { 0xff, 0x00, 0x00, 0x3f, 0x00 }, { 
 ADDRESS(0x80030fcc, 0x1524)
 void player_update_frame(void)
 {
-    MovieRec *rec;
-    MovieRec *movie;
+    MovieRecord *rec;
+    MovieRecord *movie;
     s32 t;
     s32 u;
     s32 v;
@@ -61,60 +61,60 @@ void player_update_frame(void)
         map_visited_cells[cur_avatar_status.pos.vx >> 11][cz >> 3] |= 1 << (7 - cz % 8);
     }
     player_update_status_visuals();
-    cur_avatar_status.unk178 = PadRead(1);
-    if (cur_avatar_status.unk178 & action_button_masks[12]) {
+    cur_avatar_status.pad_buttons = PadRead(1);
+    if (cur_avatar_status.pad_buttons & action_button_masks[12]) {
         cd_report_error(3);
     }
-    if (cur_avatar_status.unk178 & action_button_masks[13]) {
+    if (cur_avatar_status.pad_buttons & action_button_masks[13]) {
         menu_run_pause_screen();
     }
-    cur_avatar_status.unk180 = 200;
-    cur_avatar_status.unk184 = 32;
-    if (!(cur_avatar_status.unk178 & (action_button_masks[0] | action_button_masks[1]))) {
-        cur_avatar_status.unk184 = 40;
+    cur_avatar_status.movement_step_limit = 200;
+    cur_avatar_status.turn_step_limit = 32;
+    if (!(cur_avatar_status.pad_buttons & (action_button_masks[0] | action_button_masks[1]))) {
+        cur_avatar_status.turn_step_limit = 40;
     }
-    if (cur_avatar_status.unk82 != 0) {
-        if (cur_avatar_status.unk82 < 64) {
-            cur_avatar_status.unk12 += 100;
-            if (cur_avatar_status.unk12 > 0) {
-                cur_avatar_status.unk12 = 0;
+    if (cur_avatar_status.slow_timer != 0) {
+        if (cur_avatar_status.slow_timer < 64) {
+            cur_avatar_status.movement_speed_adjustment_q12 += 100;
+            if (cur_avatar_status.movement_speed_adjustment_q12 > 0) {
+                cur_avatar_status.movement_speed_adjustment_q12 = 0;
             }
         } else {
-            cur_avatar_status.unk12 -= 100;
-            if (cur_avatar_status.unk12 < -3300) {
-                cur_avatar_status.unk12 = -3300;
+            cur_avatar_status.movement_speed_adjustment_q12 -= 100;
+            if (cur_avatar_status.movement_speed_adjustment_q12 < -3300) {
+                cur_avatar_status.movement_speed_adjustment_q12 = -3300;
             }
         }
-        cur_avatar_status.unk184 >>= 1;
-        cur_avatar_status.unk82--;
-    } else if (cur_avatar_status.unk11 == 0) {
-        cur_avatar_status.unk12 += 800;
-        if (cur_avatar_status.unk12 > 2800) {
-            cur_avatar_status.unk12 = 2800;
+        cur_avatar_status.turn_step_limit >>= 1;
+        cur_avatar_status.slow_timer--;
+    } else if (cur_avatar_status.movement_speed_adjustment_decay_latch == 0) {
+        cur_avatar_status.movement_speed_adjustment_q12 += 800;
+        if (cur_avatar_status.movement_speed_adjustment_q12 > 2800) {
+            cur_avatar_status.movement_speed_adjustment_q12 = 2800;
         }
     } else {
-        cur_avatar_status.unk12 -= 800;
-        if (cur_avatar_status.unk12 < 0) {
-            cur_avatar_status.unk12 = 0;
+        cur_avatar_status.movement_speed_adjustment_q12 -= 800;
+        if (cur_avatar_status.movement_speed_adjustment_q12 < 0) {
+            cur_avatar_status.movement_speed_adjustment_q12 = 0;
         }
     }
-    cur_avatar_status.unk180 += cur_avatar_status.unk12 * cur_avatar_status.unk180 >> 12;
-    cur_avatar_status.unk184 += cur_avatar_status.unk12 * cur_avatar_status.unk184 >> 13;
-    if (cur_avatar_status.unk84 != 0) {
-        cur_avatar_status.unk180 = 0;
-        cur_avatar_status.unk184 = 0;
-        cur_avatar_status.unk84--;
-        cur_avatar_status.unk162 >>= 1;
-        cur_avatar_status.unk164 >>= 1;
-        if ((cur_avatar_status.unk84 & 3) == 3) {
+    cur_avatar_status.movement_step_limit += cur_avatar_status.movement_speed_adjustment_q12 * cur_avatar_status.movement_step_limit >> 12;
+    cur_avatar_status.turn_step_limit += cur_avatar_status.movement_speed_adjustment_q12 * cur_avatar_status.turn_step_limit >> 13;
+    if (cur_avatar_status.paralysis_timer != 0) {
+        cur_avatar_status.movement_step_limit = 0;
+        cur_avatar_status.turn_step_limit = 0;
+        cur_avatar_status.paralysis_timer--;
+        cur_avatar_status.strafe_velocity >>= 1;
+        cur_avatar_status.forward_velocity >>= 1;
+        if ((cur_avatar_status.paralysis_timer & 3) == 3) {
             accumulate_color_overlay(0x3c, 0x1e, 0, 0xc00, 1);
         }
     }
-    if (cur_avatar_status.unkd0 != 0) {
-        cur_avatar_status.unk180 >>= 1;
-        cur_avatar_status.unk184 >>= 1;
+    if (cur_avatar_status.weapon_guard_active != 0) {
+        cur_avatar_status.movement_step_limit >>= 1;
+        cur_avatar_status.turn_step_limit >>= 1;
     }
-    switch (cur_avatar_status.unk101) {
+    switch (cur_avatar_status.reaction_mode) {
     case 0:
     case 4:
         player_update_actions_and_charge();
@@ -124,21 +124,21 @@ void player_update_frame(void)
         player_handle_interaction_and_menu();
         break;
     case 8:
-        movie = &movie_state.movies[cur_avatar_status.unk188.turn.id];
+        movie = &movie_state.movies[cur_avatar_status.reaction.movie.movie_id];
         movie_update_state();
-        if (movie->unk22 == 0x82) {
+        if (movie->overlay_mode == 0x82) {
             render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
             cd_request_wait_idle();
-            render_frames_with_color_overlay(movie->unk22, 0x1000, 0, -256);
+            render_frames_with_color_overlay(movie->overlay_mode, 0x1000, 0, -256);
             render_set_color_overlay(0xff, 0, 0, 0);
-        } else if (movie->unk22 == 1) {
+        } else if (movie->overlay_mode == 1) {
             MoveImage(&scene_display_sys.disp[scene_display_sys.frame].disp,
                       scene_display_sys.draw[scene_display_sys.frame].clip.x,
                       scene_display_sys.draw[scene_display_sys.frame].clip.y);
             DrawSync(0);
             render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
             cd_request_wait_idle();
-            render_frames_with_color_overlay(movie->unk22, 0x1000, 0, -256);
+            render_frames_with_color_overlay(movie->overlay_mode, 0x1000, 0, -256);
         } else {
             MoveImage(&scene_display_sys.disp[scene_display_sys.frame].disp,
                       scene_display_sys.draw[scene_display_sys.frame].clip.x,
@@ -149,108 +149,108 @@ void player_update_frame(void)
         }
         break;
     case 7:
-        rec = &movie_state.movies[cur_avatar_status.unk188.turn.id];
-        t = cur_avatar_status.unk188.turn.unk1 << 7;
-        if (rec->unkc != -1) {
-            cur_avatar_status.pos.vx = fixed_lerp_q12(cur_avatar_status.pos.vx, rec->unkc, t + 1);
-            cur_avatar_status.pos.vz = fixed_lerp_q12(cur_avatar_status.pos.vz, rec->unk14, t + 1);
+        rec = &movie_state.movies[cur_avatar_status.reaction.movie.movie_id];
+        t = cur_avatar_status.reaction.movie.step << 7;
+        if (rec->approach_x != -1) {
+            cur_avatar_status.pos.vx = fixed_lerp_q12(cur_avatar_status.pos.vx, rec->approach_x, t + 1);
+            cur_avatar_status.pos.vz = fixed_lerp_q12(cur_avatar_status.pos.vz, rec->approach_z, t + 1);
         }
-        if (rec->unk10 != -1) {
-            cur_avatar_status.pos.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, rec->unk10, t + 1);
+        if (rec->approach_y != -1) {
+            cur_avatar_status.pos.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, rec->approach_y, t + 1);
         }
-        if (rec->unk4 != -1) {
-            cur_avatar_status.unk13c = angle_lerp_shortest_q12(0, rec->unk4, t + 1);
-            cur_avatar_status.unk12c.vx = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vx, 0,
-                                                                  t + 1);
+        if (rec->approach_angle_x != -1) {
+            cur_avatar_status.view_rotation_offset_x = angle_lerp_shortest_q12(0, rec->approach_angle_x, t + 1);
+            cur_avatar_status.camera_rotation_target.vx = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
+                                                                                  t + 1);
         }
-        if (rec->unk6 != -1) {
-            cur_avatar_status.unk13e = 0;
-            cur_avatar_status.unk12c.vy = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vy,
-                                                                  rec->unk6, t + 1);
+        if (rec->approach_angle_y != -1) {
+            cur_avatar_status.view_rotation_offset_y = 0;
+            cur_avatar_status.camera_rotation_target.vy = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
+                                                                                  rec->approach_angle_y, t + 1);
         }
-        if (rec->unk8 != -1) {
-            cur_avatar_status.unk140 = angle_lerp_shortest_q12(0, rec->unk8, t + 1);
-            cur_avatar_status.unk12c.vz = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vz, 0,
-                                                                  t + 1);
+        if (rec->approach_angle_z != -1) {
+            cur_avatar_status.view_rotation_offset_z = angle_lerp_shortest_q12(0, rec->approach_angle_z, t + 1);
+            cur_avatar_status.camera_rotation_target.vz = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
+                                                                                  t + 1);
         }
-        if (0x7f - cur_avatar_status.unk188.turn.unk1 * 4 < 0) {
+        if (0x7f - cur_avatar_status.reaction.movie.step * 4 < 0) {
             SsSetMVol(0, 0);
         } else {
-            SsSetMVol(0x7f - cur_avatar_status.unk188.turn.unk1 * 4,
-                      0x7f - cur_avatar_status.unk188.turn.unk1 * 4);
+            SsSetMVol(0x7f - cur_avatar_status.reaction.movie.step * 4,
+                      0x7f - cur_avatar_status.reaction.movie.step * 4);
         }
-        if (cur_avatar_status.unk188.turn.unk1++ >= 32) {
+        if (cur_avatar_status.reaction.movie.step++ >= 32) {
             if (cur_avatar_status.bgm_volume != 0 && sound_status.seq_playing == 1) {
                 SsSeqPause(sound_status.seq_id);
             }
-            player_begin_movie_playback(cur_avatar_status.unk188.turn.id);
-            if (rec->unk4 != -1) {
-                cur_avatar_status.unk12c.vx = rec->unk4;
-                cur_avatar_status.unk13c = 0;
+            player_begin_movie_playback(cur_avatar_status.reaction.movie.movie_id);
+            if (rec->approach_angle_x != -1) {
+                cur_avatar_status.camera_rotation_target.vx = rec->approach_angle_x;
+                cur_avatar_status.view_rotation_offset_x = 0;
             }
-            if (rec->unk6 != -1) {
-                cur_avatar_status.unk12c.vy = rec->unk6;
-                cur_avatar_status.unk13e = 0;
+            if (rec->approach_angle_y != -1) {
+                cur_avatar_status.camera_rotation_target.vy = rec->approach_angle_y;
+                cur_avatar_status.view_rotation_offset_y = 0;
             }
-            if (rec->unk8 != -1) {
-                cur_avatar_status.unk12c.vz = rec->unk8;
-                cur_avatar_status.unk140 = 0;
+            if (rec->approach_angle_z != -1) {
+                cur_avatar_status.camera_rotation_target.vz = rec->approach_angle_z;
+                cur_avatar_status.view_rotation_offset_z = 0;
             }
-            movie_state.unk372 = 1;
-            if (rec->unka != 0) {
-                render_frames_with_color_overlay(rec->unk22, 0, 0x1000, 0x100);
+            movie_state.stream_status = 1;
+            if (rec->fade_back != 0) {
+                render_frames_with_color_overlay(rec->overlay_mode, 0, 0x1000, 0x100);
             }
         }
         break;
     case 9:
-        rec = &movie_state.movies[cur_avatar_status.unk188.turn.id];
-        u = cur_avatar_status.unk188.turn.unk1 << 7;
-        if (rec->unk24 != -1) {
-            cur_avatar_status.pos.vx = fixed_lerp_q12(cur_avatar_status.pos.vx, rec->unk24, u);
-            cur_avatar_status.pos.vz = fixed_lerp_q12(cur_avatar_status.pos.vz, rec->unk2c, u);
+        rec = &movie_state.movies[cur_avatar_status.reaction.movie.movie_id];
+        u = cur_avatar_status.reaction.movie.step << 7;
+        if (rec->return_x != -1) {
+            cur_avatar_status.pos.vx = fixed_lerp_q12(cur_avatar_status.pos.vx, rec->return_x, u);
+            cur_avatar_status.pos.vz = fixed_lerp_q12(cur_avatar_status.pos.vz, rec->return_z, u);
         }
-        if (rec->unk28 != -1) {
-            cur_avatar_status.pos.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, rec->unk28, u);
+        if (rec->return_y != -1) {
+            cur_avatar_status.pos.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, rec->return_y, u);
         }
-        if (rec->unk1c != -1) {
-            cur_avatar_status.unk13c = angle_lerp_shortest_q12(0, rec->unk1c, u);
-            cur_avatar_status.unk12c.vx = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vx, 0,
-                                                                  u);
+        if (rec->return_angle_x != -1) {
+            cur_avatar_status.view_rotation_offset_x = angle_lerp_shortest_q12(0, rec->return_angle_x, u);
+            cur_avatar_status.camera_rotation_target.vx = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
+                                                                                  u);
         }
-        if (rec->unk1e != -1) {
-            cur_avatar_status.unk13e = 0;
-            cur_avatar_status.unk12c.vy = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vy,
-                                                                  rec->unk1e, u);
+        if (rec->return_angle_y != -1) {
+            cur_avatar_status.view_rotation_offset_y = 0;
+            cur_avatar_status.camera_rotation_target.vy = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
+                                                                                  rec->return_angle_y, u);
         }
-        if (rec->unk20 != -1) {
-            cur_avatar_status.unk140 = angle_lerp_shortest_q12(0, rec->unk20, u);
-            cur_avatar_status.unk12c.vz = angle_lerp_shortest_q12(cur_avatar_status.unk188.turn.angle.vz, 0,
-                                                                  u);
+        if (rec->return_angle_z != -1) {
+            cur_avatar_status.view_rotation_offset_z = angle_lerp_shortest_q12(0, rec->return_angle_z, u);
+            cur_avatar_status.camera_rotation_target.vz = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
+                                                                                  u);
         }
-        if (cur_avatar_status.unk188.turn.unk1 == 0 && cur_avatar_status.bgm_volume != 0
+        if (cur_avatar_status.reaction.movie.step == 0 && cur_avatar_status.bgm_volume != 0
             && sound_status.seq_playing == 1) {
             SsSeqReplay(sound_status.seq_id);
         }
-        if (cur_avatar_status.unk188.turn.unk1 * 4 < 0x7f) {
-            SsSetMVol(cur_avatar_status.unk188.turn.unk1 * 4, cur_avatar_status.unk188.turn.unk1 * 4);
+        if (cur_avatar_status.reaction.movie.step * 4 < 0x7f) {
+            SsSetMVol(cur_avatar_status.reaction.movie.step * 4, cur_avatar_status.reaction.movie.step * 4);
         } else {
             SsSetMVol(0x7f, 0x7f);
         }
-        if (cur_avatar_status.unk188.turn.unk1++ >= 32) {
+        if (cur_avatar_status.reaction.movie.step++ >= 32) {
             player_reset_reaction_state();
-            if (rec->unk1c != -1) {
-                cur_avatar_status.unk12c.vx = rec->unk1c;
-                cur_avatar_status.unk13c = 0;
+            if (rec->return_angle_x != -1) {
+                cur_avatar_status.camera_rotation_target.vx = rec->return_angle_x;
+                cur_avatar_status.view_rotation_offset_x = 0;
             }
-            if (rec->unk1e != -1) {
-                cur_avatar_status.unk12c.vy = rec->unk1e;
-                cur_avatar_status.unk13e = 0;
+            if (rec->return_angle_y != -1) {
+                cur_avatar_status.camera_rotation_target.vy = rec->return_angle_y;
+                cur_avatar_status.view_rotation_offset_y = 0;
             }
-            if (rec->unk20 != -1) {
-                cur_avatar_status.unk12c.vz = rec->unk20;
-                cur_avatar_status.unk140 = 0;
+            if (rec->return_angle_z != -1) {
+                cur_avatar_status.camera_rotation_target.vz = rec->return_angle_z;
+                cur_avatar_status.view_rotation_offset_z = 0;
             }
-            movie_state.unk372 = 1;
+            movie_state.stream_status = 1;
         }
         break;
     case 3:
@@ -263,13 +263,13 @@ void player_update_frame(void)
         player_update_actions_and_charge();
         player_update_camera_rotation();
         player_update_horizontal_motion();
-        cur_avatar_status.unk16c = 0;
+        cur_avatar_status.camera_vertical_offset = 0;
         player_update_vertical_motion();
-        cur_avatar_status.unk16c += (rcos(cur_avatar_status.unk188.count) >> 4) - 256;
-        cur_avatar_status.unk140 = rsin(cur_avatar_status.unk188.count) >> 6;
-        cur_avatar_status.unk188.count = (cur_avatar_status.unk188.count + 128) & 0xfff;
-        if (cur_avatar_status.unk188.count == 0) {
-            cur_avatar_status.unk140 = 0;
+        cur_avatar_status.camera_vertical_offset += (rcos(cur_avatar_status.reaction.bob_phase) >> 4) - 256;
+        cur_avatar_status.view_rotation_offset_z = rsin(cur_avatar_status.reaction.bob_phase) >> 6;
+        cur_avatar_status.reaction.bob_phase = (cur_avatar_status.reaction.bob_phase + 128) & 0xfff;
+        if (cur_avatar_status.reaction.bob_phase == 0) {
+            cur_avatar_status.view_rotation_offset_z = 0;
             player_reset_reaction_state();
         }
         player_handle_interaction_and_menu();
@@ -278,11 +278,11 @@ void player_update_frame(void)
         player_update_actions_and_charge();
         player_update_camera_rotation();
         player_update_horizontal_motion();
-        cur_avatar_status.unk188.knock.dir.vy = 1;
+        cur_avatar_status.reaction.damage.vel.vy = 1;
         player_move_reaction_with_collision();
         player_update_reaction_rotation_offsets();
         /* unk134 and unk136 are tested as one word (lw). */
-        if (*(s32 *)&cur_avatar_status.unk134 == 0 && cur_avatar_status.unk138 == 0) {
+        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0 && cur_avatar_status.reaction_rotation_offset_z == 0) {
             player_reset_reaction_state();
         }
         player_update_vertical_motion();
@@ -290,26 +290,26 @@ void player_update_frame(void)
         break;
     case 0x12:
         player_update_reaction_rotation_offsets();
-        if (*(s32 *)&cur_avatar_status.unk134 == 0 && cur_avatar_status.unk138 == 0) {
+        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0 && cur_avatar_status.reaction_rotation_offset_z == 0) {
             player_reset_reaction_state();
         }
         player_handle_interaction_and_menu();
         break;
     case 0x11:
         cur_avatar_status.hp = 0;
-        cur_avatar_status.unk188.knock.push.vx =
-            angle_velocity_step(-1024, cur_avatar_status.unk134, cur_avatar_status.unk188.knock.push.vx, 8,
-                                4);
-        cur_avatar_status.unk134 += cur_avatar_status.unk188.knock.push.vx * 3 >> 1;
-        if (cur_avatar_status.unk16c < 1500) {
-            cur_avatar_status.unk16c += 500;
+        cur_avatar_status.reaction.damage.angular_vel.vx =
+            angle_velocity_step(-1024, cur_avatar_status.reaction_rotation_offset_x,
+                                cur_avatar_status.reaction.damage.angular_vel.vx, 8, 4);
+        cur_avatar_status.reaction_rotation_offset_x += cur_avatar_status.reaction.damage.angular_vel.vx * 3 >> 1;
+        if (cur_avatar_status.camera_vertical_offset < 1500) {
+            cur_avatar_status.camera_vertical_offset += 500;
         } else {
-            cur_avatar_status.unk16c = 1500;
+            cur_avatar_status.camera_vertical_offset = 1500;
         }
         player_move_reaction_with_collision();
-        if (++cur_avatar_status.unk13a >= 32) {
-            if (cur_avatar_status.unk13a < 65) {
-                c = fixed_lerp_q12(0, 0xff, (cur_avatar_status.unk13a - 32) << 7);
+        if (++cur_avatar_status.death_transition_frame >= 32) {
+            if (cur_avatar_status.death_transition_frame < 65) {
+                c = fixed_lerp_q12(0, 0xff, (cur_avatar_status.death_transition_frame - 32) << 7);
                 render_set_color_overlay(0x82, c, c, c);
             } else {
                 o4c = effect_status.objects;
@@ -321,16 +321,16 @@ void player_update_frame(void)
                 if (game_counter_is_nonzero(0x6b)) {
                     actor_disable_type3_transition_actors();
                     game_counter_decrement(0x6b);
-                    cur_avatar_status.unk12c.vy = 0x2d5;
+                    cur_avatar_status.camera_rotation_target.vy = 0x2d5;
                     cur_avatar_status.pos.vy = -14976;
                     cur_avatar_status.pos.vz = 0xc000;
-                    cur_avatar_status.unk12c.vx = 0;
-                    cur_avatar_status.unk12c.vz = 0;
+                    cur_avatar_status.camera_rotation_target.vx = 0;
+                    cur_avatar_status.camera_rotation_target.vz = 0;
                     cur_avatar_status.pos.vx = 0x1c800;
-                    cur_avatar_status.unk160 = 5;
+                    cur_avatar_status.map_layer_offset = 5;
                     map_reveal_visited_rects();
                     repeat_store_word((u32 *)map_visited_cells, 0, 200);
-                    event_world_state_save_slot(asset_status.area[0]);
+                    event_world_state_save_slot(asset_status.active_resource_ids[0]);
                     player_reset_status();
                     player_recalculate_combat_stats();
                 } else {
@@ -347,45 +347,45 @@ void player_update_frame(void)
         }
         break;
     }
-    cur_avatar_status.unk17a = cur_avatar_status.unk178;
-    if (cur_avatar_status.unk78 != 0) {
-        if (cur_avatar_status.unk78 % 30 == 0) {
-            cur_avatar_status.unk174 = 2400;
-            cur_avatar_status.unk176 = 60;
+    cur_avatar_status.pad_buttons_previous = cur_avatar_status.pad_buttons;
+    if (cur_avatar_status.poison_timer != 0) {
+        if (cur_avatar_status.poison_timer % 30 == 0) {
+            cur_avatar_status.damage_red_overlay_scale = 2400;
+            cur_avatar_status.damage_red_overlay_decay = 60;
             player_adjust_hp_unclamped(-1);
         }
-        cur_avatar_status.unk78--;
+        cur_avatar_status.poison_timer--;
     }
-    if (cur_avatar_status.unk86 != 0) {
-        if (--cur_avatar_status.unk86 == 0) {
+    if (cur_avatar_status.fire_defense_boost_timer != 0) {
+        if (--cur_avatar_status.fire_defense_boost_timer == 0) {
             player_recalculate_combat_stats();
         }
     }
-    if (cur_avatar_status.unk88 != 0) {
-        if (--cur_avatar_status.unk88 == 0) {
+    if (cur_avatar_status.damage_immunity_timer != 0) {
+        if (--cur_avatar_status.damage_immunity_timer == 0) {
             player_recalculate_combat_stats();
         }
     }
-    if (cur_avatar_status.unk8a != 0) {
-        if (--cur_avatar_status.unk8a == 0) {
+    if (cur_avatar_status.physical_defense_boost_timer != 0) {
+        if (--cur_avatar_status.physical_defense_boost_timer == 0) {
             player_recalculate_combat_stats();
         }
     }
-    if (cur_avatar_status.unk92 != 0) {
-        cur_avatar_status.unk1c = cur_avatar_status.unk1a;
-        if (--cur_avatar_status.unk92 == 0) {
+    if (cur_avatar_status.full_mp_timer != 0) {
+        cur_avatar_status.mp = cur_avatar_status.mp_max;
+        if (--cur_avatar_status.full_mp_timer == 0) {
             notify_enqueue(0x1b);
         }
     }
-    if (cur_avatar_status.unk94 != 0) {
-        if (--cur_avatar_status.unk94 == 0) {
+    if (cur_avatar_status.magic_boost_timer != 0) {
+        if (--cur_avatar_status.magic_boost_timer == 0) {
             player_recalculate_combat_stats();
             notify_enqueue(0x1b);
         }
     }
-    cur_avatar_status.unk124.vx = cur_avatar_status.unk12c.vx + cur_avatar_status.unk134 + cur_avatar_status.unk13c + cur_avatar_status.unk144;
-    cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy + cur_avatar_status.unk136 + cur_avatar_status.unk13e + cur_avatar_status.unk146;
-    cur_avatar_status.unk124.vz = cur_avatar_status.unk12c.vz + cur_avatar_status.unk138 + cur_avatar_status.unk140 + cur_avatar_status.unk148;
+    cur_avatar_status.camera_rotation.vx = cur_avatar_status.camera_rotation_target.vx + cur_avatar_status.reaction_rotation_offset_x + cur_avatar_status.view_rotation_offset_x + cur_avatar_status.vertical_motion_pitch_offset;
+    cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy + cur_avatar_status.reaction_rotation_offset_y + cur_avatar_status.view_rotation_offset_y + cur_avatar_status.camera_yaw_offset;
+    cur_avatar_status.camera_rotation.vz = cur_avatar_status.camera_rotation_target.vz + cur_avatar_status.reaction_rotation_offset_z + cur_avatar_status.view_rotation_offset_z + cur_avatar_status.camera_roll_offset;
     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
     actor_status.actor_overlap_exclusion_flags = 0;
     hit = actor_find_overlap_excluding_target_type3(cur_avatar_status.pos.vx, cur_avatar_status.pos.vy,
@@ -394,55 +394,55 @@ void player_update_frame(void)
         player_begin_actor_overlap_bob();
     }
     player_update_weapon_attack();
-    if (cur_avatar_status.unkcb != 0xff) {
-        if (cur_avatar_status.unkb0->hp_regen_interval != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->hp_regen_interval == 0) {
+    if (cur_avatar_status.equipped_weapon_id != 0xff) {
+        if (cur_avatar_status.equipped_weapon_record->hp_regen_interval != 0 && cur_avatar_status.equipment_effect_ticks % cur_avatar_status.equipped_weapon_record->hp_regen_interval == 0) {
             player_adjust_hp(1);
         }
-        if (cur_avatar_status.unkb0->mp_regen_interval != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->mp_regen_interval == 0) {
+        if (cur_avatar_status.equipped_weapon_record->mp_regen_interval != 0 && cur_avatar_status.equipment_effect_ticks % cur_avatar_status.equipped_weapon_record->mp_regen_interval == 0) {
             player_adjust_mp(1);
         }
-        if (cur_avatar_status.unkf2 == 0x35 && scene_display_sys.unk15996 != 0 && cur_avatar_status.unk9c % 900 == 0) {
+        if (cur_avatar_status.equipped_shield_id == 0x35 && scene_display_sys.unk15996 != 0 && cur_avatar_status.equipment_effect_ticks % 900 == 0) {
             player_adjust_mp(1);
         }
     }
-    if (cur_avatar_status.unkf0 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unkd4);
-        player_apply_equipment_mp_tick(cur_avatar_status.unkd4);
+    if (cur_avatar_status.equipped_head_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_head_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_head_record);
     }
-    if (cur_avatar_status.unkf1 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unkd8);
-        player_apply_equipment_mp_tick(cur_avatar_status.unkd8);
+    if (cur_avatar_status.equipped_body_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_body_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_body_record);
     }
-    if (cur_avatar_status.unkf2 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unkdc);
-        player_apply_equipment_mp_tick(cur_avatar_status.unkdc);
+    if (cur_avatar_status.equipped_shield_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_shield_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_shield_record);
     }
-    if (cur_avatar_status.unkf3 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unke0);
-        player_apply_equipment_mp_tick(cur_avatar_status.unke0);
+    if (cur_avatar_status.equipped_arm_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_arm_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_arm_record);
     }
-    if (cur_avatar_status.unkf4 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unke4);
-        player_apply_equipment_mp_tick(cur_avatar_status.unke4);
+    if (cur_avatar_status.equipped_leg_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_leg_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_leg_record);
     }
-    if (cur_avatar_status.unkf5 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unke8);
-        player_apply_equipment_mp_tick(cur_avatar_status.unke8);
+    if (cur_avatar_status.equipped_accessory_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_accessory_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_accessory_record);
     }
-    if (cur_avatar_status.unkf6 != 0xff) {
-        player_apply_equipment_hp_tick(cur_avatar_status.unkec);
-        player_apply_equipment_mp_tick(cur_avatar_status.unkec);
+    if (cur_avatar_status.equipped_extra_id != 0xff) {
+        player_apply_equipment_hp_tick(cur_avatar_status.equipped_extra_record);
+        player_apply_equipment_mp_tick(cur_avatar_status.equipped_extra_record);
     }
-    if (cur_avatar_status.unkcb == 0x16 && cur_avatar_status.unk9c % 150 == 0 && (rand() >> 12) == 0) {
-        cur_avatar_status.unk84 = 200;
+    if (cur_avatar_status.equipped_weapon_id == 0x16 && cur_avatar_status.equipment_effect_ticks % 150 == 0 && (rand() >> 12) == 0) {
+        cur_avatar_status.paralysis_timer = 200;
     }
-    if (cur_avatar_status.unkf2 == 0x3a) {
+    if (cur_avatar_status.equipped_shield_id == 0x3a) {
         light_interpolate_color_and_fog(10, 10, 10, 0xd05, 6000, 0x800);
     }
-    if ((cur_avatar_status.unkf5 == 0x52 || cur_avatar_status.unkf6 == 0x52) && (rand() >> 7) == 0) {
-        cur_avatar_status.unk78 = 900;
+    if ((cur_avatar_status.equipped_accessory_id == 0x52 || cur_avatar_status.equipped_extra_id == 0x52) && (rand() >> 7) == 0) {
+        cur_avatar_status.poison_timer = 900;
     }
-    cur_avatar_status.unk9c++;
+    cur_avatar_status.equipment_effect_ticks++;
 }
 
 /*

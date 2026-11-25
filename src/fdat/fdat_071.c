@@ -83,7 +83,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
     for (i = 0; (i = map_object_find_interaction_target(i, pos, 800, 2500, angle->vy, 0x200)) != -1; i++) {
         obj = &map_objects_slots.objects[i];
         def = &map_objects_slots.defs[obj->object_id];
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         if ((def->action == 9 || def->action == 0x15) && obj->arg.b.unk3c != 0) {
             if (obj->arg.b.unk3a.index == 0xffff) {
             message:
@@ -151,12 +151,12 @@ void area_use_item_place_in_socket(VECTOR *pos, SVECTOR *angle, s32 item)
         }
         obj->arg.b.unk38 = item;
         obj->action_state = 0;
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
         game_counter_decrement(0x86);
         event_spawn_effect_object(obj, 0x86);
     } else if (map_object_check_and_consume_marker(obj, 0x86) == 3) {
         notify_enqueue(7);
-        cur_evt_state.unk0 = 1;
+        cur_evt_state.interaction_handled = 1;
     }
 }
 
