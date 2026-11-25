@@ -679,14 +679,14 @@ s32 collision_probe_floor_height(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     return map_world.collision_floor_height;
 }
 
-/* Floor height at (x, z) on the map cell's layer for area (2 the upper one). */
+/* Floor height at (x, z) on the map cell's layer for layer_mask (2 the upper one). */
 ADDRESS(0x80033b8c, 0xc0)
-s32 collision_sample_map_layer_height(u8 area, s32 x, s32 z, s32 radius, s32 height)
+s32 collision_sample_map_layer_height(u8 layer_mask, s32 x, s32 z, s32 radius, s32 height)
 {
     MapCell *cell;
 
     cell = &map_world.cells[z >> 11][x >> 11];
-    if (area == 2) {
+    if (layer_mask == 2) {
         map_world.collision_layer_offset = 5;
         map_world.collision_layer_height = -cell->layer[1].elevation << 7;
     } else {

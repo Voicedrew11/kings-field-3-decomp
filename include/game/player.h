@@ -28,11 +28,12 @@ s32 player_calculate_damage_component(s32 power, s32 defense, s32 attack);
 void player_adjust_hp_unclamped(s32 amount);
 void player_apply_damage_reaction(VECTOR *from, s32 damage, s32 flags);
 void player_cap_status_components(s32 flags);
-void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
-                         u16 element3, u16 element4, u16 scale, u16 knockback, VECTOR *from);
+void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 status_flags, u16 element0, u16 element1,
+                         u16 element2, u16 element3, u16 element4, u16 scale, u16 damage_multiplier_tenths,
+                         VECTOR *from);
 void player_apply_radial_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u16 slash,
                                 u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
-                                u16 element3, u16 element4, s32 flags, u16 knockback);
+                                u16 element3, u16 element4, s32 flags, u16 damage_multiplier_tenths);
 void player_get_camera_pose(VECTOR *pos, SVECTOR *angle);
 void player_reset_status(void);
 void player_initialize_state(void);
@@ -78,9 +79,9 @@ void player_update_reaction_rotation_offsets(void);
 void player_render_frame_and_release_pool(void);
 void player_handle_interaction_and_menu(void);
 void player_reset_reaction_state(void);
-void player_begin_movie_playback(u8 id);
-void player_begin_movie_approach(u8 id);
-void player_begin_movie_return(u8 id);
+void player_begin_movie_playback(u8 movie_id);
+void player_begin_movie_approach(u8 movie_id);
+void player_begin_movie_return(u8 movie_id);
 void player_begin_rotation_reaction(SVECTOR *dir);
 void func_800308f4(void);
 void player_begin_moving_damage_reaction(SVECTOR *dir, SVECTOR *push, s16 lift);

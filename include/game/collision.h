@@ -10,7 +10,7 @@
 #include <sys/types.h>
 
 s32 collision_probe_floor_height(s32 x, s32 y, s32 z, s32 radius, s32 shape);
-s32 collision_sample_map_layer_height(u8 area, s32 x, s32 z, s32 radius, s32 height);
+s32 collision_sample_map_layer_height(u8 layer_mask, s32 x, s32 z, s32 radius, s32 height);
 void map_cell_add_layer_occupancy(s32 x, s32 z, s32 radius, s32 count);
 s32 collision_query_shapes_with_layer_sample(s32 x, s32 y, s32 z, s32 radius, s32 shape);
 void collision_cache_load_hit_bounds(void);

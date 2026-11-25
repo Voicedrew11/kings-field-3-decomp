@@ -397,7 +397,7 @@ typedef struct MapObjectSHalves {
     s16 unk3a;
     s16 unk3c;
     s16 motion_velocity; /* +0x3e: kinds 0x60..0x62: fall speed (map_object_spawn_effect,
-                     * map_object_spawn_scattered_effect) */
+                     * map_object_spawn_gold_drop) */
     s16 unk40;      /* +0x40: kind 6: turn speed (angle_velocity_step) */
     s16 base_yaw;
 } MapObjectSHalves;
@@ -697,7 +697,7 @@ typedef struct ActorGroup {
     u16 default_vertical_anchor_offset;
     s16 experience_reward; /* +0x1e: passed to player_add_experience when the record dies */
     u16 defense_components[8]; /* +0x20: resistances to the eight attack stats (actor_apply_magic_to_actor) */
-    u16 gold_drop_center; /* +0x30: drop id (map_object_spawn_scattered_effect) when script 3 ends */
+    u16 gold_drop_center; /* +0x30: drop id (map_object_spawn_gold_drop) when script 3 ends */
     u16 initial_model_scale_q12; /* +0x32: scale */
     u32 initial_actor_flags; /* +0x34: flags copied to Actor.unk28 */
     u8 *targets[16]; /* +0x38: script records, the first byte their id; 0 ends */

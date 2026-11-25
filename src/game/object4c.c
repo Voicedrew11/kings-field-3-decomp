@@ -302,19 +302,20 @@ void effect_pool_initialize_fixed(Effect *obj, s32 a1, s32 a2, s32 y)
 }
 
 /*
- * Makes a record of the given id from a free one (NULL when none is free):
- * kind goes to unk6, flags to unk0, pos and vel are copied (vel may be NULL).
- * Each id sets its model, size, life and payload; some read further
- * arguments after vel through &vel (callers pass 5 to 12 arguments).
- * Unknown ids free the record again. kind, flags and id arrive as int and
- * are narrowed at entry.
+ * Makes a record of the given kind (its MagicRecord index) from a free one
+ * (NULL when none is free): damage_multiplier_tenths and type are stored, pos
+ * and vel are copied (vel may be NULL). Each kind sets its model, size, life
+ * and payload; some read further arguments after vel through &vel (callers
+ * pass 5 to 12 arguments). Unknown kinds free the record again. The first
+ * three arguments arrive as int and are narrowed at entry.
  */
 ADDRESS(0x80053c84, 0x1ec8)
-Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *pos, SVECTOR *vel, ...)
+Effect *effect_construct_record(int damage_multiplier_tenths_in, int type_in, int kind_in, VECTOR *pos,
+                                SVECTOR *vel, ...)
 {
+    u8 damage_multiplier_tenths = damage_multiplier_tenths_in;
+    u8 type = type_in;
     u8 kind = kind_in;
-    u8 flags = flags_in;
-    u8 id = id_in;
     Effect *obj;
     s32 *args;
     EffectTrailRow *trail;
@@ -327,8 +328,8 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
     if (obj == NULL) {
         goto end;
     }
-    obj->type = flags;
-    obj->kind = id;
+    obj->type = type;
+    obj->kind = kind;
     if (pos != NULL) {
         obj->pos = *pos;
     }
@@ -340,7 +341,7 @@ Effect *effect_construct_record(int kind_in, int flags_in, int id_in, VECTOR *po
     }
     obj->scale.vx = obj->scale.vy = obj->scale.vz = 0x1000;
     obj->phase = 0;
-    obj->damage_multiplier_tenths = kind;
+    obj->damage_multiplier_tenths = damage_multiplier_tenths;
     obj->angle.vx = obj->angle.vy = obj->angle.vz = 0;
     obj->animation_phase = 0;
     obj->unk5 = 0;

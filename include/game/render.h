@@ -544,12 +544,14 @@ void render_enqueue_map_subdivided(u16 id);
 void render_map_cell_window(void);
 void render_active_model_rows(void);
 void render_player_weapon(void);
-void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                        AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                        s32 flags, s32 depth);
-void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                                AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                                u8 flags, s32 depth);
+void render_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                        AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase,
+                        u8 lighting_override_index, s16 lighting_blend, s32 render_mode,
+                        s32 render_depth_offset);
+void render_distant_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                                AnimSlot **animation_cache, MATRIX *view, u16 animation_id,
+                                u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
+                                u8 render_mode, s32 render_depth_offset);
 void render_scene_and_update_resources(void);
 void menu_format_number(s32 value, s32 digits, s32 arg2, s32 arg3, u8 *out);
 void tim_upload_images(u8 *file);

@@ -49,11 +49,11 @@ MapObjectDefBytes	0xc	supported	asm;map_object_update_actions lbu def+0x0c..+0x1
 MapObjectDefHalves	0xc	supported	asm;map_object_update_actions lhu def+0x0c (vertex), +0x0e/+0x10 (collision_query_world radius/height); map_object_find_collision_at_point/collision_cache_load_hit_bounds lhu +0xe/+0x10	WIP (game-47010)
 MapObjectDefSHalves	0xc	supported	asm;event_map_object_interact lh def+0x0c/+0x0e (scene_position_from_camera_offset dy/dz) and lhu +0x10 into an s16 (MapObject.unke while held)	WIP (game-unclaimed)
 MapObjectHalfword	0x2	supported	asm;FDAT slot 0 lhu/sh MapObject+0x3a (area_interact_item_containers);FDAT slot 3 lbu MapObject+0x3b (12 modules)	WIP (fdat)
-MapObjectHalves	0x10	supported	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_scattered_effect sh -120 to +0x3e, map_object_step_offset_motion sh +0x40	WIP (game-k)
+MapObjectHalves	0x10	supported	asm;map_object_refresh_cell_markers lhu +0x3a, map_object_effect_pool_acquire lhu +0x3c, map_object_spawn_gold_drop sh -120 to +0x3e, map_object_step_offset_motion sh +0x40	WIP (game-k)
 MapObjectModel	0x10	supported	asm;render_scene_and_update_resources kind 0xf2 and default kinds: AnimSlot pointer at MapObject+0x34, ranges lbu +0x38/+0x39, lh +0x3a/+0x3c, lbu +0x3e	WIP (render-tu)
 MapObjectPlacement	0x18	supported	asm;map_object_initialize_from_placements reads 350 24-byte records: lbu +0/+1/+2, lhu +4/+6, lh +8/+10/+12, +16..+23 copied to MapObject+0x38	WIP (game-big)
 MapObjectSBytes	0x10	supported	asm;map_object_update_actions lb MapObject+0x3c/+0x3d (kind 0xea) and +0x40..+0x42 (kind 0xe0)	WIP (game-47010)
-MapObjectSHalves	0x10	supported	asm;map_object_update_actions lh MapObject+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_scattered_effect sh +0x3e	WIP (game-47010)
+MapObjectSHalves	0x10	supported	asm;map_object_update_actions lh MapObject+0x3e (kinds 0x60..0x62) and +0x40 (kind 6); map_object_spawn_effect/map_object_spawn_gold_drop sh +0x3e	WIP (game-47010)
 MapObjectState	0x8868	supported	asm;game loop word-count clear;translate_active_world_positions records at +0x1f20;collision_cache_load_hit_bounds 24-byte records at +0 indexed by MapObject.unk6	WIP (game-c)
 MapObjectWords	0x10	supported	asm;map_object_pool_reset sw zero to +0x34/+0x38/+0x3c, map_object_set_property sw pos.vy to +0x40	WIP (game-k)
 MapPlacedEntry	0x18	supported	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at sound_weapon_vab_buffer;translate_active_world_positions 24-byte stride, 128 records	WIP field names; untouched ranges opaque

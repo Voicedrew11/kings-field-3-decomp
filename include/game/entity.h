@@ -113,7 +113,7 @@ VECTOR *actor_resolve_group_position(Actor *obj, VECTOR *out);
 void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed);
 s32 actor_compute_target_direction(Actor *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out,
                                    s32 pitch, s16 turn, s32 steps);
-void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...);
+void actor_dispatch_group_effect(s32 kind, s32 damage_multiplier_tenths, s32 vertex, ...);
 s32 actor_sound_note_offset(Actor *obj);
 void actor_play_target_sound(Actor *obj);
 void actor_update_behavior(void);

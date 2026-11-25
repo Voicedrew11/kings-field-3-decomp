@@ -673,26 +673,26 @@ void player_reset_reaction_state(void)
 }
 
 ADDRESS(0x800307f4, 0x1c)
-void player_begin_movie_playback(u8 id)
+void player_begin_movie_playback(u8 movie_id)
 {
     cur_avatar_status.reaction_mode = 8;
-    cur_avatar_status.reaction.movie.movie_id = id;
+    cur_avatar_status.reaction.movie.movie_id = movie_id;
 }
 
 ADDRESS(0x80030810, 0x54)
-void player_begin_movie_approach(u8 id)
+void player_begin_movie_approach(u8 movie_id)
 {
     cur_avatar_status.reaction_mode = 7;
-    cur_avatar_status.reaction.movie.movie_id = id;
+    cur_avatar_status.reaction.movie.movie_id = movie_id;
     cur_avatar_status.reaction.movie.step = 0;
     cur_avatar_status.reaction.movie.start_rotation = cur_avatar_status.camera_rotation_target;
 }
 
 ADDRESS(0x80030864, 0x54)
-void player_begin_movie_return(u8 id)
+void player_begin_movie_return(u8 movie_id)
 {
     cur_avatar_status.reaction_mode = 9;
-    cur_avatar_status.reaction.movie.movie_id = id;
+    cur_avatar_status.reaction.movie.movie_id = movie_id;
     cur_avatar_status.reaction.movie.step = 0;
     cur_avatar_status.reaction.movie.start_rotation = cur_avatar_status.camera_rotation_target;
 }

@@ -756,18 +756,21 @@ void render_player_weapon(void)
 
 /*
  * Draws model file id (a monster or object model) at pos turned by rotation:
- * lit by the light record of the map layer under it (area 1 or 2), blended by
- * t toward light record light2 (0xff for none), scaled by scale and turned by
- * view when given, posed by animation_prepare_asset_vertices for anim < 128 (part anim & 0x7f
- * otherwise). flags: 0x40 render_enqueue_tmd_subdivided / flat, 4 render_enqueue_blended_tmd (flags & 3),
- * else render_enqueue_textured_tmd; 0x80 keeps the depth offset for models below the eye.
- * With view == NULL the vertices are transformed flat (x/y kept, z = depth).
+ * lit by the light record of the map layer under it (layer_mask 1 or 2), blended
+ * by lighting_blend (Q12) toward light record lighting_override_index (0xff for
+ * none), scaled by scale and turned by view when given, posed by
+ * animation_prepare_asset_vertices from animation_cache at animation_phase (Q12)
+ * for animation_id < 128 (part animation_id & 0x7f otherwise). render_mode: 0x40
+ * render_enqueue_tmd_subdivided / flat, 4 render_enqueue_blended_tmd (render_mode & 3),
+ * else render_enqueue_textured_tmd; 0x80 keeps render_depth_offset for models below
+ * the eye. With view == NULL the vertices are transformed flat (x/y kept, z =
+ * render_depth_offset).
  */
 
 ADDRESS(0x8003e34c, 0xfb8)
-void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                        AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                        s32 flags, s32 depth)
+void render_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                        AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
+                        s32 render_mode, s32 render_depth_offset)
 {
     SVECTOR rel;
     VECTOR delta;
@@ -799,7 +802,7 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     SCRATCH->next = scene_display_sys.pool->next;
     *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->end = scene_display_sys.pool->end;
-    mode = flags;
+    mode = render_mode;
     if (SCRATCH->end - 30720 < SCRATCH->next) {
         mode &= 0xbf;
     }
@@ -821,7 +824,7 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
 
             layer = row[pos->vx >> 11].layer;
         }
-        if (area != 1) {
+        if (layer_mask != 1) {
             layer++;
         }
         light = &scene_display_sys.lights[layer->lighting_index & 0x3f];
@@ -837,14 +840,14 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     if (mode & 0x80) {
         mode &= 0x7f;
     } else if (rel.vy <= 0) {
-        depth += 240;
+        render_depth_offset += 240;
     }
     matrix_set_rotation_yxz(rotation, mat);
-    if (light2 != 0xff) {
-        other = &scene_display_sys.lights[light2];
+    if (lighting_override_index != 0xff) {
+        other = &scene_display_sys.lights[lighting_override_index];
         if (other->color_matrix.m[0][0] != -1) {
             fixed_lerp_nine_halfwords_q12((MATRIX *)&light->color_matrix, (MATRIX *)&other->color_matrix,
-                                          &blend, t);
+                                          &blend, lighting_blend);
             gte_SetColorMatrix(&blend);
         } else {
             gte_SetColorMatrix(&light->color_matrix);
@@ -855,15 +858,15 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
             gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
         }
         if (other->fog_near != 0xffff && other->fog_far != 0xffff) {
-            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, t),
-                          fixed_lerp_q12(light->fog_far, other->fog_far, t));
+            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, lighting_blend),
+                          fixed_lerp_q12(light->fog_far, other->fog_far, lighting_blend));
         } else {
             fog_set_range(light->fog_near, light->fog_far);
         }
         if (other->back_color.r != 0xff) {
-            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, t),
-                             fixed_lerp_q12(light->back_color.g, other->back_color.g, t),
-                             fixed_lerp_q12(light->back_color.b, other->back_color.b, t));
+            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, lighting_blend),
+                             fixed_lerp_q12(light->back_color.g, other->back_color.g, lighting_blend),
+                             fixed_lerp_q12(light->back_color.b, other->back_color.b, lighting_blend));
         } else {
             gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
         }
@@ -888,17 +891,17 @@ void render_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR
     file = scene_display_sys.models[id];
     model = file + ((ModelFile *)file)->tmd;
     scratch->model = model;
-    if (anim < 128) {
+    if (animation_id < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
-        if (animation_prepare_asset_vertices(owner, id, anim, time,
+        if (animation_prepare_asset_vertices(animation_cache, id, animation_id, animation_phase,
                                              ((ModelData *)model)->parts[0].vertex_count) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
-        n = anim & 0x7f;
+        n = animation_id & 0x7f;
         part = &((ModelData *)scratch->model)->parts[n];
         scratch->part = &((ModelData *)model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
@@ -921,12 +924,12 @@ draw:
                 screen->sxy.vx = scratch->w.model.transformed.vx;
                 screen->sxy.vy = scratch->w.model.transformed.vy;
                 screen->fog = scratch->w.model.transformed.vz;
-                screen->z = depth;
+                screen->z = render_depth_offset;
                 screen++;
                 vertex += 8;
             }
         }
-        render_enqueue_textured_tmd(n, depth);
+        render_enqueue_textured_tmd(n, render_depth_offset);
     } else if (mode & 4) {
         if (view != NULL) {
             s32 i = part->vertex_count;
@@ -965,12 +968,12 @@ draw:
                 screen->sxy.vx = scratch->w.model.transformed.vx;
                 screen->sxy.vy = scratch->w.model.transformed.vy;
                 screen->fog = scratch->w.model.transformed.vz;
-                screen->z = depth;
+                screen->z = render_depth_offset;
                 screen++;
                 vertex += 8;
             }
         }
-        render_enqueue_blended_tmd(n, depth, mode & 3);
+        render_enqueue_blended_tmd(n, render_depth_offset, mode & 3);
     } else {
         if (view != NULL) {
             s32 i = part->vertex_count;
@@ -1009,12 +1012,12 @@ draw:
                 screen->sxy.vx = scratch->w.model.transformed.vx;
                 screen->sxy.vy = scratch->w.model.transformed.vy;
                 screen->fog = scratch->w.model.transformed.vz;
-                screen->z = depth;
+                screen->z = render_depth_offset;
                 screen++;
                 vertex += 8;
             }
         }
-        render_enqueue_textured_tmd(n, depth);
+        render_enqueue_textured_tmd(n, render_depth_offset);
     }
 done:
     scene_display_sys.pool->next = scratch->next;
@@ -1024,17 +1027,17 @@ done:
 
 /*
  * render_world_model's variant for large models (render_enqueue_distant_tmd): lit by light
- * record 0 (blended by t toward light2). With a view matrix the model is
+ * record 0 (blended by lighting_blend toward lighting_override_index). With a view matrix the model is
  * skipped outside a 1536-unit wide angle around the player's heading, and the
  * translation is kept below 0x8000 by halving it shift times (the view matrix
  * rows are scaled down to match); render_enqueue_distant_tmd gets shift and the distance.
- * area is unused.
+ * layer_mask is unused.
  */
 
 ADDRESS(0x8003f304, 0xda8)
-void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                                AnimSlot **owner, MATRIX *view, u16 anim, u16 time, u8 light2, s16 t,
-                                u8 flags, s32 depth)
+void render_distant_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
+                                AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
+                                u8 render_mode, s32 render_depth_offset)
 {
     SVECTOR rel;
     VECTOR delta;
@@ -1106,15 +1109,15 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
         m.t[1] = pos->vy;
         m.t[2] = pos->vz;
     }
-    if (!(flags & 0x80) && rel.vy <= 0) {
-        depth += 240;
+    if (!(render_mode & 0x80) && rel.vy <= 0) {
+        render_depth_offset += 240;
     }
     matrix_set_rotation_yxz(rotation, mat);
-    if (light2 != 0xff) {
-        other = &scene_display_sys.lights[light2];
+    if (lighting_override_index != 0xff) {
+        other = &scene_display_sys.lights[lighting_override_index];
         if (other->color_matrix.m[0][0] != -1) {
             fixed_lerp_nine_halfwords_q12((MATRIX *)&light->color_matrix, (MATRIX *)&other->color_matrix,
-                                          &blend, t);
+                                          &blend, lighting_blend);
             gte_SetColorMatrix(&blend);
         } else {
             gte_SetColorMatrix(&light->color_matrix);
@@ -1125,15 +1128,15 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
             gte_MulMatrix0(&light->light_matrices[0], mat, &lm);
         }
         if (other->fog_near != 0xffff && other->fog_far != 0xffff) {
-            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, t),
-                          fixed_lerp_q12(light->fog_far, other->fog_far, t));
+            fog_set_range(fixed_lerp_q12(light->fog_near, other->fog_near, lighting_blend),
+                          fixed_lerp_q12(light->fog_far, other->fog_far, lighting_blend));
         } else {
             fog_set_range(light->fog_near, light->fog_far);
         }
         if (other->back_color.r != 0xff) {
-            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, t),
-                             fixed_lerp_q12(light->back_color.g, other->back_color.g, t),
-                             fixed_lerp_q12(light->back_color.b, other->back_color.b, t));
+            gte_SetBackColor(fixed_lerp_q12(light->back_color.r, other->back_color.r, lighting_blend),
+                             fixed_lerp_q12(light->back_color.g, other->back_color.g, lighting_blend),
+                             fixed_lerp_q12(light->back_color.b, other->back_color.b, lighting_blend));
         } else {
             gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
         }
@@ -1168,17 +1171,17 @@ void render_distant_world_model(u8 area, u16 id, VECTOR *pos, SVECTOR *rotation,
     file = scene_display_sys.models[id];
     model = file + ((ModelFile *)file)->tmd;
     scratch->model = model;
-    if (anim < 128) {
+    if (animation_id < 128) {
         n = 0;
         part = ((ModelData *)model)->parts;
-        if (animation_prepare_asset_vertices(owner, id, anim, time,
+        if (animation_prepare_asset_vertices(animation_cache, id, animation_id, animation_phase,
                                              ((ModelData *)model)->parts[0].vertex_count) != 0) {
             goto draw;
         }
         scratch->part = ((ModelData *)scratch->model)->parts;
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
-        n = anim & 0x7f;
+        n = animation_id & 0x7f;
         part = &((ModelData *)scratch->model)->parts[n];
         scratch->part = &((ModelData *)model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
@@ -1211,12 +1214,12 @@ draw:
             screen->sxy.vx = scratch->w.model.transformed.vx;
             screen->sxy.vy = scratch->w.model.transformed.vy;
             screen->fog = scratch->w.model.transformed.vz;
-            screen->z = depth;
+            screen->z = render_depth_offset;
             screen++;
             vertex += 8;
         }
     }
-    render_enqueue_distant_tmd(n, depth, shift, dist);
+    render_enqueue_distant_tmd(n, render_depth_offset, shift, dist);
     scene_display_sys.pool->next = scratch->next;
     scene_display_sys.tmd_prim_count = scratch->draw.count.tmd_prim_count;
     scene_display_sys.ot_count = scratch->draw.count.ot_count;

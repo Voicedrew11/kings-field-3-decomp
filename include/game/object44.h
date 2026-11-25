@@ -38,7 +38,7 @@ s32 map_object_find_interaction_target(s32 start, VECTOR *pos, s32 height, s32 r
 void map_object_start_action_if_idle(MapObject *obj, u8 kind);
 MapObject *map_object_effect_pool_acquire(s32 first, s32 count, s32 stamp);
 void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy);
-void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy);
+void map_object_spawn_gold_drop(u16 gold_amount, VECTOR *pos, s32 dy);
 void map_object_apply_marker_signal(u8 id);
 s32 map_object_check_and_consume_marker(MapObject *obj, s32 id);
 void map_object_process_marker_all(u8 id);

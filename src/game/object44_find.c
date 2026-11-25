@@ -262,11 +262,12 @@ void map_object_spawn_effect(u8 which, u8 def_id, VECTOR *pos, s32 dy)
 }
 
 /*
- * Spawns an MapObjectDef 0x95 record (kind 0x62) for MapObject target in the
- * ten-record pool from 350, at a random point 600 from pos raised by dy.
+ * Spawns a gold pickup (MapObjectDef 0x95, action 0x62) holding gold_amount
+ * (arg.h.unk3a, added to the player's gold when picked up) in the ten-record
+ * pool from 350, at a random point 600 from pos raised by dy.
  */
 ADDRESS(0x80046294, 0x128)
-void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
+void map_object_spawn_gold_drop(u16 gold_amount, VECTOR *pos, s32 dy)
 {
     MapObject *obj;
     u16 angle;
@@ -275,7 +276,7 @@ void map_object_spawn_scattered_effect(u16 target, VECTOR *pos, s32 dy)
     map_object_reset(obj);
     obj->arg.h.unk3c = map_objects_slots.scatter_pool_sequence++;
     obj->object_id = 0x95;
-    obj->arg.h.unk3a = target;
+    obj->arg.h.unk3a = gold_amount;
     angle = rand() >> 3;
     obj->pos.vx = (rsin(angle) * 600 >> 12) + pos->vx;
     obj->pos.vy = dy + pos->vy;

@@ -23,7 +23,8 @@ RODATA(0x800126e8, 0x5cc)
 #define AIM(speed) actor_compute_target_direction(obj, target, speed, &pos, &dir, -1, 0x400, 1)
 
 /*
- * Fires attack id of the current record from its model vertex (-1: the
+ * Fires effect kind of the current record (damage_multiplier_tenths goes to
+ * effect_construct_record with it) from its model vertex (-1: the
  * offset in the next three arguments rotated by its angle; -2: between two
  * vertices, aimed at a point eased toward the player): Effect records
  * through effect_construct_record, aimed at the player. The arguments past vertex
@@ -31,7 +32,7 @@ RODATA(0x800126e8, 0x5cc)
  * and stores vertex to its slot.
  */
 ADDRESS(0x8004f414, 0xb8c)
-void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
+void actor_dispatch_group_effect(s32 kind, s32 damage_multiplier_tenths, s32 vertex, ...)
 {
     Actor *obj;
     Actor *o;
@@ -78,21 +79,21 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
     pos.vx = obj->pos.vx + off.vx;
     pos.vy = obj->pos.vy + off.vy;
     pos.vz = obj->pos.vz + off.vz;
-    switch (id) {
+    switch (kind) {
     case 0:
     case 0x56:
     case 0x66:
         audio_play_spatial_default_range(0x31, &pos, 0x6e, 0);
         AIM(500);
-        shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        shot = effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         if (shot != NULL) {
             shot->cooldown = 3;
         }
         break;
     case 0xf:
         actor_compute_target_direction(obj, target, 0x200, &pos, &dir, 0, 0x400, 1);
-        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 0);
-        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir, 0, 1);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x81, (u8)kind, &pos, &dir, 0, 0);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x81, (u8)kind, &pos, &dir, 0, 1);
         break;
     case 0x27:
         if (cur_avatar_status.paralysis_timer != 0) {
@@ -100,21 +101,21 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         }
     case 0x26:
         actor_compute_target_direction(obj, target, 0, &pos, &dir, -1, 0x400, 1);
-        shot = effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir);
+        shot = effect_construct_record((u8)damage_multiplier_tenths, 0x81, (u8)kind, &pos, &dir);
         if (shot != NULL) {
             shot->cooldown = 0;
         }
         break;
     case 0x13:
-        id = 0x71;
+        kind = 0x71;
         goto lob;
     case 0x29:
     case 0x7d:
-        id = 0x7d;
+        kind = 0x7d;
         goto lob;
     case 0x2d:
     case 0x81:
-        id = 0x81;
+        kind = 0x81;
     lob:
         AIM(600);
         delay = (fixed_vector3_length(pos.vx - target->vx, pos.vy - target->vy,
@@ -122,47 +123,47 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         if (delay < 0) {
             delay = 0;
         }
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, delay);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, delay);
         break;
     case 0xd:
         AIM(0x2a8);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0xb:
         for (i = 0; i < 4; i++) {
             AIM(200);
-            effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, i);
+            effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, i);
         }
         break;
     case 0x32:
         for (i = 0; i < 4; i++) {
             AIM(200);
-            effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+            effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         }
         break;
     case 0x2a:
         AIM(600);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &obj->angle);
         break;
     case 0x2c:
         AIM(0x1a4);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0x35:
         AIM(300);
-        effect_construct_record((u8)kind, 0x81, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x81, (u8)kind, &pos, &dir);
         break;
     case 0x31:
         AIM(600);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0x44:
         AIM(0x226);
-        effect_construct_record((u8)kind, 0x83, 0x7c, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, 0x7c, &pos, &dir);
         break;
     case 0x45:
         AIM(700);
-        effect_construct_record((u8)kind, 0x83, 0x7b, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, 0x7b, &pos, &dir);
         break;
     case 0x42:
         vector_displacement_to_pitch_yaw(target->vx - pos.vx, -(pos.vy + 1600) + target->vy,
@@ -172,38 +173,38 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         pos.vx += dir.vx;
         pos.vy += dir.vy;
         pos.vz += dir.vz;
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &sv);
         break;
     case 2:
     case 0x57:
         AIM(400);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0xfe, 2);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, 0xfe, 2);
         break;
     case 0x2e:
-        id = 100;
+        kind = 100;
     case 0x64:
         AIM(0x3c0);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0x2f:
         AIM(0x1a4);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0x30:
         AIM(0x1e0);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 7:
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
         break;
     case 0x55:
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, actor_status.current_index, vertex,
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, NULL, actor_status.current_index, vertex,
                                 SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
         pitch_yaw_to_forward_vector(&obj->angle, &dir);
         vector3s_scale_shift12(0x226, &dir);
-        shot = effect_construct_record((u8)kind, 0x83, 0x28, &pos, &dir);
+        shot = effect_construct_record((u8)damage_multiplier_tenths, 0x83, 0x28, &pos, &dir);
         if (shot != NULL) {
             shot->cooldown = 3;
         }
@@ -212,7 +213,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
     case 0x33:
     case 0x34:
         AIM(300);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 0x1f:
     case 0x20:
@@ -222,19 +223,19 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
     case 0x24:
     case 0x25:
         AIM(300);
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &obj->angle);
         break;
     case 0x12:
     case 0x14:
         vector_displacement_to_pitch_yaw(target->vx - pos.vx, -(pos.vy + 1600) + target->vy,
                                          target->vz - pos.vz, &sv);
         pitch_yaw_to_forward_vector(&sv, &dir);
-        if (id == 0x12) {
+        if (kind == 0x12) {
             vector3s_scale_shift12(200, &dir);
         } else {
             vector3s_scale_shift12(20, &dir);
         }
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
         break;
     case 0x76:
         n = SCRIPT_U16((u8 *)args[1], 4);
@@ -277,7 +278,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         sv.vy = actor_compute_target_direction(obj, &p, 800, &pos, &dir, (s16)pitch, 0xc00, 1);
         sv.vx = pitch;
         sv.vz = 0;
-        shot = effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, &sv);
+        shot = effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &sv);
         if (shot != NULL) {
             shot->arg.h.unk44 = pos.vy;
             shot->updates_remaining = 0x32;
@@ -505,7 +506,7 @@ void actor_update_behavior(void)
 
                 drop = def->gold_drop_center + random_centered_triangular_scaled(def->gold_drop_center);
                 if (drop != 0) {
-                    map_object_spawn_scattered_effect(drop, &obj->pos, -(obj->collision_height >> 1));
+                    map_object_spawn_gold_drop(drop, &obj->pos, -(obj->collision_height >> 1));
                 }
                 if (obj->slot_state == 0 || obj->slot_state == 4) {
                     if (script[12] != 0xff && (rand() >> 7) < script[13]) {

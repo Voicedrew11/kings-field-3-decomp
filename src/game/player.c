@@ -818,8 +818,9 @@ void player_cap_status_components(s32 flags)
 
 /* Damage to the player: three physical and five elemental attack values. */
 ADDRESS(0x8002ab18, 0x5fc)
-void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
-                         u16 element3, u16 element4, u16 scale, u16 knockback, VECTOR *from)
+void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 status_flags, u16 element0, u16 element1,
+                         u16 element2, u16 element3, u16 element4, u16 scale, u16 damage_multiplier_tenths,
+                         VECTOR *from)
 {
     s32 time2;
     s32 time3;
@@ -921,7 +922,7 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, 
         element3 = 0;
         element4 = 0;
     }
-    switch (type & 0xf) {
+    switch (status_flags & 0xf) {
     case 1:
         cur_avatar_status.curse_phase_limit = time2;
         cur_avatar_status.curse_strength = 1;
@@ -971,13 +972,13 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 type, u16 element0, 
     damage += player_calculate_damage_component(cur_avatar_status.physical_power,
                                                 cur_avatar_status.defense_water, element4);
     damage = scale * damage + 0x8000 >> 16;
-    player_apply_damage_reaction(from, knockback * damage / 10, type);
+    player_apply_damage_reaction(from, damage_multiplier_tenths * damage / 10, status_flags);
 }
 
 ADDRESS(0x8002b114, 0x21c)
 void player_apply_radial_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, u16 falloff, u16 slash,
                                 u16 blow, u16 stab, u16 type, u16 element0, u16 element1, u16 element2,
-                                u16 element3, u16 element4, s32 flags, u16 knockback)
+                                u16 element3, u16 element4, s32 flags, u16 damage_multiplier_tenths)
 {
     VECTOR *from = pos;
     u32 strength;
@@ -1013,7 +1014,7 @@ void player_apply_radial_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, u1
         scale = strength;
     }
     player_apply_damage(slash, blow, stab, type, element0, element1, element2, element3, element4,
-                        scale, knockback, from);
+                        scale, damage_multiplier_tenths, from);
 }
 
 /* The eye position and view angles the renderer takes. */

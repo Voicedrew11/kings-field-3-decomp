@@ -37,7 +37,8 @@ void effect_pool_initialize_fixed(Effect *obj, s32 a1, s32 a2, s32 a3);
  * kind, flags and id are u8 in the callee (they arrive as int); callers pass
  * 5 to 12 arguments and it reads those after vel through &vel.
  */
-Effect *effect_construct_record(int kind, int flags, int id, VECTOR *pos, SVECTOR *vel, ...);
+Effect *effect_construct_record(int damage_multiplier_tenths, int type, int kind, VECTOR *pos, SVECTOR *vel,
+                                ...);
 void effect_rotate_scale_offset_y(SVECTOR *dir, VECTOR *out, s32 yaw, s32 scale);
 s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel);
 s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
