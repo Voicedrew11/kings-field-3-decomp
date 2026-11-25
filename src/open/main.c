@@ -41,7 +41,7 @@ static void init_graphics(void);
 static void init_sound(void);
 static void load_title_assets(void);
 static void start_title_music(void);
-static int draw_logo(int mode);
+static int draw_title_logo(int mode);
 static int draw_press_start(int mode);
 static int draw_menu(int mode);
 static int read_menu_pad(int *selection, int saves);
@@ -151,10 +151,10 @@ title:
         swap_buffers();
         frames++;
         if (!logo_done) {
-            if (draw_logo(0) == 1)
+            if (draw_title_logo(0) == 1)
                 logo_done = 1;
         } else {
-            draw_logo(1);
+            draw_title_logo(1);
         }
         if (logo_done == 1) {
             pressed = draw_press_start(0);
@@ -166,7 +166,7 @@ title:
             break;
         flip_buffers();
     }
-    if (card_check() == 0)
+    if (card_check_writable() == 0)
         card_list_saves(dir, &saves);
     else
         saves = 0;
@@ -178,7 +178,7 @@ title:
     for (;;) {
         swap_buffers();
         frames++;
-        draw_logo(1);
+        draw_title_logo(1);
         draw_press_start(1);
         if (read_menu_pad(&selection, saves) == 1) {
             *choice = selection;
@@ -189,7 +189,7 @@ title:
             logo_done = 0;
             fade_out_title(selection);
             frames = 0;
-            draw_logo(2);
+            draw_title_logo(2);
             draw_press_start(2);
             draw_menu(3);
             if (play_movie(MOVIE_LOGO) == 1)
@@ -253,7 +253,7 @@ static void fade_out_title(int selection)
     do {
         swap_buffers();
         fade = level;
-        draw_logo(1);
+        draw_title_logo(1);
         draw_press_start(1);
         draw_menu(selection);
         flip_buffers();
@@ -343,7 +343,7 @@ static void start_title_music(void)
 
 /* The title picture and logo: mode 0 fades in, 1 holds, 2 resets. */
 ADDRESS(0x8001279c, 0x370)
-static int draw_logo(int mode)
+static int draw_title_logo(int mode)
 {
     int done = 0;
 

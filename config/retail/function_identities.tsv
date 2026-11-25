@@ -164,7 +164,7 @@ GAME.EXE	0x8001dee4	menu_storage_store_controller			unknown		supported	candidate
 GAME.EXE	0x8001e1b4	menu_storage_take_out_controller			unknown		supported	candidate	data:DAT_800c85e8[1]->[0]	Moves QTY of an item from storage back into the bag (refused at 100 carried).
 GAME.EXE	0x8001e484	menu_run_system_choice			unknown		supported	candidate	kf2:menu_root.c:menu_run_card_choice (adapted)	SYSTEM page: load (-3 when loaded), the two option pages, button config, quit (-2: stops the CD and fades the music under PLEASE WAIT).
 GAME.EXE	0x8001e710	menu_card_load_browser			unknown		supported	candidate	kf2:menu_root.c:menu_card_load_browser	Scans the card, lists the saves, prompts, reads the chosen slot; a failure shows CANNOT LOAD/DATA ERROR. 0 on success.
-GAME.EXE	0x8001ea34	menu_card_build_slot_rows			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	kf2:menu_root.c:menu_card_build_slot_rows;callees:memory_card_read_slot_summary	Builds a row (save number, experience, level and slot number for each valid save among 15 directory entries.
+GAME.EXE	0x8001ea34	menu_card_build_slot_rows			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	kf2:menu_root.c:menu_card_build_slot_rows;callees:memory_card_read_slot_summary	Builds a row (save number, experience, level, slot number) for each valid save among 15 directory entries.
 GAME.EXE	0x8001eb3c	menu_show_dialog_panel			unknown	unknown arg0;unknown arg1;unknown arg2;unknown arg3	supported	candidate	kf2:menu_root.c:menu_show_dialog_panel	Draws a dialog for two frames: optional title (message < 8), rows, window, optional return hint.
 GAME.EXE	0x8001ec84	menu_volume_brightness_controller			unknown		supported	candidate		OPTION 1: three sliders (SE volume with a test sound, BGM volume applied live, brightness); stores them on exit.
 GAME.EXE	0x8001f004	menu_display_options_controller			unknown		supported	candidate	kf2:menu_root.c:menu_options_controller (adapted)	OPTION 2: two three-way rows and three on/off rows (+0xf9..+0xfc, +0x100); stores them and reapplies the colours.
@@ -604,8 +604,8 @@ OPEN.EXE	0x80012500	init_graphics			void		supported	proven	asm;called once by ma
 OPEN.EXE	0x80012644	init_sound			void		supported	proven	asm;called once by main	SsInit, no tick, hall reverb, SsStart2, serial A on
 OPEN.EXE	0x800126ac	load_title_assets			void		supported	proven	asm;called once by main	loads OP.D's TIMs and transfers its sound bank
 OPEN.EXE	0x8001273c	start_title_music			void		supported	proven	asm;called by main	streams \OP\M2.S as XA audio
-OPEN.EXE	0x8001279c	draw_logo			int	int mode	supported	proven	asm;title sprite family	title picture and logo halves; mode 0 fades in, 1 holds, 2 resets; 1 when faded in
-OPEN.EXE	0x80012b0c	draw_press_start			int	int mode	supported	proven	asm;title sprite family	PRESS START BUTTON sprites; same modes as draw_logo
+OPEN.EXE	0x8001279c	draw_title_logo			int	int mode	supported	proven	asm;callers:main,fade_out_title	Draws the 640x240 title picture and the two logo halves (only the logo fades); mode 0 fades in, 1 holds, 2 resets; 1 when faded in.
+OPEN.EXE	0x80012b0c	draw_press_start			int	int mode	supported	proven	asm;title sprite family	PRESS START BUTTON sprites; same modes as draw_title_logo
 OPEN.EXE	0x80012ea0	draw_menu			int	int mode	supported	proven	asm;title sprite family	NEW GAME / CONTINUE sprites; mode 0/1 selects, 2 both, 3 resets, 4 dims
 OPEN.EXE	0x800131ac	read_menu_pad			int	int *selection;int saves	supported	proven	asm;called by main	1 on a new circle/cross/START press; up/down toggle the choice when a save exists
 OPEN.EXE	0x800132f4	begin_sprite			void		supported	proven	asm;title sprite family	SetPolyFT4 on prim_next, grey 96
@@ -627,10 +627,10 @@ OPEN.EXE	0x80014014	card_init			void		supported	proven	asm;called once by main	I
 OPEN.EXE	0x800140d4	card_close			void		supported	proven	asm;called once by main	closes the card events, StopCARD
 OPEN.EXE	0x80014124	card_start			void		supported	proven	asm;called by main	StartCARD, _bu_init
 OPEN.EXE	0x8001414c	card_stop			void		supported	proven	asm;called by main	StopCARD, PadInit(0)
-OPEN.EXE	0x80014174	card_check			int		supported	proven	asm;called by main	creates and deletes a TEMP file on bu00; 0 usable, 2 not, 1/3 timeout/error
+OPEN.EXE	0x80014174	card_check_writable			int		supported	proven	asm;callees:_card_info,open,bios_delete	Creates and deletes a TEMP file on slot 1: 0 when it can, 2 when it cannot, else the card event that fired.
 OPEN.EXE	0x80014264	card_list_saves			int	struct DIRENTRY *dir;int *count	supported	proven	asm;called by main	counts BASLUS-00255 saves on bu00 and sorts them by number
-OPEN.EXE	0x80014438	card_wait_event			int		supported	proven	asm;called by card_check	polls the four card events; returns which fired
-OPEN.EXE	0x800144ac	card_clear_events			void		supported	proven	asm;called by card_check	TestEvent on each card event to clear it
+OPEN.EXE	0x80014438	card_wait_event			int		supported	proven	asm;called by card_check_writable	polls the four card events; returns which fired
+OPEN.EXE	0x800144ac	card_clear_events			void		supported	proven	asm;called by card_check_writable	TestEvent on each card event to clear it
 END.EXE	0x800119b8	main			int		supported	proven	asm;called by NONE2.OBJ __SN_ENTRY_POINT	sets up display and sound, plays the closing movies, sets PSX next-program 0 and stops
 END.EXE	0x80011ae0	init_graphics			void		supported	proven	asm;called once by main	ResetGraph, geometry and the two display buffers
 END.EXE	0x80011c24	init_sound			void		supported	proven	asm;called once by main	SsInit, master volume 0, serial A mix on

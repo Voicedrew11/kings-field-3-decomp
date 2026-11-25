@@ -85,7 +85,7 @@ void card_stop(void)
  * else the failing event (1 timeout, 3 error).
  */
 ADDRESS(0x80014174, 0xf0)
-int card_check(void)
+int card_check_writable(void)
 {
     char name[] = "bu00:BASLUS-00255TEMP    ";
     long fd;

@@ -23,7 +23,7 @@ void card_init(void);
 void card_close(void);
 void card_start(void);
 void card_stop(void);
-int card_check(void);
+int card_check_writable(void);
 int card_list_saves(struct DIRENTRY *dir, int *count);
 
 #endif

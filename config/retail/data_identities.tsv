@@ -126,8 +126,8 @@ GAME.EXE	0x801e7594	0x900	DAT_801e7594	global	bss	Object4cTrail[4][24]	effect_co
 GAME.EXE	0x801e7edc	0x38c	DAT_801e7edc	global	bss	Data801e7edc	game_main_loop	address-only	asm;band A relocs	cleared by the game loop as 0xe3 words; a continued game sets +0x370..+0x384
 OPEN.EXE	0x8002c1bc	0xd	save_prefix	static	load	char[13]	card_list_saves	supported	asm;src/open/card.c open.card	.data; first .data of the image; BASLUS-00255
 OPEN.EXE	0x800403f4	0x4	next_program	global	load	u8 *	main	supported	asm;src/open/main.c open.main	.sdata; $gp+0; points at PSX.EXE next-program byte 0x800102f0
-OPEN.EXE	0x800403f8	0x4	logo_level	global	load	int	draw_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+4; logo brightness
-OPEN.EXE	0x800403fc	0x4	logo_state	global	load	int	draw_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+8; 0 fading in, else holding
+OPEN.EXE	0x800403f8	0x4	logo_level	global	load	int	draw_title_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+4; logo brightness
+OPEN.EXE	0x800403fc	0x4	logo_state	global	load	int	draw_title_logo	supported	asm;src/open/main.c open.main	.sdata; $gp+8; 0 fading in, else holding
 OPEN.EXE	0x80040400	0x4	press_level	global	load	int	draw_press_start	supported	asm;src/open/main.c open.main	.sdata; $gp+12
 OPEN.EXE	0x80040404	0x4	press_state	global	load	int	draw_press_start	supported	asm;src/open/main.c open.main	.sdata; $gp+16
 OPEN.EXE	0x80040408	0x4	menu_level	global	load	int	draw_menu	supported	asm;src/open/main.c open.main	.sdata; $gp+20
