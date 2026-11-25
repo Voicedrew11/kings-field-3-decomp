@@ -17,7 +17,7 @@ RODATA(0x801e8308, 0x88)
 void area_handler_noop(void);
 void area_update_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_trade_item(Object88 *obj);
+void area_on_actor_removed_trade_item(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -87,7 +87,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: record 0 gives item 0x11 for item 0x10 once. */
 ADDRESS(0x801e85e4, 0xb0)
-void area_on_actor_removed_trade_item(Object88 *obj)
+void area_on_actor_removed_trade_item(Actor *obj)
 {
     if (obj - actor_status.objects != 0) {
         return;

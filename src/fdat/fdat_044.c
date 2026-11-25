@@ -207,9 +207,9 @@ void area_on_load_restore_by_visit_count(void)
         map_cell_copy_rotated_fields(2, 0x4c, 3, 12, 0x48, 2, 3, 0, 0x2f);
         state = 1;
     }
-    actor_status.objects[66].unk0 = state;
-    actor_status.objects[70].unk0 = state;
-    actor_status.objects[24].unk0 = state;
-    actor_status.objects[43].unk0 = state;
+    actor_status.objects[66].slot_state = state;
+    actor_status.objects[70].slot_state = state;
+    actor_status.objects[24].slot_state = state;
+    actor_status.objects[43].slot_state = state;
     cur_evt_state.unk84[5] = 0xe;
 }

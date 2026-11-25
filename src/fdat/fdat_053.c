@@ -21,7 +21,7 @@ void area_update_respawn_actor_out_of_view(void);
 void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
 void area_set_cell_toggle(s32 index, s32 state);
-void area_on_actor_removed_set_toggles(Object88 *obj);
+void area_on_actor_removed_set_toggles(Actor *obj);
 void area_region_trigger_trade_item_and_damage(Object44 *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -30,7 +30,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
 void area_on_movie_start_show_objects_and_wake_actor(u8 id);
 void area_on_movie_end_set_flag(u8 id);
-void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 event);
+void area_talk_event_give_equipment_and_raise_element(Actor *record, s32 event);
 void area_on_load_restore_objects_and_actors(void);
 
 const FdatHeader fdat_header = {
@@ -85,16 +85,16 @@ void area_update_respawn_actor_out_of_view(void)
 {
     s32 i = 15;
 
-    if (cur_evt_state.unk32[0x23] == 1 && actor_status.objects[i].unk9 != 1) {
+    if (cur_evt_state.unk32[0x23] == 1 && actor_status.objects[i].lifecycle != 1) {
         if (angle_within_tolerance(cur_avatar_status.unk124.vy,
                                    vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
                                                       actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                    600) == 0) {
-            actor_status.objects[i].unk9 = 0;
-            actor_status.objects[i].unk0 = 2;
+            actor_status.objects[i].lifecycle = 0;
+            actor_status.objects[i].slot_state = 2;
         }
     }
-    actor_status.objects[56].unk3 = 0;
+    actor_status.objects[56].layer_mask = 0;
 }
 
 /*
@@ -182,7 +182,7 @@ void area_set_cell_toggle(s32 index, s32 state)
  * actor 15 is disabled once, actor 56 enabled.
  */
 ADDRESS(0x801e89c0, 0x150)
-void area_on_actor_removed_set_toggles(Object88 *obj)
+void area_on_actor_removed_set_toggles(Actor *obj)
 {
     switch (obj - actor_status.objects) {
     case 11:
@@ -209,12 +209,12 @@ void area_on_actor_removed_set_toggles(Object88 *obj)
     case 15:
         if (cur_evt_state.unk32[0x23] == 1) {
             cur_evt_state.unk32[0x23] = 2;
-            actor_status.objects[15].unk0 = 8;
+            actor_status.objects[15].slot_state = 8;
         }
         break;
     case 56:
-        actor_status.objects[56].unk0 = 1;
-        actor_status.objects[56].unk3 = 0;
+        actor_status.objects[56].slot_state = 1;
+        actor_status.objects[56].layer_mask = 0;
         break;
     }
 }
@@ -304,8 +304,8 @@ void area_on_movie_start_show_objects_and_wake_actor(u8 id)
             obj++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        actor_status.objects[56].unk9 = 0;
-        actor_status.objects[56].unk0 = 2;
+        actor_status.objects[56].lifecycle = 0;
+        actor_status.objects[56].slot_state = 2;
     }
 }
 
@@ -320,7 +320,7 @@ void area_on_movie_end_set_flag(u8 id)
 
 /* Slot 4: script events 0 and 1 of an object record. */
 ADDRESS(0x801e8e08, 0x17c)
-void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 event)
+void area_talk_event_give_equipment_and_raise_element(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -348,8 +348,8 @@ void area_talk_event_give_equipment_and_raise_element(Object88 *record, s32 even
             cur_avatar_status.unk34[4] += 30;
             player_learn_element_magic(4);
             player_recalculate_combat_stats();
-            actor_status.objects[56].unk0 = 8;
-            actor_status.objects[56].unk3 = 0;
+            actor_status.objects[56].slot_state = 8;
+            actor_status.objects[56].layer_mask = 0;
         }
         break;
     }
@@ -382,7 +382,7 @@ void area_on_load_restore_objects_and_actors(void)
     } else {
         area_set_cell_toggle(5, 0);
     }
-    actor_status.objects[15].unk0 = 8;
+    actor_status.objects[15].slot_state = 8;
     if (cur_evt_state.unk32[0x24] != 0) {
         map_objects_slots.objects[63].unk0 = 2;
         map_objects_slots.objects[63].arg.b.unk3f = 0xff;
@@ -399,8 +399,8 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x38, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        actor_status.objects[56].unk0 = 8;
-        actor_status.objects[56].unk3 = 0;
+        actor_status.objects[56].slot_state = 8;
+        actor_status.objects[56].layer_mask = 0;
         map_objects_slots.objects[11].unk0 = 2;
     } else if (cur_evt_state.unk32[0x25] == 1) {
         p = &map_objects_slots.objects[50];
@@ -411,8 +411,8 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        actor_status.objects[56].unk0 = 1;
-        actor_status.objects[56].unk3 = 0;
+        actor_status.objects[56].slot_state = 1;
+        actor_status.objects[56].layer_mask = 0;
         map_objects_slots.objects[11].unk0 = 2;
         obj = map_object_effect_pool_acquire(0x15e, 10, map_objects_slots.unk885e);
         map_object_reset(obj);
@@ -438,8 +438,8 @@ void area_on_load_restore_objects_and_actors(void)
             p++;
         }
         map_cell_copy_rotated_fields(2, 0x3b, 0x4c, 0x47, 0x30, 3, 4, 0, 0x2f);
-        actor_status.objects[56].unk0 = 8;
-        actor_status.objects[56].unk3 = 0;
+        actor_status.objects[56].slot_state = 8;
+        actor_status.objects[56].layer_mask = 0;
         map_objects_slots.objects[11].unk0 = 0;
     }
     cur_evt_state.unk32[0x26] = 1;

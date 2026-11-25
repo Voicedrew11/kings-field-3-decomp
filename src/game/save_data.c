@@ -20,7 +20,7 @@ ADDRESS(0x8005f7bc, 0x814)
 void card_payload_capture_game_state(u8 *data)
 {
     SaveData *save = (SaveData *)data;
-    Record18 *r;
+    MagicRecord *r;
     u8 *p;
     s32 i;
 
@@ -88,7 +88,7 @@ void card_payload_capture_game_state(u8 *data)
     p = save->unk5634;
     r = effect_status.unk0;
     for (i = 95; i != -1; i--) {
-        *p++ = r->unk0;
+        *p++ = r->menu_available;
         r++;
     }
     memcpy((void *)save->unk5508, (const void *)event_item_counters_table, sizeof(save->unk5508));
@@ -111,7 +111,7 @@ ADDRESS(0x8005ffd0, 0x830)
 void card_payload_restore_game_state(u8 *data)
 {
     SaveData *save = (SaveData *)data;
-    Record18 *r;
+    MagicRecord *r;
     u8 *p;
     s32 i;
 
@@ -180,7 +180,7 @@ void card_payload_restore_game_state(u8 *data)
     p = save->unk5634;
     r = effect_status.unk0;
     for (i = 95; i != -1; i--) {
-        r->unk0 = *p++;
+        r->menu_available = *p++;
         r++;
     }
     memcpy((void *)event_item_counters_table, (const void *)save->unk5508, sizeof(save->unk5508));

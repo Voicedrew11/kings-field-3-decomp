@@ -69,13 +69,13 @@ s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
 }
 
 /*
- * Hit by the current record: the player (kind 0x80) or the Object88 record
+ * Hit by the current record: the player (kind 0x80) or the Actor record
  * of unk12028 (0x10). effect_apply_current_magic passes a3 unmasked, so the narrow
  * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
  * and reads it back with lhu; this source spills it with sh.
  */
 ADDRESS(0x800533e8, 0x23c)
-void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in, int a4_in, int a5_in,
+void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_in, int a4_in, int a5_in,
                                   int a6_in, int a7_in, int a8_in, int a9_in, int a10_in, int a11_in,
                                   int a12_in, int a13_in, int a14_in, VECTOR *target)
 {
@@ -92,8 +92,8 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in,
     u16 a13 = a13_in;
     u16 a14 = a14_in;
     s32 mode;
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
 
     mode = flags & 0xf0000;
     flags &= 0xfff0ffff;
@@ -101,12 +101,12 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in,
         player_apply_damage(a6, a7, a8, a9, a10, a11, a12, a13, a14, a3, a5, target);
     } else if (flags == 0x10) {
         obj = &actor_status.objects[map_world.unk12028];
-        def = &actor_status.defs[obj->unk2];
+        def = &actor_status.groups[obj->group_index];
         if (target != NULL &&
             !angle_within_tolerance(obj->angle.vy,
                                     vector_xz_to_angle(obj->pos.vx - target->vx,
                                                        obj->pos.vz - target->vz) + 2048,
-                                    def->unk18)) {
+                                    def->actor_facing_tolerance)) {
             return;
         }
         kind &= 0xc0;
@@ -118,12 +118,12 @@ void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3_in,
         actor_apply_magic_to_actor(map_world.unk12028, a4, a6, a7, a8, a10, a11, a12, a13, a14, a3, kind,
                                    rec, target);
         if (mode & 0x10000) {
-            obj->unk28 |= 0x800;
+            obj->flags |= 0x800;
         }
     }
 }
 
-/* Mean of the Data801b24e4.unk42 stats the record's Record18.unk5 bits pick (5 without 0x40). */
+/* Mean of the Data801b24e4.unk42 stats the record's MagicRecord.unk5 bits pick (5 without 0x40). */
 ADDRESS(0x80053624, 0xd4)
 u16 effect_magic_power(Object4c *obj)
 {
@@ -137,7 +137,7 @@ u16 effect_magic_power(Object4c *obj)
     if (obj->unk0 & 0x40) {
         bit = 0x10;
         n = 0;
-        bits = effect_status.unk0[obj->unk1].unk5;
+        bits = effect_status.unk0[obj->unk1].element_mask;
         for (i = 4; i != -1; i--) {
             if (!(bits & bit)) {
                 bit >>= 1;
@@ -155,18 +155,19 @@ u16 effect_magic_power(Object4c *obj)
     return 5;
 }
 
-/* effect_dispatch_magic_impact with the current record and its Record18 record. */
+/* effect_dispatch_magic_impact with the current record and its MagicRecord record. */
 ADDRESS(0x800536f8, 0xf0)
 void effect_apply_current_magic(s32 flags, s32 a1, VECTOR *target)
 {
     Object4c *obj;
-    Record18 *rec;
+    MagicRecord *rec;
 
     obj = effect_status.unk2f04;
     rec = effect_status.unk2f00;
-    effect_dispatch_magic_impact(flags, obj->unk0, rec, a1, effect_magic_power(obj), obj->unk6, rec->unk6,
-                                 rec->unk8, rec->unka, rec->unk4, rec->unkc, rec->unke, rec->unk10,
-                                 rec->unk12, rec->unk14, target);
+    effect_dispatch_magic_impact(flags, obj->unk0, rec, a1, effect_magic_power(obj), obj->unk6,
+                                 rec->damage_slash, rec->damage_blow, rec->damage_stab,
+                                 rec->player_status_flags, rec->damage_holy, rec->damage_fire,
+                                 rec->damage_earth, rec->damage_wind, rec->damage_water, target);
 }
 
 /* effect_apply_current_magic from the current record's position one step back. */
@@ -184,7 +185,7 @@ void effect_apply_current_magic_backstep(s32 flags)
 }
 
 /*
- * Area hit of the current record: the player (unk0 bit 0) and the Object88
+ * Area hit of the current record: the player (unk0 bit 0) and the Actor
  * records (bit 1). Both callees read flags as a word, but retail passes it
  * masked to 16 bits (andi) to both.
  */
@@ -192,19 +193,21 @@ ADDRESS(0x80053850, 0x1bc)
 void effect_apply_radial_magic_damage(VECTOR *pos, s32 reach, s32 radius, s32 mode, s32 falloff, s32 flags)
 {
     Object4c *obj;
-    Record18 *rec;
+    MagicRecord *rec;
 
     obj = effect_status.unk2f04;
     rec = effect_status.unk2f00;
     if (obj->unk0 & 1) {
-        player_apply_radial_damage(pos, reach, radius, mode, falloff, rec->unk6, rec->unk8, rec->unka,
-                                   rec->unk4, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
+        player_apply_radial_damage(pos, reach, radius, mode, falloff, rec->damage_slash, rec->damage_blow,
+                                   rec->damage_stab, rec->player_status_flags, rec->damage_holy,
+                                   rec->damage_fire, rec->damage_earth, rec->damage_wind, rec->damage_water,
                                    (u16)flags, obj->unk6);
     }
     if (obj->unk0 & 2) {
-        actor_apply_area_magic(pos, reach, radius, mode, falloff, effect_magic_power(obj), rec->unk6,
-                               rec->unk8, rec->unka, rec->unkc, rec->unke, rec->unk10, rec->unk12, rec->unk14,
-                               (u16)flags, (obj->unk0 & 0xc0) | 0x20, rec);
+        actor_apply_area_magic(pos, reach, radius, mode, falloff, effect_magic_power(obj), rec->damage_slash,
+                               rec->damage_blow, rec->damage_stab, rec->damage_holy, rec->damage_fire,
+                               rec->damage_earth, rec->damage_wind, rec->damage_water, (u16)flags,
+                               (obj->unk0 & 0xc0) | 0x20, rec);
     }
 }
 

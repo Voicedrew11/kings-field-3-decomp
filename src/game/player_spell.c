@@ -15,7 +15,7 @@
 RODATA(0x80011920, 0x154)
 
 /*
- * Starts spell id (Record18): checks and pays its unk1c cost, then sets the
+ * Starts spell id (MagicRecord): checks and pays its unk1c cost, then sets the
  * repeat count unk106, the interval unk107 and the direction unk14c that
  * player_update_actions_and_charge casts it with.
  */
@@ -23,7 +23,7 @@ ADDRESS(0x8002deec, 0x50c)
 void player_select_magic_action(s32 id)
 {
     SVECTOR unused;
-    Record18 *r;
+    MagicRecord *r;
     s32 cost;
 
     if (cur_avatar_status.unk105 != 0xff) {
@@ -33,7 +33,7 @@ void player_select_magic_action(s32 id)
         return;
     }
     r = &effect_status.unk0[id];
-    cost = r->unk16;
+    cost = r->mp_cost;
     if (cur_avatar_status.unkf0 == 0x26) {
         cost <<= 1;
     }

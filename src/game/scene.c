@@ -134,7 +134,7 @@ void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
 {
     Object4c *a;
     Object44 *b;
-    Object88 *c;
+    Actor *c;
     Effect *d;
     u16 i;
     u16 j;
@@ -167,7 +167,7 @@ void translate_active_world_positions(s32 dx, s32 dy, s32 dz)
     c = actor_status.objects;
     k = 200;
     while (k--) {
-        if (c->unk0 != 0xff) {
+        if (c->slot_state != 0xff) {
             c->pos.vx += dx;
             c->pos.vz += dz;
             c->pos.vy += dy;
@@ -372,7 +372,7 @@ void resource_advance_transition(void)
     s32 i;
     u16 j;
     Object44 *obj44;
-    Object88 *obj88;
+    Actor *obj88;
     MapCell *cell;
     u8 *block;
 
@@ -431,10 +431,10 @@ void resource_advance_transition(void)
             part = (u32 *)stream_work_buffer;
             obj88 = actor_status.objects;
             for (i = 199; i != -1; i--) {
-                if (obj88->unk5c != 0) {
-                    pool_record_release(obj88->unk5c);
+                if (obj88->animation_cache != 0) {
+                    pool_record_release(obj88->animation_cache);
                 }
-                obj88->unk0 = 0xff;
+                obj88->slot_state = 0xff;
                 obj88++;
             }
             obj44 = map_objects_slots.objects;
@@ -464,10 +464,10 @@ void resource_advance_transition(void)
                 }
                 map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
             }
-            resource_copy_words((u32 *)actor_status.defs, part + 1, 0xcb0);
+            resource_copy_words((u32 *)actor_status.groups, part + 1, 0xcb0);
             actor_fixup_group_targets();
             part = (u32 *)((u8 *)part + (*part + 4));
-            actor_load_records((Object88Place *)(part + 1));
+            actor_load_records((ActorPlacement *)(part + 1));
             part = (u32 *)((u8 *)part + (*part + 4));
             resource_copy_words((u32 *)&map_objects_slots.defs[300], part + 1, 0xc0);
             part = (u32 *)((u8 *)part + (*part + 4));

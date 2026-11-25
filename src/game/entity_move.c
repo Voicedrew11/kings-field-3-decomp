@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object88 movement (WIP module): bouncing steps, jumps and
+ * GAME.EXE: Actor movement (WIP module): bouncing steps, jumps and
  * falls, steering toward an angle, a vertex of the record's model, its aim
  * point, the walk animation pick and the aim at the player.
  */
@@ -18,7 +18,7 @@
 ADDRESS(0x8004e094, 0x1e8)
 s32 actor_move_with_collision(SVECTOR *vel)
 {
-    Object88 *obj;
+    Actor *obj;
     VECTOR pos;
     s32 hit;
 
@@ -26,20 +26,20 @@ s32 actor_move_with_collision(SVECTOR *vel)
     pos.vx = vel->vx + obj->pos.vx;
     pos.vy = vel->vy + obj->pos.vy;
     pos.vz = vel->vz + obj->pos.vz;
-    hit = collision_query_world(pos.vx, pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                actor_status.unk9d04);
+    hit = collision_query_world(pos.vx, pos.vy, pos.vz, obj->collision_radius, ACTOR_SHAPE(obj),
+                                actor_status.actor_collision_query_flags);
     if (hit == 0) {
         obj->pos.vx = pos.vx;
         obj->pos.vy = pos.vy;
         obj->pos.vz = pos.vz;
-    } else if (collision_query_world(pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     actor_status.unk9d04)) {
+    } else if (collision_query_world(pos.vx, obj->pos.vy, obj->pos.vz, obj->collision_radius,
+                                     ACTOR_SHAPE(obj), actor_status.actor_collision_query_flags)) {
         vel->vx = -vel->vx;
-    } else if (collision_query_world(obj->pos.vx, pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     actor_status.unk9d04)) {
+    } else if (collision_query_world(obj->pos.vx, pos.vy, obj->pos.vz, obj->collision_radius,
+                                     ACTOR_SHAPE(obj), actor_status.actor_collision_query_flags)) {
         vel->vy = -vel->vy;
-    } else if (collision_query_world(obj->pos.vx, obj->pos.vy, pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                     actor_status.unk9d04)) {
+    } else if (collision_query_world(obj->pos.vx, obj->pos.vy, pos.vz, obj->collision_radius,
+                                     ACTOR_SHAPE(obj), actor_status.actor_collision_query_flags)) {
         vel->vz = -vel->vz;
     }
     return hit;
@@ -49,50 +49,52 @@ s32 actor_move_with_collision(SVECTOR *vel)
 ADDRESS(0x8004e27c, 0xa0)
 s32 actor_start_ballistic_motion(s32 high, s32 x, s32 y, s32 z, s32 gravity, s32 speed)
 {
-    Object88 *obj;
+    Actor *obj;
     s16 time;
 
     obj = actor_status.current;
     if (trajectory_solve_motion_between_points(high, obj->pos.vx, obj->pos.vy, obj->pos.vz, x, y, z, gravity,
-                                               speed, &time, &obj->unk68, &obj->unk6a) != 0) {
+                                               speed, &time, &obj->ballistic_horizontal_speed,
+                                               &obj->ballistic_launch_speed_y) != 0) {
         return -1;
     }
-    obj->unkd = 0x30;
+    obj->vertical_motion_state = 0x30;
     obj->vel.vy = 1;
-    obj->unk6c = gravity;
-    obj->unk3c = obj->pos.vy;
+    obj->ballistic_acceleration = gravity;
+    obj->ballistic_origin_y = obj->pos.vy;
     return time;
 }
 
 ADDRESS(0x8004e31c, 0x14)
 void actor_suspend_vertical_motion(void)
 {
-    actor_status.current->unkd = 0x60;
+    actor_status.current->vertical_motion_state = 0x60;
 }
 
 /* Falls, lands and jumps the current record (unkd 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
 ADDRESS(0x8004e330, 0x3c8)
 void actor_update_vertical_motion(void)
 {
-    Object88 *obj = actor_status.current;
-    Object78 *def = actor_status.def;
+    Actor *obj = actor_status.current;
+    ActorGroup *def = actor_status.current_group;
     u16 *wet = &map_world.unk1200a;
 
-    collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj));
-    obj->unk3 = *wet == 0 ? 1 : 2;
-    if (obj->unk28 & 0x400) {
+    collision_probe_floor_height(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->collision_radius,
+                                 ACTOR_SHAPE(obj));
+    obj->layer_mask = *wet == 0 ? 1 : 2;
+    if (obj->flags & 0x400) {
         map_world.unk12010 = map_world.unk1200c;
     }
-    switch (obj->unkd) {
+    switch (obj->vertical_motion_state) {
     case 0: {
         s32 dy;
 
         dy = map_world.unk12010 - obj->pos.vy;
         if (dy < 0) {
-            obj->unkd = 0x20;
+            obj->vertical_motion_state = 0x20;
             obj->vel.vy = -100;
         } else if (dy > 0) {
-            obj->unkd = 0x10;
+            obj->vertical_motion_state = 0x10;
             obj->vel.vy = 0;
         }
         return;
@@ -102,19 +104,19 @@ void actor_update_vertical_motion(void)
         s32 hit;
 
         y = obj->pos.vy + obj->vel.vy;
-        hit = collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                    actor_status.unk9d04);
+        hit = collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->collision_radius, ACTOR_SHAPE(obj),
+                                    actor_status.actor_collision_query_flags);
         if (hit == 0) {
         fall:
             obj->pos.vy = y;
-            obj->vel.vy += def->unk5;
+            obj->vel.vy += def->vertical_acceleration;
             return;
         }
         if (hit == 0x80 && obj->vel.vy > 40) {
-            player_apply_damage(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
+            player_apply_damage(0, def->landing_damage, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
         if (hit & 4) {
-            if (obj->unk28 & 0x400) {
+            if (obj->flags & 0x400) {
                 s32 floor = map_world.unk1200c;
 
                 if (obj->pos.vy < floor) {
@@ -127,7 +129,7 @@ void actor_update_vertical_motion(void)
             obj->vel.vy = 0;
             goto idle;
         }
-        if (obj->unk28 & 0x400) {
+        if (obj->flags & 0x400) {
             goto fall;
         }
         goto idle;
@@ -140,25 +142,25 @@ void actor_update_vertical_motion(void)
         }
         obj->pos.vy = map_world.unk12010;
     idle:
-        obj->unkd = 0;
+        obj->vertical_motion_state = 0;
         return;
     case 0x30: {
         s32 jump_y;
         s32 jump_hit;
 
-        jump_y = obj->unk3c - obj->unk6a * obj->vel.vy + ((obj->unk6c * obj->vel.vy * obj->vel.vy) >> 1);
-        jump_hit = collision_query_world(obj->pos.vx, jump_y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                         actor_status.unk9d04);
+        jump_y = obj->ballistic_origin_y - obj->ballistic_launch_speed_y * obj->vel.vy + ((obj->ballistic_acceleration * obj->vel.vy * obj->vel.vy) >> 1);
+        jump_hit = collision_query_world(obj->pos.vx, jump_y, obj->pos.vz, obj->collision_radius,
+                                         ACTOR_SHAPE(obj), actor_status.actor_collision_query_flags);
         if (jump_hit == 0) {
             obj->pos.vy = jump_y;
             obj->vel.vy++;
-            obj->unk3 = *wet == 0 ? 1 : 2;
+            obj->layer_mask = *wet == 0 ? 1 : 2;
             return;
         }
         if (jump_hit == 0x80) {
-            player_apply_damage(0, def->unk6, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
+            player_apply_damage(0, def->landing_damage, 0, 0, 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
         }
-        obj->unkd = 0x10;
+        obj->vertical_motion_state = 0x10;
         obj->vel.vy = 0;
         return;
     }
@@ -171,11 +173,11 @@ void actor_update_vertical_motion(void)
 ADDRESS(0x8004e6f8, 0x12c)
 s32 actor_damp_horizontal_motion(s32 speed, s32 mode)
 {
-    Object88 *obj;
+    Actor *obj;
     s32 length;
 
     obj = actor_status.current;
-    if (obj->unkd == 0) {
+    if (obj->vertical_motion_state == 0) {
         length = SquareRoot0(obj->vel.vx * obj->vel.vx + obj->vel.vz * obj->vel.vz);
         if (length == 0) {
             return 0;
@@ -190,7 +192,7 @@ s32 actor_damp_horizontal_motion(s32 speed, s32 mode)
 ADDRESS(0x8004e824, 0xc8)
 s32 actor_move_along_heading(s32 angle, s32 scale_x, s32 scale_z, s32 mode)
 {
-    Object88 *obj;
+    Actor *obj;
     struct {
         s32 v[2];
     } target, step;
@@ -227,29 +229,29 @@ s32 func_8004e914(s32 angle, s32 target)
 /*
  * Turns obj toward target: the turn rate obj->unk58 grows by accel up to max.
  * target arrives as an int (actor_update_behavior passes vector_xz_to_angle's result
- * and Object88.unk20 unconverted); retail narrows it to 16 bits for each
+ * and Actor.unk20 unconverted); retail narrows it to 16 bits for each
  * angle helper call.
  */
 ADDRESS(0x8004e928, 0x154)
-void actor_turn_toward_angle(Object88 *obj, int target, s32 max, s32 accel)
+void actor_turn_toward_angle(Actor *obj, int target, s32 max, s32 accel)
 {
     s32 yaw;
 
     if (angle_shortest_delta((s16)target, obj->angle.vy) != 0) {
         if (angle_mod_delta_le_half_turn(target, obj->angle.vy)) {
-            obj->unk58 += accel;
-            if (obj->unk58 > max) {
-                obj->unk58 = max;
+            obj->turn_rate += accel;
+            if (obj->turn_rate > max) {
+                obj->turn_rate = max;
             }
         } else {
-            obj->unk58 -= accel;
-            if (obj->unk58 < -max) {
-                obj->unk58 = -max;
+            obj->turn_rate -= accel;
+            if (obj->turn_rate < -max) {
+                obj->turn_rate = -max;
             }
         }
         yaw = obj->angle.vy;
-        obj->angle.vy += obj->unk58;
-        if (obj->unk58 > 0) {
+        obj->angle.vy += obj->turn_rate;
+        if (obj->turn_rate > 0) {
             if (angle_signed_greater_than((s16)target, yaw)
                 && !angle_signed_greater_than((s16)target, obj->angle.vy)) {
                 obj->angle.vy = target;
@@ -261,7 +263,7 @@ void actor_turn_toward_angle(Object88 *obj, int target, s32 max, s32 accel)
             }
         }
     } else {
-        obj->unk58 = 0;
+        obj->turn_rate = 0;
     }
 }
 
@@ -269,7 +271,7 @@ ADDRESS(0x8004ea7c, 0x74)
 /* Returns actor_move_along_heading's result (FDAT module slot 17 handlers test it). */
 s32 actor_turn_and_move_along_heading(s16 target, s32 scale_x, s32 max, s32 scale_z, s32 accel, s32 mode)
 {
-    Object88 *obj;
+    Actor *obj;
 
     obj = actor_status.current;
     actor_turn_toward_angle(obj, target, max, accel);
@@ -281,7 +283,7 @@ ADDRESS(0x8004eaf0, 0x118)
 s32 actor_turn_and_move_toward_point(s32 x, s32 z, s32 scale_x, s32 max, s16 face, s32 scale_z, s32 accel,
                                      s32 mode)
 {
-    Object88 *obj = actor_status.current;
+    Actor *obj = actor_status.current;
     s32 dx = x - obj->pos.vx;
     s32 dz = z - obj->pos.vz;
     s32 angle = vector_xz_to_angle(dx, dz);
@@ -298,7 +300,7 @@ s32 actor_turn_and_move_toward_point(s32 x, s32 z, s32 scale_x, s32 max, s16 fac
 ADDRESS(0x8004ec08, 0x148)
 s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 mode)
 {
-    Object88 *obj;
+    Actor *obj;
     SVECTOR target;
     SVECTOR step;
     s32 r;
@@ -314,8 +316,8 @@ s32 actor_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 scale_b, s32 
     obj->vel.vz = value_approach(obj->vel.vz, target.vz, step.vz);
     r = actor_move_horizontal_with_collision(&obj->vel, mode) != 0;
     y = obj->vel.vy + obj->pos.vy;
-    if (collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                              actor_status.unk9d04) == 0) {
+    if (collision_query_world(obj->pos.vx, y, obj->pos.vz, obj->collision_radius, ACTOR_SHAPE(obj),
+                              actor_status.actor_collision_query_flags) == 0) {
         obj->pos.vy = y;
     } else {
         r |= 2;
@@ -328,7 +330,7 @@ ADDRESS(0x8004ed50, 0x90)
 s32 actor_turn_and_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 max, s32 scale_b, s32 accel,
                                            s32 mode)
 {
-    Object88 *obj;
+    Actor *obj;
 
     obj = actor_status.current;
     actor_turn_toward_angle(obj, angle->vy, max, accel);
@@ -338,15 +340,16 @@ s32 actor_turn_and_move_along_euler_angles(SVECTOR *angle, s32 scale_a, s32 max,
 
 /* A vertex of obj's posed model relative to its position. */
 ADDRESS(0x8004ede0, 0x100)
-s32 actor_sample_rotated_animation_vertex(Object88 *obj, s32 vertex, VECTOR *out)
+s32 actor_sample_rotated_animation_vertex(Actor *obj, s32 vertex, VECTOR *out)
 {
     SVECTOR rotation;
     SVECTOR v;
 
-    if (animation_sample_vertex(obj->unk1 + 128, obj->unkc, obj->unk18, vertex, &v)) {
+    if (animation_sample_vertex(obj->definition_id + 128, obj->animation_id, obj->animation_phase, vertex,
+                                &v)) {
         v.vx = 0;
-        v.vy = -obj->unk1e >> 1;
-        v.vz = -obj->unk1c;
+        v.vy = -obj->collision_height >> 1;
+        v.vz = -obj->collision_radius;
     } else {
         v.vx = v.vx * obj->scale.vx >> 12;
         v.vy = v.vy * obj->scale.vy >> 12;
@@ -359,24 +362,24 @@ s32 actor_sample_rotated_animation_vertex(Object88 *obj, s32 vertex, VECTOR *out
     return 1;
 }
 
-/* obj's aim point (Object88.unk28 bits 0-1: position, offset, rotated offset). */
+/* obj's aim point (Actor.unk28 bits 0-1: position, offset, rotated offset). */
 ADDRESS(0x8004eee0, 0x128)
-VECTOR *actor_resolve_group_position(Object88 *obj, VECTOR *out)
+VECTOR *actor_resolve_group_position(Actor *obj, VECTOR *out)
 {
-    Object78 *def;
+    ActorGroup *def;
 
-    switch (obj->unk28 & 3) {
+    switch (obj->flags & 3) {
     case 0:
         return &obj->pos;
     case 1:
-        def = &actor_status.defs[obj->unk2];
-        out->vx = obj->pos.vx + def->unkc;
-        out->vy = obj->pos.vy + def->unke;
-        out->vz = obj->pos.vz + def->unk10;
+        def = &actor_status.groups[obj->group_index];
+        out->vx = obj->pos.vx + def->position_offset_x;
+        out->vy = obj->pos.vy + def->position_offset_y;
+        out->vz = obj->pos.vz + def->position_offset_z;
         return out;
     case 2:
-        def = &actor_status.defs[obj->unk2];
-        vector_rotate_yxz(&obj->angle, (SVECTOR *)&def->unkc, out);
+        def = &actor_status.groups[obj->group_index];
+        vector_rotate_yxz(&obj->angle, (SVECTOR *)&def->position_offset_x, out);
         out->vx += obj->pos.vx;
         out->vy += obj->pos.vy;
         out->vz += obj->pos.vz;
@@ -391,19 +394,19 @@ VECTOR *actor_resolve_group_position(Object88 *obj, VECTOR *out)
 ADDRESS(0x8004f008, 0x1c8)
 void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 down, s32 speed)
 {
-    Object88 *obj;
+    Actor *obj;
     s32 anim;
     s32 turn;
 
     obj = actor_status.current;
     anim = idle;
     turn = 0;
-    if (obj->unk58 > 0) {
+    if (obj->turn_rate > 0) {
         anim = right;
-        turn = obj->unk58;
-    } else if (obj->unk58 < 0) {
+        turn = obj->turn_rate;
+    } else if (obj->turn_rate < 0) {
         anim = left;
-        turn = -obj->unk58;
+        turn = -obj->turn_rate;
     }
     if (obj->vel.vy > 10) {
         if (turn < obj->vel.vy) {
@@ -412,44 +415,44 @@ void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 do
     } else if (obj->vel.vy < 10 && turn < -obj->vel.vy) {
         anim = down;
     }
-    if (obj->unkc == idle) {
+    if (obj->animation_id == idle) {
         actor_advance_animation_wrapped(obj, speed);
         if (actor_animation_crossed_phase(obj, 0)) {
             actor_set_animation_if_changed(anim);
         }
-    } else if (obj->unkc == left) {
-        if (obj->unk18 < 2048) {
+    } else if (obj->animation_id == left) {
+        if (obj->animation_phase < 2048) {
             actor_advance_animation_clamped(obj, speed);
         } else if (anim != left) {
             actor_advance_animation_clamped(obj, speed);
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_set_animation(anim);
             }
         }
-    } else if (obj->unkc == right) {
-        if (obj->unk18 < 2048) {
+    } else if (obj->animation_id == right) {
+        if (obj->animation_phase < 2048) {
             actor_advance_animation_clamped(obj, speed);
         } else if (anim != right) {
             actor_advance_animation_clamped(obj, speed);
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_set_animation(anim);
             }
         }
-    } else if (obj->unkc == up) {
-        if (obj->unk18 < 2048) {
+    } else if (obj->animation_id == up) {
+        if (obj->animation_phase < 2048) {
             actor_advance_animation_clamped(obj, speed);
         } else if (anim != up) {
             actor_advance_animation_clamped(obj, speed);
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_set_animation(anim);
             }
         }
-    } else if (obj->unkc == down) {
-        if (obj->unk18 < 2048) {
+    } else if (obj->animation_id == down) {
+        if (obj->animation_phase < 2048) {
             actor_advance_animation_clamped(obj, speed);
         } else if (anim != down) {
             actor_advance_animation_clamped(obj, speed);
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_set_animation(anim);
             }
         }
@@ -458,7 +461,7 @@ void actor_update_motion_animation(s32 idle, s32 left, s32 right, s32 up, s32 do
 
 /* Aims from `from` at target, leading the player's motion over steps refinements. */
 ADDRESS(0x8004f1d0, 0x244)
-s32 actor_compute_target_direction(Object88 *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out,
+s32 actor_compute_target_direction(Actor *obj, VECTOR *from, s32 speed, VECTOR *target, SVECTOR *out,
                                    s32 pitch, s16 turn, s32 steps)
 {
     VECTOR at;

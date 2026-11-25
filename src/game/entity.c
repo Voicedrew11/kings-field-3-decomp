@@ -1,6 +1,6 @@
 /*
- * GAME.EXE: Object88 records (WIP module): allocation, placement on the
- * map from the record's cell and offsets, set-up from its Object78 record,
+ * GAME.EXE: Actor records (WIP module): allocation, placement on the
+ * map from the record's cell and offsets, set-up from its ActorGroup record,
  * script record selection, and the searches over all 200 records.
  */
 #include <kf/lib/address.h>
@@ -16,14 +16,14 @@
 
 /* A free record among the last ten. */
 ADDRESS(0x8004b524, 0x3c)
-Object88 *actor_pool_find_free(void)
+Actor *actor_pool_find_free(void)
 {
-    Object88 *obj;
+    Actor *obj;
     s32 i;
 
     obj = &actor_status.objects[190];
     for (i = 9; i != -1; i--) {
-        if (obj->unk0 == OBJECT88_FREE) {
+        if (obj->slot_state == ACTOR_FREE) {
             return obj;
         }
         obj++;
@@ -33,86 +33,86 @@ Object88 *actor_pool_find_free(void)
 
 /* Places the record in its map cell and on the floor. */
 ADDRESS(0x8004b560, 0xc4)
-void actor_set_home_position(Object88 *obj)
+void actor_set_home_position(Actor *obj)
 {
-    obj->pos.vx = (obj->unk8 << 11) + obj->unk24;
-    obj->pos.vz = (obj->unk7 << 11) + obj->unk22;
-    obj->pos.vy = collision_sample_map_layer_height(obj->unk6, obj->pos.vx, obj->pos.vz, obj->unk1c,
-                                                    obj->unk1e);
+    obj->pos.vx = (obj->home_cell_x << 11) + obj->unk24;
+    obj->pos.vz = (obj->home_cell_z << 11) + obj->unk22;
+    obj->pos.vy = collision_sample_map_layer_height(obj->home_layer_mask, obj->pos.vx, obj->pos.vz,
+                                                    obj->collision_radius, obj->collision_height);
     if (obj->pos.vy >= 0) {
         obj->pos.vy = 0;
     }
-    if (obj->unk28 & 0x400) {
+    if (obj->flags & 0x400) {
         obj->pos.vy = map_world.unk1200c;
     }
-    if (!(obj->unk28 & 0x10)) {
-        obj->pos.vy += obj->unk26;
+    if (!(obj->flags & 0x10)) {
+        obj->pos.vy += obj->vertical_anchor_offset;
     }
 }
 
 ADDRESS(0x8004b624, 0x74)
-void actor_copy_group_defaults(Object88 *obj)
+void actor_copy_group_defaults(Actor *obj)
 {
-    Object78 *def;
+    ActorGroup *def;
 
-    def = &actor_status.defs[obj->unk2];
-    obj->unk1 = def->unk0;
-    obj->unk1a = def->unk1a;
-    obj->unk1c = def->unk12;
-    obj->unk1e = def->unk14;
-    obj->unk28 = def->unk34;
-    obj->scale.vx = obj->scale.vy = obj->scale.vz = def->unk32;
+    def = &actor_status.groups[obj->group_index];
+    obj->definition_id = def->definition_id;
+    obj->health = def->unk1a;
+    obj->collision_radius = def->collision_radius;
+    obj->collision_height = def->collision_height;
+    obj->flags = def->initial_actor_flags;
+    obj->scale.vx = obj->scale.vy = obj->scale.vz = def->initial_model_scale_q12;
 }
 
 ADDRESS(0x8004b698, 0xd8)
-void actor_initialize_from_group(Object88 *obj)
+void actor_initialize_from_group(Actor *obj)
 {
     actor_copy_group_defaults(obj);
-    obj->unk9 = 1;
-    obj->unkc = 0;
-    obj->unk18 = 0;
+    obj->lifecycle = 1;
+    obj->animation_id = 0;
+    obj->animation_phase = 0;
     obj->unk11 = 0;
-    obj->unkd = 0;
-    obj->unke = 0;
-    obj->unkf = 0xff;
-    obj->unk60 = NULL;
-    if (!(obj->unk5 & 1)) {
+    obj->vertical_motion_state = 0;
+    obj->target_type = 0;
+    obj->target_action_state = 0xff;
+    obj->target = NULL;
+    if (!(obj->placement_flags & 1)) {
         obj->angle.vy = rand() >> 3;
     }
     obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
-    obj->unk58 = 0;
-    if (obj->unk1 < 50) {
-        obj->unk14 = 0x3e;
+    obj->turn_rate = 0;
+    if (obj->definition_id < 50) {
+        obj->lighting_override_index = 0x3e;
     } else {
-        obj->unk14 = 0x37;
+        obj->lighting_override_index = 0x37;
     }
-    obj->unk16 = 0x800;
-    if (obj->unk28 & 0x80) {
-        obj->unk13 |= 7;
+    obj->lighting_blend = 0x800;
+    if (obj->flags & 0x80) {
+        obj->render_mode |= 7;
     } else {
-        obj->unk13 = 0;
+        obj->render_mode = 0;
     }
-    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
+    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->collision_radius, 1);
 }
 
 ADDRESS(0x8004b770, 0x24)
-void actor_set_lifecycle_and_home_position(Object88 *obj)
+void actor_set_lifecycle_and_home_position(Actor *obj)
 {
-    obj->unk9 = 3;
+    obj->lifecycle = 3;
     actor_set_home_position(obj);
 }
 
 ADDRESS(0x8004b794, 0xd4)
 void actor_disable_type3_transition_actors(void)
 {
-    Object88 *obj;
+    Actor *obj;
     s32 i;
 
     obj = actor_status.objects;
     for (i = 199; i != -1; i--) {
-        if (obj->unk0 == 1 && obj->unk9 == 1 && obj->unke == 3 && obj->unkf == 0xf0) {
-            if (obj->unk70 != 0 || obj->unk18 > 0x800) {
-                ((void (*)(Object88 *))asset_status.handlers[19])(obj);
+        if (obj->slot_state == 1 && obj->lifecycle == 1 && obj->target_type == 3 && obj->target_action_state == 0xf0) {
+            if (obj->target_phase != 0 || obj->animation_phase > 0x800) {
+                ((void (*)(Actor *))asset_status.handlers[19])(obj);
                 actor_set_lifecycle_and_home_position(obj);
             }
         }
@@ -121,15 +121,15 @@ void actor_disable_type3_transition_actors(void)
 }
 
 ADDRESS(0x8004b868, 0x5c)
-void actor_prepare_and_initialize(Object88 *obj)
+void actor_prepare_and_initialize(Actor *obj)
 {
     obj->angle.vx = obj->angle.vz = 0;
-    obj->unk3 = obj->unk6;
+    obj->layer_mask = obj->home_layer_mask;
     obj->angle.vy = obj->unk20;
     actor_set_home_position(obj);
     actor_initialize_from_group(obj);
-    if (obj->unk0 == 3) {
-        obj->unk3 = 0;
+    if (obj->slot_state == 3) {
+        obj->layer_mask = 0;
     }
 }
 
@@ -142,34 +142,34 @@ void actor_prepare_and_initialize_by_index(u16 index)
 ADDRESS(0x8004b8fc, 0x50)
 void actor_pool_clear(void)
 {
-    Object88 *obj;
+    Actor *obj;
     u16 i;
 
-    actor_status.unk9d24 = 0;
+    actor_status.actor_update_frame_count = 0;
     obj = actor_status.objects;
     i = 0;
     while (i < 200) {
         i++;
-        obj->unk0 = OBJECT88_FREE;
-        obj->unk9 = 0;
-        obj->unk5c = 0;
+        obj->slot_state = ACTOR_FREE;
+        obj->lifecycle = 0;
+        obj->animation_cache = 0;
         obj++;
     }
-    actor_status.unk9d00 = 0;
+    actor_status.actor_overlap_exclusion_flags = 0;
 }
 
 /* Starts a script record (0 stops the script). */
 ADDRESS(0x8004b94c, 0x38)
-void actor_set_target(Object88 *obj, u8 *script)
+void actor_set_target(Actor *obj, u8 *script)
 {
-    obj->unk10 = obj->unke;
+    obj->previous_target_type = obj->target_type;
     if (script != NULL) {
-        obj->unk60 = script;
-        obj->unke = script[0];
-        obj->unkf = 0;
+        obj->target = script;
+        obj->target_type = script[0];
+        obj->target_action_state = 0;
     } else {
-        obj->unk60 = NULL;
-        obj->unke = 0xff;
-        obj->unkf = 0xff;
+        obj->target = NULL;
+        obj->target_type = 0xff;
+        obj->target_action_state = 0xff;
     }
 }

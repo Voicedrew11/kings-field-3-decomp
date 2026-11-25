@@ -30,7 +30,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
 void area_on_movie_start_unlock_element(u8 id);
 void area_on_movie_end_raise_element_and_fade_objects(u8 id);
-void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event);
+void area_talk_event_give_items_and_set_flags(Actor *record, s32 event);
 void area_on_load_restore_objects_and_light(void);
 
 const FdatHeader fdat_header = {
@@ -194,8 +194,8 @@ void area_use_item_fade_object_and_brighten_light(VECTOR *pos, SVECTOR *angle, s
         }
         game_counter_decrement(0x7b);
         obj = &map_objects_slots.objects[0x8d];
-        actor_status.objects[7].unk0 = 8;
-        actor_status.objects[26].unk0 = 1;
+        actor_status.objects[7].slot_state = 8;
+        actor_status.objects[26].slot_state = 1;
         map_objects_slots.objects[0x8d].unk2 = 5;
         map_objects_slots.objects[0x8d].unk10 = 0xfff;
         for (j = 15; j != -1; j--) {
@@ -363,7 +363,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 
 /* Slot 4: script events 0..4 of an object record. */
 ADDRESS(0x801e8cc8, 0xe0)
-void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event)
+void area_talk_event_give_items_and_set_flags(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -384,7 +384,7 @@ void area_talk_event_give_items_and_set_flags(Object88 *record, s32 event)
         }
         break;
     case 3:
-        actor_status.objects[8].unk0 = 8;
+        actor_status.objects[8].slot_state = 8;
         break;
     case 4:
         cur_evt_state.unke[0xc] = 1;
@@ -399,8 +399,8 @@ void area_on_load_restore_objects_and_light(void)
     s32 k;
 
     if (cur_evt_state.unke[0xf] != 0) {
-        actor_status.objects[7].unk0 = 8;
-        actor_status.objects[26].unk0 = 1;
+        actor_status.objects[7].slot_state = 8;
+        actor_status.objects[26].slot_state = 1;
         map_objects_slots.objects[0x8d].unk6 = 0xff;
         map_objects_slots.objects[159].unk6 = 0xff;
         k = 74;
@@ -409,8 +409,8 @@ void area_on_load_restore_objects_and_light(void)
         }
         area_set_light_blend(16);
     } else {
-        actor_status.objects[7].unk0 = 1;
-        actor_status.objects[26].unk0 = 8;
+        actor_status.objects[7].slot_state = 1;
+        actor_status.objects[26].slot_state = 8;
         area_set_light_blend(0);
     }
     if (cur_evt_state.unk7f[0] != 0) {

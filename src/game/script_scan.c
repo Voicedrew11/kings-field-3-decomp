@@ -1,6 +1,6 @@
 /*
- * GAME.EXE: Object88 script record scanning (WIP module): stepping an
- * Object88's animation time to a target while rendering, and finding the
+ * GAME.EXE: Actor script record scanning (WIP module): stepping an
+ * Actor's animation time to a target while rendering, and finding the
  * entry point of its first script record. The 0xf1/0xf2/0xfe/0xff bytes
  * after +0x14 are the record's markers; +0x10 is the saved entry offset.
  * event_target_stream_execute (switch) follows.
@@ -17,7 +17,7 @@
 
 /* Sets obj's animation and time, then steps the time by step until it is within step / 2 of target. */
 ADDRESS(0x8005c0d4, 0xb8)
-void actor_animation_seek_phase(Object88 *obj, u8 anim, u16 time, s32 target, u16 step)
+void actor_animation_seek_phase(Actor *obj, u8 anim, u16 time, s32 target, u16 step)
 {
     u32 s;
     s16 half;
@@ -27,13 +27,13 @@ void actor_animation_seek_phase(Object88 *obj, u8 anim, u16 time, s32 target, u1
         s = step & 0xfffe;
         half = s >> 1;
         low = target - half;
-        obj->unkc = anim;
-        obj->unk18 = time;
-        while (!angle_within_tolerance(obj->unk18, low, half)) {
-            obj->unk18 = (s + obj->unk18) & 0xfff;
+        obj->animation_id = anim;
+        obj->animation_phase = time;
+        while (!angle_within_tolerance(obj->animation_phase, low, half)) {
+            obj->animation_phase = (s + obj->animation_phase) & 0xfff;
             render_game_frame(NULL, NULL);
         }
-        obj->unk18 = low & 0xfff;
+        obj->animation_phase = low & 0xfff;
         render_game_frame(NULL, NULL);
     }
 }
@@ -61,13 +61,13 @@ u8 event_target_stream_find_marker(u8 *script, u8 id)
 
 /* Entry point of obj's first script record: the first 0xf1 entry whose flag matches, else the saved one. */
 ADDRESS(0x8005c1e8, 0x120)
-u8 *event_target_stream_resolve_cursor(Object88 *obj)
+u8 *event_target_stream_resolve_cursor(Actor *obj)
 {
     u8 *script;
     u8 *p;
     u8 n;
 
-    script = actor_status.defs[obj->unk2].scripts[0];
+    script = actor_status.groups[obj->group_index].targets[0];
     p = script + 20;
     for (;;) {
         switch (*p) {
@@ -85,7 +85,7 @@ u8 *event_target_stream_resolve_cursor(Object88 *obj)
                 if (script[16] < n) {
                     script[16] = n;
                 }
-                cur_evt_state.unkaa = obj->unk1;
+                cur_evt_state.unkaa = obj->definition_id;
                 script[19] = 0;
                 goto found;
             }

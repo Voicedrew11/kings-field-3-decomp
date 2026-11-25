@@ -4,9 +4,9 @@
 /*
  * GAME.EXE Object4c records (src/game/object4c*.c, WIP names): the 128
  * records of effect_status.objects, made by effect_construct_record from an id that
- * indexes the Record18 records at the start of effect_status, then moved,
+ * indexes the MagicRecord records at the start of effect_status, then moved,
  * tested for hits and drawn. effect_status.unk2f04 names the record being
- * updated and unk2f00 its Record18 record.
+ * updated and unk2f00 its MagicRecord record.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -20,8 +20,8 @@
 s32 effect_play_spatial_sound(Object4c *obj, s32 se);
 s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height);
 /* Its u16/u8 parameters arrive as int and are narrowed at entry. */
-void effect_dispatch_magic_impact(s32 flags, s32 kind, Record18 *rec, int a3, int a4, int a5, int a6, int a7,
-                                  int a8, int a9, int a10, int a11, int a12, int a13, int a14,
+void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3, int a4, int a5, int a6,
+                                  int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14,
                                   VECTOR *target);
 u16 effect_magic_power(Object4c *obj);
 void effect_apply_current_magic(s32 flags, s32 a1, VECTOR *target);

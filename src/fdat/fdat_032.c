@@ -24,7 +24,7 @@ void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_give_item_and_set_flag(Object88 *record, s32 event);
+void area_talk_event_give_item_and_set_flag(Actor *record, s32 event);
 void area_on_load_restore_actor_groups_and_doors(void);
 
 const FdatHeader fdat_header = {
@@ -141,7 +141,7 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script events 0 and 1 of an object record. */
 ADDRESS(0x801e86a8, 0x60)
-void area_talk_event_give_item_and_set_flag(Object88 *record, s32 event)
+void area_talk_event_give_item_and_set_flag(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -167,9 +167,9 @@ void area_on_load_restore_actor_groups_and_doors(void)
         cur_evt_state.unk32[0xa] = 1;
     }
     if (cur_evt_state.unk32[0xb] == 0) {
-        Object88 *record = &actor_status.objects[29];
+        Actor *record = &actor_status.objects[29];
 
-        record->unk0 = 1;
+        record->slot_state = 1;
         door = &map_objects_slots.objects[253];
         door->unk0 = 0;
         k = 253;
@@ -180,17 +180,17 @@ void area_on_load_restore_actor_groups_and_doors(void)
         k = 90;
         map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
         {
-            Object88 *records = actor_status.objects;
+            Actor *records = actor_status.objects;
 
             for (i = 14, k = 0; i != -1; i--, k++) {
-                records[k].unk0 = 1;
+                records[k].slot_state = 1;
             }
         }
         {
-            Object88 *records = actor_status.objects;
+            Actor *records = actor_status.objects;
 
             for (i = 13, k = 15; i != -1; i--, k++) {
-                records[k].unk0 = 8;
+                records[k].slot_state = 8;
             }
         }
     } else if (cur_evt_state.unk84[5] != 10) {
@@ -198,27 +198,27 @@ void area_on_load_restore_actor_groups_and_doors(void)
         map_objects_slots.objects[90].unk0 = 2;
         map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
         {
-            Object88 *records = actor_status.objects;
+            Actor *records = actor_status.objects;
 
             for (i = 14, k = 0; i != -1; i--, k++) {
-                records[k].unk0 = 8;
+                records[k].slot_state = 8;
             }
         }
         if (cur_evt_state.unk32[0xc] == 0) {
             cur_evt_state.unk32[0xc] = 1;
             {
-                Object88 *records = actor_status.objects;
+                Actor *records = actor_status.objects;
 
                 for (i = 13, k = 15; i != -1; i--, k++) {
-                    records[k].unk0 = 1;
+                    records[k].slot_state = 1;
                 }
             }
         }
     } else {
         if (cur_evt_state.unk32[0xc] == 0) {
-            Object88 *record = &actor_status.objects[29];
+            Actor *record = &actor_status.objects[29];
 
-            record->unk0 = 1;
+            record->slot_state = 1;
             door = &map_objects_slots.objects[253];
             door->unk0 = 0;
             k = 253;
@@ -229,17 +229,17 @@ void area_on_load_restore_actor_groups_and_doors(void)
             k = 90;
             map_objects_slots.objects[k].arg.b.unk3d[1] = 0;
             {
-                Object88 *records = actor_status.objects;
+                Actor *records = actor_status.objects;
 
                 for (i = 14, k = 0; i != -1; i--, k++) {
-                    records[k].unk0 = 1;
+                    records[k].slot_state = 1;
                 }
             }
             {
-                Object88 *records = actor_status.objects;
+                Actor *records = actor_status.objects;
 
                 for (i = 13, k = 15; i != -1; i--, k++) {
-                    records[k].unk0 = 8;
+                    records[k].slot_state = 8;
                 }
             }
         } else {
@@ -247,10 +247,10 @@ void area_on_load_restore_actor_groups_and_doors(void)
             map_objects_slots.objects[90].unk0 = 2;
             map_objects_slots.objects[90].arg.b.unk3d[1] = 0xff;
             {
-                Object88 *records = actor_status.objects;
+                Actor *records = actor_status.objects;
 
                 for (i = 14, k = 0; i != -1; i--, k++) {
-                    records[k].unk0 = 8;
+                    records[k].slot_state = 8;
                 }
             }
         }
@@ -261,7 +261,7 @@ void area_on_load_restore_actor_groups_and_doors(void)
             map_objects_slots.objects[253].arg.b.unk38 = 0xff;
             cur_evt_state.unk32[0xc] = 2;
         }
-        actor_status.objects[29].unk0 = 8;
+        actor_status.objects[29].slot_state = 8;
     }
     cur_evt_state.unk84[5] = 10;
 }

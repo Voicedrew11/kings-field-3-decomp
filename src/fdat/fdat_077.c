@@ -17,7 +17,7 @@ RODATA(0x801e8308, 0x88)
 void area_handler_noop(void);
 void area_update_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_start_ending(Object88 *obj);
+void area_on_actor_removed_start_ending(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -85,7 +85,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: record 0 starts the ending once (flag 0x39): fades the sound out, stops the sequence. */
 ADDRESS(0x801e85e4, 0x160)
-void area_on_actor_removed_start_ending(Object88 *obj)
+void area_on_actor_removed_start_ending(Actor *obj)
 {
     s32 volume;
     s32 i;

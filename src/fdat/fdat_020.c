@@ -21,14 +21,14 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_make_persistent(Object88 *obj);
+void area_on_actor_removed_make_persistent(Actor *obj);
 void area_region_trigger_worn_item_cells_and_warp_cells(Object44 *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_check_item_held(void);
-void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event);
+void area_talk_event_give_items_and_grant_magic(Actor *record, s32 event);
 void area_on_load_restore_actors_doors_and_light(void);
 
 const FdatHeader fdat_header = {
@@ -193,10 +193,10 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: actor 3 is enabled again (state 1) whenever it is removed. */
 ADDRESS(0x801e8764, 0x44)
-void area_on_actor_removed_make_persistent(Object88 *obj)
+void area_on_actor_removed_make_persistent(Actor *obj)
 {
     if (obj - actor_status.objects == 3) {
-        obj->unk0 = 1;
+        obj->slot_state = 1;
     }
 }
 
@@ -259,7 +259,7 @@ void area_on_item_added_check_item_held(void)
 
 /* Slot 4: script events 0..5 of an object record. */
 ADDRESS(0x801e8934, 0x14c)
-void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event)
+void area_talk_event_give_items_and_grant_magic(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -280,12 +280,12 @@ void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event)
         color_overlay_transition(0x200, 0x80, 0xc8, 0x80, 0, 0, 0);
         set_accumulated_color_overlay(0, 0, 0, 0, 1);
         cur_evt_state.unk2b = 1;
-        effect_status.unk0[56].unk0 = 1;
-        effect_status.unk0[58].unk0 = 1;
-        effect_status.unk0[60].unk0 = 1;
-        effect_status.unk0[62].unk0 = 1;
-        effect_status.unk0[64].unk0 = 1;
-        effect_status.unk0[76].unk0 = 1;
+        effect_status.unk0[56].menu_available = 1;
+        effect_status.unk0[58].menu_available = 1;
+        effect_status.unk0[60].menu_available = 1;
+        effect_status.unk0[62].menu_available = 1;
+        effect_status.unk0[64].menu_available = 1;
+        effect_status.unk0[76].menu_available = 1;
         break;
     case 5:
         event_map_object_interact(NULL, 10);
@@ -297,7 +297,7 @@ void area_talk_event_give_items_and_grant_magic(Object88 *record, s32 event)
 ADDRESS(0x801e8a80, 0x268)
 void area_on_load_restore_actors_doors_and_light(void)
 {
-    Object88 *obj;
+    Actor *obj;
     Object44 *obj44;
     s32 i;
 
@@ -311,12 +311,12 @@ void area_on_load_restore_actors_doors_and_light(void)
         obj44->unk0 = 0;
         map_objects_slots.objects[121].arg.b.unk3c = 0;
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0;
-        actor_status.objects[3].unk0 = 8;
+        actor_status.objects[3].slot_state = 8;
         obj = &actor_status.objects[4];
-        actor_status.objects[0].unk0 = 1;
-        actor_status.objects[1].unk0 = 8;
+        actor_status.objects[0].slot_state = 1;
+        actor_status.objects[1].slot_state = 8;
         for (i = 0x46; i != -1; i--, obj++) {
-            obj->unk0 = 1;
+            obj->slot_state = 1;
         }
     } else if (cur_evt_state.unk32[4] == 0) {
         cur_evt_state.unke[0x1b] = 1;
@@ -327,12 +327,12 @@ void area_on_load_restore_actors_doors_and_light(void)
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0;
         obj44 = &map_objects_slots.objects[91];
         obj44->unk0 = 0;
-        actor_status.objects[3].unk0 = 1;
+        actor_status.objects[3].slot_state = 1;
         obj = &actor_status.objects[4];
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 1;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 1;
         for (i = 0x46; i != -1; i--, obj++) {
-            obj->unk0 = 8;
+            obj->slot_state = 8;
         }
     } else {
         area_set_light_blend(0);
@@ -342,16 +342,16 @@ void area_on_load_restore_actors_doors_and_light(void)
         map_objects_slots.objects[173].arg.b.unk3d[1] = 0xff;
         obj44 = &map_objects_slots.objects[91];
         obj44->unk0 = 0;
-        actor_status.objects[3].unk0 = 8;
+        actor_status.objects[3].slot_state = 8;
         obj = &actor_status.objects[4];
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 1;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 1;
         for (i = 0x46; i != -1; i--, obj++) {
-            obj->unk0 = 1;
+            obj->slot_state = 1;
         }
     }
     if (cur_evt_state.unk2c[0] == 0) {
-        actor_status.objects[58].unk0 = 8;
+        actor_status.objects[58].slot_state = 8;
     } else {
         obj44 = &map_objects_slots.objects[83];
         obj44->unk0 = 0;

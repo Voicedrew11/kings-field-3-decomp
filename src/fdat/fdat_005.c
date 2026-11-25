@@ -19,7 +19,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_actor_swap_when_far(void);
 void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_set_flag(Object88 *obj);
+void area_on_actor_removed_set_flag(Actor *obj);
 void func_801e87c4(void);
 void func_801e87cc(void);
 void func_801e87d4(void);
@@ -31,7 +31,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
 void area_on_movie_start_noop(void);
 void area_on_movie_end_restore_hp(u8 id);
-void area_talk_event_give_items_and_copy_cells(Object88 *record, s32 event);
+void area_talk_event_give_items_and_copy_cells(Actor *record, s32 event);
 void area_on_load_restore_actors_and_cells(void);
 
 const FdatHeader fdat_header = {
@@ -143,12 +143,12 @@ void area_update_actor_swap_when_far(void)
         dz *= dz;
         if (dx + dz > 400) {
             cur_evt_state.unke[1] = 1;
-            actor_status.objects[20].unk0 = 8;
-            actor_status.objects[10].unk0 = 1;
-            actor_status.objects[25].unk0 = 8;
-            actor_status.objects[23].unk0 = 1;
-            actor_status.objects[24].unk0 = 1;
-            actor_status.objects[40].unk0 = 8;
+            actor_status.objects[20].slot_state = 8;
+            actor_status.objects[10].slot_state = 1;
+            actor_status.objects[25].slot_state = 8;
+            actor_status.objects[23].slot_state = 1;
+            actor_status.objects[24].slot_state = 1;
+            actor_status.objects[40].slot_state = 8;
         }
     }
 }
@@ -172,8 +172,8 @@ void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item)
         if (map_objects_slots.objects[k].arg.b.unk38 == 0xc8) {
             map_objects_slots.objects[k].arg.b.unk38 = 0xff;
         }
-        actor_status.objects[22].unk0 = 8;
-        actor_status.objects[39].unk0 = 1;
+        actor_status.objects[22].slot_state = 8;
+        actor_status.objects[39].slot_state = 1;
         cur_evt_state.unk0 = 1;
     }
 }
@@ -185,7 +185,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: records 24 and 40 set flag 0x10 once. */
 ADDRESS(0x801e8760, 0x64)
-void area_on_actor_removed_set_flag(Object88 *obj)
+void area_on_actor_removed_set_flag(Actor *obj)
 {
     s32 index = obj - actor_status.objects;
 
@@ -271,7 +271,7 @@ void area_on_movie_end_restore_hp(u8 id)
 
 /* Slot 4: script events 0..2 of an object record. */
 ADDRESS(0x801e88e8, 0xc0)
-void area_talk_event_give_items_and_copy_cells(Object88 *record, s32 event)
+void area_talk_event_give_items_and_copy_cells(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -296,34 +296,34 @@ void area_on_load_restore_actors_and_cells(void)
     s32 k;
 
     if (cur_evt_state.unke[0] != 0) {
-        actor_status.objects[20].unk0 = 8;
-        actor_status.objects[10].unk0 = 1;
-        actor_status.objects[25].unk0 = 8;
-        actor_status.objects[23].unk0 = 1;
-        actor_status.objects[24].unk0 = 1;
-        actor_status.objects[40].unk0 = 8;
+        actor_status.objects[20].slot_state = 8;
+        actor_status.objects[10].slot_state = 1;
+        actor_status.objects[25].slot_state = 8;
+        actor_status.objects[23].slot_state = 1;
+        actor_status.objects[24].slot_state = 1;
+        actor_status.objects[40].slot_state = 8;
         k = 71;
         if (map_objects_slots.objects[k].arg.b.unk38 == 0xc8) {
             map_objects_slots.objects[k].arg.b.unk38 = 0xff;
         }
-        actor_status.objects[22].unk0 = 8;
-        actor_status.objects[39].unk0 = 1;
+        actor_status.objects[22].slot_state = 8;
+        actor_status.objects[39].slot_state = 1;
     } else {
-        actor_status.objects[20].unk0 = 1;
-        actor_status.objects[10].unk0 = 8;
-        actor_status.objects[25].unk0 = 1;
-        actor_status.objects[23].unk0 = 8;
-        actor_status.objects[24].unk0 = 1;
-        actor_status.objects[40].unk0 = 8;
-        actor_status.objects[22].unk0 = 1;
-        actor_status.objects[39].unk0 = 8;
+        actor_status.objects[20].slot_state = 1;
+        actor_status.objects[10].slot_state = 8;
+        actor_status.objects[25].slot_state = 1;
+        actor_status.objects[23].slot_state = 8;
+        actor_status.objects[24].slot_state = 1;
+        actor_status.objects[40].slot_state = 8;
+        actor_status.objects[22].slot_state = 1;
+        actor_status.objects[39].slot_state = 8;
     }
     if (cur_evt_state.unke[0x16] != 0) {
-        actor_status.objects[24].unk0 = 8;
-        actor_status.objects[40].unk0 = 1;
+        actor_status.objects[24].slot_state = 8;
+        actor_status.objects[40].slot_state = 1;
     } else {
-        actor_status.objects[24].unk0 = 1;
-        actor_status.objects[40].unk0 = 8;
+        actor_status.objects[24].slot_state = 1;
+        actor_status.objects[40].slot_state = 8;
     }
     if (cur_evt_state.unke[2] == 0 && cur_evt_state.unke[3] != 0) {
         map_cell_copy_rotated_fields(2, 0x4e, 0, 0x1b, 0x11, 1, 7, 0, 0x2f);
@@ -332,10 +332,10 @@ void area_on_load_restore_actors_and_cells(void)
     }
     if (cur_evt_state.unk32[0xa] == 1) {
         cur_evt_state.unk32[0xa] = 2;
-        actor_status.objects[42].unk0 = 8;
+        actor_status.objects[42].slot_state = 8;
         map_objects_slots.objects[276].arg.b.unk38 = 0x90;
     } else if (cur_evt_state.unk32[0xa] == 2) {
-        actor_status.objects[42].unk0 = 8;
+        actor_status.objects[42].slot_state = 8;
     }
     cur_evt_state.unk84[5] = 1;
 }

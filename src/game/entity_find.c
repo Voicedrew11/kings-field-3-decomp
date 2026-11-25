@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object88 searches and animation time (WIP module): the
+ * GAME.EXE: Actor searches and animation time (WIP module): the
  * player-in-reach test, the best record in a cone, the first record a point
  * touches, the current-record pointers, and the animation time steps.
  */
@@ -23,9 +23,9 @@
 ADDRESS(0x8004ceac, 0x3a8)
 void actor_apply_area_magic(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 falloff, u16 a5, u16 a6, u16 a7,
                             u16 a8, u16 a9, u16 a10, u16 a11, u16 a12, u16 a13, u16 flags, u16 a15,
-                            Record18 *rec)
+                            MagicRecord *rec)
 {
-    Object88 *obj;
+    Actor *obj;
     VECTOR *target;
     s32 dist;
     s32 angle;
@@ -40,26 +40,30 @@ void actor_apply_area_magic(VECTOR *pos, s32 near, s32 reach, s32 mode, u16 fall
     flags &= 0x7fff;
     obj = actor_status.objects;
     for (i = 0; i < 200; i++, obj++) {
-        if (obj->unk9 != 1 || obj == actor_status.current) {
+        if (obj->lifecycle != 1 || obj == actor_status.current) {
             continue;
         }
         if (mode == 0x8000) {
-            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->collision_radius,
+                                                      obj->collision_height);
         } else if (mode == 0x8001) {
-            if (pos->vy < obj->pos.vy - obj->unk1e) {
+            if (pos->vy < obj->pos.vy - obj->collision_height) {
                 dist = -9999999;
             } else {
-                dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+                dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->collision_radius,
+                                                          obj->collision_height);
             }
         } else if (mode == 0x8002) {
-            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->unk1c, obj->unk1e);
+            dist = vector_distance_between_with_reach(pos, reach, &obj->pos, obj->collision_radius,
+                                                      obj->collision_height);
             angle = (s16)ratan2(obj->pos.vz - pos->vz, obj->pos.vx - pos->vx);
             side = angle_within_tolerance(angle, pos->pad + 1024, 0x40);
             if (side == 1 && angle_within_tolerance(angle, pos->pad - 1024, 0x40) == side) {
                 dist = -9999999;
             }
         } else {
-            dist = vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz, reach, obj->unk1e, mode);
+            dist = vector_distance_to_point(&obj->pos, pos->vx, pos->vy, pos->vz, reach,
+                                            obj->collision_height, mode);
             if (dist == -1) {
                 dist = -9999999;
             }
@@ -84,7 +88,7 @@ ADDRESS(0x8004d254, 0x170)
 s32 actor_try_damage_player_in_cone(s32 near, s32 range, s32 height, s32 cone, u16 a4, u16 a5, u16 a6, u16 a7)
 {
     s32 offset = height << 5;
-    Object88 *obj = actor_status.current;
+    Actor *obj = actor_status.current;
     VECTOR *target;
     VECTOR pos;
     s32 dist;
@@ -114,11 +118,11 @@ s32 actor_try_damage_player_in_cone(s32 near, s32 range, s32 height, s32 cone, u
 
 /* The active record best inside the cone from pos (yaw, pitch); its distance in *dist. */
 ADDRESS(0x8004d3c4, 0x280)
-Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
-                                  s32 *dist, s32 jitter)
+Actor *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s32 max_yaw, s32 max_pitch,
+                               s32 *dist, s32 jitter)
 {
-    Object88 *obj;
-    Object88 *best;
+    Actor *obj;
+    Actor *best;
     SVECTOR angle;
     s32 best_score;
     s32 best_dist;
@@ -133,9 +137,9 @@ Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s3
     obj = actor_status.objects;
     i = 200;
     while (i--) {
-        if (obj->unk9 == 1 && obj->unke != 3 && obj != actor_status.current) {
+        if (obj->lifecycle == 1 && obj->target_type != 3 && obj != actor_status.current) {
             r = range;
-            if (obj->unk28 & 0x20000) {
+            if (obj->flags & 0x20000) {
                 r <<= 1;
             }
             d = vector_distance_to_point(&obj->pos, pos->vx, 0xffff, pos->vz, r, 0, 0);
@@ -150,7 +154,7 @@ Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s3
                 if (angle.vx >= 2048) {
                     angle.vx = 0x1000 - angle.vx;
                 }
-                if ((obj->unk28 & 0x20000) && jitter >= 0) {
+                if ((obj->flags & 0x20000) && jitter >= 0) {
                     d >>= 2;
                     angle.vx -= 512;
                     angle.vy -= 512;
@@ -179,46 +183,48 @@ Object88 *actor_find_best_in_cone(VECTOR *pos, s16 yaw, s16 pitch, s32 range, s3
 ADDRESS(0x8004d644, 0x1f4)
 s32 actor_find_overlap_excluding_target_type3(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     VECTOR pos;
     s32 i;
 
     obj = actor_status.objects;
     for (i = 0; i < 200; i++, obj++) {
-        if (obj->unk9 != 1) {
+        if (obj->lifecycle != 1) {
             continue;
         }
-        if (obj->unke == 3) {
+        if (obj->target_type == 3) {
             continue;
         }
-        if (actor_status.unk9d00 & obj->unk28) {
+        if (actor_status.actor_overlap_exclusion_flags & obj->flags) {
             continue;
         }
         if (obj == actor_status.current) {
             continue;
         }
-        if (obj->unk28 & 0x10) {
-            if (obj->unk22 == actor_status.unk9d18) {
+        if (obj->flags & 0x10) {
+            if (obj->unk22 == actor_status.current_index) {
                 continue;
             }
             pos.vx = obj->pos.vx;
             pos.vz = obj->pos.vz;
-            pos.vy = obj->unk26 + obj->pos.vy;
-            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            pos.vy = obj->vertical_anchor_offset + obj->pos.vy;
+            if (vector_distance_to_point(&pos, x, y, z, obj->collision_radius + radius, obj->collision_height,
+                                         reach_up) != -1) {
                 return i;
             }
-        } else if (obj->unk28 & 0x400000) {
-            def = &actor_status.defs[obj->unk2];
-            actor_sample_rotated_animation_vertex(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
+        } else if (obj->flags & 0x400000) {
+            def = &actor_status.groups[obj->group_index];
+            actor_sample_rotated_animation_vertex(obj, def->definition_id == 0x6a ? 0x46 : 0, &pos);
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
-            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->collision_radius + radius, obj->collision_height,
+                                         reach_up) != -1) {
                 return i;
             }
-        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e,
-                                            reach_up) != -1) {
+        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->collision_radius + radius,
+                                            obj->collision_height, reach_up) != -1) {
             return i;
         }
     }
@@ -229,46 +235,48 @@ s32 actor_find_overlap_excluding_target_type3(s32 x, s32 y, s32 z, s32 radius, s
 ADDRESS(0x8004d838, 0x1f4)
 s32 actor_find_overlap(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 {
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     VECTOR pos;
     s32 i;
 
     obj = actor_status.objects;
     for (i = 0; i < 200; i++, obj++) {
-        if (obj->unk9 != 1) {
+        if (obj->lifecycle != 1) {
             continue;
         }
-        if (actor_status.unk9d00 & obj->unk28) {
+        if (actor_status.actor_overlap_exclusion_flags & obj->flags) {
             continue;
         }
-        if (obj->unk1 == 0x6e) {
+        if (obj->definition_id == 0x6e) {
             continue;
         }
         if (obj == actor_status.current) {
             continue;
         }
-        if (obj->unk28 & 0x10) {
-            if (obj->unk22 == actor_status.unk9d18) {
+        if (obj->flags & 0x10) {
+            if (obj->unk22 == actor_status.current_index) {
                 continue;
             }
             pos.vx = obj->pos.vx;
             pos.vz = obj->pos.vz;
-            pos.vy = obj->unk26 + obj->pos.vy;
-            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            pos.vy = obj->vertical_anchor_offset + obj->pos.vy;
+            if (vector_distance_to_point(&pos, x, y, z, obj->collision_radius + radius, obj->collision_height,
+                                         reach_up) != -1) {
                 return i;
             }
-        } else if (obj->unk28 & 0x400000) {
-            def = &actor_status.defs[obj->unk2];
-            actor_sample_rotated_animation_vertex(obj, def->unk0 == 0x6a ? 0x46 : 0, &pos);
+        } else if (obj->flags & 0x400000) {
+            def = &actor_status.groups[obj->group_index];
+            actor_sample_rotated_animation_vertex(obj, def->definition_id == 0x6a ? 0x46 : 0, &pos);
             pos.vx += obj->pos.vx;
             pos.vz += obj->pos.vz;
             pos.vy += obj->pos.vy;
-            if (vector_distance_to_point(&pos, x, y, z, obj->unk1c + radius, obj->unk1e, reach_up) != -1) {
+            if (vector_distance_to_point(&pos, x, y, z, obj->collision_radius + radius, obj->collision_height,
+                                         reach_up) != -1) {
                 return i;
             }
-        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->unk1c + radius, obj->unk1e,
-                                            reach_up) != -1) {
+        } else if (vector_distance_to_point(&obj->pos, x, y, z, obj->collision_radius + radius,
+                                            obj->collision_height, reach_up) != -1) {
             return i;
         }
     }
@@ -277,63 +285,63 @@ s32 actor_find_overlap(s32 x, s32 y, s32 z, s32 radius, s32 reach_up)
 
 /* Makes obj the current record (0 clears the pointers). */
 ADDRESS(0x8004da2c, 0xdc)
-void actor_bind_current(Object88 *obj)
+void actor_bind_current(Actor *obj)
 {
     if (obj != NULL) {
         actor_status.current = obj;
-        actor_status.def = &actor_status.defs[obj->unk2];
-        actor_status.unk9d1c = obj->unk2;
-        if (actor_status.def->unk34 & 0x10) {
-            actor_status.target = &actor_status.objects[obj->unk22];
-            actor_status.target_def = &actor_status.defs[actor_status.target->unk2];
+        actor_status.current_group = &actor_status.groups[obj->group_index];
+        actor_status.current_group_index = obj->group_index;
+        if (actor_status.current_group->initial_actor_flags & 0x10) {
+            actor_status.other_actor = &actor_status.objects[obj->unk22];
+            actor_status.other_group = &actor_status.groups[actor_status.other_actor->group_index];
         }
     } else {
         actor_status.current = NULL;
-        actor_status.def = NULL;
-        actor_status.unk9d1c = 0;
-        actor_status.target = NULL;
-        actor_status.target_def = NULL;
+        actor_status.current_group = NULL;
+        actor_status.current_group_index = 0;
+        actor_status.other_actor = NULL;
+        actor_status.other_group = NULL;
     }
 }
 
 /* Steps the animation time, wrapping. */
 ADDRESS(0x8004db08, 0x34)
-void actor_advance_animation_wrapped(Object88 *obj, s16 step)
+void actor_advance_animation_wrapped(Actor *obj, s16 step)
 {
     if (step < 0) {
-        obj->unk66 = -step;
+        obj->animation_step = -step;
     } else {
-        obj->unk66 = step;
+        obj->animation_step = step;
     }
-    obj->unk18 = (step + obj->unk18) & 0xfff;
+    obj->animation_phase = (step + obj->animation_phase) & 0xfff;
 }
 
 /* Steps the animation time, holding at either end. */
 ADDRESS(0x8004db3c, 0x5c)
-void actor_advance_animation_clamped(Object88 *obj, s16 step)
+void actor_advance_animation_clamped(Actor *obj, s16 step)
 {
     s16 time;
 
     if (step < 0) {
-        obj->unk66 = -step;
+        obj->animation_step = -step;
     } else {
-        obj->unk66 = step;
+        obj->animation_step = step;
     }
-    obj->unk18 = time = step + obj->unk18;
+    obj->animation_phase = time = step + obj->animation_phase;
     if (time >= 0x1000) {
-        obj->unk18 = 0xfff;
+        obj->animation_phase = 0xfff;
     } else if (time < 0) {
-        obj->unk18 = 0;
+        obj->animation_phase = 0;
     }
 }
 
 /* Whether the last time step passed time. */
 ADDRESS(0x8004db98, 0x30)
-s32 actor_animation_crossed_phase(Object88 *obj, u16 time)
+s32 actor_animation_crossed_phase(Actor *obj, u16 time)
 {
     s32 passed;
 
-    return time < obj->unk18 && time >= obj->unk18 - obj->unk66;
+    return time < obj->animation_phase && time >= obj->animation_phase - obj->animation_step;
 }
 
 /*
@@ -344,7 +352,7 @@ s32 actor_animation_crossed_phase(Object88 *obj, u16 time)
 ADDRESS(0x8004dbc8, 0x4cc)
 s32 actor_move_horizontal_with_collision(SVECTOR *vel, s32 mode)
 {
-    Object88 *obj = actor_status.current;
+    Actor *obj = actor_status.current;
     s32 dx;
     s32 dz;
     s32 dx0;
@@ -368,11 +376,11 @@ s32 actor_move_horizontal_with_collision(SVECTOR *vel, s32 mode)
 retry:
     p.vx = obj->pos.vx + dx;
     p.vz = obj->pos.vz + dz;
-    hit = collision_query_world(p.vx, obj->pos.vy, p.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                actor_status.unk9d04);
+    hit = collision_query_world(p.vx, obj->pos.vy, p.vz, obj->collision_radius, ACTOR_SHAPE(obj),
+                                actor_status.actor_collision_query_flags);
     if (hit == 0) {
     clear:
-        if (obj->unkd == 0 && (mode & 0x24)) {
+        if (obj->vertical_motion_state == 0 && (mode & 0x24)) {
             s32 floor = map_world.unk12010;
             s32 step_x;
             s32 step_z;
@@ -380,24 +388,24 @@ retry:
             if (dx == 0) {
                 step_x = 0;
             } else if (dx > 0) {
-                step_x = obj->unk1c * 2;
+                step_x = obj->collision_radius * 2;
             } else {
-                step_x = -obj->unk1c * 2;
+                step_x = -obj->collision_radius * 2;
             }
             if (dz == 0) {
                 step_z = 0;
             } else if (dz > 0) {
-                step_z = obj->unk1c * 2;
+                step_z = obj->collision_radius * 2;
             } else {
-                step_z = -obj->unk1c * 2;
+                step_z = -obj->collision_radius * 2;
             }
             collision_query_shapes_with_layer_sample(obj->pos.vx, obj->pos.vy, obj->pos.vz + step_z,
-                                                     obj->unk1c, OBJECT88_SHAPE(obj));
+                                                     obj->collision_radius, ACTOR_SHAPE(obj));
             if (floor < map_world.unk12010) {
                 floor = map_world.unk12010;
             }
             collision_query_shapes_with_layer_sample(obj->pos.vx + step_x, obj->pos.vy, obj->pos.vz,
-                                                     obj->unk1c, OBJECT88_SHAPE(obj));
+                                                     obj->collision_radius, ACTOR_SHAPE(obj));
             if (floor < map_world.unk12010) {
                 floor = map_world.unk12010;
             }
@@ -441,7 +449,7 @@ retry:
         goto retry;
     }
     if (!(mode & 0x10)) {
-        if (obj->unk28 & 0x4000) {
+        if (obj->flags & 0x4000) {
             goto blocked;
         }
         if (!(hit & ~0x205)) {

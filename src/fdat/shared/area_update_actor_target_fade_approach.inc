@@ -8,8 +8,8 @@
 ADDRESS(0x801e87a0, 0x350)
 void area_update_actor_target_fade_approach(void)
 {
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     u8 *script;
     s32 dx;
     s32 dz;
@@ -22,19 +22,19 @@ void area_update_actor_target_fade_approach(void)
     s32 mode;
 
     obj = actor_status.current;
-    def = actor_status.def;
-    script = obj->unk60;
-    if (obj->unke != 0x85) {
+    def = actor_status.current_group;
+    script = obj->target;
+    if (obj->target_type != 0x85) {
         return;
     }
-    if (obj->unkf == 0) {
-        obj->unkf = 0xf0;
-        obj->unk16 = -12000;
-        obj->unk14 = 0x32;
-        obj->unk70 = 0;
+    if (obj->target_action_state == 0) {
+        obj->target_action_state = 0xf0;
+        obj->lighting_blend = -12000;
+        obj->lighting_override_index = 0x32;
+        obj->target_phase = 0;
         obj->unk72.vy = 0;
-        obj->unk18 = 0;
-        obj->unk13 = 7;
+        obj->animation_phase = 0;
+        obj->render_mode = 7;
         actor_set_animation(script[1]);
     }
     dx = cur_avatar_status.pos.vx - obj->pos.vx;
@@ -42,54 +42,54 @@ void area_update_actor_target_fade_approach(void)
     angle = ratan2(dz, dx);
     step_x = ((u16 *)script)[6] * rcos(angle) >> 12;
     step_z = ((u16 *)script)[6] * rsin(angle) >> 12;
-    obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
-                                    cur_avatar_status.pos.vz - obj->pos.vz);
+    obj->movement_yaw = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                           cur_avatar_status.pos.vz - obj->pos.vz);
     mode = 5;
     if (obj->unk72.vy == 0) {
-        turned = actor_turn_and_move_along_heading(obj->unk64, ((u16 *)script)[6], ((u16 *)script)[7],
+        turned = actor_turn_and_move_along_heading(obj->movement_yaw, ((u16 *)script)[6], ((u16 *)script)[7],
                                                    def->unk1[2], def->unk1[3], mode);
     } else {
-        turned = actor_move_along_heading(obj->unk64 + 2048, ((u16 *)script)[6], def->unk1[2], mode);
+        turned = actor_move_along_heading(obj->movement_yaw + 2048, ((u16 *)script)[6], def->unk1[2], mode);
     }
     if (turned != 0) {
         obj->unk72.vy = obj->unk72.vy == 0;
     }
     dist = dx * dx + dz * dz;
     range = ((u16 *)script)[10] * ((u16 *)script)[10];
-    switch (obj->unk70) {
+    switch (obj->target_phase) {
     case 0:
-        obj->unk16 = obj->unk16 < 4095 ? obj->unk16 + FADE_APPROACH_BLEND_STEP : 0xfff;
+        obj->lighting_blend = obj->lighting_blend < 4095 ? obj->lighting_blend + FADE_APPROACH_BLEND_STEP : 0xfff;
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         if (dist > 0x19000000) {
-            obj->unk70 = 1;
-            obj->unk18 = 0;
+            obj->target_phase = 1;
+            obj->animation_phase = 0;
         }
-        if (obj->unk18 >= 4095) {
-            obj->unk70 = 1;
-            obj->unk18 = 0;
+        if (obj->animation_phase >= 4095) {
+            obj->target_phase = 1;
+            obj->animation_phase = 0;
         }
         break;
     case 1:
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         obj->pos.vx += step_x;
         obj->pos.vz += step_z;
-        obj->unk16 += (rand() >> 6) - 256;
+        obj->lighting_blend += (rand() >> 6) - 256;
         if (dist < range) {
-            obj->unk70 = 2;
-            obj->unk18 = 0;
+            obj->target_phase = 2;
+            obj->animation_phase = 0;
         }
-        if (obj->unk18 >= 4095) {
-            obj->unk70 = 2;
-            obj->unk18 = 0;
+        if (obj->animation_phase >= 4095) {
+            obj->target_phase = 2;
+            obj->animation_phase = 0;
         }
         break;
     case 2:
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
-        obj->unk16 -= FADE_APPROACH_BLEND_STEP;
-        if (obj->unk18 >= 4095 && obj->unk16 <= 1024) {
-            obj->unk14 = 0x37;
-            obj->unk13 = 0;
-            obj->unk16 = 0x800;
+        obj->lighting_blend -= FADE_APPROACH_BLEND_STEP;
+        if (obj->animation_phase >= 4095 && obj->lighting_blend <= 1024) {
+            obj->lighting_override_index = 0x37;
+            obj->render_mode = 0;
+            obj->lighting_blend = 0x800;
             actor_reset_target_and_reselect();
         }
         break;

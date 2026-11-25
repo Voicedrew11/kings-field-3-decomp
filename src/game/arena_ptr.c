@@ -93,7 +93,7 @@ void event_arena_owner_pointers_subtract_delta(s32 delta)
 }
 
 /*
- * Saves area's state in its saved block: the live Object88 records, the talk
+ * Saves area's state in its saved block: the live Actor records, the talk
  * script positions and each Object44 record by its Object44Def type.
  */
 ADDRESS(0x8005efd4, 0x470)
@@ -101,8 +101,8 @@ void event_world_state_save_slot(s32 area)
 {
     u8 *ptrs[32];
     u8 buf[0xc00];
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     Object44 *rec;
     u8 *script;
     u8 *p;
@@ -113,9 +113,9 @@ void event_world_state_save_slot(s32 area)
     p = buf;
     obj = actor_status.objects;
     for (i = 0; i < 200; i++) {
-        if (obj->unk0 != 0xff && obj->unk0 == 1) {
+        if (obj->slot_state != 0xff && obj->slot_state == 1) {
             *p++ = i;
-            if (obj->unk9 == 3) {
+            if (obj->lifecycle == 3) {
                 *p = 3;
             } else {
                 *p = 0;
@@ -125,12 +125,12 @@ void event_world_state_save_slot(s32 area)
         obj++;
     }
     *p++ = 0xff;
-    def = actor_status.defs;
+    def = actor_status.groups;
     for (i = 0; i < 40; i++) {
-        if (def->unk0 == 0xff) {
+        if (def->definition_id == 0xff) {
             break;
         }
-        script = def->scripts[0];
+        script = def->targets[0];
         def++;
         if (script != NULL && script[0] == 0x70) {
             *p++ = i;
@@ -281,7 +281,7 @@ void event_world_state_restore_slot(s32 area)
         if (n == 0xff) {
             break;
         }
-        (actor_status.objects + n)->unk9 = *p++;
+        (actor_status.objects + n)->lifecycle = *p++;
     }
     for (;;) {
         s32 n = *p++;
@@ -289,7 +289,7 @@ void event_world_state_restore_slot(s32 area)
         if (n == 0xff) {
             break;
         }
-        script = (actor_status.defs + n)->scripts[0];
+        script = (actor_status.groups + n)->targets[0];
         script[16] = *p++;
         script[19] = *p++;
     }

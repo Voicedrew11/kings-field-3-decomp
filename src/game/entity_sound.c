@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: Object88 attacks, sound and script interpreter (WIP module): the
+ * GAME.EXE: Actor attacks, sound and script interpreter (WIP module): the
  * attack spawner of the current record, the note offset from the record's
  * scale, the sound effect of its running script record and the per-frame
  * interpreter of that script record.
@@ -33,10 +33,10 @@ RODATA(0x800126e8, 0x5cc)
 ADDRESS(0x8004f414, 0xb8c)
 void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
 {
-    Object88 *obj;
-    Object88 *o;
+    Actor *obj;
+    Actor *o;
     Object4c *shot;
-    Object78 *def;
+    ActorGroup *def;
     VECTOR *target;
     s32 *args;
     VECTOR pos;
@@ -96,7 +96,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         break;
     case 0x27:
         if (cur_avatar_status.unk84 != 0) {
-            obj->unk28 |= 0x100;
+            obj->flags |= 0x100;
         }
     case 0x26:
         actor_compute_target_direction(obj, target, 0, &pos, &dir, -1, 0x400, 1);
@@ -197,7 +197,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
         effect_construct_record((u8)kind, 0x83, (u8)id, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
         break;
     case 0x55:
-        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, actor_status.unk9d18, vertex,
+        effect_construct_record((u8)kind, 0x83, (u8)id, &pos, NULL, actor_status.current_index, vertex,
                                 SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
@@ -243,15 +243,15 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
             break;
         }
         AIM(400);
-        o->unk0 = 5;
-        o->unk2 = n;
+        o->slot_state = 5;
+        o->group_index = n;
         o->unk4 = 0;
-        o->unk5 = 0;
-        o->unk3 = obj->unk6;
-        o->unk9 = 1;
-        def = &actor_status.defs[n];
-        o->unk28 = def->unk34;
-        o->unk15 = def->unk9;
+        o->placement_flags = 0;
+        o->layer_mask = obj->home_layer_mask;
+        o->lifecycle = 1;
+        def = &actor_status.groups[n];
+        o->flags = def->initial_actor_flags;
+        o->render_depth_offset = def->render_depth_offset;
         o->pos.vx = pos.vx;
         o->pos.vy = pos.vy + 4096;
         o->pos.vz = pos.vz;
@@ -289,7 +289,7 @@ void actor_dispatch_group_effect(s32 id, s32 kind, s32 vertex, ...)
 
 /* Note offset for obj's sound: lower for a larger record, plus a little noise. */
 ADDRESS(0x8004ffa0, 0x70)
-s32 actor_sound_note_offset(Object88 *obj)
+s32 actor_sound_note_offset(Actor *obj)
 {
     s32 note = 16 - (s8)(obj->scale.vy >> 8);
 
@@ -303,12 +303,12 @@ s32 actor_sound_note_offset(Object88 *obj)
 
 /* Plays the sound effect of obj's running script record at obj. */
 ADDRESS(0x80050010, 0x98)
-void actor_play_target_sound(Object88 *obj)
+void actor_play_target_sound(Actor *obj)
 {
     u8 *script;
 
-    script = obj->unk60;
-    if (obj->unk28 & 0x800000) {
+    script = obj->target;
+    if (obj->flags & 0x800000) {
         audio_play_spatial_range(script[4] + 240, &obj->pos, 0x7f, 0x6000, 0x7800,
                                  actor_sound_note_offset(obj));
     } else {
@@ -319,7 +319,7 @@ void actor_play_target_sound(Object88 *obj)
 /*
  * Runs one frame of the current record's script record (actor_status.current
  * and .def): its sound and light fade first, then the record's behaviour by
- * script id (Object88.unke; unkf 0 starts it), FDAT slot 17 for the ids this
+ * script id (Actor.unke; unkf 0 starts it), FDAT slot 17 for the ids this
  * module does not know, and last the ride on its target record (flag 0x10).
  * The angles passed to actor_move_along_heading are narrowed to s16 here; the FDAT
  * callers pass theirs as int.
@@ -327,8 +327,8 @@ void actor_play_target_sound(Object88 *obj)
 ADDRESS(0x800500a8, 0x2db4)
 void actor_update_behavior(void)
 {
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     u8 *script;
     s32 phase;
     SVECTOR dir;
@@ -337,20 +337,20 @@ void actor_update_behavior(void)
     SVECTOR step;
 
     obj = actor_status.current;
-    def = actor_status.def;
-    script = obj->unk60;
-    if (obj->unk28 & 4) {
-        actor_status.unk9d04 = 3;
+    def = actor_status.current_group;
+    script = obj->target;
+    if (obj->flags & 4) {
+        actor_status.actor_collision_query_flags = 3;
     } else {
-        actor_status.unk9d04 = 0x93;
+        actor_status.actor_collision_query_flags = 0x93;
     }
-    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, -1);
+    map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->collision_radius, -1);
     if (script[4] != 0xff) {
         s32 n;
         s32 slot;
 
         n = SCRIPT_U16(script, 10) % 0x4000;
-        if (script[0] != 0x15 || obj->unk70 == 2) {
+        if (script[0] != 0x15 || obj->target_phase == 2) {
             switch (SCRIPT_U16(script, 10) & 0xc000) {
             case 0:
                 if (actor_animation_crossed_phase(obj, n)) {
@@ -363,105 +363,105 @@ void actor_update_behavior(void)
                 }
                 break;
             case 0x4000:
-                slot = n * actor_status.unk9d18 / 3 % n;
-                if (actor_status.unk9d24 % n == slot) {
+                slot = n * actor_status.current_index / 3 % n;
+                if (actor_status.actor_update_frame_count % n == slot) {
                     actor_play_target_sound(obj);
                 }
                 break;
             }
         }
     }
-    if (obj->unk28 & 0x200000) {
+    if (obj->flags & 0x200000) {
         u8 *light;
 
         light = actor_find_target_of_type(def, 2);
         if (light != NULL) {
-            switch (obj->unk84) {
+            switch (obj->hit_flash_phase) {
             case 0:
-                obj->unk14 = 0x3b;
-                obj->unk16 = 0;
-                obj->unk13 &= 0xf8;
-                obj->unk13 |= light[14];
-                obj->unk84++;
+                obj->lighting_override_index = 0x3b;
+                obj->lighting_blend = 0;
+                obj->render_mode &= 0xf8;
+                obj->render_mode |= light[14];
+                obj->hit_flash_phase++;
                 break;
             case 1:
-                obj->unk16 += 512;
-                if (obj->unk16 >= 4096) {
-                    obj->unk16 = 0xfff;
-                    obj->unk84++;
+                obj->lighting_blend += 512;
+                if (obj->lighting_blend >= 4096) {
+                    obj->lighting_blend = 0xfff;
+                    obj->hit_flash_phase++;
                 }
                 break;
             case 2:
-                obj->unk16 -= 512;
-                if (obj->unk16 < 0) {
-                    obj->unk16 = 0;
-                    obj->unk84++;
+                obj->lighting_blend -= 512;
+                if (obj->lighting_blend < 0) {
+                    obj->lighting_blend = 0;
+                    obj->hit_flash_phase++;
                 }
                 break;
             case 3:
-                if (obj->unk1 < 50) {
-                    obj->unk14 = 0x3e;
+                if (obj->definition_id < 50) {
+                    obj->lighting_override_index = 0x3e;
                 } else {
-                    obj->unk14 = 0x37;
+                    obj->lighting_override_index = 0x37;
                 }
-                if (obj->unk28 & 0x80) {
-                    obj->unk13 |= 7;
+                if (obj->flags & 0x80) {
+                    obj->render_mode |= 7;
                 } else {
-                    obj->unk13 &= 0xfb;
+                    obj->render_mode &= 0xfb;
                 }
-                obj->unk16 = 0x800;
-                obj->unk28 &= ~0x200000;
+                obj->lighting_blend = 0x800;
+                obj->flags &= ~0x200000;
                 break;
             }
         }
     }
-    switch (obj->unke) {
+    switch (obj->target_type) {
     case 2:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation(script[1]);
         }
-        phase = obj->unk70;
-        if (phase < 2 || !(obj->unk28 & 0x800)) {
+        phase = obj->target_phase;
+        if (phase < 2 || !(obj->flags & 0x800)) {
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         }
         switch (phase) {
         case 0:
-            obj->unk14 = 0x3b;
-            obj->unk16 = 0;
-            obj->unk13 &= 0xf8;
-            obj->unk13 |= script[14];
-            obj->unk70++;
+            obj->lighting_override_index = 0x3b;
+            obj->lighting_blend = 0;
+            obj->render_mode &= 0xf8;
+            obj->render_mode |= script[14];
+            obj->target_phase++;
             break;
         case 1:
-            if (obj->unk16 < 4096) {
-                obj->unk16 += 512;
+            if (obj->lighting_blend < 4096) {
+                obj->lighting_blend += 512;
             }
-            if (obj->unk18 >= 2047) {
-                obj->unk70++;
+            if (obj->animation_phase >= 2047) {
+                obj->target_phase++;
             }
             break;
         case 2:
-            if (obj->unk16 > 0) {
-                obj->unk16 -= 512;
+            if (obj->lighting_blend > 0) {
+                obj->lighting_blend -= 512;
             }
-            if (obj->unk18 >= 4095) {
-                obj->unk70++;
+            if (obj->animation_phase >= 4095) {
+                obj->target_phase++;
             }
             break;
         case 3:
-            if (obj->unk1 < 50) {
-                obj->unk14 = 0x3e;
+            if (obj->definition_id < 50) {
+                obj->lighting_override_index = 0x3e;
             } else {
-                obj->unk14 = 0x37;
+                obj->lighting_override_index = 0x37;
             }
-            if (obj->unk28 & 0x80) {
-                obj->unk13 |= 7;
+            if (obj->flags & 0x80) {
+                obj->render_mode |= 7;
             } else {
-                obj->unk13 &= 0xfb;
+                obj->render_mode &= 0xfb;
             }
-            obj->unk16 = 0x800;
+            obj->lighting_blend = 0x800;
             break;
         }
         if (phase == 3) {
@@ -472,95 +472,96 @@ void actor_update_behavior(void)
     case 3: {
         u8 *light;
 
-        phase = obj->unk70;
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        phase = obj->target_phase;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
-            obj->unk28 &= ~0x10000;
-            obj->unk70 = 0;
+            obj->flags &= ~0x10000;
+            obj->target_phase = 0;
             light = actor_find_target_of_type(def, 2);
             if (light != NULL) {
-                obj->unk14 = 0x3b;
-                obj->unk16 = 0;
-                obj->unk13 &= 0xf8;
-                obj->unk13 |= light[14];
+                obj->lighting_override_index = 0x3b;
+                obj->lighting_blend = 0;
+                obj->render_mode &= 0xf8;
+                obj->render_mode |= light[14];
             }
         }
-        if (obj->unk70 == 0) {
-            if (obj->unk18 >= 1024 && (obj->unk28 & 0x800)) {
+        if (obj->target_phase == 0) {
+            if (obj->animation_phase >= 1024 && (obj->flags & 0x800)) {
                 break;
             }
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
             if (actor_find_target_of_type(def, 2) != NULL) {
-                if (obj->unk18 < 2048) {
-                    if (obj->unk16 < 4096) {
-                        obj->unk16 += 512;
+                if (obj->animation_phase < 2048) {
+                    if (obj->lighting_blend < 4096) {
+                        obj->lighting_blend += 512;
                     }
-                } else if (obj->unk16 > 0) {
-                    obj->unk16 -= 512;
+                } else if (obj->lighting_blend > 0) {
+                    obj->lighting_blend -= 512;
                 }
             }
             if (actor_animation_crossed_phase(obj, 0x800)) {
                 u16 drop;
 
-                drop = def->unk30 + random_centered_triangular_scaled(def->unk30);
+                drop = def->gold_drop_center + random_centered_triangular_scaled(def->gold_drop_center);
                 if (drop != 0) {
-                    map_object_spawn_scattered_effect(drop, &obj->pos, -(obj->unk1e >> 1));
+                    map_object_spawn_scattered_effect(drop, &obj->pos, -(obj->collision_height >> 1));
                 }
-                if (obj->unk0 == 0 || obj->unk0 == 4) {
+                if (obj->slot_state == 0 || obj->slot_state == 4) {
                     if (script[12] != 0xff && (rand() >> 7) < script[13]) {
-                        map_object_spawn_effect(1, script[12], &obj->pos, -(obj->unk1e >> 1));
+                        map_object_spawn_effect(1, script[12], &obj->pos, -(obj->collision_height >> 1));
                     }
-                } else if (obj->unk0 == 1) {
-                    if (obj->unkb != 0xff) {
-                        map_object_spawn_effect(0, obj->unkb, &obj->pos, -(obj->unk1e >> 1));
+                } else if (obj->slot_state == 1) {
+                    if (obj->death_drop_object_id != 0xff) {
+                        map_object_spawn_effect(0, obj->death_drop_object_id, &obj->pos,
+                                                -(obj->collision_height >> 1));
                     }
                 }
             }
-            if (obj->unk18 >= 4095 || SCRIPT_U16(script, 8) == 0) {
-                obj->unk70 = 15;
+            if (obj->animation_phase >= 4095 || SCRIPT_U16(script, 8) == 0) {
+                obj->target_phase = 15;
                 if (actor_find_target_of_type(def, 2) != NULL) {
-                    if (obj->unk1 < 50) {
-                        obj->unk14 = 0x3e;
+                    if (obj->definition_id < 50) {
+                        obj->lighting_override_index = 0x3e;
                     } else {
-                        obj->unk14 = 0x37;
+                        obj->lighting_override_index = 0x37;
                     }
-                    if (obj->unk28 & 0x80) {
-                        obj->unk13 |= 7;
+                    if (obj->flags & 0x80) {
+                        obj->render_mode |= 7;
                     } else {
-                        obj->unk13 &= 0xfb;
+                        obj->render_mode &= 0xfb;
                     }
-                    obj->unk16 = 0x800;
+                    obj->lighting_blend = 0x800;
                 }
             }
         } else {
-            if (obj->unk70 == 99) {
+            if (obj->target_phase == 99) {
                 break;
             }
-            obj->unk70++;
+            obj->target_phase++;
             if (phase >= 20) {
                 if (phase == 20) {
-                    obj->unk14 = 0x32;
-                    obj->unk16 = 0x400;
-                    obj->unk13 = (obj->unk13 & 7) | 5;
+                    obj->lighting_override_index = 0x32;
+                    obj->lighting_blend = 0x400;
+                    obj->render_mode = (obj->render_mode & 7) | 5;
                 } else if (phase < 38) {
-                    if (obj->unk16 < 4096) {
-                        obj->unk16 += 192;
+                    if (obj->lighting_blend < 4096) {
+                        obj->lighting_blend += 192;
                     } else {
-                        obj->unk16 = 0x1000;
+                        obj->lighting_blend = 0x1000;
                     }
                 } else {
-                    ((void (*)(Object88 *))asset_status.handlers[19])(obj);
-                    if (obj->unk0 == 1) {
+                    ((void (*)(Actor *))asset_status.handlers[19])(obj);
+                    if (obj->slot_state == 1) {
                         actor_set_lifecycle_and_home_position(obj);
-                    } else if (obj->unk0 == 2) {
-                        obj->unk9 = 0;
+                    } else if (obj->slot_state == 2) {
+                        obj->lifecycle = 0;
                         actor_set_home_position(obj);
-                    } else if (obj->unk0 == 5) {
-                        obj->unk0 = 0xff;
-                        obj->unk9 = 0;
+                    } else if (obj->slot_state == 5) {
+                        obj->slot_state = 0xff;
+                        obj->lifecycle = 0;
                     } else {
-                        obj->unk9 = 2;
+                        obj->lifecycle = 2;
                         actor_set_home_position(obj);
                     }
                 }
@@ -570,28 +571,28 @@ void actor_update_behavior(void)
         break;
     }
     case 0:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
         actor_damp_horizontal_motion(def->unk1[2], 10);
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
     case 1:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
-            obj->unk64 = rand() >> 3;
-        } else if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12),
+            obj->movement_yaw = rand() >> 3;
+        } else if (actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 12),
                                                      SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 5) ||
                    (rand() >> 5) < script[20]) {
-            obj->unk64 = rand() >> 3;
+            obj->movement_yaw = rand() >> 3;
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
@@ -599,15 +600,16 @@ void actor_update_behavior(void)
     case 16: {
         s32 flags;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf1;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf1;
             obj->unk72.vz = 0;
             obj->unk72.vy = 0;
             obj->unk72.vx = 0;
-            obj->unk72.pad = collision_sample_map_layer_height(obj->unk6, (obj->unk8 << 11) + obj->unk24,
-                                                               (obj->unk7 << 11) + obj->unk22, obj->unk1c,
-                                                               obj->unk1e) +
-                             obj->unk26;
+            obj->unk72.pad = collision_sample_map_layer_height(obj->home_layer_mask,
+                                                               (obj->home_cell_x << 11) + obj->unk24,
+                                                               (obj->home_cell_z << 11) + obj->unk22,
+                                                               obj->collision_radius, obj->collision_height) +
+                             obj->vertical_anchor_offset;
             actor_set_animation_if_changed(script[1]);
             flags = 3;
             actor_suspend_vertical_motion();
@@ -633,7 +635,7 @@ void actor_update_behavior(void)
         if (flags & 2) {
             obj->unk72.vx = (rand() >> 5) - 512;
         }
-        if (obj->unke == 16) {
+        if (obj->target_type == 16) {
             actor_update_motion_animation(script[1], script[20], script[21], script[22], script[23],
                                           SCRIPT_U16(script, 8));
         } else {
@@ -646,60 +648,60 @@ void actor_update_behavior(void)
         s32 mode;
         s32 dist;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
-            switch (obj->unk10) {
+            switch (obj->previous_target_type) {
             case 4:
             case 18:
             case 23:
             case 24:
-                OBJECT88_B70(obj) = 1;
+                ACTOR_B70(obj) = 1;
                 break;
             default:
-                OBJECT88_B70(obj) = 0;
+                ACTOR_B70(obj) = 0;
                 break;
             }
-            OBJECT88_B71(obj) = 0;
+            ACTOR_B71(obj) = 0;
         }
         if (rand() < 6000) {
             dist = fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
                                         cur_avatar_status.pos.vz - obj->pos.vz);
             if (dist >= SCRIPT_U16(script, 22)) {
-                OBJECT88_B70(obj) = 0;
+                ACTOR_B70(obj) = 0;
             } else if (dist <= SCRIPT_U16(script, 20)) {
-                OBJECT88_B70(obj) = 1;
+                ACTOR_B70(obj) = 1;
             }
         }
-        obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
-                                        cur_avatar_status.pos.vz - obj->pos.vz);
+        obj->movement_yaw = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                               cur_avatar_status.pos.vz - obj->pos.vz);
         mode = 0x21;
-        if (OBJECT88_B71(obj) == 0) {
+        if (ACTOR_B71(obj) == 0) {
             mode = 5;
         }
-        if (OBJECT88_B70(obj) == 0) {
-            r = actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
-                                                  def->unk1[2], def->unk1[3], mode);
+        if (ACTOR_B70(obj) == 0) {
+            r = actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 12),
+                                                  SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], mode);
         } else {
-            r = actor_move_along_heading((s16)(obj->unk64 + 2048), SCRIPT_U16(script, 12), def->unk1[2],
-                                         mode);
+            r = actor_move_along_heading((s16)(obj->movement_yaw + 2048), SCRIPT_U16(script, 12),
+                                         def->unk1[2], mode);
         }
         if (r & 0x100) {
-            if (OBJECT88_B71(obj) == 0) {
+            if (ACTOR_B71(obj) == 0) {
                 if (rand() < SCRIPT_U16(script, 24)) {
-                    OBJECT88_B71(obj) = 1;
+                    ACTOR_B71(obj) = 1;
                 } else if (r != 0) {
-                    OBJECT88_B70(obj) = OBJECT88_B70(obj) == 0;
+                    ACTOR_B70(obj) = ACTOR_B70(obj) == 0;
                 }
             }
         } else {
-            OBJECT88_B71(obj) = 0;
+            ACTOR_B71(obj) = 0;
             if (r != 0) {
-                OBJECT88_B70(obj) = OBJECT88_B70(obj) == 0;
+                ACTOR_B70(obj) = ACTOR_B70(obj) == 0;
             }
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
@@ -711,10 +713,10 @@ void actor_update_behavior(void)
         s32 dz;
         s32 dist;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation_if_changed(script[1]);
-            obj->unk70 = 0;
+            obj->target_phase = 0;
         }
         dx = cur_avatar_status.pos.vx - obj->pos.vx;
         dy = cur_avatar_status.pos.vy - obj->pos.vy - 1600;
@@ -727,13 +729,13 @@ void actor_update_behavior(void)
             obj->unk72.vx = 0x200;
         }
         if (dist >= SCRIPT_U16(script, 22)) {
-            obj->unk70 = 0;
-            obj->unkf = 0xf1;
+            obj->target_phase = 0;
+            obj->target_action_state = 0xf1;
         } else if (dist <= SCRIPT_U16(script, 20)) {
-            obj->unk70 = 1;
-            obj->unkf = 0xf0;
+            obj->target_phase = 1;
+            obj->target_action_state = 0xf0;
         }
-        if (obj->unk70 == 0) {
+        if (obj->target_phase == 0) {
             actor_turn_and_move_along_euler_angles(&obj->unk72, SCRIPT_U16(script, 12),
                                                    SCRIPT_U16(script, 14), def->unk1[2], def->unk1[3], 0x11);
         } else {
@@ -743,7 +745,7 @@ void actor_update_behavior(void)
             actor_turn_and_move_along_euler_angles(&dir, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
                                                    def->unk1[2], def->unk1[3], 0x11);
         }
-        if (obj->unke == 17) {
+        if (obj->target_type == 17) {
             actor_update_motion_animation(script[1], script[24], script[25], script[26], script[27],
                                           SCRIPT_U16(script, 8));
         } else {
@@ -752,12 +754,12 @@ void actor_update_behavior(void)
         break;
     }
     case 9:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation(script[20]);
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             if (actor_move_along_heading((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 18), def->unk1[2],
                                          5) == 0) {
@@ -768,47 +770,48 @@ void actor_update_behavior(void)
                     break;
                 }
             }
-            obj->unk70 = 1;
+            obj->target_phase = 1;
             actor_set_animation(script[1]);
             break;
         case 1:
             actor_advance_animation_clamped(obj, script[22]);
-            if (obj->unk18 < 4095) {
+            if (obj->animation_phase < 4095) {
                 actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
                 break;
             }
             if ((s16)actor_start_ballistic_motion(1, cur_avatar_status.pos.vx, cur_avatar_status.pos.vy - 500,
                                                   cur_avatar_status.pos.vz, script[23],
                                                   SCRIPT_U16(script, 16)) > 0) {
-                obj->unk70 = 2;
+                obj->target_phase = 2;
                 actor_damp_horizontal_motion(def->unk1[2] * 2, 10);
                 break;
             }
-            obj->unk70 = 3;
+            obj->target_phase = 3;
             actor_set_animation(script[21]);
             break;
         case 2:
-            if (obj->unkd == 0) {
-                obj->unk70 = 3;
+            if (obj->vertical_motion_state == 0) {
+                obj->target_phase = 3;
                 actor_set_animation(script[21]);
                 break;
             }
-            actor_turn_and_move_along_heading(obj->angle.vy, obj->unk68, 0, obj->unk68, def->unk1[3], 10);
+            actor_turn_and_move_along_heading(obj->angle.vy, obj->ballistic_horizontal_speed, 0,
+                                              obj->ballistic_horizontal_speed, def->unk1[3], 10);
             break;
         case 3:
             actor_advance_animation_clamped(obj, script[22]);
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_reset_target_and_reselect();
             }
-            actor_damp_horizontal_motion(obj->unk68 >> 4, 10);
+            actor_damp_horizontal_motion(obj->ballistic_horizontal_speed >> 4, 10);
             break;
         }
         break;
     case 10: {
         s32 r;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf1;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf1;
             actor_set_animation_if_changed(script[1]);
             actor_suspend_vertical_motion();
         }
@@ -862,9 +865,9 @@ void actor_update_behavior(void)
         VECTOR *player;
 
         tries = 1;
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = SCRIPT_U16(script, 24);
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = SCRIPT_U16(script, 24);
             obj->unk72.vx = 0;
             obj->unk72.vy = 0;
             actor_set_animation(script[1]);
@@ -904,10 +907,10 @@ void actor_update_behavior(void)
             at.vz += obj->pos.vz;
             if (vector_distance_to_point(&at, cur_avatar_status.pos.vx, cur_avatar_status.pos.vy,
                                          cur_avatar_status.pos.vz, script[14], script[15], 0x6a4) != -1) {
-                time = obj->unk18;
-                obj->unk18 -= obj->unk66 << 2;
-                if ((s16)obj->unk18 < 0) {
-                    obj->unk18 = 0;
+                time = obj->animation_phase;
+                obj->animation_phase -= obj->animation_step << 2;
+                if ((s16)obj->animation_phase < 0) {
+                    obj->animation_phase = 0;
                 }
                 actor_sample_rotated_animation_vertex(obj, c, &at);
                 at.vx += obj->pos.vx;
@@ -915,22 +918,22 @@ void actor_update_behavior(void)
                 at.vz += obj->pos.vz;
                 player_apply_damage(SCRIPT_U16(script, 18), SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
                                     script[17], 0, 0, 0, 0, 0, 0x1000, 10, &at);
-                obj->unk18 = time;
+                obj->animation_phase = time;
                 break;
             }
             if (--tries == 0) {
                 break;
             }
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         actor_damp_horizontal_motion(script[13], 10);
         break;
     }
     case 4:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
@@ -938,22 +941,22 @@ void actor_update_behavior(void)
             actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
                                             SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         actor_damp_horizontal_motion(script[13], 10);
         break;
     case 23:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = SCRIPT_U16(script, 24);
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = SCRIPT_U16(script, 24);
             actor_set_animation(script[1]);
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (actor_animation_crossed_phase(obj, obj->unk70)) {
-            obj->unk70 += SCRIPT_U16(script, 40);
-            if (obj->unk70 > SCRIPT_U16(script, 38)) {
-                obj->unk70 = 0;
+        if (actor_animation_crossed_phase(obj, obj->target_phase)) {
+            obj->target_phase += SCRIPT_U16(script, 40);
+            if (obj->target_phase > SCRIPT_U16(script, 38)) {
+                obj->target_phase = 0;
             }
             actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
                                             SCRIPT_U16(script, 20), SCRIPT_U16(script, 22),
@@ -963,7 +966,7 @@ void actor_update_behavior(void)
             actor_try_damage_player_in_cone(0, script[28], script[29], script[30], SCRIPT_U16(script, 32),
                                             SCRIPT_U16(script, 34), SCRIPT_U16(script, 36), script[31]);
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         actor_damp_horizontal_motion(script[13], 10);
@@ -972,29 +975,30 @@ void actor_update_behavior(void)
         s32 speed;
         s32 turn;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= SCRIPT_U16(script, 34)) {
+        if (obj->animation_phase >= SCRIPT_U16(script, 34)) {
             speed = 0;
             turn = SCRIPT_S16(script, 38);
-        } else if (obj->unk18 >= SCRIPT_U16(script, 32)) {
+        } else if (obj->animation_phase >= SCRIPT_U16(script, 32)) {
             speed = SCRIPT_U16(script, 28);
             turn = SCRIPT_S16(script, 36);
         } else {
             speed = SCRIPT_U16(script, 28);
             turn = script[13];
         }
-        obj->unk64 = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
-                                        cur_avatar_status.pos.vz - obj->pos.vz);
-        actor_turn_and_move_along_heading(obj->unk64, speed, SCRIPT_U16(script, 30), turn, def->unk1[3], 4);
+        obj->movement_yaw = vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                               cur_avatar_status.pos.vz - obj->pos.vz);
+        actor_turn_and_move_along_heading(obj->movement_yaw, speed, SCRIPT_U16(script, 30), turn,
+                                          def->unk1[3], 4);
         if (actor_animation_crossed_phase(obj, SCRIPT_U16(script, 24))) {
             actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
                                             SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
@@ -1003,21 +1007,21 @@ void actor_update_behavior(void)
         s32 hit;
         u16 spin;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation_if_changed(script[1]);
-            obj->unk70 = 0;
+            obj->target_phase = 0;
             actor_suspend_vertical_motion();
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 vector_displacement_to_pitch_yaw(cur_avatar_status.pos.vx - obj->pos.vx,
                                                  cur_avatar_status.pos.vy - obj->pos.vy,
                                                  cur_avatar_status.pos.vz - obj->pos.vz, &dir);
                 pitch_yaw_to_forward_vector(&dir, &obj->unk72);
-                obj->unk70 = 1;
+                obj->target_phase = 1;
             }
             actor_move_with_collision(&obj->vel);
             break;
@@ -1034,7 +1038,7 @@ void actor_update_behavior(void)
                     player_apply_damage(SCRIPT_U16(script, 14), SCRIPT_U16(script, 16), SCRIPT_U16(script, 18),
                                         script[13], 0, 0, 0, 0, 0, 0x1000, 10, &obj->pos);
                 }
-                obj->unk70 = 2;
+                obj->target_phase = 2;
             }
             obj->angle.vx = (obj->angle.vx + 256) & 0xfff;
             break;
@@ -1043,13 +1047,13 @@ void actor_update_behavior(void)
             obj->angle.vx = spin;
             if (spin < 256) {
                 obj->angle.vx = 0;
-                obj->unk70 = 3;
+                obj->target_phase = 3;
             }
             actor_move_with_collision(&obj->vel);
             break;
         case 3:
             actor_advance_animation_clamped(obj, -SCRIPT_U16(script, 8));
-            if (obj->unk18 == 0) {
+            if (obj->animation_phase == 0) {
                 actor_reset_target_and_reselect();
             }
             actor_move_with_collision(&obj->vel);
@@ -1064,8 +1068,8 @@ void actor_update_behavior(void)
         s32 dy;
         s32 dz;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation_if_changed(script[1]);
         }
         dx = cur_avatar_status.pos.vx - obj->pos.vx;
@@ -1080,85 +1084,85 @@ void actor_update_behavior(void)
             actor_try_damage_player_in_cone(0, script[14], script[15], script[16], SCRIPT_U16(script, 18),
                                             SCRIPT_U16(script, 20), SCRIPT_U16(script, 22), script[17]);
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
     }
     case 14: {
-        Object88 *target;
+        Actor *target;
 
-        target = actor_status.target;
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf1;
-            obj->unk70 = 0;
+        target = actor_status.other_actor;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf1;
+            obj->target_phase = 0;
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
-            if (target->unk58 > 0) {
+            if (target->turn_rate > 0) {
                 actor_set_animation(script[13]);
-                obj->unk70 = 1;
-            } else if (target->unk58 < 0) {
+                obj->target_phase = 1;
+            } else if (target->turn_rate < 0) {
                 actor_set_animation(script[12]);
-                obj->unk70 = 2;
+                obj->target_phase = 2;
             }
             break;
         case 1:
-            if (obj->unk18 < 2048) {
-                obj->unk18 += 128;
-            } else if (target->unk58 <= 0) {
-                obj->unk70 = 3;
+            if (obj->animation_phase < 2048) {
+                obj->animation_phase += 128;
+            } else if (target->turn_rate <= 0) {
+                obj->target_phase = 3;
             }
             break;
         case 2:
-            if (obj->unk18 < 2048) {
-                obj->unk18 += 128;
-            } else if (target->unk58 >= 0) {
-                obj->unk70 = 3;
+            if (obj->animation_phase < 2048) {
+                obj->animation_phase += 128;
+            } else if (target->turn_rate >= 0) {
+                obj->target_phase = 3;
             }
             break;
         case 3:
-            obj->unk18 -= 128;
-            if (obj->unk18 == 0) {
-                obj->unk70 = 0;
+            obj->animation_phase -= 128;
+            if (obj->animation_phase == 0) {
+                obj->target_phase = 0;
             }
             break;
         }
         break;
     }
     case 15:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation_if_changed(script[1]);
         }
-        actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
+        actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 12), SCRIPT_U16(script, 14),
                                           def->unk1[2], def->unk1[3], 5);
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         break;
     case 19:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation_if_changed(script[1]);
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            if (obj->unk18 >= SCRIPT_U16(script, 16)) {
-                obj->unk70 = 16;
+            if (obj->animation_phase >= SCRIPT_U16(script, 16)) {
+                obj->target_phase = 16;
             }
             break;
         case 16:
             if (cur_avatar_status.unkc0 == -1) {
-                obj->unk70 = 32;
+                obj->target_phase = 32;
             }
             break;
         case 32:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            if (obj->unk18 >= 4095) {
+            if (obj->animation_phase >= 4095) {
                 actor_reset_target_and_reselect();
             }
             break;
@@ -1166,27 +1170,27 @@ void actor_update_behavior(void)
         actor_damp_horizontal_motion(def->unk1[2], 10);
         break;
     case 20:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = SCRIPT_U16(script, 18);
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = SCRIPT_U16(script, 18);
             actor_set_animation_if_changed(script[1]);
         }
         if (actor_move_along_heading((s16)(obj->angle.vy + 2048), SCRIPT_U16(script, 16), 1000, 5)) {
-            obj->unk70 = 1;
+            obj->target_phase = 1;
         }
         actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 0xfff - SCRIPT_U16(script, 8) && --obj->unk70 == 0) {
-            obj->unk18 = 0xfff;
+        if (obj->animation_phase >= 0xfff - SCRIPT_U16(script, 8) && --obj->target_phase == 0) {
+            obj->animation_phase = 0xfff;
             actor_reset_target_and_reselect();
         }
         break;
     case 22:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         actor_damp_horizontal_motion(def->unk1[2], 10);
@@ -1194,47 +1198,49 @@ void actor_update_behavior(void)
     case 21: {
         s32 mask;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation(script[1]);
-            obj->unk1c = SCRIPT_U16(script, 20);
-            obj->unk1e = SCRIPT_U16(script, 22);
+            obj->collision_radius = SCRIPT_U16(script, 20);
+            obj->collision_height = SCRIPT_U16(script, 22);
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             if (fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
                                      cur_avatar_status.pos.vz - obj->pos.vz) <
                 SCRIPT_U16(script, 12)) {
-                obj->unk70 = 2;
+                obj->target_phase = 2;
             }
             break;
         case 2:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 20), def->unk12, obj->unk18);
-            obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk14, obj->unk18);
-            if (obj->unk18 >= 4095) {
-                obj->unk1c = def->unk12;
-                obj->unk1e = def->unk14;
-                obj->unk70 = 3;
+            obj->collision_radius = fixed_lerp_q12(SCRIPT_U16(script, 20), def->collision_radius,
+                                                   obj->animation_phase);
+            obj->collision_height = fixed_lerp_q12(SCRIPT_U16(script, 22), def->collision_height,
+                                                   obj->animation_phase);
+            if (obj->animation_phase >= 4095) {
+                obj->collision_radius = def->collision_radius;
+                obj->collision_height = def->collision_height;
+                obj->target_phase = 3;
                 obj->unk72.vx = SCRIPT_U16(script, 16);
                 actor_set_animation(script[24]);
             }
-            if (obj->unk18 >= SCRIPT_U16(script, 18)) {
-                mask = actor_status.unk9d04;
-                actor_status.unk9d04 = mask & ~0x20;
-                actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
-                actor_status.unk9d04 = mask;
+            if (obj->animation_phase >= SCRIPT_U16(script, 18)) {
+                mask = actor_status.actor_collision_query_flags;
+                actor_status.actor_collision_query_flags = mask & ~0x20;
+                actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+                actor_status.actor_collision_query_flags = mask;
             }
             break;
         case 3:
-            mask = actor_status.unk9d04;
-            actor_status.unk9d04 = mask & ~0x20;
-            actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+            mask = actor_status.actor_collision_query_flags;
+            actor_status.actor_collision_query_flags = mask & ~0x20;
+            actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
                 actor_reset_target_and_reselect();
             }
-            actor_status.unk9d04 = mask;
+            actor_status.actor_collision_query_flags = mask;
             actor_advance_animation_wrapped(obj, script[25]);
             break;
         }
@@ -1243,58 +1249,61 @@ void actor_update_behavior(void)
     case 6: {
         s32 mask;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation(script[1]);
-            obj->unk1c = SCRIPT_U16(script, 22);
-            obj->unk1e = SCRIPT_U16(script, 24);
+            obj->collision_radius = SCRIPT_U16(script, 22);
+            obj->collision_height = SCRIPT_U16(script, 24);
             if (SCRIPT_U16(script, 14) != 0) {
-                obj->unk64 = rand() >> 3;
+                obj->movement_yaw = rand() >> 3;
             }
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             actor_advance_animation_wrapped(obj, SCRIPT_U16(script, 8));
             if (fixed_vector2_length(cur_avatar_status.pos.vx - obj->pos.vx,
                                      cur_avatar_status.pos.vz - obj->pos.vz) <
                     SCRIPT_U16(script, 12) &&
-                obj->unk18 >= 0xfff - SCRIPT_U16(script, 8)) {
-                obj->unk70 = 2;
-                obj->unk18 = 0;
+                obj->animation_phase >= 0xfff - SCRIPT_U16(script, 8)) {
+                obj->target_phase = 2;
+                obj->animation_phase = 0;
                 actor_set_animation(script[26]);
             }
-            if (actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), SCRIPT_U16(script, 16),
+            if (actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 14),
+                                                  SCRIPT_U16(script, 16),
                                                   def->unk1[2], def->unk1[3],
                                                   5) ||
                 (rand() >> 5) < script[28]) {
-                obj->unk64 = rand() >> 3;
+                obj->movement_yaw = rand() >> 3;
             }
             break;
         case 2:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = fixed_lerp_q12(SCRIPT_U16(script, 22), def->unk12, obj->unk18);
-            obj->unk1e = fixed_lerp_q12(SCRIPT_U16(script, 24), def->unk14, obj->unk18);
-            if (obj->unk18 >= 4095) {
-                obj->unk1c = def->unk12;
-                obj->unk1e = def->unk14;
-                obj->unk70 = 3;
+            obj->collision_radius = fixed_lerp_q12(SCRIPT_U16(script, 22), def->collision_radius,
+                                                   obj->animation_phase);
+            obj->collision_height = fixed_lerp_q12(SCRIPT_U16(script, 24), def->collision_height,
+                                                   obj->animation_phase);
+            if (obj->animation_phase >= 4095) {
+                obj->collision_radius = def->collision_radius;
+                obj->collision_height = def->collision_height;
+                obj->target_phase = 3;
                 obj->unk72.vx = SCRIPT_U16(script, 18);
-            } else if (obj->unk18 >= SCRIPT_U16(script, 20)) {
-                mask = actor_status.unk9d04;
-                actor_status.unk9d04 = mask & ~0x20;
-                actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
-                actor_status.unk9d04 = mask;
+            } else if (obj->animation_phase >= SCRIPT_U16(script, 20)) {
+                mask = actor_status.actor_collision_query_flags;
+                actor_status.actor_collision_query_flags = mask & ~0x20;
+                actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+                actor_status.actor_collision_query_flags = mask;
             }
             break;
         case 3:
-            mask = actor_status.unk9d04;
-            actor_status.unk9d04 = mask & ~0x20;
-            actor_turn_and_move_along_heading(obj->unk64, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
+            mask = actor_status.actor_collision_query_flags;
+            actor_status.actor_collision_query_flags = mask & ~0x20;
+            actor_turn_and_move_along_heading(obj->movement_yaw, SCRIPT_U16(script, 14), 0, 0xff, 0, 5);
             if (--obj->unk72.vx == -1) {
                 actor_reset_target_and_reselect();
             }
-            actor_status.unk9d04 = mask;
+            actor_status.actor_collision_query_flags = mask;
             actor_advance_animation_clamped(obj, script[27]);
             break;
         }
@@ -1303,29 +1312,29 @@ void actor_update_behavior(void)
     case 26: {
         Object44 *door;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
+            obj->target_phase = 0;
             actor_set_animation(script[1]);
             obj->scale.vz = 0;
             obj->scale.vy = 0;
             obj->scale.vx = 0;
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             door = &map_objects_slots.objects[obj->unk20];
             if (door->unk8 < 2 || door->angle.vx == 0 || door->angle.vx >= 3072) {
                 break;
             }
-            obj->unk70 = 2;
+            obj->target_phase = 2;
             obj->unk72.vx = 8;
-            obj->unk1c = def->unk12;
-            obj->unk1e = def->unk14;
+            obj->collision_radius = def->collision_radius;
+            obj->collision_height = def->collision_height;
             obj->pos.vy += 2048;
-            obj->scale.vx = obj->scale.vy = obj->scale.vz = def->unk32;
+            obj->scale.vx = obj->scale.vy = obj->scale.vz = def->initial_model_scale_q12;
             obj->angle.vy = door->angle.vy;
         case 2:
-            obj->unkd = 0;
+            obj->vertical_motion_state = 0;
             obj->pos.vy -= 256;
             if (--obj->unk72.vx == 0) {
                 actor_reset_target_and_reselect();
@@ -1345,21 +1354,21 @@ void actor_update_behavior(void)
         s32 b;
         s32 d;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
-            obj->unk70 = SCRIPT_U16(script, 14);
+            obj->target_phase = SCRIPT_U16(script, 14);
             obj->unk72.vx = 0;
             obj->unk72.vy = 0;
             if (script[7] == 1) {
-                obj->unkd = 0x10;
+                obj->vertical_motion_state = 0x10;
             }
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (actor_animation_crossed_phase(obj, obj->unk70)) {
-            obj->unk70 += SCRIPT_U16(script, 18);
-            if (obj->unk70 > SCRIPT_U16(script, 16)) {
-                obj->unk70 = 0;
+        if (actor_animation_crossed_phase(obj, obj->target_phase)) {
+            obj->target_phase += SCRIPT_U16(script, 18);
+            if (obj->target_phase > SCRIPT_U16(script, 16)) {
+                obj->target_phase = 0;
             }
             tries = 1;
             p = (u16 *)(script + 26) + obj->unk72.vx;
@@ -1405,7 +1414,7 @@ void actor_update_behavior(void)
             }
             obj->unk72.vy++;
         }
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_reset_target_and_reselect();
         }
         actor_damp_horizontal_motion(def->unk1[2], 10);
@@ -1414,23 +1423,23 @@ void actor_update_behavior(void)
     case 27: {
         u8 *next;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf1;
-            obj->unk70 = 0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf1;
+            obj->target_phase = 0;
             obj->unk72.vx = -1;
             actor_set_animation(script[22]);
         }
-        switch (obj->unk70) {
+        switch (obj->target_phase) {
         case 0:
             if (SCRIPT_U16(script, 14) == 0) {
-                obj->unk70 = 1;
+                obj->target_phase = 1;
             } else {
-                obj->unk72.vx = actor_turn_and_move_toward_point((obj->unk8 << 11) + obj->unk24,
-                                                                 (obj->unk7 << 11) + obj->unk22,
+                obj->unk72.vx = actor_turn_and_move_toward_point((obj->home_cell_x << 11) + obj->unk24,
+                                                                 (obj->home_cell_z << 11) + obj->unk22,
                                                                  SCRIPT_U16(script, 14), SCRIPT_U16(script, 16),
                                                                  obj->unk72.vx, def->unk1[2], def->unk1[3], 5);
                 if (obj->unk72.vx == -1) {
-                    obj->unk70 = 1;
+                    obj->target_phase = 1;
                 }
             }
             actor_advance_animation_wrapped(obj, script[23]);
@@ -1439,16 +1448,18 @@ void actor_update_behavior(void)
             actor_turn_toward_angle(obj, obj->unk20, SCRIPT_U16(script, 16), def->unk1[3]);
             if (obj->angle.vy == obj->unk20) {
                 actor_set_animation(script[1]);
-                obj->unk70 = 2;
+                obj->target_phase = 2;
             }
             break;
         case 2:
             actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-            obj->unk1c = fixed_lerp_q12(def->unk12, SCRIPT_U16(script, 18), obj->unk18);
-            obj->unk1e = fixed_lerp_q12(def->unk14, SCRIPT_U16(script, 20), obj->unk18);
-            if (obj->unk18 >= 4095) {
-                obj->unk1c = SCRIPT_U16(script, 18);
-                obj->unk1e = SCRIPT_U16(script, 20);
+            obj->collision_radius = fixed_lerp_q12(def->collision_radius, SCRIPT_U16(script, 18),
+                                                   obj->animation_phase);
+            obj->collision_height = fixed_lerp_q12(def->collision_height, SCRIPT_U16(script, 20),
+                                                   obj->animation_phase);
+            if (obj->animation_phase >= 4095) {
+                obj->collision_radius = SCRIPT_U16(script, 18);
+                obj->collision_height = SCRIPT_U16(script, 20);
                 next = actor_find_target_of_type(def, 0x15);
                 if (next != NULL) {
                     actor_set_target(obj, next);
@@ -1461,8 +1472,8 @@ void actor_update_behavior(void)
         break;
     }
     case 29:
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
             actor_suspend_vertical_motion();
             obj->unk72.vx = 16;
@@ -1477,8 +1488,8 @@ void actor_update_behavior(void)
     case 28: {
         s32 hit;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
             actor_suspend_vertical_motion();
             audio_play_spatial_default_range(0x32, &obj->pos, 0x78, 0);
@@ -1495,7 +1506,7 @@ void actor_update_behavior(void)
             }
             actor_select_target_type_in_own_group(obj, 3);
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
-            obj->unkd = 0x10;
+            obj->vertical_motion_state = 0x10;
         }
         break;
     }
@@ -1503,16 +1514,16 @@ void actor_update_behavior(void)
         VECTOR next;
         s32 hit;
 
-        if (obj->unkf == 0) {
-            obj->unkf = 0xf0;
+        if (obj->target_action_state == 0) {
+            obj->target_action_state = 0xf0;
             actor_set_animation(script[1]);
             actor_suspend_vertical_motion();
         }
         next.vx = obj->vel.vx + obj->pos.vx;
         next.vy = obj->vel.vy + obj->pos.vy;
         next.vz = obj->vel.vz + obj->pos.vz;
-        hit = collision_query_world(next.vx, next.vy, next.vz, obj->unk1c, OBJECT88_SHAPE(obj),
-                                    actor_status.unk9d04);
+        hit = collision_query_world(next.vx, next.vy, next.vz, obj->collision_radius, ACTOR_SHAPE(obj),
+                                    actor_status.actor_collision_query_flags);
         if (hit == 0) {
         move:
             obj->pos.vx = next.vx;
@@ -1528,42 +1539,42 @@ void actor_update_behavior(void)
             obj->vel.vx = obj->vel.vy = obj->vel.vz = 0;
         }
         actor_advance_animation_clamped(obj, SCRIPT_U16(script, 8));
-        if (obj->unk18 >= 4095) {
+        if (obj->animation_phase >= 4095) {
             actor_select_target_type_in_own_group(obj, 3);
-            obj->unkd = 0x10;
+            obj->vertical_motion_state = 0x10;
         }
         break;
     }
     case 31:
-        phase = obj->unk80;
+        phase = obj->fade_out_phase;
         if (phase == 0 && SCRIPT_U16(script, 14) != 0) {
-            obj->unk80++;
+            obj->fade_out_phase++;
             obj->angle.vy = cur_avatar_status.unk124.vy + 2048;
             actor_select_target_type_in_own_group(obj, 0x19);
         } else {
-            obj->unk28 &= ~0x1000000;
-            obj->unk80++;
+            obj->flags &= ~0x1000000;
+            obj->fade_out_phase++;
             if (phase > 0) {
                 if (phase == 1) {
-                    obj->unk14 = 0x32;
-                    obj->unk16 = 0x400;
-                    obj->unk13 = (obj->unk13 & 7) | 5;
+                    obj->lighting_override_index = 0x32;
+                    obj->lighting_blend = 0x400;
+                    obj->render_mode = (obj->render_mode & 7) | 5;
                 } else if (phase < 38) {
-                    if (obj->unk16 < 4096) {
-                        obj->unk16 += 192;
+                    if (obj->lighting_blend < 4096) {
+                        obj->lighting_blend += 192;
                     } else {
-                        obj->unk16 = 0x1000;
+                        obj->lighting_blend = 0x1000;
                     }
-                } else if (obj->unk0 == 1) {
+                } else if (obj->slot_state == 1) {
                     actor_set_lifecycle_and_home_position(obj);
-                } else if (obj->unk0 == 2) {
-                    obj->unk9 = 0;
+                } else if (obj->slot_state == 2) {
+                    obj->lifecycle = 0;
                     actor_set_home_position(obj);
-                } else if (obj->unk0 == 5) {
-                    obj->unk0 = 0xff;
-                    obj->unk9 = 0;
+                } else if (obj->slot_state == 5) {
+                    obj->slot_state = 0xff;
+                    obj->lifecycle = 0;
                 } else {
-                    obj->unk9 = 2;
+                    obj->lifecycle = 2;
                     actor_set_home_position(obj);
                 }
             }
@@ -1577,39 +1588,39 @@ void actor_update_behavior(void)
         asset_status.handlers[17]();
         break;
     }
-    if (obj->unk28 & 0x10) {
-        Object88 *target;
+    if (obj->flags & 0x10) {
+        Actor *target;
         SVECTOR rot;
         VECTOR from;
         VECTOR to;
         s32 hit;
 
-        target = actor_status.target;
-        if (obj->unk0 == 3) {
-            obj->unk3 = 0;
-            if (target->unk9 != 1) {
-                obj->unk9 = 0;
+        target = actor_status.other_actor;
+        if (obj->slot_state == 3) {
+            obj->layer_mask = 0;
+            if (target->lifecycle != 1) {
+                obj->lifecycle = 0;
                 goto done;
             }
-            if (target->unke == 3) {
-                obj->unke = 3;
-                obj->unkf = 0xf0;
-                obj->unk70 = 99;
+            if (target->target_type == 3) {
+                obj->target_type = 3;
+                obj->target_action_state = 0xf0;
+                obj->target_phase = 99;
                 goto done;
             }
         } else {
-            obj->unk3 = target->unk3;
-            if (target->unk9 != 1) {
-                obj->unk28 = (obj->unk28 & ~0x10) | 0x100;
-                hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->unk1c, obj->unk1e,
-                                            0x81);
+            obj->layer_mask = target->layer_mask;
+            if (target->lifecycle != 1) {
+                obj->flags = (obj->flags & ~0x10) | 0x100;
+                hit = collision_query_world(obj->pos.vx, obj->pos.vy, obj->pos.vz, obj->collision_radius,
+                                            obj->collision_height, 0x81);
                 if (hit & 0x80) {
-                    obj->pos.vx += 800 + obj->unk1c;
+                    obj->pos.vx += 800 + obj->collision_radius;
                 }
                 if (hit & 0xf) {
-                    obj->unk28 |= 0x400;
+                    obj->flags |= 0x400;
                 }
-                if (obj->unk28 & 0x200) {
+                if (obj->flags & 0x200) {
                     actor_select_target_type_in_own_group(obj, 3);
                 }
                 obj->vel.vx = target->vel.vx;
@@ -1623,16 +1634,16 @@ void actor_update_behavior(void)
         rot.vx = target->angle.vx;
         rot.vy = target->angle.vy;
         rot.vz = target->angle.vz;
-        vector_rotate_yxz(&rot, (SVECTOR *)&def->unkc, &from);
+        vector_rotate_yxz(&rot, (SVECTOR *)&def->position_offset_x, &from);
         actor_sample_rotated_animation_vertex(target, obj->unk24, &to);
         obj->pos.vx = target->pos.vx + to.vx - from.vx;
         obj->pos.vy = target->pos.vy + to.vy - from.vy;
         obj->pos.vz = target->pos.vz + to.vz - from.vz;
-    } else if (!(obj->unk28 & 0x10000)) {
+    } else if (!(obj->flags & 0x10000)) {
         actor_update_vertical_motion();
     }
 done:
-    if (obj->unk9 == 1) {
-        map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->unk1c, 1);
+    if (obj->lifecycle == 1) {
+        map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, obj->collision_radius, 1);
     }
 }

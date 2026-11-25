@@ -884,19 +884,19 @@ s32 menu_choose_magic_action(void)
 }
 
 ADDRESS(0x8001c6c0, 0xe8)
-s32 menu_collect_available_magic_rows(Record18 *spells, MenuEntry *entries, u32 *values, u8 *ids, s32 first,
-                                      s32 last)
+s32 menu_collect_available_magic_rows(MagicRecord *spells, MenuEntry *entries, u32 *values, u8 *ids,
+                                      s32 first, s32 last)
 {
     MenuEntry *src = &menu_magic_names[first];
-    Record18 *spell = &spells[first];
+    MagicRecord *spell = &spells[first];
     s32 n = 0;
     s32 i;
 
     last++;
     for (i = first; i < last; spell++, i++, src++) {
-        if (spell->unk0 == 1) {
+        if (spell->menu_available == 1) {
             *entries++ = *src;
-            *values++ = spell->unk16;
+            *values++ = spell->mp_cost;
             n++;
             *ids++ = i;
         }

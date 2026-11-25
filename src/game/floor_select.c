@@ -34,8 +34,8 @@ static MapCell collision_default_cell = { { { 0xff, 0x00, 0x00, 0x3f, 0x00 }, { 
 /*
  * The player's frame: marks the map cell visited, reads the pad, steps the
  * walk speeds (unk180/unk184), runs the unk101 mode, then the per-frame
- * timers, the view angle sums, the Object88 hit test, player_update_weapon_attack and the
- * effects of the weapon and the Record20 slots.
+ * timers, the view angle sums, the Actor hit test, player_update_weapon_attack and the
+ * effects of the weapon and the EquipmentRecord slots.
  */
 ADDRESS(0x80030fcc, 0x1524)
 void player_update_frame(void)
@@ -52,7 +52,7 @@ void player_update_frame(void)
     s32 part;
     Object4c *o4c;
 
-    actor_status.unk9d00 = 4;
+    actor_status.actor_overlap_exclusion_flags = 4;
     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, -1);
     if ((s16)asset_status.loading == 0
         || ((s16)asset_status.loading == 1 && asset_status.step != 0 && asset_status.step != 1
@@ -387,18 +387,18 @@ void player_update_frame(void)
     cur_avatar_status.unk124.vy = cur_avatar_status.unk12c.vy + cur_avatar_status.unk136 + cur_avatar_status.unk13e + cur_avatar_status.unk146;
     cur_avatar_status.unk124.vz = cur_avatar_status.unk12c.vz + cur_avatar_status.unk138 + cur_avatar_status.unk140 + cur_avatar_status.unk148;
     map_cell_add_layer_occupancy(cur_avatar_status.pos.vx, cur_avatar_status.pos.vz, 800, 1);
-    actor_status.unk9d00 = 0;
+    actor_status.actor_overlap_exclusion_flags = 0;
     hit = actor_find_overlap_excluding_target_type3(cur_avatar_status.pos.vx, cur_avatar_status.pos.vy,
                                                     cur_avatar_status.pos.vz, 1, 0x6a4);
-    if (hit != -1 && (actor_status.objects[hit].unk28 & 8)) {
+    if (hit != -1 && (actor_status.objects[hit].flags & 8)) {
         player_begin_actor_overlap_bob();
     }
     player_update_weapon_attack();
     if (cur_avatar_status.unkcb != 0xff) {
-        if (cur_avatar_status.unkb0->unk16 != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->unk16 == 0) {
+        if (cur_avatar_status.unkb0->hp_regen_interval != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->hp_regen_interval == 0) {
             player_adjust_hp(1);
         }
-        if (cur_avatar_status.unkb0->unk18 != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->unk18 == 0) {
+        if (cur_avatar_status.unkb0->mp_regen_interval != 0 && cur_avatar_status.unk9c % cur_avatar_status.unkb0->mp_regen_interval == 0) {
             player_adjust_mp(1);
         }
         if (cur_avatar_status.unkf2 == 0x35 && scene_display_sys.unk15996 != 0 && cur_avatar_status.unk9c % 900 == 0) {

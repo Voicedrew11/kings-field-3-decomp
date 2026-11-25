@@ -18,7 +18,7 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_release_container_item(Object88 *obj);
+void area_on_actor_removed_release_container_item(Actor *obj);
 void area_region_trigger_update_warp_arrival_cells(Object44 *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -141,7 +141,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: record 3 disarms object 20 and triggers its link. */
 ADDRESS(0x801e85dc, 0xa4)
-void area_on_actor_removed_release_container_item(Object88 *obj)
+void area_on_actor_removed_release_container_item(Actor *obj)
 {
     Object44 *link;
 

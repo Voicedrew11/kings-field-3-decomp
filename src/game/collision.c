@@ -749,7 +749,7 @@ s32 collision_query_shapes_with_layer_sample(s32 x, s32 y, s32 z, s32 radius, s3
 ADDRESS(0x80033d84, 0x1b4)
 void collision_cache_load_hit_bounds(void)
 {
-    Object88 *obj;
+    Actor *obj;
     Object44 *carrier;
     Object44Def *def;
 
@@ -760,8 +760,8 @@ void collision_cache_load_hit_bounds(void)
     } else if (map_world.unk12028 != -1) {
         obj = &actor_status.objects[map_world.unk12028];
         map_world.unk1203c = obj->pos;
-        map_world.unk1204c = obj->unk1c;
-        map_world.unk1204e = obj->unk1e;
+        map_world.unk1204c = obj->collision_radius;
+        map_world.unk1204e = obj->collision_height;
     } else if (map_world.unk1202c != -1) {
         carrier = &map_objects_slots.objects[map_world.unk1202c];
         def = &map_objects_slots.defs[carrier->unk6];
@@ -780,7 +780,7 @@ void collision_cache_load_hit_bounds(void)
 
 /*
  * Tests a shape at (x, y, z) against what mask selects: bit 0 the map, bit 1
- * the map's pits, bit 4 or 6 the Object88 records, bit 5 the Object44 records,
+ * the map's pits, bit 4 or 6 the Actor records, bit 5 the Object44 records,
  * bit 7 the player. Returns the bits that hit. mask is a u16: callers pass
  * actor_status.unk9d04 (a word) with lhu.
  */

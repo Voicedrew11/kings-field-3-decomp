@@ -18,7 +18,7 @@ void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
 void area_fade_out_object_pair(s32 a, s32 b);
-void area_on_actor_removed_fade_object_pair(Object88 *obj);
+void area_on_actor_removed_fade_object_pair(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -131,7 +131,7 @@ void area_fade_out_object_pair(s32 a, s32 b)
 
 /* Slot 19: records 3 and 40 each open their pair of doors once. */
 ADDRESS(0x801e870c, 0xcc)
-void area_on_actor_removed_fade_object_pair(Object88 *obj)
+void area_on_actor_removed_fade_object_pair(Actor *obj)
 {
     switch (obj - actor_status.objects) {
     case 3:

@@ -20,9 +20,9 @@ RODATA(0x801e8308, 0xa0)
 void area_handler_noop(void);
 void area_update_light_flicker_and_actor_swap(void);
 void area_use_item_noop(void);
-void area_adjust_actor_magic_damage_lethal_only(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_lethal_only(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void area_on_actor_removed_unlock_door(Object88 *obj);
+void area_on_actor_removed_unlock_door(Actor *obj);
 void area_region_trigger_set_doors_and_warp_cells(Object44 *obj);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -31,7 +31,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_check_items_held(void);
 void area_on_movie_start_noop(void);
 void area_on_movie_end_restore_hp_and_mp(u8 id);
-void area_talk_event_collect_items_and_wait(Object88 *record, s32 event);
+void area_talk_event_collect_items_and_wait(Actor *record, s32 event);
 void area_on_load_restore_actors_and_doors(void);
 
 const FdatHeader fdat_header = {
@@ -106,9 +106,9 @@ void area_update_light_flicker_and_actor_swap(void)
         dz = (actor_status.objects[1].pos.vz - cur_avatar_status.pos.vz) / 2048;
         /* ^ is exclusive or here, as written. */
         if ((dx ^ 2 + dz ^ 2) > 400) {
-            actor_status.objects[0].unk0 = 8;
-            actor_status.objects[1].unk0 = 8;
-            actor_status.objects[2].unk0 = 1;
+            actor_status.objects[0].slot_state = 8;
+            actor_status.objects[1].slot_state = 8;
+            actor_status.objects[2].slot_state = 1;
         }
     }
 }
@@ -120,17 +120,17 @@ void area_use_item_noop(void)
 
 /* Slot 18: record 32 reports 0 while its unk1a is above the value. */
 ADDRESS(0x801e870c, 0x5c)
-void area_adjust_actor_magic_damage_lethal_only(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_lethal_only(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
-    if (obj - actor_status.objects == 32 && *out < obj->unk1a) {
+    if (obj - actor_status.objects == 32 && *out < obj->health) {
         *out = 0;
     }
 }
 
 /* Slot 19: actor 32 sets flag 0xc once and clears object 344's 0xf1 lock marker. */
 ADDRESS(0x801e8768, 0x78)
-void area_on_actor_removed_unlock_door(Object88 *obj)
+void area_on_actor_removed_unlock_door(Actor *obj)
 {
     s32 k;
 
@@ -159,9 +159,9 @@ void area_region_trigger_set_doors_and_warp_cells(Object44 *obj)
     case 0:
         if (cur_evt_state.unk4[6] == 1) {
             if (cur_evt_state.unk4[7] == 0) {
-                actor_status.objects[0].unk0 = 8;
-                actor_status.objects[1].unk0 = 8;
-                actor_status.objects[2].unk0 = 8;
+                actor_status.objects[0].slot_state = 8;
+                actor_status.objects[1].slot_state = 8;
+                actor_status.objects[2].slot_state = 8;
                 door = &map_objects_slots.objects[214];
                 door->unk0 = 2;
                 door->arg.b.unk3c = 0xff;
@@ -246,7 +246,7 @@ void area_on_movie_end_restore_hp_and_mp(u8 id)
 
 /* Slot 4: script events 0..5 of an object record. */
 ADDRESS(0x801e8a34, 0x334)
-void area_talk_event_collect_items_and_wait(Object88 *record, s32 event)
+void area_talk_event_collect_items_and_wait(Actor *record, s32 event)
 {
     s32 hundreds;
 
@@ -275,8 +275,8 @@ void area_talk_event_collect_items_and_wait(Object88 *record, s32 event)
         break;
     case 2:
         cur_evt_state.unk4[2] = 1;
-        actor_status.objects[1].unk0 = 8;
-        actor_status.objects[2].unk0 = 1;
+        actor_status.objects[1].slot_state = 8;
+        actor_status.objects[2].slot_state = 1;
         cur_evt_state.unk4[4] = cur_avatar_status.play_minutes % 60;
         cur_evt_state.unk4[5] = cur_avatar_status.experience % 10000 / 100;
         break;
@@ -323,9 +323,9 @@ void area_on_load_restore_actors_and_doors(void)
         }
     }
     if (cur_evt_state.unke[0x14] == 0) {
-        actor_status.objects[0].unk0 = 1;
-        actor_status.objects[1].unk0 = 8;
-        actor_status.objects[2].unk0 = 8;
+        actor_status.objects[0].slot_state = 1;
+        actor_status.objects[1].slot_state = 8;
+        actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
         door->unk0 = 0;
         k = 214;
@@ -351,9 +351,9 @@ void area_on_load_restore_actors_and_doors(void)
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[2] == 0) {
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 1;
-        actor_status.objects[2].unk0 = 8;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 1;
+        actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
         door->unk0 = 0;
         k = 214;
@@ -379,9 +379,9 @@ void area_on_load_restore_actors_and_doors(void)
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[6] == 0) {
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 8;
-        actor_status.objects[2].unk0 = 1;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 8;
+        actor_status.objects[2].slot_state = 1;
         door = &map_objects_slots.objects[214];
         door->unk0 = 0;
         k = 214;
@@ -407,9 +407,9 @@ void area_on_load_restore_actors_and_doors(void)
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0;
     } else if (cur_evt_state.unk4[7] == 0) {
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 8;
-        actor_status.objects[2].unk0 = 8;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 8;
+        actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
         door->unk0 = 2;
         k = 214;
@@ -435,9 +435,9 @@ void area_on_load_restore_actors_and_doors(void)
         k = 172;
         map_objects_slots.objects[k].arg.b.unk38 = 0xff;
     } else {
-        actor_status.objects[0].unk0 = 8;
-        actor_status.objects[1].unk0 = 8;
-        actor_status.objects[2].unk0 = 8;
+        actor_status.objects[0].slot_state = 8;
+        actor_status.objects[1].slot_state = 8;
+        actor_status.objects[2].slot_state = 8;
         door = &map_objects_slots.objects[214];
         door->unk0 = 0;
         k = 214;

@@ -96,7 +96,7 @@ GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	memory_card_title	char[63]	as
 GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	action_button_masks	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
 GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	magic_element_learn_levels	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
-GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	magic_element_learn_ids	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' Record18 indices
+GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	magic_element_learn_ids	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' MagicRecord indices
 GAME.EXE	0x800818e3	0x710e3	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x800818e4	0x710e4	0x28	defined	supported	player_magic_spawn_offsets	SVECTOR[5]	asm;src/game/player.c game.player	.data; unk14c offsets of the five shots of spells 72..74
 GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	collision_default_cell	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record collision_sample_map_cell_layer selects outside the map

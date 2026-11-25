@@ -17,7 +17,7 @@ void area_handler_noop(void);
 void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_track_group(Object88 *obj);
+void area_on_actor_removed_track_group(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -26,7 +26,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
 void area_on_movie_start_unlock_element_and_remove_actor(u8 id);
 void area_on_movie_end_raise_element_and_fade_objects(u8 id);
-void area_talk_event_set_flag(Object88 *record, s32 event);
+void area_talk_event_set_flag(Actor *record, s32 event);
 void area_on_load_restore_objects_and_actor(void);
 
 const FdatHeader fdat_header = {
@@ -92,7 +92,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: records 0..12 each set their bit of the 13-bit mask at +0x48. */
 ADDRESS(0x801e85b8, 0x8c)
-void area_on_actor_removed_track_group(Object88 *obj)
+void area_on_actor_removed_track_group(Actor *obj)
 {
     s32 index = obj - actor_status.objects;
     s32 bit;
@@ -144,8 +144,8 @@ void area_on_movie_start_unlock_element_and_remove_actor(u8 id)
     if (id == 4) {
         if (cur_evt_state.unk32[0x14] != 0) {
             map_objects_slots.objects[20].unk6 = 0xff;
-            actor_status.objects[30].unk0 = 8;
-            actor_status.objects[30].unk9 = 3;
+            actor_status.objects[30].slot_state = 8;
+            actor_status.objects[30].lifecycle = 3;
         }
     }
     if (id == 13) {
@@ -209,7 +209,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 
 /* Slot 4: script event 0 of an object record sets flag 0x14 once. */
 ADDRESS(0x801e88a0, 0x34)
-void area_talk_event_set_flag(Object88 *record, s32 event)
+void area_talk_event_set_flag(Actor *record, s32 event)
 {
     if (event == 0) {
         if (cur_evt_state.unk32[0x14] == 0) {
@@ -232,8 +232,8 @@ void area_on_load_restore_objects_and_actor(void)
         cur_evt_state.unk32[0x15] = 1;
     } else {
         map_objects_slots.objects[20].unk6 = 0xff;
-        actor_status.objects[30].unk0 = 8;
-        actor_status.objects[30].unk9 = 3;
+        actor_status.objects[30].slot_state = 8;
+        actor_status.objects[30].lifecycle = 3;
     }
     cur_evt_state.unk84[5] = 0xd;
 }

@@ -18,14 +18,14 @@ void area_handler_noop(void);
 void area_update_respawn_actor_out_of_view(void);
 void area_use_item_flash_and_set_flag(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_disable_actor(Object88 *obj);
+void area_on_actor_removed_disable_actor(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_grant_magic(Object88 *record, s32 event);
+void area_talk_event_grant_magic(Actor *record, s32 event);
 void area_on_load_restore_actor_and_item_flags(void);
 
 const FdatHeader fdat_header = {
@@ -84,15 +84,15 @@ void area_update_respawn_actor_out_of_view(void)
         return;
     }
     i = 1;
-    if (actor_status.objects[i].unk9 == 1) {
+    if (actor_status.objects[i].lifecycle == 1) {
         return;
     }
     if (angle_within_tolerance(cur_avatar_status.unk124.vy,
                                vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
                                                   actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
                                600) == 0) {
-        actor_status.objects[i].unk9 = 0;
-        actor_status.objects[i].unk0 = 2;
+        actor_status.objects[i].lifecycle = 0;
+        actor_status.objects[i].slot_state = 2;
     }
 }
 
@@ -127,12 +127,12 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: once flag 0x30 is set, actor 1 is disabled (state 8) when removed. */
 ADDRESS(0x801e8780, 0x68)
-void area_on_actor_removed_disable_actor(Object88 *obj)
+void area_on_actor_removed_disable_actor(Actor *obj)
 {
     if (obj - actor_status.objects == 1) {
         if (cur_evt_state.unk2c[4] == 1) {
             cur_evt_state.unk2c[4] = 2;
-            actor_status.objects[1].unk0 = 8;
+            actor_status.objects[1].slot_state = 8;
         }
     }
 }
@@ -169,29 +169,29 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script events 0 and 1 of an object record. */
 ADDRESS(0x801e8818, 0x100)
-void area_talk_event_grant_magic(Object88 *record, s32 event)
+void area_talk_event_grant_magic(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
         color_overlay_transition(0x200, 0, 0, 0, 0x80, 200, 0x80);
         color_overlay_transition(0x200, 0x80, 200, 0x80, 0, 0, 0);
         cur_evt_state.unk31 = 1;
-        effect_status.unk0[54].unk0 = 1;
-        effect_status.unk0[55].unk0 = 1;
-        effect_status.unk0[66].unk0 = 1;
-        effect_status.unk0[67].unk0 = 1;
-        effect_status.unk0[68].unk0 = 1;
-        effect_status.unk0[69].unk0 = 1;
-        effect_status.unk0[70].unk0 = 1;
-        effect_status.unk0[71].unk0 = 1;
-        effect_status.unk0[72].unk0 = 1;
-        effect_status.unk0[73].unk0 = 1;
-        effect_status.unk0[74].unk0 = 1;
-        effect_status.unk0[75].unk0 = 1;
+        effect_status.unk0[54].menu_available = 1;
+        effect_status.unk0[55].menu_available = 1;
+        effect_status.unk0[66].menu_available = 1;
+        effect_status.unk0[67].menu_available = 1;
+        effect_status.unk0[68].menu_available = 1;
+        effect_status.unk0[69].menu_available = 1;
+        effect_status.unk0[70].menu_available = 1;
+        effect_status.unk0[71].menu_available = 1;
+        effect_status.unk0[72].menu_available = 1;
+        effect_status.unk0[73].menu_available = 1;
+        effect_status.unk0[74].menu_available = 1;
+        effect_status.unk0[75].menu_available = 1;
         break;
     case 1:
         cur_evt_state.unk32[0] = 1;
-        actor_status.objects[1].unk0 = 8;
+        actor_status.objects[1].slot_state = 8;
         break;
     }
 }
@@ -201,9 +201,9 @@ ADDRESS(0x801e8918, 0xb0)
 void area_on_load_restore_actor_and_item_flags(void)
 {
     if (cur_evt_state.unk2c[4] != 0 && cur_evt_state.unk32[0] == 0) {
-        actor_status.objects[1].unk0 = 1;
+        actor_status.objects[1].slot_state = 1;
     } else {
-        actor_status.objects[1].unk0 = 8;
+        actor_status.objects[1].slot_state = 8;
     }
     if (game_counter_is_nonzero(0x85) > 0) {
         cur_evt_state.unk32[1] = 1;

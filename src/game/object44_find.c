@@ -585,12 +585,12 @@ void render_frames_with_color_overlay(int mode, s32 phase, s32 last, s32 step)
     }
 }
 
-/* Moves the player, the Object4c and the Object88 records by (dx, dy, dz). */
+/* Moves the player, the Object4c and the Actor records by (dx, dy, dz). */
 ADDRESS(0x80046cb0, 0x11c)
 void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
 {
     Object4c *o4c;
-    Object88 *o88;
+    Actor *o88;
     u16 i;
 
     cur_avatar_status.pos.vx += dx;
@@ -609,7 +609,7 @@ void translate_player_effects_and_actors(s32 dx, s32 dy, s32 dz)
     o88 = actor_status.objects;
     i = 200;
     while (i--) {
-        if (o88->unk0 != 0xff) {
+        if (o88->slot_state != 0xff) {
             o88->pos.vx += dx;
             o88->pos.vz += dz;
             o88->pos.vy += dy;
@@ -2602,7 +2602,7 @@ void map_object_update_actions(void)
             break;
         case 50:
             {
-                Object88 *e;
+                Actor *e;
 
                 e = NULL;
                 if (obj->arg.h.unk3a != 0xffff) {
@@ -2610,7 +2610,7 @@ void map_object_update_actions(void)
                 }
                 if (obj->unk8 == 0) {
                     if (e != NULL) {
-                        obj->unka = (e->unk18 + obj->arg.h.unk3c) & 0xfff;
+                        obj->unka = (e->animation_phase + obj->arg.h.unk3c) & 0xfff;
                     } else {
                         obj->unka = (obj->unka + obj->arg.h.unk38) & 0xfff;
                     }

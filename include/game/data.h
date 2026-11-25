@@ -98,12 +98,12 @@ typedef struct Data801b24e4 {
     s32 unka0;
     u32 play_minutes; /* +0xa4: the VSync handler adds one every 3600 VSyncs */
     u16 *unka8;     /* +0xa8: next pad bit of the player_magic_attack_masks sequence (player_update_actions_and_charge) */
-    struct Record18 *unkac; /* +0xac: &effect_status.unk0[id] (player_dispatch_weapon_magic) */
-    struct Record44 *unkb0; /* +0xb0: &weapon_table[unkcb] */
+    struct MagicRecord *unkac; /* +0xac: &effect_status.unk0[id] (player_dispatch_weapon_magic) */
+    struct WeaponRecord *unkb0; /* +0xb0: &weapon_table[unkcb] */
     u8 *unkb4;      /* +0xb4 */
     s32 unkb8;
     struct Object4c *unkbc; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
-    s16 unkc0;      /* +0xc0: -1 blocks the Object88 script records of ids 19 and 20 */
+    s16 unkc0;      /* +0xc0: -1 blocks the Actor script records of ids 19 and 20 */
     s16 unkc2;      /* +0xc2: swing time of the next hit (player_update_weapon_attack) */
     s16 unkc4;      /* +0xc4: swing time of the next swing sound */
     u8 unkc6;
@@ -118,14 +118,14 @@ typedef struct Data801b24e4 {
     u8 unkcf;
     u8 unkd0;
     u8 unkd1[0x3];
-    struct Record20 *unkd4; /* +0xd4..+0xec: &map_world.unk11c14[] of unkf0..unkf6 */
-    struct Record20 *unkd8;
-    struct Record20 *unkdc;
-    struct Record20 *unke0;
-    struct Record20 *unke4;
-    struct Record20 *unke8;
-    struct Record20 *unkec;
-    u8 unkf0;       /* +0xf0..+0xf6: Record20 indices, 0xff for none */
+    struct EquipmentRecord *unkd4; /* +0xd4..+0xec: &map_world.unk11c14[] of unkf0..unkf6 */
+    struct EquipmentRecord *unkd8;
+    struct EquipmentRecord *unkdc;
+    struct EquipmentRecord *unke0;
+    struct EquipmentRecord *unke4;
+    struct EquipmentRecord *unke8;
+    struct EquipmentRecord *unkec;
+    u8 unkf0;       /* +0xf0..+0xf6: EquipmentRecord indices, 0xff for none */
     u8 unkf1;
     u8 unkf2;
     u8 unkf3;
@@ -212,12 +212,12 @@ typedef struct Data801ba984 {
     u8 unk6b[6];
     u8 unk71[5];    /* +0x71: per magic element 0..3; element 4 needs none */
     u8 unk76[7];
-    u8 unk7d;       /* +0x7d: set to 1 by the first Object88 kill (actor_apply_magic_to_actor) */
-    u8 unk7e;       /* +0x7e: Object88 kills (actor_apply_magic_to_actor) */
+    u8 unk7d;       /* +0x7d: set to 1 by the first Actor kill (actor_apply_magic_to_actor) */
+    u8 unk7e;       /* +0x7e: Actor kills (actor_apply_magic_to_actor) */
     u8 unk7f[5];    /* +0x7f: per magic element */
     u8 unk84[6];
     u8 unk8a[0x20]; /* +0x8a: per area, 1 once resource_request_transition loaded it */
-    u8 unkaa;      /* +0xaa: Object88.unk1 of the record whose script
+    u8 unkaa;      /* +0xaa: Actor.unk1 of the record whose script
                     * event_target_stream_resolve_cursor entered */
     u8 unkab[0x59];
     u8 unk104[0x5000]; /* +0x104: block arena (game/memory.h), cleared by event_state_initialize */
@@ -225,23 +225,23 @@ typedef struct Data801ba984 {
 } Data801ba984;
 
 /* 0x20-byte records player_add_equipment_bonuses adds to the player's halfwords +0x66..+0x76. */
-typedef struct Record20 {
+typedef struct EquipmentRecord {
     u8 unk0[2];
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unka;
-    u16 unkc;
-    u16 unke;
-    u16 unk10;
-    u16 unk12;
-    u16 unk14;      /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
-    u16 unk16;
-    u16 unk18;
-    u16 unk1a;
+    u16 defense_slash;
+    u16 defense_blow;
+    u16 defense_stab;
+    u16 poison_resistance;
+    u16 defense_holy;
+    u16 defense_fire;
+    u16 defense_earth;
+    u16 defense_wind;
+    u16 defense_water;
+    u16 hp_regen_interval; /* +0x14..+0x1a: frame periods of the hp/unk1c gain and loss */
+    u16 hp_drain_interval;
+    u16 mp_regen_interval;
+    u16 mp_drain_interval;
     u8 unk1c[0x4];
-} Record20;
+} EquipmentRecord;
 
 /*
  * One layer of a map cell; render_map_cell_object draws one (field names WIP).
@@ -249,7 +249,7 @@ typedef struct Record20 {
 typedef struct MapLayer {
     u8 unk0;        /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
     u8 unk1;        /* +0x01: floor height / -128 */
-    u8 unk2;        /* +0x02: layer 0: bits 2-7 count the Object88 records on the
+    u8 unk2;        /* +0x02: layer 0: bits 2-7 count the Actor records on the
                      * cell (map_cell_add_layer_occupancy) */
     u8 unk3;
     u8 unk4;
@@ -268,20 +268,20 @@ typedef struct Data801d4464 {
     u8 unkfa00[0x600];
     u8 unk10000[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
                           * (0x2000 bytes, through unk11ff4) here */
-    Record20 unk11c14[31]; /* +0x11c14: WIP count */
+    EquipmentRecord unk11c14[31]; /* +0x11c14: WIP count */
     u8 unk11ff4[0xc];
     MapCell *unk12000; /* +0x12000: cell of the last collision test */
     u8 *unk12004;   /* +0x12004: record of the last collision test; [2] bits 0-1 its slope */
     u8 unk12008[2];
     u16 unk1200a;   /* +0x1200a: copied to SoundState.unk24 with the listener */
-    s32 unk1200c;   /* +0x1200c: height given to Object88 records with flag 0x400 */
+    s32 unk1200c;   /* +0x1200c: height given to Actor records with flag 0x400 */
     s32 unk12010;   /* +0x12010: floor height of the last collision test */
     s32 unk12014;   /* +0x12014: second height of the last collision test (collision_evaluate_shape_records);
                      * player_move_horizontal lets the player through when it is 1700 above unk12010 */
     s32 unk12018[3]; /* +0x12018: heights player_update_collision_bounds measures the player against; [0] the
                       * floor the Object4c spawns of effect_spawn_at_lower_bound must reach */
     u32 unk12024;   /* +0x12024: hit bits of the last collision_query_world test */
-    s32 unk12028;   /* +0x12028: Object88 index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
+    s32 unk12028;   /* +0x12028: Actor index it hit, -1 for none (effect_dispatch_magic_impact reads it) */
     s32 unk1202c;   /* +0x1202c: Object44 index it hit, -1 for none */
     u8 unk12030[4];
     s32 unk12034;   /* +0x12034: push of the last collision test (collision_evaluate_shape_records); from 64
@@ -542,7 +542,7 @@ typedef struct Object4cBytes {
     u8 unk46[2];
     u8 unk48;       /* +0x48: ids 5 and 16: cursor into their 24 trail records */
     u8 unk49;       /* +0x49: ids 5 and 16: step counter of the current phase */
-    u8 unk4a;       /* +0x4a: ids 5 and 16: index of the Object88 record they hold */
+    u8 unk4a;       /* +0x4a: ids 5 and 16: index of the Actor record they hold */
     u8 unk4b;
 } Object4cBytes;
 
@@ -587,8 +587,8 @@ typedef union Object4cArg {
 
 typedef struct Object4c {
     u8 unk0;        /* +0x00: 0xff when free; bits 0-2 pick the collision mask,
-                     * 0x40 averages the Record18.unk5 stats (effect_magic_power) */
-    u8 unk1;        /* +0x01: index of its Record18 record */
+                     * 0x40 averages the MagicRecord.unk5 stats (effect_magic_power) */
+    u8 unk1;        /* +0x01: index of its MagicRecord record */
     u8 unk2;
     u8 unk3;        /* +0x03: model id - 40 (effect_sample_rotated_vertex) */
     u8 unk4;        /* +0x04: animation */
@@ -614,137 +614,137 @@ typedef struct Object4c {
     Object4cArg arg; /* +0x44: per-id payload (effect_construct_record) */
 } Object4c;
 
-typedef struct Object88 {
-    u8 unk0;        /* +0x00: 0xff when free */
-    u8 unk1;        /* +0x01: Object78.unk0 of its record */
-    u8 unk2;        /* +0x02: index of its Object78 record */
-    u8 unk3;
+typedef struct Actor {
+    u8 slot_state;  /* +0x00: 0xff when free */
+    u8 definition_id; /* +0x01: ActorGroup.unk0 of its record */
+    u8 group_index; /* +0x02: index of its ActorGroup record */
+    u8 layer_mask;
     u8 unk4;
-    u8 unk5;        /* +0x05: bit 0 keeps its initial yaw */
-    u8 unk6;        /* +0x06: area passed to collision_sample_map_layer_height */
-    u8 unk7;        /* +0x07: map cell z */
-    u8 unk8;        /* +0x08: map cell x */
-    u8 unk9;        /* +0x09: state, 1 active */
-    u8 unka;
-    u8 unkb;
-    u8 unkc;        /* +0x0c: animation */
-    u8 unkd;
-    u8 unke;        /* +0x0e: id of the running script record, 0xff none */
-    u8 unkf;        /* +0x0f: script step, 0xff restart */
-    u8 unk10;       /* +0x10: previous unke */
+    u8 placement_flags; /* +0x05: bit 0 keeps its initial yaw */
+    u8 home_layer_mask; /* +0x06: area passed to collision_sample_map_layer_height */
+    u8 home_cell_z; /* +0x07: map cell z */
+    u8 home_cell_x; /* +0x08: map cell x */
+    u8 lifecycle;   /* +0x09: state, 1 active */
+    u8 spawn_chance;
+    u8 death_drop_object_id;
+    u8 animation_id; /* +0x0c: animation */
+    u8 vertical_motion_state;
+    u8 target_type; /* +0x0e: id of the running script record, 0xff none */
+    u8 target_action_state; /* +0x0f: script step, 0xff restart */
+    u8 previous_target_type; /* +0x10: previous unke */
     u8 unk11;
     u8 unk12;
-    u8 unk13;
-    u8 unk14;       /* +0x14: second light record (render_world_model light2) */
-    s8 unk15;       /* +0x15: depth offset (render_world_model) */
-    s16 unk16;      /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
-    u16 unk18;      /* +0x18: animation time */
-    u16 unk1a;
-    u16 unk1c;
-    u16 unk1e;
+    u8 render_mode;
+    u8 lighting_override_index; /* +0x14: second light record (render_world_model light2) */
+    s8 render_depth_offset; /* +0x15: depth offset (render_world_model) */
+    s16 lighting_blend; /* +0x16: FDAT slot 17 raises and lowers it (-12000 at the start) */
+    u16 animation_phase; /* +0x18: animation time */
+    u16 health;
+    u16 collision_radius;
+    u16 collision_height;
     u16 unk20;      /* +0x20: initial yaw */
     s16 unk22;      /* +0x22: z offset in its cell */
     s16 unk24;      /* +0x24: x offset in its cell */
-    s16 unk26;      /* +0x26: height above the floor */
-    u32 unk28;      /* +0x28: flags (Object78.unk34) */
+    s16 vertical_anchor_offset; /* +0x26: height above the floor */
+    u32 flags;      /* +0x28: flags (ActorGroup.unk34) */
     VECTOR pos;     /* +0x2c */
-    s32 unk3c;
+    s32 ballistic_origin_y;
     SVECTOR angle;  /* +0x40 */
     SVECTOR scale;  /* +0x48: 0x1000 = 1 */
     SVECTOR vel;    /* +0x50 */
-    s16 unk58;
+    s16 turn_rate;
     u8 unk5a[2];
-    struct AnimSlot *unk5c; /* +0x5c: pose slot (animation_prepare_asset_vertices) */
-    u8 *unk60;      /* +0x60: running script record */
-    s16 unk64;      /* +0x64: FDAT slot 17 stores the angle to the player */
-    s16 unk66;
-    s16 unk68;
-    s16 unk6a;
-    s16 unk6c;
+    struct AnimSlot *animation_cache; /* +0x5c: pose slot (animation_prepare_asset_vertices) */
+    u8 *target;     /* +0x60: running script record */
+    s16 movement_yaw; /* +0x64: FDAT slot 17 stores the angle to the player */
+    s16 animation_step;
+    s16 ballistic_horizontal_speed;
+    s16 ballistic_launch_speed_y;
+    s16 ballistic_acceleration;
     u8 unk6e[2];
-    s16 unk70;      /* +0x70: script phase (FDAT slot 17: 0..2); script 5 keeps two
-                     * byte flags here (OBJECT88_B70/B71) */
+    s16 target_phase; /* +0x70: script phase (FDAT slot 17: 0..2); script 5 keeps two
+                     * byte flags here (ACTOR_B70/B71) */
     SVECTOR unk72;  /* +0x72: script direction; vx/vy also counters and indexes, pad a
                      * height (script 12); FDAT slot 17 toggles vy when the turn completes */
     u8 unk7a[6];
-    s16 unk80;      /* +0x80: phase of script 31 */
+    s16 fade_out_phase; /* +0x80: phase of script 31 */
     u8 unk82[2];
-    u8 unk84;       /* +0x84: cleared by a hit below the hurt threshold (actor_apply_magic_to_actor) */
+    u8 hit_flash_phase; /* +0x84: cleared by a hit below the hurt threshold (actor_apply_magic_to_actor) */
     u8 unk85[3];
-} Object88;
+} Actor;
 
 /*
- * The record an Object88 is made from (its unk2 indexes actor_status.defs);
+ * The record an Actor is made from (its unk2 indexes actor_status.defs);
  * player_probe_view_target_and_vectors hands one to actor_find_target_of_type.
  */
-typedef struct Object78 {
-    u8 unk0;
+typedef struct ActorGroup {
+    u8 definition_id;
     u8 unk1[4];
-    u8 unk5;        /* +0x05: fall acceleration */
-    u8 unk6;
-    u8 unk7[2];
-    u8 unk9;
-    u8 unka;        /* +0x0a: wake range in map cells */
-    u8 unkb;        /* +0x0b: sleep range in map cells */
-    s16 unkc;       /* +0x0c: offset of the record's point (Object88.unk28 bits 0-1) */
-    s16 unke;
-    s16 unk10;
-    u16 unk12;
-    u16 unk14;
-    s16 unk16;      /* +0x16: yaw range of its front (player_update_weapon_attack) */
-    s16 unk18;      /* +0x18: yaw range (effect_dispatch_magic_impact) */
+    u8 vertical_acceleration; /* +0x05: fall acceleration */
+    u8 landing_damage;
+    u8 vab_resource_indices[2];
+    u8 render_depth_offset;
+    u8 activation_range_cells; /* +0x0a: wake range in map cells */
+    u8 deactivation_range_cells; /* +0x0b: sleep range in map cells */
+    s16 position_offset_x; /* +0x0c: offset of the record's point (Actor.unk28 bits 0-1) */
+    s16 position_offset_y;
+    s16 position_offset_z;
+    u16 collision_radius;
+    u16 collision_height;
+    s16 player_facing_tolerance; /* +0x16: yaw range of its front (player_update_weapon_attack) */
+    s16 actor_facing_tolerance; /* +0x18: yaw range (effect_dispatch_magic_impact) */
     u16 unk1a;
-    u16 unk1c;
-    s16 unk1e;      /* +0x1e: passed to player_add_experience when the record dies */
-    u16 unk20[8];   /* +0x20: resistances to the eight attack stats (actor_apply_magic_to_actor) */
-    u16 unk30;      /* +0x30: drop id (map_object_spawn_scattered_effect) when script 3 ends */
-    u16 unk32;      /* +0x32: scale */
-    u32 unk34;      /* +0x34: flags copied to Object88.unk28 */
-    u8 *scripts[16]; /* +0x38: script records, the first byte their id; 0 ends */
-} Object78;
+    u16 default_vertical_anchor_offset;
+    s16 experience_reward; /* +0x1e: passed to player_add_experience when the record dies */
+    u16 defense_components[8]; /* +0x20: resistances to the eight attack stats (actor_apply_magic_to_actor) */
+    u16 gold_drop_center; /* +0x30: drop id (map_object_spawn_scattered_effect) when script 3 ends */
+    u16 initial_model_scale_q12; /* +0x32: scale */
+    u32 initial_actor_flags; /* +0x34: flags copied to Actor.unk28 */
+    u8 *targets[16]; /* +0x38: script records, the first byte their id; 0 ends */
+} ActorGroup;
 
-typedef struct Data80185da8 {
-    Object88 objects[200];
-    Object78 defs[40];      /* +0x6a40 */
-    u8 unk7d00[0x2000];
-    u8 unk9d00;             /* +0x9d00: Object88.unk28 flags the searches skip */
+typedef struct ActorState {
+    Actor objects[200];
+    ActorGroup groups[40];  /* +0x6a40 */
+    u8 target_candidate_blob[0x2000];
+    u8 actor_overlap_exclusion_flags; /* +0x9d00: Actor.unk28 flags the searches skip */
     u8 unk9d01[3];
-    s32 unk9d04;            /* +0x9d04: mask passed to the collision tests */
-    Object78 *def;          /* +0x9d08: record of current */
-    Object88 *current;      /* +0x9d0c: the record being updated */
-    Object78 *target_def;   /* +0x9d10: record of target */
-    Object88 *target;       /* +0x9d14: objects[current->unk22] when flag 0x10 */
-    s32 unk9d18;            /* +0x9d18: index of current */
-    s32 unk9d1c;            /* +0x9d1c: current->unk2 */
-    s32 unk9d20;            /* +0x9d20: active records updated this frame */
-    s32 unk9d24;            /* +0x9d24: frame counter */
-    Object88 *unk9d28;      /* +0x9d28: player_probe_view_target_and_vectors keeps its last object here */
-} Data80185da8;
+    s32 actor_collision_query_flags; /* +0x9d04: mask passed to the collision tests */
+    ActorGroup *current_group; /* +0x9d08: record of current */
+    Actor *current;         /* +0x9d0c: the record being updated */
+    ActorGroup *other_group; /* +0x9d10: record of target */
+    Actor *other_actor;     /* +0x9d14: objects[current->unk22] when flag 0x10 */
+    s32 current_index;      /* +0x9d18: index of current */
+    s32 current_group_index; /* +0x9d1c: current->unk2 */
+    s32 active_actor_count; /* +0x9d20: active records updated this frame */
+    s32 actor_update_frame_count; /* +0x9d24: frame counter */
+    Actor *player_view_target; /* +0x9d28: player_probe_view_target_and_vectors keeps its last object here */
+} ActorState;
 
 /* 0x18-byte records at the start of effect_status (WIP). */
-typedef struct Record18 {
-    u8 unk0;        /* +0x00: player_learn_element_magic sets it to 1 */
-    u8 unk1;
-    u8 unk2;        /* +0x02: SoundState.effects[unk2 + 144], 0xff for none */
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;        /* +0x05: bits 0-4 pick Data801b24e4.unk42[0..4] */
-    u16 unk6;
-    u16 unk8;
-    u16 unka;
-    u16 unkc;
-    u16 unke;
-    u16 unk10;
-    u16 unk12;
-    u16 unk14;
-    u16 unk16;      /* +0x16: unk1c cost of the spell (player_dispatch_weapon_magic);
+typedef struct MagicRecord {
+    u8 menu_available; /* +0x00: player_learn_element_magic sets it to 1 */
+    u8 charge_rate;
+    u8 sound_id;    /* +0x02: SoundState.effects[unk2 + 144], 0xff for none */
+    u8 training_gain;
+    u8 player_status_flags;
+    u8 element_mask; /* +0x05: bits 0-4 pick Data801b24e4.unk42[0..4] */
+    u16 damage_slash;
+    u16 damage_blow;
+    u16 damage_stab;
+    u16 damage_holy;
+    u16 damage_fire;
+    u16 damage_earth;
+    u16 damage_wind;
+    u16 damage_water;
+    u16 mp_cost;    /* +0x16: unk1c cost of the spell (player_dispatch_weapon_magic);
                      * menu_collect_available_magic_rows lists it */
-} Record18;
+} MagicRecord;
 
 typedef struct Data801b77ec {
-    Record18 unk0[96];
+    MagicRecord unk0[96];
     Object4c objects[128];  /* +0x900 */
-    Record18 *unk2f00;      /* +0x2f00: record of unk2f04 */
+    MagicRecord *unk2f00;   /* +0x2f00: record of unk2f04 */
     Object4c *unk2f04;      /* +0x2f04: the Object4c record being updated */
     s32 unk2f08;            /* +0x2f08: index of unk2f04 (effect_pool_sweep) */
 } Data801b77ec;
@@ -759,36 +759,36 @@ typedef struct Record0c {
 } Record0c;
 
 /* 0x44-byte records player_recalculate_combat_stats adds to the player's unk54[]/unk62 (WIP). */
-typedef struct Record44 {
+typedef struct WeaponRecord {
     u8 unk0[4];
-    u8 unk4;
-    u8 unk5;
-    u16 unk6[8];
-    u16 unk16;      /* +0x16: frame period of an hp point (player_update_frame), 0 for none */
-    u16 unk18;      /* +0x18: frame period of a Data801b24e4.unk1c point, 0 for none */
-    u16 unk1a;      /* +0x1a: reach of the swing probe (player_update_weapon_attack) */
-    u16 unk1c;      /* +0x1c..+0x32: per hand the swing speed, hit time, limits and steps
+    u8 alternate_magic_id;
+    u8 magic_shots;
+    u16 attack_components[8];
+    u16 hp_regen_interval; /* +0x16: frame period of an hp point (player_update_frame), 0 for none */
+    u16 mp_regen_interval; /* +0x18: frame period of a Data801b24e4.unk1c point, 0 for none */
+    u16 attack_reach; /* +0x1a: reach of the swing probe (player_update_weapon_attack) */
+    u16 attack_phase_step; /* +0x1c..+0x32: per hand the swing speed, hit time, limits and steps
                      * player_update_weapon_attack runs the swing with (WIP names) */
-    u16 unk1e;
-    u16 unk20;
-    u16 unk22;
-    u16 unk24;
-    u16 unk26;
-    u16 unk28;
-    u16 unk2a;
-    u16 unk2c;
-    u16 unk2e;
-    u16 unk30;
-    u16 unk32;
-    u16 unk34;      /* +0x34..+0x42: model offsets of the weapon tip (player_sample_weapon_world_vertex) */
-    u16 unk36;
-    u16 unk38;
-    s16 unk3a;
-    u16 unk3c;
-    u16 unk3e;
-    u16 unk40;
-    s16 unk42;
-} Record44;
+    u16 normal_attack_end_phase;
+    u16 magic_window_start;
+    u16 magic_window_end;
+    u16 alternate_attack_phase_step;
+    u16 alternate_attack_window_start;
+    u16 alternate_attack_end_phase;
+    u16 magic_phase_step;
+    u16 normal_attack_sound_phase;
+    u16 alternate_attack_sound_start_phase;
+    u16 alternate_attack_sound_end_phase;
+    u16 alternate_attack_sound_phase_step;
+    u16 position_offset_x; /* +0x34..+0x42: model offsets of the weapon tip (player_sample_weapon_world_vertex) */
+    u16 position_offset_y;
+    u16 position_offset_z;
+    s16 initial_vertex_index;
+    u16 rotation_offset_x;
+    u16 rotation_offset_y;
+    u16 rotation_offset_z;
+    s16 final_vertex_index;
+} WeaponRecord;
 
 /* One entry of a loaded FDAT module's handler table. */
 typedef s32 (*FdatHandler)();
@@ -852,7 +852,7 @@ extern u32 fdat_window_bounds[6];
 /* Arena memory_arena_initialize_blocks formats with a 0x4d800-byte free block. */
 extern u8 resource_space[0x4d800];
 
-extern Data80185da8 actor_status;
+extern ActorState actor_status;
 extern Data8018fad4 asset_status;
 extern Data8018fb3c map_objects_slots;
 extern Data801b24e4 cur_avatar_status;
@@ -904,7 +904,7 @@ extern Data801e7edc movie_state;
  * records (48 fill the gap to map_world), and the rest (WIP extents).
  */
 extern Record0c player_lv_grow_list[100];
-extern Record44 weapon_table[48];
+extern WeaponRecord weapon_table[48];
 extern u32 tmd_archive_28_buffer[];
 extern u32 tmd_0_buffer[];
 extern u32 item_gear_recs[];

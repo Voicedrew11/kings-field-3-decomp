@@ -700,10 +700,10 @@ void render_player_weapon(void)
     gte_SetLightMatrix(&light->unk0[0]);
     fog_set_range(light->unk68, light->unk6a);
     gte_SetBackColor(light->unk64.r, light->unk64.g, light->unk64.b);
-    m.t[0] = (s16)cur_avatar_status.unkb0->unk34;
-    m.t[1] = (s16)cur_avatar_status.unkb0->unk36;
-    m.t[2] = (s16)cur_avatar_status.unkb0->unk38;
-    RotMatrix((SVECTOR *)&cur_avatar_status.unkb0->unk3c, &m);
+    m.t[0] = (s16)cur_avatar_status.unkb0->position_offset_x;
+    m.t[1] = (s16)cur_avatar_status.unkb0->position_offset_y;
+    m.t[2] = (s16)cur_avatar_status.unkb0->position_offset_z;
+    RotMatrix((SVECTOR *)&cur_avatar_status.unkb0->rotation_offset_x, &m);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     file = scene_display_sys.models[32];
@@ -1474,7 +1474,7 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
 
 /*
  * Draws the objects in view once a frame and keeps their files loaded: the
- * Object88 records (models from 128, sound banks from 51), the Object44
+ * Actor records (models from 128, sound banks from 51), the Object44
  * records (models from 256 and the area bank, sound banks from 147; kind
  * 0x1f plays its sound by the player's distance), the Object4c records and
  * the placed effects. The passes flag the model ids and sound banks in use
@@ -1487,8 +1487,8 @@ void render_scene_and_update_resources(void)
     VECTOR pos;
     u8 *model;
     ScratchPad *scratch;
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     Object44 *rec;
     Object44Def *rec_def;
     Object4c *obj4c;
@@ -1516,44 +1516,47 @@ void render_scene_and_update_resources(void)
     SCRATCH->draw.count.clut = 0;
     obj = actor_status.objects;
     for (i = 199; i != -1; i--, obj++) {
-        if (obj->unk9 != 1) {
+        if (obj->lifecycle != 1) {
             continue;
         }
-        if (obj->unk28 & 0x2000) {
-            mask = obj->unk3 | 0x10;
+        if (obj->flags & 0x2000) {
+            mask = obj->layer_mask | 0x10;
         } else {
-            mask = obj->unk3;
+            mask = obj->layer_mask;
         }
-        if (!(obj->unk28 & 0x80000)) {
+        if (!(obj->flags & 0x80000)) {
             if (!(map_cell_layer_mask(&obj->pos) & mask)) {
                 continue;
             }
         } else {
-            if (!(map_cell_layer_mask_radius(&obj->pos, 3) & obj->unk3)) {
+            if (!(map_cell_layer_mask_radius(&obj->pos, 3) & obj->layer_mask)) {
                 continue;
             }
         }
-        resource_registry_get(obj->unk1 + 128, &model);
+        resource_registry_get(obj->definition_id + 128, &model);
         if (model != NULL) {
             at = actor_resolve_group_position(obj, &pos);
-            if (obj->unk28 & 0x20) {
+            if (obj->flags & 0x20) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                render_world_model(obj->unk3, obj->unk1 + 128, &obj->pos, &scratch->u.load.angle, &obj->scale,
-                                   &obj->unk5c, &render_world_identity_matrix, obj->unkc, obj->unk18,
-                                   obj->unk14, obj->unk16, obj->unk13, obj->unk15);
+                render_world_model(obj->layer_mask, obj->definition_id + 128, &obj->pos,
+                                   &scratch->u.load.angle, &obj->scale, &obj->animation_cache,
+                                   &render_world_identity_matrix, obj->animation_id, obj->animation_phase,
+                                   obj->lighting_override_index, obj->lighting_blend, obj->render_mode,
+                                   obj->render_depth_offset);
             } else {
                 scratch->u.load.angle.vx = obj->angle.vx;
                 scratch->u.load.angle.vy = obj->angle.vy + 2048;
                 scratch->u.load.angle.vz = obj->angle.vz;
-                render_world_model(obj->unk3, obj->unk1 + 128, at, &scratch->u.load.angle,
-                                   &obj->scale, &obj->unk5c, &scene_display_sys.unk159f8, obj->unkc,
-                                   obj->unk18, obj->unk14, obj->unk16, obj->unk13, obj->unk15);
+                render_world_model(obj->layer_mask, obj->definition_id + 128, at, &scratch->u.load.angle,
+                                   &obj->scale, &obj->animation_cache, &scene_display_sys.unk159f8,
+                                   obj->animation_id, obj->animation_phase, obj->lighting_override_index,
+                                   obj->lighting_blend, obj->render_mode, obj->render_depth_offset);
             }
         }
-        def = &actor_status.defs[obj->unk2];
-        scratch->u.load.sounds[def->unk7[0]] = 1;
-        scratch->u.load.sounds[def->unk7[1]] = 1;
-        scratch->u.load.models[obj->unk1] = 1;
+        def = &actor_status.groups[obj->group_index];
+        scratch->u.load.sounds[def->vab_resource_indices[0]] = 1;
+        scratch->u.load.sounds[def->vab_resource_indices[1]] = 1;
+        scratch->u.load.models[obj->definition_id] = 1;
     }
     resource_tmd_update_range(0, 0, 0x80, 0x80);
     resource_vab_update_range(2, 0x91, 0x33, 0x60);

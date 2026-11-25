@@ -255,8 +255,8 @@ typedef struct ScratchLoad {
     SVECTOR angle;      /* +0x114: rotation handed to the model front ends */
     u8 *model_wanted;   /* +0x11c: one flag per model id of the area: keep it loaded */
     u8 *sound_wanted;   /* +0x120: one flag per sound bank of the area */
-    u8 models[332];     /* +0x124: model flags from id 128 (Object88) or 256 (Object44) */
-    u8 sounds[96];      /* +0x270: sound bank flags from 51 (Object88) or 147 (Object44) */
+    u8 models[332];     /* +0x124: model flags from id 128 (Actor) or 256 (Object44) */
+    u8 sounds[96];      /* +0x270: sound bank flags from 51 (Actor) or 147 (Object44) */
 } ScratchLoad;
 
 /* Scratchpad words from +0x100 while a frame is built (view_build_visibility_grid). */

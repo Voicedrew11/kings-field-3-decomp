@@ -26,13 +26,13 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
     SVECTOR rot;
     s32 y;
 
-    rot.vx = cur_avatar_status.unk124.vx - cur_avatar_status.unkb0->unk3c;
-    rot.vy = cur_avatar_status.unk124.vy - cur_avatar_status.unkb0->unk3e;
-    rot.vz = cur_avatar_status.unk124.vz + cur_avatar_status.unkb0->unk40;
+    rot.vx = cur_avatar_status.unk124.vx - cur_avatar_status.unkb0->rotation_offset_x;
+    rot.vy = cur_avatar_status.unk124.vy - cur_avatar_status.unkb0->rotation_offset_y;
+    rot.vz = cur_avatar_status.unk124.vz + cur_avatar_status.unkb0->rotation_offset_z;
     animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0, vertex, &v);
-    v.vx -= cur_avatar_status.unkb0->unk34;
-    v.vy += cur_avatar_status.unkb0->unk36;
-    v.vz -= cur_avatar_status.unkb0->unk38;
+    v.vx -= cur_avatar_status.unkb0->position_offset_x;
+    v.vy += cur_avatar_status.unkb0->position_offset_y;
+    v.vz -= cur_avatar_status.unkb0->position_offset_z;
     vector_rotate_yxz(&rot, &v, out);
     out->vx += cur_avatar_status.pos.vx;
     out->vz += cur_avatar_status.pos.vz;
@@ -41,7 +41,7 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
 }
 
 /*
- * Whether the weapon's spell of hand (0: Record44.unk3, 1: unk4) may be cast:
+ * Whether the weapon's spell of hand (0: WeaponRecord.unk3, 1: unk4) may be cast:
  * the spell must be learned; weapon 2 and 13..17 always may, others need
  * unk40 and every unk42 at 50 or more.
  */
@@ -53,11 +53,11 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
 
     if (cur_avatar_status.unkcb != 0xff) {
         if (hand == 0 && cur_avatar_status.unkb0->unk0[3] != 0xff
-            && effect_status.unk0[cur_avatar_status.unkb0->unk0[3]].unk0 == 0) {
+            && effect_status.unk0[cur_avatar_status.unkb0->unk0[3]].menu_available == 0) {
             return 0;
         }
-        if (hand == 1 && cur_avatar_status.unkb0->unk4 != 0xff
-            && effect_status.unk0[cur_avatar_status.unkb0->unk4].unk0 == 0) {
+        if (hand == 1 && cur_avatar_status.unkb0->alternate_magic_id != 0xff
+            && effect_status.unk0[cur_avatar_status.unkb0->alternate_magic_id].menu_available == 0) {
             return 0;
         }
     }
@@ -79,21 +79,21 @@ s32 player_meets_weapon_magic_requirement(s32 hand)
     return cur_avatar_status.unk40 >= 50 && low >= 50;
 }
 
-/* Casts spell id (Record18) along dir when unk1c covers its cost; pay takes the cost. */
+/* Casts spell id (MagicRecord) along dir when unk1c covers its cost; pay takes the cost. */
 ADDRESS(0x8002d130, 0x170)
 void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 {
     VECTOR unused;
-    Record18 *r = &effect_status.unk0[id];
+    MagicRecord *r = &effect_status.unk0[id];
 
-    if (cur_avatar_status.unk1c < r->unk16) {
+    if (cur_avatar_status.unk1c < r->mp_cost) {
         return;
     }
     cur_avatar_status.unkac = r;
     if (pay) {
         cur_avatar_status.unk22 = 0;
         cur_avatar_status.unk10 = 0;
-        cur_avatar_status.unk1c -= r->unk16;
+        cur_avatar_status.unk1c -= r->mp_cost;
         if (id == 0x36) {
             audio_play_sound(0x63, 0x6e);
         }
@@ -124,9 +124,9 @@ void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir)
 
 /*
  * Weapon swing and bow update (once per frame): unkc0 runs the swing of the
- * held weapon (Record44, unkb0) from 0 to 4096; the bows (27, 28) spend an
+ * held weapon (WeaponRecord, unkb0) from 0 to 4096; the bows (27, 28) spend an
  * arrow (event_item_counters_table) and aim it, the other weapons cast the weapon spell,
- * play the swing sound and probe for an Object88 along the swing.
+ * play the swing sound and probe for an Actor along the swing.
  */
 ADDRESS(0x8002d2a0, 0xc4c)
 void player_update_weapon_attack(void)
@@ -140,10 +140,10 @@ void player_update_weapon_attack(void)
     VECTOR probe;
     SVECTOR dir;
     s32 dist;
-    Record44 *w;
+    WeaponRecord *w;
     Object4c *arrow;
-    Object88 *obj;
-    Object78 *def;
+    Actor *obj;
+    ActorGroup *def;
     VECTOR *target;
     s32 speed;
     s32 hit;
@@ -199,35 +199,37 @@ void player_update_weapon_attack(void)
                     cur_avatar_status.unkbc = NULL;
                 }
             }
-            cur_avatar_status.unkc0 += w->unk1c;
+            cur_avatar_status.unkc0 += w->attack_phase_step;
             if (cur_avatar_status.unkc0 >= 4095) {
                 cur_avatar_status.unkc0 = 0xfff;
             }
-            if (cur_avatar_status.unkc0 >= w->unk1e) {
+            if (cur_avatar_status.unkc0 >= w->normal_attack_end_phase) {
                 if (cur_avatar_status.unk1e == 0) {
                     audio_play_sound(0x60, 0x6e);
                 }
-                cur_avatar_status.unk1e = (cur_avatar_status.unkc0 - w->unk1e) * 5000 / (0xfff - w->unk1e);
+                cur_avatar_status.unk1e = (cur_avatar_status.unkc0 - w->normal_attack_end_phase) * 5000 / (0xfff - w->normal_attack_end_phase);
             } else {
                 cur_avatar_status.unk1e = 0;
             }
             arrow = cur_avatar_status.unkbc;
             if (arrow != NULL) {
-                rot.vx = cur_avatar_status.unk124.vx - w->unk3c;
-                rot.vy = cur_avatar_status.unk124.vy - w->unk3e;
-                rot.vz = cur_avatar_status.unk124.vz + w->unk40;
-                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0, w->unk3a, &v);
-                v.vx -= w->unk34;
-                v.vy += w->unk36;
-                v.vz -= w->unk38;
+                rot.vx = cur_avatar_status.unk124.vx - w->rotation_offset_x;
+                rot.vy = cur_avatar_status.unk124.vy - w->rotation_offset_y;
+                rot.vz = cur_avatar_status.unk124.vz + w->rotation_offset_z;
+                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0,
+                                        w->initial_vertex_index, &v);
+                v.vx -= w->position_offset_x;
+                v.vy += w->position_offset_y;
+                v.vz -= w->position_offset_z;
                 vector_rotate_yxz(&rot, &v, &a);
                 arrow->pos.vx = cur_avatar_status.pos.vx + a.vx;
                 arrow->pos.vz = cur_avatar_status.pos.vz + a.vz;
                 arrow->pos.vy = cur_avatar_status.pos.vy + a.vy + cur_avatar_status.unk16c + cur_avatar_status.unk170 - 1600;
-                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0, w->unk42, &v);
-                v.vx -= w->unk34;
-                v.vy += w->unk36;
-                v.vz -= w->unk38;
+                animation_sample_vertex(0x20, cur_avatar_status.unkca, cur_avatar_status.unkc0,
+                                        w->final_vertex_index, &v);
+                v.vx -= w->position_offset_x;
+                v.vy += w->position_offset_y;
+                v.vz -= w->position_offset_z;
                 vector_rotate_yxz(&rot, &v, &b);
                 vector_displacement_to_pitch_yaw(a.vx - b.vx, a.vy - b.vy, a.vz - b.vz, &arrow->angle);
             }
@@ -265,24 +267,24 @@ void player_update_weapon_attack(void)
 
             div = 0;
             if (cur_avatar_status.unkca == 0) {
-                speed = w->unk1c;
-                hit = w->unk1e;
-                limit = w->unk2c;
+                speed = w->attack_phase_step;
+                hit = w->normal_attack_end_phase;
+                limit = w->normal_attack_sound_phase;
                 add = 0;
             } else {
-                speed = w->unk24;
-                hit = w->unk28;
-                div = w->unk2a;
-                limit = w->unk30;
-                add = w->unk32;
+                speed = w->alternate_attack_phase_step;
+                hit = w->alternate_attack_end_phase;
+                div = w->magic_phase_step;
+                limit = w->alternate_attack_sound_end_phase;
+                add = w->alternate_attack_sound_phase_step;
             }
             cur_avatar_status.unkc0 += speed;
             if (cur_avatar_status.unkca == 0 && w->unk0[3] != 0xff && cur_avatar_status.unkcf != 0
                 && player_meets_weapon_magic_requirement(0)
                 && (cur_avatar_status.unk178 & action_button_masks[6])) {
-                if (cur_avatar_status.unkc0 >= w->unk20 && cur_avatar_status.unkc0 <= w->unk22) {
+                if (cur_avatar_status.unkc0 >= w->magic_window_start && cur_avatar_status.unkc0 <= w->magic_window_end) {
                     if (cur_avatar_status.unkce != 0) {
-                        player_dispatch_weapon_magic(w->unk0[3], cur_avatar_status.unkce == w->unk5,
+                        player_dispatch_weapon_magic(w->unk0[3], cur_avatar_status.unkce == w->magic_shots,
                                                      cur_avatar_status.unkce);
                         cur_avatar_status.unkce--;
                     }
@@ -315,8 +317,8 @@ void player_update_weapon_attack(void)
                         cur_avatar_status.unkc0 -= speed;
                         break;
                     }
-                    player_dispatch_weapon_magic(w->unk4, cur_avatar_status.unkc0 >= hit,
-                                                 (cur_avatar_status.unkc0 - w->unk26) / div);
+                    player_dispatch_weapon_magic(w->alternate_magic_id, cur_avatar_status.unkc0 >= hit,
+                                                 (cur_avatar_status.unkc0 - w->alternate_attack_window_start) / div);
                 }
                 if (cur_avatar_status.unkc0 >= hit) {
                     target = &from;
@@ -334,12 +336,12 @@ void player_update_weapon_attack(void)
                 }
                 v.vx = 0;
                 v.vy = 0;
-                v.vz = w->unk1a;
+                v.vz = w->attack_reach;
                 rot.vx = -cur_avatar_status.unk12c.vx;
                 rot.vy = cur_avatar_status.unk12c.vy;
                 rot.vz = 0;
                 vector_rotate_yxz(&rot, &v, &step);
-                step.vy = (3600 - w->unk1a) * step.vy / 1800;
+                step.vy = (3600 - w->attack_reach) * step.vy / 1800;
                 step.vx /= 4;
                 step.vy /= 4;
                 step.vz /= 4;
@@ -353,11 +355,13 @@ void player_update_weapon_attack(void)
                     found = actor_find_overlap_excluding_target_type3(probe.vx, probe.vy, probe.vz, 400, 600);
                     if (found != -1) {
                         obj = &actor_status.objects[found];
-                        def = &actor_status.defs[obj->unk2];
+                        def = &actor_status.groups[obj->group_index];
                         angle = vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
                                                    obj->pos.vz - cur_avatar_status.pos.vz);
-                        if (angle_within_tolerance(cur_avatar_status.unk124.vy, angle, def->unk16)
-                            && angle_within_tolerance(obj->angle.vy, angle + 2048, def->unk18)) {
+                        if (angle_within_tolerance(cur_avatar_status.unk124.vy, angle,
+                                                   def->player_facing_tolerance)
+                            && angle_within_tolerance(obj->angle.vy, angle + 2048,
+                                                      def->actor_facing_tolerance)) {
                             actor_apply_magic_to_actor(found, cur_avatar_status.unk40,
                                                        cur_avatar_status.unk54[0], cur_avatar_status.unk54[1],
                                                        cur_avatar_status.unk54[2], cur_avatar_status.unk54[3],

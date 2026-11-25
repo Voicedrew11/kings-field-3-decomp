@@ -72,7 +72,7 @@ s32 effect_move_probe(s32 scale, s32 max, s32 radius, s32 height, SVECTOR *accel
     return 0;
 }
 
-/* Homing: turns the current record toward an Object88 record (unk0 bit 6) or the player, then
+/* Homing: turns the current record toward an Actor record (unk0 bit 6) or the player, then
  * effect_move_probe. */
 ADDRESS(0x80055db0, 0x1c4)
 s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s32 range, s32 near_scale,
@@ -83,14 +83,14 @@ s32 effect_aim_and_move(s32 max, s32 scale, s32 turn, s32 radius, s32 height, s3
     SVECTOR dir;
     SVECTOR accel;
     s32 dist;
-    Object88 *found;
+    Actor *found;
 
     obj = effect_status.unk2f04;
     if (obj->unk0 & 0x40) {
         found = actor_find_best_in_cone(&obj->pos, obj->angle.vy, obj->angle.vx, 24000, cone, cone, &dist, 0);
         if (found != NULL) {
             target.vx = found->pos.vx;
-            target.vy = found->pos.vy - (found->unk1e >> 1);
+            target.vy = found->pos.vy - (found->collision_height >> 1);
             target.vz = found->pos.vz;
         aim:
             vector_displacement_to_pitch_yaw(target.vx - obj->pos.vx, target.vy - obj->pos.vy,
@@ -611,16 +611,16 @@ void effect_update_dispatch(void)
             VECTOR a;
             VECTOR c;
             VECTOR old;
-            Object88 *o;
+            Actor *o;
             VECTOR *b;
             VECTOR *pos;
 
             o = &actor_status.objects[obj->arg.s.unk44];
-            if (o->unk9 != 1) {
+            if (o->lifecycle != 1) {
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
-            if (o->unke != 0x19) {
+            if (o->target_type != 0x19) {
                 obj->unk0 = OBJECT4C_FREE;
                 break;
             }
@@ -640,7 +640,7 @@ void effect_update_dispatch(void)
             obj->vel.vy = obj->pos.vy - old.vy;
             obj->vel.vz = obj->pos.vz - old.vz;
             effect_spawn_motion(obj, -1, -700, obj->scale.vx, -300, 3, phase, 0);
-            if (o->unk18 < obj->arg.h.unk48) {
+            if (o->animation_phase < obj->arg.h.unk48) {
                 break;
             }
             effect_play_spatial_sound(obj, 0x33);
@@ -853,10 +853,10 @@ void effect_update_dispatch(void)
             if (obj->arg.s.unk44 >= 48) {
                 obj->scale.vy -= 440;
                 if (obj->arg.s.unk46 != -1) {
-                    Object88 *t;
+                    Actor *t;
 
                     t = &actor_status.objects[obj->arg.s.unk46];
-                    t->unk28 &= ~0x800;
+                    t->flags &= ~0x800;
                 }
             }
             if (obj->arg.s.unk44 >= 12 && obj->arg.s.unk44 < 48) {
@@ -1097,7 +1097,7 @@ void effect_update_dispatch(void)
             break;
     case 124:
         {
-            Object88 *o;
+            Actor *o;
             s32 n;
 
             obj->angle.vy += 400;
@@ -1556,7 +1556,7 @@ void effect_update_dispatch(void)
         {
             SVECTOR v;
             VECTOR p;
-            Object88 *o;
+            Actor *o;
 
             if (obj->arg.b.unk44 == 0xfe) {
                 p.vx = cur_avatar_status.pos.vx;
@@ -1568,7 +1568,7 @@ void effect_update_dispatch(void)
             } else {
                 o = &actor_status.objects[obj->arg.b.unk44];
                 p.vx = o->pos.vx;
-                p.vy = o->pos.vy - (o->unk1e >> 1);
+                p.vy = o->pos.vy - (o->collision_height >> 1);
                 p.vz = o->pos.vz;
                 hit = effect_target_motion(&p, 450, 60, 100, 0, 10, 0x80000000);
             }
@@ -1702,7 +1702,7 @@ void effect_update_dispatch(void)
                 SVECTOR dir;
                 VECTOR t;
                 VECTOR a;
-                Object88 *o;
+                Actor *o;
                 s32 dist;
 
                 obj->unk14 = (obj->unk14 + 128) & 0xfff;
@@ -1710,7 +1710,7 @@ void effect_update_dispatch(void)
                     effect_sample_world_vertex(obj, 0, &a, &obj->scale);
                     o = &actor_status.objects[obj->arg.b.unk44];
                     t.vx = o->pos.vx;
-                    t.vy = o->pos.vy - (o->unk1e >> 1);
+                    t.vy = o->pos.vy - (o->collision_height >> 1);
                     t.vz = o->pos.vz;
                     vector_direction_scaled(&a, &t, 800, &dir);
                     effect_construct_record(10, obj->unk0, 0, &a, &dir);
@@ -1743,7 +1743,7 @@ void effect_update_dispatch(void)
         break;
     case 16:
         {
-            Object88 *o;
+            Actor *o;
             Object4cTrail *trail;
             s32 a;
             VECTOR tmp;
@@ -1780,7 +1780,7 @@ void effect_update_dispatch(void)
                     effect_apply_current_magic(0x10010, 5000, NULL);
                     obj->arg.b.unk4a = map_world.unk12028;
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    if (o->unke != 2 && o->unke != 3) {
+                    if (o->target_type != 2 && o->target_type != 3) {
                         goto fail16;
                     }
                     obj->unk8 = 1;
@@ -1814,13 +1814,13 @@ void effect_update_dispatch(void)
                     u32 k;
 
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    o->unk28 |= 0x800;
-                    n = o->unk1c;
+                    o->flags |= 0x800;
+                    n = o->collision_radius;
                     if (++obj->arg.b.unk48 >= 24) {
                         obj->arg.b.unk48 = 0;
                     }
                     obj->pos = *actor_resolve_group_position(o, &tmp);
-                    obj->pos.vy -= o->unk1e >> 1;
+                    obj->pos.vy -= o->collision_height >> 1;
                     k = obj->arg.b.unk49;
                     if (k >= 17) {
                         if (k >= 60) {
@@ -1829,7 +1829,7 @@ void effect_update_dispatch(void)
                         }
                     } else {
                         obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
-                        obj->scale.vy = fixed_lerp_q12(0, o->unk1e, obj->arg.b.unk49 * 350);
+                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height, obj->arg.b.unk49 * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;
@@ -1869,7 +1869,7 @@ void effect_update_dispatch(void)
                     }
                 release16:
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    o->unk28 &= ~0x800;
+                    o->flags &= ~0x800;
                     obj->unk0 = OBJECT4C_FREE;
                 }
                 break;
@@ -1877,7 +1877,7 @@ void effect_update_dispatch(void)
             break;
     case 5:
         {
-            Object88 *o;
+            Actor *o;
             Object4cTrail *trail;
             s32 a;
             SVECTOR v;
@@ -1915,7 +1915,7 @@ void effect_update_dispatch(void)
                     effect_apply_current_magic(0x10010, 5000, NULL);
                     obj->arg.b.unk4a = map_world.unk12028;
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    if (o->unke != 2 && o->unke != 3) {
+                    if (o->target_type != 2 && o->target_type != 3) {
                         goto fail5;
                     }
                     obj->unk8 = 1;
@@ -1952,17 +1952,17 @@ void effect_update_dispatch(void)
                     u32 k;
 
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    o->unk28 |= 0x800;
+                    o->flags |= 0x800;
                     v.vx = rand() * 100 / 32767 - 50;
                     v.vy = -(rand() * 160 / 32767) - 200;
                     v.vz = rand() * 100 / 32767 - 50;
                     effect_construct_record(10, 0, 0x6f, &o->pos, &v, 0x1000, 0x200, 6, 0x1c, 2, 1, 2);
-                    n = o->unk1c;
+                    n = o->collision_radius;
                     if (++obj->arg.b.unk48 >= 24) {
                         obj->arg.b.unk48 = 0;
                     }
                     obj->pos = *actor_resolve_group_position(o, &tmp);
-                    obj->pos.vy -= o->unk1e >> 1;
+                    obj->pos.vy -= o->collision_height >> 1;
                     k = obj->arg.b.unk49;
                     if (k >= 17) {
                         if (k >= 60) {
@@ -1971,7 +1971,7 @@ void effect_update_dispatch(void)
                         }
                     } else {
                         obj->scale.vx = obj->scale.vz = fixed_lerp_q12(0, n, k << 9);
-                        obj->scale.vy = fixed_lerp_q12(0, o->unk1e, obj->arg.b.unk49 * 350);
+                        obj->scale.vy = fixed_lerp_q12(0, o->collision_height, obj->arg.b.unk49 * 350);
                     }
                     d = 100000 / n;
                     n = n * 6400 >> 12;
@@ -2006,7 +2006,7 @@ void effect_update_dispatch(void)
                     }
                 release5:
                     o = &actor_status.objects[obj->arg.b.unk4a];
-                    o->unk28 &= ~0x800;
+                    o->flags &= ~0x800;
                     obj->unk0 = OBJECT4C_FREE;
                 }
                 break;

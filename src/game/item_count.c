@@ -311,7 +311,7 @@ back:
 }
 
 /*
- * The action button at pos facing angle: the Object88 within reach in front
+ * The action button at pos facing angle: the Actor within reach in front
  * gets event_target_stream_execute, then each Object44 record
  * map_object_find_interaction_target finds in front acts by the type of its def
  * (doors and locks show why they stay shut or open, items are picked up, the
@@ -323,7 +323,7 @@ ADDRESS(0x8005e2d0, 0x794)
 void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
 {
     VECTOR p;
-    Object88 *o88;
+    Actor *o88;
     Object44 *obj;
     Object44Def *def;
     Object44 *link;

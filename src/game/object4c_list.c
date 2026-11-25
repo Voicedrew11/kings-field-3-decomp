@@ -1,6 +1,6 @@
 /*
  * GAME.EXE: Object4c record list (WIP module, after effect_update_dispatch): clearing
- * the records, loading the Record18 table and the per-frame update loop.
+ * the records, loading the MagicRecord table and the per-frame update loop.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -23,7 +23,7 @@ void effect_pool_reset(void)
     }
 }
 
-/* Copies the 96 Record18 records (0x900 bytes) from src. */
+/* Copies the 96 MagicRecord records (0x900 bytes) from src. */
 ADDRESS(0x8005bc24, 0x2c)
 void magic_load_records(u32 *src)
 {

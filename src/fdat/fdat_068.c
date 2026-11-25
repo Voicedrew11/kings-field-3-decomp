@@ -24,7 +24,7 @@ void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_set_flags(Object88 *record, s32 event);
+void area_talk_event_set_flags(Actor *record, s32 event);
 void area_on_load_restore_actor_and_door(void);
 
 const FdatHeader fdat_header = {
@@ -179,7 +179,7 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script events 0 and 1 of an object record set flags 0x2d and 0x2e. */
 ADDRESS(0x801e8644, 0x3c)
-void area_talk_event_set_flags(Object88 *record, s32 event)
+void area_talk_event_set_flags(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -196,12 +196,12 @@ ADDRESS(0x801e8680, 0x7c)
 void area_on_load_restore_actor_and_door(void)
 {
     if (cur_evt_state.unk32[0x2e] == 0) {
-        actor_status.objects[25].unk0 = 1;
+        actor_status.objects[25].slot_state = 1;
         map_objects_slots.objects[28].unk0 = 0;
         map_objects_slots.objects[28].arg.b.unk3c = 0;
         map_objects_slots.objects[95].arg.b.unk3d[1] = 0;
     } else {
-        actor_status.objects[25].unk0 = 8;
+        actor_status.objects[25].slot_state = 8;
         map_objects_slots.objects[28].unk0 = 2;
         map_objects_slots.objects[28].arg.b.unk3c = 0xff;
         map_objects_slots.objects[95].arg.b.unk3d[1] = 0xff;

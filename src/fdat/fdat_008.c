@@ -21,7 +21,7 @@ void area_interact_item_containers_and_dials(VECTOR *pos, SVECTOR *angle);
 void area_update_cell_toggles_by_worn_item(void);
 void area_use_item_offer_items_in_order(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_open_gate(Object88 *obj);
+void area_on_actor_removed_open_gate(Actor *obj);
 void area_region_trigger_lock_door_and_warp_cells(Object44 *obj);
 void area_init_map_object_dial(Object44 *obj, Object44Def *def);
 void area_update_map_object_dial(void);
@@ -30,7 +30,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_check_item_held(void);
 void area_on_movie_start_unlock_element(u8 id);
 void area_on_movie_end_raise_element_and_fade_objects(u8 id);
-void area_talk_event_request_item_or_give(Object88 *record, s32 event);
+void area_talk_event_request_item_or_give(Actor *record, s32 event);
 void area_on_load_restore_objects(void);
 
 const FdatHeader fdat_header = {
@@ -218,7 +218,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: record 4 sets flag 0x19 and starts object 82. */
 ADDRESS(0x801e882c, 0x60)
-void area_on_actor_removed_open_gate(Object88 *obj)
+void area_on_actor_removed_open_gate(Actor *obj)
 {
     if (obj - actor_status.objects == 4) {
         cur_evt_state.unke[0xb] = 1;
@@ -423,14 +423,14 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
     conversation_record_mark_page(12, 17);
     if (cur_evt_state.unke[8] == 0) {
         cur_evt_state.unke[8] = 1;
-        actor_status.objects[4].unk0 = 8;
+        actor_status.objects[4].slot_state = 8;
         map_objects_slots.objects[44].arg.b.unk38 = 0xff;
     }
 }
 
 /* Slot 4: script events 0..3 set the item flag 0x14 asks for next; 4 and 5 trigger objects. */
 ADDRESS(0x801e8e08, 0xac)
-void area_talk_event_request_item_or_give(Object88 *record, s32 event)
+void area_talk_event_request_item_or_give(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -466,7 +466,7 @@ void area_on_load_restore_objects(void)
         cur_evt_state.unke[8] = 1;
     }
     if (cur_evt_state.unke[8] != 0) {
-        actor_status.objects[4].unk0 = 8;
+        actor_status.objects[4].slot_state = 8;
         map_objects_slots.objects[44].arg.b.unk38 = 0xff;
     } else {
         k = 44;

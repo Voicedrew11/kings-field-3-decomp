@@ -1,5 +1,5 @@
 /*
- * GAME.EXE: an Object88's talk script (event_target_stream_execute), an Object44 spawn
+ * GAME.EXE: an Actor's talk script (event_target_stream_execute), an Object44 spawn
  * helper, the player's move to one of 14 start positions (areas loaded
  * through resource_request_transition) and the item use dispatcher (event_scene_command_dispatch) (WIP
  * module). The .rdata is player_warp_to_destination's local table initializer, then the
@@ -28,9 +28,9 @@ RODATA(0x800130f0, 0x1a4)
 
 /* Runs obj's talk script record (id 0x70) from its entry point up to the 0xff end, then its end action. */
 ADDRESS(0x8005c308, 0x4e0)
-void event_target_stream_execute(Object88 *obj)
+void event_target_stream_execute(Actor *obj)
 {
-    Object78 *def;
+    ActorGroup *def;
     u8 *script;
     u8 *p;
     s32 repeat;
@@ -39,18 +39,18 @@ void event_target_stream_execute(Object88 *obj)
     s32 n;
     u8 back;
 
-    def = &actor_status.defs[obj->unk2];
-    script = def->scripts[0];
+    def = &actor_status.groups[obj->group_index];
+    script = def->targets[0];
     if (script == NULL || script[0] != 0x70) {
         return;
     }
     posed = 0;
     repeat = 0;
     if (script[16] == 0) {
-        cur_evt_state.unkaa = obj->unk1;
+        cur_evt_state.unkaa = obj->definition_id;
     }
     p = event_target_stream_resolve_cursor(obj);
-    if (cur_evt_state.unkaa != obj->unk1 && script[19] == 1) {
+    if (cur_evt_state.unkaa != obj->definition_id && script[19] == 1) {
         while (*p++ != 0xf0)
             ;
         p++;
@@ -82,7 +82,7 @@ void event_target_stream_execute(Object88 *obj)
         case 0xf4:
             script[16]++;
             p++;
-            ((void (*)(Object88 *, u8))asset_status.handlers[4])(obj, *p);
+            ((void (*)(Actor *, u8))asset_status.handlers[4])(obj, *p);
             break;
         case 0xf5:
             script[16]++;
@@ -90,7 +90,7 @@ void event_target_stream_execute(Object88 *obj)
             repeat = *p;
             break;
         case 0xf6:
-            cur_evt_state.unkaa = obj->unk1;
+            cur_evt_state.unkaa = obj->definition_id;
             p++;
             script[19] = 0;
             script[16]++;
@@ -106,15 +106,16 @@ void event_target_stream_execute(Object88 *obj)
             goto end;
         default:
             if (!posed && script[1] != 0xff) {
-                anim = obj->unkc;
+                anim = obj->animation_id;
                 posed = 1;
-                if (obj->unk18 != 0) {
-                    actor_animation_seek_phase(obj, obj->unkc, obj->unk18, 0, obj->unk66);
+                if (obj->animation_phase != 0) {
+                    actor_animation_seek_phase(obj, obj->animation_id, obj->animation_phase, 0,
+                                               obj->animation_step);
                 }
                 actor_animation_seek_phase(obj, script[1], 0, 0xfff, *(u16 *)(script + 8));
             }
-            if (def->unk0 != 0x2b) {
-                conversation_record_mark_page(def->unk0, *p);
+            if (def->definition_id != 0x2b) {
+                conversation_record_mark_page(def->definition_id, *p);
             }
             render_game_frame(NULL, NULL);
             menu_show_transition_image(7, *(u16 *)(script + 12) + *p);
@@ -158,10 +159,10 @@ end:
         }
         break;
     }
-    cur_evt_state.unkaa = obj->unk1;
+    cur_evt_state.unkaa = obj->definition_id;
     if (posed && script[17] != 0xff) {
         actor_animation_seek_phase(obj, script[17], 0, 0xfff, *(u16 *)(script + 14));
-        obj->unkc = anim;
+        obj->animation_id = anim;
     }
     player_clear_motion();
     cur_evt_state.unk0 = 1;
@@ -262,12 +263,12 @@ ADDRESS(0x8005cbe0, 0xbdc)
 void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
 {
     VECTOR unused[2]; /* the frame keeps 32 unused bytes here */
-    Object88 *o88;
+    Actor *o88;
     Object44 *obj;
     Object44 *obj2;
-    Object88 *o88b;
+    Actor *o88b;
     Object44 *obj2b;
-    Object88 *target;
+    Actor *target;
     Object44 *made;
     s32 dist;
     s32 i;
@@ -365,37 +366,37 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     obj2 = &map_objects_slots.objects[0x5b];
                     i = 16;
                     o88 = &actor_status.objects[3];
-                    o88->unk9 = 0;
-                    o88->unk0 = 2;
-                    while (o88->unk9 == 0) {
+                    o88->lifecycle = 0;
+                    o88->slot_state = 2;
+                    while (o88->lifecycle == 0) {
                         actor_update_frame();
                         cd_request_service_vab();
                         cd_request_service_stream();
                         render_game_frame(NULL, NULL);
                     }
                     cd_request_wait_idle();
-                    o88->unk15 = -1;
+                    o88->render_depth_offset = -1;
                     obj2->unk10 = 0x400;
                     obj2->unk2 = 5;
-                    o88->unk16 = 0x1000;
-                    o88->unk13 = 5;
+                    o88->lighting_blend = 0x1000;
+                    o88->render_mode = 5;
                     while (--i != -1) {
-                        if (o88->unk15 > 100) {
-                            o88->unk15 -= 8;
+                        if (o88->render_depth_offset > 100) {
+                            o88->render_depth_offset -= 8;
                             obj2->scale.vx += 8;
                             obj2->scale.vz += 8;
                             obj2->unk10 += 256;
-                            o88->unk16 -= 256;
+                            o88->lighting_blend -= 256;
                         } else {
-                            o88->unk15 = 100;
+                            o88->render_depth_offset = 100;
                         }
                         cd_request_service_vab();
                         cd_request_service_stream();
                         render_game_frame(NULL, NULL);
                     }
-                    o88->unk16 = 0x800;
-                    o88->unk13 = 0;
-                    o88->unk0 = 1;
+                    o88->lighting_blend = 0x800;
+                    o88->render_mode = 0;
+                    o88->slot_state = 1;
                     obj2->unk6 = 0xff;
                     cur_evt_state.unke[0x19] = 1;
                     break;
@@ -404,41 +405,41 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
                     cur_evt_state.unk0 = 1;
                     game_counter_decrement(0x80);
                     o88b = &actor_status.objects[58];
-                    o88b->unk9 = 0;
-                    o88b->unk0 = 2;
+                    o88b->lifecycle = 0;
+                    o88b->slot_state = 2;
                     actor_select_target_type_in_own_group(o88b, 0x15);
                     obj2b = &map_objects_slots.objects[0x53];
                     i = 16;
-                    while (o88b->unk9 == 0) {
+                    while (o88b->lifecycle == 0) {
                         actor_update_frame();
-                        o88b->unk18 = 0;
+                        o88b->animation_phase = 0;
                         cd_request_service_vab();
                         cd_request_service_stream();
                         render_game_frame(NULL, NULL);
                     }
                     cd_request_wait_idle();
-                    o88b->unk15 = -1;
+                    o88b->render_depth_offset = -1;
                     obj2b->unk10 = 0x400;
                     obj2b->unk2 = 5;
-                    o88b->unk16 = 0x1000;
-                    o88b->unk13 = 5;
+                    o88b->lighting_blend = 0x1000;
+                    o88b->render_mode = 5;
                     while (--i != -1) {
-                        if (o88b->unk15 > 0) {
-                            o88b->unk15 -= 8;
+                        if (o88b->render_depth_offset > 0) {
+                            o88b->render_depth_offset -= 8;
                             obj2b->scale.vx += 8;
                             obj2b->scale.vz += 8;
                             obj2b->unk10 += 256;
-                            o88b->unk16 -= 256;
+                            o88b->lighting_blend -= 256;
                         } else {
-                            o88b->unk15 = 0;
+                            o88b->render_depth_offset = 0;
                         }
                         cd_request_service_vab();
                         cd_request_service_stream();
                         render_game_frame(NULL, NULL);
                     }
-                    o88b->unk16 = 0x800;
-                    o88b->unk13 = 0;
-                    o88b->unk0 = 1;
+                    o88b->lighting_blend = 0x800;
+                    o88b->render_mode = 0;
+                    o88b->slot_state = 1;
                     obj2b->unk6 = 0xff;
                     cur_evt_state.unk2c[0] = 1;
                     break;
@@ -610,8 +611,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             flag = 1;
         }
         target = actor_find_best_in_cone(pos, angle->vy, angle->vx, 8000, 500, 500, &dist, -1);
-        if (target != NULL && target->unk3 == flag) {
-            menu_show_transition_image(6, target->unk1 + 270);
+        if (target != NULL && target->layer_mask == flag) {
+            menu_show_transition_image(6, target->definition_id + 270);
             cur_evt_state.unk0 = 1;
         } else {
             n = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);

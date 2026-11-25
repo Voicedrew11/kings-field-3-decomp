@@ -27,7 +27,7 @@ void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_blacksmith(Object88 *obj, s32 event);
+void area_talk_event_blacksmith(Actor *obj, s32 event);
 void area_on_load_reset_blacksmith(void);
 
 const FdatHeader fdat_header = {
@@ -159,7 +159,7 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script events 0..2 of an object record. */
 ADDRESS(0x801e86c0, 0x100)
-void area_talk_event_blacksmith(Object88 *obj, s32 event)
+void area_talk_event_blacksmith(Actor *obj, s32 event)
 {
     s32 result;
 

@@ -20,10 +20,10 @@ void scene_position_from_camera_offset(s32 x, s32 y, s32 z, s32 pitch, s32 yaw, 
 void scene_pose_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, SVECTOR *afrom, SVECTOR *ato, s32 t);
 void scene_position_interpolate(Object44 *obj, VECTOR *from, VECTOR *to, s32 t);
 void scene_angles_interpolate(Object44 *obj, SVECTOR *afrom, SVECTOR *ato, s32 t);
-void actor_animation_seek_phase(Object88 *obj, u8 anim, u16 time, s32 target, u16 step);
+void actor_animation_seek_phase(Actor *obj, u8 anim, u16 time, s32 target, u16 step);
 u8 event_target_stream_find_marker(u8 *script, u8 id);
-void event_target_stream_execute(Object88 *obj);
-u8 *event_target_stream_resolve_cursor(Object88 *obj);
+void event_target_stream_execute(Actor *obj);
+u8 *event_target_stream_resolve_cursor(Actor *obj);
 void event_spawn_effect_object(Object44 *obj, s32 id);
 
 /* A start position of player_warp_to_destination's table: areas, map cell and height, yaw. */

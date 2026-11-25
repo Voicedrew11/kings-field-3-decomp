@@ -33,7 +33,7 @@ void func_801e88bc(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_set_flag(Object88 *obj, s32 event);
+void area_talk_event_set_flag(Actor *obj, s32 event);
 void area_on_load_store_area_index(void);
 
 const FdatHeader fdat_header = {
@@ -252,7 +252,7 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script event 0 of an object record sets flag 2. */
 ADDRESS(0x801e88dc, 0x18)
-void area_talk_event_set_flag(Object88 *obj, s32 event)
+void area_talk_event_set_flag(Actor *obj, s32 event)
 {
     if (event == 0) {
         cur_evt_state.unk2c[2] = 1;

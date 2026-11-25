@@ -21,7 +21,7 @@ void player_add_equipment_bonuses(s32 id);
 void player_recalculate_combat_stats(void);
 void player_learn_element_magic(u32 element);
 void player_increment_physical_power_training(void);
-void player_increment_magic_training(struct Record18 *spell);
+void player_increment_magic_training(struct MagicRecord *spell);
 void player_grow_weapon_with_experience(void);
 void player_add_experience(int amount);
 s32 player_calculate_damage_component(s32 power, s32 defense, s32 attack);
@@ -47,7 +47,7 @@ void player_set_secondary_item_shortcut_id(u8 id);
 void player_set_equipment_slot(u8 id, u8 slot);
 void player_equip_weapon(u8 id);
 void player_begin_weapon_attack(s32 hand);
-struct Object88 *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
+struct Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
 /* Pad bit per action (WIP), defined in player.c; [7] toggles a setting in
  * Data801b24e4.unk178 (menu_fade_transition). */
@@ -91,8 +91,8 @@ s16 status_phase_step_scaled(s16 *count, s16 *timer, s32 range, s32 scale);
 void player_adjust_hp(s32 amount);
 void player_adjust_hp_on_weapon_hit(s32 amount);
 void player_adjust_mp(s32 amount);
-void player_apply_equipment_hp_tick(struct Record20 *r);
-void player_apply_equipment_mp_tick(struct Record20 *r);
+void player_apply_equipment_hp_tick(struct EquipmentRecord *r);
+void player_apply_equipment_mp_tick(struct EquipmentRecord *r);
 void player_update_status_visuals(void);
 
 /* Callees outside the module (no definition reconstructed yet). */

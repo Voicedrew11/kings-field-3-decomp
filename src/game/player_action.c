@@ -535,7 +535,7 @@ void player_update_actions_and_charge(void)
     if (cur_avatar_status.unk10 == 0) {
         weight = 0;
         if (cur_avatar_status.unkac != NULL) {
-            weight = cur_avatar_status.unkac->unk1;
+            weight = cur_avatar_status.unkac->charge_rate;
             if (cur_avatar_status.unkf0 == 0x25) {
                 weight -= weight >> 2;
             }
@@ -562,8 +562,8 @@ void player_update_actions_and_charge(void)
     }
     mask = action_button_masks[7] | action_button_masks[4] | action_button_masks[6];
     if ((cur_avatar_status.unk178 & mask) && !(cur_avatar_status.unk17a & mask)) {
-        if (cur_avatar_status.unkb0->unk24 != 0 && player_meets_weapon_magic_requirement(1)
-            && cur_avatar_status.unkb0->unk4 != 0xff
+        if (cur_avatar_status.unkb0->alternate_attack_phase_step != 0 && player_meets_weapon_magic_requirement(1)
+            && cur_avatar_status.unkb0->alternate_magic_id != 0xff
             && (cur_avatar_status.unk178 & *cur_avatar_status.unka8)
             && (cur_avatar_status.unka8 != player_magic_attack_masks
                 || (cur_avatar_status.unk1e == 5000 && cur_avatar_status.unk22 == cur_avatar_status.unk1e))) {
@@ -829,23 +829,23 @@ void player_adjust_mp(s32 amount)
 }
 
 ADDRESS(0x80030cbc, 0xac)
-void player_apply_equipment_hp_tick(Record20 *r)
+void player_apply_equipment_hp_tick(EquipmentRecord *r)
 {
-    if (r->unk14 != 0 && cur_avatar_status.unk9c % r->unk14 == 0) {
+    if (r->hp_regen_interval != 0 && cur_avatar_status.unk9c % r->hp_regen_interval == 0) {
         player_adjust_hp(1);
     }
-    if (r->unk16 != 0 && cur_avatar_status.unk9c % r->unk16 == 0) {
+    if (r->hp_drain_interval != 0 && cur_avatar_status.unk9c % r->hp_drain_interval == 0) {
         player_adjust_hp(-1);
     }
 }
 
 ADDRESS(0x80030d68, 0xac)
-void player_apply_equipment_mp_tick(Record20 *r)
+void player_apply_equipment_mp_tick(EquipmentRecord *r)
 {
-    if (r->unk18 != 0 && cur_avatar_status.unk9c % r->unk18 == 0) {
+    if (r->mp_regen_interval != 0 && cur_avatar_status.unk9c % r->mp_regen_interval == 0) {
         player_adjust_mp(1);
     }
-    if (r->unk1a != 0 && cur_avatar_status.unk9c % r->unk1a == 0) {
+    if (r->mp_drain_interval != 0 && cur_avatar_status.unk9c % r->mp_drain_interval == 0) {
         player_adjust_mp(-1);
     }
 }

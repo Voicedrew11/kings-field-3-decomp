@@ -15,7 +15,7 @@ void area_handler_noop(void);
 void area_update_noop(void);
 void area_use_item_noop(void);
 void area_adjust_actor_magic_damage_noop(void);
-void area_on_actor_removed_show_object(Object88 *obj);
+void area_on_actor_removed_show_object(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -88,7 +88,7 @@ void area_adjust_actor_magic_damage_noop(void)
 
 /* Slot 19: object record 20 opens the way (sets the flag and object 85). */
 ADDRESS(0x801e85b8, 0x60)
-void area_on_actor_removed_show_object(Object88 *obj)
+void area_on_actor_removed_show_object(Actor *obj)
 {
     if (obj - actor_status.objects == 20) {
         cur_evt_state.unk32[0x27] = 1;
@@ -137,9 +137,9 @@ ADDRESS(0x801e8650, 0x74)
 void area_on_load_restore_actor_and_object(void)
 {
     if (cur_evt_state.unk32[0x2b] != 0) {
-        actor_status.objects[17].unk0 = 8;
+        actor_status.objects[17].slot_state = 8;
     } else {
-        actor_status.objects[17].unk0 = 1;
+        actor_status.objects[17].slot_state = 1;
     }
     if (cur_evt_state.unk32[0x27] != 0) {
         map_objects_slots.objects[85].arg.b.unk3f = 0xff;

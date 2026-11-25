@@ -96,8 +96,8 @@ s32 menu_choose_warp_destination(void);
 
 /* helpers past band E (call-site signatures) */
 s32 menu_choose_magic_action(void);
-s32 menu_collect_available_magic_rows(Record18 *spells, MenuEntry *entries, u32 *values, u8 *ids, s32 first,
-                                      s32 last);
+s32 menu_collect_available_magic_rows(MagicRecord *spells, MenuEntry *entries, u32 *values, u8 *ids,
+                                      s32 first, s32 last);
 void menu_equipment_list_controller(void);
 void menu_build_equipped_label_rows(MenuEntry *out);
 void menu_equipment_category_controller(s32 slot);

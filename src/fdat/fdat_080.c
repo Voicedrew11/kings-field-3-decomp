@@ -19,7 +19,7 @@ void area_handler_noop(void);
 void area_update_flag_on_element_stat(void);
 void area_use_item_noop(void);
 void area_refresh_lamp_effects_and_light(void);
-void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_light_lamps(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void area_on_actor_removed_noop(void);
 void area_region_trigger_set_flags_and_recalc_stats(Object44 *obj);
@@ -30,7 +30,7 @@ void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
 void area_on_movie_start_unlock_element(u8 id);
 void area_on_movie_end_raise_element_and_fade_objects(u8 id);
-void area_talk_event_signal_marker(Object88 *record, s32 event);
+void area_talk_event_signal_marker(Actor *record, s32 event);
 void area_on_load_restore_lamps_and_markers(void);
 
 const FdatHeader fdat_header = {
@@ -138,7 +138,7 @@ void area_refresh_lamp_effects_and_light(void)
 
 /* Slot 18: records 40..51 each light their lamp bit. */
 ADDRESS(0x801e8758, 0xf8)
-void area_adjust_actor_magic_damage_light_lamps(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_light_lamps(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
     s32 index = obj - actor_status.objects - 40;
@@ -280,7 +280,7 @@ void area_on_movie_end_raise_element_and_fade_objects(u8 id)
 
 /* Slot 4: script event 0 of an object record sets flag 0x32 once. */
 ADDRESS(0x801e8af0, 0x48)
-void area_talk_event_signal_marker(Object88 *record, s32 event)
+void area_talk_event_signal_marker(Actor *record, s32 event)
 {
     if (event == 0) {
         if (cur_evt_state.unk32[0x32] == 0) {

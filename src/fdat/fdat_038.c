@@ -17,9 +17,9 @@ void area_handler_noop(void);
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_noop(void);
 void area_use_item_noop(void);
-void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_element_kill(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void area_on_actor_removed_send_signals(Object88 *obj);
+void area_on_actor_removed_send_signals(Actor *obj);
 void area_region_trigger_noop(void);
 void area_init_map_object_noop(void);
 void area_update_map_object_noop(void);
@@ -139,14 +139,14 @@ void area_use_item_noop(void)
 
 /* Slot 18: records 50..52 report their unk1a while the last four arguments are 0. */
 ADDRESS(0x801e85e0, 0x8c)
-void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
+void area_adjust_actor_magic_damage_element_kill(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9)
 {
     s32 index = obj - actor_status.objects;
 
     if (index == 50 || index == 51 || index == 52) {
         if (arg6 == 0 && arg7 == 0 && arg8 == 0 && arg9 == 0) {
-            *out = obj->unk1a;
+            *out = obj->health;
         } else {
             *out = 0;
         }
@@ -155,7 +155,7 @@ void area_adjust_actor_magic_damage_element_kill(Object88 *obj, s32 *out, s32 ar
 
 /* Slot 19: records 50..52 each set their flag and start their object once. */
 ADDRESS(0x801e866c, 0xf0)
-void area_on_actor_removed_send_signals(Object88 *obj)
+void area_on_actor_removed_send_signals(Actor *obj)
 {
     s32 index = obj - actor_status.objects;
 

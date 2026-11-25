@@ -25,7 +25,7 @@ void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_set_flags(Object88 *record, s32 event);
+void area_talk_event_set_flags(Actor *record, s32 event);
 void area_on_load_restore_doors_and_barrier(void);
 
 const FdatHeader fdat_header = {
@@ -173,7 +173,7 @@ void area_region_trigger_damage_barrier_and_doors(Object44 *obj)
     switch (obj->arg.b.unk3a.bytes[1]) {
     case 0:
         if (cur_evt_state.unk32[6] == 1 && player_camera_within_map_region(0x36, 0xf, 10, 4, 0x8000) == 0) {
-            actor_status.objects[2].unk0 = 8;
+            actor_status.objects[2].slot_state = 8;
             map_objects_slots.objects[249].unk0 = 2;
             map_objects_slots.objects[249].arg.b.unk3c = 0xff;
             map_objects_slots.objects[262].arg.b.unk3d[1] = 0xff;
@@ -259,7 +259,7 @@ void area_on_item_added_noop(void)
 
 /* Slot 4: script events 0 and 1 of an object record set flags 0x37 and 0x38. */
 ADDRESS(0x801e8a90, 0x3c)
-void area_talk_event_set_flags(Object88 *record, s32 event)
+void area_talk_event_set_flags(Actor *record, s32 event)
 {
     switch (event) {
     case 0:
@@ -279,12 +279,12 @@ void area_on_load_restore_doors_and_barrier(void)
         cur_evt_state.unk32[4] = 1;
     }
     if (cur_evt_state.unk32[6] == 0) {
-        actor_status.objects[2].unk0 = 1;
+        actor_status.objects[2].slot_state = 1;
         map_objects_slots.objects[249].unk0 = 0;
         map_objects_slots.objects[249].arg.b.unk3c = 0;
         map_objects_slots.objects[262].arg.b.unk3d[1] = 0;
     } else {
-        actor_status.objects[2].unk0 = 8;
+        actor_status.objects[2].slot_state = 8;
         map_objects_slots.objects[249].unk0 = 2;
         map_objects_slots.objects[249].arg.b.unk3c = 0xff;
         map_objects_slots.objects[262].arg.b.unk3d[1] = 0xff;
