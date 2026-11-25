@@ -2358,7 +2358,7 @@ s32 func_800431e8(AnimSlot **owner, s32 id, s32 anim, s32 time, s32 count)
         slot->model = id;
         slot->owner = owner;
     retry:
-        if ((slot->pose = func_800194b0(count * 8)) == NULL) {
+        if ((slot->pose = (SVECTOR *)func_800194b0(count * 8)) == NULL) {
             func_800438e0();
             goto retry;
         }

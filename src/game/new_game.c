@@ -26,7 +26,7 @@ void func_8005ea64(void)
 
     func_80018fbc((u32 *)DAT_801ba984.unk4, 0, 0x40);
     func_80018fbc((u32 *)DAT_801ba984.unk104, 0, 0x1400);
-    func_8001937c(DAT_801ba984.unk104, 0x5000);
+    func_8001937c((void *)DAT_801ba984.unk104, 0x5000);
     off = DAT_801ba984.unk5104;
     for (i = 31; i != -1; i--) {
         *off++ = 0xffff;

@@ -374,7 +374,7 @@ static int draw_logo(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(1, 1, 640, 256);
     prim_next->clut = getClut(0, 481);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     setRGB0(prim_next, logo_level, logo_level, logo_level);
     setXYWH(prim_next, 64, 44, 256, 89);
     setUVWH(prim_next, 0, 0, 255, 89);
@@ -382,7 +382,7 @@ static int draw_logo(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(1, 1, 640, 256);
     prim_next->clut = getClut(0, 482);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     setRGB0(prim_next, logo_level, logo_level, logo_level);
     setXYWH(prim_next, 320, 44, 256, 89);
     setUVWH(prim_next, 0, 128, 255, 89);
@@ -416,7 +416,7 @@ static int draw_press_start(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(0, 1, 896, 0);
     prim_next->clut = getClut(0, 500);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     setRGB0(prim_next, press_level, press_level, press_level);
     setXYWH(prim_next, 124, 154, 255, 12);
     setUVWH(prim_next, 0, 0, 255, 12);
@@ -424,7 +424,7 @@ static int draw_press_start(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(0, 1, 896, 0);
     prim_next->clut = getClut(0, 500);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     setRGB0(prim_next, press_level, press_level, press_level);
     setXYWH(prim_next, 124, 168, 255, 12);
     setUVWH(prim_next, 0, 24, 255, 12);
@@ -432,7 +432,7 @@ static int draw_press_start(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(0, 1, 896, 0);
     prim_next->clut = getClut(0, 500);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     setRGB0(prim_next, press_level, press_level, press_level);
     setXYWH(prim_next, 380, 168, 144, 12);
     setUVWH(prim_next, 0, 40, 144, 12);
@@ -469,7 +469,7 @@ static int draw_menu(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(0, 1, 896, 0);
     prim_next->clut = getClut(0, 500);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     if (mode != 1) {
         setRGB0(prim_next, menu_level, menu_level, menu_level);
     } else {
@@ -481,7 +481,7 @@ static int draw_menu(int mode)
     begin_sprite();
     prim_next->tpage = GetTPage(0, 1, 896, 0);
     prim_next->clut = getClut(0, 500);
-    SetSemiTrans(prim_next, 1);
+    SetSemiTrans((void *)prim_next, 1);
     if (mode != 0) {
         setRGB0(prim_next, menu_level, menu_level, menu_level);
     } else {
@@ -537,7 +537,7 @@ static void add_sprite(int depth)
             c -= fade;
         setRGB0(prim_next, c, c, c);
     }
-    AddPrim(&cdb->ot[depth], prim_next);
+    AddPrim((void *)&cdb->ot[depth], (void *)prim_next);
     prim_next++;
 }
 
@@ -589,7 +589,7 @@ static int load_file(u_long *addr, char *name)
             CdControl(CdlPause, 0, 0);
             return 3;
         }
-        CdGetSector(addr, 512);
+        CdGetSector((void *)addr, 512);
         addr += 512;
     }
     CdControl(CdlSetloc, (u_char *)&start, 0);

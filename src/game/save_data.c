@@ -25,7 +25,7 @@ void func_8005f7bc(u8 *data)
     s32 i;
 
     /* Through the byte pointer: retail moves the area list unaligned (lwl/lwr). */
-    memcpy(data, DAT_8018fad4.area, sizeof(DAT_8018fad4.area));
+    memcpy((void *)data, (const void *)DAT_8018fad4.area, sizeof(DAT_8018fad4.area));
     save->pos = DAT_801b24e4.pos;
     save->unk56a4 = DAT_801b24e4.unk12c;
     save->play_minutes = DAT_801b24e4.play_minutes;
@@ -91,14 +91,14 @@ void func_8005f7bc(u8 *data)
         *p++ = r->unk0;
         r++;
     }
-    memcpy(save->unk5508, DAT_800c85e8, sizeof(save->unk5508));
-    memcpy(save->unk8, DAT_801ba984.unk4, sizeof(save->unk8));
-    memcpy(save->unk108, DAT_801ba984.unk104, sizeof(save->unk108));
-    memcpy(save->unk5108, DAT_801ba984.unk5104, sizeof(save->unk5108));
-    memcpy(save->unk5148, DAT_801983a8.unk1e0, sizeof(save->unk5148));
-    memcpy(save->unk571e, DAT_801b56cc, sizeof(save->unk571e));
-    memcpy(save->unk599e, DAT_80081780, sizeof(save->unk599e));
-    memcpy(save->unk5a34, DAT_80080718[0], sizeof(save->unk5a34));
+    memcpy((void *)save->unk5508, (const void *)DAT_800c85e8, sizeof(save->unk5508));
+    memcpy((void *)save->unk8, (const void *)DAT_801ba984.unk4, sizeof(save->unk8));
+    memcpy((void *)save->unk108, (const void *)DAT_801ba984.unk104, sizeof(save->unk108));
+    memcpy((void *)save->unk5108, (const void *)DAT_801ba984.unk5104, sizeof(save->unk5108));
+    memcpy((void *)save->unk5148, (const void *)DAT_801983a8.unk1e0, sizeof(save->unk5148));
+    memcpy((void *)save->unk571e, (const void *)DAT_801b56cc, sizeof(save->unk571e));
+    memcpy((void *)save->unk599e, (const void *)DAT_80081780, sizeof(save->unk599e));
+    memcpy((void *)save->unk5a34, (const void *)DAT_80080718[0], sizeof(save->unk5a34));
     save->unk5aca[0] = DAT_8009c22c;
     save->unk5aca[1] = DAT_8009c22d;
     save->unk5aca[2] = DAT_8009c22e;
@@ -116,7 +116,7 @@ void func_8005ffd0(u8 *data)
     s32 i;
 
     /* Through the byte pointer: retail moves the area list unaligned (lwl/lwr). */
-    memcpy(DAT_8018fad4.area, data, sizeof(DAT_8018fad4.area));
+    memcpy((void *)DAT_8018fad4.area, (const void *)data, sizeof(DAT_8018fad4.area));
     DAT_8018fad4.area[2] = DAT_8018fad4.area[1] = DAT_8018fad4.area[0];
     DAT_801b24e4.pos = save->pos;
     DAT_801b24e4.unk12c = save->unk56a4;
@@ -183,14 +183,14 @@ void func_8005ffd0(u8 *data)
         r->unk0 = *p++;
         r++;
     }
-    memcpy(DAT_800c85e8, save->unk5508, sizeof(save->unk5508));
-    memcpy(DAT_801ba984.unk4, save->unk8, sizeof(save->unk8));
-    memcpy(DAT_801ba984.unk104, save->unk108, sizeof(save->unk108));
-    memcpy(DAT_801ba984.unk5104, save->unk5108, sizeof(save->unk5108));
-    memcpy(DAT_801983a8.unk1e0, save->unk5148, sizeof(save->unk5148));
-    memcpy(DAT_801b56cc, save->unk571e, sizeof(save->unk571e));
-    memcpy(DAT_80081780, save->unk599e, sizeof(save->unk599e));
-    memcpy(DAT_80080718[0], save->unk5a34, sizeof(save->unk5a34));
+    memcpy((void *)DAT_800c85e8, (const void *)save->unk5508, sizeof(save->unk5508));
+    memcpy((void *)DAT_801ba984.unk4, (const void *)save->unk8, sizeof(save->unk8));
+    memcpy((void *)DAT_801ba984.unk104, (const void *)save->unk108, sizeof(save->unk108));
+    memcpy((void *)DAT_801ba984.unk5104, (const void *)save->unk5108, sizeof(save->unk5108));
+    memcpy((void *)DAT_801983a8.unk1e0, (const void *)save->unk5148, sizeof(save->unk5148));
+    memcpy((void *)DAT_801b56cc, (const void *)save->unk571e, sizeof(save->unk571e));
+    memcpy((void *)DAT_80081780, (const void *)save->unk599e, sizeof(save->unk599e));
+    memcpy((void *)DAT_80080718[0], (const void *)save->unk5a34, sizeof(save->unk5a34));
     DAT_8009c22c = save->unk5aca[0];
     DAT_8009c22d = save->unk5aca[1];
     DAT_8009c22e = save->unk5aca[2];

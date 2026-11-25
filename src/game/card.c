@@ -95,7 +95,7 @@ void func_80028034(void)
     StartCARD();
     ChangeClearPAD(0);
     _bu_init();
-    DAT_8009c3c8 = func_800194f0(CARD_FILE_SIZE);
+    DAT_8009c3c8 = (u8 *)func_800194f0(CARD_FILE_SIZE);
     if (DAT_8009c3c8 == NULL) {
         exit(1);
     }

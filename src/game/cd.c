@@ -374,7 +374,7 @@ ADDRESS(0x8001a0bc, 0x5c)
 u8 *func_8001a0bc(CdlFILE *file)
 {
     s32 bytes = (file->size + 2047) & ~2047;
-    u8 *buffer = func_800194f0(bytes);
+    u8 *buffer = (u8 *)func_800194f0(bytes);
 
     func_80019f60(&file->pos, buffer, bytes >> 11);
     return buffer;
@@ -421,7 +421,7 @@ u8 *func_8001a1e8(char *name)
         func_80019f58(0);
     }
     bytes = (file.size + 2047) & ~2047;
-    buffer = func_800194f0(bytes);
+    buffer = (u8 *)func_800194f0(bytes);
     func_80019f60(&file.pos, buffer, bytes >> 11);
     return buffer;
 }
@@ -466,7 +466,7 @@ void func_8001a34c(int index_in, char *name)
     f->extent.pos = file.pos;
     f->extent.size = file.size;
     func_8001a118(buffer, &f->extent, 0x800);
-    f->sectors = func_800194f0((*(u16 *)buffer + 1) * 2);
+    f->sectors = (u16 *)func_800194f0((*(u16 *)buffer + 1) * 2);
     func_80018f8c(f->sectors, (u16 *)buffer + 1, *(u16 *)buffer + 1);
 }
 

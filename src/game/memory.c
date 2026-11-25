@@ -175,7 +175,7 @@ void func_80019294(HeapBlock *arena)
 ADDRESS(0x8001937c, 0x20)
 void func_8001937c(void *arena, s32 size)
 {
-    HeapBlock *block = arena;
+    HeapBlock *block = (HeapBlock *)arena;
 
     block->state = HEAP_FREE;
     block->size = size - 16;

@@ -525,7 +525,7 @@ void func_8001b5c4(u8 item)
     }
     bytes = func_80019cc4(6, n, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
     func_80027d88(6, n);
     DAT_8009c230 = 1;
     do {
@@ -620,7 +620,7 @@ void func_8001babc(void)
     n = DAT_8018fad4.unk9 + 721;
     bytes = func_80019cc4(6, n, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
     func_80027d88(6, n);
     DAT_8009c230 = 1;
     do {
@@ -738,7 +738,7 @@ s32 func_8001c030(void)
     }
     bytes = func_80019cc4(6, 0x2f1, 0);
     DAT_8009c234 = (bytes + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = func_800194f0(bytes);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(bytes);
     func_80027d88(6, 0x2f1);
     DAT_8009c230 = 1;
     do {
@@ -1465,7 +1465,7 @@ s32 func_8001dbc4(s32 index, s32 book, u8 *out)
     s32 i;
     u16 page;
 
-    buffer = func_800194f0(func_80019cc4(8, entry, 0));
+    buffer = (u8 *)func_800194f0(func_80019cc4(8, entry, 0));
     func_8001a154(8, entry, buffer);
     func_80043b38(buffer);
     DrawSync(0);
@@ -1495,7 +1495,7 @@ void func_8001dcd0(s32 book, s32 page)
     ClearImage(&rect, 0, 0, 0);
     entry = func_80060a10(book, page);
     if (entry <= 0xf000) {
-        buffer = func_800194f0(func_80019cc4(8, entry, 0));
+        buffer = (u8 *)func_800194f0(func_80019cc4(8, entry, 0));
         func_8001a154(8, entry, buffer);
         func_80043b38(buffer);
         DrawSync(0);
@@ -4357,7 +4357,7 @@ void func_80024f88(MenuList *list, s32 mode, u8 item)
     saved = DAT_8009c230;
     size = func_80019cc4(6, entry, 0);
     DAT_8009c234 = (size + 2047) >> 11;
-    buffer = func_800194f0(size);
+    buffer = (u8 *)func_800194f0(size);
     DAT_8009c380 = buffer;
     func_80027d88(6, entry);
     DAT_8009c230 = 1;
@@ -5440,7 +5440,7 @@ void func_80027ac0(void)
     func_80027b5c();
     size = func_80019cc4(6, DAT_8009c23c, 0);
     DAT_8009c234 = (size + 2047) >> 11;
-    DAT_8009c380 = DAT_8009c37c = func_800194f0(size);
+    DAT_8009c380 = DAT_8009c37c = (u8 *)func_800194f0(size);
     DAT_8009c240 = func_80027d88(6, DAT_8009c23c);
     DAT_8009c230 = 1;
     DAT_8009c244 = DAT_8009c23c;
@@ -5475,10 +5475,10 @@ void func_80027bb4(void)
     DisableEvent(DAT_801c12e4.complete_event);
     DisableEvent(DAT_801c12e4.ready_event);
     CloseEvent(DAT_801c12e4.ready_event);
-    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, func_80027ea8);
+    DAT_801c12e4.ready_event = OpenEvent(HwCdRom, EvSpDR, EvMdINTR, (void (*)(void))func_80027ea8);
     EnableEvent(DAT_801c12e4.ready_event);
     EnableEvent(DAT_801c12e4.error_event);
-    CdReadyCallback(func_80027ea8);
+    CdReadyCallback((void (*)(void))func_80027ea8);
     ExitCriticalSection();
     VSync(4);
     VSync(4);

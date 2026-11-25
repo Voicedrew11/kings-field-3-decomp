@@ -134,10 +134,10 @@ int card_list_saves(struct DIRENTRY *dir, int *count)
         if (strncmp(dir->name, save_prefix, 12) == 0) {
             number[0] = dir->name[12];
             slot = atoi(number) - 1;
-            memcpy(&sorted[slot], dir, sizeof(*dir));
+            memcpy((void *)&sorted[slot], (const void *)dir, sizeof(*dir));
         }
     }
-    memcpy(top, sorted, sizeof(sorted));
+    memcpy((void *)top, (const void *)sorted, sizeof(sorted));
     return used > 0x1a000;
 }
 
