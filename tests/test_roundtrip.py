@@ -258,13 +258,13 @@ class OverlayAddressBookTests(unittest.TestCase):
         from scripts.kf.roundtrip import address_book
 
         book = address_book("FDAT_002.BIN")
-        self.assertEqual(book["func_801e83a8"], {0x801E83A8})
-        # The module calls GAME.EXE's func_80041eec in place.
-        self.assertEqual(book["func_80041eec"], {0x80041EEC})
+        self.assertEqual(book["area_handler_noop"], {0x801E83A8})
+        # The module calls GAME.EXE's notify_enqueue in place.
+        self.assertEqual(book["notify_enqueue"], {0x80041EEC})
         layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
         host = address_book("GAME.EXE")
         for name, addresses in book.items():
-            if name in host and name != "func_801e83a8":
+            if name in host and name != "area_handler_noop":
                 self.assertFalse(any(layout.contains(va) for va in addresses), name)
 
 

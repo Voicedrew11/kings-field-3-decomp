@@ -192,15 +192,15 @@ class OverlayHostSymbolTests(unittest.TestCase):
     def test_references_resolve_through_the_host_address_book(self):
         from scripts.kf.lnk import Symbol
 
-        self.assertEqual(self.resolve(Symbol('func_80041eec', None), Symbol('handler', 1, 0x10),
+        self.assertEqual(self.resolve(Symbol('notify_enqueue', None), Symbol('handler', 1, 0x10),
                                       Symbol('DAT_801ba984', None), Symbol('DAT_8009c21c', None)),
-                         {'func_80041eec': 0x80041EEC, 'DAT_801ba984': 0x801BA984,
+                         {'notify_enqueue': 0x80041EEC, 'DAT_801ba984': 0x801BA984,
                           'DAT_8009c21c': 0x8009C21C})
 
     def test_module_addresses_and_unknown_names_are_not_host_symbols(self):
         from scripts.kf.lnk import Symbol
 
-        for name in ('func_801e83a8', 'no_such_symbol'):
+        for name in ('area_handler_noop', 'no_such_symbol'):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 self.resolve(Symbol(name, None))
 
