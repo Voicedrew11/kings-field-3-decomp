@@ -87,8 +87,10 @@ void area_update_respawn_actor_out_of_view(void)
 
     if (cur_evt_state.unk32[0x23] == 1 && actor_status.objects[i].lifecycle != 1) {
         if (angle_within_tolerance(cur_avatar_status.camera_rotation.vy,
-                                   vector_xz_to_angle(actor_status.objects[i].pos.vx - cur_avatar_status.pos.vx,
-                                                      actor_status.objects[i].pos.vz - cur_avatar_status.pos.vz),
+                                   vector_xz_to_angle(actor_status.objects[i].pos.vx
+                                                      - cur_avatar_status.pos.vx,
+                                                      actor_status.objects[i].pos.vz
+                                                      - cur_avatar_status.pos.vz),
                                    600) == 0) {
             actor_status.objects[i].lifecycle = 0;
             actor_status.objects[i].slot_state = 2;

@@ -10,7 +10,8 @@
 #include <game/data.h>
 #include <game/misc.h>
 
-/* Builds the ConversationRecord records and an empty run of count slots for each, then marks slots 0-3 of id 0x20. */
+/* Builds the ConversationRecord records and an empty run of count slots for each, then marks slots 0-3 of id
+ * 0x20. */
 ADDRESS(0x80060800, 0xec)
 void conversation_records_initialize(void)
 {

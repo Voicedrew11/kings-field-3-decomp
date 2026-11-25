@@ -270,7 +270,8 @@ pressed:
                 }
                 break;
             case 0x94:
-                event_item_counters_table[0][0x94] = event_item_counters_table[0][0x94] < 95 ? event_item_counters_table[0][0x94] + 4 : 99;
+                event_item_counters_table[0][0x94] = event_item_counters_table[0][0x94] < 95
+                    ? event_item_counters_table[0][0x94] + 4 : 99;
                 break;
             }
             pad = 1;

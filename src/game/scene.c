@@ -53,7 +53,8 @@ void resource_initialize_game_assets(void)
 {
     u32 *p = (u32 *)resource_space;
 
-    asset_status.active_resource_ids[1] = asset_status.active_resource_ids[2] = asset_status.active_resource_ids[3] = AREA_KEEP;
+    asset_status.active_resource_ids[1] = asset_status.active_resource_ids[2] =
+        asset_status.active_resource_ids[3] = AREA_KEEP;
     asset_status.loading = 0;
     asset_status.step = 0;
     asset_status.active_resource_ids[0] = 0;
@@ -291,7 +292,8 @@ start:
 busy:
     if (((s16)asset_status.loading != 1 || asset_status.requested_resource_ids[0] == next0)
         && asset_status.requested_resource_ids[1] == next1 && asset_status.requested_resource_ids[2] == next2
-        && asset_status.requested_resource_ids[3] == next3 && asset_status.requested_resource_ids[4] == next4) {
+        && asset_status.requested_resource_ids[3] == next3
+        && asset_status.requested_resource_ids[4] == next4) {
         return;
     }
     if (asset_status.requested_resource_ids[0] == AREA_KEEP && asset_status.active_resource_ids[0] == want0) {
@@ -480,7 +482,8 @@ void resource_advance_transition(void)
             repeat_store_word((u32 *)map_visited_cells, 0, 200);
             if (asset_status.active_resource_ids[0] != asset_status.requested_resource_ids[0]
                 && asset_status.active_resource_ids[0] != AREA_RELOAD) {
-                for (j = asset_status.active_resource_ids[0] * 32 + 556; j < asset_status.active_resource_ids[0] * 32 + 588;
+                for (j = asset_status.active_resource_ids[0] * 32
+                     + 556; j < asset_status.active_resource_ids[0] * 32 + 588;
                      j++) {
                     block = scene_display_sys.models[j];
                     if (block != NULL && memory_block_kind(block) != 3) {
@@ -501,7 +504,8 @@ void resource_advance_transition(void)
             cd_map_stream_read(3, asset_status.requested_resource_ids[2]);
         }
         asset_status.tmd_object_limit_active = 0;
-        if (asset_status.requested_resource_ids[3] == AREA_KEEP && asset_status.requested_resource_ids[4] == AREA_KEEP) {
+        if (asset_status.requested_resource_ids[3] == AREA_KEEP
+            && asset_status.requested_resource_ids[4] == AREA_KEEP) {
         done:
             asset_status.area_records_loaded = 0;
             if (asset_status.requested_resource_ids[0] != AREA_KEEP) {

@@ -29,7 +29,8 @@ RODATA(0x80011ac0, 0x4c)
 
 /* The map cell outside the 0x28000 square map. */
 DATA(0x8008190c, 0xa, ".data")
-static MapCell collision_default_cell = { { { 0xff, 0x00, 0x00, 0x3f, 0x00 }, { 0xff, 0x00, 0x00, 0x3f, 0x00 } } };
+static MapCell collision_default_cell =
+    { { { 0xff, 0x00, 0x00, 0x3f, 0x00 }, { 0xff, 0x00, 0x00, 0x3f, 0x00 } } };
 
 /*
  * The player's frame: marks the map cell visited, reads the pad, steps the
@@ -98,8 +99,10 @@ void player_update_frame(void)
             cur_avatar_status.movement_speed_adjustment_q12 = 0;
         }
     }
-    cur_avatar_status.movement_step_limit += cur_avatar_status.movement_speed_adjustment_q12 * cur_avatar_status.movement_step_limit >> 12;
-    cur_avatar_status.turn_step_limit += cur_avatar_status.movement_speed_adjustment_q12 * cur_avatar_status.turn_step_limit >> 13;
+    cur_avatar_status.movement_step_limit += cur_avatar_status.movement_speed_adjustment_q12
+        * cur_avatar_status.movement_step_limit >> 12;
+    cur_avatar_status.turn_step_limit += cur_avatar_status.movement_speed_adjustment_q12
+        * cur_avatar_status.turn_step_limit >> 13;
     if (cur_avatar_status.paralysis_timer != 0) {
         cur_avatar_status.movement_step_limit = 0;
         cur_avatar_status.turn_step_limit = 0;
@@ -159,18 +162,24 @@ void player_update_frame(void)
             cur_avatar_status.pos.vy = fixed_lerp_q12(cur_avatar_status.pos.vy, rec->approach_y, t + 1);
         }
         if (rec->approach_angle_x != -1) {
-            cur_avatar_status.view_rotation_offset_x = angle_lerp_shortest_q12(0, rec->approach_angle_x, t + 1);
-            cur_avatar_status.camera_rotation_target.vx = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
+            cur_avatar_status.view_rotation_offset_x = angle_lerp_shortest_q12(0, rec->approach_angle_x, t
+                                                                               + 1);
+            cur_avatar_status.camera_rotation_target.vx =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
                                                                                   t + 1);
         }
         if (rec->approach_angle_y != -1) {
             cur_avatar_status.view_rotation_offset_y = 0;
-            cur_avatar_status.camera_rotation_target.vy = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
-                                                                                  rec->approach_angle_y, t + 1);
+            cur_avatar_status.camera_rotation_target.vy =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
+                                                                                  rec->approach_angle_y,
+                                        t + 1);
         }
         if (rec->approach_angle_z != -1) {
-            cur_avatar_status.view_rotation_offset_z = angle_lerp_shortest_q12(0, rec->approach_angle_z, t + 1);
-            cur_avatar_status.camera_rotation_target.vz = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
+            cur_avatar_status.view_rotation_offset_z = angle_lerp_shortest_q12(0, rec->approach_angle_z, t
+                                                                               + 1);
+            cur_avatar_status.camera_rotation_target.vz =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
                                                                                   t + 1);
         }
         if (0x7f - cur_avatar_status.reaction.movie.step * 4 < 0) {
@@ -214,17 +223,20 @@ void player_update_frame(void)
         }
         if (rec->return_angle_x != -1) {
             cur_avatar_status.view_rotation_offset_x = angle_lerp_shortest_q12(0, rec->return_angle_x, u);
-            cur_avatar_status.camera_rotation_target.vx = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
+            cur_avatar_status.camera_rotation_target.vx =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vx, 0,
                                                                                   u);
         }
         if (rec->return_angle_y != -1) {
             cur_avatar_status.view_rotation_offset_y = 0;
-            cur_avatar_status.camera_rotation_target.vy = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
+            cur_avatar_status.camera_rotation_target.vy =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vy,
                                                                                   rec->return_angle_y, u);
         }
         if (rec->return_angle_z != -1) {
             cur_avatar_status.view_rotation_offset_z = angle_lerp_shortest_q12(0, rec->return_angle_z, u);
-            cur_avatar_status.camera_rotation_target.vz = angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
+            cur_avatar_status.camera_rotation_target.vz =
+                angle_lerp_shortest_q12(cur_avatar_status.reaction.movie.start_rotation.vz, 0,
                                                                                   u);
         }
         if (cur_avatar_status.reaction.movie.step == 0 && cur_avatar_status.bgm_volume != 0
@@ -282,7 +294,8 @@ void player_update_frame(void)
         player_move_reaction_with_collision();
         player_update_reaction_rotation_offsets();
         /* reaction_rotation_offset_x and _y are tested as one word (lw). */
-        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0 && cur_avatar_status.reaction_rotation_offset_z == 0) {
+        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0
+            && cur_avatar_status.reaction_rotation_offset_z == 0) {
             player_reset_reaction_state();
         }
         player_update_vertical_motion();
@@ -290,7 +303,8 @@ void player_update_frame(void)
         break;
     case 0x12:
         player_update_reaction_rotation_offsets();
-        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0 && cur_avatar_status.reaction_rotation_offset_z == 0) {
+        if (*(s32 *)&cur_avatar_status.reaction_rotation_offset_x == 0
+            && cur_avatar_status.reaction_rotation_offset_z == 0) {
             player_reset_reaction_state();
         }
         player_handle_interaction_and_menu();
@@ -300,7 +314,8 @@ void player_update_frame(void)
         cur_avatar_status.reaction.damage.angular_vel.vx =
             angle_velocity_step(-1024, cur_avatar_status.reaction_rotation_offset_x,
                                 cur_avatar_status.reaction.damage.angular_vel.vx, 8, 4);
-        cur_avatar_status.reaction_rotation_offset_x += cur_avatar_status.reaction.damage.angular_vel.vx * 3 >> 1;
+        cur_avatar_status.reaction_rotation_offset_x += cur_avatar_status.reaction.damage.angular_vel.vx
+            * 3 >> 1;
         if (cur_avatar_status.camera_vertical_offset < 1500) {
             cur_avatar_status.camera_vertical_offset += 500;
         } else {
@@ -401,7 +416,8 @@ void player_update_frame(void)
         if (cur_avatar_status.equipped_weapon_record->mp_regen_interval != 0 && cur_avatar_status.equipment_effect_ticks % cur_avatar_status.equipped_weapon_record->mp_regen_interval == 0) {
             player_adjust_mp(1);
         }
-        if (cur_avatar_status.equipped_shield_id == 0x35 && scene_display_sys.unk15996 != 0 && cur_avatar_status.equipment_effect_ticks % 900 == 0) {
+        if (cur_avatar_status.equipped_shield_id == 0x35 && scene_display_sys.unk15996 != 0
+            && cur_avatar_status.equipment_effect_ticks % 900 == 0) {
             player_adjust_mp(1);
         }
     }
@@ -433,13 +449,15 @@ void player_update_frame(void)
         player_apply_equipment_hp_tick(cur_avatar_status.equipped_extra_record);
         player_apply_equipment_mp_tick(cur_avatar_status.equipped_extra_record);
     }
-    if (cur_avatar_status.equipped_weapon_id == 0x16 && cur_avatar_status.equipment_effect_ticks % 150 == 0 && (rand() >> 12) == 0) {
+    if (cur_avatar_status.equipped_weapon_id == 0x16 && cur_avatar_status.equipment_effect_ticks % 150 == 0
+        && (rand() >> 12) == 0) {
         cur_avatar_status.paralysis_timer = 200;
     }
     if (cur_avatar_status.equipped_shield_id == 0x3a) {
         light_interpolate_color_and_fog(10, 10, 10, 0xd05, 6000, 0x800);
     }
-    if ((cur_avatar_status.equipped_accessory_id == 0x52 || cur_avatar_status.equipped_extra_id == 0x52) && (rand() >> 7) == 0) {
+    if ((cur_avatar_status.equipped_accessory_id == 0x52 || cur_avatar_status.equipped_extra_id == 0x52)
+        && (rand() >> 7) == 0) {
         cur_avatar_status.poison_timer = 900;
     }
     cur_avatar_status.equipment_effect_ticks++;

@@ -228,7 +228,8 @@ void player_warp_to_destination(s32 n)
         resource_advance_transition();
     } while ((s16)asset_status.loading != 0);
     cur_avatar_status.reaction_mode = 0;
-    cur_avatar_status.view_rotation_offset_x = cur_avatar_status.view_rotation_offset_y = cur_avatar_status.view_rotation_offset_z = 0;
+    cur_avatar_status.view_rotation_offset_x = cur_avatar_status.view_rotation_offset_y =
+        cur_avatar_status.view_rotation_offset_z = 0;
     cur_avatar_status.camera_rotation = cur_avatar_status.camera_rotation_target;
     cur_avatar_status.pos.vx = (rec->x << 11) + 1024;
     z = rec->z << 11;
@@ -237,7 +238,8 @@ void player_warp_to_destination(s32 n)
     yaw = -rec->yaw;
     cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy = yaw;
     if (n == 13) {
-        cur_avatar_status.camera_rotation.vx = cur_avatar_status.camera_rotation_target.vx = cur_avatar_status.camera_rotation.vz =
+        cur_avatar_status.camera_rotation.vx = cur_avatar_status.camera_rotation_target.vx =
+            cur_avatar_status.camera_rotation.vz =
             cur_avatar_status.camera_rotation_target.vz = 0;
         cur_avatar_status.pos.vz = z + 2000;
     } else {
@@ -254,7 +256,8 @@ void player_warp_to_destination(s32 n)
         cur_evt_state.interaction_handled = 1;
         player_recalculate_combat_stats();
     }
-    cur_avatar_status.reaction_rotation_offset_x = cur_avatar_status.reaction_rotation_offset_y = cur_avatar_status.reaction_rotation_offset_z = 0;
+    cur_avatar_status.reaction_rotation_offset_x = cur_avatar_status.reaction_rotation_offset_y =
+        cur_avatar_status.reaction_rotation_offset_z = 0;
 }
 
 /* Uses item id at pos/angle (stat raises, objects near the player, start-position moves),
@@ -590,7 +593,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             break;
         }
         if ((s16)asset_status.loading == 1
-            && (asset_status.requested_resource_ids[0] == 25 || asset_status.requested_resource_ids[0] == 27)) {
+            && (asset_status.requested_resource_ids[0] == 25
+                || asset_status.requested_resource_ids[0] == 27)) {
             break;
         }
         player_warp_to_destination(k);
@@ -616,7 +620,8 @@ void event_scene_command_dispatch(VECTOR *pos, SVECTOR *angle, s32 id)
             cur_evt_state.interaction_handled = 1;
         } else {
             n = map_object_find_interaction_target(0, pos, 800, 1700, angle->vy, 512);
-            if (n != -1 && map_objects_slots.objects[n].layer_mask != 0 && n == 11 && asset_status.active_resource_ids[0] == 17) {
+            if (n != -1 && map_objects_slots.objects[n].layer_mask != 0 && n == 11
+                && asset_status.active_resource_ids[0] == 17) {
                 menu_show_transition_image(6, 305);
                 cur_evt_state.interaction_handled = 1;
             }

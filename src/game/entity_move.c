@@ -71,7 +71,8 @@ void actor_suspend_vertical_motion(void)
     actor_status.current->vertical_motion_state = 0x60;
 }
 
-/* Falls, lands and jumps the current record (vertical_motion_state 0, 0x10 falling, 0x20 rising, 0x30 jumping). */
+/* Falls, lands and jumps the current record (vertical_motion_state 0, 0x10 falling, 0x20 rising, 0x30
+ * jumping). */
 ADDRESS(0x8004e330, 0x3c8)
 void actor_update_vertical_motion(void)
 {
@@ -148,7 +149,8 @@ void actor_update_vertical_motion(void)
         s32 jump_y;
         s32 jump_hit;
 
-        jump_y = obj->ballistic_origin_y - obj->ballistic_launch_speed_y * obj->vel.vy + ((obj->ballistic_acceleration * obj->vel.vy * obj->vel.vy) >> 1);
+        jump_y = obj->ballistic_origin_y - obj->ballistic_launch_speed_y * obj->vel.vy
+            + ((obj->ballistic_acceleration * obj->vel.vy * obj->vel.vy) >> 1);
         jump_hit = collision_query_world(obj->pos.vx, jump_y, obj->pos.vz, obj->collision_radius,
                                          ACTOR_SHAPE(obj), actor_status.actor_collision_query_flags);
         if (jump_hit == 0) {

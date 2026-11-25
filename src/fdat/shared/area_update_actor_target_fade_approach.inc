@@ -58,7 +58,8 @@ void area_update_actor_target_fade_approach(void)
     range = ((u16 *)script)[10] * ((u16 *)script)[10];
     switch (obj->target_phase) {
     case 0:
-        obj->lighting_blend = obj->lighting_blend < 4095 ? obj->lighting_blend + FADE_APPROACH_BLEND_STEP : 0xfff;
+        obj->lighting_blend = obj->lighting_blend < 4095 ? obj->lighting_blend
+            + FADE_APPROACH_BLEND_STEP : 0xfff;
         actor_advance_animation_clamped(obj, ((u16 *)script)[4]);
         if (dist > 0x19000000) {
             obj->target_phase = 1;

@@ -769,7 +769,8 @@ void render_player_weapon(void)
 
 ADDRESS(0x8003e34c, 0xfb8)
 void render_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                        AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
+                        AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase,
+                        u8 lighting_override_index, s16 lighting_blend,
                         s32 render_mode, s32 render_depth_offset)
 {
     SVECTOR rel;
@@ -1036,7 +1037,8 @@ done:
 
 ADDRESS(0x8003f304, 0xda8)
 void render_distant_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, SVECTOR *scale,
-                                AnimSlot **animation_cache, MATRIX *view, u16 animation_id, u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
+                                AnimSlot **animation_cache, MATRIX *view, u16 animation_id,
+                                u16 animation_phase, u8 lighting_override_index, s16 lighting_blend,
                                 u8 render_mode, s32 render_depth_offset)
 {
     SVECTOR rel;
@@ -1318,7 +1320,8 @@ u16 map_object_asset_index(u16 id)
     if (id < 300) {
         return id + 256;
     }
-    if ((s16)asset_status.loading == 1 && asset_status.area_records_loaded == 1 && asset_status.requested_resource_ids[0] != 0xff) {
+    if ((s16)asset_status.loading == 1 && asset_status.area_records_loaded == 1
+        && asset_status.requested_resource_ids[0] != 0xff) {
         return id + (asset_status.requested_resource_ids[0] * 32 + 256);
     }
     return id + (asset_status.active_resource_ids[0] * 32 + 256);
@@ -1973,7 +1976,8 @@ void notification_update(void)
         scene_display_sys.message_level -= 20;
         if (scene_display_sys.message_level == 0) {
             message = notification_quads[0].visible = notification_quads[1].visible =
-                notification_quads[2].visible = notification_quads[3].visible = notification_quads[4].visible =
+                notification_quads[2].visible = notification_quads[3].visible =
+                    notification_quads[4].visible =
                     notification_quads[5].visible =
                         scene_display_sys.message_queue[scene_display_sys.message_tail];
             do {
@@ -1992,7 +1996,8 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
 {
     s32 i;
 
-    map_textured_primitive_color.b = map_textured_primitive_color.g = map_textured_primitive_color.r = cur_avatar_status.brightness;
+    map_textured_primitive_color.b = map_textured_primitive_color.g = map_textured_primitive_color.r =
+        cur_avatar_status.brightness;
     display_set_view_transform(pos, angle);
     vram_scroll_update();
     notification_update();
@@ -2016,7 +2021,8 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
                         hud_sprites[29].visible = (cur_avatar_status.vitals_display & 2) >> 1;
     i = cur_avatar_status.compass_display - 1;
     if (i >= 0) {
-        render_model_yaw_smoothing_accumulator += angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.view_rotation.vy);
+        render_model_yaw_smoothing_accumulator +=
+            angle_shortest_delta(render_model_rows[i].angle.vy, scene_display_sys.view_rotation.vy);
         if (render_model_yaw_smoothing_accumulator > 0) {
             render_model_yaw_smoothing_accumulator -= (render_model_yaw_smoothing_accumulator + 7) >> 3;
         } else if (render_model_yaw_smoothing_accumulator < 0) {
@@ -2024,7 +2030,8 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
         }
         render_model_rows[i == 0].angle.vy = render_model_rows[i].angle.vy =
             render_model_rows[i].angle.vy + (render_model_yaw_smoothing_accumulator >> 6);
-        render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx = scene_display_sys.view_rotation.vx;
+        render_model_rows[i == 0].angle.vx = render_model_rows[i].angle.vx =
+            scene_display_sys.view_rotation.vx;
     }
     if (cur_avatar_status.vitals_display == 1) {
         hud_sprites[4].width = hud_sprites[4].w = cur_avatar_status.hp * 48 / cur_avatar_status.hp_max;

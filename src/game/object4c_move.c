@@ -282,7 +282,8 @@ s32 effect_scatter_lower_bound(VECTOR *pos, s32 count, s32 spread, s32 a3, s32 a
     return 0;
 }
 
-/* Moves the current record one step, tests it (also half a step back when midpoint_collision_enabled), spins it. */
+/* Moves the current record one step, tests it (also half a step back when midpoint_collision_enabled), spins
+ * it. */
 ADDRESS(0x800566d4, 0x12c)
 s32 effect_collision_step(s32 radius, s32 height, s32 spin)
 {

@@ -63,7 +63,8 @@ typedef struct SaveData {
     u8 revealed_map_rects[32][20]; /* +0x571e: map_revealed_rects, the rooms seen */
     u8 item_guide_levels[150]; /* +0x599e: item_guide_level */
     u8 shop_stock[150];     /* +0x5a34: menu_shop_stock_pages[0], the first shop's stock */
-    u8 menu_list_cursors[4]; /* +0x5aca: the menu list cursors menu_item_list_cursor..menu_take_out_list_cursor */
+    u8 menu_list_cursors[4]; /* +0x5aca: the menu list cursors
+                              * menu_item_list_cursor..menu_take_out_list_cursor */
     u8 unk5ace[0x132];
 } SaveData;
 

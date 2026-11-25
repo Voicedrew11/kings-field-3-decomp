@@ -26,9 +26,12 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
     SVECTOR rot;
     s32 y;
 
-    rot.vx = cur_avatar_status.camera_rotation.vx - cur_avatar_status.equipped_weapon_record->rotation_offset_x;
-    rot.vy = cur_avatar_status.camera_rotation.vy - cur_avatar_status.equipped_weapon_record->rotation_offset_y;
-    rot.vz = cur_avatar_status.camera_rotation.vz + cur_avatar_status.equipped_weapon_record->rotation_offset_z;
+    rot.vx = cur_avatar_status.camera_rotation.vx
+        - cur_avatar_status.equipped_weapon_record->rotation_offset_x;
+    rot.vy = cur_avatar_status.camera_rotation.vy
+        - cur_avatar_status.equipped_weapon_record->rotation_offset_y;
+    rot.vz = cur_avatar_status.camera_rotation.vz
+        + cur_avatar_status.equipped_weapon_record->rotation_offset_z;
     animation_sample_vertex(0x20, cur_avatar_status.weapon_attack_mode, cur_avatar_status.weapon_attack_phase,
                             vertex, &v);
     v.vx -= cur_avatar_status.equipped_weapon_record->position_offset_x;
@@ -38,7 +41,8 @@ void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out)
     out->vx += cur_avatar_status.pos.vx;
     out->vz += cur_avatar_status.pos.vz;
     y = out->vy - 1600;
-    out->vy = y + (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset);
+    out->vy = y + (cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy
+                   + cur_avatar_status.landing_vertical_offset);
 }
 
 /*
@@ -225,7 +229,8 @@ void player_update_weapon_attack(void)
                 vector_rotate_yxz(&rot, &v, &a);
                 arrow->pos.vx = cur_avatar_status.pos.vx + a.vx;
                 arrow->pos.vz = cur_avatar_status.pos.vz + a.vz;
-                arrow->pos.vy = cur_avatar_status.pos.vy + a.vy + cur_avatar_status.camera_vertical_offset + cur_avatar_status.landing_vertical_offset - 1600;
+                arrow->pos.vy = cur_avatar_status.pos.vy + a.vy + cur_avatar_status.camera_vertical_offset
+                    + cur_avatar_status.landing_vertical_offset - 1600;
                 animation_sample_vertex(0x20, cur_avatar_status.weapon_attack_mode,
                                         cur_avatar_status.weapon_attack_phase, w->final_vertex_index, &v);
                 v.vx -= w->position_offset_x;
@@ -280,10 +285,12 @@ void player_update_weapon_attack(void)
                 add = w->alternate_attack_sound_phase_step;
             }
             cur_avatar_status.weapon_attack_phase += speed;
-            if (cur_avatar_status.weapon_attack_mode == 0 && w->unk0[3] != 0xff && cur_avatar_status.weapon_attack_fully_charged != 0
+            if (cur_avatar_status.weapon_attack_mode == 0 && w->unk0[3] != 0xff
+                && cur_avatar_status.weapon_attack_fully_charged != 0
                 && player_meets_weapon_magic_requirement(0)
                 && (cur_avatar_status.pad_buttons & action_button_masks[6])) {
-                if (cur_avatar_status.weapon_attack_phase >= w->magic_window_start && cur_avatar_status.weapon_attack_phase <= w->magic_window_end) {
+                if (cur_avatar_status.weapon_attack_phase >= w->magic_window_start
+                    && cur_avatar_status.weapon_attack_phase <= w->magic_window_end) {
                     if (cur_avatar_status.weapon_magic_shots_configured != 0) {
                         player_dispatch_weapon_magic(w->unk0[3], cur_avatar_status.weapon_magic_shots_configured == w->magic_shots,
                                                      cur_avatar_status.weapon_magic_shots_configured);
@@ -303,7 +310,8 @@ void player_update_weapon_attack(void)
                     cur_avatar_status.weapon_next_sound_phase = 5000;
                 }
             }
-            if (cur_avatar_status.weapon_attack_phase >= cur_avatar_status.weapon_attack_window && cur_avatar_status.weapon_attack_phase < cur_avatar_status.weapon_attack_window + speed) {
+            if (cur_avatar_status.weapon_attack_phase >= cur_avatar_status.weapon_attack_window
+                && cur_avatar_status.weapon_attack_phase < cur_avatar_status.weapon_attack_window + speed) {
                 if (cur_avatar_status.equipped_weapon_id == 0x21 && cur_avatar_status.magic_charge == 5000) {
                     cur_avatar_status.magic_origin_offset.vx = -200;
                     cur_avatar_status.magic_origin_offset.vy = 200;
@@ -313,14 +321,16 @@ void player_update_weapon_attack(void)
                 }
                 cur_avatar_status.weapon_guard_active = 0;
                 if (cur_avatar_status.weapon_attack_mode == 1) {
-                    if (cur_avatar_status.equipped_weapon_id == 13 && (cur_avatar_status.pad_buttons & action_button_masks[6])) {
+                    if (cur_avatar_status.equipped_weapon_id == 13
+                        && (cur_avatar_status.pad_buttons & action_button_masks[6])) {
                         cur_avatar_status.weapon_guard_active = 1;
                         cur_avatar_status.weapon_attack_phase -= speed;
                         break;
                     }
                     player_dispatch_weapon_magic(w->alternate_magic_id,
                                                  cur_avatar_status.weapon_attack_phase >= hit,
-                                                 (cur_avatar_status.weapon_attack_phase - w->alternate_attack_window_start) / div);
+                                                 (cur_avatar_status.weapon_attack_phase
+                                                  - w->alternate_attack_window_start) / div);
                 }
                 if (cur_avatar_status.weapon_attack_phase >= hit) {
                     target = &from;
@@ -395,7 +405,8 @@ void player_update_weapon_attack(void)
                 if (cur_avatar_status.equipped_arm_id == 0x46) {
                     weight >>= 1;
                 }
-                cur_avatar_status.attack_charge_current += player_charge_gain_for_rank(cur_avatar_status.physical_power, weight) * 2;
+                cur_avatar_status.attack_charge_current +=
+                    player_charge_gain_for_rank(cur_avatar_status.physical_power, weight) * 2;
                 if (cur_avatar_status.attack_charge_current > 5000) {
                     cur_avatar_status.attack_charge_current = 5000;
                 }

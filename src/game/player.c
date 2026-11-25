@@ -886,7 +886,8 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 status_flags, u16 el
         blow = 0;
         stab = 0;
     }
-    if (*(u32 *)&cur_avatar_status.equipped_head_id == 0x453b2f28 && cur_avatar_status.equipped_leg_id == 0x4e) {
+    if (*(u32 *)&cur_avatar_status.equipped_head_id == 0x453b2f28
+        && cur_avatar_status.equipped_leg_id == 0x4e) {
         slash = 0;
         blow = 0;
         stab = 0;
@@ -915,7 +916,8 @@ void player_apply_damage(u16 slash, u16 blow, u16 stab, u16 status_flags, u16 el
         element3 = 0;
         element4 = 0;
     }
-    if ((cur_avatar_status.equipped_accessory_id == 0x55 || cur_avatar_status.equipped_extra_id == 0x55) && rand() < 16384) {
+    if ((cur_avatar_status.equipped_accessory_id == 0x55 || cur_avatar_status.equipped_extra_id == 0x55)
+        && rand() < 16384) {
         element1 = 0;
         element0 = 0;
         element2 = 0;
@@ -1023,7 +1025,8 @@ void player_get_camera_pose(VECTOR *pos, SVECTOR *angle)
 {
     pos->vx = cur_avatar_status.pos.vx;
     pos->vz = cur_avatar_status.pos.vz;
-    pos->vy = cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy + cur_avatar_status.landing_vertical_offset - 1600;
+    pos->vy = cur_avatar_status.camera_vertical_offset + cur_avatar_status.pos.vy
+        + cur_avatar_status.landing_vertical_offset - 1600;
     angle->vx = cur_avatar_status.camera_rotation.vx;
     angle->vy = cur_avatar_status.camera_rotation.vy;
     angle->vz = cur_avatar_status.camera_rotation.vz;
@@ -1133,14 +1136,16 @@ void player_clear_motion(void)
     cur_avatar_status.movement_speed = 0;
     cur_avatar_status.forward_velocity = 0;
     cur_avatar_status.strafe_velocity = 0;
-    cur_avatar_status.pad_buttons &= action_button_masks[7] | action_button_masks[4] | action_button_masks[6] | action_button_masks[12];
+    cur_avatar_status.pad_buttons &= action_button_masks[7] | action_button_masks[4] | action_button_masks[6]
+        | action_button_masks[12];
 }
 
 ADDRESS(0x8002b760, 0xac)
 void player_sync_position_to_map(void)
 {
     cur_avatar_status.equipment_effect_ticks = 0;
-    cur_avatar_status.pos.vy = collision_sample_map_layer_height(cur_avatar_status.map_layer_offset == 0 ? 1 : 2,
+    cur_avatar_status.pos.vy = collision_sample_map_layer_height(cur_avatar_status.map_layer_offset == 0
+                                                                 ? 1 : 2,
                                                                  cur_avatar_status.pos.vx,
                                                                  cur_avatar_status.pos.vz, 800, 1700);
     player_update_collision_bounds();
@@ -1285,37 +1290,44 @@ void player_set_equipment_slot(u8 id, u8 slot)
         break;
     }
     if (cur_avatar_status.equipped_head_id != 0xff) {
-        cur_avatar_status.equipped_head_record = &map_world.equipment_records[cur_avatar_status.equipped_head_id];
+        cur_avatar_status.equipped_head_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_head_id];
     } else {
         cur_avatar_status.equipped_head_record = NULL;
     }
     if (cur_avatar_status.equipped_body_id != 0xff) {
-        cur_avatar_status.equipped_body_record = &map_world.equipment_records[cur_avatar_status.equipped_body_id];
+        cur_avatar_status.equipped_body_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_body_id];
     } else {
         cur_avatar_status.equipped_body_record = NULL;
     }
     if (cur_avatar_status.equipped_arm_id != 0xff) {
-        cur_avatar_status.equipped_arm_record = &map_world.equipment_records[cur_avatar_status.equipped_arm_id];
+        cur_avatar_status.equipped_arm_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_arm_id];
     } else {
         cur_avatar_status.equipped_arm_record = NULL;
     }
     if (cur_avatar_status.equipped_leg_id != 0xff) {
-        cur_avatar_status.equipped_leg_record = &map_world.equipment_records[cur_avatar_status.equipped_leg_id];
+        cur_avatar_status.equipped_leg_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_leg_id];
     } else {
         cur_avatar_status.equipped_leg_record = NULL;
     }
     if (cur_avatar_status.equipped_shield_id != 0xff) {
-        cur_avatar_status.equipped_shield_record = &map_world.equipment_records[cur_avatar_status.equipped_shield_id];
+        cur_avatar_status.equipped_shield_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_shield_id];
     } else {
         cur_avatar_status.equipped_shield_record = NULL;
     }
     if (cur_avatar_status.equipped_accessory_id != 0xff) {
-        cur_avatar_status.equipped_accessory_record = &map_world.equipment_records[cur_avatar_status.equipped_accessory_id];
+        cur_avatar_status.equipped_accessory_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_accessory_id];
     } else {
         cur_avatar_status.equipped_accessory_record = NULL;
     }
     if (cur_avatar_status.equipped_extra_id != 0xff) {
-        cur_avatar_status.equipped_extra_record = &map_world.equipment_records[cur_avatar_status.equipped_extra_id];
+        cur_avatar_status.equipped_extra_record =
+            &map_world.equipment_records[cur_avatar_status.equipped_extra_id];
     } else {
         cur_avatar_status.equipped_extra_record = NULL;
     }
@@ -1340,7 +1352,8 @@ void player_equip_weapon(u8 id)
         cd_archive_read(4, id + 98, cur_avatar_status.weapon_asset_buffer);
         asset_registry_set(0x20, cur_avatar_status.weapon_asset_buffer);
         if (effect[cur_avatar_status.equipped_weapon_id] != 0xff) {
-            audio_queue_vab_stream(2, sound_status.effects[effect[cur_avatar_status.equipped_weapon_id] + 96].bank + 47,
+            audio_queue_vab_stream(2, sound_status.effects[effect[cur_avatar_status.equipped_weapon_id]
+                                   + 96].bank + 47,
                                    2);
         }
     }
@@ -1388,16 +1401,22 @@ void player_begin_weapon_attack(s32 hand)
     cur_avatar_status.weapon_attack_mode = hand;
     cur_avatar_status.weapon_attack_phase = 0;
     if (hand == 0) {
-        cur_avatar_status.weapon_attack_window = cur_avatar_status.equipped_weapon_record->normal_attack_end_phase;
-        cur_avatar_status.weapon_next_sound_phase = cur_avatar_status.equipped_weapon_record->normal_attack_sound_phase;
+        cur_avatar_status.weapon_attack_window =
+            cur_avatar_status.equipped_weapon_record->normal_attack_end_phase;
+        cur_avatar_status.weapon_next_sound_phase =
+            cur_avatar_status.equipped_weapon_record->normal_attack_sound_phase;
     } else {
-        cur_avatar_status.weapon_attack_window = cur_avatar_status.equipped_weapon_record->alternate_attack_window_start;
-        cur_avatar_status.weapon_next_sound_phase = cur_avatar_status.equipped_weapon_record->alternate_attack_sound_start_phase;
+        cur_avatar_status.weapon_attack_window =
+            cur_avatar_status.equipped_weapon_record->alternate_attack_window_start;
+        cur_avatar_status.weapon_next_sound_phase =
+            cur_avatar_status.equipped_weapon_record->alternate_attack_sound_start_phase;
     }
     cur_avatar_status.attack_charge_committed = cur_avatar_status.attack_charge_current;
-    if (cur_avatar_status.attack_charge_current == 5000 && cur_avatar_status.magic_charge == cur_avatar_status.attack_charge_current) {
+    if (cur_avatar_status.attack_charge_current == 5000
+        && cur_avatar_status.magic_charge == cur_avatar_status.attack_charge_current) {
         cur_avatar_status.weapon_attack_fully_charged = 1;
-        cur_avatar_status.weapon_magic_shots_configured = cur_avatar_status.equipped_weapon_record->magic_shots;
+        cur_avatar_status.weapon_magic_shots_configured =
+            cur_avatar_status.equipped_weapon_record->magic_shots;
     } else {
         cur_avatar_status.weapon_attack_fully_charged = 0;
     }

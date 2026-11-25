@@ -802,7 +802,8 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
     shape &= 0xfffffff;
     if (map_world.collision_cell->layer[0].quarter_turns & 0xfc) {
         if (mask & 0x10) {
-            map_world.collision_actor_index = actor_find_overlap_excluding_target_type3(x, y, z, radius, shape);
+            map_world.collision_actor_index =
+                actor_find_overlap_excluding_target_type3(x, y, z, radius, shape);
             if (map_world.collision_actor_index != -1) {
                 hits |= 0x10;
             }

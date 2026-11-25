@@ -122,7 +122,8 @@ void card_payload_restore_game_state(u8 *data)
     /* Through the byte pointer: retail moves the area list unaligned (lwl/lwr). */
     memcpy((void *)asset_status.active_resource_ids, (const void *)data,
            sizeof(asset_status.active_resource_ids));
-    asset_status.active_resource_ids[2] = asset_status.active_resource_ids[1] = asset_status.active_resource_ids[0];
+    asset_status.active_resource_ids[2] = asset_status.active_resource_ids[1] =
+        asset_status.active_resource_ids[0];
     cur_avatar_status.pos = save->pos;
     cur_avatar_status.camera_rotation_target = save->camera_rotation_target;
     cur_avatar_status.play_minutes = save->play_minutes;

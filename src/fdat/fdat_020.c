@@ -301,8 +301,10 @@ void area_on_load_restore_actors_doors_and_light(void)
     MapObject *obj44;
     s32 i;
 
-    if (cur_avatar_status.base_physical_power >= 50 && cur_avatar_status.base_magic[0] >= 50 && cur_avatar_status.base_magic[1] >= 50 &&
-        cur_avatar_status.base_magic[2] >= 50 && cur_avatar_status.base_magic[3] >= 50 && cur_avatar_status.base_magic[4] >= 50) {
+    if (cur_avatar_status.base_physical_power >= 50 && cur_avatar_status.base_magic[0] >= 50
+        && cur_avatar_status.base_magic[1] >= 50 &&
+        cur_avatar_status.base_magic[2] >= 50 && cur_avatar_status.base_magic[3] >= 50
+        && cur_avatar_status.base_magic[4] >= 50) {
         cur_evt_state.unke[0x1c] = 1;
     }
     if (cur_evt_state.unke[0x19] == 0) {

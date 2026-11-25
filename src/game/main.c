@@ -58,7 +58,8 @@ void game_shutdown(void);
 ADDRESS(0x80014b48, 0x8c)
 int main(void)
 {
-    fdat_window_bounds[5] = ((fdat_window_bounds[4] - fdat_window_bounds[2] + 2047) & ~2047) + fdat_window_bounds[2];
+    fdat_window_bounds[5] = ((fdat_window_bounds[4] - fdat_window_bounds[2] + 2047) & ~2047)
+        + fdat_window_bounds[2];
     InitHeap((unsigned long *)fdat_window_bounds[5], HEAP_END - fdat_window_bounds[5]);
     CdInit();
     PadInit(0);

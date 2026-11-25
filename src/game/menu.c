@@ -374,12 +374,15 @@ s32 menu_collect_available_item_rows(u8 *bag, MenuGlyphRow *entries, u8 *counts,
     for (i = first; i < last; count++, i++, src++) {
         if (*count != 0) {
             *counts = *count;
-            if (i == cur_avatar_status.equipped_weapon_id || i == cur_avatar_status.equipped_head_id || i == cur_avatar_status.equipped_body_id
+            if (i == cur_avatar_status.equipped_weapon_id || i == cur_avatar_status.equipped_head_id
+                || i == cur_avatar_status.equipped_body_id
                 || i == cur_avatar_status.equipped_shield_id || i == cur_avatar_status.equipped_arm_id
                 || i == cur_avatar_status.equipped_leg_id || i == cur_avatar_status.equipped_accessory_id
-                || i == cur_avatar_status.equipped_extra_id || i == cur_avatar_status.secondary_item_shortcut_id) {
+                || i == cur_avatar_status.equipped_extra_id
+                || i == cur_avatar_status.secondary_item_shortcut_id) {
                 (*counts)--;
-                if (i == cur_avatar_status.equipped_accessory_id && i == cur_avatar_status.equipped_extra_id) {
+                if (i == cur_avatar_status.equipped_accessory_id
+                    && i == cur_avatar_status.equipped_extra_id) {
                     (*counts)--;
                 }
             }
@@ -1257,7 +1260,8 @@ void menu_item_magic_controller(void)
     list.entries = entries;
     list.counts = counts;
     list.values = values;
-    if (cur_avatar_status.secondary_magic_shortcut_id != 0xff || cur_avatar_status.secondary_item_shortcut_id != 0xff) {
+    if (cur_avatar_status.secondary_magic_shortcut_id != 0xff
+        || cur_avatar_status.secondary_item_shortcut_id != 0xff) {
         for (i = 0; i < 88; i++) {
             if (cur_avatar_status.secondary_magic_shortcut_id == 0xff) {
                 if (ids[i] == cur_avatar_status.secondary_item_shortcut_id) {
@@ -1597,7 +1601,8 @@ void menu_storage_store_controller(void)
         menu_store_list_cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[1][item] + menu_item_quantity >= 100) {
+            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[1][item]
+                + menu_item_quantity >= 100) {
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
             } else {
@@ -1667,7 +1672,8 @@ void menu_storage_take_out_controller(void)
         menu_take_out_list_cursor = list.cursor;
         item = ids[list.cursor];
         if (confirmed == 1) {
-            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[0][item] + menu_item_quantity >= 100) {
+            if (counts[list.cursor] < menu_item_quantity || event_item_counters_table[0][item]
+                + menu_item_quantity >= 100) {
                 menu_play_sound_cue(0xe);
                 confirmed = 0;
             } else {
@@ -5176,7 +5182,8 @@ void menu_enter_display_state(void)
     scene_display_sys.draw[1].dfe = 0;
     menu_saved_primitive_buffer_0 = scene_display_sys.pools[0];
     menu_saved_primitive_buffer_1 = scene_display_sys.pools[1];
-    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base
+        + 0x7400;
     menu_frame_upload_pixels = scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x7400;
     if (scene_display_sys.frame == 1) {
         menu_frame_upload_rect.x = 0;

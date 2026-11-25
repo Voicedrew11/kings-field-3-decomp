@@ -74,7 +74,8 @@ void movie_play_stream(void)
         }
     }
     DrawSync(0);
-    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x7400;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base
+        + 0x7400;
     scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x7400;
     if ((p = scene_display_sys.models[0x629]) == NULL) {
         if ((p = memory_arena_allocate_block((HeapBlock *)resource_space, 0x10000,
@@ -168,7 +169,8 @@ void movie_play_stream(void)
     memory_block_set_kind(scene_display_sys.models[0x629], 1);
     memory_block_set_kind(scene_display_sys.models[0x62a], 1);
     memory_block_set_kind(scene_display_sys.models[0x62b], 1);
-    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base + 0x1a000;
+    scene_display_sys.pools[1].base = scene_display_sys.pools[0].end = scene_display_sys.pools[0].base
+        + 0x1a000;
     scene_display_sys.pools[1].end = scene_display_sys.pools[1].base + 0x1a000;
 }
 

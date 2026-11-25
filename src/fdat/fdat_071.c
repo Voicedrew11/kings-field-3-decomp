@@ -101,7 +101,8 @@ void area_interact_item_containers(VECTOR *pos, SVECTOR *angle)
                         notify_enqueue(0x20);
                     } else if (obj->object_id == 0xf5) {
                         notify_enqueue(0xe);
-                    } else if (obj->object_id == 0xba || obj->object_id == 0x142 || obj->object_id == 0x143 || obj->object_id == 0x144) {
+                    } else if (obj->object_id == 0xba || obj->object_id == 0x142 || obj->object_id == 0x143
+                               || obj->object_id == 0x144) {
                         notify_enqueue(0x22);
                     } else if (obj->object_id >= 190 && obj->object_id < 198) {
                         notify_enqueue(8);

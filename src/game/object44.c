@@ -40,7 +40,8 @@ void map_object_pool_reset(void)
         obj->arg.w.animation_cache = obj->arg.w.unk38 = obj->arg.w.unk3c = 0;
         obj++;
     }
-    map_objects_slots.scatter_pool_sequence = map_objects_slots.definition_drop_sequence = map_objects_slots.placement_drop_sequence = 0;
+    map_objects_slots.scatter_pool_sequence = map_objects_slots.definition_drop_sequence =
+        map_objects_slots.placement_drop_sequence = 0;
 }
 
 /* Resets a record's state, angle and scale. */
@@ -406,7 +407,8 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
             obj->layer_mask = 2;
             obj->action = 0x54;
             map_cell_apply_rotated_pattern(obj->arg.b.unk40, obj->pos.vx, obj->pos.vz, obj->angle.vy,
-                                           map_object_cell_patterns[def->arg.b.unke * 2 + (obj->arg.b.unk3d[1] & 1)], 0,
+                                           map_object_cell_patterns[def->arg.b.unke * 2
+                                           + (obj->arg.b.unk3d[1] & 1)], 0,
                                            0);
             obj->scale.vx = obj->scale.vy = obj->scale.vz = 0;
             break;

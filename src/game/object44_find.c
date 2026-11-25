@@ -950,8 +950,10 @@ void map_object_update_actions(void)
                                                          obj->arg.h.base_yaw, 900)) {
                         if ((other != NULL &&
                              angle_within_tolerance(map_object_door1b_view_yaw,
-                                                    vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
-                                                                       other->pos.vz - cur_avatar_status.pos.vz),
+                                                    vector_xz_to_angle(other->pos.vx
+                                                                       - cur_avatar_status.pos.vx,
+                                                                       other->pos.vz
+                                                                       - cur_avatar_status.pos.vz),
                                                     0x400)) ||
                             angle_within_tolerance(cur_avatar_status.camera_rotation.vy,
                                                    vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
@@ -1087,8 +1089,10 @@ void map_object_update_actions(void)
                                                          obj->arg.h.base_yaw, 900)) {
                         if ((other != NULL &&
                              angle_within_tolerance(map_object_door0_view_yaw,
-                                                    vector_xz_to_angle(other->pos.vx - cur_avatar_status.pos.vx,
-                                                                       other->pos.vz - cur_avatar_status.pos.vz),
+                                                    vector_xz_to_angle(other->pos.vx
+                                                                       - cur_avatar_status.pos.vx,
+                                                                       other->pos.vz
+                                                                       - cur_avatar_status.pos.vz),
                                                     0x400)) ||
                             angle_within_tolerance(cur_avatar_status.camera_rotation.vy,
                                                    vector_xz_to_angle(obj->pos.vx - cur_avatar_status.pos.vx,
@@ -1727,7 +1731,8 @@ void map_object_update_actions(void)
                             break;
                         }
                     }
-                    if (obj->animation_phase >= 2048 && obj->animation_phase < speed + 2048 && obj->arg.b.unk3a.bytes[1] == 0xff &&
+                    if (obj->animation_phase >= 2048 && obj->animation_phase < speed + 2048
+                        && obj->arg.b.unk3a.bytes[1] == 0xff &&
                         def->arg.b.collision_sound_id != 0xff) {
                         map_object_play_spatial_sound(obj, def->arg.b.collision_sound_id + 496);
                     }
@@ -2205,8 +2210,10 @@ void map_object_update_actions(void)
                     cur_avatar_status.map_layer_offset = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
                     cur_avatar_status.camera_rotation_target.vy = -(obj->arg.b.unk3f << 4);
                     player_sync_position_to_map();
-                    cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy + cur_avatar_status.reaction_rotation_offset_y +
-                                             cur_avatar_status.view_rotation_offset_y + cur_avatar_status.camera_yaw_offset;
+                    cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy
+                        + cur_avatar_status.reaction_rotation_offset_y +
+                                             cur_avatar_status.view_rotation_offset_y
+                                                 + cur_avatar_status.camera_yaw_offset;
                     render_frames_with_color_overlay(0x82, 0x1000, 0x1000, 0);
                     cd_request_wait_idle();
                     render_frames_with_color_overlay(0x82, 0x1000, 0, -128);
@@ -2273,7 +2280,8 @@ void map_object_update_actions(void)
                         cur_avatar_status.pos.vx = (x << 11) + 1024;
                         cur_avatar_status.pos.vz = (z << 11) + 1024;
                         cur_avatar_status.pos.vy = -(y << 7);
-                        cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy = -(yaw << 4);
+                        cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy =
+                            -(yaw << 4);
                         render_frames_with_color_overlay(1, 0x1000, 0x1000, 0);
                         cd_request_wait_idle();
                         render_frames_with_color_overlay(1, 0x1000, 0, -256);
@@ -2335,8 +2343,10 @@ void map_object_update_actions(void)
                     cur_avatar_status.map_layer_offset = obj->arg.b.unk3d[1] != 1 ? 5 : 0;
                     cur_avatar_status.camera_rotation_target.vy = -(obj->arg.b.unk3f << 4);
                     player_sync_position_to_map();
-                    cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy + cur_avatar_status.reaction_rotation_offset_y +
-                                             cur_avatar_status.view_rotation_offset_y + cur_avatar_status.camera_yaw_offset;
+                    cur_avatar_status.camera_rotation.vy = cur_avatar_status.camera_rotation_target.vy
+                        + cur_avatar_status.reaction_rotation_offset_y +
+                                             cur_avatar_status.view_rotation_offset_y
+                                                 + cur_avatar_status.camera_yaw_offset;
                     render_zoom_screen_transition(&c.r, 320, 240, -1);
                 }
             } else if (obj->arg.b.unk40 != 0xff) {

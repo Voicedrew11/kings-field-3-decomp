@@ -93,7 +93,8 @@ void player_select_magic_action(s32 id)
         player_increment_magic_training(r);
         return;
     case 30:
-        if (cur_avatar_status.hp == cur_avatar_status.hp_max && cur_avatar_status.curse_strength == 0 && cur_avatar_status.darkness_phase == 0
+        if (cur_avatar_status.hp == cur_avatar_status.hp_max && cur_avatar_status.curse_strength == 0
+            && cur_avatar_status.darkness_phase == 0
             && cur_avatar_status.slow_timer == 0 && cur_avatar_status.paralysis_timer == 0) {
             return;
         }
@@ -293,7 +294,8 @@ retry:
     }
     blocked = 0;
     if (!(hit & ~0x207)) {
-        if (map_world.collision_floor_height + 1280 >= cur_avatar_status.pos.vy && cur_avatar_status.reaction_mode == 0
+        if (map_world.collision_floor_height + 1280 >= cur_avatar_status.pos.vy
+            && cur_avatar_status.reaction_mode == 0
             && map_world.collision_height_limit - map_world.collision_floor_height < -1700) {
             goto free;
         }

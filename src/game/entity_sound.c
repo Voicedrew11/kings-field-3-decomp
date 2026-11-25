@@ -195,10 +195,12 @@ void actor_dispatch_group_effect(s32 kind, s32 damage_multiplier_tenths, s32 ver
         effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir);
         break;
     case 7:
-        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, 0x1000, 0x100, 0x1000, 1);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, 0x1000, 0x100,
+                                0x1000, 1);
         break;
     case 0x55:
-        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, NULL, actor_status.current_index, vertex,
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, NULL,
+                                actor_status.current_index, vertex,
                                 SCRIPT_U16((u8 *)args[1], 4));
         break;
     case 0x28:
@@ -235,7 +237,8 @@ void actor_dispatch_group_effect(s32 kind, s32 damage_multiplier_tenths, s32 ver
         } else {
             vector3s_scale_shift12(20, &dir);
         }
-        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &obj->angle, 600, 60, 0x80, 0x8c, 0xa0);
+        effect_construct_record((u8)damage_multiplier_tenths, 0x83, (u8)kind, &pos, &dir, &obj->angle, 600,
+                                60, 0x80, 0x8c, 0xa0);
         break;
     case 0x76:
         n = SCRIPT_U16((u8 *)args[1], 4);

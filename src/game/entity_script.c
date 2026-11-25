@@ -160,7 +160,8 @@ void actor_update_lifecycle_for_player_range(void)
                 return;
             }
         } else {
-            if (dist < def->activation_range_cells << 11 && cur_avatar_status.force_actor_lifecycle_refresh == 0) {
+            if (dist < def->activation_range_cells << 11
+                && cur_avatar_status.force_actor_lifecycle_refresh == 0) {
                 goto wake;
             }
             if (kind != 1) {
@@ -384,8 +385,10 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
             player_adjust_hp_on_weapon_hit((rand() * 9 >> 15) + 1);
             break;
         case 0x20:
-            if (obj->definition_id == 59 || obj->definition_id == 60 || obj->definition_id == 61 || obj->definition_id == 63 || obj->definition_id == 66 ||
-                obj->definition_id == 67 || obj->definition_id == 79 || obj->definition_id == 88 || obj->definition_id == 89 || obj->definition_id == 91) {
+            if (obj->definition_id == 59 || obj->definition_id == 60 || obj->definition_id == 61
+                || obj->definition_id == 63 || obj->definition_id == 66 ||
+                obj->definition_id == 67 || obj->definition_id == 79 || obj->definition_id == 88
+                || obj->definition_id == 89 || obj->definition_id == 91) {
                 if (obj->health != 0) {
                     dmg = obj->health;
                 }

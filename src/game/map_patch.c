@@ -129,19 +129,23 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
                     dst->layer[1].elevation = src->layer[1].elevation;
                 }
                 if (mask & 4) {
-                    dst->layer[1].quarter_turns = (dst->layer[1].quarter_turns & 0xfc) | ((src->layer[1].quarter_turns + turn) & 3);
+                    dst->layer[1].quarter_turns = (dst->layer[1].quarter_turns & 0xfc)
+                        | ((src->layer[1].quarter_turns + turn) & 3);
                 }
                 if (mask & 8) {
                     dst->layer[1].collision_shape_id = src->layer[1].collision_shape_id;
                 }
                 if (mask & 0x10) {
-                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x3f) | (dst->layer[1].lighting_index & 0xc0);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x3f)
+                        | (dst->layer[1].lighting_index & 0xc0);
                 }
                 if (mask & 0x20) {
-                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x40) | (dst->layer[1].lighting_index & 0xbf);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x40)
+                        | (dst->layer[1].lighting_index & 0xbf);
                 }
                 if (mask & 0x40) {
-                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x80) | (dst->layer[1].lighting_index & 0x7f);
+                    dst->layer[1].lighting_index = (src->layer[1].lighting_index & 0x80)
+                        | (dst->layer[1].lighting_index & 0x7f);
                 }
             }
             src++;

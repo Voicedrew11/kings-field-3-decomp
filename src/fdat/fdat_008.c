@@ -165,7 +165,8 @@ void area_update_cell_toggles_by_worn_item(void)
         gate->arg.b.unk40 = 1;
     } else {
         obj = &map_objects_slots.objects[82];
-        if (map_objects_slots.objects[82].action_state == 0 && map_objects_slots.objects[82].arg.b.unk40 != 0) {
+        if (map_objects_slots.objects[82].action_state == 0
+            && map_objects_slots.objects[82].arg.b.unk40 != 0) {
             map_objects_slots.objects[82].action_state = 4;
         }
         obj->arg.b.unk40 = 0;
