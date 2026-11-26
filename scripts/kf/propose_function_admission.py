@@ -7,10 +7,12 @@ The default output is below ``build``. This tool never overwrites the admitted
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from scripts.kf.audit_functions import CALL_EXTEND_LIMIT, DIVISION_CHECK_SIZE
 from scripts.kf.retail import (
     DATA_FIELDS,
     FUNCTION_FIELDS,
@@ -24,7 +26,15 @@ from scripts.kf.retail import (
 )
 
 
-ADMITTED_CONFIDENCE = {"strong", "strong-leaf"}
+ADMITTED_CONFIDENCE = {
+    "strong", "strong-leaf", "call-target", "call-split", "call-extend", "switch-extend",
+}
+FUNCTION_CONFIDENCE = {
+    "strong": "mips-frame-carve",
+    "strong-leaf": "mips-return-carve",
+    "call-target": "mips-call-carve",
+    "call-split": "mips-call-split",
+}
 
 
 def comments(path: Path) -> list[str]:
@@ -66,6 +76,52 @@ def proposed_functions(
     candidates: list[dict[str, str]],
 ) -> list[dict[str, object]]:
     _fields, current = read_tsv(config_dir / "functions.tsv")
+    current = [dict(row) for row in current]
+    by_start = {(row["image"], parse_int(row["va"])): row for row in current}
+    # A call-split candidate shortens its owner to the end of the owner's
+    # final unconditional transfer; the candidate takes the rest.
+    for candidate in sorted(
+        (item for item in candidates if item["confidence"] == "call-split"),
+        key=lambda item: (item["image"], -parse_int(item["va"])),
+    ):
+        owner = by_start[(candidate["image"], parse_int(candidate["owner_va"]))]
+        owner_start = parse_int(owner["va"])
+        split = parse_int(candidate["boundary"].removeprefix("split-owner-end="))
+        if not owner_start < split <= parse_int(candidate["va"]) < owner_start + parse_int(
+            owner["size"]
+        ):
+            raise ValueError(f"invalid call split of {candidate['image']} {owner['va']}")
+        owner["size"] = format_size(split - owner_start)
+        owner["body_size"] = format_size(min(parse_int(owner["body_size"]), split - owner_start))
+    # A call-extend candidate moves its owner's start back to the call target.
+    for candidate in (item for item in candidates if item["confidence"] == "call-extend"):
+        owner = by_start.pop((candidate["image"], parse_int(candidate["owner_va"])))
+        start = parse_int(candidate["va"])
+        delta = parse_int(owner["va"]) - start
+        traps = re.search(r"division-checks x(\d+)", candidate["note"])
+        limit = CALL_EXTEND_LIMIT + DIVISION_CHECK_SIZE * (int(traps.group(1)) if traps else 0)
+        if not 0 < delta <= limit:
+            raise ValueError(f"invalid call extension of {candidate['image']} {owner['va']}")
+        owner["va"] = format_hex(start)
+        owner["file_offset"] = format_size(IMAGE_LAYOUTS[candidate["image"]].file_offset(start))
+        owner["size"] = format_size(parse_int(owner["size"]) + delta)
+        owner["body_size"] = format_size(parse_int(owner["body_size"]) + delta)
+        owner["note"] = f"{owner['note']}; start moved to jal target ({candidate['note']})"
+        by_start[(candidate["image"], start)] = owner
+    # A switch-extend candidate grows its owner over the switch's case bodies.
+    for candidate in (item for item in candidates if item["confidence"] == "switch-extend"):
+        owner = by_start[(candidate["image"], parse_int(candidate["owner_va"]))]
+        owner_start = parse_int(owner["va"])
+        start = parse_int(candidate["va"])
+        end = parse_int(candidate["return_va"]) + 8
+        if owner_start + parse_int(owner["size"]) != start or end <= start:
+            raise ValueError(f"invalid switch extension of {candidate['image']} {owner['va']}")
+        owner["size"] = format_size(end - owner_start)
+        owner["body_size"] = format_size(end - owner_start)
+        owner["note"] = f"{owner['note']}; extended over its switch cases ({candidate['note']})"
+    candidates = [
+        item for item in candidates if item["confidence"] not in {"call-extend", "switch-extend"}
+    ]
     intervals: dict[str, list[tuple[int, int]]] = defaultdict(list)
     for row in current:
         start = parse_int(row["va"])
@@ -81,11 +137,9 @@ def proposed_functions(
                for other_start, other_end in intervals[image]):
             raise ValueError(f"candidate overlaps admitted function: {image} {start:#x}")
         intervals[image].append((start, end))
-        confidence = (
-            "mips-frame-carve"
-            if candidate["confidence"] == "strong"
-            else "mips-return-carve"
-        )
+        confidence = FUNCTION_CONFIDENCE[candidate["confidence"]]
+        if candidate["note"].startswith("handler-pointer"):
+            confidence = confidence.replace("-call-", "-handler-")
         added.append({
             "image": image,
             "va": format_hex(start),
@@ -100,7 +154,7 @@ def proposed_functions(
             "provenance": "scripts/kf/audit_functions.py",
             "note": f"anonymous WIP start; {candidate['note']}",
         })
-    result: list[dict[str, object]] = [dict(row) for row in current]
+    result: list[dict[str, object]] = list(current)
     result.extend(added)
     return sorted(
         result,
@@ -113,11 +167,33 @@ def proposed_data(
     candidates: list[dict[str, str]],
 ) -> list[dict[str, object]]:
     _fields, current = read_tsv(config_dir / "data.tsv")
+    current = list(current)
+    for candidate in candidates:
+        if candidate["confidence"] != "call-split":
+            continue
+        split = parse_int(candidate["boundary"].removeprefix("split-owner-end="))
+        target = parse_int(candidate["va"])
+        if split < target:
+            layout = IMAGE_LAYOUTS[candidate["image"]]
+            current.append({
+                "image": candidate["image"],
+                "va": format_hex(split),
+                "file_offset": format_size(layout.file_offset(split)),
+                "size": format_size(target - split),
+                "kind": "unclassified",
+                "confidence": "coverage-gap",
+                "name": "",
+                "datatype": "",
+                "provenance": "payload-complement",
+                "note": "may contain missed code, tables, constants, padding, or writable data",
+            })
     cuts: dict[str, list[tuple[int, int]]] = defaultdict(list)
     for candidate in candidates:
-        cuts[candidate["image"]].append(
-            (parse_int(candidate["va"]), parse_int(candidate["return_va"]) + 8)
-        )
+        start = parse_int(candidate["va"])
+        if candidate["confidence"] == "call-extend":
+            cuts[candidate["image"]].append((start, parse_int(candidate["owner_va"])))
+            continue
+        cuts[candidate["image"]].append((start, parse_int(candidate["return_va"]) + 8))
     for image in cuts:
         cuts[image].sort()
 

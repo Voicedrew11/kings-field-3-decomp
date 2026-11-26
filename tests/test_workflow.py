@@ -23,6 +23,12 @@ from scripts.kf.progress import (
     classifications,
 )
 from scripts.kf.readme import END, START, render_block, write_block
+from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS
+
+from types import SimpleNamespace
+
+# A manifest whose only unit belongs to GAME.EXE: the closure/relink gates apply.
+STARTED_GAME = SimpleNamespace(units=(SimpleNamespace(image="GAME.EXE"),))
 
 
 def sample_current(percent: float | None) -> Current:
@@ -33,7 +39,7 @@ def sample_current(percent: float | None) -> Current:
         "game_sample",
         "GAME.EXE",
         "src/game/sample.c",
-        "probe-gcc260-o2-g0",
+        "gcc260-o2-g8",
         (function,),
     )
     return Current(
@@ -67,10 +73,10 @@ class ManifestTests(unittest.TestCase):
 
     def test_repository_manifest_has_valid_reconstruction_units(self) -> None:
         manifest = load_manifest()
-        self.assertIn("probe-gcc260-o2-g0", manifest.profiles)
-        self.assertIn("probe-gcc257-o2-g0", manifest.profiles)
-        probe_257 = manifest.profiles["probe-gcc257-o2-g0"]
-        self.assertEqual(probe_257.compiler, "gcc257-native")
+        self.assertIn("gcc260-o2-g8", manifest.profiles)
+        default = manifest.profiles["gcc260-o2-g8"]
+        self.assertEqual((default.compiler, default.optimization, default.small_data,
+                          default.aspsx_version), ("gcc260-sony", "O2", 8, "2.21"))
         self.assertEqual(
             len({unit.unit for unit in manifest.units}),
             len(manifest.units),
@@ -130,7 +136,7 @@ class ProgressTests(unittest.TestCase):
 
     def test_default_check_always_gates_data(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -143,9 +149,26 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(progress.check(("GAME.EXE",)), 1)
         data_gate.assert_called_once()
 
+    def test_check_does_not_gate_closure_or_relink_of_an_unstarted_image(self) -> None:
+        unstarted = SimpleNamespace(units=())
+        with (
+            mock.patch.object(progress, "current_state", return_value=(unstarted, {}, [], [])),
+            mock.patch.object(progress, "load_baseline", return_value={}),
+            mock.patch.object(progress, "print_status", return_value=0),
+            mock.patch.object(progress, "_report_cleanliness"),
+            mock.patch("scripts.kf.data_match.run", return_value=0),
+            mock.patch("scripts.kf.data_reachability.run", return_value=1) as reachability,
+            mock.patch("scripts.kf.roundtrip.run", return_value=1) as roundtrip,
+            mock.patch("scripts.kf.readme.refresh", return_value=False),
+            mock.patch("builtins.print"),
+        ):
+            self.assertEqual(progress.check(("GAME.EXE",)), 0)
+        reachability.assert_not_called()
+        roundtrip.assert_not_called()
+
     def test_default_check_rejects_unowned_data_even_when_objects_match(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -160,7 +183,7 @@ class ProgressTests(unittest.TestCase):
 
     def test_default_check_rejects_unfaithful_target_even_when_objects_match(self) -> None:
         with (
-            mock.patch.object(progress, "current_state", return_value=(None, {}, [], [])),
+            mock.patch.object(progress, "current_state", return_value=(STARTED_GAME, {}, [], [])),
             mock.patch.object(progress, "load_baseline", return_value={}),
             mock.patch.object(progress, "print_status", return_value=0),
             mock.patch.object(progress, "_report_cleanliness"),
@@ -301,7 +324,7 @@ class GraphTests(unittest.TestCase):
         ):
             graph.emit()
         lines = write.call_args.args[1].splitlines()
-        for rule, count in (("report", 1), ("check", 4)):
+        for rule, count in (("report", 1), ("check", len(IMAGE_LAYOUTS))):
             edges = [line for line in lines if f": {rule} " in line]
             self.assertEqual(len(edges), count)
             for edge in edges:
@@ -413,7 +436,7 @@ class ReadmeTests(unittest.TestCase):
             "fuzzy_overall_percent": 0.0,
         }
         document = {
-            "images": {key: dict(summary) for key in ("psx", "game", "open", "end")},
+            "images": {key: dict(summary) for key in IMAGE_KEYS},
             "total": dict(summary),
         }
         block = render_block(document)

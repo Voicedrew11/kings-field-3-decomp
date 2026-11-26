@@ -11,7 +11,7 @@ import re
 import struct
 from dataclasses import dataclass
 
-from scripts.kf.retail import parse_int
+from scripts.kf.retail import IMAGE_GP, parse_int, referent_image
 
 
 SIGNED_LOW_OPCODES = {
@@ -78,12 +78,30 @@ def encode_mips26_addend(word: int, addend: int) -> int:
     return (word & 0xFC000000) | ((addend >> 2) & 0x03FFFFFF)
 
 
-def decode_hi_lo_target(hi_word: int, lo_word: int) -> int:
+def lui_copy_register(hi_word: int, next_word: int) -> int | None:
+    """The register a `move` directly after a LUI copies its value into.
+
+    GCC can take the high half into a temporary and copy it to the register
+    the signed lows use (`lui v0,%hi(x)` then `move s3,v0`); the LUI and each
+    low still form one HI16/LO16 family.
+    """
+    if hi_word >> 26 != 0x0F:
+        return None
+    # addu rd, rs, $zero (move) whose source is the LUI register
+    if next_word & 0xFC1F07FF != 0x21 or (next_word >> 21) & 0x1F != (hi_word >> 16) & 0x1F:
+        return None
+    return ((next_word >> 11) & 0x1F) or None
+
+
+def decode_hi_lo_target(hi_word: int, lo_word: int, copy_word: int | None = None) -> int:
+    """Decode a HI/LO address; `copy_word` is the instruction after the LUI."""
     if hi_word >> 26 != 0x0F:
         raise ValueError("HI site is not LUI")
     hi_register = (hi_word >> 16) & 0x1F
     low_opcode = lo_word >> 26
-    if (lo_word >> 21) & 0x1F != hi_register:
+    base = (lo_word >> 21) & 0x1F
+    if base != hi_register and (
+            copy_word is None or lui_copy_register(hi_word, copy_word) != base):
         raise ValueError("LO instruction does not consume the LUI register")
     low = lo_word & 0xFFFF
     if low_opcode == 0x0D:  # ori
@@ -102,6 +120,52 @@ def encode_hi_lo_addend(hi_word: int, lo_word: int, addend: int) -> tuple[int, i
     high = ((addend + 0x8000) >> 16) & 0xFFFF
     low = addend & 0xFFFF
     return (hi_word & 0xFFFF0000) | high, (lo_word & 0xFFFF0000) | low
+
+
+# addiu, lb, lh, lwl, lw, lbu, lhu, lwr, sb, sh, swl, sw, swr, lwc2, swc2
+GP_RELATIVE_OPCODES = {0x09, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x28, 0x29, 0x2A, 0x2B,
+                       0x2E, 0x32, 0x3A}
+
+
+def decode_gprel16_target(image: str, word: int) -> int:
+    """Decode a `$gp`-relative access against the image's startup `$gp`."""
+    gp = IMAGE_GP.get(image)
+    if gp is None:
+        raise ValueError("image-gp-unknown")
+    if (word >> 21) & 0x1F != 28 or word >> 26 not in GP_RELATIVE_OPCODES:
+        raise ValueError("instruction-opcode-mismatch")
+    low = word & 0xFFFF
+    return (gp + (low - 0x10000 if low & 0x8000 else low)) & 0xFFFFFFFF
+
+
+def ambiguous_sites(rows) -> set[int]:
+    """Sites claimed by more than one row that do not form one HI/LO family.
+
+    GCC shares address halves: one `lui` can feed several signed-low
+    instructions, and two `lui`s on converging paths can feed one. Rows that
+    share a site and decode the same target through `mips_hi16_lo16` describe
+    one relocation family, as ELF REL represents it (HI16 entries precede the
+    LO16 entries they pair with). Any other shared site, including a repeated
+    row for the same pair, stays ambiguous.
+    """
+    claims: dict[int, list[dict[str, str]]] = {}
+    for row in rows:
+        sites = [parse_int(row["site_va"])]
+        if row["paired_site_va"]:
+            sites.append(parse_int(row["paired_site_va"]))
+        for site in sites:
+            claims.setdefault(site, []).append(row)
+    ambiguous = set()
+    for site, members in claims.items():
+        if len(members) < 2:
+            continue
+        family = {(row["kind"], parse_int(row["target_va"]), row.get("target_name", ""))
+                  for row in members}
+        pairs = {(row["site_va"], row["paired_site_va"]) for row in members}
+        if (len(family) != 1 or next(iter(family))[0] != "mips_hi16_lo16"
+                or len(pairs) != len(members)):
+            ambiguous.add(site)
+    return ambiguous
 
 
 def policy_reason(row: dict[str, str], policy: str) -> str | None:
@@ -151,7 +215,8 @@ def validate_relocation(
             raise ValueError("instruction-opcode-mismatch")
         if decode_mips26_target(site, word) != target:
             raise ValueError("decoded-target-mismatch")
-        target_function = catalog.function_starts[function.image].get(target)
+        target_function = catalog.function_starts[
+            referent_image(function.image, target)].get(target)
         if not function.contains(target) and target_function is None and policy != "all":
             raise ValueError("target-is-not-a-function-start")
         return RelocationValidation(site, target, offset, word=word)
@@ -170,8 +235,9 @@ def validate_relocation(
             raise ValueError("pair-crosses-function-extent")
         paired_offset = paired - function.va
         paired_word = _word(blob, paired_offset)
+        copy_word = _word(blob, offset + 4) if offset + 8 <= len(blob) else None
         try:
-            decoded = decode_hi_lo_target(word, paired_word)
+            decoded = decode_hi_lo_target(word, paired_word, copy_word)
         except ValueError as error:
             raise ValueError(f"instruction-pair-mismatch:{error}") from error
         if decoded != target:
@@ -189,6 +255,12 @@ def validate_relocation(
             word,
             paired_word,
         )
+
+    if row["kind"] == "mips_gprel16":
+        # $gp-relative access to small data: a load, store or addiu off $gp.
+        if decode_gprel16_target(function.image, word) != target:
+            raise ValueError("decoded-target-mismatch")
+        return RelocationValidation(site, target, offset, word=word)
 
     if row["kind"] == "mips32_candidate" and (
         policy == "all" or row["status"] == "reviewed"

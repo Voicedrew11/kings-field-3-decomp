@@ -420,6 +420,8 @@ def _header_structure_layouts() -> dict[str, HeaderStructureLayout]:
         "EVECTOR": (0x2C, 4),
         "DISPENV": (0x14, 2),
         "CdlLOC": (4, 1),
+        # Sony movie-sample decode environment (kf/decenv.h, an unnamed-tag typedef).
+        "DECENV": (0x30, 4),
         "RECT": (8, 2),
         "POLY_F4": (0x18, 4),
         "POLY_FT4": (0x28, 4),
@@ -474,9 +476,19 @@ def _header_structure_layouts() -> dict[str, HeaderStructureLayout]:
     definitions = {}
     constants: dict[str, int] = {}
     enum_domains: set[str] = set()
+    # `volatile` does not change a layout. A header may also spell it through
+    # a macro (`#define NAME volatile`) so that only its owning unit sees the
+    # qualifier; both spellings are dropped before fields are parsed.
+    qualifier_macros: set[str] = set()
     for path in checked_headers:
         text = re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.DOTALL)
         text = re.sub(r"//[^\n]*", "", text)
+        qualifier_macros.update(re.findall(
+            r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)[ \t]+volatile[ \t]*$", text, flags=re.M
+        ))
+        text = re.sub(
+            r"\b(?:" + "|".join(["volatile", *sorted(qualifier_macros)]) + r")\b", "", text
+        )
         for callback in callback_typedef_pattern.finditer(text):
             name = callback.group(1)
             if name in primitive_layouts or name in definitions:

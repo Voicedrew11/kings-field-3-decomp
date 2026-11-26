@@ -1,12 +1,14 @@
 # Build and progress system
 
-> **Inherited from the King's Field II (`SLPS-00069`) project.** Statements here
-> about retail bytes, linker order, SDK versions or compiler probes describe that
-> game. For King's Field III (`SLUS-00255`) they are hypotheses until re-proven.
+> **Inherited from the King's Field II (`SLPS-00069`) project.** The build
+> mechanics apply here. Retail addresses and evidence quoted from that game are
+> examples; the King's Field III tools and libraries are in
+> [`toolchain.md`](toolchain.md).
 
 `kf build` is the source-to-EXE build: the pinned compiler emits assembly,
-ASPSX emits native Psy-Q objects, PSYLINK links those objects with original
-SDK inputs, and CPE2X writes each executable. See
+ASPSX emits native Psy-Q objects (DMPSX rewrites any GTE macro placeholders),
+PSYLINK links those objects with original SDK inputs, and CPE2X writes each
+executable. See
 [the linking guide](executable-linking.md) for outputs and provenance.
 It does not read retail executable bytes, calculate match scores, or update
 the README. Tool failures stop the build; reconstruction checks are separate.
@@ -92,11 +94,12 @@ its anonymous `.sdata` constants once:
 SDATA(0x8006d6a4, 0xb)
 ```
 
-GCC 2.5.7's MIPS `SELECT_SECTION` sends every constant of at most `-G` bytes
+GCC 2.x's MIPS `SELECT_SECTION` sends every constant of at most `-G` bytes
 to `.sdata`, so a short literal (or a local `char buf[2] = " "` initializer)
 is an `.sdata` member, while the same text initializing a larger array keeps
-the array's type and stays in `.rdata`. ASPSX 1.07 still expands every access
-to `lui` plus a low instruction, so `-G8` changes placement, not code. The
+the array's type and stays in `.rdata`. ASPSX 2.21 reaches `.sdata`/`.sbss`
+with one `$gp`-relative instruction (patch 30, `X - sectstart(.sdata)`), so
+`-G8` changes both placement and code, as in `PSX.EXE`'s `main`. The
 delinker packs the claimed range among the unit's `.sdata` `DATA()` claims in
 address order and resolves code references to it as `.sdata` offsets; the
 range never becomes a symbol. Small statics (`.lcomm`, rounded to eight
@@ -185,7 +188,7 @@ absent, as in graphs written before it).
 ## Status and banking
 
 The status universe is every contiguous, non-vendored function: currently
-1 PSX, 488 GAME, 28 OPEN, and 18 END functions. Progress is counted per function even
+1 PSX, 593 GAME, 34 OPEN, 13 END and 437 FDAT functions. Progress is counted per function even
 when several functions share a module unit; the objdiff report lists each
 function inside its unit. Only manifested units with real base objects enter
 objdiff. This keeps an absent reconstruction distinct from a
@@ -242,7 +245,7 @@ image reuses it with a unit that binds by name:
 unit = "open.memory"
 image = "OPEN.EXE"
 source = "src/lib/memory.c"
-profile = "probe-gcc257-o2-g0"
+profile = "gcc260-o2-g8"
 bind = "name"
 defines = ["KF_OPEN"]
 ```
@@ -252,7 +255,17 @@ defines = ["KF_OPEN"]
   the definition name, so addresses stay image-qualified. The claimed size
   must still equal that image's body size; a size mismatch means the images
   do not share the body and the difference has to be expressed in source.
-  `RODATA()` ranges are image-specific and cannot be name-bound.
+  `RODATA()` ranges are image-specific and cannot be name-bound in a source
+  that several units list.
+- A source only one unit lists may still bind by name and claim its image's
+  `RODATA()`/`SDATA()` ranges: the ranges belong to that image, while the
+  functions of the `.inc` fragments it includes resolve through the image's
+  identities. The FDAT modules use this (one `src/fdat/fdat_nnn.c` per
+  module, `bind = "name"`): a body several modules repeat is one fragment in
+  `src/fdat/shared/`, its claim spelled with the address of the first module
+  that has it, and its function carries that one shared identity name
+  (for example `area_interact_item_containers`) in every module's
+  `function_identities.tsv` rows.
 - `defines` adds `-DNAME` (or `-DNAME=value`) to the preprocessor run for
   that unit only. Use it for constants that provably differ between the
   images (in SLPS-00017 the mode-1 arena limit was `0xfefff` in `GAME.EXE`

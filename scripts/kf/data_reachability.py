@@ -20,8 +20,9 @@ from pathlib import Path
 
 from scripts.kf.manifest import Manifest, load as load_manifest
 from scripts.kf.paths import BUILD, RETAIL_CONFIG
-from scripts.kf.retail import IMAGE_LAYOUTS, read_tsv
+from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, read_tsv
 from scripts.kf.sema import Context
+from scripts.kf.sema.cfg import build_graph, switch_tables
 from scripts.kf.sema.evidence import Reference, TIER_RANK
 from scripts.kf.sema.image import RetailImage
 from scripts.kf.sema.index import Binding
@@ -48,7 +49,7 @@ class DataExtent:
 
     @property
     def claimed(self) -> bool:
-        return self.source in {"DATA", "RODATA"}
+        return self.source in {"DATA", "RODATA", "SDATA"}
 
     @property
     def key(self) -> str:
@@ -96,6 +97,145 @@ def _function_key(function: Binding) -> str:
     return f"function:{function.va:08x}"
 
 
+BIOS_VECTORS = {0xA0, 0xB0, 0xC0}
+JR_T2 = 0x01400008
+
+
+def proven_vendored_dispatch(
+    img: RetailImage, function: Binding, site: int
+) -> tuple[str, int | None] | None:
+    """Prove an SDK member's indirect transfer from its own instruction values.
+
+    Two value chains are accepted, both ending inside the same function:
+
+    * a BIOS table stub, `li $t2, 0xA0|0xB0|0xC0` then `jr $t2` (the target is
+      the fixed BIOS vector); and
+    * an SN startup table loop whose count register is the link-time constant
+      zero (`lui r,0; addiu r,r,0` then `beqz r` before the `jalr`), so the
+      call cannot execute.
+
+    These specific proofs are recorded on the witness row; every other
+    indirect transfer inside a Sony member is exempted as `vendored-indirect`
+    by `audit` (a project decision, not a proof). Game-code `jr`/`jalr` stays
+    unresolved, as AGENTS.md requires, unless it is a proven switch.
+    """
+    word = img.u32(site)
+    if word is None:
+        return None
+    if word == JR_T2:
+        for back in (4, 8):
+            prior = img.u32(site - back) if site - back >= function.va else None
+            if prior is not None and prior >> 16 == 0x240A and prior & 0xFFFF in BIOS_VECTORS:
+                return "bios-vector-stub", prior & 0xFFFF
+        return None
+    if word & 0xFC1FFFFF != 0x0000F809:  # jalr $ra, rs
+        return None
+    zero_registers: set[int] = set()
+    for address in range(function.va, site, 4):
+        current = img.u32(address)
+        following = img.u32(address + 4)
+        if current is None or following is None:
+            return None
+        register = (current >> 16) & 0x1F
+        if (
+            current & 0xFFE0FFFF == 0x3C000000  # lui r, 0
+            and following == (0x24000000 | register << 21 | register << 16)  # addiu r, r, 0
+        ):
+            zero_registers.add(register)
+        if current >> 26 == 0x04 and (current >> 16) & 0x1F == 0:  # beqz rs
+            if (current >> 21) & 0x1F in zero_registers:
+                return "empty-link-time-table", None
+    return None
+
+
+def proven_switch_dispatch(img: RetailImage, function: Binding) -> dict[int, dict]:
+    """Switch `jr` sites of a game function, proved by the shared CFG rule.
+
+    `scripts.kf.sema.cfg.switch_table` is the only switch-table prover: a
+    bounded `sltiu`/`beqz` index, a `lui`/`addiu` table base (the `lui` may
+    sit in the bound's delay slot), `sll`/`addu`/`lw`/`jr`, no branch into
+    the scanned run, the index unchanged, and every table word an instruction
+    start inside this function. Vendored members are not proved by it (their
+    indirect sites are exempted wholesale as `vendored-indirect`).
+    Returns the witness detail per `jr` site.
+    """
+    if function.vendored or function.fragments != 1:
+        return {}
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return {}
+    return {
+        site: {"site": site, "pattern": "switch-table", "table": proven.table,
+               "entries": len(proven.targets)}
+        for site, proven in switch_tables(function, payload, img.u32).items()
+    }
+
+
+def function_flow(img: RetailImage, function: Binding):
+    """Reaching definitions over FUNCTION's complete CFG, or None."""
+    from scripts.kf.sema.values import ValueFlow
+
+    if function.fragments != 1:
+        return None
+    payload = img.read(function.va, function.body_size)
+    if payload is None:
+        return None
+    try:
+        return ValueFlow(build_graph(function, payload, None, img.u32))
+    except ValueError:
+        return None
+
+
+def _loads(flow, va: int, register: int, offset: int) -> str | None:
+    """Why some definition of REGISTER reaching VA is not `lw register, offset(base)`."""
+    defs = flow.definitions(va, register)
+    if not defs:
+        return "no definition reaches the register"
+    for definition in defs:
+        if not definition.known:
+            return "the register may hold an incoming or clobbered value"
+        load = flow.word_at(definition.va)
+        if (load >> 26 != 0x23 or (load >> 16) & 0x1F != register
+                or load & 0xFFFF != offset & 0xFFFF):
+            return f"0x{definition.va:08x} does not load offset 0x{offset & 0xFFFF:x}"
+    return None
+
+
+def pointer_site_problem(flow, site: int, row) -> str | None:
+    """Why a reviewed pointer row does not describe this `jr`/`jalr`, or None.
+
+    Every definition of the jump register reaching SITE must be
+    `lw r, row.load_offset(base)`: the site loads the reviewed member. With a
+    `row.holder`, every definition of each such load's base register must in
+    turn be `lw base, k(p)` where `p` can only hold the constant
+    `holder - k`: the table or record comes from the holder word.
+    """
+    if flow is None or not flow.reached(site):
+        return "no complete CFG reaches the site"
+    word = flow.word_at(site)
+    if word >> 26 != 0 or word & 0x3F not in {0x08, 0x09}:
+        return "not a jr/jalr"
+    register = (word >> 21) & 0x1F
+    problem = _loads(flow, site, register, row.load_offset)
+    if problem is not None or row.holder is None:
+        return problem
+    for definition in flow.definitions(site, register):
+        base = (flow.word_at(definition.va) >> 21) & 0x1F
+        for holder_load in flow.definitions(definition.va, base):
+            if not holder_load.known:
+                return f"the base of 0x{definition.va:08x} may be incoming or clobbered"
+            load = flow.word_at(holder_load.va)
+            if load >> 26 != 0x23 or (load >> 16) & 0x1F != base:
+                return f"0x{holder_load.va:08x} does not load the base from 0x{row.holder:08x}"
+            pointer = (load >> 21) & 0x1F
+            offset = load & 0xFFFF
+            offset -= 0x10000 if offset & 0x8000 else 0
+            values = flow.values(holder_load.va, pointer)
+            if values != frozenset({(row.holder - offset) & 0xFFFFFFFF}):
+                return f"0x{holder_load.va:08x} does not load the base from 0x{row.holder:08x}"
+    return None
+
+
 def access_span(reference: Reference, img: RetailImage) -> tuple[int, int]:
     """Minimum directly observed memory span, or one anchor byte for an address.
 
@@ -134,6 +274,11 @@ def audit(
     config_comparisons: tuple = (),
     include_entry: bool = False,
     link_labels: frozenset[int] = frozenset(),
+    indirect_sites: tuple = (),
+    pointer_targets: dict | None = None,
+    pointer_problems: tuple[str, ...] = (),
+    host_functions: tuple[Binding, ...] = (),
+    host_extents: tuple[DataExtent, ...] = (),
 ) -> dict:
     """Lossless reference worklist with weakest-edge reachability witnesses.
 
@@ -143,6 +288,20 @@ def audit(
     scanned conservatively; candidate discovery does not assert execution.
     Optional executable entry roots include SDK startup without changing the
     game-function denominator.
+
+    A game `jalr`/`jr` listed in `indirect_sites` (`indirect_pointers.load_sites`)
+    calls through a reviewed run-time pointer: the site must load the row's
+    member offset, from the row's holder word if it names one
+    (`pointer_site_problem`), and the pointer's checked targets
+    (`pointer_targets`, from `indirect_pointers.resolve`) become `validated`
+    edges; a target in another image (an FDAT module's handler) is recorded as
+    a cross-image edge, owned and audited with that image. Each such site is a
+    `pointer_dispatch` witness row.
+
+    An overlay's references outside its own load window reach its host
+    program (`retail.referent_image`). They are checked against the host's
+    owners (`host_functions`, `host_extents`) and recorded as cross-image
+    edges; the host's own closure is audited with the host image.
     """
     if img.image != image:
         raise ValueError("reference audit image does not match retail bytes")
@@ -159,6 +318,15 @@ def audit(
     outgoing: dict[str, list[int]] = {}
     destinations: dict[int, list[str]] = {}
     issues: dict[tuple, dict] = {}
+    dispatch_witnesses: dict[int, dict] = {}
+    switch_witnesses: dict[int, dict] = {}
+    switches: dict[str, dict[int, dict]] = {}
+    pointer_witnesses: dict[int, dict] = {}
+    pointer_targets = pointer_targets or {}
+    site_rows = {row.site: row for row in indirect_sites if row.image == image}
+    used_rows: set[int] = set()
+    flows: dict[int, object] = {}
+    starts = {f.va: f for f in functions}
     queue: deque[str] = deque()
 
     def issue(code: str, key: str, ref: int | None = None, **detail) -> None:
@@ -184,9 +352,26 @@ def audit(
         identities = [d for d in data if d.source == "data_identities.tsv"]
         return [*code, *(identities or data)]
 
+    host = OVERLAY_SOURCES.get(image)
+    window = IMAGE_LAYOUTS[image] if host is not None else None
+    host_name = host.host if host is not None else ""
+    host_functions = tuple(f for f in host_functions if f.image == host_name)
+    host_extents = tuple(d for d in host_extents if d.image == host_name)
+    cross_image: dict[int, list[str]] = {}
+
+    def host_owners(va: int) -> list[str]:
+        code = [_function_key(f) for f in host_functions if f.va <= va < f.body_end]
+        data = [d for d in host_extents if d.va <= va < d.end]
+        claimed = [d for d in data if d.claimed]
+        identities = [d for d in data if d.source == "data_identities.tsv"]
+        return [f"{host_name}:{key}"
+                for key in (*code, *(d.key for d in (claimed or identities or data)))]
+
     for root in roots:
         visit(root, TIER_RANK["proven"], None, None)
-    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(img.layout.entry))
+    entry = img.layout.entry
+    include_entry = include_entry and entry is not None
+    entry_roots = tuple(f for f in functions if include_entry and f.contains_body(entry))
     for root in entry_roots:
         visit(root, TIER_RANK["proven" if len(entry_roots) == 1 else "candidate"], None, None)
     if include_entry and len(entry_roots) != 1:
@@ -204,6 +389,12 @@ def audit(
         if key not in outgoing:
             lo, hi = bisect.bisect_left(sites, node.va), bisect.bisect_left(sites, end)
             outgoing[key] = list(range(lo, hi))
+            if isinstance(node, Binding):
+                # The semantic evidence already folds these into the CFG; the
+                # audit re-proves them so each reached switch keeps a witness.
+                switches[key] = proven_switch_dispatch(img, node)
+                for site, witness in switches[key].items():
+                    switch_witnesses[site] = {"owner": key, **witness}
         for number in outgoing[key]:
             reference = references[number]
             if reference.site + 4 > end:
@@ -219,9 +410,72 @@ def audit(
                     issue("invalid-live-reference", key, number)
                 continue
             if reference.target is None:
+                if isinstance(node, Binding) and node.vendored:
+                    # Project decision (2026-11-17): every indirect transfer
+                    # inside a vendored Sony member is exempt from the gate.
+                    # It stays auditable as a witness row; a transfer proved
+                    # from the member's own instruction values also names
+                    # that proof (BIOS vector stub, empty link-time table).
+                    # The library column tells a member whose object is
+                    # preserved (Runtime Library 3.3) from one whose release
+                    # is not (`unmatched`, sdk-unmatched-version); both are exempt.
+                    proven = proven_vendored_dispatch(img, node, reference.site)
+                    dispatch_witnesses[number] = {
+                        "owner": key, "site": reference.site,
+                        "pattern": "vendored-indirect",
+                        "library": node.library,
+                        "proof": proven[0] if proven else None,
+                        "target": proven[1] if proven else None,
+                    }
+                    continue
+                if reference.site in switches.get(key, {}):
+                    # A game switch whose every case lands in this function's
+                    # body: the transfer adds no edge; its witness row is kept.
+                    continue
+                row = site_rows.get(reference.site)
+                if row is not None and isinstance(node, Binding):
+                    used_rows.add(row.site)
+                    if node.va not in flows:
+                        flows[node.va] = function_flow(img, node)
+                    problem = (f"owner 0x{node.va:08x} is not 0x{row.owner:08x}"
+                               if row.owner != node.va else
+                               pointer_site_problem(flows[node.va], reference.site, row))
+                    targets = pointer_targets.get(row.pointer, ())
+                    if problem is None and not targets:
+                        problem = f"{row.pointer} has no checked source"
+                    if problem is not None:
+                        issue("unresolved-indirect-control", key, number,
+                              pointer=row.pointer, problem=problem)
+                        continue
+                    keys = []
+                    for target in targets:
+                        if target.image != image:
+                            keys.append(f"{target.image}:function:{target.va:08x}")
+                            continue
+                        if target.va not in starts:
+                            issue("unmodeled-target", key, number, target=target.va)
+                            continue
+                        keys.append(visit(starts[target.va],
+                                          min(rank, TIER_RANK["validated"]), key, number))
+                    destinations[number] = list(dict.fromkeys(keys))
+                    pointer_witnesses[number] = {
+                        "owner": key, "site": reference.site, "pattern": "reviewed-pointer",
+                        "pointer": row.pointer, "load_offset": row.load_offset,
+                        "holder": row.holder, "targets": destinations[number],
+                    }
+                    continue
                 issue("unresolved-indirect-control", key, number)
                 continue
             path_rank = min(rank, TIER_RANK[reference.tier])
+            if window is not None and not window.contains(reference.destination):
+                # A cross-image edge into the host: owned there, not traversed.
+                hosts = host_owners(reference.destination)
+                if not hosts:
+                    issue("unmodeled-target", key, number, target=reference.target,
+                          image=host_name)
+                destinations[number] = hosts
+                cross_image[number] = hosts
+                continue
             found = owners(reference.destination)
             if not found and reference.target in link_labels:
                 # A curated zero-size link-layout label (BSS_END) names a
@@ -244,6 +498,13 @@ def audit(
                 if start < owner.va or start + width > owner_end:
                     issue("access-crosses-owner", key, number, target=reference.target,
                           access_start=start, access_size=width)
+
+    for row in site_rows.values():
+        if row.site not in used_rows:
+            issue("stale-indirect-site", f"function:{row.owner:08x}", site=row.site,
+                  pointer=row.pointer)
+    for problem in pointer_problems:
+        issue("invalid-indirect-pointer", image, problem=problem)
 
     tier = {rank: name for name, rank in TIER_RANK.items()}
     range_rows = []
@@ -291,7 +552,11 @@ def audit(
         for number in outgoing[key]:
             reference = references[number]
             path_rank = min(rank, TIER_RANK[reference.tier])
-            if len(destinations.get(number, [])) > 1:
+            if number in pointer_witnesses:
+                # A dispatch reaches each of its targets; several targets are
+                # its reviewed value set, not an ambiguous owner.
+                path_rank = min(path_rank, TIER_RANK["validated"])
+            elif len(destinations.get(number, [])) > 1:
                 path_rank = min(path_rank, TIER_RANK["candidate"])
             if path_rank == TIER_RANK["candidate"]:
                 issue("candidate-reference-path", key, number)
@@ -327,15 +592,30 @@ def audit(
             "config_matched_data_ranges": sum(r.get("comparison") == "config-provider-matched"
                                               for r in range_rows),
             "reference_occurrences": len(reference_rows),
+            "vendored_indirect_exempt": len(dispatch_witnesses),
+            "vendored_indirect_unpreserved": sum(
+                w["library"] == "unmatched"
+                for w in dispatch_witnesses.values()
+            ),
+            "proven_vendored_dispatch": sum(
+                w["proof"] is not None for w in dispatch_witnesses.values()
+            ),
+            "proven_switch_dispatch": len(switch_witnesses),
+            "reviewed_pointer_dispatch": len(pointer_witnesses),
+            "host_references": len(cross_image),
             "issues": dict(sorted(Counter(r["code"] for r in issue_rows).items())),
         },
         "ranges": range_rows, "references": reference_rows, "issues": issue_rows,
+        "vendored_dispatch": [dispatch_witnesses[n] for n in sorted(dispatch_witnesses)],
+        "switch_dispatch": [switch_witnesses[n] for n in sorted(switch_witnesses)],
+        "pointer_dispatch": [pointer_witnesses[n] for n in sorted(pointer_witnesses)],
         "config_comparisons": [asdict(c) for c in config_comparisons if c.image == image],
     }
 
 
 def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     from scripts.kf.config_data import audit as compare_config_data
+    from scripts.kf.indirect_pointers import load_sites, resolve as resolve_pointers
     from scripts.kf.roundtrip import link_labels
 
     manifest = load_manifest()
@@ -344,15 +624,32 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
     reports = []
     for image in images:
         ctx = Context(image)
+        pointer_targets, pointer_problems = resolve_pointers(image, ctx.refs.references)
+        host = OVERLAY_SOURCES.get(image)
+        host_functions = Context(host.host).idx.functions if host is not None else ()
         report = audit(image, ctx.idx.functions, extents, ctx.refs.references, ctx.img,
                        config_comparisons=comparisons,
-                       link_labels=frozenset(link_labels(image).values()))
+                       link_labels=frozenset(link_labels(image).values()),
+                       indirect_sites=load_sites(image), pointer_targets=pointer_targets,
+                       pointer_problems=tuple(pointer_problems),
+                       host_functions=host_functions, host_extents=extents)
         reports.append(report)
         summary = report["summary"]
         print(f"{image} known-reference closure: {summary['game_roots']} game roots, "
               f"{summary['reached_vendor_functions']} reached vendor functions, "
               f"{summary['source_owned_data_ranges']} source-owned / "
               f"{summary['config_only_data_ranges']} config-only data ranges")
+        if summary["vendored_indirect_exempt"]:
+            print(f"  vendored Sony indirect sites exempt (witnessed): "
+                  f"{summary['vendored_indirect_exempt']} "
+                  f"({summary['vendored_indirect_unpreserved']} in members of unpreserved releases, "
+                  f"{summary['proven_vendored_dispatch']} with a value-chain proof)")
+        if summary["reviewed_pointer_dispatch"]:
+            print(f"  game indirect sites through reviewed run-time pointers: "
+                  f"{summary['reviewed_pointer_dispatch']}")
+        if summary["host_references"]:
+            print(f"  references into {OVERLAY_SOURCES[image].host} (owned there): "
+                  f"{summary['host_references']}")
         if summary['config_matched_data_ranges']:
             print(f"  independent provider/retail matches: {summary['config_matched_data_ranges']} config ranges")
         for code, count in summary["issues"].items():
@@ -370,7 +667,7 @@ def run(images: tuple[str, ...], *, output: Path | None = None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="kf verify reachability", description=__doc__)
-    aliases = {image.removesuffix(".EXE").lower(): image for image in IMAGE_LAYOUTS}
+    aliases = dict(IMAGE_NAMES)
     parser.add_argument("--image", action="append", choices=tuple(aliases))
     parser.add_argument("--output", type=Path,
                         help="write full witness/evidence JSON under build/")

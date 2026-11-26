@@ -20,4 +20,13 @@ typedef unsigned long u32;
 #define KF_VALUELESS_S32 s32
 #endif
 
+/* Old C valueless return from a function that returns a value on other
+ * paths: `return KF_VALUELESS;` compiles as `return;`, leaving v0 as it is.
+ * C++ requires a value there, so the modern view returns 0. */
+#ifdef __cplusplus
+#define KF_VALUELESS 0
+#else
+#define KF_VALUELESS
+#endif
+
 #endif

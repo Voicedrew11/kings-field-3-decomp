@@ -3,11 +3,17 @@
 - Reconstruct the King's Field III (`SLUS-00255`) sources so the pinned PlayStation
   toolchain can emit objects matching the retail programs.
 - This repository contains four independent linked programs: `PSX.EXE`, `GAME.EXE`, `OPEN.EXE`, and `END.EXE`
-  (the boot loader plus three overlays at 0x80011000). Overlays share load windows, so an address is never an
+  (the boot loader plus three overlays at 0x80011000), and 28 headerless code modules `FDAT_nnn.BIN` that
+  `GAME.EXE` loads from `CD\COM\FDAT.T` at 0x801E8308. Images share load windows, so an address is never an
   identity without its image. `config/images.toml` is the authority.
-- The toolchain, compiler probes and linker model are inherited from the
-  King's Field II (`SLPS-00069`) project. Re-prove each against this game's
-  retail bytes before relying on it.
+- The tooling is inherited from the King's Field II (`SLPS-00069`) project;
+  the toolchain is this game's own (`docs/toolchain.md`): Sony's GNU C 2.60
+  CC1PSX with ASPSX 2.21, PSYLINK 2.27, CPE2X 1.5 and DMPSX 2.03 from the
+  Runtime Library 3.3 CD. It rebuilds `PSX.EXE` byte-identically. GAME and
+  OPEN link Library 3.4 and END a post-3.3 LIBGPU/LIBSND, none of which is
+  preserved, so their links against the 3.3 archives remain a probe; re-prove
+  any other inherited fact against this game's retail bytes before relying
+  on it.
 - The PS-X EXEs retain linked bytes, not symbols or relocation tables.
   Functions, data, labels, relocations, and TU ownership under `config/retail/`
   are curated working models, not recovered ground truth.
@@ -16,8 +22,12 @@
   not be distorted to protect a metric.
 - Exact means objdiff `100%`. `--loose` is display-only and is never a closure
   or banking criterion.
-- Exact compiler, assembler, linker, and optimization attribution remain open.
-  `probe-gcc260-o2-g0` is a productive probe, not historical proof.
+- `gcc260-o2-g8` (`-O2 -G8`) and `gcc260-o2-g0` are proven only for the
+  units that match under them (for example `psx.main`, and the FDAT modules
+  at `-G0`); for
+  every other unit they are probes until that unit matches. Small-data
+  use is mixed per TU (95 GAME functions are `$gp`-relative). Plain `char` is
+  unsigned under this compiler.
 
 ## Environment and evidence discipline
 
@@ -25,7 +35,7 @@
 - Extract and initialize hash-identical retail files with
   `kf extract --disc PATH.cue && kf init --retail-dir retail` before binary queries.
 - Select one image explicitly for every semantic query:
-  `kf sema --image psx|game|open|end ...`.
+  `kf sema --image psx|game|open|end|fdat_nnn ...`.
 - Before editing a function, inspect its retail disassembly/CFG, callers,
   callees, strings, data references, relocation evidence, adjacent functions,
   source history, and current match state.
@@ -56,6 +66,9 @@
   batch, catalogue recurring residues, prove the exact GCC/profile, then read
   the corresponding MIPS optimizer/backend and validate mechanisms with
   controlled probes. MSVC internals and levers do not transfer.
+- Mechanisms already proven this way, with their source forms, are in
+  `docs/compiler-notes.md`; check it before recording a residue, and add new
+  ones there rather than in per-campaign notes.
 - Treat a lower intermediate score as an experiment, not automatic
   falsification, when an independently evidenced source fact moved code toward
   retail. The final kept source must be humane and must not regress a banked
@@ -91,7 +104,8 @@
   bytes.
 - SDK macros or inline GTE forms may legitimately emit raw COP2 instructions;
   prove the header/macro identity and version rather than hand-transcribing
-  `.word` instructions into game source.
+  `.word` instructions into game source. The SDK's `INLINE.H`/`GTEMAC.H`
+  macros emit placeholder words that the build's DMPSX step rewrites.
 
 ## MIPS-I and PlayStation rules
 
@@ -105,7 +119,10 @@
   `lui` plus `ori` is not interchangeable. Audit the exact low opcode and
   target addend.
 - `jalr` and non-return `jr` are unresolved indirect control flow until a table
-  or value chain is proved. Do not invent a callee from proximity.
+  or value chain is proved. Do not invent a callee from proximity. The
+  known-reference closure gate exempts indirect sites inside vendored Sony
+  (Psy-Q) functions by project decision, listing each as a
+  `vendored-indirect` witness row; game-code sites still need a proof.
 - Signedness and width are first-class codegen facts. Propagate `char`, `u8`,
   `s16`, `u16`, `int`, and pointer types through callers and callees; `lb/lbu`,
   `lh/lhu`, extension instructions, comparisons, and stack argument slots are
@@ -170,6 +187,10 @@
   remove the real source reference to accommodate an incomplete target object.
 - BSS, overlay RAM, pointer tables, and GP-relative data require explicit
   ownership work. Do not infer initialized storage from aggregate objdiff data.
+- A check that cannot run is skipped only by a recorded, reasoned row in
+  `config/check_exemptions.tsv` (today only `common-placement`: COMMON whose
+  address depends on unpreserved SDK objects). Reports print it as EXEMPT;
+  never fake an address or drop a claim to pass a gate.
 - Generated build products, reports, and local retail paths are not committed.
 
 ## Verification and change discipline

@@ -3,15 +3,18 @@
 The structural function list remains the authority for starts and WIP extents.
 This command layers three independent kinds of library evidence over it:
 
-* relocation-masked exact Psy-Q 3.0 object-section matches, with XDEF
-  names read from the matching archive members; and
-* project-built, function-level Psy-Q 3.0 FIDs derived from every supplied
-  archive member; and
-* the wildcarded Psy-Q 3.00 object signatures bundled by ``ghidra_psx_ldr``.
+* optional reviewed relocation-masked exact object-section matches against
+  the supplied SDK archives, with XDEF names read from the matching members;
+* project-built, function-level FIDs derived from every supplied archive
+  member (``--sdk-lib-dir``, labelled with ``--sdk-version``); and
+* the wildcarded object signatures bundled by ``ghidra_psx_ldr``, one
+  signature set per SDK release (``--signature-set``, preferred set first).
 
-Psy-Q 3.0 matches establish the actual linked input.  The later signatures
-are deliberately marked as version-skewed candidates.  Output goes below
-``build`` by default and never overwrites the hand-owned retail list.
+Exact matches against the supplied archives establish the linked input.
+Signature rows carry their set in the confidence (``psyq340-signature``), so a
+set other than the linked release stays a visibly version-skewed candidate.
+Output goes below ``build`` by default and never overwrites the hand-owned
+retail list.
 """
 
 from __future__ import annotations
@@ -30,8 +33,8 @@ from typing import Iterable, Sequence
 from scripts.kf.retail import (
     IMAGE_LAYOUTS,
     IMAGE_ORDER,
+    load_payload,
     parse_int,
-    parse_psx_exe,
     read_tsv,
     write_tsv,
 )
@@ -90,6 +93,44 @@ XDEF_RE = re.compile(
 AUTOMATIC_LABEL_RE = re.compile(
     r"^(?:loc|text|lab|fun|sub|byte|word|dword|unk)_[0-9a-f]+$", re.IGNORECASE
 )
+SDK_DIRECTORY_RE = re.compile(r"psyq-(\d+(?:\.\d+)+)", re.IGNORECASE)
+# The flake supplies the Runtime Library 3.3 CD archives (exact and FID rows
+# carry `sdk33`); no Library 3.4 archive is preserved. GAME.EXE and OPEN.EXE
+# also carry newer members (intr.c 1.73, sys.c 1.116; most GAME signature hits
+# are 3.4-consistent), END.EXE a newer LIBGPU SYS and LIBSND members. The 3.4
+# signature set fills starts the archives leave open; the 3.3 set only fills
+# what 3.4 leaves open and stays visible as `psyq330-signature`.
+DEFAULT_SIGNATURE_SETS = ("340", "330")
+GHIDRA_PSX_LOADER_RELEASE = "ghidra_psx_ldr-2026.07.08"
+
+
+@dataclass(frozen=True)
+class SdkLabel:
+    """The SDK release that `--sdk-lib-dir` supplies, e.g. ``3.4``."""
+
+    version: str
+
+    @property
+    def token(self) -> str:
+        return "sdk" + self.version.replace(".", "")
+
+    @property
+    def source_version(self) -> str:
+        return f"Psy-Q {self.version}"
+
+    @classmethod
+    def from_directory(cls, directory: Path) -> "SdkLabel":
+        match = SDK_DIRECTORY_RE.search(str(directory))
+        if match is None:
+            raise ValueError(
+                f"{directory}: cannot infer the SDK release; pass --sdk-version"
+            )
+        return cls(match.group(1))
+
+
+def signature_set_version(name: str) -> str:
+    """Spell a ghidra_psx_ldr set directory as a release (`340` -> `3.4`)."""
+    return f"{name[0]}.{name[1:].rstrip('0') or '0'}"
 
 
 @dataclass(frozen=True)
@@ -342,6 +383,7 @@ def exact_object_rows(
     evidence_path: Path,
     symbols: dict[tuple[str, str], ObjectSymbols],
     images: dict[str, tuple[int, bytes]],
+    sdk: SdkLabel,
 ) -> dict[tuple[str, int], dict[str, object]]:
     fields, evidence = read_tsv(evidence_path)
     if fields != OBJECT_EVIDENCE_FIELDS:
@@ -408,9 +450,9 @@ def exact_object_rows(
         end = start + block_size
         match_confidence = matches[0]["match_confidence"]
         confidence = {
-            "strong_unique": "exact-sdk30",
-            "short_unique": "exact-sdk30-short",
-            "archive_ambiguous": "exact-sdk30-ambiguous",
+            "strong_unique": f"exact-{sdk.token}",
+            "short_unique": f"exact-{sdk.token}-short",
+            "archive_ambiguous": f"exact-{sdk.token}-ambiguous",
         }[match_confidence]
         compared_bits = int(matches[0]["compared_bits"])
         relocations = int(matches[0]["relocations_masked"])
@@ -438,12 +480,10 @@ def exact_object_rows(
                 "library": "|".join(sorted({candidate[0] for candidate in candidates})),
                 "module": "|".join(sorted({candidate[1] for candidate in candidates})),
                 "member_offset": f"0x{member_offset:x}",
-                "source_version": "Psy-Q 3.0",
+                "source_version": sdk.source_version,
                 "evidence": "relocation-masked-object-section",
                 "confidence": confidence,
-                "provenance": (
-                    "psyq_release_25_text_sections.tsv;psy-k-0.4.0-XDEF"
-                ),
+                "provenance": f"{evidence_path.name};psy-k-0.4.0-XDEF",
                 "note": (
                     f"function extent lies within exact {block_size:#x}-byte .text "
                     f"match ({compared_bits} compared bits; {relocations} relocations masked)"
@@ -458,6 +498,7 @@ def apply_complete_object_rows(
     symbols: dict[tuple[str, str], ObjectSymbols],
     images: dict[str, tuple[int, bytes]],
     rows: dict[tuple[str, int], dict[str, object]],
+    sdk: SdkLabel,
 ) -> None:
     fields, evidence = read_tsv(evidence_path)
     if fields != COMPLETE_OBJECT_FIELDS:
@@ -507,10 +548,10 @@ def apply_complete_object_rows(
             "library": library,
             "module": module,
             "member_offset": "0x0",
-            "source_version": "Psy-Q 3.0",
+            "source_version": sdk.source_version,
             "evidence": "complete-object-byte-match",
-            "confidence": "exact-sdk30-complete",
-            "provenance": "psyq_release_25_complete_objects.tsv;psy-k-0.4.0-XDEF",
+            "confidence": f"exact-{sdk.token}-complete",
+            "provenance": f"{evidence_path.name};psy-k-0.4.0-XDEF",
             "note": evidence_row["note"],
         }
 
@@ -531,6 +572,7 @@ def parse_signature(signature: str) -> tuple[bytes, bytes]:
 
 
 def load_signatures(directory: Path) -> list[SignaturePattern]:
+    """Load one ghidra_psx_ldr signature set (a directory of LIB JSON files)."""
     patterns: list[SignaturePattern] = []
     for path in sorted(directory.glob("*.json")):
         library = path.name.removesuffix(".json").upper()
@@ -622,25 +664,8 @@ def find_masked_bytes(data: bytes, mask: bytes, payload: bytes) -> list[int]:
         cursor = found + 1
 
 
-def read_payload(path: Path) -> tuple[int, bytes]:
-    data = path.read_bytes()
-    if len(data) < 0x800 or data[:8] != b"PS-X EXE":
-        raise ValueError(f"{path}: not a PS-X EXE")
-    load_address = int.from_bytes(data[0x18:0x1c], "little")
-    load_size = int.from_bytes(data[0x1c:0x20], "little")
-    if len(data) < 0x800 + load_size:
-        raise ValueError(f"{path}: truncated load image")
-    return load_address, data[0x800:0x800 + load_size]
-
-
 def load_retail_payloads(exe_dir: Path) -> dict[str, tuple[int, bytes]]:
-    images: dict[str, tuple[int, bytes]] = {}
-    for image, expected in IMAGE_LAYOUTS.items():
-        path = exe_dir / image
-        if parse_psx_exe(path) != expected:
-            raise ValueError(f"{path}: retail identity/layout mismatch")
-        images[image] = read_payload(path)
-    return images
+    return {image: load_payload(exe_dir / image, image) for image in IMAGE_LAYOUTS}
 
 
 def signature_hits(
@@ -686,7 +711,14 @@ def apply_signature_rows(
     functions: Sequence[Function],
     hits: Sequence[SignatureHit],
     rows: dict[tuple[str, int], dict[str, object]],
+    signature_set: str,
 ) -> None:
+    """Add rows from one signature set; rows already present are kept.
+
+    Call it once per set, preferred set first: a later (version-skewed) set
+    only fills starts that the earlier sets and exact channels left open.
+    """
+    version = signature_set_version(signature_set)
     starts = {(function.image, function.va): function for function in functions}
     observations: dict[tuple[str, int], list[tuple[SignatureHit, set[str]]]] = {}
     for hit in hits:
@@ -727,8 +759,12 @@ def apply_signature_rows(
                 name, aliases = _choose_names(function, names)
                 row["name"] = name
                 row["aliases"] = aliases
-                row["provenance"] = str(row["provenance"]) + ";ghidra_psx_ldr-psyq300-label"
-                row["note"] = str(row["note"]) + "; name corroborated by 3.00 signature"
+                row["provenance"] = (
+                    str(row["provenance"]) + f";ghidra_psx_ldr-psyq{signature_set}-label"
+                )
+                row["note"] = (
+                    str(row["note"]) + f"; name corroborated by {version} signature"
+                )
             continue
 
         name, aliases = _choose_names(function, names)
@@ -745,12 +781,13 @@ def apply_signature_rows(
             "library": "|".join(libraries),
             "module": "|".join(modules),
             "member_offset": f"0x{function.va - hit.va:x}",
-            "source_version": "Psy-Q 3.00 signature corpus",
+            "source_version": f"Psy-Q {version} signature corpus",
             "evidence": "wildcard-object-signature",
             "confidence": (
-                "psyq300-signature-ambiguous" if ambiguous else "psyq300-signature"
+                f"psyq{signature_set}-signature"
+                + ("-ambiguous" if ambiguous else "")
             ),
-            "provenance": "ghidra_psx_ldr-2026.07.08/psyq/300",
+            "provenance": f"{GHIDRA_PSX_LOADER_RELEASE}/psyq/{signature_set}",
             "note": (
                 f"unique image occurrence; {hit.fixed_bytes}/{hit.size} bytes fixed"
                 + (f"; {len(hit.patterns)} archive candidates" if ambiguous else "")
@@ -761,6 +798,7 @@ def apply_signature_rows(
 def apply_fid_rows(
     fid_rows: Sequence[dict[str, str]],
     rows: dict[tuple[str, int], dict[str, object]],
+    sdk: SdkLabel,
 ) -> None:
     """Promote strong project-built function IDs.
 
@@ -776,7 +814,7 @@ def apply_fid_rows(
             continue
         key = (fid["image"], parse_int(fid["va"]))
         witness = (
-            f"psyq-sdk30-fid:{fid['fid_sha256'][:12]}:"
+            f"psyq-{sdk.token}-fid:{fid['fid_sha256'][:12]}:"
             f"{fid['object_sha256'][:12]}"
         )
         if key in rows:
@@ -805,9 +843,9 @@ def apply_fid_rows(
             "library": fid["library"],
             "module": fid["module"],
             "member_offset": fid["member_offset"],
-            "source_version": "Psy-Q 3.0",
+            "source_version": sdk.source_version,
             "evidence": "relocation-masked-function-id",
-            "confidence": "fid-sdk30",
+            "confidence": f"fid-{sdk.token}",
             "provenance": witness,
             "note": (
                 f"unique substantial {fid['boundary']} FID; "
@@ -857,7 +895,7 @@ def apply_fid_rows(
             for fid in candidates
         })
         witnesses = sorted({
-            f"psyq-sdk30-fid:{fid['fid_sha256'][:12]}:"
+            f"psyq-{sdk.token}-fid:{fid['fid_sha256'][:12]}:"
             f"{fid['object_sha256'][:12]}"
             for fid in candidates
         })
@@ -876,9 +914,9 @@ def apply_fid_rows(
             "library": "|".join(sorted({item[0] for item in identities})),
             "module": "|".join(sorted({item[1] for item in identities})),
             "member_offset": next(iter(offsets)) if len(offsets) == 1 else "0x0",
-            "source_version": "Psy-Q 3.0",
+            "source_version": sdk.source_version,
             "evidence": "exact-function-id-multiobject",
-            "confidence": "fid-sdk30-ambiguous",
+            "confidence": f"fid-{sdk.token}-ambiguous",
             "provenance": ";".join(witnesses),
             "note": (
                 f"fully fixed {size:#x}-byte FID shared by {len(identities)} "
@@ -887,15 +925,94 @@ def apply_fid_rows(
         }
 
 
-def signature_directory_from_environment() -> Path | None:
+SDK_BAND_FIELDS = ("image", "start", "end", "note")
+
+
+def load_sdk_bands(path: Path) -> list[tuple[str, int, int]]:
+    fields, rows = read_tsv(path)
+    if fields != SDK_BAND_FIELDS:
+        raise ValueError(f"{path}: fields {fields!r}, expected {SDK_BAND_FIELDS!r}")
+    bands = []
+    for row in rows:
+        if row["image"] not in IMAGE_LAYOUTS:
+            raise ValueError(f"{path}: unknown image {row['image']!r}")
+        start, end = parse_int(row["start"]), parse_int(row["end"])
+        if not start < end:
+            raise ValueError(f"{path}: empty band {row!r}")
+        bands.append((row["image"], start, end))
+    return bands
+
+
+def apply_band_rows(
+    functions: Sequence[Function],
+    bands: Sequence[tuple[str, int, int]],
+    rows: dict[tuple[str, int], dict[str, object]],
+    band_path: Path,
+) -> None:
+    """Mark SDK text-band functions that no stronger channel identified.
+
+    The band file is the reviewed extent of each image's library text. A
+    function inside it with no exact, FID or signature row belongs to a
+    library release that no supplied archive or signature set preserves; it
+    stays vendored (it is not game code) under `sdk-unmatched-version`, with
+    the identified neighbours recorded for review.
+    """
+    by_image: dict[str, list[tuple[int, dict[str, object]]]] = {}
+    for (image, va), row in rows.items():
+        by_image.setdefault(image, []).append((va, row))
+    for entries in by_image.values():
+        entries.sort(key=lambda item: item[0])
+
+    def neighbour(image: str, va: int, step: int) -> str:
+        entries = by_image.get(image, [])
+        candidates = [row for address, row in entries if (address - va) * step > 0]
+        if not candidates:
+            return "none"
+        row = candidates[0] if step > 0 else candidates[-1]
+        return f"{row['library']}/{row['module']} {row['name'] or row['va']}"
+
+    for function in functions:
+        key = (function.image, function.va)
+        if key in rows:
+            continue
+        band = next(
+            (band for band in bands
+             if band[0] == function.image and band[1] <= function.va
+             and function.end <= band[2]),
+            None,
+        )
+        if band is None:
+            continue
+        rows[key] = {
+            "image": function.image,
+            "va": f"0x{function.va:08x}",
+            "size": f"0x{function.size:x}",
+            "name": "",
+            "aliases": "",
+            "provider": "Sony Computer Entertainment",
+            "library": "unmatched",
+            "module": "unmatched",
+            "member_offset": "0x0",
+            "source_version": "Psy-Q library release not preserved",
+            "evidence": "sdk-text-band",
+            "confidence": "sdk-unmatched-version",
+            "provenance": band_path.name,
+            "note": (
+                f"inside SDK text band 0x{band[1]:08x}..0x{band[2]:08x}; no exact, FID or "
+                f"signature match; follows {neighbour(function.image, function.va, -1)}, "
+                f"precedes {neighbour(function.image, function.va, 1)}"
+            ),
+        }
+
+
+def signature_root_from_environment() -> Path | None:
+    """The ghidra_psx_ldr `data/psyq` directory holding one subdirectory per set."""
     if root := os.environ.get("GHIDRA_PSX_LOADER"):
-        candidate = Path(root) / "data" / "psyq" / "300"
+        candidate = Path(root) / "data" / "psyq"
         if candidate.is_dir():
             return candidate
     if root := os.environ.get("NIX_GHIDRAHOME"):
-        candidate = (
-            Path(root) / "Extensions" / "ghidra_psx_ldr" / "data" / "psyq" / "300"
-        )
+        candidate = Path(root) / "Extensions" / "ghidra_psx_ldr" / "data" / "psyq"
         if candidate.is_dir():
             return candidate
     return None
@@ -914,14 +1031,16 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--functions", type=Path, default=Path("config/retail/functions.tsv"))
     parser.add_argument(
-        "--object-evidence",
-        type=Path,
-        default=Path("config/evidence/psyq_30_text_sections.tsv"),
+        "--object-evidence", type=Path,
+        help="reviewed exact .text matches against --sdk-lib-dir (optional)",
     )
     parser.add_argument(
-        "--complete-object-evidence",
-        type=Path,
-        default=Path("config/evidence/psyq_30_complete_objects.tsv"),
+        "--complete-object-evidence", type=Path,
+        help="reviewed complete small-object matches against --sdk-lib-dir (optional)",
+    )
+    parser.add_argument(
+        "--sdk-version",
+        help="release of the --sdk-lib-dir archives (default: inferred from its psyq-X.Y path)",
     )
     parser.add_argument("--psyk", type=Path)
     parser.add_argument(
@@ -930,7 +1049,24 @@ def parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(os.environ["PSYQ_LIB"]) if "PSYQ_LIB" in os.environ else None,
     )
     parser.add_argument("--exe-dir", type=Path)
-    parser.add_argument("--signature-dir", type=Path, default=signature_directory_from_environment())
+    parser.add_argument(
+        "--signature-root", type=Path, default=signature_root_from_environment(),
+        help="ghidra_psx_ldr data/psyq directory (automatic inside nix develop)",
+    )
+    parser.add_argument(
+        "--signature-set", action="append",
+        help="signature set below --signature-root, preferred first; repeat for "
+        f"version-skewed fallbacks (default: {', '.join(DEFAULT_SIGNATURE_SETS)})",
+    )
+    parser.add_argument(
+        "--signature-dir", type=Path,
+        help="one explicit signature set directory, used instead of --signature-set",
+    )
+    parser.add_argument(
+        "--sdk-bands", type=Path,
+        help="reviewed SDK text bands; unidentified functions inside them become "
+        "sdk-unmatched-version rows (optional)",
+    )
     parser.add_argument("--no-fids", action="store_true")
     parser.add_argument("--no-signatures", action="store_true")
     parser.add_argument(
@@ -954,9 +1090,19 @@ def main(arguments: Sequence[str] | None = None) -> int:
     else:
         raise SystemExit("refusing to overwrite hand-owned config/retail; seed below build first")
 
+    sdk = (
+        SdkLabel(args.sdk_version) if args.sdk_version
+        else SdkLabel.from_directory(args.sdk_lib_dir)
+    )
     functions = load_functions(args.functions)
-    _fields, evidence = read_tsv(args.object_evidence)
-    _complete_fields, complete_evidence = read_tsv(args.complete_object_evidence)
+    images = load_retail_payloads(args.exe_dir)
+    evidence = (
+        read_tsv(args.object_evidence)[1] if args.object_evidence else []
+    )
+    complete_evidence = (
+        read_tsv(args.complete_object_evidence)[1]
+        if args.complete_object_evidence else []
+    )
     wanted = {
         parse_archive_candidate(candidate)
         for row in evidence
@@ -966,14 +1112,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
         (row["library"].upper(), row["module"].upper())
         for row in complete_evidence
     )
-    symbols = load_sdk_symbols(
-        resolve_tool(args.psyk, "psyk"), args.sdk_lib_dir, wanted
+    symbols = (
+        load_sdk_symbols(resolve_tool(args.psyk, "psyk"), args.sdk_lib_dir, wanted)
+        if wanted else {}
     )
-    images = load_retail_payloads(args.exe_dir)
-    rows = exact_object_rows(functions, args.object_evidence, symbols, images)
-    apply_complete_object_rows(
-        functions, args.complete_object_evidence, symbols, images, rows
+    rows = (
+        exact_object_rows(functions, args.object_evidence, symbols, images, sdk)
+        if args.object_evidence else {}
     )
+    if args.complete_object_evidence:
+        apply_complete_object_rows(
+            functions, args.complete_object_evidence, symbols, images, rows, sdk
+        )
 
     if not args.no_fids:
         # Kept local to avoid making the standalone FID tool depend on this
@@ -989,16 +1139,29 @@ def main(arguments: Sequence[str] | None = None) -> int:
         fid_rows = classify_hits(find_hits(
             corpus, load_retail_functions(args.functions), images
         ))
-        apply_fid_rows(fid_rows, rows)
+        apply_fid_rows(fid_rows, rows, sdk)
 
     if not args.no_signatures:
-        if args.signature_dir is None:
+        if args.signature_dir is not None:
+            signature_sets = [(args.signature_dir.name, args.signature_dir)]
+        elif args.signature_root is not None:
+            signature_sets = [
+                (name, args.signature_root / name)
+                for name in (args.signature_set or DEFAULT_SIGNATURE_SETS)
+            ]
+        else:
             raise SystemExit(
-                "signature matching needs --signature-dir "
+                "signature matching needs --signature-root or --signature-dir "
                 "(automatic inside nix develop)"
             )
-        patterns = load_signatures(args.signature_dir)
-        apply_signature_rows(functions, signature_hits(patterns, images), rows)
+        for name, directory in signature_sets:
+            if not directory.is_dir():
+                raise SystemExit(f"{directory}: missing signature set {name}")
+            patterns = load_signatures(directory)
+            apply_signature_rows(functions, signature_hits(patterns, images), rows, name)
+
+    if args.sdk_bands:
+        apply_band_rows(functions, load_sdk_bands(args.sdk_bands), rows, args.sdk_bands)
 
     ordered = sorted(
         rows.values(),
@@ -1010,7 +1173,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         ordered,
         (
             "Candidate Sony/Psy-Q ownership layered over config/retail/functions.tsv.",
-            "Psy-Q 3.0 exact objects and project-built FIDs outrank Ghidra Psy-Q 3.00 signatures.",
+            f"{sdk.source_version} exact objects and project-built FIDs outrank Ghidra "
+            "signature sets; earlier --signature-set entries outrank later ones.",
             "Review before mechanically admitting changes to config/retail/functions_vendored.tsv.",
         ),
     )

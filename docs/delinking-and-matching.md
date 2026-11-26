@@ -26,14 +26,26 @@ reference shown as `validated` uses the same proof boundary as safe delinking.
 
 ## First-pass topology
 
-The four programs are processed independently:
+The 32 images (four programs and 28 FDAT modules) are processed
+independently, each under its `--image` key:
 
 ```text
-PSX.EXE  + config/retail/*.tsv -> build/delink/psx  -> build/objdiff/psx
-GAME.EXE + config/retail/*.tsv -> build/delink/game -> build/objdiff/game
-OPEN.EXE + config/retail/*.tsv -> build/delink/open -> build/objdiff/open
-END.EXE  + config/retail/*.tsv -> build/delink/end  -> build/objdiff/end
+PSX.EXE      + config/retail/*.tsv -> build/delink/psx      -> build/objdiff/psx
+GAME.EXE     + config/retail/*.tsv -> build/delink/game     -> build/objdiff/game
+OPEN.EXE     + config/retail/*.tsv -> build/delink/open     -> build/objdiff/open
+END.EXE      + config/retail/*.tsv -> build/delink/end      -> build/objdiff/end
+FDAT_005.BIN + config/retail/*.tsv -> build/delink/fdat_005 -> build/objdiff/fdat_005
+...
 ```
+
+A module's calls and data references into `GAME.EXE` are cross-image
+references (`retail.referent_image`): an address outside the module's own
+load window belongs to its host. The delinker names such a referent with the
+host's identity (a call to `notify_enqueue` stays `notify_enqueue`), the
+relocation validator accepts a J/JAL whose target is a host function start,
+the target relink resolves the external from the host's address book, and the
+closure audit records the edge as a host reference owned there instead of an
+unmodeled target (the host's own closure is audited with the host).
 
 The target object format is ELF32, little-endian, `EM_MIPS`, MIPS-I/O32. It is
 understood by GNU `mipsel` binutils and objdiff 3.7.3. Each initial object has a
@@ -62,6 +74,9 @@ independently validate the TSV claim:
 - an external J/JAL target must be an admitted function start;
 - a HI/LO pair must remain inside one function extent, consume the LUI register,
   decode to the recorded address, and use a sign-extending low instruction;
+  rows may share a site only as one HI/LO family (same target: one `lui`
+  feeding several lows, or `lui`s on converging paths feeding one low), which
+  is emitted once per site in ELF REL order;
 - an out-of-load HI/LO pair remains withheld unless a human has promoted that
   exact decoded pair to `status=reviewed`; this is the path for RAM/BSS symbols
   whose addresses are real but whose storage is absent from the PS-X EXE payload;
@@ -301,11 +316,78 @@ The default build also checks target-object roundtrips through the independent
 GNU MIPS linker. A packed section must admit one retail base for all its owned
 symbols; the linker may not scatter it or override defined symbols to hide a
 layout conflict. Relinked initialized bytes are compared in full, and BSS is
-checked as uninitialized storage. Synthetic tails imitating the probe assembler
+checked as uninitialized storage. A unit's single global COMMON request whose exact `DATA()` claim
+is the only one in its section is placed at that claim: in `.bss`, or in
+`.sbss` for a small request of a `-G8` unit. A unit whose `.sdata` holds
+only its `SDATA()` literal range places that section at the range's start. Synthetic tails imitating the probe assembler
 are not appended to retail claims: source alignment/extent differences remain
 real comparison failures. See the [placement evidence](../config/evidence/target_roundtrip_layout.md)
 for known conflicts. This is not yet a linked reconstruction or a check of all
 config-only reachable storage.
+
+`kf check` applies the target-relink and known-reference closure gates only to
+images that at least one source unit claims; an image without units has
+nothing to relink, and its census-wide closure is the curation worklist
+(`kf verify reachability --image KEY`). The OK line says how many images were
+gated. Inside reached vendored Sony (Psy-Q) functions, every indirect
+`jr`/`jalr` is exempt from the closure gate by project decision (2026-11-17;
+revisit if a vendored site turns out to matter). The exemption is witnessed,
+not silent: each site is a `vendored_dispatch` row (`owner`, `site`,
+`pattern: "vendored-indirect"`) in the reachability report, and the summary
+counts them as `vendored_indirect_exempt`. Members of library releases no
+preserved archive matches (`functions_vendored.tsv` library `unmatched`,
+`sdk-unmatched-version`: GAME/OPEN's Library 3.4, END's newer LIBGPU/LIBSND)
+are covered alike; each row carries the member's `library` and the summary
+counts those as `vendored_indirect_unpreserved`. A site also proved from the
+member's own instructions names that proof in `proof` (`bios-vector-stub`
+for `li $t2, 0xA0/0xB0/0xC0; jr $t2`, with the vector in `target`;
+`empty-link-time-table` for a startup table loop with a link-time zero
+count), counted as `proven_vendored_dispatch`. Game-code indirect transfers
+get no such exemption. In a game
+function, a compiled `switch` jump is proved from its own bounded value
+chain (`sltiu`/`beqz` bound, `lui`/`addiu` table address, `sll`/`addu`/`lw`,
+`jr`) when every table word is an instruction start inside that function;
+the CFG's `switch_table` rule (`scripts/kf/sema/cfg.py`) is the one prover,
+and each such jump is a `switch_dispatch` witness row. A Sony member's
+switch jump is not proved by it; it is covered by the vendored exemption.
+
+A game call through a pointer installed at run time (a struct member set from
+an argument, a handler table an FDAT module brings) has no value chain inside
+the caller. Its evidence is curated in two tables, checked by
+`scripts/kf/indirect_pointers.py` (ported from the Shadow Tower decomp):
+`config/retail/indirect_pointers.tsv` lists every value source the review
+found for one typed member (`CdRequest.callback`): a `table-word` (a code
+pointer in a data word, which needs a reviewed `mips32_candidate` row matching
+the bytes; `source_image` `FDAT_*.BIN` means the same word in every FDAT
+module) or an `address` (a `lui`/low pair in the audited image's code taking
+a function's address, which needs a validated reviewed reference); every
+source must hold a function start, and the `evidence` column says why the
+list is complete (every store to the member, every caller of the installer).
+`config/retail/indirect_sites.tsv` ties a game `jalr`/`jr` to its pointer
+and to the offset of the load: every definition of the jump register that
+reaches the site must be `lw r, load_offset(base)` (reaching definitions,
+`scripts/kf/sema/values.py`). A row's optional `holder_va` also pins where
+the table or record comes from: every definition of that base must be
+`lw base, k(p)` with `p` holding only the constant `holder_va - k`. Such a
+site becomes a `pointer_dispatch` witness (`reviewed-pointer`) whose targets
+are `validated` edges; a target in an FDAT module is a cross-image edge,
+owned and audited with that module. A row the audit does not meet is
+`stale-indirect-site`; a source that fails its check is
+`invalid-indirect-pointer`. Completeness of a source list is the reviewed
+claim, not a proof.
+
+A check that cannot run for a unit is skipped only through a recorded row in
+`config/check_exemptions.tsv` (image, unit, check, sections, reason; see
+`scripts/kf/check_exemptions.py`). The one kind, `common-placement`, covers a
+unit's global `.sbss`/`.bss` COMMON requests whose retail addresses depend on
+SDK objects that are not preserved (OPEN's Library 3.4, END's newer LIBGPU
+and LIBSND), so no link can place them. For those claims the data gate and
+the target relink skip storage placement and print `EXEMPT` with the reason;
+they still require every covered claim to be a COMMON request of its claimed
+size with no fixed allocation beside it, and the relink still links and
+compares the unit's code with each exempt symbol at its claimed address.
+`kf check` lists every exemption and says so in its OK line, and the README's
+exact data-module count leaves exempt units out.
 
 Both objdiff front ends are built from the same pinned 3.7.3 source with
 `patches/objdiff-strict-data.patch`. Native section scores include anonymous

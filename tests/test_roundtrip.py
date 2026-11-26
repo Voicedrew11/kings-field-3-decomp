@@ -252,6 +252,22 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class OverlayAddressBookTests(unittest.TestCase):
+    def test_overlay_externals_resolve_to_host_identities_outside_its_window(self):
+        from scripts.kf.retail import IMAGE_LAYOUTS
+        from scripts.kf.roundtrip import address_book
+
+        book = address_book("FDAT_002.BIN")
+        self.assertEqual(book["area_handler_noop"], {0x801E83A8})
+        # The module calls GAME.EXE's notify_enqueue in place.
+        self.assertEqual(book["notify_enqueue"], {0x80041EEC})
+        layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
+        host = address_book("GAME.EXE")
+        for name, addresses in book.items():
+            if name in host and name != "area_handler_noop":
+                self.assertFalse(any(layout.contains(va) for va in addresses), name)
+
+
 class LinkLabelTests(unittest.TestCase):
     def test_labels_are_image_local_and_unique(self):
         with tempfile.TemporaryDirectory() as directory:

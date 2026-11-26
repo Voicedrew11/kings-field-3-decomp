@@ -34,8 +34,28 @@
         inherit pkgs;
         sdkBuilder = ./scripts/create-toolchain.py;
       };
-      inherit (toolchain) psyqSdk psyqMallocObj psyqRuntime30Cpe2x gcc257Native gcc257Headers gcc260Native cc1psx257 cpppsx257
-        cc1psx260 cpppsx260 aspsxNative asmpsxNative;
+      inherit (toolchain) psyqSdk psyq33Sdk sonyGcc260 gcc257Native gcc257Headers gcc260Native
+        cc1psx257 cpppsx257 cc1psx260 cpppsx260;
+
+      # The executable chain: Sony GNU C 2.60 CC1PSX, and ASPSX 2.21, PSYLINK
+      # 2.27, CPE2X 1.5, DMPSX and the Library 3.3 archives and headers from
+      # the Runtime Library 3.3 CD. The Psy-Q 3.0 kit (PSYQ_SDK/PSYQ_BIN) stays
+      # only as an analysis corpus and for the gcc241-kit probe.
+      chainEnvironment = {
+        PSYQ_SDK = "${psyqSdk}/psyq-3.0";
+        PSYQ_BIN = "${psyqSdk}/psyq-3.0/BIN";
+        PSYQ_INCLUDE = "${psyq33Sdk}/include-lf";
+        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
+        PSYQ_LIB = "${psyq33Sdk}/lib";
+        PSYQ_MALLOC_OBJ = "${psyq33Sdk}/lib/MALLOC.OBJ";
+        PSYQ_CC1PSX = "${sonyGcc260}/CC1PSX.EXE";
+        PSYQ_ASPSX = "${psyq33Sdk}/bin/ASPSX.EXE";
+        PSYQ_PSYLINK = "${psyq33Sdk}/bin/PSYLINK.EXE";
+        PSYQ_CPE2X = "${psyq33Sdk}/bin/CPE2X.EXE";
+        PSYQ_DMPSX = "${psyq33Sdk}/bin/DMPSX.EXE";
+      };
+      chainExports = pkgs.lib.concatStrings (pkgs.lib.mapAttrsToList
+        (name: value: "export ${name}=\"${value}\"\n") chainEnvironment);
 
       psy-k = pkgs.rustPlatform.buildRustPackage {
         pname = "psy-k";
@@ -243,8 +263,12 @@
           cd "$repo"
           exec python3 -m scripts.kf.seed_vendored_functions \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
-            --signature-dir ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq/300 \
+            --sdk-lib-dir "${psyq33Sdk}/lib" \
+            --sdk-version 3.3 \
+            --object-evidence config/evidence/psyq_33_text_sections.tsv \
+            --complete-object-evidence config/evidence/psyq_33_complete_objects.tsv \
+            --sdk-bands config/evidence/sdk_text_bands.tsv \
+            --signature-root ${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr/data/psyq \
             "$@"
         '';
       };
@@ -257,7 +281,7 @@
           cd "$repo"
           exec python3 -m scripts.kf.fid_census \
             --psyk ${psy-k}/bin/psyk \
-            --sdk-lib-dir "${psyqSdk}/psyq-3.0/LIB" \
+            --sdk-lib-dir "${psyq33Sdk}/lib" \
             "$@"
         '';
       };
@@ -306,9 +330,7 @@
         ];
         text = ''
           repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
+          ${chainExports}
           cd "$repo"
           exec python3 -m scripts.kf.compile "$@"
         '';
@@ -346,15 +368,7 @@
         ];
         text = ''
           repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
-          export PSYQ_SDK="${psyqSdk}/psyq-3.0"
-          export PSYQ_ASMPSX="${asmpsxNative}"
-          export PSYQ_BIN="$PSYQ_SDK/BIN"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
-          export PSYQ_LIB="$PSYQ_SDK/LIB"
-          export PSYQ_MALLOC_OBJ="${psyqMallocObj}/MALLOC.OBJ"
-          export PSYQ_CPE2X="${psyqRuntime30Cpe2x}/CPE2X.EXE"
+          ${chainExports}
           cd "$repo"
           exec python3 -m scripts.kf.cli "$@"
         '';
@@ -364,8 +378,8 @@
         name = "kings-field";
         packages = [
           psyqSdk
-          psyqMallocObj
-          psyqRuntime30Cpe2x
+          psyq33Sdk
+          sonyGcc260
           psy-k
           pkgs.dosbox-x
           cc1psx260
@@ -442,17 +456,9 @@
           export KINGS_FIELD_DIR="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
           unset PSYQ_DIR PSYQ_GCC241_DIR PSYQ_GCC260_RELEASE25_DIR
           unset PSYQ_GCC260_DISK_DIR PSYQ_GCC260_IMG
-          export PSYQ_SDK="${psyqSdk}/psyq-3.0"
-          export PSYQ_BIN="$PSYQ_SDK/BIN"
-          export PSYQ_INCLUDE="${psyqSdk}/include-lf"
-          export PSYQ_C_INCLUDE="${gcc257Headers}/include"
-          export PSYQ_LIB="$PSYQ_SDK/LIB"
-          export PSYQ_MALLOC_OBJ="${psyqMallocObj}/MALLOC.OBJ"
-          export PSYQ_CPE2X="${psyqRuntime30Cpe2x}/CPE2X.EXE"
+          ${chainExports}
           export PSYQ_COMPILER="$PSYQ_SDK/COMPILER"
-          export PSYQ_ASPSX="${aspsxNative}/1.07/ASPSX.EXE"
           export KF_GCC260_NATIVE="${gcc260Native}"
-          export PSYQ_ASMPSX="${asmpsxNative}"
           export KF_GCC257_NATIVE="${gcc257Native}"
           export GHIDRA_INSTALL_DIR="${pkgs.ghidra}/lib/ghidra"
           export NIX_GHIDRAHOME="${ghidraWithPlugins}/lib/ghidra/Ghidra"
@@ -464,9 +470,9 @@
 
           ${kfCli}/bin/kf clangd >&2 || echo "[kings-field-3] clangd setup failed; run kf clangd after fixing the reported error" >&2
 
-          echo "[kings-field-3] SDK             : Psy-Q 3.0 (1995-04-08 kit); one complete pinned media tree" >&2
-          echo "[kings-field-3] SDK assembler   : ASPSX 1.07 hash-pinned; kit ASPSX 2.08 not yet wired in" >&2
-          echo "[kings-field-3] compiler probes : cc1psx-260/cpppsx-260 and cc1psx-257/cpppsx-257" >&2
+          echo "[kings-field-3] SDK             : Runtime Library 3.3 CD (1995-10-20) archives, headers, ASPSX 2.21, PSYLINK 2.27, CPE2X 1.5, DMPSX" >&2
+          echo "[kings-field-3] compiler        : Sony GNU C 2.60 CC1PSX (DOSBox-X); native cpppsx-260 preprocesses" >&2
+          echo "[kings-field-3] compiler probes : cc1psx-260/cpppsx-260 and cc1psx-257/cpppsx-257 rebuilds" >&2
           echo "[kings-field-3] analysis        : ghidra + PSX loader, pyghidra, psy-k, radare2, mipsel binutils" >&2
           echo "[kings-field-3] PSX emulator    : pcsx-redux ${pcsxRedux.version}" >&2
           echo "[kings-field-3] runtime checks  : kf-run-retail / kf-run-candidate" >&2
@@ -479,21 +485,14 @@
         '';
       };
 
-      sdkBuilderTests = pkgs.runCommand "kings-field-sdk-builder-tests" {
+      sdkBuilderTests = pkgs.runCommand "kings-field-sdk-builder-tests" ({
         nativeBuildInputs = [
           analysisPython mipsBinutilsAliases psy-k objdiff-cli pkgs.dosbox-x pkgs.git
-          cc1psx257 cpppsx257
+          cc1psx260 cpppsx260 cc1psx257 cpppsx257
           pkgs.llvmPackages.clang-unwrapped
         ];
         GHIDRA_PSX_LOADER = "${ghidraPsxLoader}/lib/ghidra/Ghidra/Extensions/ghidra_psx_ldr";
-        PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        PSYQ_LIB = "${psyqSdk}/psyq-3.0/LIB";
-        PSYQ_INCLUDE = "${psyqSdk}/include-lf";
-        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
-        PSYQ_BIN = "${psyqSdk}/psyq-3.0/BIN";
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${asmpsxNative}";
-      } ''
+      } // chainEnvironment) ''
         mkdir project
         cp -r ${./scripts} project/scripts
         cp -r ${./tests} project/tests
@@ -506,18 +505,9 @@
         touch "$out"
       '';
 
-      executableDeterminismTests = pkgs.runCommand "kings-field-executable-determinism" {
-        nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx257 cpppsx257 ];
-        PSYQ_SDK = "${psyqSdk}/psyq-3.0";
-        PSYQ_LIB = "${psyqSdk}/psyq-3.0/LIB";
-        PSYQ_BIN = "${psyqSdk}/psyq-3.0/BIN";
-        PSYQ_INCLUDE = "${psyqSdk}/include-lf";
-        PSYQ_C_INCLUDE = "${gcc257Headers}/include";
-        PSYQ_MALLOC_OBJ = "${psyqMallocObj}/MALLOC.OBJ";
-        PSYQ_CPE2X = "${psyqRuntime30Cpe2x}/CPE2X.EXE";
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
-        PSYQ_ASMPSX = "${asmpsxNative}";
-      } ''
+      executableDeterminismTests = pkgs.runCommand "kings-field-executable-determinism" ({
+        nativeBuildInputs = [ analysisPython pkgs.dosbox-x cc1psx260 cpppsx260 cc1psx257 cpppsx257 ];
+      } // chainEnvironment) ''
         export HOME="$TMPDIR/home"
         mkdir -p "$HOME" project
         cp -r ${./scripts} project/scripts
@@ -536,8 +526,7 @@
         nativeBuildInputs = [ pkgs.dosbox-x
           analysisPython cc1psx257 cpppsx257 mipsBinutilsAliases
         ];
-
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
+        inherit (chainEnvironment) PSYQ_ASPSX;
       } ''
         mkdir -p project/tests/fixtures project/config
         cp -r ${./scripts} project/scripts
@@ -589,8 +578,7 @@
           cc1psx257
           cpppsx257
         ];
-
-        PSYQ_ASPSX = "${aspsxNative}/1.07/ASPSX.EXE";
+        inherit (chainEnvironment) PSYQ_ASPSX;
       } ''
         mkdir project
         cp -r ${./scripts} project/scripts
@@ -615,7 +603,7 @@
         gcc257Instrumented = gcc257Probe.instrumented;
         gcc257Source = gcc257Probe.source;
         inherit psyqSdk psy-k gcc260Native cc1psx260 cpppsx260 gcc257Native cc1psx257 cpppsx257 mipsBinutilsAliases ghidraPsxLoader ghidraWithPlugins objdiff-cli objdiff retailValidate retailSeed functionAudit functionPropose vendoredSeed fidCensus retailDelink objdiffProject objdiffReport sourceCompile runRetail runCandidate kfCli;
-        aspsx107 = aspsxNative;
+        inherit psyq33Sdk sonyGcc260;
         pcsx-redux = pcsxRedux;
         default = psyqSdk;
       };

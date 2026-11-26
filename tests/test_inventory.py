@@ -138,6 +138,30 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual([(f.offset, f.size) for f in carrier.fields],
                          [(0, 1), (4, 8), (12, 1)])
 
+    def test_volatile_and_volatile_macro_qualifiers_do_not_change_layout(self) -> None:
+        source = """
+            #ifdef OWNER
+            #define SHARED volatile
+            #else
+            #define SHARED
+            #endif
+            typedef struct QualifiedCarrier {
+                volatile u8 flag;
+                SHARED u32 counter;
+                u16 *cursor;
+            } QualifiedCarrier;
+        """
+
+        def header(path):
+            return source if path.name == "types.h" else ""
+
+        with patch("pathlib.Path.read_text", header):
+            layout = _header_structure_layouts()["QualifiedCarrier"]
+        self.assertEqual((layout.size, layout.alignment), (12, 4))
+        self.assertEqual([(f.offset, f.size, f.name, f.datatype) for f in layout.fields],
+                         [(0, 1, "flag", "u8"), (4, 4, "counter", "u32"),
+                          (8, 4, "cursor", "u16 *")])
+
     def test_named_union_rejects_unknown_member_type(self) -> None:
         def header(path):
             return ("typedef union BadLayout { Missing value; } BadLayout;"
@@ -249,14 +273,14 @@ class InventoryTests(unittest.TestCase):
                          [(0, 1), (4, 8), (12, 1)])
 
     def test_curated_inventories_cover_the_wip_universe(self) -> None:
-        # Every carveable non-vendored function in the four images has a
+        # Every carveable non-vendored function in every image has a
         # (candidate) identity row; update these counts with each admission.
         counts = validate(RETAIL_CONFIG)
-        self.assertEqual(counts["functions"], 0)
-        self.assertEqual(counts["signatures_started"], 0)
-        self.assertEqual(counts["data"], 0)
+        self.assertEqual(counts["functions"], 1078)
+        self.assertEqual(counts["signatures_started"], 1078)
+        self.assertEqual(counts["data"], 188)
         self.assertGreaterEqual(counts["functions_named"], 0)
-        self.assertEqual(counts["structures"], 0)
+        self.assertEqual(counts["structures"], 101)
 
     def test_static_signature_hint_tracks_live_arguments_and_result(self) -> None:
         parameters, result, shape = _signature_hints(words(

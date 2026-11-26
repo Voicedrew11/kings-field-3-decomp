@@ -1,9 +1,23 @@
-# MANUALLY MANAGED - the retail disc and the linked programs it carries.
+# MANUALLY MANAGED - the retail disc and the linked images it carries.
 #
-# `name` is the tool's image identity (`--image` takes its lowercase stem);
-# `disc_file` is the root ISO9660 file it is read from. The PS-X EXE header
-# fields are checked by `kf init`, so a wrong dump fails before any query.
-# Images are listed in the order reports and inventories sort them.
+# `name` is the tool's image identity (`--image` takes its lowercase stem,
+# e.g. `game` or `fdat_002`). Root programs are PS-X EXEs read from the root
+# ISO9660 file `disc_file`; `kf init` checks their header fields, so a wrong
+# dump fails before any query. Overlays are headerless code images read from
+# an archive entry (see the end of this file). Programs are listed first,
+# then the overlays by archive entry; reports and inventories sort them in
+# this order.
+#
+# Who loads what. PSX.EXE is a program sequencer: its table at 0x8001024C
+# names, by index, 0 OPEN.EXE, 1 GAME.EXE, 2 END.EXE. It clears the index
+# byte at 0x800102F0 (the pointer in its gp+4 word), then loops: BIOS
+# Load(table[index]), Exec, and on return reads the next index from that
+# byte. Which program stores which successor is not yet traced. GAME.EXE
+# alone names `COM\FDAT.T` and loads the FDAT area modules.
+#
+# `gp` is the $gp value each program's startup loads (lui/addiu gp before the
+# jump to main); gp-relative relocations decode against it. Overlays use
+# their host's.
 
 [disc]
 serial = "SLUS-00255"
@@ -20,6 +34,7 @@ disc_file = "SLUS_002.55"
 sha256 = "c8e696c312c6ba0ad9c24b0977a993b517cddf649e3a20586a4f394b1224ae70"
 file_size = 0x1000
 entry = 0x80010120
+gp = 0x80010260
 load_address = 0x80010000
 load_size = 0x800
 
@@ -30,6 +45,7 @@ disc_file = "GAME.EXE"
 sha256 = "7556ec7fa3324f39df483f5383bb8f6fcef5ba3b88a6dd4e895e366edf6b83d9"
 file_size = 0x8C000
 entry = 0x800144F8
+gp = 0x8009C214
 load_address = 0x80011000
 load_size = 0x8B800
 
@@ -39,6 +55,7 @@ disc_file = "OPEN.EXE"
 sha256 = "bf5b2c820007157c2bf3bd380b0e5b280843f579c2e7fbc84605c22c5eb13edb"
 file_size = 0x30000
 entry = 0x800136C8
+gp = 0x800403F4
 load_address = 0x80011000
 load_size = 0x2F800
 
@@ -48,5 +65,286 @@ disc_file = "END.EXE"
 sha256 = "57feb4f5cb2031469516a88d485334cc3ba6162a8f47ce73ab934164a7b7f999"
 file_size = 0x27000
 entry = 0x80011D04
+gp = 0x80037498
 load_address = 0x80011000
 load_size = 0x26800
+
+# Code overlays inside CD\COM\FDAT.T. The archive is a u16 entry count (132)
+# followed by u16 sector (0x800-byte) offsets; entry i spans sectors
+# offset[i]..offset[i+1]. Entries 0..83 are 28 triplets of two data entries
+# and one code module, so the code is entry 3n+2 (2, 5, ..., 83); entries
+# 84..131 hold no code. GAME.EXE alone names `COM\FDAT.T` (its archive-name
+# table at 0x80011000) and holds the common load address 0x801E8308 as three
+# words at 0x800136E8. Each module is loaded whole there, so it shares
+# GAME.EXE's address space and calls straight into GAME.EXE's text.
+# `load_size` is the sector-granular entry span. Every module starts with a
+# u32 id word (5, 6, ..., 0x20, one per module), 32 absolute handler pointers
+# (0x04..0x83; `handler_offset`/`handler_count` below) and a u32 equal to the
+# id plus 0x20 at 0x84, which GAME.EXE's table also points at (0x801E838C).
+# Every handler pointer lands inside its own module; the lowest is a shared
+# `jr ra; nop` default handler, and the slots that use it are the unused
+# ones. In seven modules more bytes sit between 0x88 and that default
+# handler: short code-pointer tables and functions no handler names. No two
+# modules are byte-identical. Modules
+# are named by archive entry index, not by area, because the area-to-entry
+# relation is not yet proven.
+[[archive]]
+name = "FDAT.T"
+disc_path = "CD/COM/FDAT.T"
+sha256 = "2ece40fb09b5c7dc74b71387725ce5e97d5b0823752bd852f6709b1e932bc9c7"
+file_size = 0x41B000
+handler_offset = 0x4
+handler_count = 32
+header_size = 0x88
+
+[[overlay]]
+name = "FDAT_002.BIN"
+archive = "FDAT.T"
+index = 2
+host = "GAME.EXE"
+sha256 = "1e41d31418e9b056310a2936510ee44ac13fbc286b2a715409bac6f419baf4a8"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_005.BIN"
+archive = "FDAT.T"
+index = 5
+host = "GAME.EXE"
+sha256 = "4625b4ff0f4f484f0dcf383928e9e9e2fe8e229feabc1369b81c4c7dc7d2b2d0"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_008.BIN"
+archive = "FDAT.T"
+index = 8
+host = "GAME.EXE"
+sha256 = "5e89c09094095f6c230a7e07e05c953609d72c64bf712bc03782fcb754285cdd"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_011.BIN"
+archive = "FDAT.T"
+index = 11
+host = "GAME.EXE"
+sha256 = "bd51c0550e985029f814990adc4eb4baa4e612d4deda5d6135abf23cce67290c"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_014.BIN"
+archive = "FDAT.T"
+index = 14
+host = "GAME.EXE"
+sha256 = "b2e783c0e427eebb6d16c9d0765c836d68de6a2b4b93d5b08ff75fb3bb28a83d"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_017.BIN"
+archive = "FDAT.T"
+index = 17
+host = "GAME.EXE"
+sha256 = "30ccebfc9c824b5f29365d4f3ae11a6eb9d27446520f7d14f718dc8376631d86"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_020.BIN"
+archive = "FDAT.T"
+index = 20
+host = "GAME.EXE"
+sha256 = "08f3660443b0451f1fd900ac18924783b7443a918b92c9703bb84d992791b6d3"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_023.BIN"
+archive = "FDAT.T"
+index = 23
+host = "GAME.EXE"
+sha256 = "be36b5a7bc08fb0273b070c0fcaf5810a0871e7e4b6a3b9b9a17745507420522"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_026.BIN"
+archive = "FDAT.T"
+index = 26
+host = "GAME.EXE"
+sha256 = "3152cff69be35d436b3ed38dcddc148f055983ef842a50acc6462e7c8f37e5ff"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_029.BIN"
+archive = "FDAT.T"
+index = 29
+host = "GAME.EXE"
+sha256 = "77f794d94f2579d23a8558de13b45b6063441fec121ab10974d6da38e181ba53"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_032.BIN"
+archive = "FDAT.T"
+index = 32
+host = "GAME.EXE"
+sha256 = "875e0c129cee88680d894adfca788a7f8ff531f98f7235433fa99bc8c3ba03e4"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_035.BIN"
+archive = "FDAT.T"
+index = 35
+host = "GAME.EXE"
+sha256 = "64924e5065884109726f9a30b8666c4beb0633052d88a9eb415824750150ab20"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_038.BIN"
+archive = "FDAT.T"
+index = 38
+host = "GAME.EXE"
+sha256 = "9e056a22380cc65e18f6e2bf43d20f1b5ff7a18db2e323be52353d455f9ed019"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_041.BIN"
+archive = "FDAT.T"
+index = 41
+host = "GAME.EXE"
+sha256 = "1b0eea123609817f467b722be4db593d659f5b02bfdcb972ac42515a0629a315"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_044.BIN"
+archive = "FDAT.T"
+index = 44
+host = "GAME.EXE"
+sha256 = "47d688903100f74f44cd045e804258e8a3c1682a29cb2c775f46deef2c544045"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_047.BIN"
+archive = "FDAT.T"
+index = 47
+host = "GAME.EXE"
+sha256 = "4f562c11dccf08ef47ba24875da2570d0c5f4bb89945887f6c5cbd393c8c3943"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_050.BIN"
+archive = "FDAT.T"
+index = 50
+host = "GAME.EXE"
+sha256 = "fdb7c5b835960ad5f4daea2e8c66558b5863b9c7323245455e8a7812e4bf07e0"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_053.BIN"
+archive = "FDAT.T"
+index = 53
+host = "GAME.EXE"
+sha256 = "b9c3351155a51127a08ab12cc9abe7eb7f6f02a7885ff2e2fee05cb7dc25f80e"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_056.BIN"
+archive = "FDAT.T"
+index = 56
+host = "GAME.EXE"
+sha256 = "2f8994cedf69485b62470582fa585045cb2c920a5ecc85982176864d3789bc12"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_059.BIN"
+archive = "FDAT.T"
+index = 59
+host = "GAME.EXE"
+sha256 = "99e494529a5f6308315a4a7a02c6dac9adc589503bcba08c994d32879324c93a"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_062.BIN"
+archive = "FDAT.T"
+index = 62
+host = "GAME.EXE"
+sha256 = "16958f73bb05888fcbfbf3d0863225264b2973c801248347cc5cbd2cdd27aa2c"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_065.BIN"
+archive = "FDAT.T"
+index = 65
+host = "GAME.EXE"
+sha256 = "374a140377ddee86c437ef4a352ca89b5f27b1ffe98b8dc26bb5093f2f3098b2"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_068.BIN"
+archive = "FDAT.T"
+index = 68
+host = "GAME.EXE"
+sha256 = "cc479ca1fc4913bb2c883a5dff82d4d3ba144ae541266838e89f07800c9d8501"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_071.BIN"
+archive = "FDAT.T"
+index = 71
+host = "GAME.EXE"
+sha256 = "9f73f13b47abf7bf0945870d7ffb6aab7db44ba739281b1c425d15570c00254e"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_074.BIN"
+archive = "FDAT.T"
+index = 74
+host = "GAME.EXE"
+sha256 = "bef31dc457af300f0f7535d322bb702c473d5e037a4d6386764758fb3f6407b0"
+load_address = 0x801E8308
+load_size = 0x800
+
+[[overlay]]
+name = "FDAT_077.BIN"
+archive = "FDAT.T"
+index = 77
+host = "GAME.EXE"
+sha256 = "e5cc8ba6d4d692c9ae7ce38bd4a5d3de9ebf29349de54195ecd2842297ca0b28"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_080.BIN"
+archive = "FDAT.T"
+index = 80
+host = "GAME.EXE"
+sha256 = "424a0a81b1e9caf59bcb47a73a1a549d1adc6664fe8ce4884a54467cce79e685"
+load_address = 0x801E8308
+load_size = 0x1000
+
+[[overlay]]
+name = "FDAT_083.BIN"
+archive = "FDAT.T"
+index = 83
+host = "GAME.EXE"
+sha256 = "e9c3fb1b77d5637dc0c697b1fd1be9b8dda07e80fb79d29206bc693b9c05c464"
+load_address = 0x801E8308
+load_size = 0x800

@@ -19,10 +19,10 @@ from scripts.kf.sema.index import Binding
 IMAGE = "GAME.EXE"
 
 
-def function(va=0x1000, *, vendor=False, image=IMAGE, fragments=1):
+def function(va=0x1000, *, vendor=False, image=IMAGE, fragments=1, library=""):
     return Binding(image, va, 0x20, "text", "function", f"fn_{va:x}", "",
                    "test", "test", body_size=0x20, fragments=fragments,
-                   provider="psyq" if vendor else "")
+                   provider="psyq" if vendor else "", library=library)
 
 
 def datum(va, size=8, *, source="DATA", image=IMAGE, storage="load"):
@@ -33,7 +33,143 @@ def ref(site, target, *, tier="validated", kind="address", image=IMAGE, origins=
     return Reference(image, site, target, kind, None, tier=tier, origins=origins)
 
 
+def words(*values):
+    import struct
+
+    return struct.pack(f"<{len(values)}I", *values)
+
+
 class ReachabilityTest(unittest.TestCase):
+    def test_bios_vector_stub_is_a_witnessed_vendored_dispatch(self):
+        # li $t2,0xb0; jr $t2; li $t1,0x32
+        code = words(0x240A00B0, 0x01400008, 0x24090032)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1004, None, tier="proven", kind="jump")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1004,
+            "pattern": "vendored-indirect", "library": "", "proof": "bios-vector-stub",
+            "target": 0xB0,
+        }])
+        self.assertEqual(report["summary"]["proven_vendored_dispatch"], 1)
+
+    def test_empty_link_time_table_loop_is_proven_dead(self):
+        # lui $s1,0; addiu $s1,$s1,0; beqz $s1,+3; nop; jalr $t0
+        code = words(0x3C110000, 0x26310000, 0x12200003, 0, 0x0100F809)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1010, None, tier="proven", kind="indirect-call")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"][0]["proof"], "empty-link-time-table")
+
+    def test_unproven_vendored_indirect_control_is_an_exempt_witness(self):
+        # jr $v0 through an unproven value: exempt by project decision
+        # (2026-11-17), but still listed as a witness row.
+        code = words(0x00400008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100), function(0x1000, vendor=True)), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1000, None, tier="proven", kind="indirect-jump")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1000,
+            "pattern": "vendored-indirect", "library": "", "proof": None, "target": None,
+        }])
+        self.assertEqual(report["summary"]["vendored_indirect_exempt"], 1)
+        self.assertEqual(report["summary"]["vendored_indirect_unpreserved"], 0)
+        self.assertEqual(report["summary"]["proven_vendored_dispatch"], 0)
+
+    def test_unpreserved_release_member_is_exempt_and_counted(self):
+        # A band member no preserved archive matches (library "unmatched",
+        # sdk-unmatched-version) is vendored too: exempt, counted separately.
+        code = words(0x00400008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1100),
+                               function(0x1000, vendor=True, library="unmatched")), (),
+                       (ref(0x1100, 0x1000, tier="proven", kind="call"),
+                        ref(0x1000, None, tier="proven", kind="indirect-jump")), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["vendored_dispatch"][0]["library"], "unmatched")
+        self.assertEqual(report["summary"]["vendored_indirect_unpreserved"], 1)
+
+    def test_game_indirect_control_is_not_exempt(self):
+        # The same unproven jr $v0 in a game function blocks closure.
+        code = words(0x00400008, 0)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * 0x100)
+        report = audit(IMAGE, (function(0x1000),), (),
+                       (ref(0x1000, None, tier="proven", kind="indirect-jump"),), img)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["vendored_dispatch"], [])
+
+    def switch_code(self, table_words):
+        # andi v1,v0,0xff; sltiu v0,v1,3; beqz v0,+7; lui v0,0; addiu v0,v0,0x40;
+        # sll v1,v1,2; addu v1,v1,v0; lw v0,0(v1); nop; jr v0; nop
+        code = words(0x304300FF, 0x2C620003, 0x10400007, 0x3C020000, 0x24420040,
+                     0x00031880, 0x00621821, 0x8C620000, 0, 0x00400008, 0)
+        return code + b"\0" * (0x40 - len(code)) + words(*table_words)
+
+    def test_bounded_game_switch_table_is_a_proven_dispatch(self):
+        img = RetailImage.synthetic(IMAGE, 0x0, self.switch_code((0x2C, 0x2C, 0x28)) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x40, body_size=0x40)
+        report = audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00000000", "site": 0x24, "pattern": "switch-table",
+            "table": 0x40, "entries": 3,
+        }])
+
+    def test_game_switch_table_leaving_the_function_stays_unresolved(self):
+        img = RetailImage.synthetic(IMAGE, 0x0, self.switch_code((0x2C, 0x80, 0x28)) + b"\0" * 0x100)
+        game = replace(function(0x0), size=0x40, body_size=0x40)
+        report = audit(IMAGE, (game,), (), (ref(0x24, None, tier="proven", kind="jump"),), img)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def switch_table(self, last_entry, *, vendor=False, unresolved=True):
+        # sltiu $v0,$v1,2; beqz $v0,+7; lui $v0,0; addiu $v0,$v0,0x1100;
+        # sll $v1,$v1,2; addu $v1,$v1,$v0; lw $v0,0($v1); nop; jr $v0; nop
+        code = words(0x2C620002, 0x10400007, 0x3C020000, 0x24421100, 0x00031880,
+                     0x00621821, 0x8C620000, 0, 0x00400008, 0)
+        table = words(0x1028, last_entry)
+        img = RetailImage.synthetic(IMAGE, 0x1000, code + b"\0" * (0x100 - len(code)) + table
+                                    + b"\0" * 0x100)
+        switch = replace(function(0x1000, vendor=vendor), size=0x30, body_size=0x30)
+        functions = (switch, function(0x1400)) if vendor else (switch,)
+        refs = (ref(0x1400, 0x1000, tier="proven", kind="call"),) if vendor else ()
+        if unresolved:
+            refs += (ref(0x1020, None, tier="proven", kind="indirect-jump"),)
+        return audit(IMAGE, functions, (), refs, img)
+
+    def test_bounded_switch_table_inside_the_function_is_proven(self):
+        report = self.switch_table(0x102C)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [{
+            "owner": "function:00001000", "site": 0x1020,
+            "pattern": "switch-table", "table": 0x1100, "entries": 2,
+        }])
+
+    def test_switch_table_leaving_the_function_stays_unresolved(self):
+        report = self.switch_table(0x1200)
+        self.assertEqual(report["summary"]["issues"]["unresolved-indirect-control"], 1)
+        self.assertEqual(report["switch_dispatch"], [])
+
+    def test_switch_witness_needs_no_unresolved_reference(self):
+        # The semantic evidence folds a proven game switch into the CFG, so
+        # the audit sees no reference at the `jr`; the witness row remains.
+        report = self.switch_table(0x102C, unresolved=False)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual([row["site"] for row in report["switch_dispatch"]], [0x1020])
+
+    def test_vendored_switch_table_is_exempt_but_not_switch_proved(self):
+        report = self.switch_table(0x102C, vendor=True)
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["switch_dispatch"], [])
+        self.assertEqual([(r["site"], r["pattern"]) for r in report["vendored_dispatch"]],
+                         [(0x1020, "vendored-indirect")])
+
     def audit(self, functions, data=(), refs=(), img=None):
         img = img or RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)
         return audit(IMAGE, tuple(functions), tuple(data), tuple(refs), img)
@@ -151,6 +287,29 @@ class ReachabilityTest(unittest.TestCase):
         )
         self.assertEqual(len(report["references"]), 1)
         self.assertEqual(report["summary"]["issues"], {"unmodeled-target": 1})
+
+    def test_overlay_reference_into_its_host_is_owned_there_not_traversed(self):
+        overlay, host = "FDAT_002.BIN", "GAME.EXE"
+        img = RetailImage.synthetic(overlay, 0x801E8308, b"\0" * 0x1000)
+        root = replace(function(0x801E83A8, image=overlay))
+        callee = function(0x80041EEC, image=host)
+        table = datum(0x801CA984, 4, source="data_identities.tsv", image=host, storage="bss")
+        refs = (ref(0x801E83A8, 0x80041EEC, tier="proven", kind="call", image=overlay),
+                ref(0x801E83AC, 0x801CA984, image=overlay),
+                ref(0x801E83B0, 0x80070000, image=overlay))
+        report = audit(overlay, (root,), (), refs, img,
+                       host_functions=(callee,), host_extents=(table,))
+        self.assertEqual(report["summary"]["host_references"], 3)
+        self.assertEqual(report["summary"]["reached_vendor_functions"], 0)
+        self.assertEqual(report["summary"]["issues"], {"unmodeled-target": 1})
+        self.assertEqual(report["issues"][0]["image"], host)
+        owners = {row["id"]: row["target_owners"] for row in report["references"]}
+        self.assertEqual(owners[0], ["GAME.EXE:function:80041eec"])
+        self.assertEqual(owners[1], [f"GAME.EXE:{table.key}"])
+        self.assertEqual(owners[2], [])
+        # Without the host inventories the same edges stay unmodeled.
+        bare = audit(overlay, (root,), (), refs, img)
+        self.assertEqual(bare["summary"]["issues"], {"unmodeled-target": 3})
 
     def test_link_label_target_is_a_boundary_not_an_unmodeled_owner(self):
         img = RetailImage.synthetic(IMAGE, 0x1000, b"\0" * 0x1000)

@@ -7,16 +7,29 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from scripts.kf.retail import ImageLayout, _merged_coverage, parse_psx_exe
+from scripts.kf import retail
+from scripts.kf.retail import (
+    IMAGE_LAYOUTS,
+    IMAGE_NAMES,
+    OVERLAY_SOURCES,
+    ImageLayout,
+    _merged_coverage,
+    archive_entry,
+    image_key,
+    parse_psx_exe,
+    verify_retail_image,
+)
 from scripts.kf.propose_function_admission import subtract_interval
 from scripts.kf.seed_retail import escape_trailing_spaces
 from scripts.kf.seed_vendored_functions import (
+    SdkLabel,
     SignaturePattern,
     find_masked_bytes,
     find_signature,
     load_sdk_symbols,
     parse_object_symbols,
     parse_signature,
+    signature_set_version,
 )
 
 
@@ -56,6 +69,98 @@ class RetailTests(unittest.TestCase):
                 0x20,
             ),
         )
+
+    def test_image_keys_strip_any_extension(self) -> None:
+        self.assertEqual(image_key("GAME.EXE"), "game")
+        self.assertEqual(image_key("FDAT_005.BIN"), "fdat_005")
+        self.assertEqual(IMAGE_NAMES["fdat_005"], "FDAT_005.BIN")
+
+    def test_fdat_modules_share_game_address_space(self) -> None:
+        self.assertEqual(len(OVERLAY_SOURCES), 28)
+        self.assertEqual(sorted(source.index for source in OVERLAY_SOURCES.values()),
+                         list(range(2, 84, 3)))
+        for image, source in OVERLAY_SOURCES.items():
+            layout = IMAGE_LAYOUTS[image]
+            with self.subTest(image=image):
+                self.assertEqual(image, f"FDAT_{source.index:03d}.BIN")
+                self.assertEqual((source.archive, source.host), ("FDAT.T", "GAME.EXE"))
+                self.assertIsNone(layout.entry)
+                self.assertEqual(layout.header_size, 0)
+                self.assertEqual(layout.file_size, layout.load_size)
+                self.assertEqual(layout.load_size % retail.ARCHIVE_SECTOR_SIZE, 0)
+                self.assertEqual(layout.load_address, 0x801E8308)
+                self.assertEqual(layout.file_offset(0x801E830C), 4)
+
+    def test_overlay_references_outside_its_window_belong_to_its_host(self) -> None:
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x801E83A8), "FDAT_002.BIN")
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x80041EEC), "GAME.EXE")
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", 0x801CA984), "GAME.EXE")
+        # One past the overlay's load window is no longer the overlay's.
+        layout = IMAGE_LAYOUTS["FDAT_002.BIN"]
+        self.assertEqual(retail.referent_image("FDAT_002.BIN", layout.load_end), "GAME.EXE")
+        # A root program owns every address its code names.
+        self.assertEqual(retail.referent_image("GAME.EXE", 0x801E83A8), "GAME.EXE")
+        self.assertEqual(retail.referent_image("OPEN.EXE", 0x80041EEC), "OPEN.EXE")
+
+    def test_archive_entry_slices_sector_offsets(self) -> None:
+        archive = bytearray(0x1800)
+        struct.pack_into("<4H", archive, 0, 2, 1, 2, 3)
+        archive[0x800:0x1000] = b"A" * 0x800
+        archive[0x1000:0x1800] = b"B" * 0x800
+        self.assertEqual(archive_entry(bytes(archive), 1), b"B" * 0x800)
+        with self.assertRaises(ValueError):
+            archive_entry(bytes(archive), 2)
+
+    def test_verify_overlay_checks_size_and_hash(self) -> None:
+        payload = struct.pack("<I", 0x03E00008) * 0x200
+        layout = ImageLayout(
+            "OVL_001.BIN", hashlib.sha256(payload).hexdigest(), len(payload), None,
+            0x801E8308, len(payload), 0,
+        )
+        source = retail.OverlaySource("OVL.T", 1, "GAME.EXE")
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            mock.patch.dict(IMAGE_LAYOUTS, {"OVL_001.BIN": layout}),
+            mock.patch.dict(OVERLAY_SOURCES, {"OVL_001.BIN": source}),
+        ):
+            path = Path(directory) / "OVL_001.BIN"
+            path.write_bytes(payload)
+            self.assertEqual(verify_retail_image(path, "OVL_001.BIN"), payload)
+            self.assertEqual(
+                retail.load_payload(path, "OVL_001.BIN"), (0x801E8308, payload)
+            )
+            path.write_bytes(payload[:-4] + bytes(4))
+            with self.assertRaises(ValueError):
+                verify_retail_image(path, "OVL_001.BIN")
+
+    def test_vendored_labels_carry_their_sdk_release(self) -> None:
+        sdk = SdkLabel.from_directory(Path("/nix/store/x-sdk/psyq-3.4/LIB"))
+        self.assertEqual((sdk.token, sdk.source_version), ("sdk34", "Psy-Q 3.4"))
+        with self.assertRaises(ValueError):
+            SdkLabel.from_directory(Path("/opt/sdk/LIB"))
+        self.assertEqual(signature_set_version("340"), "3.4")
+        self.assertEqual(signature_set_version("300"), "3.0")
+        self.assertEqual(signature_set_version("3610"), "3.61")
+        for confidence in ("fid-sdk34", "exact-sdk34-complete", "psyq340-signature",
+                           "psyq3610-signature-ambiguous", "sdk-lineage-supported"):
+            self.assertIsNotNone(retail.VENDORED_CONFIDENCE.fullmatch(confidence))
+        self.assertIsNone(retail.VENDORED_CONFIDENCE.fullmatch("psyq-signature"))
+
+    def test_gp_relative_relocation_decodes_against_the_startup_gp(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.relocations import validate_relocation
+
+        self.assertEqual(retail.IMAGE_GP["PSX.EXE"], 0x80010260)
+        self.assertEqual(retail.IMAGE_GP["FDAT_005.BIN"], retail.IMAGE_GP["GAME.EXE"])
+        function = SimpleNamespace(image="PSX.EXE", va=0x8001006C)
+        row = {"site_va": "0x8001006c", "target_va": "0x80010264", "kind": "mips_gprel16",
+               "status": "reviewed", "channel": "reachable-code"}
+        lw_v0_4_gp = struct.pack("<I", 0x8F820004)
+        validation = validate_relocation(lw_v0_4_gp, function, row, None, "safe")
+        self.assertEqual(validation.target, 0x80010264)
+        with self.assertRaises(ValueError):
+            validate_relocation(struct.pack("<I", 0x8C820004), function, row, None, "safe")
 
     def test_parse_interleaved_object_symbols(self) -> None:
         parsed = parse_object_symbols(

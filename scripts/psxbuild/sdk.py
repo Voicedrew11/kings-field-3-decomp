@@ -11,6 +11,10 @@ import struct
 import subprocess
 
 C_COMPILERS = {
+    # Sony's GNU C 2.60 CC1PSX.EXE ("GNU C 2.6.0 [AL 1.1, MM 40]") runs under
+    # DOSBox; the Decompals 2.6.0 rebuild preprocesses and answers the
+    # source-size probe, both optimizer-independent.
+    "gcc260-sony": ("cpppsx-260", "cc1psx-260"),
     "gcc257-native": ("cpppsx-257", "cc1psx-257"),
     "gcc260-native": ("cpppsx-260", "cc1psx-260"),
     # The kit's extensionless CC1PSX (GCC 2.4.1) runs under DOSBox. Its
@@ -18,7 +22,64 @@ C_COMPILERS = {
     # are optimizer-independent and see the same headers and MIPS ABI.
     "gcc241-kit": ("cpppsx-257", "cc1psx-257"),
 }
-DOS_C_COMPILERS = frozenset({"gcc241-kit"})
+DOS_C_COMPILERS = frozenset({"gcc260-sony", "gcc241-kit"})
+# The Psy-Q CCPSX 1.17 driver's preprocessor definitions for C with -O.
+SONY_DRIVER_DEFINES = ('mips', '__mips__', '__mips', 'psx', '__psx__', '__psx',
+                       '__EXTENSIONS__', '_MIPSEL', '__CHAR_UNSIGNED__',
+                       '_LANGUAGE_C', 'LANGUAGE_C', '__OPTIMIZE__')
+# The Runtime Library 3.3 CD's assembler: it reproduces the retail div/rem
+# expansion and `li` -> `ori` with no hazard nop where 2.30 and 2.34 add one.
+ASPSX_VERSION = '2.21'
+
+
+def aspsx_command(stem: str, small_data: int) -> str:
+    return f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
+
+
+# Runtime Library 3.3 INLINE.H writes each GTE operation as placeholder words
+# (`.word 0x0000007f`: below 0x2000 with SPECIAL funct 0x3e or 0x3f, which no
+# R3000 instruction uses) that Sony's DMPSX 2.03 rewrites in the assembled
+# object, from INLINE.TBL, into the COP2 transfers and commands. Objects
+# without such words are never given to DMPSX.
+GTE_WORD = re.compile(rb'(?m)^\s*\.word\s+0x([0-9a-fA-F]+)\s*$')
+
+
+def gte_placeholder(value: int) -> bool:
+    return value < 0x2000 and value & 0x3e == 0x3e
+
+
+def uses_gte_inline(assembly: bytes) -> bool:
+    return any(gte_placeholder(int(match.group(1), 16)) for match in GTE_WORD.finditer(assembly))
+
+
+def dmpsx_commands(stem: str) -> list[str]:
+    # The copy keeps ASPSX's object for dmpsx_verified.
+    return [f'copy {stem}.OBJ {stem}.ASP > NUL', f'dmpsx {stem}.OBJ -b > {stem}.DMP']
+
+
+def stage_dmpsx(root: Path) -> None:
+    tool = Path(os.environ['PSYQ_DMPSX'])
+    shutil.copyfile(tool, root / 'DMPSX.EXE')
+    shutil.copyfile(tool.with_name('INLINE.TBL'), root / 'INLINE.TBL')
+
+
+def dmpsx_verified(root: Path, stem: str) -> None:
+    """Require DMPSX to have changed only GTE placeholder words of the object."""
+    log = (root / (stem + '.DMP')).read_text(errors='replace')
+    before, after = (root / (stem + '.ASP')).read_bytes(), (root / (stem + '.OBJ')).read_bytes()
+    if 'DMPSX version' not in log or len(before) != len(after) or before == after:
+        raise RuntimeError(f'{stem}: DMPSX rewrote no GTE placeholder: {log.strip()}')
+    covered = set()
+    for index in range(len(before)):
+        if before[index] == after[index] or index in covered:
+            continue
+        for start in range(max(index - 3, 0), index + 1):
+            word = before[start:start + 4]
+            if len(word) == 4 and gte_placeholder(int.from_bytes(word, 'little')):
+                covered.update(range(start, start + 4))
+                break
+        else:
+            raise RuntimeError(f'{stem}: DMPSX changed object byte {index:#x} outside a GTE word')
 
 
 def run_command(arguments, *, environment=None):
@@ -77,10 +138,12 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     cpp, cc1 = C_COMPILERS[compiler]
     preprocessed, assembly = root / (stem + '.I'), root / (stem + '.S')
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
-    # The name becomes the assembly's `.file`; ASPSX 1.07 hangs on long ones,
-    # so a checkout-relative spelling keeps deep worktrees buildable.
+    # The name becomes the assembly's `.file`; older ASPSX builds hang on long
+    # ones, so a checkout-relative spelling keeps deep worktrees buildable.
+    driver = SONY_DRIVER_DEFINES if compiler == 'gcc260-sony' else ()
     cpp_command = [cpp, '-lang-c', '-undef', '-nostdinc', *includes,
-                   *(f'-D{value}' for value in defines), os.path.relpath(source.resolve())]
+                   *(f'-D{value}' for value in (*driver, *defines)),
+                   os.path.relpath(source.resolve())]
     preprocessed.write_bytes(run(cpp_command))
     cc1_command = [str(cc1_override) if cc1_override else cc1, '-quiet', '-g', f'-{optimization}',
                    f'-G{small_data}', *cc1_flags, str(preprocessed), '-o', str(assembly)]
@@ -88,7 +151,10 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     if compiler in DOS_C_COMPILERS:
         if cc1_override is not None:
             raise ValueError(f'{compiler} has no cc1 override')
-        stage_kit_gcc241(root / 'CC1.EXE')
+        if compiler == 'gcc260-sony':
+            shutil.copyfile(os.environ['PSYQ_CC1PSX'], root / 'CC1.EXE')
+        else:
+            stage_kit_gcc241(root / 'CC1.EXE')
         assembly.unlink(missing_ok=True)
         dos_command = ['CC1', '-quiet', '-g', f'-{optimization}', f'-G{small_data}', *cc1_flags,
                        preprocessed.name, '-o', assembly.name]
@@ -96,15 +162,17 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
         if not assembly.is_file() or not assembly.stat().st_size:
             log = root / (stem + '.CC1')
             detail = log.read_text(errors='replace').strip() if log.is_file() else ''
-            raise RuntimeError(f'kit CC1PSX produced no assembly: {detail or "no output"}')
+            raise RuntimeError(f'{compiler} CC1PSX produced no assembly: {detail or "no output"}')
         probe = {'size_probe_command': cc1_command}
         cc1_command = dos_command
     else:
         run(cc1_command, environment=environment)
     dos_text(assembly)
+    gte = uses_gte_inline(assembly.read_bytes())
     return {'object': stem + '.OBJ', 'assembly': stem + '.S', 'log': stem + '.TXT',
             'preprocessor_command': cpp_command, 'compiler_command': cc1_command, **probe,
-            'assembler_command': f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT',
+            'assembler_command': aspsx_command(stem, small_data),
+            **({'gte_commands': dmpsx_commands(stem)} if gte else {}),
             'assembly_sha256': hashlib.sha256(assembly.read_bytes()).hexdigest()}
 
 
@@ -148,11 +216,19 @@ def assemble(root: Path, stem: str, small_data: int) -> bytes:
 
 def assemble_many(root: Path, stems: tuple[str, ...], small_data: int) -> dict[str, bytes]:
     shutil.copyfile(os.environ['PSYQ_ASPSX'], root / 'ASPSX.EXE')
+    commands, gte = [], []
     for stem in stems:
         dos_text(root / (stem + '.S'))
         (root / (stem + '.OBJ')).unlink(missing_ok=True)
-    dos_run(root, [f'aspsx -g -G{small_data} -o {stem}.OBJ {stem}.S > {stem}.TXT'
-                   for stem in stems], 'asm')
+        commands.append(aspsx_command(stem, small_data))
+        if uses_gte_inline((root / (stem + '.S')).read_bytes()):
+            commands.extend(dmpsx_commands(stem))
+            gte.append(stem)
+    if gte:
+        stage_dmpsx(root)
+    dos_run(root, commands, 'asm')
     for stem in stems:
         tool_succeeded(root, stem + '.TXT', stem + '.OBJ', b'LNK\x02')
+        if stem in gte:
+            dmpsx_verified(root, stem)
     return {stem: (root / (stem + '.OBJ')).read_bytes() for stem in stems}

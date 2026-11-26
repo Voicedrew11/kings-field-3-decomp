@@ -2,7 +2,7 @@
 #define KF_PSYQ_KERNEL_H
 
 /*
- * Psy-Q 3.0 kernel, controller, and BIOS file interfaces. KERNEL.H
+ * Runtime Library 3.3 kernel, controller, and BIOS file interfaces. KERNEL.H
  * and SYS/FILE.H provide the vendor constants and layouts, but this release
  * ships no LIBAPI header with callable declarations. Keep the missing BIOS
  * entry points here so game sources do not reproduce private extern blocks.
@@ -24,13 +24,16 @@ extern long DisableEvent(long event);
 extern long TestEvent(long event);
 extern long UnDeliverEvent(long event);
 extern long CloseEvent(long event);
+extern long SetRCnt(unsigned long spec, unsigned short target, long mode);
+extern long StartRCnt(unsigned long spec);
 
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
-extern void ResetCallback(void);
-extern void StopCallback(void);
+/* As Runtime Library 3.3 LIBETC.H declares them, so both headers can meet. */
+extern int ResetCallback(void);
+extern int StopCallback(void);
 
-extern void InitHeap(void *head, long size);
+/* InitHeap: Runtime Library 3.3 MALLOC.H (psyq/libc.h) declares it. */
 extern void InitCARD(long pad_enable);
 extern long StartCARD(void);
 extern long StopCARD(void);

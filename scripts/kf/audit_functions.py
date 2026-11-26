@@ -1,8 +1,9 @@
 """Find plausible MIPS function starts missed by the admitted retail census.
 
 This analyzer is deliberately independent of Ghidra.  It combines compiler-like
-stack frames, matching return sequences, cross-function tail jumps, and stored
-code pointers.  Its TSV is review evidence; it never edits ``config/retail``.
+stack frames, matching return sequences, cross-function tail jumps, stored
+code pointers, and direct `jal` targets decoded from admitted functions.  Its
+TSV is review evidence; it never edits ``config/retail``.
 """
 
 from __future__ import annotations
@@ -15,7 +16,17 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.kf.retail import IMAGE_LAYOUTS, IMAGE_ORDER, parse_int, read_tsv
+from scripts.kf.retail import (
+    IMAGE_LAYOUTS,
+    IMAGE_ORDER,
+    load_payload,
+    overlay_handlers,
+    overlay_header_end,
+    parse_int,
+    read_tsv,
+)
+from scripts.kf.sema.cfg import switch_table
+from scripts.kf.sema.mips import decode_words, with_controls
 
 
 FIELDS = (
@@ -34,6 +45,23 @@ FIELDS = (
     "confidence",
     "note",
 )
+
+
+# Longest straight-line run a jal target may sit above an admitted start
+# (GCC hoists constant-division setup and loads above the frame allocation).
+CALL_EXTEND_LIMIT = 0x40
+
+# ASPSX expands each `div`/`divu` with a divide-by-zero trap (`bnez rt; nop;
+# break 7`) and, when signed, an overflow trap (`li at,-1; bne rt,at; lui
+# at,0x8000; bne rs,at; nop; break 6`): ten words that GCC schedules along
+# with the division, also above a frame allocation.
+DIVISION_TRAPS = {0x0007000D, 0x0006000D}  # break 7, break 6
+DIVISION_CHECK_SIZE = 0x28
+
+# Candidate tiers that kf-function-propose admits.
+ADMISSIBLE = {
+    "strong", "strong-leaf", "call-target", "call-split", "call-extend", "switch-extend",
+}
 
 
 @dataclass(frozen=True)
@@ -70,6 +98,19 @@ def function_target(site: int, word: int) -> int:
 
 def is_jr_ra(word: int) -> bool:
     return word == 0x03E00008
+
+
+def is_unconditional_transfer(word: int) -> bool:
+    """`j` or `jr reg`: control never falls through past the delay slot."""
+    return opcode(word) == 0x02 or (word & 0xFC1FFFFF) == 0x00000008
+
+
+def is_control_transfer(word: int) -> bool:
+    op = opcode(word)
+    return (
+        op in {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}
+        or (op == 0 and (word & 0x3F) in {0x08, 0x09})
+    )
 
 
 def stack_adjust(word: int) -> int | None:
@@ -157,8 +198,12 @@ def valid_instruction(word: int) -> bool:
 class ImageWords:
     def __init__(self, path: Path, image: str):
         self.layout = IMAGE_LAYOUTS[image]
-        raw = path.read_bytes()
-        self.payload = raw[0x800 : 0x800 + self.layout.load_size]
+        _load_address, self.payload = load_payload(path, image)
+        self.handlers = [
+            pointer for pointer in overlay_handlers(image, self.payload)
+            if self.contains_word(pointer)
+        ]
+        self.header_end = overlay_header_end(image)
 
     def contains_word(self, address: int) -> bool:
         return self.layout.contains(address, 4) and not (address & 3)
@@ -219,7 +264,14 @@ def matching_return(
     for site in range(address + 4, end, 4):
         if not is_jr_ra(words.word(site)) or not words.contains_word(site + 4):
             continue
-        if stack_adjust(words.word(site + 4)) == frame.size:
+        # Some compilers restore the stack in the return's delay slot
+        # (`jr ra; addiu sp`); the GCC 2.6 that built the game code always
+        # restores it first (`lw ra; addiu sp; jr ra; nop`). The Psy-Q library
+        # text has both forms, so only the converse marks library code.
+        if (
+            stack_adjust(words.word(site + 4)) == frame.size
+            or stack_adjust(words.word(site - 4)) == frame.size
+        ):
             return site
     return None
 
@@ -247,8 +299,186 @@ def linear_return(
     return None
 
 
+def trap_skip(words: ImageWords, site: int, stop: int) -> bool:
+    """A conditional branch that only skips forward over an ASPSX division trap."""
+    word = words.word(site)
+    if opcode(word) not in {0x04, 0x05}:  # beq/bne (bnez is bne rs,zero)
+        return False
+    target = site + 4 + (signed16(word & 0xFFFF) << 2)
+    return (
+        site + 8 < target <= stop
+        and words.contains_word(target - 4)
+        and words.word(target - 4) in DIVISION_TRAPS
+    )
+
+
+def straight_line(words: ImageWords, start: int, stop: int) -> int | None:
+    """Count the division traps in [start, stop) if it is straight-line code.
+
+    Valid instructions only; the sole branches allowed are those that skip
+    forward over a division trap. Returns None for anything else.
+    """
+    traps = 0
+    for site in range(start, stop, 4):
+        word = words.word(site)
+        if not valid_instruction(word):
+            return None
+        if word in DIVISION_TRAPS:
+            traps += word == 0x0007000D
+        elif is_control_transfer(word) and not trap_skip(words, site, stop):
+            return None
+    return traps
+
+
 def valid_span(words: ImageWords, start: int, end: int) -> bool:
     return all(valid_instruction(words.word(site)) for site in range(start, end, 4))
+
+
+def hoisted_start(words: ImageWords, address: int, limit: int = 8) -> int | None:
+    """Start of straight-line code scheduled above a stack-frame allocation.
+
+    GCC may hoist loads (and varargs home stores) above `addiu sp,sp,-N`; the
+    function then starts right after the previous function's return. Accept
+    only a short run of valid, non-transfer instructions that reaches such a
+    boundary.
+    """
+    back = 0
+    overflow_trap = None
+    while back < limit:
+        back += 1
+        start = address - 4 * back
+        if not words.contains_word(start):
+            return None
+        word = words.word(start)
+        delay_slot = words.contains_word(start - 4) and trap_skip(words, start - 4, address)
+        if (word == 0 and not delay_slot) or not valid_instruction(word):
+            return None
+        # One widening per division expansion. Walking back, a signed
+        # division shows its `break 6` first and its `break 7` 6 words above.
+        if word == 0x0006000D:
+            overflow_trap = start
+            limit += DIVISION_CHECK_SIZE // 4
+        elif word == 0x0007000D:
+            if overflow_trap is None or overflow_trap - start > 0x18:
+                limit += DIVISION_CHECK_SIZE // 4
+            overflow_trap = None
+        if is_control_transfer(word) and not trap_skip(words, start, address):
+            return None
+        if boundary_before(words, start):
+            return start
+    return None
+
+
+def call_targets(words: ImageWords, extents: list[FunctionExtent]) -> Counter[int]:
+    """Count `jal` targets inside this image decoded from admitted functions."""
+    targets: Counter[int] = Counter()
+    for extent in extents:
+        for site in range(extent.start, extent.end, 4):
+            if not words.contains_word(site):
+                continue
+            word = words.word(site)
+            if opcode(word) != 0x03:
+                continue
+            target = function_target(site, word)
+            if words.contains_word(target):
+                targets[target] += 1
+    return targets
+
+
+def fallthrough_boundary(words: ImageWords, address: int) -> int | None:
+    """End of the code before `address` when it cannot fall through into it.
+
+    Skips up to three zero padding words, then requires an unconditional
+    transfer (`j`/`jr`) whose delay slot ends there.
+    """
+    end = address
+    for _padding in range(4):
+        if words.contains_word(end - 8) and is_unconditional_transfer(words.word(end - 8)):
+            return end
+        if not words.contains_word(end - 4) or words.word(end - 4) != 0:
+            return None
+        end -= 4
+    return None
+
+
+def forward_target(site: int, word: int) -> int | None:
+    """Target of a conditional branch or a `j` at `site`, if it is forward."""
+    op = opcode(word)
+    if op in {0x04, 0x05, 0x06, 0x07} or (op == 0x01 and rt(word) in {0x00, 0x01}):
+        target = site + 4 + (signed16(word & 0xFFFF) << 2)
+    elif op == 0x02:
+        target = function_target(site, word)
+    else:
+        return None
+    return target if target > site else None
+
+
+def transfer_end(words: ImageWords, address: int, stop: int) -> int | None:
+    """End (after the delay slot) of the code a carve from `address` owns.
+
+    That is the first unconditional transfer (`j`, `jr reg`) at or past the
+    furthest forward branch or jump target seen so far below `stop`: a switch
+    dispatch or an intra-function `j` that later code is branched to does not
+    end the function. A jump to `stop` or beyond (a tail call) does not count.
+    """
+    end = min(words.layout.load_end - 4, stop)
+    furthest = address
+    for site in range(address, end, 4):
+        word = words.word(site)
+        target = forward_target(site, word)
+        if target is not None and target < stop:
+            furthest = max(furthest, target)
+        if (
+            is_unconditional_transfer(word)
+            and words.contains_word(site + 4)
+            and furthest <= site + 4
+        ):
+            return site + 8 if site + 8 <= stop else None
+    return None
+
+
+@dataclass(frozen=True)
+class _Span:
+    """The `contains_body` view of a candidate extent the switch prover asks for."""
+
+    start: int
+    end: int
+
+    def contains_body(self, va: int, size: int = 1) -> bool:
+        return self.start <= va and va + size <= self.end
+
+
+def switch_extension(words: ImageWords, extent: FunctionExtent, stop: int) -> int | None:
+    """End of an extent that was cut at its own switch dispatch, else None.
+
+    A carve that stops at the first unconditional transfer ends at a GCC
+    tablejump (`jr reg`) when the function is a switch. If that jump is a
+    proven table (`scripts.kf.sema.cfg.switch_table`) over valid code up to
+    the next admitted start `stop`, and every case lies in the unowned bytes
+    `[extent.end, stop)`, the cases are the function's own body: it extends
+    to `stop`.
+    """
+    site = extent.end - 8
+    if stop <= extent.end or site < extent.start or not words.contains_word(site):
+        return None
+    word = words.word(site)
+    if (word & 0xFC1FFFFF) != 0x08 or is_jr_ra(word):
+        return None
+    if not valid_span(words, extent.start, stop):
+        return None
+    offset = extent.start - words.layout.load_address
+    instructions = list(with_controls(decode_words(
+        extent.start, words.payload[offset:offset + stop - extent.start],
+    )))
+    terminal = next(row for row in instructions if row.va == site)
+
+    def read_word(address: int) -> int | None:
+        return words.word(address) if words.contains_word(address) else None
+
+    proven = switch_table(instructions, terminal, _Span(extent.start, stop), read_word)
+    if proven is None or not all(extent.end <= target < stop for target in proven.targets):
+        return None
+    return stop
 
 
 def boundary_before(words: ImageWords, address: int) -> str:
@@ -307,11 +537,22 @@ def audit_image(
         address for address in words.addresses() if frame_at(words, address) is not None
     )
     rows: list[dict[str, object]] = []
-    for address in sorted(candidates - known_starts):
-        frame = frame_at(words, address)
+    for frame_address in sorted(candidates - known_starts):
+        address = frame_address
+        frame = frame_at(words, frame_address)
+        hoisted = False
+        if frame and not boundary_before(words, frame_address):
+            start = hoisted_start(words, frame_address)
+            if (
+                start is not None
+                and start not in known_starts
+                and extent_owner(extents, start) is None
+            ):
+                address, hoisted = start, True
+                rows = [row for row in rows if parse_int(str(row["va"])) != address]
         owner = extent_owner(extents, address)
         boundary = boundary_before(words, address)
-        return_site = matching_return(words, address, frame) if frame else None
+        return_site = matching_return(words, frame_address, frame) if frame else None
         score = first_window_score(words, address)
         valid, total = (int(part) for part in score.split("/"))
         refs = pointer_refs[address] + tail_refs[address]
@@ -331,6 +572,8 @@ def audit_image(
         evidence = []
         if frame:
             evidence.append("stack-frame+ra-save")
+        if hoisted:
+            evidence.append("hoisted-prologue")
         if return_site is not None:
             evidence.append("matching-stack-return")
         if pointer_refs[address]:
@@ -368,10 +611,12 @@ def audit_image(
     ]
     boundaries = sorted(known_starts | {start for start, _end in strong_ranges})
     rows_by_start = {parse_int(str(row["va"])): row for row in rows}
-    for return_site in words.addresses():
-        if not is_jr_ra(words.word(return_site)):
-            continue
-        address = return_site + 8
+    # An overlay's handler header ends at a boundary as firm as a return.
+    origins = [(site + 8, "previous-return") for site in words.addresses()
+               if is_jr_ra(words.word(site))]
+    if getattr(words, "header_end", None) is not None:
+        origins.insert(0, (words.header_end, "overlay-header-end"))
+    for address, origin in origins:
         padding_words = 0
         while (
             padding_words < 3
@@ -398,7 +643,7 @@ def audit_image(
         if size < 8:
             continue
         reloc_count = relocations.get((image, address), 0)
-        evidence = ["previous-return", "return-delimited-valid-code"]
+        evidence = [origin, "return-delimited-valid-code"]
         if padding_words:
             evidence.append(f"skipped-{padding_words}-padding-nop")
         if pointer_refs[address]:
@@ -420,9 +665,7 @@ def audit_image(
             "reloc_refs": reloc_count,
             "valid_first_12": first_window_score(words, address),
             "boundary": (
-                f"previous-return+{padding_words}-padding-nop"
-                if padding_words
-                else "previous-return"
+                f"{origin}+{padding_words}-padding-nop" if padding_words else origin
             ),
             "confidence": "strong-leaf",
             "note": "+".join(evidence),
@@ -432,6 +675,139 @@ def audit_image(
             rows_by_start[address] = leaf_row
         else:
             existing.update(leaf_row)
+
+    # Direct calls from admitted code are decoded control flow: each target is
+    # a function entry. A target in unowned bytes is carved to its first
+    # unconditional transfer (BIOS stubs end in `jr $t2`, not `jr $ra`). A
+    # target inside an admitted extent splits it only when the preceding code
+    # cannot fall through into it; otherwise it is an interior entry label.
+    # An overlay's dispatch-table pointers (its host calls them through the
+    # table) are carved the same way but keep their own evidence label.
+    calls = call_targets(words, extents)
+    handlers = Counter(getattr(words, "handlers", ()))
+    calls.update(handlers)
+    boundaries = sorted(
+        known_starts
+        | {parse_int(str(row["va"])) for row in rows if row["confidence"] in ADMISSIBLE}
+    )
+    candidate_ranges = [
+        (parse_int(str(row["va"])), parse_int(str(row["return_va"])) + 8)
+        for row in rows
+        if row["confidence"] in ADMISSIBLE and row["return_va"]
+    ]
+    splits: dict[int, tuple[FunctionExtent, int]] = {}
+    gaps: list[int] = []
+    for target in sorted(calls):
+        existing = rows_by_start.get(target)
+        if target in known_starts or (existing and existing["confidence"] in ADMISSIBLE):
+            continue
+        if any(start <= target < end for start, end in candidate_ranges):
+            continue
+        owner = extent_owner(extents, target)
+        if owner is None:
+            gaps.append(target)
+            continue
+        split = fallthrough_boundary(words, target)
+        if split is not None and split > owner.start:
+            splits[target] = (owner, split)
+    # Every accepted target bounds the carve of the one before it.
+    boundaries = sorted(set(boundaries) | set(splits) | set(gaps))
+    for target in sorted([*gaps, *splits]):
+        # Only a non-admissible candidate at this same start is replaced.
+        existing = rows_by_start.get(target)
+        count = calls[target] - handlers[target]
+        index = bisect.bisect_right(boundaries, target)
+        stop = boundaries[index] if index < len(boundaries) else words.layout.load_end
+        evidence = [f"jal-target x{count}"] if count else []
+        if handlers[target]:
+            evidence.append(f"handler-pointer x{handlers[target]}")
+        if target not in splits:
+            end = transfer_end(words, target, stop)
+            traps = straight_line(words, target, stop) if end is None else None
+            if (
+                traps is not None and stop in known_starts
+                and stop - target <= CALL_EXTEND_LIMIT + DIVISION_CHECK_SIZE * traps
+            ):
+                # Straight-line code scheduled above an admitted start: the
+                # call proves the function begins earlier.
+                end = extent_owner(extents, stop).end
+                confidence, owner_va = "call-extend", f"0x{stop:08x}"
+                boundary = boundary_before(words, target)
+                evidence.append("hoisted-above-admitted-start")
+                if traps:
+                    evidence.append(f"division-checks x{traps}")
+            elif end is None or not valid_span(words, target, end):
+                continue
+            else:
+                confidence, owner_va = "call-target", ""
+                boundary = boundary_before(words, target)
+                evidence.append("first-unconditional-transfer")
+        else:
+            owner, split = splits[target]
+            following = splits.get(stop)
+            end = following[1] if following and following[0] == owner else min(owner.end, stop)
+            if end <= target or not valid_span(words, target, end):
+                continue
+            confidence, owner_va = "call-split", f"0x{owner.start:08x}"
+            boundary = f"split-owner-end=0x{split:08x}"
+            evidence.append("owner-cannot-fall-through")
+        row = {
+            "image": image,
+            "va": f"0x{target:08x}",
+            "file_offset": f"0x{words.layout.file_offset(target):x}",
+            "owner_va": owner_va,
+            "frame_size": "",
+            "ra_save_offset": "",
+            "return_va": f"0x{end - 8:08x}",
+            "pointer_refs": pointer_refs[target],
+            "tail_jump_refs": tail_refs[target],
+            "reloc_refs": relocations.get((image, target), 0),
+            "valid_first_12": first_window_score(words, target),
+            "boundary": boundary,
+            "confidence": confidence,
+            "note": "+".join(evidence),
+        }
+        if existing is not None:
+            rows.remove(existing)
+        rows.append(row)
+        rows_by_start[target] = row
+
+    # An admitted extent that ends at its own proven switch dispatch owns the
+    # case bodies that follow it, up to the next admitted or proposed start.
+    starts = sorted(
+        known_starts
+        | {parse_int(str(row["va"])) for row in rows if row["confidence"] in ADMISSIBLE}
+    )
+    for extent in extents:
+        index = bisect.bisect_right(starts, extent.start)
+        stop = starts[index] if index < len(starts) else words.layout.load_end
+        end = switch_extension(words, extent, stop)
+        if end is None:
+            continue
+        # The table's first case is also a pointer-referenced candidate.
+        existing = rows_by_start.get(extent.end)
+        if existing is not None:
+            if existing["confidence"] in ADMISSIBLE:
+                continue
+            rows.remove(existing)
+        row = {
+            "image": image,
+            "va": f"0x{extent.end:08x}",
+            "file_offset": f"0x{words.layout.file_offset(extent.end):x}",
+            "owner_va": f"0x{extent.start:08x}",
+            "frame_size": "",
+            "ra_save_offset": "",
+            "return_va": f"0x{end - 8:08x}",
+            "pointer_refs": pointer_refs[extent.end],
+            "tail_jump_refs": tail_refs[extent.end],
+            "reloc_refs": relocations.get((image, extent.end), 0),
+            "valid_first_12": first_window_score(words, extent.end),
+            "boundary": f"switch-dispatch=0x{extent.end - 8:08x}",
+            "confidence": "switch-extend",
+            "note": "owner-ends-at-proven-switch-dispatch+cases-up-to-next-start",
+        }
+        rows.append(row)
+        rows_by_start[extent.end] = row
     return rows
 
 

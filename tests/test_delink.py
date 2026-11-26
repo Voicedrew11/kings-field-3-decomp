@@ -80,6 +80,23 @@ class MipsElfTests(unittest.TestCase):
                 with self.subTest(name=name, alignment=alignment), self.assertRaises(ValueError):
                     write_mips_elf(bytes(8), 'control', 8, **{name: alignment})
 
+    def test_shared_hi_lo_family_is_not_ambiguous(self) -> None:
+        from scripts.kf.relocations import ambiguous_sites
+
+        def row(site, paired, target, kind="mips_hi16_lo16", name=""):
+            return {"site_va": site, "paired_site_va": paired, "kind": kind,
+                    "target_va": target, "target_name": name}
+
+        family = [row("0x10", "0x18", "0x80020000"), row("0x14", "0x18", "0x80020000"),
+                  row("0x10", "0x20", "0x80020000")]
+        self.assertEqual(ambiguous_sites(family), set())
+        conflict = family + [row("0x14", "0x24", "0x80030000")]
+        self.assertEqual(ambiguous_sites(conflict), {0x14})
+        mixed = [row("0x10", "", "0x80020000", kind="mips26"), row("0x10", "0x18", "0x80020000")]
+        self.assertEqual(ambiguous_sites(mixed), {0x10})
+        repeated = [row("0x10", "0x18", "0x80020000"), row("0x10", "0x18", "0x80020000")]
+        self.assertEqual(ambiguous_sites(repeated), {0x10, 0x18})
+
     def test_unreviewed_bss_candidate_does_not_compete_in_safe_policy(self) -> None:
         candidate = {"status": "candidate", "target_region": "bss"}
         reviewed = {"status": "reviewed", "target_region": "bss"}
@@ -137,6 +154,30 @@ class MipsElfTests(unittest.TestCase):
         rewritten_hi, rewritten_lo = encode_hi_lo_addend(lui, addiu, 0x9234)
         self.assertEqual(rewritten_hi & 0xFFFF, 1)
         self.assertEqual(rewritten_lo & 0xFFFF, 0x9234)
+
+    def test_overlay_call_into_its_host_validates_against_host_starts(self) -> None:
+        from types import SimpleNamespace
+
+        from scripts.kf.relocations import validate_relocation
+
+        overlay = Function("FDAT_002.BIN", 0x801E83B0, 8, 8, 1, "func_801e83b0",
+                           "test", "test")
+        host_callee = Function("GAME.EXE", 0x80041EEC, 0xA0, 0xA0, 1, "func_80041eec",
+                               "test", "test")
+        word = 0x0C000000 | (0x80041EEC & 0x0FFFFFFF) >> 2
+        blob = struct.pack("<2I", word, 0)
+        row = {"image": "FDAT_002.BIN", "site_va": "0x801e83b0", "paired_site_va": "",
+               "kind": "mips26", "channel": "reachable-code", "target_va": "0x80041eec",
+               "target_region": "load", "target_name": "", "opcode": "jal",
+               "status": "reviewed", "confidence": "test", "provenance": "test"}
+        hosted = SimpleNamespace(function_starts={"FDAT_002.BIN": {},
+                                                  "GAME.EXE": {0x80041EEC: host_callee}})
+        self.assertEqual(validate_relocation(blob, overlay, row, hosted, "safe").target,
+                         0x80041EEC)
+        # The same address is not a function start of the overlay itself.
+        alone = SimpleNamespace(function_starts={"FDAT_002.BIN": {}, "GAME.EXE": {}})
+        with self.assertRaisesRegex(ValueError, "target-is-not-a-function-start"):
+            validate_relocation(blob, overlay, row, alone, "safe")
 
     def test_local_jump_uses_text_section_relocation(self) -> None:
         function = Function(
@@ -206,6 +247,50 @@ class MipsElfTests(unittest.TestCase):
             ],
         )
         self.assertEqual(used["action"], "paired-symbol")
+
+    def test_hi_lo_pair_through_a_copied_lui_register(self) -> None:
+        # lui v0,0x801c; move s3,v0; nop; sw v0,-21400(s3): GCC copies the high
+        # half before the low uses it, and the pair stays one HI16/LO16.
+        function = Function(
+            "GAME.EXE", 0x80010000, 16, 16, 1, "test", "test", "test"
+        )
+        catalog = Catalog(
+            functions={"GAME.EXE": (function,)},
+            function_starts={"GAME.EXE": {function.va: function}},
+            data={"GAME.EXE": ()},
+        )
+        lui, move, store = 0x3C02801C, 0x00409821, 0xAE62AC68
+        self.assertEqual(decode_hi_lo_target(lui, store, move), 0x801BAC68)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, store)
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            decode_hi_lo_target(lui, store, 0x00409021)  # move s2,v0
+        row = {
+            "image": "GAME.EXE",
+            "site_va": f"{function.va:#x}",
+            "paired_site_va": f"{function.va + 12:#x}",
+            "kind": "mips_hi16_lo16",
+            "channel": "reachable-code",
+            "target_va": "0x801bac68",
+            "target_region": "bss",
+            "target_name": "DAT_801bac68",
+            "opcode": "lui+sw",
+            "confidence": "manual-decoded",
+            "status": "reviewed",
+        }
+        blob = bytearray(struct.pack("<4I", lui, move, 0, store))
+        relocations, used = _apply_relocation(blob, function, row, catalog, "safe")
+        self.assertEqual(
+            relocations,
+            [
+                MipsRelocation(0, "R_MIPS_HI16", "DAT_801bac68"),
+                MipsRelocation(12, "R_MIPS_LO16", "DAT_801bac68"),
+            ],
+        )
+        self.assertEqual(used["action"], "paired-symbol")
+        other = bytearray(struct.pack("<4I", lui, 0x00409021, 0, store))
+        with self.assertRaisesRegex(ValueError, "does not consume"):
+            _apply_relocation(other, function, row, catalog, "safe")
 
     def test_reviewed_instruction_word_pair_is_safe(self) -> None:
         function = Function(
@@ -851,6 +936,108 @@ class ModuleObjectTests(unittest.TestCase):
         self.assertEqual(struct.unpack_from("<I", text, 8)[0], 20)
         self.assertEqual(decode_hi_lo_target(*struct.unpack_from("<2I", text, 12)), 0)
 
+    def test_static_small_data_gprel_and_shared_hi_lo_use_section_offsets(self) -> None:
+        # One lui feeding two lows, two luis on converging paths feeding one
+        # low, and a $gp-relative store, all against .sbss/.bss statics.
+        function = Function("GAME.EXE", 0x80010000, 28, 28, 1, "only", "test", "test")
+        words = (0x3c020000, 0x24420000, 0x8c430000,
+                 0x3c040000, 0x3c040000, 0x24840000, 0xaf800000)
+        carved = {function.va: (struct.pack("<7I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_LO16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_HI16", "big"),
+            MipsRelocation(16, "R_MIPS_HI16", "big"),
+            MipsRelocation(20, "R_MIPS_LO16", "big"),
+            MipsRelocation(24, "R_MIPS_GPREL16", "second"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 4, "first", "bss", "static", ".sbss"),
+            Datum(0x80058024, 4, "second", "bss", "static", ".sbss"),
+            Datum(0x80058030, 0x20, "pad", "bss", "static"),
+            Datum(0x80058050, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        self.assertEqual([item.symbol for item in built.relocations],
+                         [".bss"] * 6 + [".sbss"])
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<7I", text)
+        for high, low in ((0, 1), (0, 2), (3, 5), (4, 5)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+        self.assertEqual(words[6] & 0xFFFF, 4)
+
+    def test_dead_lui_pairs_with_the_low_of_its_own_register(self) -> None:
+        # A lui left dead in a delay slot (s1), another lui of the same static
+        # (v1) feeding a store, then the live lui s1 and its load: the dead
+        # lui must not take the v1-based store as its low.
+        function = Function("GAME.EXE", 0x80010000, 20, 20, 1, "only", "test", "test")
+        words = (0x3c110000, 0x3c030000, 0xac600000, 0x3c110000, 0x8e300000)
+        carved = {function.va: (struct.pack("<5I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_HI16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_HI16", "big"),
+            MipsRelocation(16, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        self.assertEqual([item.symbol for item in built.relocations], [".bss"] * 5)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<5I", text)
+        for high, low in ((0, 4), (1, 2), (3, 4)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
+    def test_branch_path_lui_keeps_off_the_other_paths_low(self) -> None:
+        # lui v0 in a delay slot feeds a store on the taken path; the other
+        # path loads lui v1 and stores through it. The v1 lui must not take
+        # the v0-based store that follows its own low.
+        function = Function("GAME.EXE", 0x80010000, 16, 16, 1, "only", "test", "test")
+        words = (0x3c020000, 0x3c030000, 0xac600000, 0xac400000)
+        carved = {function.va: (struct.pack("<4I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_HI16", "big"),
+            MipsRelocation(8, "R_MIPS_LO16", "big"),
+            MipsRelocation(12, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<4I", text)
+        for high, low in ((0, 3), (1, 2)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
+    def test_low_after_another_paths_lui_pairs_with_its_registers_lui(self) -> None:
+        # lui a1 feeds a load, then a delay-slot lui s2 (another path) comes
+        # before a second a1-based store: the store still belongs to lui a1.
+        function = Function("GAME.EXE", 0x80010000, 20, 20, 1, "only", "test", "test")
+        words = (0x3c050000, 0x8ca20000, 0x3c120000, 0x8e420000, 0xaca20000)
+        carved = {function.va: (struct.pack("<5I", *words), [
+            MipsRelocation(0, "R_MIPS_HI16", "big"),
+            MipsRelocation(4, "R_MIPS_LO16", "big"),
+            MipsRelocation(8, "R_MIPS_HI16", "big"),
+            MipsRelocation(12, "R_MIPS_LO16", "big"),
+            MipsRelocation(16, "R_MIPS_LO16", "big"),
+        ])}
+        module = Module("GAME.EXE", "game.unit", "unit", (function.va,), (
+            Datum(0x80058020, 0x20, "pad", "bss", "static"),
+            Datum(0x80058040, 0x10, "big", "bss", "static"),
+        ))
+        built = _module_object(module, {function.va: function}, carved)
+        section = elf_sections(built.data)[".text"]
+        text = built.data[section[4]:section[4] + section[5]]
+        words = struct.unpack_from("<5I", text)
+        for high, low in ((0, 1), (2, 3), (0, 4)):
+            self.assertEqual(decode_hi_lo_target(words[high], words[low]), 0x20)
+
     def test_same_module_initialized_data_uses_section_offsets(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 32, 32, 1, "only", "test", "test")
         words = (0x3c020000, 0x24420004, 12, 0x3c030000, 0x24630000,
@@ -954,6 +1141,21 @@ class ModuleRodataTests(unittest.TestCase):
             [MipsRelocation(0, "R_MIPS_32", ".text"), MipsRelocation(4, "R_MIPS_32", ".text")],
         )
         self.assertIn(".rel.rodata", sections)
+
+    def test_module_rodata_rebases_pointers_to_its_own_literals(self) -> None:
+        function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "only", "test", "test")
+        carved = {function.va: (struct.pack("<2I", 0x03E00008, 0), [])}
+        module = Module("GAME.EXE", "game.table", "table", (function.va,), (), (0x80012000, 0x10))
+        # two literals followed by a table of pointers to them
+        blob = b"AB\0\0CD\0\0" + struct.pack("<2I", 0x80012000, 0x80012004)
+        built = _module_object(module, {function.va: function}, carved, {}, blob)
+        sections = elf_sections(built.data)
+        rodata = built.data[sections[".rodata"][4]:sections[".rodata"][4] + sections[".rodata"][5]]
+        self.assertEqual(struct.unpack_from("<2I", rodata, 8), (0, 4))
+        self.assertEqual(
+            [item for item in built.relocations if item.symbol == ".rodata"],
+            [MipsRelocation(8, "R_MIPS_32", ".rodata"), MipsRelocation(12, "R_MIPS_32", ".rodata")],
+        )
 
     def test_module_switch_table_rodata_ends_at_the_retail_claim(self) -> None:
         function = Function("GAME.EXE", 0x80010000, 8, 8, 1, "first", "test", "test")
