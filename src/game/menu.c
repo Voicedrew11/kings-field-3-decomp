@@ -4457,11 +4457,12 @@ void menu_render_list(MenuList *list, s32 flags)
     u8 *second;
     u32 *values;
     u8 *counts;
+    u8 *out;
+    MenuSpriteDef *sprite;
+    s32 value;
     s32 hide;
-    s32 stock;
     s32 i;
-    s32 j;
-    s32 bright;
+    s32 n; /* glyph counter, then the cursor brightness */
     s32 blue;
 
     hide = flags & 0x8000;
@@ -4478,65 +4479,71 @@ void menu_render_list(MenuList *list, s32 flags)
     second += list->first * 24;
     values += list->first;
     counts += list->first;
-    stock = flags == 8 || flags == 9;
-    for (i = 0; i < list->rows; i++) {
-        if (i >= list->count) {
-            break;
-        }
+    for (i = 0; i < list->rows && i < list->count; i++) {
         text.x = list->x + 13;
         text.y = list->y + 8 + i * 16;
-        for (j = 0; j < list->glyphs_per_entry; j++) {
-            text.text[j] = *names++;
+        out = text.text;
+        for (n = 0; n < list->glyphs_per_entry; n++) {
+            *out++ = *names++;
         }
         menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         if (flags == 3) {
             text.x += 84;
-            for (j = 0; j < 24; j++) {
-                text.text[j] = *second++;
+            out = text.text;
+            for (n = 0; n < 24; n++) {
+                *out++ = *second++;
             }
-            text.text[j] = 0xff;
+            *out = 0xff;
             menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         }
         if (flags >= 10 && flags < 16 && flags != 12) {
+            value = *values;
             text.x += 161;
-            menu_format_number(*values++, 6, 0, 2, text.text);
+            menu_format_number(value, 6, 0, 2, text.text);
             menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
+            values++;
         }
         if (flags == 2 || flags == 4) {
-            if (*values++ != -1) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 206;
-                menu_format_number(values[-1], 3, 0, 3, text.text);
+                menu_format_number(value, 3, 0, 3, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
-        if (stock) {
-            if (*values++ != -1) {
+        if (flags == 8 || flags == 9) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 115;
-                menu_format_number(values[-1], 7, 0, 4, text.text);
+                menu_format_number(value, 7, 0, 4, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
-            if (*counts++ != 0xff) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x += 91;
-                menu_format_number(counts[-1], 3, 0, 5, text.text);
+                menu_format_number(value, 3, 0, 5, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
-        if (!(flags == 2 || flags == 3 || flags == 4 || stock || flags == 16)) {
-            if (*counts++ != 0xff) {
+        if (flags != 2 && flags != 3 && flags != 4 && flags != 8 && flags != 9 && flags != 16) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x = list->x + 233;
-                menu_format_number(counts[-1], 2, 0, 1, text.text);
+                menu_format_number(value, 2, 0, 1, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
         if (flags == 16) {
-            if (*counts++ != 0xff) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x += 220;
-                menu_format_number(counts[-1], 2, 0, 1, text.text);
+                menu_format_number(value, 2, 0, 1, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
-            if (*values++ != -1) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 206;
-                menu_format_number(values[-1], 3, 0, 3, text.text);
+                menu_format_number(value, 3, 0, 3, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
@@ -4545,20 +4552,19 @@ void menu_render_list(MenuList *list, s32 flags)
     for (i = 0; i < list->rows; i++) {
         if (i == list->row) {
             if (menu_cursor_animation_frame < 48) {
-                bright = menu_cursor_animation_frame + menu_sprite_shade;
+                n = menu_cursor_animation_frame + menu_sprite_shade;
                 blue = menu_cursor_animation_frame / 2 + menu_sprite_shade;
             } else {
-                bright = menu_sprite_shade + 95 - menu_cursor_animation_frame;
-                blue = menu_sprite_shade + 47 - menu_cursor_animation_frame / 2;
+                n = menu_sprite_shade + (95 - menu_cursor_animation_frame);
+                blue = menu_sprite_shade + (47 - menu_cursor_animation_frame / 2);
             }
+            sprite = &menu_sprite_defs[11];
             primitive_buffer_begin_poly_ft4();
-            setRGB0(current_poly_ft4, bright, bright, blue);
-            current_poly_ft4->tpage = menu_sprite_defs[11].tpage;
-            current_poly_ft4->clut = menu_sprite_defs[11].clut;
-            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, menu_sprite_defs[11].width,
-                                        menu_sprite_defs[11].height, menu_sprite_defs[11].u,
-                                        menu_sprite_defs[11].v, menu_sprite_defs[11].width,
-                                        menu_sprite_defs[11].height);
+            setRGB0(current_poly_ft4, n, n, blue);
+            current_poly_ft4->tpage = sprite->tpage;
+            current_poly_ft4->clut = sprite->clut;
+            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, sprite->width, sprite->height,
+                                        sprite->u, sprite->v, sprite->width, sprite->height);
             SetSemiTrans((void *)current_poly_ft4, 1);
             primitive_buffer_commit_poly_ft4(0x31);
         }
