@@ -5015,7 +5015,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     s32 k;
     s32 ww;
     s32 hh;
-    s32 v;
+    s16 v;
     s32 wrem;
     s32 hrem;
     s32 done;
@@ -5023,9 +5023,9 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
 
     x = x0;
     y = y0;
+    done = 0;
     wrem = w - 66;
     hrem = h - 66;
-    done = 0;
     for (i = 0, k = 9; i < 6; i++, k++) {
         if (i == 3) {
             k += 3;
@@ -5033,14 +5033,14 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             if (hrem < 0) {
                 y += 33;
             } else {
-                y = y + 33 + hrem;
+                y += hrem + 33;
             }
             wrem = w - 66;
         }
         f = &menu_sprite_defs[k + 3];
         if (i >= 3 && hrem < 0) {
             hh = h - 33;
-            v = f->v + 66 - h;
+            v = f->v + (66 - h);
         } else {
             hh = f->height;
             v = f->v;
@@ -5070,17 +5070,17 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     }
     y = y0 + 33;
     x = x0;
-    i = 11;
+    k = 11;
     while (!done) {
-        i++;
-        f = &menu_sprite_defs[i + 3];
+        k++;
+        f = &menu_sprite_defs[k + 3];
         hh = f->height;
         ww = f->width;
-        end = 0;
         if (hrem < hh) {
             hh = hrem;
         }
         wrem = w - 66;
+        end = 0;
         do {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
@@ -5090,7 +5090,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->u, f->v, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
-            if (i != 13) {
+            if (k != 13) {
                 break;
             }
             wrem -= ww;
@@ -5100,8 +5100,8 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
                 ww = wrem;
             }
         } while (!end);
-        if (i == 14) {
-            i = 11;
+        if (k == 14) {
+            k = 11;
             y += 28;
             x = x0;
             hrem -= hh;
