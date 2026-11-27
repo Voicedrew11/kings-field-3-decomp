@@ -2076,8 +2076,6 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
  * Draws model 3 (the menu's item model) with the matrices the caller set:
  * projects its vertices into GraphicsRuntime.screen with a depth-cue value from
  * the fog range, then draws part 0 at depth offset 100.
- * Not exact: retail stores the CLUT offset between SCRATCH->screen and
- * SCRATCH->end; every statement order tried schedules it earlier.
  */
 
 ADDRESS(0x8004290c, 0x264)
@@ -2085,6 +2083,7 @@ void menu_render_item_model(void)
 {
     ScratchPad *scratch;
     u8 *model;
+    ModelPart *part;
     u8 *vertex;
     ScreenVertex *screen;
     s32 i;
@@ -2099,18 +2098,19 @@ void menu_render_item_model(void)
     offset = SCRATCH->part->vertices + 12;
     SCRATCH->vertices = (u8 *)(offset + (s32)model);
     fog_set_range(20000, 24000);
+    part = ((ModelData *)SCRATCH->model)->parts;
     SCRATCH->ot = scene_display_sys.ot;
     SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
-    SCRATCH->draw.count.clut = 0;
     SCRATCH->end = scene_display_sys.pool->end;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->screen = scene_display_sys.screen;
-    i = ((ModelData *)SCRATCH->model)->parts[0].vertex_count;
+    SCRATCH->draw.count.clut = 0;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     vertex = SCRATCH->vertices;
     screen = scene_display_sys.screen;
+    i = part->vertex_count;
     while (--i != -1) {
         gte_ldv0(vertex);
         gte_rtps();
