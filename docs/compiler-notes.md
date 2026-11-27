@@ -6,9 +6,9 @@ and its evidence are in [toolchain.md](toolchain.md). Every rule below was
 found on a function that did not match, and names a function where the
 retail source form now stands: GAME unless another image is given; find it
 with `grep -rn 'ADDRESS(0x...' src`. Where a cause names a GCC function or
-file, it was read in the GCC 2.5.7 and 2.6.3 sources (no 2.6.0 source tree is
-preserved) and checked against this compiler's output; a rule that rests only
-on the shape of the output says so.
+file, it was read in the GCC 2.5.7 and 2.6.3 sources (the combine rules of
+`0x8003591c` in GNU's 2.6.0 source) and checked against this compiler's
+output; a rule that rests only on the shape of the output says so.
 
 The rules explain residues; they do not excuse one, and
 [AGENTS.md](../AGENTS.md) still decides what a source may contain. Fake
@@ -152,13 +152,13 @@ What decides the numbers:
   one loop counts 2 and a set in the preheader 1. A `retry:`/`goto` loop has
   no loop notes: no weighting, and loop.c leaves it alone (`0x800431e8`,
   where `count` loses to `scratch` only in the goto form).
-- **Hoisted constants.** A constant made by `force_reg` (a compare operand
-  such as the `-1` of `while (--n != -1)`) carries a `REG_EQUAL` note, so
-  `update_equiv_regs` doubles its live length; a constant copied into a
-  register as an operator's operand (`x & 0x00ffffff`, the mask of a
-  bit-field store) has no note and is not doubled. In `0x8003591c` the
-  `-1` (8 references, length 380) therefore ranks below the mask (7
-  references, length 189) and takes the register after it.
+- **Hoisted constants.** The hoisted compare constant of
+  `while (--n != -1)` carries a `REG_EQUAL` note (`force_reg` adds one to
+  a constant it loads), so `update_equiv_regs` doubles its live length;
+  the mask of a bit-field store, copied into a register as an operator's
+  operand, has no note and is not doubled (`.lreg` shows both). In
+  `0x8003591c` the `-1` (8 references, length 380) therefore ranks below
+  the mask (7 references, length 189) and takes the register after it.
 - **Returns.** Each `return i` inside a loop is two references of `i`; one
   shared return can drop a variable below another (`0x80045c7c`).
 - **Live length** follows statement order: reading `z` before `p` lengthens
@@ -346,10 +346,11 @@ insn gives it (`block_alloc` tries operands in order).
 - **Byte stores into a register copy.** A `u8` member of a word-sized
   union that lives in a register is stored as `w = (w & mask) | (v << n)`
   with the mask in a register (`store_fixed_bit_field`) and read with a
-  shift. combine removes such a store only from a later shift of the word
-  (or an `and` with a constant): it replaces the read by the stored value.
-  An `and` with the mask register absorbs nothing, so a second store does
-  not remove the first. Three rules decide what is left, and `0x8003591c`
+  shift. combine removes such a store from a later shift of the word: it
+  replaces the read by the stored value. The `and` of a second store was
+  never combined with the first store (the mask is a register), so a
+  second store does not remove the first. Three rules decide what is
+  left, and `0x8003591c`
   shows all of them (`tag.code &= ~2; code = tag.code; tag.unk2 = 0;
   tag.code = code; switch (tag.code & 0xfd)` keeps the first store and the
   `srl 24; andi 0xfd`):
