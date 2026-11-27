@@ -53,6 +53,11 @@ throughout:
 - **Compiler.** "GNU C 2.6.0 [AL 1.1, MM 40]" from Sony's 2.60 floppy. It
   calls `__main` at the top of `main` (supplied by `2MBYTE.OBJ`). Plain `char`
   is unsigned (`lbu`), as the CCPSX driver's `__CHAR_UNSIGNED__` says.
+  GAME's own compiler had one later reload change (see
+  [toolchain.md](toolchain.md#games-compiler-revision)). Earlier rounds read
+  the 2.6.3 sources; 2.6.0's differ in most passes (`-O2` turns on
+  `-fcaller-saves` but not `-fforce-mem`, for one), so check a fact taken
+  from 2.6.3 against 2.6.0 before relying on it.
 - **Profiles.** `-G8` and `-G0` occur per translation unit. All FDAT modules
   and `game.save_data` are `-G0` (no `$gp` use at all). A unit whose small
   globals are members of one aggregate compiles the same either way (the CD
@@ -591,9 +596,10 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   block-scoped temporary (`{ u16 t; ...; t = p[3] & 0xff9f; p[3] = t; }`)
   its load is scheduled first and held in a third register (`a0`) while the
   shifts keep their own order (the case blocks of `0x8003591c`).
-- **Loop notes are barriers.** No insn is scheduled across a
-  `NOTE_INSN_LOOP_BEG`/`END` inside a basic block (`sched_analyze_insn`;
-  read in the source, no match rests on it yet).
+- **Loop notes are not barriers in 2.6.0.** GCC 2.6.3's `sched_analyze_insn`
+  keeps insns from crossing a `NOTE_INSN_LOOP_BEG`/`END` inside a basic
+  block, but that rule dates from 1994-08-20 and is not in 2.6.0's
+  `sched.c`; no match rests on it.
 - **Delay slots (reorg).** An assignment written after an if-block can fill
   the branch's slot from its target (`0x8001eb3c`); `speed = 0` inside the
   first arm, not before the `if`, lands in that branch's slot (`0x800500a8`).
@@ -780,9 +786,10 @@ Residues whose mechanism is known but whose source form is not:
   straight to the callees' `u16` parameters, whose two call blocks, scheduled
   by hand with one `USE` insn per read, give retail's order and its load-use
   `nop`. No function of GAME, OPEN, END or the FDAT modules shows the 2.6.0
-  form (a word reload of a spill slot used only narrow). A `cc1` built from
-  2.6.1 to 2.6.3 sources would settle whether retail's compiler was a later
-  revision than the pinned one.
+  form (a word reload of a spill slot used only narrow). Under decompals'
+  `gcc-2.6.3-psx` both functions are identical to retail in those forms, so
+  here the compiler, not the source, is the open part (see
+  [toolchain.md](toolchain.md#games-compiler-revision)).
 - `0x800608ec`: retail stops hoisting after four invariants. With the
   threshold at 52 the record loop needs 41 to 43 insns at loop time; the
   plain source has 36 (each narrow temporary for a loaded byte adds one).
