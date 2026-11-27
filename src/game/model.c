@@ -22,12 +22,13 @@ RODATA(0x80011be0, 0x74)
  * is cleared in the copy of the head word only.
  * The copy is changed twice more before the switch reads it, and nothing
  * reads those changes: the code is saved, another byte of the copy is
- * cleared and the code is put back. Retail's instructions need them. They
+ * cleared and the code is put back. Retail's instructions need them: they
  * are why the compiler keeps the first store of the code byte and the
- * `& 0xfd` of the switch instead of folding one into the other, they give
- * the 0x00ffffff mask its second use (register t2), and the two values
- * they leave unused are the 8 bytes of frame. Any store to another byte of
- * the copy does this; which one the original had is not known.
+ * `& 0xfd` of the switch instead of folding one into the other, the second
+ * store is the second use of the 0x00ffffff mask (register t2), and the
+ * mask of the cleared byte, left without an instruction, is the 8 unused
+ * bytes of frame. Any store to another byte of the copy does this; which
+ * one the original had is not known.
  */
 ADDRESS(0x8003591c, 0x328)
 void tmd_prepare_primitive_indices(u8 *data)
