@@ -81,7 +81,7 @@ void resource_initialize_game_assets(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     resource_copy_words((u32 *)weapon_table, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    resource_copy_words(item_gear_recs, p + 1, *p >> 2);
+    resource_copy_words((u32 *)item_gear_recs, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     resource_copy_words((u32 *)player_lv_grow_list, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));

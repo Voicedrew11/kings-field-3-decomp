@@ -216,7 +216,7 @@ void player_add_equipment_bonuses(s32 id)
     if (id == 0xff) {
         return;
     }
-    r = &map_world.equipment_records[id];
+    r = &item_gear_recs[id - EQUIPMENT_RECORD_FIRST_ID];
     cur_avatar_status.defense_slash += r->defense_slash;
     cur_avatar_status.defense_blow += r->defense_blow;
     cur_avatar_status.defense_stab += r->defense_stab;
@@ -1291,43 +1291,43 @@ void player_set_equipment_slot(u8 id, u8 slot)
     }
     if (cur_avatar_status.equipped_head_id != 0xff) {
         cur_avatar_status.equipped_head_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_head_id];
+            &item_gear_recs[cur_avatar_status.equipped_head_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_head_record = NULL;
     }
     if (cur_avatar_status.equipped_body_id != 0xff) {
         cur_avatar_status.equipped_body_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_body_id];
+            &item_gear_recs[cur_avatar_status.equipped_body_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_body_record = NULL;
     }
     if (cur_avatar_status.equipped_arm_id != 0xff) {
         cur_avatar_status.equipped_arm_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_arm_id];
+            &item_gear_recs[cur_avatar_status.equipped_arm_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_arm_record = NULL;
     }
     if (cur_avatar_status.equipped_leg_id != 0xff) {
         cur_avatar_status.equipped_leg_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_leg_id];
+            &item_gear_recs[cur_avatar_status.equipped_leg_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_leg_record = NULL;
     }
     if (cur_avatar_status.equipped_shield_id != 0xff) {
         cur_avatar_status.equipped_shield_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_shield_id];
+            &item_gear_recs[cur_avatar_status.equipped_shield_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_shield_record = NULL;
     }
     if (cur_avatar_status.equipped_accessory_id != 0xff) {
         cur_avatar_status.equipped_accessory_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_accessory_id];
+            &item_gear_recs[cur_avatar_status.equipped_accessory_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_accessory_record = NULL;
     }
     if (cur_avatar_status.equipped_extra_id != 0xff) {
         cur_avatar_status.equipped_extra_record =
-            &map_world.equipment_records[cur_avatar_status.equipped_extra_id];
+            &item_gear_recs[cur_avatar_status.equipped_extra_id - EQUIPMENT_RECORD_FIRST_ID];
     } else {
         cur_avatar_status.equipped_extra_record = NULL;
     }

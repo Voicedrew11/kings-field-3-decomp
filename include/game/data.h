@@ -123,7 +123,7 @@ typedef struct PlayerState {
     u8 weapon_attack_fully_charged;
     u8 weapon_guard_active;
     u8 unkd1[0x3];
-    struct EquipmentRecord *equipped_head_record; /* +0xd4..+0xec: &map_world.equipment_records[]
+    struct EquipmentRecord *equipped_head_record; /* +0xd4..+0xec: the item_gear_recs records
                      * of equipped_head_id..equipped_extra_id */
     struct EquipmentRecord *equipped_body_record;
     struct EquipmentRecord *equipped_shield_record;
@@ -287,12 +287,8 @@ typedef struct MapCell {
 typedef struct MapWorld {
     MapCell cells[80][80];
     u8 unkfa00[0x600];
-    u8 shape_bank[0x1c14]; /* +0x10000: resource_advance_transition copies an area file's second table
-                          * (0x2000 bytes, through unk11ff4) here */
-    EquipmentRecord equipment_records[31]; /* +0x11c14: by item id; MapWorld ends at
-                     * item_gear_recs (0x801e64b8), so ids >= 34 land in that table: its by-item-id
-                     * base (layout fix later) */
-    u8 unk11ff4[0xc];
+    u8 shape_bank[0x2000]; /* +0x10000: resource_advance_transition copies an area file's second table
+                            * here */
     MapCell *collision_cell; /* +0x12000: cell of the last collision test */
     MapLayer *collision_layer; /* +0x12004: layer of the last collision test
                                 * (collision_evaluate_shape_records) */
@@ -1011,7 +1007,9 @@ extern PlayerLevelGrowth player_lv_grow_list[100];
 extern WeaponRecord weapon_table[48];
 extern u32 tmd_archive_28_buffer[];
 extern u32 tmd_0_buffer[];
-extern u32 item_gear_recs[];
+/* Equipment records, the first for item EQUIPMENT_RECORD_FIRST_ID (WIP extent). */
+#define EQUIPMENT_RECORD_FIRST_ID 34
+extern EquipmentRecord item_gear_recs[];
 extern u8 resource_tmd_arc_work[];
 
 /* What game_initialize_session points PlayerState.weapon_asset_buffer at (WIP extent). */
