@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import bisect
 import hashlib
 import json
 import os
@@ -18,7 +19,9 @@ from scripts.kf.graph import IncludeScanner
 from scripts.kf.manifest import Manifest, Profile, Unit, load as load_manifest
 from scripts.kf.paths import BUILD, REPO, RETAIL_CONFIG
 from scripts.kf.readme import refresh_executable
-from scripts.kf.retail import IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key
+from scripts.kf.retail import (
+    IMAGE_KEYS, IMAGE_LAYOUTS, IMAGE_NAMES, OVERLAY_SOURCES, image_key, read_tsv,
+)
 from scripts.kf.sema.image import RetailImage
 
 
@@ -89,6 +92,57 @@ def unclaimed_game_functions(name: str, units: list[Unit]) -> list[int]:
             if not function.provider and function.va not in claimed]
 
 
+def census_references(name: str) -> list[tuple[int, int]]:
+    """(site, target) pairs of the image in the reviewed reference census."""
+    _, rows = read_tsv(RETAIL_CONFIG / 'relocs.tsv')
+    return [(int(row['site_va'], 0), int(row['target_va'], 0))
+            for row in rows if row['image'] == name and row['target_va']]
+
+
+def unowned_data_references(name: str, units: list[Unit]) -> list[int]:
+    """Image-local data addresses that claimed code references but no unit owns.
+
+    This is the data-ownership gap `kf check` reports as "known-reference data
+    ownership is incomplete", taken from the configuration alone (the build
+    reads no retail file): a census reference from a claimed function to an
+    address inside the image that is neither claimed code or data nor inside
+    a cataloged function. PSYLINK cannot resolve such a symbol, so the image
+    stays on the partial path until every one has an owning unit.
+    """
+    layout = IMAGE_LAYOUTS[name]
+    code = _Ranges((f.va, f.va + f.size) for unit in units for f in unit.functions)
+    if not code:
+        return []
+    claims = [(datum.va, datum.va + datum.size) for unit in units for datum in unit.data]
+    claims += [(va, va + size) for unit in units
+               for va, size in filter(None, (unit.rodata, unit.sdata))]
+    owned = _Ranges([*code.ranges, *claims,
+                     *((f.va, f.end) for f in load_catalog(RETAIL_CONFIG).functions[name])])
+    return sorted({target for site, target in census_references(name)
+                   if site in code and layout.contains(target) and target not in owned})
+
+
+class _Ranges:
+    """Half-open address ranges, merged, with a membership test."""
+
+    def __init__(self, ranges):
+        merged: list[tuple[int, int]] = []
+        for start, end in sorted(ranges):
+            if merged and start <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+            else:
+                merged.append((start, end))
+        self.ranges = merged
+        self.starts = [start for start, _ in merged]
+
+    def __bool__(self) -> bool:
+        return bool(self.ranges)
+
+    def __contains__(self, address: int) -> bool:
+        i = bisect.bisect_right(self.starts, address) - 1
+        return i >= 0 and address < self.ranges[i][1]
+
+
 def host_symbols(name: str, objects: list[Path]) -> dict[str, int]:
     """Absolute addresses of the host symbols a module's objects reference.
 
@@ -143,6 +197,17 @@ def build_image(name: str, manifest: Manifest, root: Path) -> dict:
         report = {'image': name, 'linked': False, 'phase': 'partial',
                   'units': [unit.unit for unit in units],
                   'unclaimed_game_functions': len(unclaimed)}
+        (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+        return report
+    unowned = unowned_data_references(name, units)
+    if unowned:
+        # Every function is claimed, but claimed code still references the
+        # image's own data that no unit defines: the link would leave those
+        # symbols undefined. The data gates report the same gap.
+        root.mkdir(parents=True, exist_ok=True)
+        report = {'image': name, 'linked': False, 'phase': 'partial',
+                  'units': [unit.unit for unit in units],
+                  'unowned_data_references': len(unowned)}
         (root / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
         return report
     report = link_image(
@@ -228,9 +293,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f'{name}: built {report["executable"]}')
             elif report['phase'] == 'not-started':
                 print(f'{name}: no source units yet; link skipped')
-            elif report['phase'] == 'partial':
+            elif report['phase'] == 'partial' and 'unclaimed_game_functions' in report:
                 print(f'{name}: partial reconstruction ({report["unclaimed_game_functions"]} '
                       'game functions unclaimed); native link skipped')
+            elif report['phase'] == 'partial':
+                print(f'{name}: partial reconstruction ({report["unowned_data_references"]} '
+                      'referenced data addresses without an owning unit); native link skipped')
             else:
                 print(f'{name}: {report["phase"]} failed; see {root}: {report["error"]}')
             (root / filename).write_text(json.dumps(report, indent=2) + '\n')
