@@ -35,9 +35,11 @@ it cannot stat headers under `/mnt/c`.
 `kf analyze`. See [verification traps](#verification-traps) for what a
 native-only comparison hides.
 
-**Pass order.** expansion, jump, cse, loop, cse2, flow, combine, sched1,
-local-alloc, global-alloc (with reload), sched2, jump2, reorg. Consequences
-used throughout:
+**Pass order.** expansion, jump, cse, loop, jump again, cse2, flow, combine,
+sched1, local-alloc, global-alloc (with reload), sched2, jump2, reorg. The
+jump pass after loop (`toplev.c`) has no dump of its own; like the first it
+may duplicate a loop's exit test (see [loop.c](#loopc)). Consequences used
+throughout:
 
 - flow counts references before combine, and nothing lowers the count
   afterwards, so uses that combine folds away still count for allocation.
@@ -197,6 +199,22 @@ insn gives it (`block_alloc` tries operands in order).
   (`0x8002d130`, `0x800443c8`, `0x80040708`).
 - A constant held in a saved register is an initialised local (`last = 2`,
   `h = 240`, `part = 0xff`; `0x8001ec84`, `0x80035394`, `0x80030fcc`).
+- One variable reused for two values is one pseudo: used in two blocks it is
+  global, so local-alloc cannot tie it to its own extension (`u16 entry` for
+  the archive entry and the page entry, `0x8001dbc4`), and if either use
+  crosses a call both sit in a saved register (a glyph counter that later
+  holds the cursor brightness counts in `s0`, `0x80025468`).
+- A flag set directly before its loop has a shorter life, and so a higher
+  priority, than one set at the top of the enclosing body (`end = 0;`,
+  `0x80026acc`).
+- A copy of a parameter declared before a block-move initializer is not
+  rewritten back onto the parameter: the move's loop labels end cse's path
+  between the copy and its uses (`u8 weapon = id;` before `u8 effect[34] =
+  {...}`, `0x8002bdc0`).
+- A pointer local initialised to a constant address that crosses calls and
+  gets no saved register is not given a stack slot: reload rematerialises
+  the constant at each use (`lui t8,0x1f80`, `0x80034bf4`; `li t2,255` for a
+  hoisted constant, `0x80025468`).
 
 ## CSE
 
@@ -226,7 +244,9 @@ insn gives it (`block_alloc` tries operands in order).
   onto `mode`; a mode-changing copy (`u8 mode = flags`) is not an equivalence
   and the argument register is masked as in retail (`0x8003e34c`). After a
   jump equivalence (`record_jump_cond`) the compare's first operand stays
-  canonical (`0x80028750`, open).
+  canonical while it lives: one variable for the `write()` and the `read()`
+  result is reassigned, leaves the class, and the second compare reuses the
+  constant's register (`0x80028750`).
 - **Invalidation.** Any store to a varying in-struct address forgets all
   struct memory, and so does a store to a fixed scalar; a store placed
   between two reads forces retail's reload (`0x800568bc`; `0x80053c84` case
@@ -240,6 +260,25 @@ insn gives it (`block_alloc` tries operands in order).
   instead of `x = c; if (...) x = d;` keeps a value from being shared across
   the join (`0x8002c30c`), and a cross-jumped call starts a new extended
   block, so an address is recomputed after it.
+- **Absolute addresses after a base.** cse1 rewrites a constant address as
+  `base + offset` when a related address is already in a register on the
+  path (`use_related_value`); cse2 folds it back to the constant when it
+  still sees the base's value. A member updated on such a path (`x.m +=
+  f()`) is then loaded and stored absolutely instead of through one address
+  register. A statement after an `if` join starts a new path with an empty
+  table, so the same update written once after the join keeps its address
+  register; written in both arms it is absolute in each, and jump2 merges
+  the two tails (`0x8002fe1c`). A pointer local set from a constant address
+  (`sprite = &menu_sprite_defs[11]`) gives absolute member accesses the same
+  way, with no base left for loop.c to hoist (`0x80025468`).
+- **Extensions of different width are different expressions.** A `u8` field
+  tested as an int is `(zero_extend:SI mem)`; the same field read in an
+  expression assigned to a `u16` or `s16` is `(zero_extend:HI mem)`. cse
+  does not relate the two, so the field is loaded twice, and reorg does not
+  delete the second `lbu` as redundant because the patterns differ in mode
+  (`se = r->sound_id + 144` with `u16 se`, `0x8002b928`, `0x8002ba38`). In
+  the same way `id + 98` assigned to a `u16` re-extends `id` beside the
+  `SImode` extension of the table index (`0x8002bdc0`).
 
 ## Expansion, fold and combine
 
@@ -337,6 +376,22 @@ insn gives it (`block_alloc` tries operands in order).
   then `return r;` after the loop (`0x80024c70`); in a void function `return;`
   inside works (`0x8001d944`). A `return value;` inside a `for (;;)` puts the
   return label before the loop end note, so its block never moves.
+- **Exit-test duplication.** jump copies a rotated loop's exit test in front
+  of the loop (`duplicate_loop_exit_test`) unless the test is over 20 insns
+  or holds a call, a label or a block note. An indexed test
+  (`a.m[e] >= table[e][n]`) is too long for the first jump pass; after
+  loop.c has hoisted its addresses and reduced the index, the jump pass
+  after loop duplicates it. By then loop.c may have moved an inner loop's
+  exit block behind the entry jump's barrier, which keeps the copy's
+  `if (c) goto body; goto end;` apart from the body until jump2 cross-jumps
+  its compare into the bottom test: the operand loads appear before the
+  entry jump (`0x80029f1c`).
+- **Hoisting order.** Movables are taken in scan order, which starts at the
+  exit test when the loop is entered at the bottom; each move lowers the
+  threshold by 3, and a register already moved out of an inner loop doubles
+  `insn_count` for the rest of the pass. Address invariants in the test can
+  use up the budget before short-lived temporaries in the body are reached
+  (`0x80029f1c`).
 - **Rotation.** `expand_end_loop` (`stmt.c`) moves the exit test to the bottom
   unless it meets a call, a label or a block note. A test that stays at the
   top is `for (;;) { s32 n = *p++; if (n == 0xff) break; ... }`: the
@@ -432,7 +487,13 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   first (`0x8001a9dc`).
 - **Births.** sched1 gives single-set register births launch priority, so a
   constant load lands right before its first consumer; memory insns win ties
-  by potential hazard; otherwise the later insn is placed later.
+  by potential hazard; otherwise the later insn is placed later. Equal
+  chains therefore keep source order: a sum built from locals assigned in
+  retail's order (`left = ...; x = ...; f(left + x, ...)`) schedules as
+  retail does where one expression does not (`0x8001b5c4`), and each local
+  also keeps its own constant from fold's reassociation.
+- **Loop notes are barriers.** No insn is scheduled across a
+  `NOTE_INSN_LOOP_BEG`/`END` inside a basic block (`sched_analyze_insn`).
 - **Delay slots (reorg).** An assignment written after an if-block can fill
   the branch's slot from its target (`0x8001eb3c`); `speed = 0` inside the
   first arm, not before the `if`, lands in that branch's slot (`0x800500a8`).
@@ -547,8 +608,9 @@ so the qualifier is defined by a macro only under the owning modules'
 `GAME_*_MODULE`. The step's readers show it as a reload per compare (`lhu`
 and `sll/sra` five times in `0x80030fcc`) and as `lui/addiu` plus `sh
 0(reg)` stores (`0x800182e0`..). `0x8002b928` and `0x8002ba38` re-read a `u8`
-record field in a way only a volatile access reproduces; with no
-asynchronous writer they are left non-exact.
+record field, which a volatile pointer reproduces but which is a `u16`
+local in the source (see [CSE](#cse)): a second load is not by itself
+evidence of `volatile`.
 
 ## FDAT modules
 
@@ -594,8 +656,6 @@ Residues whose mechanism is known but whose source form is not:
   copy is CSE'd away or allocated elsewhere.
 - `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
   `lhu`; no source form makes combine produce that pseudo.
-- `0x80028750`: the jump equivalence keeps the call result canonical where
-  retail compares against a constant register.
 - `0x8003f304`, `0x8003e34c`: retail reloads `scratch->model` in the else arm
   before the `scratch->part` store, as if cse had not followed the jump.
 - `0x800608ec`: retail stops hoisting after four invariants (the threshold),
