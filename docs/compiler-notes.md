@@ -181,6 +181,19 @@ block-scoped `MapObject *made` dying in `made - objects` gives retail's tie in
 result already has a quantity, which a hard-register operand earlier in the
 insn gives it (`block_alloc` tries operands in order).
 
+A hard-register operand has the same effect, and a returned local produces
+one: with `return made;` the copy to `v0` has nothing to wait for, so sched1
+moves it up behind the call that set `made`, and `optimize_reg_copy_1`
+(`update_equiv_regs`) rewrites every later use of `made` as `v0`. In
+`made - objects` operand 1 is then the hard register, the difference gets its
+quantity from it and the dying base is not tied (`lui v1; addiu v1; subu
+a0,v0,v1`, `0x8005c7e8`, whose callers ignore the returned record).
+
+Quantities are allocated in priority order, so one more insn in a pointer's
+life can move it behind three shorter-lived values: in `0x8004290c` the pool
+pointer (3 references) gets `a2` after the three counters (2 each) only
+because the `SCRATCH->model` load for `part` is scheduled inside its life.
+
 ### Source levers
 
 - Declaration order breaks equal priorities (`0x80017c78`).
@@ -233,6 +246,11 @@ insn gives it (`block_alloc` tries operands in order).
   112 writes the `$gp` word first). A different spelling of the same value
   also defeats reuse: `U16(10) % 0x4000` reloads where `& 0x3fff` is shared
   with the later `& 0xc000` (`0x800500a8`).
+- **Helper order.** King's Field II selects a part's vertices
+  (`tmd_select_object_vertices`) before it takes the part pointer
+  (`tmd_get_object`); with both inline, the two scratchpad stores come first
+  and the part pointer is computed from a reloaded `scratch->model`
+  (`0x8003e34c`, `0x8003f304`).
 - **Followed jumps.** cse follows jumps into later blocks
   (`-fcse-follow-jumps` is on at `-O2`). An exit that jump1 cannot thread
   into a bare jump changes what cse2 sees: a dead store in the exit
@@ -432,7 +450,27 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   first (`0x8001a9dc`).
 - **Births.** sched1 gives single-set register births launch priority, so a
   constant load lands right before its first consumer; memory insns win ties
-  by potential hazard; otherwise the later insn is placed later.
+  by potential hazard; otherwise the later insn is placed later. Only a
+  pseudo with one set in the whole function is a birth (`birthing_insn_p`):
+  a load into a variable that is also assigned elsewhere keeps its source
+  position among other non-births and stays ahead of a birth that becomes
+  ready with it. Retail's `lhu v1,14(s1); lhu a2,16(s1)` in `0x80044d9c` is
+  one temporary used for two values of the definition, 50 lines apart.
+- **Memory order in both schedulers.** A varying struct load (`pool->end`)
+  stays behind every earlier fixed-address struct store and ahead of every
+  later one; two fixed-address members of one base register and different
+  offsets are independent, and so is a scalar access to a fixed address
+  (`*(u32 *)&SCRATCH->w.model.rgb`). A load can therefore rise above
+  scratchpad stores written before it (`0x8003e34c`), and "load A, then
+  store B" in retail puts B's statement after A's (`0x8004290c`).
+- **Fillers and no-op copies.** A load costs two cycles to its consumer and
+  is held back one cycle directly in front of a store; the gap is filled by
+  the ready insn that came latest in the incoming order. sched2 first deletes
+  moves whose two sides are `rtx_equal_p`; a copy through a paradoxical
+  subreg (`(set (reg:SI a3) (subreg:SI (reg:HI a3) 0))`, a narrow variable
+  passed in the register it lives in) is not one, is scheduled as a filler
+  and disappears only in jump2. A load-use `nop` in retail where this build
+  has a real filler can be such a copy (`0x800533e8`, `0x8005c308`, open).
 - **Delay slots (reorg).** An assignment written after an if-block can fill
   the branch's slot from its target (`0x8001eb3c`); `speed = 0` inside the
   first arm, not before the `if`, lands in that branch's slot (`0x800500a8`).
@@ -587,20 +625,16 @@ raw words where GAME narrows. The link and the archive frame are in
 
 Residues whose mechanism is known but whose source form is not:
 
-- `0x8005c7e8`: retail's `subu` result is not tied to the dying base; here
-  the base is block-local and ties (see
-  [ties in local-alloc](#ties-in-local-alloc)).
 - `0x8003be34`: retail keeps the flags parameter in two registers; a source
   copy is CSE'd away or allocated elsewhere.
 - `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
-  `lhu`; no source form makes combine produce that pseudo.
+  `lhu`; no source form makes combine produce that pseudo. Both calls also
+  schedule as if one more no-op copy were present than here.
 - `0x80028750`: the jump equivalence keeps the call result canonical where
   retail compares against a constant register.
-- `0x8003f304`, `0x8003e34c`: retail reloads `scratch->model` in the else arm
-  before the `scratch->part` store, as if cse had not followed the jump.
 - `0x800608ec`: retail stops hoisting after four invariants (the threshold),
   which needs a larger loop at loop time than any spelling found.
 - `0x8004b984`: three copies of one call-and-test tail survive in retail;
   every spelling tried merges two of them.
-- `0x80044d9c`, `0x8005c308`: reorg fills, and sched2 moves, an instruction
-  that retail leaves in place.
+- `0x8005c308`: sched2 moves `li a3,0xfff` into a load-use gap that retail
+  leaves alone; retail's argument copy for `a1` was not a plain no-op there.
