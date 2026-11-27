@@ -71,15 +71,15 @@ s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
 /*
  * Hit by the current record: the player (kind 0x80) or the Actor record
  * of map_world.collision_actor_index (0x10). effect_apply_current_magic passes a3 unmasked, so the narrow
- * parameters arrive as int and are narrowed at entry. Not exact: retail spills a3 with sw
- * and reads it back with lhu; this source spills it with sh.
+ * parameters arrive as int and are narrowed at entry. a3 stays an int and is passed straight to the
+ * callees' u16 parameters: retail spills it as a word and reads the low half back with lhu, which needs
+ * the 1994-08-07 reload of the GAME compiler (docs/toolchain.md); GNU C 2.6.0 reloads the word instead.
  */
 ADDRESS(0x800533e8, 0x23c)
-void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_in, int a4_in, int a5_in,
+void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3, int a4_in, int a5_in,
                                   int a6_in, int a7_in, int a8_in, int a9_in, int a10_in, int a11_in,
                                   int a12_in, int a13_in, int a14_in, VECTOR *target)
 {
-    u16 a3 = a3_in;
     u16 a4 = a4_in;
     u8 a5 = a5_in;
     u16 a6 = a6_in;
