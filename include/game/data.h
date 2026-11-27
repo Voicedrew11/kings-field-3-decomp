@@ -68,9 +68,8 @@ typedef struct PlayerState {
     u16 wisdom;     /* +0x4c: the menu shows it plus one (menu_draw_player_status, lhu) */
     u8 unk4e[0x2];
     s32 gold;
-    u16 attack_components[7]; /* +0x54: player_recalculate_combat_stats rebuilds them; never above 0x7fff;
-                     * with attack_water really one u16[8] (type later) */
-    u16 attack_water;
+    u16 attack_components[8]; /* +0x54: slash, blow, stab, holy, fire, earth, wind, water (WeaponRecord
+                               * order); player_recalculate_combat_stats rebuilds them; never above 0x7fff */
     u8 unk64[0x2];
     u16 defense_slash; /* +0x66..+0x76: player_recalculate_combat_stats rebuilds them from EquipmentRecords */
     u16 defense_blow;
@@ -106,7 +105,8 @@ typedef struct PlayerState {
                                                 * (player_dispatch_weapon_magic) */
     struct WeaponRecord *equipped_weapon_record; /* +0xb0: &weapon_table[equipped_weapon_id] */
     u8 *weapon_asset_buffer; /* +0xb4 */
-    s32 weapon_animation_cache; /* +0xb8: holds an AnimSlot * (type later) */
+    struct AnimSlot *weapon_animation_cache; /* +0xb8: pose slot of the weapon model
+                                              * (animation_prepare_asset_vertices) */
     struct Effect *weapon_effect; /* +0xbc: arrow of a bow shot (player_update_weapon_attack) */
     s16 weapon_attack_phase; /* +0xc0: -1 blocks the Actor script records of ids 19 and 20 */
     s16 weapon_attack_window; /* +0xc2: swing time of the next hit (player_update_weapon_attack) */
@@ -805,8 +805,7 @@ typedef struct PlayerLevelGrowth {
     s32 experience_threshold; /* experience for the next level */
 } PlayerLevelGrowth;
 
-/* 0x44-byte records player_recalculate_combat_stats adds to the player's attack_components[]/attack_water
- * (WIP). */
+/* 0x44-byte records player_recalculate_combat_stats adds to the player's attack_components[] (WIP). */
 typedef struct WeaponRecord {
     u8 unk0[4];
     u8 alternate_magic_id;

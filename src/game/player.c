@@ -241,7 +241,7 @@ void player_recalculate_combat_stats(void)
     cur_avatar_status.attack_components[4] = 0;
     cur_avatar_status.attack_components[5] = 0;
     cur_avatar_status.attack_components[6] = 0;
-    cur_avatar_status.attack_water = 0;
+    cur_avatar_status.attack_components[7] = 0;
     cur_avatar_status.defense_slash = 0;
     cur_avatar_status.defense_blow = 0;
     cur_avatar_status.defense_stab = 0;
@@ -276,7 +276,7 @@ void player_recalculate_combat_stats(void)
         cur_avatar_status.attack_components[4] += w->attack_components[4];
         cur_avatar_status.attack_components[5] += w->attack_components[5];
         cur_avatar_status.attack_components[6] += w->attack_components[6];
-        cur_avatar_status.attack_water += w->attack_components[7];
+        cur_avatar_status.attack_components[7] += w->attack_components[7];
     }
     player_add_equipment_bonuses(cur_avatar_status.equipped_head_id);
     player_add_equipment_bonuses(cur_avatar_status.equipped_body_id);
@@ -332,7 +332,7 @@ void player_recalculate_combat_stats(void)
         cur_avatar_status.attack_components[4] += 10;
         cur_avatar_status.attack_components[5] += 10;
         cur_avatar_status.attack_components[6] += 10;
-        cur_avatar_status.attack_water += 10;
+        cur_avatar_status.attack_components[7] += 10;
         cur_avatar_status.attack_components[3] += 10;
     }
     if (cur_avatar_status.equipped_arm_id == 0x46) {
@@ -359,7 +359,7 @@ void player_recalculate_combat_stats(void)
         cur_avatar_status.attack_components[4] += 12;
         cur_avatar_status.attack_components[5] += 12;
         cur_avatar_status.attack_components[6] += 12;
-        cur_avatar_status.attack_water += 12;
+        cur_avatar_status.attack_components[7] += 12;
     }
     if (cur_avatar_status.equipped_accessory_id == 0x59 || cur_avatar_status.equipped_extra_id == 0x59) {
         cur_avatar_status.magic[3] += 20;
@@ -406,8 +406,8 @@ void player_recalculate_combat_stats(void)
     if (cur_avatar_status.attack_components[6] >= 0x8000) {
         cur_avatar_status.attack_components[6] = 0;
     }
-    if (cur_avatar_status.attack_water > 0x7fff) {
-        cur_avatar_status.attack_water = 0;
+    if (cur_avatar_status.attack_components[7] > 0x7fff) {
+        cur_avatar_status.attack_components[7] = 0;
     }
     if (cur_avatar_status.defense_slash > 0x7fff) {
         cur_avatar_status.defense_slash = 0;
