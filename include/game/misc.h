@@ -2,8 +2,9 @@
 #define GAME_MISC_H
 
 /*
- * GAME.EXE functions after the Effect modules (src/game/misc_5bd34.c,
- * object44_move.c, ...; WIP names and module edges).
+ * GAME.EXE functions after the Effect records: src/game/audio_sound_wrappers.c,
+ * event_pose_interpolate.c, card_payload.c, conversation_record.c and movie.c
+ * (WIP names).
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

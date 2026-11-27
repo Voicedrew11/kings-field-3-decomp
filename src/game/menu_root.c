@@ -1,12 +1,12 @@
 /*
- * GAME.EXE: the in-game menu (WIP module, 0x8001a634..0x80027f2c): the pause
- * screen, the button page and the pages it opens (items, equipment, magic,
- * status, books, map, options, saves, shops), their list and yes/no input,
- * the item preview read from ITEM.T, and the menu's own drawing helpers
- * (frame begin/present, glyph text, windows) and CD read callback. Its unit
- * is -G8: the menu state words are $gp-relative .sdata globals and .sbss
- * statics the unit defines, short labels are .sdata literals, and the name
- * tables and jump tables are its .rdata.
+ * GAME.EXE: the in-game menu (KF2's menu_root.c in its order with KF3's own
+ * pages spliced in, 0x8001a634..0x80027f2c): the pause screen, the button page
+ * and the pages it opens (items, equipment, magic, status, books, map, options,
+ * saves, shops), their list and yes/no input, the item preview read from
+ * ITEM.T, and the menu's own drawing helpers (frame begin/present, glyph text,
+ * windows) and CD read callback. Its unit is -G8: the menu state words are
+ * $gp-relative .sdata globals and .sbss statics the unit defines, short labels
+ * are .sdata literals, and the name tables and jump tables are its .rdata.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

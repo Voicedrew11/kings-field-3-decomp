@@ -1,8 +1,8 @@
-#ifndef GAME_OBJECT44_H
-#define GAME_OBJECT44_H
+#ifndef GAME_MAP_OBJECT_H
+#define GAME_MAP_OBJECT_H
 
 /*
- * GAME.EXE MapObject records (src/game/object44.c, WIP): the 396 records of
+ * GAME.EXE MapObject records (src/game/map_object.c, WIP): the 396 records of
  * map_objects_slots.objects and their MapObjectDef table.
  */
 #include <kf/lib/types.h>

@@ -1,12 +1,12 @@
-#ifndef GAME_OBJECT4C_H
-#define GAME_OBJECT4C_H
+#ifndef GAME_EFFECT_H
+#define GAME_EFFECT_H
 
 /*
- * GAME.EXE Effect records (src/game/object4c*.c, WIP names): the 128
- * records of effect_status.objects, made by effect_construct_record from a kind that
- * indexes the MagicRecord records at the start of effect_status, then moved,
- * tested for hits and drawn. effect_status.current names the record being
- * updated and .current_magic its MagicRecord.
+ * GAME.EXE Effect records (src/game/effect_runtime.c, WIP names): the 128
+ * records of effect_status.objects, made by effect_construct_record from a kind
+ * that indexes the MagicRecord records at the start of effect_status, then
+ * moved, tested for hits and drawn. effect_status.current names the record
+ * being updated and .current_magic its MagicRecord.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

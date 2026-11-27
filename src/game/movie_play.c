@@ -1,6 +1,6 @@
 /*
- * GAME.EXE: the last function of the game band (WIP module, after the
- * switch movie_update_state): runs the in-game movie player.
+ * GAME.EXE: the last function of the game band (KF3-only, after the switch
+ * movie_update_state): runs the in-game movie player.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

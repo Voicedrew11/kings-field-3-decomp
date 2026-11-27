@@ -1,9 +1,11 @@
 /*
- * GAME.EXE: view and frame state (WIP slice of the render module that runs
- * on into game.screen): the screen effect reset, the area light records, the
- * 25 x 25 map-cell visibility grid around the viewer, the VRAM scrolls, the
- * fog, the display and GTE set-up, the double-buffered ordering tables and
- * packet pools, the frame flip and the view matrices.
+ * GAME.EXE: view and frame state (the end of KF2's
+ * collision_shape_mask_runtime.c, with this game's visibility grid where KF2
+ * builds its layer masks, then the head of KF2's display.c; neither edge is
+ * proven, so it stays one unit): the screen effect reset, the area light
+ * records, the 25 x 25 map-cell visibility grid around the viewer, the VRAM
+ * scrolls, the fog, the display and GTE set-up, the double-buffered ordering
+ * tables and packet pools, the frame flip and the view matrices.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

@@ -133,7 +133,7 @@ typedef struct PlayerState {
     struct EquipmentRecord *equipped_extra_record;
     u8 equipped_head_id; /* +0xf0..+0xf6: EquipmentRecord indices, 0xff for none, in byte order
                      * head, body, shield, arm, leg/feet, accessory, extra: shields are items
-                     * 0x33..0x3e, arms 0x3f..0x47, feet 0x48..0x50, and floor_select.c tests
+                     * 0x33..0x3e, arms 0x3f..0x47, feet 0x48..0x50, and player_runtime.c tests
                      * +0xf2 == 0x35 (a shield). player_set_equipment_slot's cases (2 arm,
                      * 3 leg, 4 shield) follow neither this order nor KF2's slot enum */
     u8 equipped_body_id;
@@ -395,7 +395,7 @@ typedef struct MapObjectHalves {
                      * the oldest); item id (FDAT_053); object index (kind 0x17); countdown and
                      * phase seeds */
     u16 unk3e;      /* +0x3e: kinds 0/0x1b: the other door leaf's index, 0xffff for none;
-                     * kind 0x1f: repeat delay at set-up, in units of 6 VSyncs (object44.c) */
+                     * kind 0x1f: repeat delay at set-up, in units of 6 VSyncs (map_object.c) */
     u16 unk40;      /* +0x40: kind 0x70: index of its driver (map_object_step_offset_motion); kinds 0/1/0x1b:
                      * frames since the door started opening */
     u16 base_yaw;   /* +0x42: kinds 0/1/0x1b: yaw when shut */
@@ -683,7 +683,7 @@ typedef struct Actor {
     u16 collision_radius;
     u16 collision_height;
     u16 unk20;      /* +0x20: home yaw (ActorPlacement.unk8 as -unk8 & 0xfff); one target
-                     * type keeps a map-object index here (entity_sound.c) */
+                     * type keeps a map-object index here (actor_runtime.c) */
     s16 unk22;      /* +0x22: home z offset in its cell (ActorPlacement.unka); linked actors:
                      * the index of the actor followed; flag 0x10000: a carrier map object */
     s16 unk24;      /* +0x24: home x offset in its cell (ActorPlacement.unkc); linked actors:

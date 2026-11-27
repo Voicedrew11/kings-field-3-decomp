@@ -2,7 +2,7 @@
 #define GAME_CD_H
 
 /*
- * GAME.EXE CD and VSync state (src/game/cd.c, WIP names): the root-counter
+ * GAME.EXE CD and VSync state (src/game/cd_memory.c, WIP names): the root-counter
  * frame counters, the CD event ids, a ring of 24 0x2c-byte CD read requests
  * with its write and read pointers, and the table of archive files whose
  * sector index the loader keeps. One aggregate: the module reaches the
@@ -30,7 +30,7 @@ struct SoundSlot;
 #define CD_REQUEST_FREE 0
 #define CD_REQUEST_READ 0x10   /* checksummed read, then callback(buffer) */
 #define CD_REQUEST_STREAM 0x20 /* CdRead2 stream, callback(request) per sector */
-#define CD_REQUEST_SOUND 0x30  /* sound bank read (src/game/sound.c) */
+#define CD_REQUEST_SOUND 0x30  /* sound bank read (src/game/audio_runtime.c) */
 #define CD_REQUEST_IMAGE 0x40  /* VRAM image read (cd_request_service_stream) */
 
 /* Called with the buffer (CD_REQUEST_READ) or with the request; stored

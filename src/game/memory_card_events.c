@@ -1,7 +1,7 @@
 /*
- * GAME.EXE: memory card saves (WIP module), in the shape of Sony's memory
- * card sample that OPEN.EXE's card checks also follow: four BIOS card
- * events, a test that slot 1 holds a usable card, the save list, reading a
+ * GAME.EXE: memory card saves (KF2's memory_card_events.c), in the shape of
+ * Sony's memory card sample that OPEN.EXE's card checks also follow: four BIOS
+ * card events, a test that slot 1 holds a usable card, the save list, reading a
  * save's experience and level back from its title, loading and saving.
  */
 #include <kf/lib/address.h>

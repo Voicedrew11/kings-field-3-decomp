@@ -2,8 +2,8 @@
 #define GAME_PLAYER_H
 
 /*
- * GAME.EXE player state functions (src/game/player.c, WIP module) over the
- * player record cur_avatar_status (game/data.h). Signatures follow the call sites
+ * GAME.EXE player state functions (src/game/player_runtime.c) over the player
+ * record cur_avatar_status (game/data.h). Signatures follow the call sites
  * reconstructed so far.
  */
 #include <kf/lib/types.h>
@@ -50,17 +50,13 @@ void player_equip_weapon(u8 id);
 void player_begin_weapon_attack(s32 hand);
 struct Actor *player_probe_view_target_and_vectors(s32 speed, VECTOR *offset, SVECTOR *dir, s32 *dist);
 
-/* Pad bit per action (WIP), defined in player.c; [7] toggles a setting in
+/* Pad bit per action (WIP), defined in player_runtime.c; [7] toggles a setting in
  * PlayerState.pad_buttons (menu_fade_transition). */
 extern u16 action_button_masks[14];
 
 void player_dispatch_magic_effect(s32 id, ...);
 
-/*
- * The same WIP module after player_dispatch_magic_effect: src/game/player_cast.c,
- * player_spell.c and player_action.c (player_update_weapon_attack is not exact
- * yet).
- */
+/* After player_dispatch_magic_effect. */
 void player_sample_weapon_world_vertex(s32 vertex, VECTOR *out);
 s32 player_meets_weapon_magic_requirement(s32 hand);
 void player_dispatch_weapon_magic(s32 id, s32 pay, s32 dir);

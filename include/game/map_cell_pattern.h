@@ -1,8 +1,8 @@
-#ifndef GAME_MAP_PATCH_H
-#define GAME_MAP_PATCH_H
+#ifndef GAME_MAP_CELL_PATTERN_H
+#define GAME_MAP_CELL_PATTERN_H
 
 /*
- * GAME.EXE map cell patches (src/game/map_patch.c, WIP).
+ * GAME.EXE map cell patches (src/game/map_cell_pattern_place.c, WIP).
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

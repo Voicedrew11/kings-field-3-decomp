@@ -1,6 +1,6 @@
 /*
- * GAME.EXE: angle, vector and matrix helpers (WIP module). Angles are in
- * 4096ths of a turn; GTE fixed point is 4.12.
+ * GAME.EXE: angle, vector and matrix helpers (KF2's matrix_rotation.c, with two
+ * KF3 additions). Angles are in 4096ths of a turn; GTE fixed point is 4.12.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

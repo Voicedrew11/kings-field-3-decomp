@@ -13,7 +13,7 @@ CdImageRequest	0xc	supported	asm;cd_request_service_stream/cd_archive_read_chunk
 CdRequest	0x2c	supported	asm;cd_request_advance 0x2c stride;CD event handlers and band A sound accesses	WIP (game-c)
 CdRequestUnion	0xc	supported	asm;sound and image requests share CdRequest+0x4..0xf	WIP (game-c)
 CdSoundRequest	0xc	supported	asm;band A sound accesses at CdRequest+0x4..0xf	WIP (game-c)
-CdState	0x4c0	supported	asm;src/game/cd.c game.cd (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
+CdState	0x4c0	supported	asm;src/game/cd_memory.c game.cd_memory (cd_initialize base+0x20 requests, cd_request_enqueue write == &requests[24])	WIP (game-c)
 ColorSum	0x8	supported	asm;render_accumulated_color_overlay_additive/accumulate_color_overlay/set_accumulated_color_overlay (8-byte stride, 2 entries)	WIP field names; untouched ranges opaque
 ConversationRecord	0x6	supported	asm;conversation_records_initialize/conversation_record_mark_page 6-byte stride at conversation_records+0xc0	WIP (game-i)
 ConversationRecords	0xda0	supported	asm;conversation_records_initialize relates the three parts to one base (+0xc0, +0x1e0); card_payload_capture_game_state/card_payload_restore_game_state copy 0x3c0 bytes from +0x1e0 with word-aligned block moves; WIP extent up to actor_animation_shift_target	WIP (game-i)
@@ -32,7 +32,7 @@ EventState	0x5144	supported	asm;game loop word-count clear;band D player_recalcu
 FdatHandlers	0x80	supported	asm;asset_status.handlers / FdatHeader +0x4: 32 handler words (callback_default_table, the FDAT module tables);GAME indirect_sites.tsv slot loads	types (ty1)
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 GraphicsRuntime	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
-HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
+HeapBlock	0xc	supported	asm;src/game/cd_memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
 LightRecord	0x6c	supported	asm;light_reset_records/light_refresh_record_rotations/light_interpolate_records 108-byte stride at GraphicsRuntime+0x15da8;render_map_cell_object field reads	WIP (game-h)
 LightSourceRecord	0x30	supported	asm;light_reset_records 48-byte stride source records at light_default_records;light_interpolate_color_and_fog builds one on the stack	WIP (game-h)
 MagicRecord	0x18	supported	asm;player_learn_element_magic/player_set_primary_magic_shortcut_id 24-byte stride at effect_status;game-e menu_collect_available_magic_rows u16 at +0x16	WIP (game-d)
@@ -79,9 +79,9 @@ PlayerState	0x19c	supported	asm;game loop clears 0x67 words;band A, game-c (tran
 PrimPool	0xc	supported	asm;packet allocation in the draw helpers (+4 end, +8 next)	WIP field names; untouched ranges opaque
 PrimTag	0x4	supported	asm;render_enqueue_textured_tmd copies each primitive record head word to 0x1f80001c and reads +0x1d (length in words) and +0x1f (GPU code)	WIP (game-gte)
 RenderModelRow	0x24	supported	asm;render_active_model_rows 36-byte overlay records: light +2, model +4, time +6, scale +8, translation +0x10, angle +0x18, AnimSlot pointer +0x20	WIP field names; untouched ranges opaque
-ResourceState	0x68	supported	asm;game loop clears 0x1a words;src/game/scene.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
+ResourceState	0x68	supported	asm;game loop clears 0x1a words;src/game/resource_startup.c field accesses;map_object_asset_index and render_sprite_record field accesses;player_reload_map_resources field accesses	WIP field names (game-c, game-b, game-d)
 SaveData	0x5c00	supported	asm;card_payload_capture_game_state/card_payload_restore_game_state copy every field at CARD_DATA (block moves and lw/lh/lb copies), memory_card_read_slot/memory_card_write_slot pass it	WIP (game-top2)
-SaveHeader	0x280	supported	asm;src/game/card.c game.card (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
+SaveHeader	0x280	supported	asm;src/game/memory_card_events.c game.memory_card_events (memory_card_write_slot builds it at sp+616, 0x280 copy, checksum +0x200)	WIP (game-d)
 ScratchCount	0x20	supported	asm;menu_render_item_model/render_player_weapon/render_animated_object copy GraphicsRuntime+0x159bc..0x159c4 to 0x1f800078..80 and back;render_enqueue_textured_tmd counters and CLUT offset 0x1f800084	WIP (game-gte)
 ScratchDraw	0x20	supported	asm;scratchpad 0x1f800074.. holds the map layer MATRIX (render_map_cell_object) or the model counters (menu_render_item_model)	WIP (game-gte)
 ScratchLayer	0x18	supported	asm;render_map_cell_layers SVECTOR at 0x1f800100 handed to render_map_cell_object and the VECTOR origin at 0x1f800108	WIP (render-tu)

@@ -1,8 +1,10 @@
 /*
- * GAME.EXE: the game state a memory card save holds (WIP module):
- * card_payload_capture_game_state copies it into the save data (SaveData, game/card.h) and
- * card_payload_restore_game_state copies it back. Every global is reached through lui/low
- * pairs, the menu's .sdata cursors included, so the unit is -G0.
+ * GAME.EXE: the game state a memory card save holds (KF2's card_payload
+ * functions, which close KF2's event_pose_interpolate.c; a TU of their own
+ * here): card_payload_capture_game_state copies it into the save data
+ * (SaveData, game/card.h) and card_payload_restore_game_state copies it back.
+ * Every global is reached through lui/low pairs, the menu's .sdata cursors
+ * included, so the unit is -G0.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

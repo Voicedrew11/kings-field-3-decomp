@@ -78,28 +78,28 @@ GAME.EXE	0x800796ec	0x68eec	0x4	unclassified	coverage-gap			payload-complement	m
 GAME.EXE	0x800796fc	0x68efc	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c330	0x6bb30	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8007c340	0x6bb40	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8007e4c4	0x6dcc4	0x20	defined	supported	render_world_identity_matrix	MATRIX	asm;src/game/render.c game.render	.data; identity MATRIX (0x1000 diagonal, zero translation); the view matrix of the placed-model and effect draws
+GAME.EXE	0x8007e4c4	0x6dcc4	0x20	defined	supported	render_world_identity_matrix	MATRIX	asm;src/game/display.c game.display	.data; identity MATRIX (0x1000 diagonal, zero translation); the view matrix of the placed-model and effect draws
 GAME.EXE	0x8007e4e4	0x6dce4	0x80	defined	supported	callback_default_table	FdatHandlers	asm;game-big relocs (resource_advance_transition)	.data; 32 words 0x8001765c (the empty stub): the handler table the area loader installs while an FDAT module loads
-GAME.EXE	0x8007e564	0x6dd64	0xfc	defined	supported	menu_sprite_defs	MenuSpriteDef[21]	asm;src/game/menu.c game.menu	.data; 12-byte sprite rows (tpage, clut, u, v, w, h): the menu glyph sets and frame sprites
-GAME.EXE	0x8007e660	0x6de60	0xbd0	defined	supported	menu_window_layouts	MenuGlyphString[108]	asm;src/game/menu.c game.menu	.data; 0x1c-byte rows (x, y, 24 glyphs): 9 rows per button page; yes/no at [10]/[11]; message titles from [28]
-GAME.EXE	0x8007f230	0x6ea30	0x3f0	defined	supported	menu_label_rows	MenuGlyphRow[42]	asm;src/game/menu.c game.menu	.data; 24-glyph label rows: equipment list labels [0..9], the none-option row [11], status and card message rows up to [41]
-GAME.EXE	0x8007f620	0x6ee20	0xe10	defined	supported	menu_item_names	MenuGlyphRow[150]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per item id
-GAME.EXE	0x80080430	0x6fc30	0x2e8	defined	supported	menu_magic_names	MenuGlyphRow[31]	asm;src/game/menu.c game.menu	.data; 24-glyph name row per magic id
-GAME.EXE	0x80080718	0x6ff18	0x384	defined	supported	menu_shop_stock_pages	u8[6][150]	asm;src/game/menu.c game.menu;src/game/save_data.c game.save_data	.data; per shop page and item id: [0] the first shop's live stock (saved with the game), [5] the blacksmith list; also masks for menu_collect_masked_item_rows
-GAME.EXE	0x80080a9c	0x7029c	0x708	defined	supported	menu_shop_buy_prices	u16[6][150]	asm;src/game/menu.c game.menu	.data; buy price per shop and item id
-GAME.EXE	0x800811a4	0x709a4	0x5dc	defined	supported	menu_shop_sell_prices	u16[5][150]	asm;src/game/menu.c game.menu	.data; sell price per shop and item id
-GAME.EXE	0x80081780	0x70f80	0x96	defined	supported	item_guide_level	u8[150]	asm;src/game/menu.c game.menu;src/game/save_data.c game.save_data	.data; per item id 0..5: the player value (+0x4c) the full item-guide entry needs; saved with the game
+GAME.EXE	0x8007e564	0x6dd64	0xfc	defined	supported	menu_sprite_defs	MenuSpriteDef[21]	asm;src/game/menu_root.c game.menu_root	.data; 12-byte sprite rows (tpage, clut, u, v, w, h): the menu glyph sets and frame sprites
+GAME.EXE	0x8007e660	0x6de60	0xbd0	defined	supported	menu_window_layouts	MenuGlyphString[108]	asm;src/game/menu_root.c game.menu_root	.data; 0x1c-byte rows (x, y, 24 glyphs): 9 rows per button page; yes/no at [10]/[11]; message titles from [28]
+GAME.EXE	0x8007f230	0x6ea30	0x3f0	defined	supported	menu_label_rows	MenuGlyphRow[42]	asm;src/game/menu_root.c game.menu_root	.data; 24-glyph label rows: equipment list labels [0..9], the none-option row [11], status and card message rows up to [41]
+GAME.EXE	0x8007f620	0x6ee20	0xe10	defined	supported	menu_item_names	MenuGlyphRow[150]	asm;src/game/menu_root.c game.menu_root	.data; 24-glyph name row per item id
+GAME.EXE	0x80080430	0x6fc30	0x2e8	defined	supported	menu_magic_names	MenuGlyphRow[31]	asm;src/game/menu_root.c game.menu_root	.data; 24-glyph name row per magic id
+GAME.EXE	0x80080718	0x6ff18	0x384	defined	supported	menu_shop_stock_pages	u8[6][150]	asm;src/game/menu_root.c game.menu_root;src/game/card_payload.c game.card_payload	.data; per shop page and item id: [0] the first shop's live stock (saved with the game), [5] the blacksmith list; also masks for menu_collect_masked_item_rows
+GAME.EXE	0x80080a9c	0x7029c	0x708	defined	supported	menu_shop_buy_prices	u16[6][150]	asm;src/game/menu_root.c game.menu_root	.data; buy price per shop and item id
+GAME.EXE	0x800811a4	0x709a4	0x5dc	defined	supported	menu_shop_sell_prices	u16[5][150]	asm;src/game/menu_root.c game.menu_root	.data; sell price per shop and item id
+GAME.EXE	0x80081780	0x70f80	0x96	defined	supported	item_guide_level	u8[150]	asm;src/game/menu_root.c game.menu_root;src/game/card_payload.c game.card_payload	.data; per item id 0..5: the player value (+0x4c) the full item-guide entry needs; saved with the game
 GAME.EXE	0x80081816	0x71016	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081818	0x71018	0xd	defined	supported	memory_card_file_prefix	char[13]	asm;src/game/card.c game.card	.data; BASLUS-00255, the save file name prefix
+GAME.EXE	0x80081818	0x71018	0xd	defined	supported	memory_card_file_prefix	char[13]	asm;src/game/memory_card_events.c game.memory_card_events	.data; BASLUS-00255, the save file name prefix
 GAME.EXE	0x80081825	0x71025	0x3	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	memory_card_title	char[63]	asm;src/game/card.c game.card	.data; Shift-JIS save title
+GAME.EXE	0x80081828	0x71028	0x3f	defined	supported	memory_card_title	char[63]	asm;src/game/memory_card_events.c game.memory_card_events	.data; Shift-JIS save title
 GAME.EXE	0x80081867	0x71067	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	action_button_masks	u16[14]	asm;src/game/player.c game.player	.data; first .data of the player module; pad bits
-GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	magic_element_learn_levels	s16[5][6]	asm;src/game/player.c game.player	.data; per magic element the levels that teach spells
-GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	magic_element_learn_ids	u8[5][7]	asm;src/game/player.c game.player	.data; per magic element its spells' MagicRecord indices
+GAME.EXE	0x80081868	0x71068	0x1c	defined	supported	action_button_masks	u16[14]	asm;src/game/player_runtime.c game.player_runtime	.data; first .data of the player module; pad bits
+GAME.EXE	0x80081884	0x71084	0x3c	defined	supported	magic_element_learn_levels	s16[5][6]	asm;src/game/player_runtime.c game.player_runtime	.data; per magic element the levels that teach spells
+GAME.EXE	0x800818c0	0x710c0	0x23	defined	supported	magic_element_learn_ids	u8[5][7]	asm;src/game/player_runtime.c game.player_runtime	.data; per magic element its spells' MagicRecord indices
 GAME.EXE	0x800818e3	0x710e3	0x1	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x800818e4	0x710e4	0x28	defined	supported	player_magic_spawn_offsets	SVECTOR[5]	asm;src/game/player.c game.player	.data; unk14c offsets of the five shots of spells 72..74
-GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	collision_default_cell	MapCell	asm;src/game/floor_select.c game.floor_select	.data; the tile record collision_sample_map_cell_layer selects outside the map
+GAME.EXE	0x800818e4	0x710e4	0x28	defined	supported	player_magic_spawn_offsets	SVECTOR[5]	asm;src/game/player_runtime.c game.player_runtime	.data; unk14c offsets of the five shots of spells 72..74
+GAME.EXE	0x8008190c	0x7110c	0xa	defined	supported	collision_default_cell	MapCell	asm;src/game/player_runtime.c game.player_runtime	.data; the tile record collision_sample_map_cell_layer selects outside the map
 GAME.EXE	0x80081916	0x71116	0x12	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x80081928	0x71128	0x8c	defined	proven	notification_quads	SpriteRec[7]	asm;game-b hud relocs	message strip sprites: the message (128x14 cells, 18 per column) or "number" plus four digits; visible 0xff ends the list
 GAME.EXE	0x800819b4	0x711b4	0x26c	defined	proven	hud_sprites	SpriteRec[31]	asm;game-b hud relocs	status overlay sprites; render_game_frame rewrites their positions and texture cells every frame; visible 0xff ends the list
@@ -118,64 +118,64 @@ GAME.EXE	0x8008295c	0x7215c	0x1e	defined	supported	map_object_door5_object_patte
 GAME.EXE	0x8008297a	0x7217a	0x198a2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c21c	0x8ba1c	0x4	defined	supported	light_flicker_step	s32	asm;FDAT_002 area_update_light_flicker_and_actor_swap relocs	.sdata ($gp+0x8); 1; FDAT_002 negates it to reverse object 158's light flicker (owner unit unknown)
 GAME.EXE	0x8009c220	0x8ba20	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	menu_item_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x18); 0; item page list cursor
-GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	menu_magic_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x19); 0; list cursor
-GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	menu_store_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1a); 0; list cursor
-GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	menu_take_out_list_cursor	u8	asm;src/game/menu.c game.menu	.sdata ($gp+0x1b); 0; list cursor
-GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	menu_cd_read_state	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	menu_cd_sectors_left	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x20); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	menu_item_model_registered	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x24); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	menu_item_model_request	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x28); -0x1; menu state word (WIP)
-GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	menu_item_model_read_sectors	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	menu_item_model_read_id	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x30); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	input_press_pending	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x34); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	menu_confirm_button	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x38); 0x20; menu state word (WIP)
-GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	menu_cancel_button	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
-GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	menu_confirm_button_icon	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x40); 0x1; menu state word (WIP)
-GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	menu_cancel_button_icon	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x44); 0x3; menu state word (WIP)
-GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	menu_item_quantity	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x48); 0x1; menu state word (WIP)
-GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	menu_cursor_animation_frame	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	menu_option_pulse_frame	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x50); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	menu_cursor_animation_state	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x54); 0x0; menu state word (WIP)
-GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	menu_sprite_shade	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x58); 0x57; menu state word (WIP)
-GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	menu_text_red	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	menu_text_green	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x60); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	menu_text_blue	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x64); 0x30; menu state word (WIP)
-GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	menu_text_shadow_shade	s32	asm;src/game/menu.c game.menu	.sdata ($gp+0x68); 0x80; menu state word (WIP)
+GAME.EXE	0x8009c22c	0x8ba2c	0x1	defined	proven	menu_item_list_cursor	u8	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x18); 0; item page list cursor
+GAME.EXE	0x8009c22d	0x8ba2d	0x1	defined	proven	menu_magic_list_cursor	u8	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x19); 0; list cursor
+GAME.EXE	0x8009c22e	0x8ba2e	0x1	defined	proven	menu_store_list_cursor	u8	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x1a); 0; list cursor
+GAME.EXE	0x8009c22f	0x8ba2f	0x1	defined	proven	menu_take_out_list_cursor	u8	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x1b); 0; list cursor
+GAME.EXE	0x8009c230	0x8ba30	0x4	defined	proven	menu_cd_read_state	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x1c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c234	0x8ba34	0x4	defined	proven	menu_cd_sectors_left	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x20); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c238	0x8ba38	0x4	defined	proven	menu_item_model_registered	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x24); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c23c	0x8ba3c	0x4	defined	proven	menu_item_model_request	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x28); -0x1; menu state word (WIP)
+GAME.EXE	0x8009c240	0x8ba40	0x4	defined	proven	menu_item_model_read_sectors	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x2c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c244	0x8ba44	0x4	defined	proven	menu_item_model_read_id	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x30); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c248	0x8ba48	0x4	defined	proven	input_press_pending	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x34); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c24c	0x8ba4c	0x4	defined	proven	menu_confirm_button	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x38); 0x20; menu state word (WIP)
+GAME.EXE	0x8009c250	0x8ba50	0x4	defined	proven	menu_cancel_button	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x3c); 0x40; menu state word (WIP)
+GAME.EXE	0x8009c254	0x8ba54	0x4	defined	proven	menu_confirm_button_icon	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x40); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c258	0x8ba58	0x4	defined	proven	menu_cancel_button_icon	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x44); 0x3; menu state word (WIP)
+GAME.EXE	0x8009c25c	0x8ba5c	0x4	defined	proven	menu_item_quantity	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x48); 0x1; menu state word (WIP)
+GAME.EXE	0x8009c260	0x8ba60	0x4	defined	proven	menu_cursor_animation_frame	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x4c); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c264	0x8ba64	0x4	defined	proven	menu_option_pulse_frame	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x50); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c268	0x8ba68	0x4	defined	proven	menu_cursor_animation_state	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x54); 0x0; menu state word (WIP)
+GAME.EXE	0x8009c26c	0x8ba6c	0x4	defined	proven	menu_sprite_shade	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x58); 0x57; menu state word (WIP)
+GAME.EXE	0x8009c270	0x8ba70	0x4	defined	proven	menu_text_red	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x5c); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c274	0x8ba74	0x4	defined	proven	menu_text_green	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x60); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c278	0x8ba78	0x4	defined	proven	menu_text_blue	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x64); 0x30; menu state word (WIP)
+GAME.EXE	0x8009c27c	0x8ba7c	0x4	defined	proven	menu_text_shadow_shade	s32	asm;src/game/menu_root.c game.menu_root	.sdata ($gp+0x68); 0x80; menu state word (WIP)
 GAME.EXE	0x8009c280	0x8ba80	0x40	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	memory_card_loaded_slot	u8	asm;src/game/card.c game.card	.sdata $gp+0xac; save number last loaded or saved
+GAME.EXE	0x8009c2c0	0x8bac0	0x1	defined	supported	memory_card_loaded_slot	u8	asm;src/game/memory_card_events.c game.memory_card_events	.sdata $gp+0xac; save number last loaded or saved
 GAME.EXE	0x8009c2c1	0x8bac1	0xf	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	menu_transition_rect	RECT	asm;src/game/render.c game.render	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
-GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	menu_transition_image_rect	RECT	asm;src/game/render.c game.render	.sdata; {960, 256, 64, 240}: the picture area menu_show_transition_image clears before loading a TIM into it
-GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	map_textured_primitive_color	CVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; render_game_frame copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
-GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/render.c game.render	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
-GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	render_model_yaw_smoothing_accumulator	s32	asm;src/game/render.c game.render	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
+GAME.EXE	0x8009c2d0	0x8bad0	0x8	defined	proven	menu_transition_rect	RECT	asm;src/game/display.c game.display	.sdata ($gp+0xbc); {320, 0, 320, 240}: the screen half the wipe stores, moves and restores
+GAME.EXE	0x8009c2d8	0x8bad8	0x8	defined	proven	menu_transition_image_rect	RECT	asm;src/game/display.c game.display	.sdata; {960, 256, 64, 240}: the picture area menu_show_transition_image clears before loading a TIM into it
+GAME.EXE	0x8009c2e0	0x8bae0	0x4	defined	proven	map_textured_primitive_color	CVECTOR	asm;src/game/display.c game.display	.sdata ($gp+0xcc); {0x80, 0x80, 0x80, 0}; render_game_frame copies the overlay brightness into r, g, b; the 3D draw functions read it as a word
+GAME.EXE	0x8009c2e4	0x8bae4	0x8	defined	proven	DAT_8009c2e4	SVECTOR	asm;src/game/display.c game.display	.sdata ($gp+0xd0); {0x1000, 0x1000, 0x1000, 0}; no GAME.EXE reference found
+GAME.EXE	0x8009c2ec	0x8baec	0x4	defined	proven	render_model_yaw_smoothing_accumulator	s32	asm;src/game/display.c game.display	.sdata ($gp+0xd8); compass swing: the turn since last frame, decayed by an eighth per frame
 GAME.EXE	0x8009c2f0	0x8baf0	0x48	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c338	0x8bb38	0x4	defined	proven	effect_trail_next_slot	s32	asm;src/game/object4c.c game.object4c	.sdata ($gp+0x124); 0: index of the next effect_trails_table trail set (effect_construct_record)
-GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	effect_zero_direction	SVECTOR	asm;src/game/object4c_move.c game.object4c_move	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity effect_spawn_zero_direction passes to effect_construct_record
+GAME.EXE	0x8009c338	0x8bb38	0x4	defined	proven	effect_trail_next_slot	s32	asm;src/game/effect_runtime.c game.effect_runtime	.sdata ($gp+0x124); 0: index of the next effect_trails_table trail set (effect_construct_record)
+GAME.EXE	0x8009c33c	0x8bb3c	0x8	defined	proven	effect_zero_direction	SVECTOR	asm;src/game/effect_runtime.c game.effect_runtime	.sdata ($gp+0x128); {0, 0, 0, 0}: the zero velocity effect_spawn_zero_direction passes to effect_construct_record
 GAME.EXE	0x8009c344	0x8bb44	0x64	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	memory_card_io_end_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x194; card I/O end event
-GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	memory_card_timeout_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x198; card timeout event
-GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	memory_card_new_device_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x19c; new card event
-GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	memory_card_error_event	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a0; card error event
-GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	memory_card_unreferenced_word_0	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a4; never referenced
-GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	memory_card_unreferenced_word_1	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1a8; never referenced
-GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	memory_card_unreferenced_word_2	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1ac; never referenced
-GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	memory_card_unreferenced_word_3	long	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b0; never referenced
-GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	memory_card_buffer	u8 *	asm;src/game/card.c game.card	.sbss fixed; $gp+0x1b4; the card file buffer
-GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	player_magic_attack_masks	u16[4]	asm;src/game/player_action.c game.player_action	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through PlayerState.magic_attack_mask_cursor
-GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	map_object_door1b_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c0; door kind 0x1b start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3a8	0x8bba8	0x4	bss	supported	memory_card_io_end_event	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x194; card I/O end event
+GAME.EXE	0x8009c3ac	0x8bbac	0x4	bss	supported	memory_card_timeout_event	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x198; card timeout event
+GAME.EXE	0x8009c3b0	0x8bbb0	0x4	bss	supported	memory_card_new_device_event	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x19c; new card event
+GAME.EXE	0x8009c3b4	0x8bbb4	0x4	bss	supported	memory_card_error_event	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1a0; card error event
+GAME.EXE	0x8009c3b8	0x8bbb8	0x4	bss	supported	memory_card_unreferenced_word_0	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1a4; never referenced
+GAME.EXE	0x8009c3bc	0x8bbbc	0x4	bss	supported	memory_card_unreferenced_word_1	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1a8; never referenced
+GAME.EXE	0x8009c3c0	0x8bbc0	0x4	bss	supported	memory_card_unreferenced_word_2	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1ac; never referenced
+GAME.EXE	0x8009c3c4	0x8bbc4	0x4	bss	supported	memory_card_unreferenced_word_3	long	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1b0; never referenced
+GAME.EXE	0x8009c3c8	0x8bbc8	0x4	bss	supported	memory_card_buffer	u8 *	asm;src/game/memory_card_events.c game.memory_card_events	.sbss fixed; $gp+0x1b4; the card file buffer
+GAME.EXE	0x8009c3cc	0x8bbcc	0x8	bss	supported	player_magic_attack_masks	u16[4]	asm;src/game/player_runtime.c game.player_runtime	.sbss fixed; $gp+0x1b8; pad-bit sequence rebuilt by player_update_actions_and_charge, followed through PlayerState.magic_attack_mask_cursor
+GAME.EXE	0x8009c3d4	0x8bbd4	0x2	bss	supported	map_object_door1b_view_yaw	s16	asm;src/game/map_object.c game.map_object	.sbss; $gp+0x1c0; door kind 0x1b start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3d6	0x8bbd6	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	map_object_door0_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c4; door kind 0 start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3d8	0x8bbd8	0x2	bss	supported	map_object_door0_view_yaw	s16	asm;src/game/map_object.c game.map_object	.sbss; $gp+0x1c4; door kind 0 start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3da	0x8bbda	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3dc	0x8bbdc	0x2	bss	supported	map_object_door1_view_yaw	s16	asm;src/game/object44_find.c game.object44_find	.sbss; $gp+0x1c8; door kind 1 start yaw (map_object_update_actions)
+GAME.EXE	0x8009c3dc	0x8bbdc	0x2	bss	supported	map_object_door1_view_yaw	s16	asm;src/game/map_object.c game.map_object	.sbss; $gp+0x1c8; door kind 1 start yaw (map_object_update_actions)
 GAME.EXE	0x8009c3de	0x8bbde	0x2	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 GAME.EXE	0x8009c3e0	0x8bbe0	0x10	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	effect_sound_cooldown_time	s32	asm;src/game/object4c.c game.object4c	.sbss; $gp+0x1dc; id 112 rate limit frame (effect_construct_record)
+GAME.EXE	0x8009c3f0	0x8bbf0	0x4	bss	supported	effect_sound_cooldown_time	s32	asm;src/game/effect_runtime.c game.effect_runtime	.sbss; $gp+0x1dc; id 112 rate limit frame (effect_construct_record)
 GAME.EXE	0x8009c3f4	0x8bbf4	0xc	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
-GAME.EXE	0x8009c400	0x8bc00	0x4	bss	supported	fdat_window_base	u32[1]	asm;src/game/scene.c game.scene	address the area module loads to (set from fdat_window_bounds[2]); only [0] is used
-GAME.EXE	0x8009c404	0x8bc04	0xc	bss	supported	menu_saved_primitive_buffer_0	PrimPool	asm;src/game/menu.c game.menu	copy of scene_display_sys.pools[0] while the menu owns the display; restored on exit
-GAME.EXE	0x8009c410	0x8bc10	0xc	bss	supported	menu_saved_primitive_buffer_1	PrimPool	asm;src/game/menu.c game.menu	copy of scene_display_sys.pools[1] while the menu owns the display; restored on exit
+GAME.EXE	0x8009c400	0x8bc00	0x4	bss	supported	fdat_window_base	u32[1]	asm;src/game/resource_startup.c game.resource_startup	address the area module loads to (set from fdat_window_bounds[2]); only [0] is used
+GAME.EXE	0x8009c404	0x8bc04	0xc	bss	supported	menu_saved_primitive_buffer_0	PrimPool	asm;src/game/menu_root.c game.menu_root	copy of scene_display_sys.pools[0] while the menu owns the display; restored on exit
+GAME.EXE	0x8009c410	0x8bc10	0xc	bss	supported	menu_saved_primitive_buffer_1	PrimPool	asm;src/game/menu_root.c game.menu_root	copy of scene_display_sys.pools[1] while the menu owns the display; restored on exit
 GAME.EXE	0x8009c41c	0x8bc1c	0x3e4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80011000	0x800	0xe14	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data
 OPEN.EXE	0x80014b0c	0x430c	0x4	unclassified	coverage-gap			payload-complement	may contain missed code, tables, constants, padding, or writable data

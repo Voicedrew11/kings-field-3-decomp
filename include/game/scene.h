@@ -2,7 +2,7 @@
 #define GAME_SCENE_H
 
 /*
- * GAME.EXE area set-up (src/game/scene.c, WIP names): start-up loading of
+ * GAME.EXE area set-up (src/game/resource_startup.c, WIP names): start-up loading of
  * the archive index tables and the first FDAT.T entry, the area load loop,
  * and the shift that moves every object when the area origin changes.
  */

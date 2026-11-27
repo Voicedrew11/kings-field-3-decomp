@@ -1,11 +1,12 @@
 /*
  * GAME.EXE: the in-game movie player's Sony movie-sample stream functions
- * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
+ * (KF3-only; src/open/movie.c and src/end/movie.c are the same sample): the
  * decode environment lives in movie_state.dec, the ring buffer is
- * stream_work_buffer, and the display swaps through scene_display_sys. The decode
- * set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream precedes
- * it. movie_update_state steps the movie state; its jump table is this unit's .rdata
- * (after movie_play_stream's file names, so the TU starts at or before it).
+ * stream_work_buffer, and the display swaps through scene_display_sys. The
+ * decode set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream
+ * precedes it. movie_update_state steps the movie state; its jump table is this
+ * unit's .rdata (after movie_play_stream's file names, so the TU starts at or
+ * before it).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

@@ -3,7 +3,7 @@
 
 /*
  * GAME.EXE word and halfword copy/fill helpers and the block arena
- * (src/game/memory.c, WIP names). An arena is a run of blocks, each a
+ * (src/game/cd_memory.c, WIP names). An arena is a run of blocks, each a
  * 12-byte header followed by its data and ended by a header whose state is
  * HEAP_END. A used block records where its owner keeps the data pointer, so
  * compaction can move the block and update that pointer.

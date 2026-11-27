@@ -178,7 +178,7 @@ remain inspectable. It does not reach the linked executable.
 
 `config/units.toml` keeps `gcc260-o2-g8` and `gcc260-o2-g0`, the latter for
 translation units whose globals are all reached through `lui`/low pairs
-(every FDAT module, `game.save_data`); each is proven for the units that
+(every FDAT module, `game.card_payload`); each is proven for the units that
 match under it: 95 GAME, 20 OPEN and 5 END game functions use `$gp`
 and the rest do not, so both settings occur. The King's Field II probe
 profiles (GCC 2.5.7/2.6.0 rebuilds with ASPSX 1.07) are removed; the

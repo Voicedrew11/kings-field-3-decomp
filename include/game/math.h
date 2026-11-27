@@ -2,7 +2,7 @@
 #define GAME_MATH_H
 
 /*
- * GAME.EXE angle, vector and matrix helpers (src/game/math.c). Angles are in
+ * GAME.EXE angle, vector and matrix helpers (src/game/matrix_rotation.c). Angles are in
  * 4096ths of a turn; GTE fixed point is 4.12 (0x1000 = 1.0).
  */
 #include <kf/lib/types.h>

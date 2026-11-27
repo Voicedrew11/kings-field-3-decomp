@@ -1,8 +1,8 @@
 /*
- * GAME.EXE: the slot tables of conversation_records (WIP module): building the
- * ConversationRecord records and their runs of slot bytes from the copied ConversationSource
- * table, marking a slot used, and the searches and counts over the runs.
- * movie_play_stream (the in-game movie player) follows.
+ * GAME.EXE: the slot tables of conversation_records (KF3-only): building the
+ * ConversationRecord records and their runs of slot bytes from the copied
+ * ConversationSource table, marking a slot used, and the searches and counts
+ * over the runs. movie_play_stream (the in-game movie player) follows.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>

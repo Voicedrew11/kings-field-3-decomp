@@ -59,7 +59,7 @@ throughout:
   `-fcaller-saves` but not `-fforce-mem`, for one), so check a fact taken
   from 2.6.3 against 2.6.0 before relying on it.
 - **Profiles.** `-G8` and `-G0` occur per translation unit. All FDAT modules
-  and `game.save_data` are `-G0` (no `$gp` use at all). A unit whose small
+  and `game.card_payload` are `-G0` (no `$gp` use at all). A unit whose small
   globals are members of one aggregate compiles the same either way (the CD
   and sound state is one struct, reached absolutely): model the aggregate
   before choosing `-G0` for a unit.
@@ -79,7 +79,7 @@ throughout:
   `gte_MulMatrix0`) is all a unit needs; the build runs DMPSX on any object
   with placeholder words. Each macro moves its operands into `t4`..`t7`
   (`$12`..`$15`) and emits a placeholder that DMPSX rewrites (`0x80035394`,
-  `0x8003bb04`, the `game.render` front ends). The asm statements are
+  `0x8003bb04`, the `game.display` front ends). The asm statements are
   volatile and flush CSE. Recognition:
 
   | Retail | Macro |
@@ -99,26 +99,36 @@ throughout:
   initializers and string literals first, then the jump tables in function
   order. In PSX `main` the literals come out in reverse: the source's OPEN,
   GAME, END path table is laid out END, GAME, OPEN. Literals that follow a
-  jump table therefore start a new TU (`0x80013680` in `game.movie`).
+  jump table therefore start a new TU (`0x80013680` in `game.movie`), and a
+  literal ahead of a jump table whose function comes earlier in the image
+  puts both functions in one TU (`0x80011bd0`, `loading_screen_show`'s
+  path, before `tmd_prepare_primitive_indices`' table at `0x80011be0`:
+  `game.display`).
 - **Initializer constants take the array's type.** Under `-G8`
   `char s[2] = " "` is `.sdata` while `char path[40] = "bu00:"` is `.rdata`,
   and a later identical literal shares that constant. Literals of at most 8
   bytes go to `.sdata`: their address is built with `lui/addiu`, their bytes
   are read `$gp`-relative.
-- **Jump tables are `.align 3`** inside a compilation, so a 4-byte pad
-  between two tables is that alignment and proves nothing; a table at 4 mod 8
-  directly after another table's end cannot share its `.rdata` and starts a
-  new TU (`0x8003260c` begins the TU after the player's).
+- **Jump tables are `.align 3`** inside a compilation, relative to the
+  object's `.rdata`, and PSYLINK packs the objects' `.rdata` at 4 bytes with
+  no trailing pad. So a table at 4 mod 8 directly after another table's end
+  cannot share its `.rdata` and starts a new TU (`0x8003260c` begins the TU
+  after the player's), while a 4-byte pad between two tables is that
+  alignment inside one `.rdata`: a new TU would start its table right at the
+  previous end. The pads at `0x8001191c`, `0x80011a74` and `0x80011abc`
+  (`game.player_runtime`), `0x80012098` (`game.map_object`), `0x800126e4`
+  (`game.actor_runtime`) and `0x80013294` (`game.event_pose_interpolate`)
+  join the functions between those tables into one TU.
 - **`$gp` merges TUs.** `0x8003c35c`, `0x8003df50` and `0x800400ac` read
   `map_textured_primitive_color`, a datum of the hud code (`..0x8004290c`), as `$gp+0xcc`:
-  screen, objects and hud are one TU (`game.render`).
+  screen, objects and hud are one TU (`game.display`).
 - **Unreferenced statics and globals are emitted.** `RODATA`/`SDATA` claims
   are the object's real extent, without a trailing alignment pad.
 - **Jump-table entries are `.text` offsets of the unit.** A non-exact
   function of the wrong size ahead of a table in the same unit moves every
   entry, and `kf verify data` reports `.rodata [addend]`; keep such a function
-  in its own WIP slice until it matches (`game.floor_select`,
-  `game.entity_sound`).
+  in its own WIP slice until it matches, then merge the slices back (as
+  `game.player_runtime` and `game.actor_runtime` were).
 
 ## Register allocation
 
@@ -685,7 +695,7 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   with an `int` prototype, or a prototyped `u16` whose callers pass a word
   (`0x80033f38`). Where one image narrows and another does not, the images saw
   different declarations: `FDAT_MODULE` gives FDAT units an unprototyped view
-  (`include/game/entity.h`), and a function called with five and six
+  (`include/game/actor.h`), and a function called with five and six
   arguments in one unit had no prototype (`0x80053c84`).
 - **Return types.** The callee's declared return type changes which register
   an `and` with its result lands in (`u16` against `s32`); an `s16` local for

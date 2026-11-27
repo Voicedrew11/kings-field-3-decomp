@@ -13,7 +13,7 @@
  * and the module units bind their claims by name.
  */
 
-/* Marks the declarations whose FDAT view differs from GAME.EXE's (game/entity.h). */
+/* Marks the declarations whose FDAT view differs from GAME.EXE's (game/actor.h). */
 #define FDAT_MODULE
 #include <kf/lib/null.h>
 #include <kf/lib/types.h>
@@ -27,11 +27,11 @@
 #include <game/cd.h>
 #include <game/render.h>
 #include <game/player.h>
-#include <game/entity.h>
+#include <game/actor.h>
 #include <game/misc.h>
 #include <game/menu.h>
-#include <game/map_patch.h>
-#include <game/object44.h>
+#include <game/map_cell_pattern.h>
+#include <game/map_object.h>
 
 /* The table at the module's first byte (WIP layout). */
 typedef struct FdatHeader {
@@ -44,7 +44,7 @@ typedef struct FdatHeader {
 extern s32 light_flicker_step;
 
 /*
- * GAME.EXE function the modules call (game.item_count; no GAME header
+ * GAME.EXE function the modules call (game.event_pose_interpolate; no GAME header
  * prototype yet). Varargs: with obj NULL it takes the object index from the
  * second argument. event_target_stream_execute comes from game/misc.h.
  */

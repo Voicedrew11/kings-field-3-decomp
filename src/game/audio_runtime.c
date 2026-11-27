@@ -1,8 +1,8 @@
 /*
- * GAME.EXE: sound (WIP module): libsnd start-up and shutdown, the background
- * sequence, positional and plain sound effects, and VAB bank loading through
- * CD read requests. It references no small data, so -G8 and -G0 compile it
- * alike; the CD request pointers it reads are members of the CD state
+ * GAME.EXE: sound (KF2's audio_runtime.c): libsnd start-up and shutdown, the
+ * background sequence, positional and plain sound effects, and VAB bank loading
+ * through CD read requests. It references no small data, so -G8 and -G0 compile
+ * it alike; the CD request pointers it reads are members of the CD state
  * aggregate (game/cd.h), reached absolutely either way.
  */
 #include <kf/lib/address.h>

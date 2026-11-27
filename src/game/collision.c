@@ -1,8 +1,10 @@
 /*
- * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records and its front ends
- * (WIP module after src/game/floor_select.c). They pick the map cell, run the
- * interpreter and the record searches, and leave their results in
- * map_world (+0x12000..+0x12050).
+ * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records
+ * and its front ends (KF2's collision_shape_mask_runtime.c up to
+ * collision_query_world; the rest of that file opens src/game/view.c, and the
+ * edge between the two is not proven). They pick the map cell, run the
+ * interpreter and the record searches, and leave their results in map_world
+ * (+0x12000..+0x12050).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -11,9 +13,9 @@
 #include <game/data.h>
 #include <game/funcs.h>
 #include <game/player.h>
-#include <game/entity.h>
+#include <game/actor.h>
 #include <game/collision.h>
-#include <game/object44.h>
+#include <game/map_object.h>
 
 RODATA(0x80011b0c, 0xc4)
 

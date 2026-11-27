@@ -1,14 +1,16 @@
 /*
- * GAME.EXE: area set-up (WIP module). resource_initialize_game_assets opens the archive
- * files, loads the first FDAT.T entry into the arena and copies its tables
- * out; resource_run_initial_transition asks for a full area load and steps the loader until it
- * finishes; translate_active_world_positions shifts the player and every live object;
- * resource_request_transition asks for a load of some area parts; resource_advance_transition is the
- * loader's step machine (FDAT module, map, objects, image, sequence), whose
- * CD requests complete through the five callbacks before it. Its unit is
- * -G8: the handler-table pointer is a $gp-relative .sbss word, while the
- * FDAT window base is reached absolutely (declared without a size here).
- * The RODATA claim holds the COM names and resource_advance_transition's jump table.
+ * GAME.EXE: area set-up (KF2's resource_startup.c).
+ * resource_initialize_game_assets opens the archive files, loads the first
+ * FDAT.T entry into the arena and copies its tables out;
+ * resource_run_initial_transition asks for a full area load and steps the
+ * loader until it finishes; translate_active_world_positions shifts the player
+ * and every live object; resource_request_transition asks for a load of some
+ * area parts; resource_advance_transition is the loader's step machine (FDAT
+ * module, map, objects, image, sequence), whose CD requests complete through
+ * the five callbacks before it. Its unit is -G8: the handler-table pointer is a
+ * $gp-relative .sbss word, while the FDAT window base is reached absolutely
+ * (declared without a size here). The RODATA claim holds the COM names and
+ * resource_advance_transition's jump table.
  */
 /* The area step is volatile only here (see game/data.h). */
 #define GAME_SCENE_MODULE
@@ -29,9 +31,9 @@
 #include <game/funcs.h>
 #include <game/player.h>
 #include <game/menu.h>
-#include <game/entity.h>
+#include <game/actor.h>
 #include <game/collision.h>
-#include <game/object44.h>
+#include <game/map_object.h>
 
 /* archive file numbers (cd_archive_open table slots) */
 #define FILE_FDAT 4

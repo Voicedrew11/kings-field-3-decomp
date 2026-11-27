@@ -1,11 +1,11 @@
-#ifndef GAME_ENTITY_H
-#define GAME_ENTITY_H
+#ifndef GAME_ACTOR_H
+#define GAME_ACTOR_H
 
 /*
- * GAME.EXE Actor records (src/game/entity*.c, WIP names): the 200
- * records of actor_status made from its ActorGroup records, their placement
- * on the map, the target records each runs, their movement and the searches
- * over them. actor_status.current and .current_group name the record being updated.
+ * GAME.EXE Actor records (src/game/actor_runtime.c, WIP names): the 200 records
+ * of actor_status made from its ActorGroup records, their placement on the map,
+ * the target records each runs, their movement and the searches over them.
+ * actor_status.current and .current_group name the record being updated.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

@@ -1,15 +1,16 @@
 /*
- * GAME.EXE: map cell patches (WIP module): records that rewrite the layer
- * bytes of map cells around a point, turned by an angle, and a block copy
- * of cells to a turned destination. Callers: the MapObject set-up
- * map_object_initialize_from_placements and the big switch map_object_update_actions.
+ * GAME.EXE: map cell patches (KF2's map_cell_pattern_place.c): records that
+ * rewrite the layer bytes of map cells around a point, turned by an angle, and
+ * a block copy of cells to a turned destination. Callers: the MapObject set-up
+ * map_object_initialize_from_placements and the big switch
+ * map_object_update_actions.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/data.h>
-#include <game/map_patch.h>
+#include <game/map_cell_pattern.h>
 
 /*
  * Applies the patch records at rec (variant index) to the cells around
