@@ -493,7 +493,8 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   retail does where one expression does not (`0x8001b5c4`), and each local
   also keeps its own constant from fold's reassociation.
 - **Loop notes are barriers.** No insn is scheduled across a
-  `NOTE_INSN_LOOP_BEG`/`END` inside a basic block (`sched_analyze_insn`).
+  `NOTE_INSN_LOOP_BEG`/`END` inside a basic block (`sched_analyze_insn`;
+  read in the source, no match rests on it yet).
 - **Delay slots (reorg).** An assignment written after an if-block can fill
   the branch's slot from its target (`0x8001eb3c`); `speed = 0` inside the
   first arm, not before the `if`, lands in that branch's slot (`0x800500a8`).
