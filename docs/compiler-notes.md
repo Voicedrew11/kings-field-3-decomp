@@ -8,8 +8,13 @@ retail source form now stands: GAME unless another image is given; find it
 with `grep -rn 'ADDRESS(0x...' src`. Where a cause names a GCC function or
 file, it was read in the GCC 2.5.7 and 2.6.3 sources (the combine rules of
 `0x8003591c` and the reload of `0x8003daec`/`0x800533e8` in GNU's 2.6.0
-source) and checked against this compiler's output; a rule that rests only
-on the shape of the output says so.
+source, which is now pinned too, `nix build .#gcc260Source`) and checked
+against this compiler's output; a rule that rests only on the shape of the
+output says so. GAME units compile with `cc1psx-260r`, the same compiler
+with FSF's 1994-08-07 reload change (see
+[narrow reads](#narrow-reads-of-a-spilled-word) and
+[toolchain.md](toolchain.md#games-compiler-revision)); every other rule
+holds for both.
 
 The rules explain residues; they do not excuse one, and
 [AGENTS.md](../AGENTS.md) still decides what a source may contain. Fake
@@ -30,7 +35,9 @@ definitions, compile with the build's `-quiet -g -O2 -G8` (or `-G0`), and add
 cse, loop, flow, combine, sched1, local-alloc (`.lreg`: refs and live length
 per pseudo), global-alloc/reload (`.greg`), sched2, jump2 and delay-slot
 dumps. An include overlay for `cpppsx-260` must live on the WSL file system:
-it cannot stat headers under `/mnt/c`.
+it cannot stat headers under `/mnt/c`. For GAME units use `cc1psx-260r`
+(also in the flake, same flags and dump flags); it differs from
+`cc1psx-260` only in reload.
 
 **Tracing a pass.** GNU's `gcc-2.6.0.tar.gz` builds with the Decompals
 recipe's patches into a `cc1` whose output was identical to `cc1psx-260` on
@@ -55,6 +62,22 @@ throughout:
   scheduled order, not the source order.
 - jump2 (the only pass that cross-jumps) runs after sched2, so both copies of
   a merged tail were present for the allocators and the schedulers.
+
+## Narrow reads of a spilled word
+
+When a word pseudo that got no hard register is read through
+`(subreg:HI (reg:SI x) 0)`, GNU C 2.6.0 reloads the whole word (`lw t0,slot`,
+then `move`/`andi`/`sh` of `t0`): its `LOAD_EXTEND_OP` tests in `reload.c`
+force a reload whenever the inner and outer sizes differ. FSF's reload of
+1994-08-07 forces it only for paradoxical subregs, so the narrow part is read
+straight from the slot (`lhu s1,16(sp)`), and `eliminate_regs` leaves a
+`(use (reg x))` insn in front that sched2 schedules like any insn and that
+emits nothing (it can account for a load-use `nop`). Retail GAME has the later
+form (`0x8003daec`, `0x800533e8`) and no function of any image has the 2.6.0
+form, hence `cc1psx-260r`. Source consequence: a parameter that retail spills
+as a word and reads as a halfword stays a word in C and is narrowed only at
+its uses (`0x800533e8`'s fourth parameter, passed straight to `u16`
+parameters).
 
 ## Toolchain facts
 
@@ -701,17 +724,9 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - **Stack parameters.** One declared `int` but used as `u8` is read with
   `lbu` from its incoming slot; a `u8`-typed one is copied to a saved
   register (`0x80029188`).
-- **Narrow reads of a spilled word.** When a word pseudo that got no register
-  is read through `(subreg:HI (reg:SI x) 0)`, GNU C 2.6.0 reloads the whole
-  word: `lw t0,slot`, then `move`, `andi` or `sh` of `t0`. Its `reload.c`
-  forces that for every subreg whose inner and outer sizes differ (the
-  `LOAD_EXTEND_OP` tests of `find_reloads` and `push_reload` use `!=`), and
-  both Sony 2.6.0 binaries behave so. FSF sources from 1994-08-07 on (2.6.1
-  to 2.6.3: the tests use `>`, and `eliminate_regs` puts `(use (reg x))` in
-  front of the insn) read the narrow part straight from the slot, `lhu
-  s1,16(sp)`, and the `USE` insn takes a slot in sched2 without emitting
-  code. Retail has the later form in `0x8003daec` and `0x800533e8` and the
-  2.6.0 form nowhere (see [Open mechanisms](#open-mechanisms)).
+- **Narrow reads of a spilled word.** See
+  [Narrow reads of a spilled word](#narrow-reads-of-a-spilled-word): GAME's
+  compiler reads the narrow part straight from the slot (`lhu`).
 
 ## Types and declarations
 
@@ -827,19 +842,6 @@ raw words where GAME narrows. The link and the archive frame are in
 
 Residues whose mechanism is known but whose source form is not:
 
-- `0x8003daec` and `0x800533e8`: retail spills a register parameter with `sw`
-  and reads its low half back with `lhu` (`sw a1,16(sp)` ... `lhu s1,16(sp)`;
-  `sw a3,64(sp)` ... `lhu v0,64(sp)`), which the pinned compiler cannot emit
-  (narrow reads of a spilled word, under [Stack frames](#stack-frames)). With
-  the later reload the sources come out as retail on paper: `0x8003daec` as
-  it stands, and `0x800533e8` with the fourth parameter an `int` passed
-  straight to the callees' `u16` parameters, whose two call blocks, scheduled
-  by hand with one `USE` insn per read, give retail's order and its load-use
-  `nop`. No function of GAME, OPEN, END or the FDAT modules shows the 2.6.0
-  form (a word reload of a spill slot used only narrow). Under decompals'
-  `gcc-2.6.3-psx` both functions are identical to retail in those forms, so
-  here the compiler, not the source, is the open part (see
-  [toolchain.md](toolchain.md#games-compiler-revision)).
 - `0x800608ec`: retail stops hoisting after four invariants. With the
   threshold at 52 the record loop needs 41 to 43 insns at loop time; the
   plain source has 36 (each narrow temporary for a loaded byte adds one).

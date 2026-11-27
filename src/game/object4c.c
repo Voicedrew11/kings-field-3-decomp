@@ -72,25 +72,17 @@ s32 effect_probe_collision_by_type(VECTOR *pos, s32 radius, s32 height)
  * Hit by the current record: the player (kind 0x80) or the Actor record
  * of map_world.collision_actor_index (0x10). effect_apply_current_magic
  * passes a3 unmasked, so the narrow parameters arrive as int and are
- * narrowed at entry.
- *
- * Not exact: retail spills the fourth parameter as a word (`sw a3,64(sp)`)
- * and reads its low half back from that slot at both calls (`lhu
- * v0,64(sp)`), which GNU C 2.6.0's reload cannot emit; here the narrowed
- * local is spilled with `sh`, the closest form under the pinned compiler.
- * As in render_zoom_screen_transition, FSF's reload change of 1994-08-07
- * (2.6.1 and later) explains it: under decompals' gcc 2.6.3-psx the function
- * is identical to retail with the fourth parameter an `int` passed straight
- * to the callees, but 2.6.3 breaks 0x80047010 and 0x800568bc (frame size),
- * so GAME's compiler looks like a Sony 2.6.0 build with that reload fix
- * (docs/toolchain.md).
+ * narrowed at entry, except the fourth: it stays an int and goes straight to
+ * the callees' u16 parameters. Retail spills it as a word (`sw a3,64(sp)`)
+ * and reads its low half back from the slot at both calls (`lhu
+ * v0,64(sp)`), the 1994-08-07 reload of GAME's compiler
+ * (docs/toolchain.md, GAME's compiler revision).
  */
 ADDRESS(0x800533e8, 0x23c)
-void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3_in, int a4_in, int a5_in,
+void effect_dispatch_magic_impact(s32 flags, s32 kind, MagicRecord *rec, int a3, int a4_in, int a5_in,
                                   int a6_in, int a7_in, int a8_in, int a9_in, int a10_in, int a11_in,
                                   int a12_in, int a13_in, int a14_in, VECTOR *target)
 {
-    u16 a3 = a3_in;
     u16 a4 = a4_in;
     u8 a5 = a5_in;
     u16 a6 = a6_in;

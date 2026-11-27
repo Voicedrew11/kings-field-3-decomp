@@ -1,0 +1,85 @@
+FSF GNU C reload change of 1994-08-07 (Richard Kenner), applied to the
+2.6.0 release for KF3's GAME units. ChangeLog of GNU C 2.6.3:
+
+	* reload.c (push_reload): Make test in LOAD_EXTEND_OP case more
+	precise; handle CLASS_CANNOT_CHANGE_SIZE.
+	(find_relods): When setting force_reloads, make LOAD_EXTEND_OP
+	case more precise.
+
+	* reload1.c (eliminate_regs, case SUBREG): Add USE of pseudo
+	so we don't improperly delete an output reload.
+
+Each new line is copied from GNU C 2.6.3, where no later ChangeLog entry
+touches them. Left out: the CLASS_CANNOT_CHANGE_SIZE parts of the entry
+(MIPS does not define that macro, so they compile to nothing) and all later
+reload changes (1994-08-08 BYTES_BIG_ENDIAN test, 1994-09-21 eliminate_regs
+LOAD_EXTEND_OP test).
+
+Effect: a narrow read of a spilled word pseudo loads the narrow part from
+the stack slot (`lhu`) instead of reloading the word (`lw` + use).
+
+--- gcc-2.6.0.orig/reload.c
++++ gcc-2.6.0/reload.c
+@@ -808,7 +808,9 @@
+ 		      && (GET_MODE_SIZE (GET_MODE (SUBREG_REG (in)))
+ 			  <= UNITS_PER_WORD)
+ 		      && (GET_MODE_SIZE (inmode)
+-			  != GET_MODE_SIZE (GET_MODE (SUBREG_REG (in)))))
++			  > GET_MODE_SIZE (GET_MODE (SUBREG_REG (in))))
++		      && INTEGRAL_MODE_P (GET_MODE (SUBREG_REG (in)))
++		      && LOAD_EXTEND_OP (GET_MODE (SUBREG_REG (in))) != NIL)
+ #endif
+ 		  ))
+ 	  || (GET_CODE (SUBREG_REG (in)) == REG
+@@ -885,15 +887,7 @@
+ 		&& REGNO (SUBREG_REG (out)) >= FIRST_PSEUDO_REGISTER)
+ 	       || GET_CODE (SUBREG_REG (out)) == MEM)
+ 	      && ((GET_MODE_SIZE (outmode)
+-		   > GET_MODE_SIZE (GET_MODE (SUBREG_REG (out))))
+-#ifdef LOAD_EXTEND_OP
+-		  || (GET_MODE_SIZE (outmode) <= UNITS_PER_WORD
+-		      && (GET_MODE_SIZE (GET_MODE (SUBREG_REG (out)))
+-			  <= UNITS_PER_WORD)
+-		      && (GET_MODE_SIZE (outmode)
+-			  != GET_MODE_SIZE (GET_MODE (SUBREG_REG (out)))))
+-#endif
+-		  ))
++		   > GET_MODE_SIZE (GET_MODE (SUBREG_REG (out))))))
+ 	  || (GET_CODE (SUBREG_REG (out)) == REG
+ 	      && REGNO (SUBREG_REG (out)) < FIRST_PSEUDO_REGISTER
+ 	      && ((GET_MODE_SIZE (outmode) <= UNITS_PER_WORD
+@@ -2572,7 +2566,9 @@
+ 			      && (GET_MODE_SIZE (GET_MODE (operand))
+ 				  <= UNITS_PER_WORD)
+ 			      && (GET_MODE_SIZE (operand_mode[i])
+-				  != GET_MODE_SIZE (GET_MODE (operand))))
++				  > GET_MODE_SIZE (GET_MODE (operand)))
++			      && INTEGRAL_MODE_P (GET_MODE (operand))
++			      && LOAD_EXTEND_OP (GET_MODE (operand)) != NIL)
+ #endif
+ 			  ))
+ 		  /* Subreg of a hard reg which can't handle the subreg's mode
+--- gcc-2.6.0.orig/reload1.c
++++ gcc-2.6.0/reload1.c
+@@ -2888,9 +2888,18 @@
+ 	  if (new == reg_equiv_memory_loc[REGNO (SUBREG_REG (x))])
+ 	    new = XEXP (x, 0);
+ 	  else
+-	    /* Otherwise, ensure NEW isn't shared in case we have to reload
+-	       it.  */
+-	    new = copy_rtx (new);
++	    {
++	      /* Otherwise, ensure NEW isn't shared in case we have to reload
++		 it.  */
++	      new = copy_rtx (new);
++
++	      /* In this case, we must show that the pseudo is used in this
++		 insn so that delete_output_reload will do the right thing.  */
++	      if (insn != 0 && GET_CODE (insn) != EXPR_LIST
++		  && GET_CODE (insn) != INSN_LIST)
++		emit_insn_before (gen_rtx (USE, VOIDmode, SUBREG_REG (x)),
++				  insn);
++	    }
+ 	}
+       else
+ 	new = eliminate_regs (SUBREG_REG (x), mem_mode, insn);

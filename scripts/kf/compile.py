@@ -31,6 +31,11 @@ C_COMPILERS = {
         "cc1psx-260",
         "Decompals old-gcc 0.17 GCC 2.6.0 PSX rebuild",
     ),
+    "gcc260r-native": (
+        "cpppsx-260",
+        "cc1psx-260r",
+        "GNU C 2.6.0 PSX (Decompals recipe) with FSF's 1994-08-07 reload change, built from source",
+    ),
     "gcc257-native": (
         "cpppsx-257",
         "cc1psx-257",
