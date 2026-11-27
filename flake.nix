@@ -69,6 +69,10 @@
 
 
       gcc257Probe = import ./nix/gcc257.nix { inherit pkgs; };
+      # GAME's compiler: GNU C 2.6.0 built from source with FSF's 1994-08-07
+      # reload change, a reconstructed revision (docs/toolchain.md).
+      gcc260r = import ./nix/gcc260r.nix { inherit pkgs; };
+      cc1psx260r = gcc260r.reload;
       pcsxRedux = import ./nix/pcsx-redux.nix { inherit pkgs; };
 
       ghidraPsxLoader = pkgs.stdenvNoCC.mkDerivation {
@@ -321,6 +325,7 @@
         runtimeInputs = [
           analysisPython
           cc1psx260
+          cc1psx260r
           cpppsx260
           cc1psx257
           cpppsx257
@@ -356,6 +361,7 @@
         runtimeInputs = [
           analysisPython
           cc1psx260
+          cc1psx260r
           cpppsx260
           cc1psx257
           cpppsx257
@@ -383,6 +389,7 @@
           psy-k
           pkgs.dosbox-x
           cc1psx260
+          cc1psx260r
           cpppsx260
           cc1psx257
           cpppsx257
@@ -471,7 +478,7 @@
           ${kfCli}/bin/kf clangd >&2 || echo "[kings-field-3] clangd setup failed; run kf clangd after fixing the reported error" >&2
 
           echo "[kings-field-3] SDK             : Runtime Library 3.3 CD (1995-10-20) archives, headers, ASPSX 2.21, PSYLINK 2.27, CPE2X 1.5, DMPSX" >&2
-          echo "[kings-field-3] compiler        : Sony GNU C 2.60 CC1PSX (DOSBox-X); native cpppsx-260 preprocesses" >&2
+          echo "[kings-field-3] compiler        : Sony GNU C 2.60 CC1PSX (DOSBox-X); GAME: cc1psx-260r (2.6.0 + 1994-08-07 reload); native cpppsx-260 preprocesses" >&2
           echo "[kings-field-3] compiler probes : cc1psx-260/cpppsx-260 and cc1psx-257/cpppsx-257 rebuilds" >&2
           echo "[kings-field-3] analysis        : ghidra + PSX loader, pyghidra, psy-k, radare2, mipsel binutils" >&2
           echo "[kings-field-3] PSX emulator    : pcsx-redux ${pcsxRedux.version}" >&2
@@ -602,6 +609,9 @@
         gcc257Debug = gcc257Probe.debug;
         gcc257Instrumented = gcc257Probe.instrumented;
         gcc257Source = gcc257Probe.source;
+        gcc260Source = gcc260r.source;
+        gcc260SourceBuild = gcc260r.plain;
+        inherit cc1psx260r;
         inherit psyqSdk psy-k gcc260Native cc1psx260 cpppsx260 gcc257Native cc1psx257 cpppsx257 mipsBinutilsAliases ghidraPsxLoader ghidraWithPlugins objdiff-cli objdiff retailValidate retailSeed functionAudit functionPropose vendoredSeed fidCensus retailDelink objdiffProject objdiffReport sourceCompile runRetail runCandidate kfCli;
         inherit psyq33Sdk sonyGcc260;
         pcsx-redux = pcsxRedux;

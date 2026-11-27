@@ -2,3 +2,4 @@
 patches/*.patch whitespace=-blank-at-eol
 # GCC context lines retain upstream tabs after the unified-diff space marker.
 patches/gcc257-trace.patch whitespace=-blank-at-eol,-space-before-tab
+patches/gcc-2.6.0-reload-19940807.patch whitespace=-blank-at-eol,-space-before-tab

@@ -558,15 +558,8 @@ void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
 }
 
 /*
- * Not exact (one instruction and one delay slot): retail reads the low half
- * of the spilled x for the second quad straight from its stack slot (`sw
- * a1,16(sp)` ... `lhu s1,16(sp)`) and fills the next branch's delay slot
- * with `li a0,2`; this build reloads the whole word (`lw t0,16(sp)`) and puts
- * `move s1,t0` in that slot. GNU C 2.6.0's reload cannot read part of a
- * spilled word. FSF's reload change of 1994-08-07 (in 2.6.1 and later) does,
- * and decompals' gcc 2.6.3-psx compiles this source to retail's code, but
- * 2.6.3 breaks 0x80047010 and 0x800568bc (frame size), so GAME's compiler
- * looks like a Sony 2.6.0 build with that reload fix (docs/toolchain.md).
+ * The second quad reads the low half of the spilled x straight from its
+ * stack slot (`lhu s1,16(sp)`): GAME's compiler revision (docs/toolchain.md).
  */
 ADDRESS(0x8003daec, 0x464)
 void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)

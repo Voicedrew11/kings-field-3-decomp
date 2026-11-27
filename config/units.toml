@@ -23,6 +23,27 @@ small_data = 0
 aspsx_version = "2.21"
 cc1_flags = []
 
+# GAME's compiler: GNU C 2.6.0 built from source (nix/gcc260r.nix) with FSF's
+# 1994-08-07 reload change, a reconstructed revision. It emits retail's narrow
+# reads of spilled words (0x8003daec, 0x800533e8) and is otherwise
+# instruction-identical to CC1PSX on every claimed function of every image
+# (docs/toolchain.md). Same flags and assembler as the profiles above.
+[profiles.gcc260r-o2-g8]
+language = "c"
+compiler = "gcc260r-native"
+optimization = "O2"
+small_data = 8
+aspsx_version = "2.21"
+cc1_flags = []
+
+[profiles.gcc260r-o2-g0]
+language = "c"
+compiler = "gcc260r-native"
+optimization = "O2"
+small_data = 0
+aspsx_version = "2.21"
+cc1_flags = []
+
 [profiles.asm-r3000-g0]
 language = "assembly"
 compiler = "aspsx"
@@ -72,248 +93,248 @@ profile = "gcc260-o2-g8"
 unit = "game.main"
 image = "GAME.EXE"
 source = "src/game/main.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.sound"
 image = "GAME.EXE"
 source = "src/game/sound.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.math"
 image = "GAME.EXE"
 source = "src/game/math.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.scene"
 image = "GAME.EXE"
 source = "src/game/scene.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.image"
 image = "GAME.EXE"
 source = "src/game/image.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.memory"
 image = "GAME.EXE"
 source = "src/game/memory.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.cd"
 image = "GAME.EXE"
 source = "src/game/cd.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.menu"
 image = "GAME.EXE"
 source = "src/game/menu.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.card"
 image = "GAME.EXE"
 source = "src/game/card.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.player"
 image = "GAME.EXE"
 source = "src/game/player.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.player_cast"
 image = "GAME.EXE"
 source = "src/game/player_cast.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.player_spell"
 image = "GAME.EXE"
 source = "src/game/player_spell.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.player_action"
 image = "GAME.EXE"
 source = "src/game/player_action.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.floor_select"
 image = "GAME.EXE"
 source = "src/game/floor_select.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.collision"
 image = "GAME.EXE"
 source = "src/game/collision.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.view"
 image = "GAME.EXE"
 source = "src/game/view.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.model"
 image = "GAME.EXE"
 source = "src/game/model.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.render"
 image = "GAME.EXE"
 source = "src/game/render.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.map_patch"
 image = "GAME.EXE"
 source = "src/game/map_patch.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object44"
 image = "GAME.EXE"
 source = "src/game/object44.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object44_find"
 image = "GAME.EXE"
 source = "src/game/object44_find.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity"
 image = "GAME.EXE"
 source = "src/game/entity.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity_script"
 image = "GAME.EXE"
 source = "src/game/entity_script.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity_find"
 image = "GAME.EXE"
 source = "src/game/entity_find.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity_move"
 image = "GAME.EXE"
 source = "src/game/entity_move.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity_sound"
 image = "GAME.EXE"
 source = "src/game/entity_sound.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.entity_load"
 image = "GAME.EXE"
 source = "src/game/entity_load.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object4c"
 image = "GAME.EXE"
 source = "src/game/object4c.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object4c_move"
 image = "GAME.EXE"
 source = "src/game/object4c_move.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object4c_list"
 image = "GAME.EXE"
 source = "src/game/object4c_list.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.misc_5bd34"
 image = "GAME.EXE"
 source = "src/game/misc_5bd34.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.object44_move"
 image = "GAME.EXE"
 source = "src/game/object44_move.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.script_scan"
 image = "GAME.EXE"
 source = "src/game/script_scan.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.start_pos"
 image = "GAME.EXE"
 source = "src/game/start_pos.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.item_count"
 image = "GAME.EXE"
 source = "src/game/item_count.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.new_game"
 image = "GAME.EXE"
 source = "src/game/new_game.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.arena_ptr"
 image = "GAME.EXE"
 source = "src/game/arena_ptr.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 # The save serialisers reach the menu's .sdata cursors through lui/low pairs.
 [[unit]]
 unit = "game.save_data"
 image = "GAME.EXE"
 source = "src/game/save_data.c"
-profile = "gcc260-o2-g0"
+profile = "gcc260r-o2-g0"
 
 [[unit]]
 unit = "game.slot_table"
 image = "GAME.EXE"
 source = "src/game/slot_table.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.movie"
 image = "GAME.EXE"
 source = "src/game/movie.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 [[unit]]
 unit = "game.movie_start"
 image = "GAME.EXE"
 source = "src/game/movie_start.c"
-profile = "gcc260-o2-g8"
+profile = "gcc260r-o2-g8"
 
 # FDAT.T area modules: one source per module, -G0 (no module uses $gp; the
 # modules reach GAME.EXE's small data with lui/low pairs). A module source

@@ -17,6 +17,9 @@ C_COMPILERS = {
     "gcc260-sony": ("cpppsx-260", "cc1psx-260"),
     "gcc257-native": ("cpppsx-257", "cc1psx-257"),
     "gcc260-native": ("cpppsx-260", "cc1psx-260"),
+    # GNU C 2.6.0 built from source with FSF's 1994-08-07 reload change
+    # (nix/gcc260r.nix): the GAME units' compiler, a reconstructed revision.
+    "gcc260r-native": ("cpppsx-260", "cc1psx-260r"),
     # The kit's extensionless CC1PSX (GCC 2.4.1) runs under DOSBox. Its
     # preprocessing and the source-size probe use the native 2.5.7 pair: both
     # are optimizer-independent and see the same headers and MIPS ABI.
@@ -140,7 +143,7 @@ def compile_c(source: Path, root: Path, stem: str, *, compiler: str,
     includes = [argument for path in include_dirs for argument in ('-I', str(path.resolve()))]
     # The name becomes the assembly's `.file`; older ASPSX builds hang on long
     # ones, so a checkout-relative spelling keeps deep worktrees buildable.
-    driver = SONY_DRIVER_DEFINES if compiler == 'gcc260-sony' else ()
+    driver = SONY_DRIVER_DEFINES if compiler in ('gcc260-sony', 'gcc260r-native') else ()
     cpp_command = [cpp, '-lang-c', '-undef', '-nostdinc', *includes,
                    *(f'-D{value}' for value in (*driver, *defines)),
                    os.path.relpath(source.resolve())]
