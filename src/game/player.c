@@ -442,8 +442,6 @@ void player_recalculate_combat_stats(void)
 ADDRESS(0x80029f1c, 0x158)
 void player_learn_element_magic(u32 element)
 {
-    s16 *threshold;
-    u16 *magic;
     u8 *spell;
     MagicRecord *r;
     s32 n;
@@ -455,38 +453,24 @@ void player_learn_element_magic(u32 element)
     if (element != 4 && cur_evt_state.element_unlocked[element] == 0) {
         return;
     }
-    n = 0;
-    threshold = magic_element_learn_levels[element];
-    magic = &cur_avatar_status.base_magic[element];
-    goto check;
-
-learn:
-    r->menu_available = 1;
-    notify_enqueue(3);
-    cur_evt_state.interaction_handled = 1;
-    cur_evt_state.element_magic_learned[element] = 1;
-    goto advance;
-
-next:
-    if (*threshold == 0) {
-        return;
-    }
-    spell = magic_element_learn_ids[element];
-    for (k = n; k != -1; k--, spell++) {
-        if (*spell == 0xff) {
+    for (n = 0; cur_avatar_status.base_magic[element] >= magic_element_learn_levels[element][n]; n++) {
+        if (magic_element_learn_levels[element][n] == 0) {
             return;
         }
-        r = &effect_status.magic_records[*spell];
-        if (r->menu_available == 0) {
-            goto learn;
+        spell = magic_element_learn_ids[element];
+        for (k = n; k != -1; k--, spell++) {
+            if (*spell == 0xff) {
+                return;
+            }
+            r = &effect_status.magic_records[*spell];
+            if (r->menu_available == 0) {
+                r->menu_available = 1;
+                notify_enqueue(3);
+                cur_evt_state.interaction_handled = 1;
+                cur_evt_state.element_magic_learned[element] = 1;
+                break;
+            }
         }
-    }
-advance:
-    threshold++;
-    n++;
-check:
-    if (*magic >= *threshold) {
-        goto next;
     }
 }
 
