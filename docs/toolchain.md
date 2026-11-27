@@ -140,12 +140,13 @@ nothing else distinguishes it from the pinned compiler. The evidence:
   function's listing or score moves.
 - **Why not 2.6.3.** The Decompals `gcc-2.6.3-psx` rebuild also makes both
   functions exact but changes the frames of `0x80047010` (304 bytes against
-  retail's 288) and `0x800568bc` (736 against 696); 2.6.3's `function.c`
-  keeps address-taken temporaries differently (ChangeLog 1994-10-06 on).
-  Retail therefore behaves like FSF sources after 1994-08-07 and before
-  1994-10-06. No FSF release falls in that window (2.6.1 is 1994-11-01), so
-  the compiler is a Sony build of that period's sources that we do not have;
-  GAME links Library 3.4, whose kit is not archived.
+  retail's 288) and `0x800568bc` (736 against 696), most likely through
+  2.6.3's `function.c` handling of address-taken temporaries (ChangeLog
+  1994-10-06 on). Retail therefore behaves like FSF sources after 1994-08-07
+  and, probably, before 1994-10-06. No FSF release falls in that window
+  (2.6.1 is 1994-11-01), so the compiler was presumably a Sony build of that
+  period's sources that is not preserved; GAME links Library 3.4, whose kit
+  is not archived either.
 
 `PSX.EXE`, the FDAT modules, OPEN and END keep the floppy's `CC1PSX.EXE`:
 they are proven with it, and every function of theirs compiles identically
