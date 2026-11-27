@@ -903,9 +903,9 @@ void render_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, S
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
         n = animation_id & 0x7f;
-        part = &((ModelData *)scratch->model)->parts[n];
-        scratch->part = &((ModelData *)model)->parts[n];
+        scratch->part = &((ModelData *)scratch->model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        part = &((ModelData *)scratch->model)->parts[n];
     }
 draw:
     if (mode & 0x40) {
@@ -1184,9 +1184,9 @@ void render_distant_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rot
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
         n = animation_id & 0x7f;
-        part = &((ModelData *)scratch->model)->parts[n];
-        scratch->part = &((ModelData *)model)->parts[n];
+        scratch->part = &((ModelData *)scratch->model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        part = &((ModelData *)scratch->model)->parts[n];
     }
 draw:
     dist = SquareRoot0(mat->t[0] * mat->t[0] + mat->t[1] * mat->t[1] + mat->t[2] * mat->t[2]);
