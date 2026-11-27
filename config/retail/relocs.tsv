@@ -5653,6 +5653,7 @@ GAME.EXE	0x800358cc	0x250cc		mips26	reachable-code	0x80016290	load		jal		manual-
 GAME.EXE	0x800358dc	0x250dc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358ec	0x250ec		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358fc	0x250fc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
+GAME.EXE	0x80035998	0x25198	0x8003599c	mips_hi16_lo16	reachable-code	0x80011be0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x800359e0	0x251e0		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a20	0x25220		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a60	0x25260		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review

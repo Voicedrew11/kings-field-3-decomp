@@ -1,7 +1,8 @@
 /*
- * GAME.EXE: model data registration, the model part renderers and the map
- * layer front ends with their ground renderers (WIP slice of the render
- * module; the primitive fix-up tmd_prepare_primitive_indices before it is not claimed yet).
+ * GAME.EXE: the model primitive fix-up, model data registration, the model
+ * part renderers and the map layer front ends with their ground renderers
+ * (WIP slice of the render module). The RODATA claim holds
+ * tmd_prepare_primitive_indices's jump table.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -10,6 +11,136 @@
 #include <game/data.h>
 #include <game/render.h>
 #include <INLINE.H>
+
+RODATA(0x80011be0, 0x74)
+
+/*
+ * Fixes up the primitive records of every part of a model data block: the
+ * vertex and normal numbers become byte offsets (8 per SVECTOR) and the
+ * textured kinds lose the blend bits (5-6) of their texture page word. The
+ * kind is the record's GPU code without the semi-transparency bit (2), which
+ * is cleared in the copy of the head word only.
+ * Not exact: retail keeps the part counter, the part pointer and the
+ * 0x00ffffff mask in t0, t1 and t2; here the mask is used three times and
+ * takes t0 (nine instructions differ by a register). The three stores of
+ * the code byte stand in for a form not found yet that uses the mask twice.
+ */
+ADDRESS(0x8003591c, 0x328)
+void tmd_prepare_primitive_indices(u8 *data)
+{
+    ModelData *model;
+    ModelPart *part;
+    union {
+        u32 w;
+        PrimTag t;
+    } tag;
+    u8 *prim;
+    u16 *body;
+    s32 i;
+    s32 j;
+    s32 code;
+
+    model = (ModelData *)data;
+    part = model->parts;
+    i = model->count;
+    while (--i != -1) {
+        j = part->prim_count;
+        prim = data + (part->prims + 12);
+        while (--j != -1) {
+            body = (u16 *)(prim + 4);
+            tag.w = *(u32 *)prim;
+            prim = (u8 *)body + prim[1] * 4;
+            tag.t.code &= ~2;
+            code = tag.t.code &= ~2;
+            tag.t.code = code;
+            switch (tag.t.code & 0xfd) {
+            case 0x20: /* flat triangle: three vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x24: { /* flat textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[8] <<= 3;
+                body[9] <<= 3;
+                body[6] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x28: /* flat quad: four vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[6] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x2c: { /* flat textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[10] <<= 3;
+                body[11] <<= 3;
+                body[12] <<= 3;
+                body[8] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x30: /* gouraud triangle: three vertices, three normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                break;
+            case 0x34: { /* gouraud textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x38: /* gouraud quad: four vertices, four normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                break;
+            case 0x3c: { /* gouraud textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[13] <<= 3;
+                body[15] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                body[12] <<= 3;
+                body[14] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            }
+        }
+        part++;
+    }
+}
 
 /* Registers model data id (0..3) and fixes up its primitives. */
 ADDRESS(0x80035c44, 0x40)
