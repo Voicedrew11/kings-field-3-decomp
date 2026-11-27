@@ -557,6 +557,17 @@ void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
     }
 }
 
+/*
+ * Not exact (one instruction and one delay slot): retail reads the low half
+ * of the spilled x for the second quad straight from its stack slot (`sw
+ * a1,16(sp)` ... `lhu s1,16(sp)`) and fills the next branch's delay slot
+ * with `li a0,2`; this build reloads the whole word (`lw t0,16(sp)`) and puts
+ * `move s1,t0` in that slot. GNU C 2.6.0's reload cannot read part of a
+ * spilled word. FSF's reload change of 1994-08-07 (in 2.6.1 and later) does,
+ * and decompals' gcc 2.6.3-psx compiles this source to retail's code, but
+ * 2.6.3 breaks 0x80047010 and 0x800568bc (frame size), so GAME's compiler
+ * looks like a Sony 2.6.0 build with that reload fix (docs/toolchain.md).
+ */
 ADDRESS(0x8003daec, 0x464)
 void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
 {
@@ -1456,9 +1467,20 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
  * records (models from 256 and the area bank, sound banks from 147; kind
  * 0x1f plays its sound by the player's distance), the Effect records and
  * the placed models. The passes flag the model ids and sound banks in use
- * and resource_tmd_update_range/resource_vab_update_range load the missing ones and release the rest.
+ * and resource_tmd_update_range/resource_vab_update_range load the missing
+ * ones and release the rest. The gotos and the scale variable follow King's
+ * Field II's function.
+ *
+ * Not exact, three differences. Retail tests case 0xe5 with a `beq` to the
+ * next object and a `j` to the default case; here reorg inverts that pair
+ * because the branch is predicted not taken (retail's was not, as if it
+ * left an inner loop). Retail loads the constant 1 of the mark stores in
+ * each case; here loop.c hoists it, since the object loop has 467 insns at
+ * loop time against a limit of 468, so retail's loop was larger at that
+ * point. Retail updates map_placed_frame_counter through an address
+ * register, the code of a struct member (King's Field II has
+ * scene_display_sys.map_placed_frame_counter++); here it is a plain s32.
  */
-
 ADDRESS(0x80040ae4, 0xff0)
 void render_scene_and_update_resources(void)
 {

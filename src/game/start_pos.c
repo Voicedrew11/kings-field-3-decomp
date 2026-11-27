@@ -26,7 +26,20 @@
 
 RODATA(0x800130f0, 0x1a4)
 
-/* Runs obj's talk script record (id 0x70) from its entry point up to the 0xff end, then its end action. */
+/*
+ * Runs obj's talk script record (id 0x70) from its entry point up to the
+ * 0xff end, then its end action.
+ *
+ * Not exact (one instruction out of place): in the first
+ * actor_animation_seek_phase(obj, script[1], ...) call retail sets `li
+ * a3,0xfff` before the argument loads and leaves the `lhu` next to the
+ * `jal`; here sched2 moves `li a3` into that load-use gap. Retail's sched2
+ * still had the copy of script[1] into a1 at that point, which needs the
+ * byte in a pseudo that combine could not merge into its extension. Only a
+ * volatile read of that one byte reproduces it, and the same byte is read
+ * non-volatile three lines earlier, so the plain read stays. gcc 2.6.3
+ * gives the same code as 2.6.0 here.
+ */
 ADDRESS(0x8005c308, 0x4e0)
 void event_target_stream_execute(Actor *obj)
 {
