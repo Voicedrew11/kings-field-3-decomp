@@ -1323,7 +1323,7 @@ void resource_tmd_read_complete(u8 *file)
 }
 
 ADDRESS(0x80040694, 0x74)
-u8 map_cell_layer_mask(VECTOR *pos)
+u32 map_cell_layer_mask(VECTOR *pos)
 {
     s32 row;
     s32 col;
@@ -1340,7 +1340,7 @@ u8 map_cell_layer_mask(VECTOR *pos)
 }
 
 ADDRESS(0x80040708, 0xc4)
-u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
+u32 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
 {
     u8 cells = 0;
     s32 row = (pos->vz >> 11) + scene_display_sys.grid_z - radius;
@@ -1468,20 +1468,21 @@ void render_scene_and_update_resources(void)
     Actor *obj;
     ActorGroup *def;
     MapObject *rec;
+    MapObject *animated;
     MapObjectDef *rec_def;
     Effect *effect;
     MapPlacedEntry *placed;
     VECTOR *at;
+    SVECTOR *scale;
     s32 i;
     s32 now;
     s32 near;
     s32 dist;
-    s32 range;
     s32 volume;
     SoundEffect *sound;
     u16 id;
-    u8 mask;
-    u8 cells;
+    u32 mask;
+    u32 cells;
     u8 flags;
 
     scratch = SCRATCH;
@@ -1493,7 +1494,7 @@ void render_scene_and_update_resources(void)
     repeat_store_word((u32 *)SCRATCH->u.load.sounds, 0, 0x18);
     SCRATCH->draw.count.clut = 0;
     obj = actor_status.objects;
-    for (i = 199; i != -1; i--, obj++) {
+    for (i = 199; i != -1; obj++, i--) {
         if (obj->lifecycle != 1) {
             continue;
         }
@@ -1547,22 +1548,26 @@ void render_scene_and_update_resources(void)
     if (scene_display_sys.unk15996 == 0) {
         asset_status.animated_object = NULL;
     }
-    scratch->draw.count.clut = 0;
     rec = map_objects_slots.objects;
-    for (i = 395; i != -1; i--, rec++) {
+    scratch->draw.count.clut = 0;
+    for (i = 395; i != -1; rec++, i--) {
+        /* The frame keeps 16 unused bytes here, after model: King's Field II
+         * builds the rotation in an SVECTOR beside one unreferenced SVECTOR,
+         * and this version builds it in the scratchpad. */
+        SVECTOR rotation;
+        SVECTOR unused;
+
         if (rec->object_id == 0xff) {
             continue;
         }
         rec->flags &= 0x7f;
         switch (rec->action) {
-        case 0xe5:
-        case 0xe9:
-            break;
         case 0xf2:
             if (map_cell_visible(&rec->pos, rec->arg.m.radius_x, rec->arg.m.radius_z) == 0) {
                 break;
             }
             scratch->u.load.models[rec->object_id] = 1;
+            scale = &rec->scale;
             id = map_object_asset_index(rec->object_id);
             resource_registry_get(id, &model);
             if (model == NULL) {
@@ -1571,13 +1576,14 @@ void render_scene_and_update_resources(void)
             scratch->u.load.angle.vx = rec->angle.vx;
             scratch->u.load.angle.vy = rec->angle.vy + 2048;
             scratch->u.load.angle.vz = rec->angle.vz;
+            flags = rec->render_mode;
             pos.vx = ((rec->arg.m.cell_offset_x << 11) + rec->pos.vx) >> 1;
             pos.vz = ((rec->arg.m.cell_offset_z << 11) + rec->pos.vz) >> 1;
             pos.vy = (rec->pos.vy - (rec->arg.m.cell_height << 11)) >> 1;
-            render_distant_world_model(rec->layer_mask, id, &pos, &scratch->u.load.angle, &rec->scale,
+            render_distant_world_model(rec->layer_mask, id, &pos, &scratch->u.load.angle, scale,
                                        &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                        rec->animation_id, rec->animation_phase, rec->lighting_override_index,
-                                       rec->lighting_blend, rec->render_mode, rec->render_depth_offset);
+                                       rec->lighting_blend, flags, rec->render_depth_offset);
             rec->flags |= 0x80;
             break;
         case 0xf0:
@@ -1607,36 +1613,39 @@ void render_scene_and_update_resources(void)
                 }
                 if (rec->arg.s.next_sound_frame - now < 0) {
                     rec->arg.s.next_sound_frame = now + rec->arg.s.repeat_delay_units * 6;
-                    range = rec->arg.s.region_width << 10;
-                    dist = cur_avatar_status.pos.vx - (range + rec->pos.vx);
+                    /* One local carries each half extent, the fade distance
+                     * and finally the volume (King's Field II's shape). */
+                    volume = rec->arg.s.region_width << 10;
+                    near = cur_avatar_status.pos.vx - (volume + rec->pos.vx);
+                    if (near < 0) {
+                        near = -near;
+                    }
+                    near = volume - near;
+                    volume = rec->arg.s.region_depth << 10;
+                    dist = cur_avatar_status.pos.vz - (volume + rec->pos.vz);
                     if (dist < 0) {
                         dist = -dist;
                     }
-                    near = range - dist;
-                    range = rec->arg.s.region_depth << 10;
-                    dist = cur_avatar_status.pos.vz - (range + rec->pos.vz);
-                    if (dist < 0) {
-                        dist = -dist;
-                    }
-                    dist = range - dist;
+                    dist = volume - dist;
                     if (dist < near) {
                         near = dist;
                     }
-                    range = rec->arg.s.fade_distance << 11;
-                    if (near >= range) {
+                    volume = rec->arg.s.fade_distance << 11;
+                    if (near >= volume) {
                         volume = rec->arg.s.maximum_volume;
                     } else {
-                        if (range == 0) {
+                        if (volume == 0) {
                             break;
                         }
-                        volume = rec->arg.s.maximum_volume * near / range;
+                        volume = rec->arg.s.maximum_volume * near / volume;
                     }
                     if (rec->arg.s.vertical_attenuation_flags & 1) {
                         dist = cur_avatar_status.pos.vy - rec->pos.vy;
                         if (dist < 0) {
                             dist = -dist;
                         }
-                        volume -= (rec->arg.s.maximum_volume * dist) >> 13;
+                        dist = (rec->arg.s.maximum_volume * dist) >> 13;
+                        volume -= dist;
                     }
                     if (volume >= 20) {
                         audio_play_sound(rec->arg.s.sound_id + 496, volume);
@@ -1647,21 +1656,18 @@ void render_scene_and_update_resources(void)
             }
             break;
         default:
-            if (!(rec->flags & 2) || (rec->flags & 8)) {
-                cells = map_cell_layer_mask(&rec->pos);
-                if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
-                    break;
-                }
-                rec_def = &map_objects_slots.defs[rec->object_id];
-            } else {
-                rec_def = &map_objects_slots.defs[rec->object_id];
-                cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
-                if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
-                    break;
-                }
+            if ((rec->flags & 2) && !(rec->flags & 8)) {
+                goto reach;
             }
+            cells = map_cell_layer_mask(&rec->pos);
+            if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
+                break;
+            }
+            rec_def = &map_objects_slots.defs[rec->object_id];
+        shown:
             scratch->u.load.models[rec->object_id] = 1;
             scratch->u.load.sounds[rec_def->vab_resource_index] = 1;
+            scale = &rec->scale;
             id = map_object_asset_index(rec->object_id);
             resource_registry_get(id, &model);
             if (model == NULL) {
@@ -1680,23 +1686,33 @@ void render_scene_and_update_resources(void)
             }
             if (rec->flags & 0x40) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, scale,
                                    &rec->arg.m.animation_cache, &scene_display_sys.pitch_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             } else if (rec->flags & 8) {
                 render_distant_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle,
-                                           &rec->scale, &rec->arg.m.animation_cache,
+                                           scale, &rec->arg.m.animation_cache,
                                            &scene_display_sys.view_matrix, rec->animation_id,
                                            rec->animation_phase, rec->lighting_override_index,
                                            rec->lighting_blend, flags, rec->render_depth_offset);
             } else {
-                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, scale,
                                    &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             }
             rec->flags |= 0x80;
+            break;
+        reach:
+            rec_def = &map_objects_slots.defs[rec->object_id];
+            cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
+            if ((cells & rec->layer_mask) || (rec->flags & 8)) {
+                goto shown;
+            }
+            /* fall through */
+        case 0xe5:
+        case 0xe9:
             break;
         }
     }
@@ -1714,15 +1730,15 @@ void render_scene_and_update_resources(void)
     }
     resource_vab_update_range(2, 0xf1, 0x93, 0x20);
     if ((s16)asset_status.loading == 1 && asset_status.step > 0
-        && (rec = asset_status.animated_object) != NULL) {
-        id = rec->object_id - 221;
-        render_animated_object(id, &rec->angle, &rec->arg.v.animation_cache, rec->animation_id,
-                               rec->animation_phase, rec->arg.v.blend_mode, rec->arg.v.lighting_index,
-                               0x1fff - rec->arg.v.depth_code);
-        rec->flags |= 0x80;
+        && (animated = asset_status.animated_object) != NULL) {
+        id = animated->object_id - 221;
+        render_animated_object(id, &animated->angle, &animated->arg.v.animation_cache, animated->animation_id,
+                               animated->animation_phase, animated->arg.v.blend_mode, animated->arg.v.lighting_index,
+                               0x1fff - animated->arg.v.depth_code);
+        animated->flags |= 0x80;
     }
     effect = effect_status.objects;
-    for (i = 127; i != -1; i--, effect++) {
+    for (i = 127; i != -1; effect++, i--) {
         if (effect->type == 0xff) {
             continue;
         }
@@ -1767,7 +1783,7 @@ void render_scene_and_update_resources(void)
     placed = map_placed_entries;
     scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
     scratch->draw.count.clut = 0;
-    for (i = 127; i != -1; i--, placed++) {
+    for (i = 127; i != -1; placed++, i--) {
         if (placed->model_index == 0xffff) {
             continue;
         }
