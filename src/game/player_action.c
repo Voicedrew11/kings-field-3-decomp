@@ -548,8 +548,9 @@ void player_update_actions_and_charge(void)
     }
     sum /= 5;
     if (cur_avatar_status.magic_charge_delay == 0) {
-        weight = 0;
-        if (cur_avatar_status.selected_magic_record != NULL) {
+        if (cur_avatar_status.selected_magic_record == NULL) {
+            cur_avatar_status.magic_charge += player_charge_gain_for_rank(sum, 0);
+        } else {
             weight = cur_avatar_status.selected_magic_record->charge_rate;
             if (cur_avatar_status.equipped_head_id == 0x25) {
                 weight -= weight >> 2;
@@ -557,8 +558,8 @@ void player_update_actions_and_charge(void)
             if (cur_avatar_status.equipped_body_id == 0x30) {
                 weight <<= 1;
             }
+            cur_avatar_status.magic_charge += player_charge_gain_for_rank(sum, weight);
         }
-        cur_avatar_status.magic_charge += player_charge_gain_for_rank(sum, weight);
     } else {
         cur_avatar_status.magic_charge_delay--;
     }
@@ -576,9 +577,9 @@ void player_update_actions_and_charge(void)
         cur_avatar_status.magic_attack_mask_cursor = player_magic_attack_masks;
     }
     mask = action_button_masks[7] | action_button_masks[4] | action_button_masks[6];
-    if ((cur_avatar_status.pad_buttons & mask) && !(cur_avatar_status.pad_buttons_previous & mask)) {
-        if (cur_avatar_status.equipped_weapon_record->alternate_attack_phase_step != 0
-            && player_meets_weapon_magic_requirement(1)
+    if ((cur_avatar_status.pad_buttons & mask) && !(cur_avatar_status.pad_buttons_previous & mask)
+        && cur_avatar_status.equipped_weapon_record->alternate_attack_phase_step != 0) {
+        if (player_meets_weapon_magic_requirement(1)
             && cur_avatar_status.equipped_weapon_record->alternate_magic_id != 0xff
             && (cur_avatar_status.pad_buttons & *cur_avatar_status.magic_attack_mask_cursor)
             && (cur_avatar_status.magic_attack_mask_cursor != player_magic_attack_masks
