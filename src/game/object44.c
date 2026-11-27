@@ -230,9 +230,6 @@ void map_object_refresh_cell_markers(s32 mode)
  * position on the map cell, radius on the cell grid, then per MapObjectDef
  * type the kind and its state (map patches, timers, cell bytes); types
  * without a case go to FDAT handler 8.
- * Not exact: retail adds the cell row (base + z * 800) before the column
- * (+ x * 10) where GCC here forms z * 800 + (x * 10 + base) (as in
- * map_object_set_cell_marker), and loads def->arg.h.unke before def->arg.h.unk10 for the larger radius.
  */
 ADDRESS(0x80044d9c, 0xd2c)
 void map_object_initialize_from_placements(MapObjectPlacement *place)
@@ -242,6 +239,7 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
     u32 radius;
     s32 i;
     u32 frames;
+    s32 extent;
 
     frames = cdrom_ctl.frames;
     obj = map_objects_slots.objects;
@@ -273,7 +271,8 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
             obj->render_mode |= 0x80;
         }
         if (obj->flags & 0x10) {
-            obj->collision_height = (def->collision_height * place->arg_bytes[0]) >> 7;
+            extent = def->collision_height;
+            obj->collision_height = (extent * place->arg_bytes[0]) >> 7;
             obj->scale.vx = obj->scale.vy = obj->scale.vz = place->arg_bytes[0] << 5;
         } else {
             obj->collision_height = def->collision_height;
@@ -299,9 +298,10 @@ void map_object_initialize_from_placements(MapObjectPlacement *place)
                 map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, radius, 1);
             }
         } else if (obj->flags & 4) {
+            extent = def->arg.h.unke;
             radius = def->arg.h.unk10;
-            if (def->arg.h.unke > radius) {
-                radius = def->arg.h.unke;
+            if (radius < extent) {
+                radius = extent;
             }
             map_cell_add_layer_occupancy(obj->pos.vx, obj->pos.vz, radius, 1);
         }

@@ -75,19 +75,16 @@ void conversation_record_mark_page(u8 id, u8 slot)
             return;
         }
         if (t->id == id) {
-            p = conversation_records.page_states + t->offset + slot;
+            p = conversation_records.page_states + slot + t->offset;
             *p = 3;
-            if (slot == 0) {
-                return;
-            }
             k = 0;
-            c = slot - 1;
-            do {
+            c = slot;
+            while (c--) {
                 k++;
                 if (p[-k] == 0xff) {
                     p[-k] = 0;
                 }
-            } while (c--);
+            }
             return;
         }
         t++;

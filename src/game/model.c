@@ -1804,11 +1804,11 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 
 /*
  * Draws the layers of map cell (x, z) that are visible, with flags bit 1 set.
- * Not exact: control flow, calls and constants agree; retail copies flags to
- * $a3 and x/z to $t0/$t1 at entry (unattributed allocation residue).
+ * The position is built in the scratchpad in King's Field II's order (x, y, z).
+ * Nothing in the decompiled images calls it.
  */
 ADDRESS(0x8003be34, 0x19c)
-void render_map_cell_layers(s32 x, s32 z, s32 flags)
+void render_map_cell_layers(s32 x, s32 z, u8 flags)
 {
     SVECTOR *pos;
     VECTOR *origin;
@@ -1821,8 +1821,8 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
     kind = cell->layer[0].object_index;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;
-        pos->vz = (z << 11) - origin->vz + 1024;
         pos->vy = (-cell->layer[0].elevation << 7) - origin->vy;
+        pos->vz = (z << 11) - origin->vz + 1024;
         render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.pos, flags);
         kind = cell->layer[1].object_index;
         if (kind < 240) {
@@ -1833,8 +1833,8 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
         kind = cell->layer[1].object_index;
         if ((flags & 2) && kind < 240) {
             pos->vx = (x << 11) - origin->vx + 1024;
-            pos->vz = (z << 11) - origin->vz + 1024;
             pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
+            pos->vz = (z << 11) - origin->vz + 1024;
             render_map_cell_object(&cell->layer[1], pos, flags);
         }
     }

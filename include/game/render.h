@@ -473,8 +473,8 @@ void render_animated_object(u16 id, SVECTOR *rotation, AnimSlot **owner, u16 ani
 u16 map_object_asset_index(u16 id);
 void resource_registry_get(u16 id, u8 **out);
 void resource_tmd_read_complete(u8 *file);
-u8 map_cell_layer_mask(VECTOR *pos);
-u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius);
+u32 map_cell_layer_mask(VECTOR *pos);
+u32 map_cell_layer_mask_radius(VECTOR *pos, s32 radius);
 s32 map_cell_visible(VECTOR *pos, s32 range_x, s32 range_z);
 void resource_tmd_queue_read(s32 file, s32 entry, s32 id);
 void resource_vab_update_range(s32 file, s32 entry, s32 bank, s32 count);
@@ -534,7 +534,7 @@ void tmd_set_slot(u16 id, u8 *data);
 void render_enqueue_textured_tmd(u16 part, s32 depth);
 
 void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags);
-void render_map_cell_layers(s32 x, s32 z, s32 flags);
+void render_map_cell_layers(s32 x, s32 z, u8 flags);
 
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */

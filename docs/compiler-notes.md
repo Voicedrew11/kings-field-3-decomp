@@ -193,6 +193,19 @@ block-scoped `MapObject *made` dying in `made - objects` gives retail's tie in
 result already has a quantity, which a hard-register operand earlier in the
 insn gives it (`block_alloc` tries operands in order).
 
+A hard-register operand has the same effect, and a returned local produces
+one: with `return made;` the copy to `v0` has nothing to wait for, so sched1
+moves it up behind the call that set `made`, and `optimize_reg_copy_1`
+(`update_equiv_regs`) rewrites every later use of `made` as `v0`. In
+`made - objects` operand 1 is then the hard register, the difference gets its
+quantity from it and the dying base is not tied (`lui v1; addiu v1; subu
+a0,v0,v1`, `0x8005c7e8`, whose callers ignore the returned record).
+
+Quantities are allocated in priority order, so one more insn in a pointer's
+life can move it behind three shorter-lived values: in `0x8004290c` the pool
+pointer (3 references) gets `a2` after the three counters (2 each) only
+because the `SCRATCH->model` load for `part` is scheduled inside its life.
+
 ### Source levers
 
 - Declaration order breaks equal priorities (`0x80017c78`).
@@ -263,6 +276,11 @@ insn gives it (`block_alloc` tries operands in order).
   112 writes the `$gp` word first). A different spelling of the same value
   also defeats reuse: `U16(10) % 0x4000` reloads where `& 0x3fff` is shared
   with the later `& 0xc000` (`0x800500a8`).
+- **Helper order.** King's Field II selects a part's vertices
+  (`tmd_select_object_vertices`) before it takes the part pointer
+  (`tmd_get_object`); with both inline, the two scratchpad stores come first
+  and the part pointer is computed from a reloaded `scratch->model`
+  (`0x8003e34c`, `0x8003f304`).
 - **Followed jumps.** cse follows jumps into later blocks
   (`-fcse-follow-jumps` is on at `-O2`). An exit that jump1 cannot thread
   into a bare jump changes what cse2 sees: a dead store in the exit
@@ -359,10 +377,29 @@ insn gives it (`block_alloc` tries operands in order).
 ## loop.c
 
 - **Hoisting threshold.** `move_movables` starts at
-  `2 * (1 + n_non_fixed_regs)` and lowers the threshold by 3 for every insn it
-  moves; a candidate needs `threshold * savings * lifetime >= insn_count`. In
-  a big loop the late invariants stay in place (`0x8003260c`'s
-  `0x800 - q[k] + radius`).
+  `2 * (1 + n_non_fixed_regs)` (52 with this compiler, 26 when the loop has a
+  call) and lowers the threshold by 3 for every insn it moves; a candidate
+  needs `threshold * savings * lifetime >= insn_count`. In a big loop the late
+  invariants stay in place (`0x8003260c`'s `0x800 - q[k] + radius`). The
+  lifetime is counted in insn positions including line-number notes, so two
+  statements on separate lines are one further apart, and matching movables
+  (the same constant loaded at several places) add their savings and
+  lifetimes.
+- **Moved once, counted double.** A register that an inner loop has already
+  moved (`moved_once`) doubles `insn_count` for the rest of the outer loop's
+  list, cumulatively, moved or not ("halved since already moved" in the `-dL`
+  dump), and its lifetime is then the whole inner loop. A test of a `u8`
+  parameter (`if (flags & 2)`) is three insns at loop time (the `and`, the
+  truncation, the extension); written inside the inner loop of
+  `0x800445b8` they are moved out of both loops, and the third doubling is
+  what stops the outer loop from moving the second and third step of
+  `col * 10`, exactly as in retail. The same test kept in a variable set
+  before the loops gives another register allocation.
+- **A user variable's giv is not reduced.** `strength_reduce` lowers the
+  benefit of a giv whose register is a user variable, so
+  `scale = &rec->scale;` (King's Field II has the same statement) stays an
+  `addiu` in the loop while the argument expressions `&rec->pos` and
+  `&rec->arg.m.animation_cache` become incremented registers (`0x80040ae4`).
 - **Multi-set variables are not movable** (`scan_loop` wants one set): a
   variable assigned at several sites inside the loop is recomputed at each.
 - **Where hoisted code lands.** An invariant spelled inside the loop goes to
@@ -397,11 +434,9 @@ insn gives it (`block_alloc` tries operands in order).
   its compare into the bottom test: the operand loads appear before the
   entry jump (`0x80029f1c`).
 - **Hoisting order.** Movables are taken in scan order, which starts at the
-  exit test when the loop is entered at the bottom; each move lowers the
-  threshold by 3, and a register already moved out of an inner loop doubles
-  `insn_count` for the rest of the pass. Address invariants in the test can
-  use up the budget before short-lived temporaries in the body are reached
-  (`0x80029f1c`).
+  exit test when the loop is entered at the bottom (threshold and doubling
+  as above). Address invariants in the test can use up the budget before
+  short-lived temporaries in the body are reached (`0x80029f1c`).
 - **Rotation.** `expand_end_loop` (`stmt.c`) moves the exit test to the bottom
   unless it meets a call, a label or a block note. A test that stays at the
   top is `for (;;) { s32 n = *p++; if (n == 0xff) break; ... }`: the
@@ -506,7 +541,10 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - **Three independent updates.** For three independent `+=`, stores or
   negations of `x`, `y`, `z`, the second and third source statements come out
   swapped: write `x, z, y` to get retail's `x, y, z` and the reverse
-  (`0x800568bc`, `0x80056268`, `0x800562f0`).
+  (`0x800568bc`, `0x80056268`, `0x800562f0`). King's Field II's `x, y, z`
+  order in `0x8003be34` also puts the cell's elevation read before the `z`
+  store, which lets sched1 schedule the flag's extension at the top of each
+  arm; the flag's life is then short enough to be allocated before `x` and `z`.
 - **Memory disambiguation.** A load of a struct or array member is not moved
   above a store through a struct pointer; a fixed-address scalar load is
   (`0x8001a34c`). Loads through a pointer local set once from a constant
@@ -519,7 +557,27 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   chains therefore keep source order: a sum built from locals assigned in
   retail's order (`left = ...; x = ...; f(left + x, ...)`) schedules as
   retail does where one expression does not (`0x8001b5c4`), and each local
-  also keeps its own constant from fold's reassociation.
+  also keeps its own constant from fold's reassociation. Only a
+  pseudo with one set in the whole function is a birth (`birthing_insn_p`):
+  a load into a variable that is also assigned elsewhere keeps its source
+  position among other non-births and stays ahead of a birth that becomes
+  ready with it. Retail's `lhu v1,14(s1); lhu a2,16(s1)` in `0x80044d9c` is
+  one temporary used for two values of the definition, 50 lines apart.
+- **Memory order in both schedulers.** A varying struct load (`pool->end`)
+  stays behind every earlier fixed-address struct store and ahead of every
+  later one; two fixed-address members of one base register and different
+  offsets are independent, and so is a scalar access to a fixed address
+  (`*(u32 *)&SCRATCH->w.model.rgb`). A load can therefore rise above
+  scratchpad stores written before it (`0x8003e34c`), and "load A, then
+  store B" in retail puts B's statement after A's (`0x8004290c`).
+- **Fillers and no-op copies.** A load costs two cycles to its consumer and
+  is held back one cycle directly in front of a store; the gap is filled by
+  the ready insn that came latest in the incoming order. sched2 first deletes
+  moves whose two sides are `rtx_equal_p`; a copy through a paradoxical
+  subreg (`(set (reg:SI a3) (subreg:SI (reg:HI a3) 0))`, a narrow variable
+  passed in the register it lives in) is not one, is scheduled as a filler
+  and disappears only in jump2. A load-use `nop` in retail where this build
+  has a real filler can be such a copy (`0x800533e8`, `0x8005c308`, open).
 - **An odd update among shifts.** In a run of `p[n] <<= 3` updates sched1
   pipelines two loads ahead in `v0`/`v1`; four, six or eight updates keep
   source order and five come out as 1, 3, 2, 5, 4. A different update in
@@ -608,7 +666,10 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   arguments in one unit had no prototype (`0x80053c84`).
 - **Return types.** The callee's declared return type changes which register
   an `and` with its result lands in (`u16` against `s32`); an `s16` local for
-  an `s16` result keeps it apart from the next argument (`0x80030b24`).
+  an `s16` result keeps it apart from the next argument (`0x80030b24`). A
+  `u32` result tested against a `u32` mask is the first operand of the `and`
+  (`and v0,v0,s1`), a `u8` result the second (`map_cell_layer_mask`,
+  `0x80040ae4`).
 - **Extension patterns.** `lhu` then `sll/sra` = an `s16` local used raw and
   as an int (`s16 va = *a++`). `s16 d = (a - b) & 0xfff` masks before the
   extension. `s16` locals passed in a loop give a hoisted `sll` with the `sra`
@@ -693,19 +754,20 @@ raw words where GAME narrows. The link and the archive frame are in
 
 Residues whose mechanism is known but whose source form is not:
 
-- `0x8005c7e8`: retail's `subu` result is not tied to the dying base; here
-  the base is block-local and ties (see
-  [ties in local-alloc](#ties-in-local-alloc)).
-- `0x8003be34`: retail keeps the flags parameter in two registers; a source
-  copy is CSE'd away or allocated elsewhere.
 - `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
-  `lhu`; no source form makes combine produce that pseudo.
-- `0x8003f304`, `0x8003e34c`: retail reloads `scratch->model` in the else arm
-  before the `scratch->part` store, as if cse had not followed the jump.
-- `0x800608ec`: retail stops hoisting after four invariants (the threshold),
-  which needs a larger loop at loop time than any spelling found.
-- `0x80044d9c`, `0x8005c308`: reorg fills, and sched2 moves, an instruction
-  that retail leaves in place.
+  `lhu`; no source form makes combine produce that pseudo. Both calls also
+  schedule as if one more no-op copy were present than here.
+- `0x800608ec`: retail stops hoisting after four invariants. With the
+  threshold at 52 the record loop needs 41 to 43 insns at loop time; the
+  plain source has 36 (each narrow temporary for a loaded byte adds one).
+- `0x80040ae4`: reorg (`relax_delay_slots`) swaps the `0xe5` test with the
+  jump to the default case unless `mostly_true_jump` is non-zero; retail does
+  not swap, as if that branch left an inner loop (a `do { } while (0)` around
+  the loop body gives retail's branch but moves two saved registers). The
+  constant 1 of the three mark stores is hoisted here because the object loop
+  has 467 insns at loop time and the limit is 468.
+- `0x8005c308`: sched2 moves `li a3,0xfff` into a load-use gap that retail
+  leaves alone; retail's argument copy for `a1` was not a plain no-op there.
 - `0x8003591c`: retail keeps the byte insert of `tag.code &= ~2` in the
   register copy of the head word *and* the `srl 24; andi 0xfd` of the
   switch, with the `0x00ffffff` mask hoisted out of both loops and
