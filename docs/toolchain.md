@@ -12,7 +12,8 @@ instructions, and the source forms behind them, is in
 | Part | Pinned file | Source | Status |
 | --- | --- | --- | --- |
 | Compiler | `CC1PSX.EXE`, "GNU C 2.6.0 [AL 1.1, MM 40] Sony Playstation" (sha256 `6587ed37…`) | Sony "GNU C Compiler Version 2.60 (World)" floppy, `CC1PSX.EXZ` dated 1994-10-07 | proven: `PSX.EXE` and all 28 FDAT modules rebuild byte-identically |
-| Flags | `-O2 -G8` (the compiler's own `-G` default), or `-O2 -G0` | profiles `gcc260-o2-g8`, `gcc260-o2-g0` | proven per unit that matches (e.g. `psx.main`; `-G0` for the FDAT modules) |
+| Compiler (GAME) | `cc1psx-260r`: GNU C 2.6.0 built from the FSF source with the Decompals `gcc-2.6.0-psx` recipe and FSF's 1994-08-07 reload change | `nix/gcc260r.nix`, `patches/gcc-2.6.0-reload-19940807.patch` | **reconstructed revision**: no binary preserved; see [GAME's compiler revision](#games-compiler-revision) |
+| Flags | `-O2 -G8` (the compiler's own `-G` default), or `-O2 -G0` | profiles `gcc260-o2-g8`, `gcc260-o2-g0`; for GAME `gcc260r-o2-g8`, `gcc260r-o2-g0` | proven per unit that matches (e.g. `psx.main`; `-G0` for the FDAT modules) |
 | Assembler | ASPSX 2.21 (1995-06-22, `b52bf3d4…`) | Runtime Library 3.3 CD `PSYQ/ASPSX.EXE` | proven |
 | GTE post-processor | DMPSX 2.03 with `INLINE.TBL` | Runtime Library 3.3 CD `PSX/BIN` | proven (GAME GTE functions exact, e.g. `0x80035394`, `0x8003bb04`, `0x800400ac`) |
 | Linker | PSYLINK 2.27 (1995-08-30, `39c9e16b…`) | Runtime Library 3.3 CD `PSYQ/PSYLINK.EXE` | proven for `PSX.EXE` and the 28 FDAT modules |
@@ -101,12 +102,63 @@ cannot link byte-identically from them. `kf-vendored-seed` and
 object, 3.3 function ID, signature only, unmatched version) is in
 [the inventory](function-and-data-inventory.md#psy-q-library-text).
 
+## GAME's compiler revision
+
+GAME's units compile with `cc1psx-260r`, which is **not a preserved
+compiler**: it is GNU C 2.6.0 rebuilt from source with one FSF change from
+after the 2.6.0 release, chosen because retail GAME shows its effect and
+nothing else distinguishes it from the pinned compiler. The evidence:
+
+- **What 2.6.0 cannot emit.** `0x8003daec` and `0x800533e8` spill a register
+  parameter as a word and read its low half back from the slot (`sw a1,16(sp)`
+  ... `lhu s1,16(sp)`; `sw a3,64(sp)` ... `lhu v0,64(sp)`). GNU C 2.6.0's
+  reload always reloads the whole word for such a read (`lw t0,slot`, then a
+  `move`/`andi` of `t0`); both Sony 2.6.0 binaries (the floppy's and the Psy-Q
+  3.0 kit's `CC1PSX.EXE`) do. FSF's change of 1994-08-07 (Kenner; `reload.c`
+  `push_reload` and `find_reloads`: the `LOAD_EXTEND_OP` tests force a reload
+  only for paradoxical subregs; `reload1.c` `eliminate_regs`: a `USE` of the
+  pseudo before the insn) reads the narrow part directly. A scan of every
+  function with a frame in GAME, OPEN, END and the FDAT modules finds the
+  2.6.0 form nowhere and the later form only in these two functions.
+- **The patch.** `patches/gcc-2.6.0-reload-19940807.patch` holds only the hunks
+  of that ChangeLog entry that exist for this target, copied from GNU C 2.6.3
+  (no later entry touches those lines). For MIPS it reduces to `!=` becoming
+  `>` in two tests and the `USE` insn.
+- **The build.** `nix/gcc260r.nix` follows the Decompals
+  `gcc-2.6.0-psx.Dockerfile` (old-gcc `b74211c`, already pinned for 2.5.7)
+  on the FSF 2.6.0 tarball. Without the patch (`.#gcc260SourceBuild`) it emits
+  assembly identical, file for file, to `cc1psx-260` (the Decompals 0.17
+  binary) for all 75 C units; with it (`.#cc1psx260r`) 73 units are identical
+  and in `render.c` and `object4c.c` only `0x8003daec` and `0x800533e8`
+  change. Both builds are bit-reproducible (`nix build --rebuild`).
+- **Against retail** (`kf try` listings, every claimed function, 1,076):
+  every function that is exact under `CC1PSX.EXE` stays exact, with the same
+  listing, under `cc1psx-260r` (GAME, OPEN 34, END 13, PSX 1, FDAT 437).
+  GAME gains `0x8003daec` (with the newest `render.c`), `0x800533e8` (with
+  its fourth parameter an `int`, passed straight to the callees) and the
+  `.text` addend of `0x80040830`, which follows `0x8003daec`'s size. No other
+  function's listing or score moves.
+- **Why not 2.6.3.** The Decompals `gcc-2.6.3-psx` rebuild also makes both
+  functions exact but changes the frames of `0x80047010` (304 bytes against
+  retail's 288) and `0x800568bc` (736 against 696); 2.6.3's `function.c`
+  keeps address-taken temporaries differently (ChangeLog 1994-10-06 on).
+  Retail therefore behaves like FSF sources after 1994-08-07 and before
+  1994-10-06. No FSF release falls in that window (2.6.1 is 1994-11-01), so
+  the compiler is a Sony build of that period's sources that we do not have;
+  GAME links Library 3.4, whose kit is not archived.
+
+`PSX.EXE`, the FDAT modules, OPEN and END keep the floppy's `CC1PSX.EXE`:
+they are proven with it, and every function of theirs compiles identically
+under both compilers, so they cannot tell the two apart. If a Sony binary
+with this reload is ever found, it replaces `cc1psx-260r`.
+
 ## Build commands
 
 There is one source compilation path:
 
 ```text
 C source -> cpppsx-260 (CCPSX 1.17 definitions) -> CC1PSX.EXE (DOSBox-X)
+                                                   [GAME: cc1psx-260r, native]
          -> ASPSX 2.21 -> [DMPSX 2.03 if the unit uses INLINE.H] -> Psy-Q OBJ
 Psy-Q OBJs + 2MBYTE/NONE2/MALLOC + Library 3.3 archives -> PSYLINK 2.27
          -> CPE -> CPE2X 1.5 /CA -> PS-X EXE
@@ -120,6 +172,10 @@ the auxiliary sizeof probe. Both are optimizer-independent. The floppy's
 `CPPPSX.EXE` is pinned beside the compiler but not run. Plain `char` is
 unsigned in this `CC1PSX` (`*p` of a `char *` loads with `lbu`), which is
 what the driver's `__CHAR_UNSIGNED__` announces.
+
+`compiler = "gcc260r-native"` runs `cc1psx-260r` natively on the same
+preprocessed source (the same driver definitions) with the same flags, and
+hands its assembly to the same ASPSX step.
 
 `kf build`, `kf analyze` and `kf try` share the same compiler, assembler and
 DMPSX step. Runtime Library 3.3's `INLINE.H` writes each GTE operation as
@@ -147,7 +203,9 @@ remain inspectable. It does not reach the linked executable.
 translation units whose globals are all reached through `lui`/low pairs
 (every FDAT module, `game.save_data`); each is proven for the units that
 match under it: 95 GAME, 20 OPEN and 5 END game functions use `$gp`
-and the rest do not, so both settings occur. The King's Field II probe
+and the rest do not, so both settings occur. GAME's units use
+`gcc260r-o2-g8` and `gcc260r-o2-g0`, the same settings with `cc1psx-260r`
+([GAME's compiler revision](#games-compiler-revision)). The King's Field II probe
 profiles (GCC 2.5.7/2.6.0 rebuilds with ASPSX 1.07) are removed; the
 `gcc257-native`, `gcc260-native` and `gcc241-kit` compilers stay selectable.
 

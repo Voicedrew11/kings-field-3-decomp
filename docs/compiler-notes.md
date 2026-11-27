@@ -6,9 +6,13 @@ and its evidence are in [toolchain.md](toolchain.md). Every rule below was
 found on a function that did not match, and names a function where the
 retail source form now stands: GAME unless another image is given; find it
 with `grep -rn 'ADDRESS(0x...' src`. Where a cause names a GCC function or
-file, it was read in the GCC 2.5.7 and 2.6.3 sources (no 2.6.0 source tree is
-preserved) and checked against this compiler's output; a rule that rests only
-on the shape of the output says so.
+file, it was read in the GCC 2.5.7 and 2.6.3 sources (the FSF 2.6.0 tree is
+now pinned too, `nix build .#gcc260Source`) and checked against this
+compiler's output; a rule that rests only on the shape of the output says so.
+GAME units compile with `cc1psx-260r`, the same compiler with FSF's
+1994-08-07 reload change (see [narrow reads](#narrow-reads-of-a-spilled-word)
+and [toolchain.md](toolchain.md#games-compiler-revision)); every other rule
+holds for both.
 
 The rules explain residues; they do not excuse one, and
 [AGENTS.md](../AGENTS.md) still decides what a source may contain. Fake
@@ -29,7 +33,9 @@ definitions, compile with the build's `-quiet -g -O2 -G8` (or `-G0`), and add
 cse, loop, flow, combine, sched1, local-alloc (`.lreg`: refs and live length
 per pseudo), global-alloc/reload (`.greg`), sched2, jump2 and delay-slot
 dumps. An include overlay for `cpppsx-260` must live on the WSL file system:
-it cannot stat headers under `/mnt/c`.
+it cannot stat headers under `/mnt/c`. For GAME units use `cc1psx-260r`
+(also in the flake, same flags and dump flags); it differs from
+`cc1psx-260` only in reload.
 
 **Authority.** Use native compiles to search; confirm with `kf try` and
 `kf analyze`. See [verification traps](#verification-traps) for what a
@@ -45,6 +51,22 @@ used throughout:
   scheduled order, not the source order.
 - jump2 (the only pass that cross-jumps) runs after sched2, so both copies of
   a merged tail were present for the allocators and the schedulers.
+
+## Narrow reads of a spilled word
+
+When a word pseudo that got no hard register is read through
+`(subreg:HI (reg:SI x) 0)`, GNU C 2.6.0 reloads the whole word (`lw t0,slot`,
+then `move`/`andi`/`sh` of `t0`): its `LOAD_EXTEND_OP` tests in `reload.c`
+force a reload whenever the inner and outer sizes differ. FSF's reload of
+1994-08-07 forces it only for paradoxical subregs, so the narrow part is read
+straight from the slot (`lhu s1,16(sp)`), and `eliminate_regs` leaves a
+`(use (reg x))` insn in front that sched2 schedules like any insn and that
+emits nothing (it can account for a load-use `nop`). Retail GAME has the later
+form (`0x8003daec`, `0x800533e8`) and no function of any image has the 2.6.0
+form, hence `cc1psx-260r`. Source consequence: a parameter that retail spills
+as a word and reads as a halfword stays a word in C and is narrowed only at
+its uses (`0x800533e8`'s fourth parameter, passed straight to `u16`
+parameters).
 
 ## Toolchain facts
 
@@ -592,8 +614,6 @@ Residues whose mechanism is known but whose source form is not:
   [ties in local-alloc](#ties-in-local-alloc)).
 - `0x8003be34`: retail keeps the flags parameter in two registers; a source
   copy is CSE'd away or allocated elsewhere.
-- `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
-  `lhu`; no source form makes combine produce that pseudo.
 - `0x80028750`: the jump equivalence keeps the call result canonical where
   retail compares against a constant register.
 - `0x8003f304`, `0x8003e34c`: retail reloads `scratch->model` in the else arm

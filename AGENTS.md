@@ -9,7 +9,9 @@
 - The tooling is inherited from the King's Field II (`SLPS-00069`) project;
   the toolchain is this game's own (`docs/toolchain.md`): Sony's GNU C 2.60
   CC1PSX with ASPSX 2.21, PSYLINK 2.27, CPE2X 1.5 and DMPSX 2.03 from the
-  Runtime Library 3.3 CD. It rebuilds `PSX.EXE` byte-identically. GAME and
+  Runtime Library 3.3 CD. It rebuilds `PSX.EXE` byte-identically. GAME units
+  compile with `cc1psx-260r`, GNU C 2.6.0 rebuilt with FSF's 1994-08-07 reload
+  change: a reconstructed revision, not a preserved binary. GAME and
   OPEN link Library 3.4 and END a post-3.3 LIBGPU/LIBSND, none of which is
   preserved, so their links against the 3.3 archives remain a probe; re-prove
   any other inherited fact against this game's retail bytes before relying
@@ -25,7 +27,8 @@
 - `gcc260-o2-g8` (`-O2 -G8`) and `gcc260-o2-g0` are proven only for the
   units that match under them (for example `psx.main`, and the FDAT modules
   at `-G0`); for
-  every other unit they are probes until that unit matches. Small-data
+  every other unit they are probes until that unit matches. GAME units use
+  `gcc260r-o2-g8`/`gcc260r-o2-g0`, the same flags with `cc1psx-260r`. Small-data
   use is mixed per TU (95 GAME functions are `$gp`-relative). Plain `char` is
   unsigned under this compiler.
 
