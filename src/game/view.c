@@ -331,9 +331,6 @@ void view_grid_occlude_walls_descending(void)
  * Builds the visibility grid: marks the cells inside the view cone (by the
  * yaw, the pitch-widened half angle and the view range) around the viewer,
  * hides those behind walls and copies the result to GraphicsRuntime.grid.
- * Not exact: retail stores map_scan_start_z, reads it back at once and only
- * then computes the x pair; here the read-back is scheduled after the x
- * stores (12 instructions in another order, same registers and frame).
  */
 ADDRESS(0x80034bf4, 0x4cc)
 void view_build_visibility_grid(void)
@@ -449,10 +446,10 @@ void view_build_visibility_grid(void)
         scratch->u.view.grid[back_z][back_x + 1] = 0;
         scratch->u.view.grid[back_z + 1][back_x] = 0;
     }
-    scene_display_sys.grid_z = eye_z - scene_display_sys.view_cell_z;
-    scene_display_sys.map_scan_start_z = -scene_display_sys.grid_z;
     scene_display_sys.grid_x = eye_x - scene_display_sys.view_cell_x;
+    scene_display_sys.grid_z = eye_z - scene_display_sys.view_cell_z;
     scene_display_sys.map_scan_start_x = -scene_display_sys.grid_x;
+    scene_display_sys.map_scan_start_z = -scene_display_sys.grid_z;
     scratch->u.view.x = scene_display_sys.map_scan_start_x;
     scratch->u.view.z = scene_display_sys.map_scan_start_z;
     if ((yaw & 0xfff) < 2048) {
