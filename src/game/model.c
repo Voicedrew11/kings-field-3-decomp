@@ -20,10 +20,15 @@ RODATA(0x80011be0, 0x74)
  * textured kinds lose the blend bits (5-6) of their texture page word. The
  * kind is the record's GPU code without the semi-transparency bit (2), which
  * is cleared in the copy of the head word only.
- * Not exact: retail keeps the part counter, the part pointer and the
- * 0x00ffffff mask in t0, t1 and t2; here the mask is used three times and
- * takes t0 (nine instructions differ by a register). The three stores of
- * the code byte stand in for a form not found yet that uses the mask twice.
+ * The copy is changed twice more before the switch reads it, and nothing
+ * reads those changes: the code is saved, another byte of the copy is
+ * cleared and the code is put back. Retail's instructions need them: they
+ * are why the compiler keeps the first store of the code byte and the
+ * `& 0xfd` of the switch instead of folding one into the other, the second
+ * store is the second use of the 0x00ffffff mask (register t2), and the
+ * mask of the cleared byte, left without an instruction, is the 8 unused
+ * bytes of frame. Clearing either of the other two bytes instead gives the
+ * same object; which statement the original had is not known.
  */
 ADDRESS(0x8003591c, 0x328)
 void tmd_prepare_primitive_indices(u8 *data)
@@ -51,7 +56,8 @@ void tmd_prepare_primitive_indices(u8 *data)
             tag.w = *(u32 *)prim;
             prim = (u8 *)body + prim[1] * 4;
             tag.t.code &= ~2;
-            code = tag.t.code &= ~2;
+            code = tag.t.code;
+            tag.t.unk2 = 0;
             tag.t.code = code;
             switch (tag.t.code & 0xfd) {
             case 0x20: /* flat triangle: three vertices, one normal */
