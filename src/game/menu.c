@@ -506,12 +506,6 @@ void player_cap_curse_strength(void)
     }
 }
 
-/*
- * Not exact: the map-marker argument loads (area, pos.vz) are scheduled and
- * allocated differently. The two-frame repeat is a goto loop: as a nested
- * loop its uses would be weighted by depth and the hoisted address would
- * outrank the 0x66666667 constant and the item copy ($s2/$s3/$s4).
- */
 ADDRESS(0x8001b5c4, 0x2c8)
 void menu_show_item_picture(u8 item)
 {
@@ -519,6 +513,9 @@ void menu_show_item_picture(u8 item)
     s32 i;
     s32 bytes;
     u8 area;
+    s32 left;
+    s32 x;
+    s32 y;
 
     if (item == 0x5f) {
         n = 0x2f1;
@@ -542,7 +539,6 @@ void menu_show_item_picture(u8 item)
     menu_cd_read_state = 0;
     input_wait_release();
     do {
-    again:
         menu_frame_begin();
         menu_draw_item_picture(item);
         if (asset_status.current_area < 12 && item == 0x5f) {
@@ -560,8 +556,10 @@ void menu_show_item_picture(u8 item)
                 n = 0;
             }
             area = asset_status.current_area;
-            primitive_set_poly_ft4_rect((area & 3) * 56 + cur_avatar_status.pos.vx / 2560 + 40,
-                                        0xbc - cur_avatar_status.pos.vz / 2560 - (area >> 2) * 56,
+            left = (area & 3) * 56;
+            x = cur_avatar_status.pos.vx / 2560 + 40;
+            y = 0xbc - cur_avatar_status.pos.vz / 2560;
+            primitive_set_poly_ft4_rect(left + x, y - (area >> 2) * 56,
                                         15, 15, n * 16 + 128, 0x90, 15, 15);
             primitive_buffer_commit_poly_ft4(0x1c);
         }
@@ -569,10 +567,7 @@ void menu_show_item_picture(u8 item)
         menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
         menu_present_frame();
         i++;
-        if (i < 2) {
-            goto again;
-        }
-    } while (!input_read_mark_active());
+    } while (i < 2 || !input_read_mark_active());
     input_wait_press();
     input_wait_release();
 }
