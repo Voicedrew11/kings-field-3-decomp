@@ -24,7 +24,7 @@ void actor_animation_seek_phase(Actor *obj, u8 anim, u16 time, s32 target, u16 s
 u8 event_target_stream_find_marker(u8 *script, u8 id);
 void event_target_stream_execute(Actor *obj);
 u8 *event_target_stream_resolve_cursor(Actor *obj);
-void event_spawn_effect_object(MapObject *obj, s32 id);
+MapObject *event_spawn_effect_object(MapObject *obj, s32 id);
 
 /* A start position of player_warp_to_destination's table: areas, map cell and height, yaw. */
 typedef struct WarpDestination {

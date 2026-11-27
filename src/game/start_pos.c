@@ -168,17 +168,17 @@ end:
     cur_evt_state.interaction_handled = 1;
 }
 
-/* Spawns MapObject 0x17c and links obj to it (its index - 124). */
+/* Spawns MapObject 0x17c, links obj to it (its index - 124) and returns it. */
 ADDRESS(0x8005c7e8, 0x7c)
-void event_spawn_effect_object(MapObject *obj, s32 id)
+MapObject *event_spawn_effect_object(MapObject *obj, s32 id)
 {
     MapObject *made;
-    s32 i;
 
     made = map_object_effect_pool_acquire(0x17c, 0x10, -1);
     obj->arg.b.unk39 = made - map_objects_slots.objects - 124;
     made->object_id = id;
     made->arg.b.unk38 = 0;
+    return made;
 }
 
 /* Loads start position n's areas and puts the player there (12: none). */
