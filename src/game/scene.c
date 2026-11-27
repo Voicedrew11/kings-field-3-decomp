@@ -442,8 +442,8 @@ void resource_advance_transition(void)
             }
             obj44 = map_objects_slots.objects;
             for (i = 395; i != -1; i--) {
-                if (obj44->arg.w.animation_cache != 0) {
-                    pool_record_release((AnimSlot *)obj44->arg.w.animation_cache);
+                if (obj44->arg.m.animation_cache != NULL) {
+                    pool_record_release(obj44->arg.m.animation_cache);
                 }
                 switch (obj44->action) {
                 case 0x20:

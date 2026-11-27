@@ -268,10 +268,12 @@ typedef struct EquipmentRecord {
 typedef struct MapLayer {
     u8 object_index; /* +0x00: below 240 the layer is drawn; 0xfd..0xff are walls */
     u8 elevation;   /* +0x01: floor height / -128 */
-    u8 quarter_turns; /* +0x02: layer 0: bits 2-7 count the Actor records on the
-                     * cell (map_cell_add_layer_occupancy) */
+    u8 quarter_turns; /* +0x02: bits 0-1 turn the collision shape; layer 0: bits 2-7 count the
+                     * Actor records on the cell (map_cell_add_layer_occupancy) */
     u8 collision_shape_id;
-    u8 lighting_index;
+    u8 lighting_index; /* +0x04: bit 0x40: collision_query_world (mask bit 2) reports a wall hit
+                        * and no floor */
+
 } MapLayer;
 
 /*
@@ -292,8 +294,8 @@ typedef struct MapWorld {
                      * base (layout fix later) */
     u8 unk11ff4[0xc];
     MapCell *collision_cell; /* +0x12000: cell of the last collision test */
-    u8 *collision_layer; /* +0x12004: MapLayer of the last collision test (declared u8 *,
-                     * type later); [2] bits 0-1 its slope */
+    MapLayer *collision_layer; /* +0x12004: layer of the last collision test
+                                * (collision_evaluate_shape_records) */
     u8 unk12008[2];
     u16 collision_layer_offset; /* +0x1200a: copied to SoundState.listener_layer_offset with the listener */
     s32 collision_layer_height; /* +0x1200c: height given to Actor records with flag 0x400 */
@@ -434,7 +436,8 @@ typedef struct MapObjectSHalves {
 } MapObjectSHalves;
 
 typedef struct MapObjectWords {
-    s32 animation_cache;
+    s32 animation_cache; /* +0x34: the pose slot of MapObjectModel/MapObjectAnimated as a word
+                          * (map_object_pool_reset clears it) */
     s32 unk38;
     s32 unk3c;
     s32 unk40;      /* +0x40: kind 0x10: height it started from */
