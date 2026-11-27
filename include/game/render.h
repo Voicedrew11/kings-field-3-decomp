@@ -534,7 +534,7 @@ void tmd_set_slot(u16 id, u8 *data);
 void render_enqueue_textured_tmd(u16 part, s32 depth);
 
 void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags);
-void render_map_cell_layers(s32 x, s32 z, s32 flags);
+void render_map_cell_layers(s32 x, s32 z, u8 flags);
 
 /* Callees outside the render modules; signatures from these call sites
  * (game/math.h, game/memory.h and game/cd.h declare the others). */
