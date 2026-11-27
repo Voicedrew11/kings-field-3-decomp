@@ -6,8 +6,9 @@ and its evidence are in [toolchain.md](toolchain.md). Every rule below was
 found on a function that did not match, and names a function where the
 retail source form now stands: GAME unless another image is given; find it
 with `grep -rn 'ADDRESS(0x...' src`. Where a cause names a GCC function or
-file, it was read in the GCC 2.5.7 and 2.6.3 sources (no 2.6.0 source tree is
-preserved) and checked against this compiler's output; a rule that rests only
+file, it was read in the GCC 2.5.7 and 2.6.3 sources (the combine rules of
+`0x8003591c` and the reload of `0x8003daec`/`0x800533e8` in GNU's 2.6.0
+source) and checked against this compiler's output; a rule that rests only
 on the shape of the output says so.
 
 The rules explain residues; they do not excuse one, and
@@ -30,6 +31,13 @@ cse, loop, flow, combine, sched1, local-alloc (`.lreg`: refs and live length
 per pseudo), global-alloc/reload (`.greg`), sched2, jump2 and delay-slot
 dumps. An include overlay for `cpppsx-260` must live on the WSL file system:
 it cannot stat headers under `/mnt/c`.
+
+**Tracing a pass.** GNU's `gcc-2.6.0.tar.gz` builds with the Decompals
+recipe's patches into a `cc1` whose output was identical to `cc1psx-260` on
+every file compared (868 variants of `0x8003591c`'s unit). With prints added
+to `combine.c` (each `try_combine`, each success, each insn deleted through a
+death note, each value recorded for a register) it shows why a combination
+is or is not made, which the `-dc` dump does not.
 
 **Authority.** Use native compiles to search; confirm with `kf try` and
 `kf analyze`. See [verification traps](#verification-traps) for what a
@@ -160,6 +168,13 @@ What decides the numbers:
   one loop counts 2 and a set in the preheader 1. A `retry:`/`goto` loop has
   no loop notes: no weighting, and loop.c leaves it alone (`0x800431e8`,
   where `count` loses to `scratch` only in the goto form).
+- **Hoisted constants.** The hoisted compare constant of
+  `while (--n != -1)` carries a `REG_EQUAL` note (`force_reg` adds one to
+  a constant it loads), so `update_equiv_regs` doubles its live length;
+  the mask of a bit-field store, copied into a register as an operator's
+  operand, has no note and is not doubled (`.lreg` shows both). In
+  `0x8003591c` the `-1` (8 references, length 380) therefore ranks below
+  the mask (7 references, length 189) and takes the register after it.
 - **Returns.** Each `return i` inside a loop is two references of `i`; one
   shared return can drop a variable below another (`0x80045c7c`).
 - **Live length** follows statement order: reading `z` before `p` lengthens
@@ -362,6 +377,41 @@ because the `SCRATCH->model` load for `part` is scheduled inside its life.
   `sllv; and` is `x & (bit = 1 << n)`. `x >= 0x8000` on a `u16`
   becomes `lbu` of the high byte and `srl 7`; `& 0x8000`, `>> 15` and
   `(s16)x < 0` do not (`0x80029500`, `0x80047010`).
+- **Byte stores into a register copy.** A `u8` member of a word-sized
+  union that lives in a register is stored as `w = (w & mask) | (v << n)`
+  with the mask in a register (`store_fixed_bit_field`) and read with a
+  shift. combine removes such a store from a later shift of the word: it
+  replaces the read by the stored value. The `and` of a second store was
+  never combined with the first store (the mask is a register), so a
+  second store does not remove the first. Three rules decide what is
+  left, and `0x8003591c`
+  shows all of them (`tag.code &= ~2; code = tag.code; tag.unk2 = 0;
+  tag.code = code; switch (tag.code & 0xfd)` keeps the first store and the
+  `srl 24; andi 0xfd`):
+  - A read reaches the store through the `LOG_LINKS` of the word's first
+    user only, and a three-insn combination is refused when the word is
+    used between the two later insns (`can_combine_p`). Writing back the
+    byte just read (`code = tag.code; tag.code = code;`) lets combine see
+    that the value shifted back is the first store's, and then both stores
+    go; any other use of the word between the read and the write-back
+    (here the store to `unk2`) stops that.
+  - When the switch's read folds the second store, that `ior` is deleted
+    and combine no longer knows the register's value
+    (`record_value_for_reg` without a value). The first store is then not
+    looked through, and the `& 0xfd` on its top byte is not dropped as
+    redundant. With one store, or a second one that combine proves equal,
+    either the store or the `andi` disappears.
+  - The insns that lose their reader are deleted through their death
+    notes (`distribute_notes`), not as members of the combination, so
+    their registers keep their reference counts: an unallocated one
+    gets a reload slot (the mask constant of the `unk2` store is the 8
+    unused bytes of this frame), and the `0x00ffffff` register keeps the
+    weight of both uses for global-alloc.
+- **A member read that becomes a byte load.** `tag.len` read from the
+  register copy directly after `tag.w = *p` is combined with the load into
+  `lbu 1(p)`, but leaves more unused slots (a 16-byte frame in
+  `0x8003591c`, retail has 8): there the length is `p[1]`, read from
+  memory.
 - **Narrowing (`shorten` in `c-typeck.c`).** `obj->scale.vx >> 3` becomes a
   HImode shift whose extension cse folds (`lhu; sll; sra 19`), while
   `obj->scale.vx * 512 >> 12` keeps `lh; sra 3` (`0x800568bc`). `x % 30 == 0`
@@ -820,10 +870,3 @@ Residues whose mechanism is known but whose source form is not:
   `u8`, `u16` or `s16` local for the byte merges, and what would keep it (a
   second use of the local, or a store between its load and the call) is not
   in retail's block.
-- `0x8003591c`: retail keeps the byte insert of `tag.code &= ~2` in the
-  register copy of the head word *and* the `srl 24; andi 0xfd` of the
-  switch, with the `0x00ffffff` mask hoisted out of both loops and
-  allocated after the part counter and pointer. Combine keeps both only
-  when a later store of the byte dies after the switch value was combined;
-  the three-store form that does this references the mask three times and
-  the allocation order needs two.
