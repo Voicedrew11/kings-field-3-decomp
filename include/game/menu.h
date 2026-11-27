@@ -204,7 +204,7 @@ extern MenuSpriteDef menu_sprite_defs[];
  * yes/no positions [10] and [11], message titles from [28]. */
 extern MenuGlyphString menu_window_layouts[];
 extern MenuGlyphRow menu_item_names[];
-extern MenuGlyphRow menu_label_rows[10];
+extern MenuGlyphRow menu_label_rows[42];
 extern MenuGlyphRow menu_magic_names[];
 extern u8 item_guide_level[];
 /* Shop stock counts per shop and item id, buy prices and sell prices. */
