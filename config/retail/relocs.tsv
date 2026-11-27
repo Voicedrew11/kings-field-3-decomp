@@ -7353,6 +7353,7 @@ GAME.EXE	0x8004b93c	0x3b13c	0x8004b940	mips_hi16_lo16	reachable-code	0x8018faa8	
 GAME.EXE	0x8004b964	0x3b164		mips26	reachable-code	0x8004b97c	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9a8	0x3b1a8	0x8004b9ac	mips_hi16_lo16	reachable-code	0x8018fab4	bss	actor_status	lui+lw		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9b8	0x3b1b8		mips26	reachable-code	0x8004befc	load		j		manual-decoded	reviewed	game-f asm review
+GAME.EXE	0x8004b9cc	0x3b1cc	0x8004b9d0	mips_hi16_lo16	reachable-code	0x800124d0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x8004ba10	0x3b210		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba2c	0x3b22c		mips26	reachable-code	0x8004bef8	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba70	0x3b270		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review

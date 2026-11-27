@@ -1,7 +1,8 @@
 /*
  * GAME.EXE: Actor records (WIP module): allocation, placement on the
  * map from the record's cell and offsets, set-up from its ActorGroup record,
- * script record selection, and the searches over all 200 records.
+ * script record selection and scoring, and the searches over all 200 records.
+ * The RODATA claim holds actor_score_target_candidate's jump table.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/null.h>
@@ -13,6 +14,8 @@
 #include <game/data.h>
 #include <game/render.h>
 #include <game/entity.h>
+
+RODATA(0x800124d0, 0x214)
 
 /* A free record among the last ten. */
 ADDRESS(0x8004b524, 0x3c)
@@ -173,4 +176,195 @@ void actor_set_target(Actor *obj, u8 *script)
         obj->target_type = 0xff;
         obj->target_action_state = 0xff;
     }
+}
+
+/*
+ * Scores target record script for the current Actor at player distance dist;
+ * actor_select_best_target starts the best one (0: not now, -1: never by
+ * score). Past the type and the two chances (script[2] to start the record,
+ * script[3] while it runs), the fields depend on the type: ranges are u16
+ * words, cone half-widths are bytes in units of 16 or 32. Types from 128
+ * ask the area module first.
+ */
+ADDRESS(0x8004b984, 0x598)
+s32 actor_score_target_candidate(u8 *script, s32 dist)
+{
+    Actor *obj;
+    s32 score; /* unassigned on some rejection paths (target types 9 and 128+) */
+    s32 near;
+
+    obj = actor_status.current;
+    if (script[0] == 0xff) {
+        return 0;
+    }
+    switch (script[0]) {
+    case 0:
+        if (script == obj->target) {
+            if (SCRIPT_U16(script, 12) < dist) {
+                score = random_triangular_scaled(script[3]);
+            } else {
+                score = 0;
+            }
+        } else {
+            if (SCRIPT_U16(script, 12) < dist) {
+                score = random_triangular_scaled(script[2]);
+            } else {
+                score = 0;
+            }
+        }
+        break;
+    case 1:
+        if (script == obj->target) {
+            score = 0;
+            if (SCRIPT_U16(script, 16) < dist && SCRIPT_U16(script, 18) >= dist) {
+                score = random_triangular_scaled(script[3]);
+            }
+        } else {
+            if (SCRIPT_U16(script, 16) < dist && SCRIPT_U16(script, 18) >= dist) {
+                score = random_triangular_scaled(script[2]);
+            } else {
+                score = 0;
+            }
+        }
+        break;
+    case 5:
+    case 13:
+        if (script == obj->target) {
+            score = 0;
+            if (SCRIPT_U16(script, 18) >= dist) {
+                score = random_triangular_scaled(script[3]);
+            }
+        } else {
+            score = 0;
+            if (SCRIPT_U16(script, 16) >= dist) {
+                score = random_triangular_scaled(script[2]);
+            }
+            switch (obj->target_type) {
+            case 4:
+            case 18:
+            case 23:
+            case 24:
+            case 132:
+                score <<= 1;
+                break;
+            }
+        }
+        break;
+    case 9:
+        if (SCRIPT_U16(script, 12) < dist) {
+            score = 0;
+            break;
+        }
+        if (cur_avatar_status.pos.vy - obj->pos.vy > -1024 && cur_avatar_status.pos.vy - obj->pos.vy < 1024
+            && rand() >= 4096) {
+            break;
+        }
+        if (angle_within_tolerance(obj->angle.vy,
+                                   vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                      cur_avatar_status.pos.vz - obj->pos.vz),
+                                   0x140)) {
+            goto score_target;
+        }
+        break;
+    case 4:
+    case 18:
+    case 23:
+    case 24:
+    case 132:
+        if ((obj->flags & 0x100) || SCRIPT_U16(script, 26) < dist) {
+            score = 0;
+            break;
+        }
+        if (!directed_intervals_overlap(obj->pos.vy, obj->collision_height, cur_avatar_status.pos.vy + 200,
+                                        0x834)) {
+            score = 0;
+            break;
+        }
+        if (!angle_within_tolerance(obj->angle.vy,
+                                    vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                       cur_avatar_status.pos.vz - obj->pos.vz),
+                                    script[16] << 4)) {
+            score = 0;
+            break;
+        }
+        if (script == obj->target) {
+            score = random_triangular_scaled(script[3]);
+            break;
+        }
+        score = script[2];
+        near = script[14] << 6;
+        if (dist >= (near + SCRIPT_U16(script, 26)) >> 1) {
+            score -= score / 3;
+        } else if (dist >= near) {
+            score -= score / 6;
+        }
+        score = random_triangular_scaled(score);
+        break;
+    case 25:
+        if (!(obj->flags & 0x100)) {
+            if (SCRIPT_U16(script, 22) >= dist && dist >= SCRIPT_U16(script, 20)
+                && angle_within_tolerance(obj->angle.vy,
+                                          vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                             cur_avatar_status.pos.vz - obj->pos.vz),
+                                          script[13] << 4)) {
+                goto score_target;
+            }
+        } else if (script[12] == 0x27 && cur_avatar_status.paralysis_timer == 0) {
+            obj->flags &= ~0x100;
+        }
+        score = 0;
+        break;
+    case 31:
+        if (dist < SCRIPT_U16(script, 12)) {
+            goto score_target;
+        }
+        score = 0;
+        break;
+    case 11:
+        if (SCRIPT_U16(script, 26) >= dist
+            && angle_within_tolerance(obj->angle.vy,
+                                      vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                         cur_avatar_status.pos.vz - obj->pos.vz),
+                                      0x140)) {
+            goto score_target;
+        }
+        score = 0;
+        break;
+    case 19:
+    case 20:
+        if (SCRIPT_U16(script, 14) >= dist && cur_avatar_status.weapon_attack_phase != -1
+            && angle_within_tolerance(obj->angle.vy,
+                                      vector_xz_to_angle(cur_avatar_status.pos.vx - obj->pos.vx,
+                                                         cur_avatar_status.pos.vz - obj->pos.vz),
+                                      script[12] << 5)) {
+            goto score_target;
+        }
+        score = 0;
+        break;
+    case 112:
+        score = -1;
+        break;
+    case 2:
+    case 3:
+    case 22:
+        score = 0;
+        break;
+    case 27:
+        if (dist >= SCRIPT_U16(script, 12)) {
+            goto score_target;
+        }
+        score = 0;
+        break;
+    default:
+        if (script[0] < 128 || asset_status.handlers[FDAT_SLOT_ACTOR_TARGET_CHECK](script, dist)) {
+        score_target:
+            if (script == obj->target) {
+                score = random_triangular_scaled(script[3]);
+            } else {
+                score = random_triangular_scaled(script[2]);
+            }
+        }
+        break;
+    }
+    return score;
 }
