@@ -356,7 +356,8 @@ s32 actor_score_target_candidate(u8 *script, s32 dist)
         score = 0;
         break;
     default:
-        if (script[0] < 128 || asset_status.handlers[FDAT_SLOT_ACTOR_TARGET_CHECK](script, dist)) {
+        if (script[0] < 128
+            || ((s32 (*)(u8 *, s32))asset_status.handlers[FDAT_SLOT_ACTOR_TARGET_CHECK])(script, dist)) {
         score_target:
             if (script == obj->target) {
                 score = random_triangular_scaled(script[3]);
