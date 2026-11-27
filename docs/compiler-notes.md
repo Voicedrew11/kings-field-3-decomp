@@ -577,7 +577,13 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   subreg (`(set (reg:SI a3) (subreg:SI (reg:HI a3) 0))`, a narrow variable
   passed in the register it lives in) is not one, is scheduled as a filler
   and disappears only in jump2. A load-use `nop` in retail where this build
-  has a real filler can be such a copy (`0x800533e8`, `0x8005c308`, open).
+  has a real filler can be such a copy. combine makes one from
+  `V = byte; P = zero_extend (V); a1 = P` only when the load cannot be merged
+  into the extension: `V` is set in another block (a narrow parameter), or
+  the merged insn is refused. Within one block a plain byte load always
+  merges, and the copy that is left (`a1 = P` with `P` in `a1`) is deleted.
+  `0x8005c308` has the surviving form at one argument (see
+  [Open mechanisms](#open-mechanisms)).
 - **An odd update among shifts.** In a run of `p[n] <<= 3` updates sched1
   pipelines two loads ahead in `v0`/`v1`; four, six or eight updates keep
   source order and five come out as 1, 3, 2, 5, 4. A different update in
@@ -639,6 +645,17 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - **Stack parameters.** One declared `int` but used as `u8` is read with
   `lbu` from its incoming slot; a `u8`-typed one is copied to a saved
   register (`0x80029188`).
+- **Narrow reads of a spilled word.** When a word pseudo that got no register
+  is read through `(subreg:HI (reg:SI x) 0)`, GNU C 2.6.0 reloads the whole
+  word: `lw t0,slot`, then `move`, `andi` or `sh` of `t0`. Its `reload.c`
+  forces that for every subreg whose inner and outer sizes differ (the
+  `LOAD_EXTEND_OP` tests of `find_reloads` and `push_reload` use `!=`), and
+  both Sony 2.6.0 binaries behave so. FSF sources from 1994-08-07 on (2.6.1
+  to 2.6.3: the tests use `>`, and `eliminate_regs` puts `(use (reg x))` in
+  front of the insn) read the narrow part straight from the slot, `lhu
+  s1,16(sp)`, and the `USE` insn takes a slot in sched2 without emitting
+  code. Retail has the later form in `0x8003daec` and `0x800533e8` and the
+  2.6.0 form nowhere (see [Open mechanisms](#open-mechanisms)).
 
 ## Types and declarations
 
@@ -754,9 +771,18 @@ raw words where GAME narrows. The link and the archive frame are in
 
 Residues whose mechanism is known but whose source form is not:
 
-- `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
-  `lhu`; no source form makes combine produce that pseudo. Both calls also
-  schedule as if one more no-op copy were present than here.
+- `0x8003daec` and `0x800533e8`: retail spills a register parameter with `sw`
+  and reads its low half back with `lhu` (`sw a1,16(sp)` ... `lhu s1,16(sp)`;
+  `sw a3,64(sp)` ... `lhu v0,64(sp)`), which the pinned compiler cannot emit
+  (narrow reads of a spilled word, under [Stack frames](#stack-frames)). With
+  the later reload the sources come out as retail on paper: `0x8003daec` as
+  it stands, and `0x800533e8` with the fourth parameter an `int` passed
+  straight to the callees' `u16` parameters, whose two call blocks, scheduled
+  by hand with one `USE` insn per read, give retail's order and its load-use
+  `nop`. No function of GAME, OPEN, END or the FDAT modules shows the 2.6.0
+  form (a word reload of a spill slot used only narrow). A `cc1` built from
+  2.6.1 to 2.6.3 sources would settle whether retail's compiler was a later
+  revision than the pinned one.
 - `0x800608ec`: retail stops hoisting after four invariants. With the
   threshold at 52 the record loop needs 41 to 43 insns at loop time; the
   plain source has 36 (each narrow temporary for a loaded byte adds one).
@@ -768,6 +794,15 @@ Residues whose mechanism is known but whose source form is not:
   has 467 insns at loop time and the limit is 468.
 - `0x8005c308`: sched2 moves `li a3,0xfff` into a load-use gap that retail
   leaves alone; retail's argument copy for `a1` was not a plain no-op there.
+  The first `actor_animation_seek_phase(obj, script[1], ...)` call matches
+  only when `script[1]` is loaded into a byte pseudo that combine cannot
+  merge into its extension, leaving `(set (reg:SI a1) (subreg:SI (reg:QI a1)
+  0))` for sched2. A volatile read of that one byte does it and makes the
+  function's listing equal to retail; the test of the same byte a few lines
+  earlier is not a volatile read in retail, and no plain form was found: a
+  `u8`, `u16` or `s16` local for the byte merges, and what would keep it (a
+  second use of the local, or a store between its load and the call) is not
+  in retail's block.
 - `0x8003591c`: retail keeps the byte insert of `tag.code &= ~2` in the
   register copy of the head word *and* the `srl 24; andi 0xfd` of the
   switch, with the `0x00ffffff` mask hoisted out of both loops and
