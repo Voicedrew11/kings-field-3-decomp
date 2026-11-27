@@ -384,7 +384,6 @@ void player_update_weapon_attack(void)
                                                        cur_avatar_status.attack_components[6],
                                                        cur_avatar_status.attack_components[7], scale, 80,
                                                        NULL, target);
-
                             break;
                         }
                     }

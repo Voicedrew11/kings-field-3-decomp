@@ -17,7 +17,6 @@ extern u32 fdat_window_base[];
  * resource_noop_callback (.data, owner unit unknown). */
 extern FdatHandlers callback_default_table;
 
-
 void resource_initialize_game_assets(void);
 void resource_run_initial_transition(void);
 void translate_active_world_positions(s32 dx, s32 dy, s32 dz);

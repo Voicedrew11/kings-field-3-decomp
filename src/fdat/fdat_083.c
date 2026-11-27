@@ -10,7 +10,6 @@
 #include <psyq/sdk.h>
 #include <psyq/libc.h>
 #include <game/data.h>
-
 #include <game/render.h>
 #include <fdat/fdat.h>
 

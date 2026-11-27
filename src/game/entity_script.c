@@ -351,7 +351,6 @@ void actor_apply_magic_to_actor(u16 index, u16 a1, u16 a2, u16 a3, u16 a4, u16 a
     }
     dmg = (dmg * a10 / 5000 + 128) >> 4;
     asset_status.handlers->adjust_actor_magic_damage(obj, &dmg, a2, a3, a4, a5, a6, a7, a8, a9);
-
     if (dmg == 0) {
         return;
     }

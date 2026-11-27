@@ -273,7 +273,6 @@ typedef struct MapLayer {
     u8 collision_shape_id;
     u8 lighting_index; /* +0x04: bit 0x40: collision_query_world (mask bit 2) reports a wall hit
                         * and no floor */
-
 } MapLayer;
 
 /*
@@ -864,7 +863,6 @@ typedef struct FdatHandlers {
     FdatInteractHandler interact; /* slot 0: the player interacts at (pos, angle)
                                    * (event_world_dispatch_interaction) */
     FdatHandler update;           /* slot 1: every frame (game_update_ending) */
-
     FdatUseItemHandler use_item;  /* slot 2: an item is used at (pos, angle)
                                    * (event_scene_command_dispatch) */
     FdatMapObjectHandler region_trigger; /* slot 3: map object region trigger

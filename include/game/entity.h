@@ -88,7 +88,6 @@ void actor_advance_animation_wrapped(Actor *obj, s16 step);
  */
 void actor_advance_animation_clamped(Actor *obj, u16 step);
 #else
-
 void actor_advance_animation_clamped(Actor *obj, s16 step);
 #endif
 s32 actor_animation_crossed_phase(Actor *obj, u16 time);

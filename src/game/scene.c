@@ -421,7 +421,6 @@ void resource_advance_transition(void)
         cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3 + 1, stream_work_buffer,
                               resource_transition_set_phase_3);
         asset_status.handlers = (FdatHandlers *)fdat_window_handlers;
-
         break;
     case 3:
     parts:
