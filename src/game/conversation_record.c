@@ -1,8 +1,8 @@
 /*
- * GAME.EXE: the slot tables of conversation_records (WIP module): building the
- * ConversationRecord records and their runs of slot bytes from the copied ConversationSource
- * table, marking a slot used, and the searches and counts over the runs.
- * movie_play_stream (the in-game movie player) follows.
+ * GAME.EXE: the slot tables of conversation_records (KF3-only): building the
+ * ConversationRecord records and their runs of slot bytes from the copied
+ * ConversationSource table, marking a slot used, and the searches and counts
+ * over the runs. movie_play_stream (the in-game movie player) follows.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -46,7 +46,15 @@ void conversation_records_initialize(void)
     conversation_record_mark_page(0x20, 3);
 }
 
-/* Marks slot of id's run used (3) and frees (0) the 0xff slots before it. */
+/*
+ * Marks slot of id's run used (3) and frees (0) the 0xff slots before it.
+ *
+ * Not exact: retail leaves the constants 3 and -1 inside the record loop.
+ * loop.c moves a constant out only while threshold times savings times
+ * lifetime is at least the loop's insn count, with the threshold at 52 less
+ * 3 per move; retail's loop had 41 to 43 insns when loop.c ran and this
+ * source has 36, so both are moved and three registers differ.
+ */
 ADDRESS(0x800608ec, 0x124)
 void conversation_record_mark_page(u8 id, u8 slot)
 {
@@ -75,19 +83,16 @@ void conversation_record_mark_page(u8 id, u8 slot)
             return;
         }
         if (t->id == id) {
-            p = conversation_records.page_states + t->offset + slot;
+            p = conversation_records.page_states + slot + t->offset;
             *p = 3;
-            if (slot == 0) {
-                return;
-            }
             k = 0;
-            c = slot - 1;
-            do {
+            c = slot;
+            while (c--) {
                 k++;
                 if (p[-k] == 0xff) {
                     p[-k] = 0;
                 }
-            } while (c--);
+            }
             return;
         }
         t++;

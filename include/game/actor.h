@@ -1,11 +1,11 @@
-#ifndef GAME_ENTITY_H
-#define GAME_ENTITY_H
+#ifndef GAME_ACTOR_H
+#define GAME_ACTOR_H
 
 /*
- * GAME.EXE Actor records (src/game/entity*.c, WIP names): the 200
- * records of actor_status made from its ActorGroup records, their placement
- * on the map, the target records each runs, their movement and the searches
- * over them. actor_status.current and .current_group name the record being updated.
+ * GAME.EXE Actor records (src/game/actor_runtime.c, WIP names): the 200 records
+ * of actor_status made from its ActorGroup records, their placement on the map,
+ * the target records each runs, their movement and the searches over them.
+ * actor_status.current and .current_group name the record being updated.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>
@@ -83,10 +83,10 @@ void actor_bind_current(Actor *obj);
 void actor_advance_animation_wrapped(Actor *obj, s16 step);
 #ifdef FDAT_MODULE
 /*
- * The FDAT modules call it without this prototype: FDAT_077/083 pass a u16
- * script field zero-extended (lhu) where GAME.EXE's callers narrow to s16.
+ * FDAT_077/083 pass a u16 script field zero-extended (lhu) where GAME.EXE's
+ * callers narrow to s16: the FDAT view declares the step as the modules pass it.
  */
-void actor_advance_animation_clamped();
+void actor_advance_animation_clamped(Actor *obj, u16 step);
 #else
 void actor_advance_animation_clamped(Actor *obj, s16 step);
 #endif

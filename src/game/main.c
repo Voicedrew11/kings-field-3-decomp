@@ -1,10 +1,10 @@
 /*
- * GAME.EXE: main and the game loop (WIP module). main sets up the heap above
- * the FDAT window, CD, pads and memory cards and runs the loop; the loop
- * clears and initialises the game state, runs one frame per pass until a
- * module sets the exit word, then shuts down and tells PSX.EXE which program
- * comes next. Its unit is -G8: the loop's exit word is $gp-relative and the
- * clear RECT is an .sdata literal.
+ * GAME.EXE: main and the game loop (KF2's main.c). main sets up the heap above
+ * the FDAT window, CD, pads and memory cards and runs the loop; the loop clears
+ * and initialises the game state, runs one frame per pass until a module sets
+ * the exit word, then shuts down and tells PSX.EXE which program comes next.
+ * Its unit is -G8: the loop's exit word is $gp-relative and the clear RECT is
+ * an .sdata literal.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -20,10 +20,10 @@
 #include <game/image.h>
 #include <game/scene.h>
 #include <game/render.h>
-#include <game/entity.h>
-#include <game/object4c.h>
+#include <game/actor.h>
+#include <game/effect.h>
 #include <game/misc.h>
-#include <game/object44.h>
+#include <game/map_object.h>
 #include <game/funcs.h>
 #include <game/card.h>
 #include <game/player.h>

@@ -16,17 +16,17 @@ RODATA(0x801e8308, 0x88)
 void area_handler_noop(void);
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_noop(void);
-void area_use_item_noop(void);
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_element_kill(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void area_on_actor_removed_send_signals(Actor *obj);
-void area_region_trigger_noop(void);
-void area_init_map_object_noop(void);
+void area_region_trigger_noop(MapObject *obj);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_talk_event_noop(void);
+void area_talk_event_noop(Actor *obj, s32 event);
 void area_on_load_clear_signalled_markers(void);
 
 const FdatHeader fdat_header = {
@@ -39,16 +39,16 @@ const FdatHeader fdat_header = {
         /*  4 */ area_talk_event_noop,
         /*  5 */ area_on_load_clear_signalled_markers,
         /*  6 */ area_on_item_added_noop,
-        /*  7 */ area_handler_noop,
+        /*  7 */ (FdatMovieHandler)area_handler_noop,
         /*  8 */ area_init_map_object_noop,
         /*  9 */ area_update_map_object_noop,
-        /* 10 */ area_handler_noop,
+        /* 10 */ (FdatMovieHandler)area_handler_noop,
         /* 11 */ area_handler_noop,
         /* 12 */ area_handler_noop,
         /* 13 */ area_handler_noop,
         /* 14 */ area_handler_noop,
         /* 15 */ area_handler_noop,
-        /* 16 */ area_actor_target_check_noop,
+        /* 16 */ (FdatActorTargetCheckHandler)area_actor_target_check_noop,
         /* 17 */ area_update_actor_target_noop,
         /* 18 */ area_adjust_actor_magic_damage_element_kill,
         /* 19 */ area_on_actor_removed_send_signals,
@@ -133,7 +133,7 @@ void area_update_noop(void)
 }
 
 ADDRESS(0x801e85d8, 0x8)
-void area_use_item_noop(void)
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item)
 {
 }
 
@@ -182,12 +182,12 @@ void area_on_actor_removed_send_signals(Actor *obj)
 }
 
 ADDRESS(0x801e875c, 0x8)
-void area_region_trigger_noop(void)
+void area_region_trigger_noop(MapObject *obj)
 {
 }
 
 ADDRESS(0x801e8764, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 
@@ -212,7 +212,7 @@ void area_on_item_added_noop(void)
 }
 
 ADDRESS(0x801e878c, 0x8)
-void area_talk_event_noop(void)
+void area_talk_event_noop(Actor *obj, s32 event)
 {
 }
 

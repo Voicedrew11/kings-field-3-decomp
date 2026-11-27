@@ -3414,7 +3414,7 @@ GAME.EXE	0x80029318	0x18b18		mips26	reachable-code	0x80046c00	load		jal		manual-
 GAME.EXE	0x80029320	0x18b20		mips26	reachable-code	0x80019ab4	load		jal		manual-decoded	reviewed	x
 GAME.EXE	0x80029334	0x18b34		mips26	reachable-code	0x80046c00	load		jal		manual-decoded	reviewed	x
 GAME.EXE	0x80029360	0x18b60		mips26	reachable-code	0x80017c78	load		jal		manual-decoded	reviewed	x
-GAME.EXE	0x800293f0	0x18bf0	0x800293f4	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x800293f0	0x18bf0	0x800293f4	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x800293fc	0x18bfc	0x80029400	mips_hi16_lo16	reachable-code	0x801b254a	bss	cur_avatar_status	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x80029418	0x18c18	0x8002941c	mips_hi16_lo16	reachable-code	0x801b254c	bss	cur_avatar_status	lui+lhu		manual-decoded	reviewed	x
 GAME.EXE	0x8002942c	0x18c2c	0x80029430	mips_hi16_lo16	reachable-code	0x801b254c	bss	cur_avatar_status	lui+sh		manual-decoded	reviewed	x
@@ -3896,37 +3896,37 @@ GAME.EXE	0x8002bc08	0x1b408	0x8002bc0c	mips_hi16_lo16	reachable-code	0x801b25d9	
 GAME.EXE	0x8002bc10	0x1b410		mips26	reachable-code	0x8002bc20	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc18	0x1b418	0x8002bc1c	mips_hi16_lo16	reachable-code	0x801b25da	bss	cur_avatar_status	lui+sb		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc20	0x1b420	0x8002bc24	mips_hi16_lo16	reachable-code	0x801b25d4	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bc34	0x1b434	0x8002bc38	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bc34	0x1b434	0x8002bc38	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc40	0x1b440	0x8002bc44	mips_hi16_lo16	reachable-code	0x801b25b8	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc48	0x1b448		mips26	reachable-code	0x8002bc58	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc50	0x1b450	0x8002bc54	mips_hi16_lo16	reachable-code	0x801b25b8	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc58	0x1b458	0x8002bc5c	mips_hi16_lo16	reachable-code	0x801b25d5	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bc6c	0x1b46c	0x8002bc70	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bc6c	0x1b46c	0x8002bc70	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc78	0x1b478	0x8002bc7c	mips_hi16_lo16	reachable-code	0x801b25bc	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc80	0x1b480		mips26	reachable-code	0x8002bc90	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc88	0x1b488	0x8002bc8c	mips_hi16_lo16	reachable-code	0x801b25bc	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bc90	0x1b490	0x8002bc94	mips_hi16_lo16	reachable-code	0x801b25d7	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bca4	0x1b4a4	0x8002bca8	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bca4	0x1b4a4	0x8002bca8	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcb0	0x1b4b0	0x8002bcb4	mips_hi16_lo16	reachable-code	0x801b25c4	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcb8	0x1b4b8		mips26	reachable-code	0x8002bcc8	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcc0	0x1b4c0	0x8002bcc4	mips_hi16_lo16	reachable-code	0x801b25c4	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcc8	0x1b4c8	0x8002bccc	mips_hi16_lo16	reachable-code	0x801b25d8	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bcdc	0x1b4dc	0x8002bce0	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bcdc	0x1b4dc	0x8002bce0	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bce8	0x1b4e8	0x8002bcec	mips_hi16_lo16	reachable-code	0x801b25c8	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcf0	0x1b4f0		mips26	reachable-code	0x8002bd00	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bcf8	0x1b4f8	0x8002bcfc	mips_hi16_lo16	reachable-code	0x801b25c8	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd00	0x1b500	0x8002bd04	mips_hi16_lo16	reachable-code	0x801b25d6	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bd14	0x1b514	0x8002bd18	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bd14	0x1b514	0x8002bd18	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd20	0x1b520	0x8002bd24	mips_hi16_lo16	reachable-code	0x801b25c0	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd28	0x1b528		mips26	reachable-code	0x8002bd38	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd30	0x1b530	0x8002bd34	mips_hi16_lo16	reachable-code	0x801b25c0	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd38	0x1b538	0x8002bd3c	mips_hi16_lo16	reachable-code	0x801b25d9	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bd4c	0x1b54c	0x8002bd50	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bd4c	0x1b54c	0x8002bd50	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd58	0x1b558	0x8002bd5c	mips_hi16_lo16	reachable-code	0x801b25cc	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd60	0x1b560		mips26	reachable-code	0x8002bd70	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd68	0x1b568	0x8002bd6c	mips_hi16_lo16	reachable-code	0x801b25cc	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd70	0x1b570	0x8002bd74	mips_hi16_lo16	reachable-code	0x801b25da	bss	cur_avatar_status	lui+lbu		manual-decoded	reviewed	x
-GAME.EXE	0x8002bd84	0x1b584	0x8002bd88	mips_hi16_lo16	reachable-code	0x801e6078	bss	map_world	lui+addiu		manual-decoded	reviewed	x
+GAME.EXE	0x8002bd84	0x1b584	0x8002bd88	mips_hi16_lo16	reachable-code	0x801e6078	bss	item_gear_recs	lui+addiu		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd90	0x1b590	0x8002bd94	mips_hi16_lo16	reachable-code	0x801b25d0	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
 GAME.EXE	0x8002bd98	0x1b598		mips26	reachable-code	0x8002bda8	load		j		manual-decoded	reviewed	x
 GAME.EXE	0x8002bda0	0x1b5a0	0x8002bda4	mips_hi16_lo16	reachable-code	0x801b25d0	bss	cur_avatar_status	lui+sw		manual-decoded	reviewed	x
@@ -5653,6 +5653,7 @@ GAME.EXE	0x800358cc	0x250cc		mips26	reachable-code	0x80016290	load		jal		manual-
 GAME.EXE	0x800358dc	0x250dc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358ec	0x250ec		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358fc	0x250fc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
+GAME.EXE	0x80035998	0x25198	0x8003599c	mips_hi16_lo16	reachable-code	0x80011be0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x800359e0	0x251e0		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a20	0x25220		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a60	0x25260		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
@@ -7353,6 +7354,7 @@ GAME.EXE	0x8004b93c	0x3b13c	0x8004b940	mips_hi16_lo16	reachable-code	0x8018faa8	
 GAME.EXE	0x8004b964	0x3b164		mips26	reachable-code	0x8004b97c	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9a8	0x3b1a8	0x8004b9ac	mips_hi16_lo16	reachable-code	0x8018fab4	bss	actor_status	lui+lw		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9b8	0x3b1b8		mips26	reachable-code	0x8004befc	load		j		manual-decoded	reviewed	game-f asm review
+GAME.EXE	0x8004b9cc	0x3b1cc	0x8004b9d0	mips_hi16_lo16	reachable-code	0x800124d0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x8004ba10	0x3b210		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba2c	0x3b22c		mips26	reachable-code	0x8004bef8	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba70	0x3b270		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review

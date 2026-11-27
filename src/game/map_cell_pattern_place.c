@@ -1,15 +1,16 @@
 /*
- * GAME.EXE: map cell patches (WIP module): records that rewrite the layer
- * bytes of map cells around a point, turned by an angle, and a block copy
- * of cells to a turned destination. Callers: the MapObject set-up
- * map_object_initialize_from_placements and the big switch map_object_update_actions.
+ * GAME.EXE: map cell patches (KF2's map_cell_pattern_place.c): records that
+ * rewrite the layer bytes of map cells around a point, turned by an angle, and
+ * a block copy of cells to a turned destination. Callers: the MapObject set-up
+ * map_object_initialize_from_placements and the big switch
+ * map_object_update_actions.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/data.h>
-#include <game/map_patch.h>
+#include <game/map_cell_pattern.h>
 
 /*
  * Applies the patch records at rec (variant index) to the cells around
@@ -67,14 +68,14 @@ void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapCellPat
 
 /*
  * Copies a w x h block of map cells from (sx, sz) to (dx, dz), turned by
- * angle in quarter turns; mask picks the layer 1 bytes and bits copied
- * (bits 0-1 of quarter_turns are turned with the block). flags bit 1 enables the copy.
+ * angle, which is reduced to quarter turns in place; mask picks the layer 1
+ * bytes and bits copied (bits 0-1 of quarter_turns are turned with the
+ * block). Bit 1 of flags enables the copy; the test is inside the loops.
  */
 ADDRESS(0x800445b8, 0x274)
-void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
+void map_cell_copy_rotated_fields(u8 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
                                   s32 mask)
 {
-    s32 turn;
     s32 col;
     s32 row;
     MapCell *src_row;
@@ -83,13 +84,12 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
     MapCell *dst;
     s32 i;
     s32 j;
-    s32 copy;
 
     if (sx == 0xff || dx == 0xff || w == 0xff) {
         return;
     }
-    turn = -(angle >> 10) & 3;
-    switch (turn) {
+    angle = -(angle >> 10) & 3;
+    switch (angle) {
     case 0:
         col = 1;
         row = 80;
@@ -111,7 +111,6 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
         dx += h - 1;
         break;
     }
-    copy = flags & 2;
     src_row = &map_world.cells[sz][sx];
     dst_row = &map_world.cells[dz][dx];
     for (i = h - 1; i != -1; i--) {
@@ -121,7 +120,7 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
         dst_row += row;
         j = w;
         while (--j != -1) {
-            if (copy) {
+            if (flags & 2) {
                 if (mask & 1) {
                     dst->layer[1].object_index = src->layer[1].object_index;
                 }
@@ -130,7 +129,7 @@ void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32
                 }
                 if (mask & 4) {
                     dst->layer[1].quarter_turns = (dst->layer[1].quarter_turns & 0xfc)
-                        | ((src->layer[1].quarter_turns + turn) & 3);
+                        | ((src->layer[1].quarter_turns + angle) & 3);
                 }
                 if (mask & 8) {
                     dst->layer[1].collision_shape_id = src->layer[1].collision_shape_id;

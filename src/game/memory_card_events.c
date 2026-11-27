@@ -1,7 +1,7 @@
 /*
- * GAME.EXE: memory card saves (WIP module), in the shape of Sony's memory
- * card sample that OPEN.EXE's card checks also follow: four BIOS card
- * events, a test that slot 1 holds a usable card, the save list, reading a
+ * GAME.EXE: memory card saves (KF2's memory_card_events.c), in the shape of
+ * Sony's memory card sample that OPEN.EXE's card checks also follow: four BIOS
+ * card events, a test that slot 1 holds a usable card, the save list, reading a
  * save's experience and level back from its title, loading and saving.
  */
 #include <kf/lib/address.h>
@@ -289,6 +289,7 @@ s32 memory_card_write_slot(s32 number)
     s32 n;
     u32 sum;
     long fd;
+    s32 done;
 
     memset((u_char *)used, 0, sizeof(used));
     memset((u_char *)dir, 0, sizeof(dir));
@@ -350,11 +351,13 @@ retry:
     }
     fd = open(path, O_WRONLY);
     if (fd != -1) {
-        if (write(fd, (const void *)memory_card_buffer, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
+        done = write(fd, (const void *)memory_card_buffer, CARD_FILE_SIZE);
+        if (done == CARD_FILE_SIZE) {
             close(fd);
             fd = open(path, O_RDONLY);
             if (fd != -1) {
-                if (read(fd, (void *)memory_card_buffer, CARD_FILE_SIZE) == CARD_FILE_SIZE) {
+                done = read(fd, (void *)memory_card_buffer, CARD_FILE_SIZE);
+                if (done == CARD_FILE_SIZE) {
                     close(fd);
                     if (sum == memory_card_payload_byte_sum(memory_card_buffer + CARD_DATA)) {
                         memory_card_loaded_slot = number;

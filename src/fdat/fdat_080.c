@@ -17,13 +17,13 @@ RODATA(0x801e8308, 0x88)
 
 void area_handler_noop(void);
 void area_update_flag_on_element_stat(void);
-void area_use_item_noop(void);
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_refresh_lamp_effects_and_light(void);
 void area_adjust_actor_magic_damage_light_lamps(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void area_on_actor_removed_noop(void);
+void area_on_actor_removed_noop(Actor *obj);
 void area_region_trigger_set_flags_and_recalc_stats(MapObject *obj);
-void area_init_map_object_noop(void);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
@@ -52,7 +52,7 @@ const FdatHeader fdat_header = {
         /* 13 */ area_handler_noop,
         /* 14 */ area_handler_noop,
         /* 15 */ area_handler_noop,
-        /* 16 */ area_actor_target_check_noop,
+        /* 16 */ (FdatActorTargetCheckHandler)area_actor_target_check_noop,
         /* 17 */ area_update_actor_target_noop,
         /* 18 */ area_adjust_actor_magic_damage_light_lamps,
         /* 19 */ area_on_actor_removed_noop,
@@ -93,7 +93,7 @@ void area_update_flag_on_element_stat(void)
 }
 
 ADDRESS(0x801e86bc, 0x8)
-void area_use_item_noop(void)
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item)
 {
 }
 
@@ -166,7 +166,7 @@ void area_adjust_actor_magic_damage_light_lamps(Actor *obj, s32 *out, s32 arg2, 
 }
 
 ADDRESS(0x801e8850, 0x8)
-void area_on_actor_removed_noop(void)
+void area_on_actor_removed_noop(Actor *obj)
 {
 }
 
@@ -196,7 +196,7 @@ void area_region_trigger_set_flags_and_recalc_stats(MapObject *obj)
 }
 
 ADDRESS(0x801e8910, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 

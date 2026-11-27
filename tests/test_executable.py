@@ -162,10 +162,79 @@ class PartialImageTests(unittest.TestCase):
         catalog = self.catalog(0x80014000, 0x80014010, vendored=(0x80014010,))
         with (tempfile.TemporaryDirectory() as directory,
               mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'census_references', return_value=[]),
               mock.patch.object(executable, 'link_image', return_value=dict(linked)) as link):
             report = build_image('GAME.EXE', self.manifest(0x80014000), Path(directory))
             link.assert_called_once()
             self.assertTrue(report['linked'])
+
+    @staticmethod
+    def data_manifest(data=(), rodata=None):
+        from scripts.kf.delink import Datum, Function
+        profile = Profile('control', 'c', 'gcc260-sony', 'O2', 8, '2.21', ())
+        functions = (Function('GAME.EXE', 0x80014000, 8, 8, 1, 'func_80014000', 'test', 'test'),)
+        unit = Unit('game.control', 'GAME.EXE', 'src/game/control.c', profile.name, functions,
+                    data=tuple(Datum(va, size, f'D_{va:08x}', 'load') for va, size in data),
+                    rodata=rodata)
+        return Manifest({profile.name: profile}, (unit,))
+
+    def build_with_references(self, manifest, references):
+        catalog = self.catalog(0x80014000, 0x80014010, vendored=(0x80014010,))
+        linked = {'image': 'GAME.EXE', 'linked': True, 'executable': 'GAME.EXE'}
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'load_catalog', return_value=catalog),
+              mock.patch.object(executable, 'census_references', return_value=references),
+              mock.patch.object(executable, 'link_image', return_value=dict(linked)) as link):
+            report = build_image('GAME.EXE', manifest, Path(directory))
+            if not report['linked']:
+                self.assertEqual(json.loads((Path(directory) / 'build.json').read_text()), report)
+            return report, link.call_count
+
+    def test_unowned_data_reference_keeps_a_fully_claimed_image_partial(self):
+        report, links = self.build_with_references(
+            self.data_manifest(data=[(0x80080000, 4)]),
+            [(0x80014004, 0x80080000), (0x80014004, 0x80090000), (0x80014004, 0x80090002)])
+        self.assertEqual(links, 0)
+        self.assertEqual((report['linked'], report['phase']), (False, 'partial'))
+        self.assertEqual(report['unowned_data_references'], 2)
+        self.assertNotIn('unclaimed_game_functions', report)
+
+    def test_owned_library_foreign_or_unclaimed_site_references_do_not_block_the_link(self):
+        report, links = self.build_with_references(
+            self.data_manifest(data=[(0x80080000, 8)], rodata=(0x80012000, 0x10)),
+            [(0x80014004, 0x80080004),      # a DATA claim
+             (0x80014000, 0x8001200c),      # the unit's RODATA claim
+             (0x80014004, 0x80014010),      # a library function
+             (0x80014004, 0x1f800000),      # outside the image (scratchpad)
+             (0x80015000, 0x80090000)])     # a site outside claimed code
+        self.assertEqual(links, 1)
+        self.assertTrue(report['linked'])
+
+    def test_data_partial_image_is_not_a_build_failure(self):
+        partial = {'image': 'GAME.EXE', 'linked': False, 'phase': 'partial',
+                   'units': ['game.control'], 'unowned_data_references': 5}
+        with (tempfile.TemporaryDirectory() as directory,
+              mock.patch.object(executable, 'BUILD', Path(directory)),
+              mock.patch.object(executable, 'load_manifest', return_value=self.manifest()),
+              mock.patch.object(executable, 'build_image', return_value=partial),
+              contextlib.redirect_stdout(io.StringIO()) as output):
+            (Path(directory) / 'link/game').mkdir(parents=True)
+            self.assertEqual(executable.main(['--image', 'game']), 0)
+        self.assertIn('partial reconstruction (5 referenced data addresses without an owning unit)',
+                      output.getvalue())
+
+    def test_shipped_census_keeps_the_linking_images_on_the_link_path(self):
+        # PSX, OPEN, END and the FDAT modules link byte-for-byte today, so the
+        # real census must find no unowned data reference in them. (GAME's
+        # count shrinks as its data gets owners; it is not pinned here.)
+        from scripts.kf.manifest import load
+        manifest = load()
+        for name in executable.IMAGE_LAYOUTS:
+            if name == 'GAME.EXE':
+                continue
+            units = [u for u in manifest.units if u.image == name and u.scope != 'vendored']
+            with self.subTest(image=name):
+                self.assertEqual(executable.unowned_data_references(name, units), [])
 
     def test_partial_image_is_not_a_build_failure(self):
         partial = {'image': 'GAME.EXE', 'linked': False, 'phase': 'partial',

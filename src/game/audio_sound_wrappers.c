@@ -1,14 +1,16 @@
 /*
- * GAME.EXE: two sound-effect wrappers, a collision probe in front of a
- * position and two empty functions (WIP module; the empty pair is taken
- * as its end, like 0x8001765c and 0x8001a62c).
+ * GAME.EXE: two sound-effect wrappers, a collision probe in front of a position
+ * and two empty functions (KF2's audio_sound_wrappers.c; KF2 puts the empty
+ * pair at the head of its next file, event_pose_interpolate.c, but nothing in
+ * this game's bytes places them, so they stay at this file's end, like
+ * 0x8001765c and 0x8001a62c).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
 #include <game/sound.h>
-#include <game/entity.h>
+#include <game/actor.h>
 #include <game/misc.h>
 
 ADDRESS(0x8005bd34, 0x24)

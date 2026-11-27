@@ -2,7 +2,7 @@
 #define GAME_SOUND_H
 
 /*
- * GAME.EXE sound state (src/game/sound.c): the libsnd sequence, the listener
+ * GAME.EXE sound state (src/game/audio_runtime.c): the libsnd sequence, the listener
  * for positional effects, the VAB banks, the effect table and the
  * main-RAM buffers VAB bodies are read into. Field names are WIP.
  */

@@ -1,8 +1,10 @@
 /*
- * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records and its front ends
- * (WIP module after src/game/floor_select.c). They pick the map cell, run the
- * interpreter and the record searches, and leave their results in
- * map_world (+0x12000..+0x12050).
+ * GAME.EXE: the collision shape interpreter collision_evaluate_shape_records
+ * and its front ends (KF2's collision_shape_mask_runtime.c up to
+ * collision_query_world; the rest of that file opens src/game/view.c, and the
+ * edge between the two is not proven). They pick the map cell, run the
+ * interpreter and the record searches, and leave their results in map_world
+ * (+0x12000..+0x12050).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -11,9 +13,9 @@
 #include <game/data.h>
 #include <game/funcs.h>
 #include <game/player.h>
-#include <game/entity.h>
+#include <game/actor.h>
 #include <game/collision.h>
-#include <game/object44.h>
+#include <game/map_object.h>
 
 RODATA(0x80011b0c, 0xc4)
 
@@ -33,7 +35,7 @@ s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     s32 locked;
     s32 unused; /* never set: ceiling records are always tested */
     s32 second;
-    u8 *layer;
+    MapLayer *layer;
     s16 *p;
     s32 count;
     s32 top;
@@ -61,12 +63,12 @@ s32 collision_evaluate_shape_records(s32 x, s32 y, s32 z, s32 radius, s32 shape)
     map_world.collision_bounds[2] = 100000;
     map_world.collision_slope_push = 0;
     map_world.collision_slope_angle = 0;
-    layer = (u8 *)map_world.collision_cell + map_world.collision_layer_offset;
+    layer = (MapLayer *)((u8 *)map_world.collision_cell + map_world.collision_layer_offset);
     map_world.collision_layer = layer;
     flags = shape & 0xf0000000;
     shape &= 0x0fffffff;
 again:
-    p = (s16 *)(map_world.shape_bank + ((u16 *)map_world.shape_bank)[layer[3]]);
+    p = (s16 *)(map_world.shape_bank + ((u16 *)map_world.shape_bank)[layer->collision_shape_id]);
     radius = radius * *p++ >> 12;
     top = y - shape;
     count = *p++;
@@ -121,7 +123,7 @@ again:
             wall = p;
             p += 4;
             bit = 5;
-            switch ((layer[2] + (u16)wall[3]) & 3) {
+            switch ((layer->quarter_turns + (u16)wall[3]) & 3) {
             case 0:
                 if (wall[0] + radius - cell_x < 0) {
                     break;
@@ -162,7 +164,7 @@ again:
             wall = p;
             p += 4;
             bit = 5;
-            rot = (layer[2] + (u16)wall[3]) & 3;
+            rot = (layer->quarter_turns + (u16)wall[3]) & 3;
             switch (rot) {
             case 0:
                 if (wall[0] + radius < cell_x && cell_z < 0x800 - wall[0] - radius) {
@@ -190,7 +192,7 @@ again:
             wall = p;
             p += 4;
             bit = 5;
-            rot = (layer[2] + (u16)wall[3]) & 3;
+            rot = (layer->quarter_turns + (u16)wall[3]) & 3;
             switch (rot) {
             case 0:
                 if (wall[0] + radius < cell_x || cell_z < 0x800 - wall[0] - radius) {
@@ -220,7 +222,7 @@ again:
             wall = p;
             p += 4;
             bit = 6;
-            rot = (layer[2] + (u16)wall[3]) & 3;
+            rot = (layer->quarter_turns + (u16)wall[3]) & 3;
             switch (rot) {
             case 0:
                 reach = radius - 0x800;
@@ -255,7 +257,7 @@ again:
             wall = p;
             p += 5;
             bit = 5;
-            rot = (layer[2] + (u16)wall[4]) & 3;
+            rot = (layer->quarter_turns + (u16)wall[4]) & 3;
             switch (rot) {
             case 0:
                 d1 = wall[1] + radius - cell_x;
@@ -306,7 +308,7 @@ again:
             wall = p;
             p += 7;
             bit = 5;
-            rot = (layer[2] + (u16)wall[6]) & 3;
+            rot = (layer->quarter_turns + (u16)wall[6]) & 3;
             switch (rot) {
             case 0:
                 if ((wall[1] + radius < cell_x && cell_z < wall[2] - radius) || cell_x < wall[0] - radius
@@ -355,7 +357,7 @@ again:
 
             slope = p;
             p += 6;
-            rot = (layer[2] + (u16)slope[3]) & 3;
+            rot = (layer->quarter_turns + (u16)slope[3]) & 3;
             switch (rot) {
             case 0:
                 if (local_x < slope[1] - radius || slope[2] + radius < local_x) {
@@ -404,7 +406,7 @@ again:
 
             q = p;
             p += 4;
-            rot = (layer[2] + (u16)q[1]) & 3;
+            rot = (layer->quarter_turns + (u16)q[1]) & 3;
             switch (rot) {
             case 0:
                 a = cell_x;
@@ -448,7 +450,7 @@ again:
 
             q = p;
             p += 4;
-            rot = (layer[2] + (u16)q[1]) & 3;
+            rot = (layer->quarter_turns + (u16)q[1]) & 3;
             switch (rot) {
             case 0:
                 a = cell_x;
@@ -491,7 +493,7 @@ again:
 
             q = p;
             p += 6;
-            rot = (layer[2] + (u16)q[3]) & 3;
+            rot = (layer->quarter_turns + (u16)q[3]) & 3;
             switch (rot) {
             case 0:
                 n = local_z + (0x800 - local_x);
@@ -534,7 +536,7 @@ again:
 
             slope = p;
             p += 6;
-            rot = (layer[2] + (u16)slope[3]) & 3;
+            rot = (layer->quarter_turns + (u16)slope[3]) & 3;
             switch (rot) {
             case 0:
                 if (local_x < slope[1] - radius || slope[2] + radius < local_x) {
@@ -589,7 +591,7 @@ again:
                 p += 5;
                 distance = cell_z;
                 x_distance = cell_x;
-                rot = (layer[2] + (u16)wall[4]) & 3;
+                rot = (layer->quarter_turns + (u16)wall[4]) & 3;
                 switch (rot) {
                 case 0:
                 ledge:
@@ -625,10 +627,10 @@ again:
                 u16 *offset = &map_world.collision_layer_offset;
 
                 *offset = *offset == 0 ? 5 : 0;
-                layer = (u8 *)map_world.collision_cell + *offset;
+                layer = (MapLayer *)((u8 *)map_world.collision_cell + *offset);
             }
             second = 1;
-            map_world.collision_layer_height = -layer[1] << 7;
+            map_world.collision_layer_height = -layer->elevation << 7;
             goto again;
         case 0x18: {
             s16 *q;
@@ -792,7 +794,7 @@ s32 collision_query_world(s32 x, s32 y, s32 z, s32 radius, s32 shape, u16 mask)
     hits = 0;
     if (mask & 1) {
         hits = collision_query_shapes_with_layer_sample(x, y, z, radius, shape);
-        if ((mask & 2) && (map_world.collision_layer[4] & 0x40)) {
+        if ((mask & 2) && (map_world.collision_layer->lighting_index & 0x40)) {
             map_world.collision_floor_height = -100000;
             hits |= 1;
         }

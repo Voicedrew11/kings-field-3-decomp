@@ -101,6 +101,39 @@ cannot link byte-identically from them. `kf-vendored-seed` and
 object, 3.3 function ID, signature only, unmatched version) is in
 [the inventory](function-and-data-inventory.md#psy-q-library-text).
 
+## GAME's compiler revision
+
+The pinned compiler stays. Two GAME functions, `0x8003daec` and
+`0x800533e8`, keep a residue that no source form removes under it: retail
+spills a register parameter as a word and reads its low half back from the
+slot (`sw a1,16(sp)` ... `lhu s1,16(sp)`). GNU C 2.6.0's reload always
+reloads the whole word for such a read (`lw`, then a register copy), and
+both Sony 2.6.0 binaries (the floppy's and the Psy-Q 3.0 kit's) do so. The
+FSF reload change of 1994-08-07 (`reload.c`, `reload1.c`; in 2.6.1 and
+later) reads the narrow part directly. No retail function in any image
+shows the 2.6.0 form.
+
+A probe with decompals' `gcc-2.6.3-psx` (old-gcc 0.17) `cc1`, run through
+the same preprocessor, flags, ASPSX step and `kf try` listing comparison,
+gives (**probe**, nothing in the build changed):
+
+- `0x8003daec` as it stands, and `0x800533e8` with its fourth parameter an
+  `int` passed straight to the callees, are identical to retail.
+- Two functions that 2.6.0 matches break: `0x80047010` and `0x800568bc` get
+  frames of 304 and 736 bytes against retail's 288 and 696 (2.6.3's
+  `function.c` temporary-slot changes, from 1994-10-06 on).
+- Every other function compiles to the same assembly under both: four
+  functions of the 1,076 compared tell the revisions apart (FDAT, OPEN, END
+  and `PSX.EXE` are identical).
+
+So GAME's compiler behaves like 2.6.0 with the August reload fix and
+without the October `function.c` changes. No FSF release falls in that
+window (2.6.1, 1994-11-01, has both) and neither Sony 2.6.0 binary has the
+reload fix; GAME links Library 3.4, whose kit is not archived, so a Sony
+build from that kit is a plausible source. The two functions stay
+non-exact with source comments; `0x800533e8` keeps the form that scores
+best under the pinned compiler.
+
 ## Build commands
 
 There is one source compilation path:
@@ -145,7 +178,7 @@ remain inspectable. It does not reach the linked executable.
 
 `config/units.toml` keeps `gcc260-o2-g8` and `gcc260-o2-g0`, the latter for
 translation units whose globals are all reached through `lui`/low pairs
-(every FDAT module, `game.save_data`); each is proven for the units that
+(every FDAT module, `game.card_payload`); each is proven for the units that
 match under it: 95 GAME, 20 OPEN and 5 END game functions use `$gp`
 and the rest do not, so both settings occur. The King's Field II probe
 profiles (GCC 2.5.7/2.6.0 rebuilds with ASPSX 1.07) are removed; the

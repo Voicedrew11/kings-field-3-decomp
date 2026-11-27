@@ -1,13 +1,18 @@
 /*
- * GAME.EXE: band B's render module from 0x8003bfd0 (WIP name): the map
- * layers of the view grid, the 3D overlay and model drawing front ends,
- * full-screen 2D effects and the loading screen, object model files, the map
- * cell grid and the per-frame object drawer, the 2D overlay sprites and
- * messages, the animated model poses and the picture fade. One TU:
- * render_map_cell_window, render_active_model_rows, render_player_weapon and
- * render_animated_object read map_textured_primitive_color and menu_show_transition_image
- * reads menu_transition_rect $gp-relative, which ASPSX emits only for .sdata defined
- * in the same file.
+ * GAME.EXE: KF2's display.c from tmd_prepare_primitive_indices on: the model
+ * primitive fix-up, model data registration, the model part renderers, the
+ * map layer front ends with their ground renderers, the map layers of the
+ * view grid, the 3D overlay and model drawing front ends, full-screen 2D
+ * effects and the loading screen, object model files, the map cell grid and
+ * the per-frame object drawer, the 2D overlay sprites and messages, the
+ * animated model poses and the picture fade. One TU: GCC 2.6 emits a TU's
+ * literals ahead of its jump tables, and loading_screen_show's "\LOAD.MSG;1"
+ * (0x80011bd0) precedes tmd_prepare_primitive_indices' jump table
+ * (0x80011be0). render_map_cell_window, render_active_model_rows,
+ * render_player_weapon and render_animated_object read
+ * map_textured_primitive_color and menu_show_transition_image reads
+ * menu_transition_rect $gp-relative, which ASPSX emits only for .sdata
+ * defined in the same file.
  */
 /* render_scene_and_update_resources reads ResourceState.step as volatile (see game/data.h). */
 #define GAME_RENDER_MODULE
@@ -15,23 +20,1855 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
-#include <psyq/cd.h>
-#include <psyq/libc.h>
 #include <game/data.h>
 #include <game/render.h>
 #include <INLINE.H>
+#include <psyq/cd.h>
+#include <psyq/libc.h>
 #include <GTEMAC.H>
 #include <kf/lib/null.h>
 #include <game/sound.h>
-#include <game/entity.h>
-#include <game/object44.h>
+#include <game/actor.h>
+#include <game/map_object.h>
 #include <stdarg.h>
 #include <MALLOC.H>
 #include <RAND.H>
 #include <game/cd.h>
 #include <game/player.h>
 
-RODATA(0x80011bd0, 0xc)
+RODATA(0x80011bd0, 0x84)
+
+/*
+ * Fixes up the primitive records of every part of a model data block: the
+ * vertex and normal numbers become byte offsets (8 per SVECTOR) and the
+ * textured kinds lose the blend bits (5-6) of their texture page word. The
+ * kind is the record's GPU code without the semi-transparency bit (2), which
+ * is cleared in the copy of the head word only.
+ * The copy is changed twice more before the switch reads it, and nothing
+ * reads those changes: the code is saved, another byte of the copy is
+ * cleared and the code is put back. Retail's instructions need them: they
+ * are why the compiler keeps the first store of the code byte and the
+ * `& 0xfd` of the switch instead of folding one into the other, the second
+ * store is the second use of the 0x00ffffff mask (register t2), and the
+ * mask of the cleared byte, left without an instruction, is the 8 unused
+ * bytes of frame. Clearing either of the other two bytes instead gives the
+ * same object; which statement the original had is not known.
+ */
+ADDRESS(0x8003591c, 0x328)
+void tmd_prepare_primitive_indices(u8 *data)
+{
+    ModelData *model;
+    ModelPart *part;
+    union {
+        u32 w;
+        PrimTag t;
+    } tag;
+    u8 *prim;
+    u16 *body;
+    s32 i;
+    s32 j;
+    s32 code;
+
+    model = (ModelData *)data;
+    part = model->parts;
+    i = model->count;
+    while (--i != -1) {
+        j = part->prim_count;
+        prim = data + (part->prims + 12);
+        while (--j != -1) {
+            body = (u16 *)(prim + 4);
+            tag.w = *(u32 *)prim;
+            prim = (u8 *)body + prim[1] * 4;
+            tag.t.code &= ~2;
+            code = tag.t.code;
+            tag.t.unk2 = 0;
+            tag.t.code = code;
+            switch (tag.t.code & 0xfd) {
+            case 0x20: /* flat triangle: three vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x24: { /* flat textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[8] <<= 3;
+                body[9] <<= 3;
+                body[6] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x28: /* flat quad: four vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[6] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x2c: { /* flat textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[10] <<= 3;
+                body[11] <<= 3;
+                body[12] <<= 3;
+                body[8] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x30: /* gouraud triangle: three vertices, three normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                break;
+            case 0x34: { /* gouraud textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x38: /* gouraud quad: four vertices, four normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                break;
+            case 0x3c: { /* gouraud textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[13] <<= 3;
+                body[15] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                body[12] <<= 3;
+                body[14] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            }
+        }
+        part++;
+    }
+}
+
+/* Registers model data id (0..3) and fixes up its primitives. */
+ADDRESS(0x80035c44, 0x40)
+void tmd_register(u16 id, u8 *data)
+{
+    scene_display_sys.current_tmd = scene_display_sys.tmd_slots[id] = data;
+    tmd_prepare_primitive_indices(data);
+}
+
+/* Registers model data id without the fix-up. */
+ADDRESS(0x80035c84, 0x20)
+void tmd_set_slot(u16 id, u8 *data)
+{
+    scene_display_sys.tmd_slots[id] = data;
+}
+
+/*
+ * Draws part id of the model in SCRATCH->model from the projected vertices in
+ * SCRATCH->screen: back faces (gte_nclip) dropped, each face lit from its
+ * normals (normal colour depth-cued by the vertex fog values) and linked at
+ * its average depth plus depth. Returns early when the packet pool is full.
+ */
+ADDRESS(0x80035ca4, 0xa04)
+void render_enqueue_textured_tmd(u16 id, s32 depth)
+{
+    s32 n;
+    ScreenVertex *v0;
+    ScreenVertex *v1;
+    ScreenVertex *v2;
+    ScreenVertex *v3;
+    u8 *p;
+    ScratchPad *scratch;
+    s32 *opz;
+    CVECTOR *rgb;
+
+    scratch = SCRATCH;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
+    n = SCRATCH->part->prim_count;
+    SCRATCH->draw.count.tmd_prim_count += n;
+    while (n-- != 0) {
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24: {
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_FT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT3 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT3 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_FT3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_FT3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_FT3 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u16 *)&((POLY_FT3 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT3 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT3 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((v0->fog + v1->fog + v2->fog) / 3);
+            gte_ncds();
+            gte_strgb(&((POLY_FT3 *)p)->r0);
+            setlen(p, 7);
+            setcode(p, scratch->tag.code);
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
+            break;
+        }
+        case 0x2c: {
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_FT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT4 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT4 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_FT4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x3 = *(u32 *)&v3->sxy;
+            *(u16 *)&((POLY_FT4 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT4 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT4 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_FT4 *)p)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((v0->fog + v1->fog + v2->fog + v3->fog) >> 2);
+            gte_ncds();
+            gte_strgb(&((POLY_FT4 *)p)->r0);
+            setlen(p, 9);
+            setcode(p, scratch->tag.code);
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
+            break;
+        }
+        case 0x34: {
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT3 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT3 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u16 *)&((POLY_GT3 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv3(((u16 *)scratch->prim)[6] + scratch->normals,
+                     ((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)v0->fog);
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT3 *)p)->r0, &((POLY_GT3 *)p)->r1, &((POLY_GT3 *)p)->r2);
+            setlen(p, 9);
+            setcode(p, scratch->tag.code);
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
+            break;
+        }
+        case 0x3c: {
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[13] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT4 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT4 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x3 = *(u32 *)&v3->sxy;
+            *(u16 *)&((POLY_GT4 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT4 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT4 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_GT4 *)p)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv3(((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals,
+                     ((u16 *)scratch->prim)[12] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)v0->fog);
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT4 *)p)->r0, &((POLY_GT4 *)p)->r1, &((POLY_GT4 *)p)->r2);
+            gte_ldv0(((u16 *)scratch->prim)[14] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)v0->fog);
+            gte_ncds();
+            gte_strgb(&((POLY_GT4 *)p)->r3);
+            setlen(p, 12);
+            setcode(p, scratch->tag.code);
+            LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
+            break;
+        }
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the model in SCRATCH->model near the eye: projects its
+ * vertices with a fog value from GraphicsRuntime's fog range, then hands each
+ * front face to the LIBGTE subdivision (RCpolyFT3/FT4/GT3/GT4), more finely
+ * the nearer it is. Faces with every vertex nearer than draw.count.clip are
+ * dropped.
+ */
+ADDRESS(0x800366a8, 0x1544)
+void render_enqueue_tmd_subdivided(u16 id)
+{
+    s32 n;
+    ScratchPad *scratch;
+    CVECTOR *rgb;
+    union {
+        DIVPOLYGON3 d3;
+        DIVPOLYGON4 d4;
+    } div;
+
+    scratch = SCRATCH;
+    SCRATCH->screen_cursor = SCRATCH->screen;
+    SCRATCH->vertex = SCRATCH->vertices;
+    SCRATCH->w.model.near = scene_display_sys.fog_near;
+    SCRATCH->w.model.far = scene_display_sys.fog_far;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    n = SCRATCH->part->vertex_count;
+    while (n-- != 0) {
+        gte_ldv0(scratch->vertex);
+        gte_rtps();
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
+        if (scratch->w.model.near < 32000) {
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.model.near >> 2)) << 14) /
+                                  (scratch->w.model.far - scratch->w.model.near);
+        } else {
+            scratch->screen_cursor->fog = 0;
+        }
+        if (scratch->screen_cursor->fog >= 8192) {
+            scratch->screen_cursor->fog = 0x1fff;
+        }
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
+        }
+        scratch->screen_cursor++;
+        scratch->vertex += 8;
+    }
+    scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
+    n = scratch->part->prim_count;
+    scratch->draw.count.tmd_prim_count += n;
+    while (n-- != 0) {
+        rgb = &scratch->w.model.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.model.opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->draw.count.clip &&
+                scratch->vert[1]->z < scratch->draw.count.clip &&
+                scratch->vert[2]->z < scratch->draw.count.clip) {
+                break;
+            }
+            scratch->draw.count.z = (scratch->vert[0]->z + scratch->vert[1]->z +
+                                     scratch->vert[2]->z) / 3;
+            div.d3.ndiv = scratch->draw.count.z < 1024 ? ((1024 - scratch->draw.count.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog) / 3);
+            gte_ncds();
+            gte_strgb(&div.d3.rgbc);
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x24;
+            div.d3.ot = scratch->ot + scratch->draw.count.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[8]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyFT3((POLY_FT3 *)scratch->next, &div.d3);
+            scratch->draw.count.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x2c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[0]);
+            gte_ldsxy3(*(u32 *)&scratch->vert[3]->sxy, *(u32 *)&scratch->vert[2]->sxy,
+                       *(u32 *)&scratch->vert[1]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[1]);
+            if (scratch->nclip[0] > 0 || scratch->nclip[1] > 0) {
+                scratch->w.model.opz = 1;
+            } else {
+                scratch->w.model.opz = -1;
+            }
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->draw.count.clip &&
+                scratch->vert[1]->z < scratch->draw.count.clip &&
+                scratch->vert[2]->z < scratch->draw.count.clip &&
+                scratch->vert[3]->z < scratch->draw.count.clip) {
+                break;
+            }
+            scratch->draw.count.z = (scratch->vert[0]->z + scratch->vert[1]->z +
+                                     scratch->vert[2]->z + scratch->vert[3]->z) >> 2;
+            div.d4.ndiv = scratch->draw.count.z < 1024 ? ((1024 - scratch->draw.count.z) >> 9) + 1 : 1;
+            div.d4.pih = 320;
+            div.d4.piv = 240;
+            div.d4.clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            div.d4.tpage = ((u16 *)scratch->prim)[3];
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog +
+                      scratch->vert[3]->fog) / 4);
+            gte_ncds();
+            gte_strgb(&div.d4.rgbc);
+            div.d4.cr[0].r0 = &div.d4.r0;
+            div.d4.cr[0].r1 = &div.d4.r1;
+            div.d4.cr[0].r2 = &div.d4.r2;
+            div.d4.cr[0].r3 = &div.d4.r3;
+            div.d4.rgbc.cd = scratch->tag.code | 0x2c;
+            div.d4.ot = scratch->ot + scratch->draw.count.z;
+            div.d4.r0.sxy = scratch->vert[0]->sxy;
+            div.d4.r1.sxy = scratch->vert[1]->sxy;
+            div.d4.r2.sxy = scratch->vert[2]->sxy;
+            div.d4.r3.sxy = scratch->vert[3]->sxy;
+            div.d4.r0.sz = scratch->vert[0]->z;
+            div.d4.r1.sz = scratch->vert[1]->z;
+            div.d4.r2.sz = scratch->vert[2]->z;
+            div.d4.r3.sz = scratch->vert[3]->z;
+            div.d4.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            div.d4.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[10]);
+            div.d4.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[11]);
+            div.d4.r3.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[12]);
+            ((u32 *)&div.d4.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d4.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d4.r2)[2] = scratch->prim[2];
+            ((u32 *)&div.d4.r3)[2] = scratch->prim[3];
+            scratch->next = (u8 *)RCpolyFT4((POLY_FT4 *)scratch->next, &div.d4);
+            scratch->draw.count.ot_count += div.d4.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x34:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.model.opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->draw.count.clip &&
+                scratch->vert[1]->z < scratch->draw.count.clip &&
+                scratch->vert[2]->z < scratch->draw.count.clip) {
+                break;
+            }
+            scratch->draw.count.z = (scratch->vert[0]->z + scratch->vert[1]->z +
+                                     scratch->vert[2]->z) / 3;
+            div.d3.ndiv = scratch->draw.count.z < 1024 ? ((1024 - scratch->draw.count.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r0.c);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r1.c);
+            gte_ldv0(((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r2.c);
+            div.d3.rgbc = div.d3.r0.c;
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x34;
+            div.d3.ot = scratch->ot + scratch->draw.count.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[11]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyGT3((POLY_GT3 *)scratch->next, &div.d3);
+            scratch->draw.count.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x3c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[13] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[0]);
+            gte_ldsxy3(*(u32 *)&scratch->vert[3]->sxy, *(u32 *)&scratch->vert[2]->sxy,
+                       *(u32 *)&scratch->vert[1]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[1]);
+            if (scratch->nclip[0] > 0 || scratch->nclip[1] > 0) {
+                scratch->w.model.opz = 1;
+            } else {
+                scratch->w.model.opz = -1;
+            }
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->draw.count.clip &&
+                scratch->vert[1]->z < scratch->draw.count.clip &&
+                scratch->vert[2]->z < scratch->draw.count.clip &&
+                scratch->vert[3]->z < scratch->draw.count.clip) {
+                break;
+            }
+            scratch->draw.count.z = (scratch->vert[0]->z + scratch->vert[1]->z +
+                                     scratch->vert[2]->z) / 3;
+            div.d4.ndiv = scratch->draw.count.z < 1024 ? ((1024 - scratch->draw.count.z) >> 9) + 1 : 1;
+            div.d4.pih = 320;
+            div.d4.piv = 240;
+            div.d4.clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            div.d4.tpage = ((u16 *)scratch->prim)[3];
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&div.d4.r0.c);
+            gte_ldv0(((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_ncds();
+            gte_strgb(&div.d4.r1.c);
+            gte_ldv0(((u16 *)scratch->prim)[12] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_ncds();
+            gte_strgb(&div.d4.r2.c);
+            gte_ldv0(((u16 *)scratch->prim)[14] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[3]->fog);
+            gte_ncds();
+            gte_strgb(&div.d4.r3.c);
+            div.d4.rgbc = div.d4.r0.c;
+            div.d4.cr[0].r0 = &div.d4.r0;
+            div.d4.cr[0].r1 = &div.d4.r1;
+            div.d4.cr[0].r2 = &div.d4.r2;
+            div.d4.cr[0].r3 = &div.d4.r3;
+            div.d4.rgbc.cd = scratch->tag.code | 0x3c;
+            div.d4.ot = scratch->ot + scratch->draw.count.z;
+            div.d4.r0.sxy = scratch->vert[0]->sxy;
+            div.d4.r1.sxy = scratch->vert[1]->sxy;
+            div.d4.r2.sxy = scratch->vert[2]->sxy;
+            div.d4.r3.sxy = scratch->vert[3]->sxy;
+            div.d4.r0.sz = scratch->vert[0]->z;
+            div.d4.r1.sz = scratch->vert[1]->z;
+            div.d4.r2.sz = scratch->vert[2]->z;
+            div.d4.r3.sz = scratch->vert[3]->z;
+            div.d4.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            div.d4.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[11]);
+            div.d4.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[13]);
+            div.d4.r3.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[15]);
+            ((u32 *)&div.d4.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d4.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d4.r2)[2] = scratch->prim[2];
+            ((u32 *)&div.d4.r3)[2] = scratch->prim[3];
+            scratch->next = (u8 *)RCpolyGT4((POLY_GT4 *)scratch->next, &div.d4);
+            scratch->draw.count.ot_count += div.d4.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the model in SCRATCH->model like render_enqueue_textured_tmd with every
+ * face semi-transparent at blend rate mode (tpage bits 5-6); the packet and
+ * its vertices are kept in the scratchpad while a face is filled.
+ */
+ADDRESS(0x80037bec, 0xc58)
+void render_enqueue_blended_tmd(u16 id, s32 depth, s32 mode)
+{
+    s32 n;
+    ScratchPad *scratch;
+    s32 *opz;
+    CVECTOR *rgb;
+
+    mode <<= 5;
+    scratch = SCRATCH;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
+    n = SCRATCH->part->prim_count;
+    SCRATCH->draw.count.tmd_prim_count += n;
+    while (n-- != 0) {
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_FT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT3 *)scratch->poly)->clut =
+                ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT3 *)scratch->poly)->tpage = mode | (((u16 *)scratch->prim)[3] & 0xff9f);
+            *(u32 *)&((POLY_FT3 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_FT3 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_FT3 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u16 *)&((POLY_FT3 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT3 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT3 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog) / 3);
+            gte_ncds();
+            gte_strgb(&((POLY_FT3 *)scratch->poly)->r0);
+            setlen(scratch->poly, 7);
+            setcode(scratch->poly, 0x26);
+            LINK_PART_PRIM(scratch,
+                (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3,
+                depth, scratch->poly);
+            break;
+        case 0x2c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_FT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT4 *)scratch->poly)->clut =
+                ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT4 *)scratch->poly)->tpage = mode | (((u16 *)scratch->prim)[3] & 0xff9f);
+            *(u32 *)&((POLY_FT4 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_FT4 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_FT4 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u32 *)&((POLY_FT4 *)scratch->poly)->x3 = *(u32 *)&scratch->vert[3]->sxy;
+            *(u16 *)&((POLY_FT4 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT4 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT4 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_FT4 *)scratch->poly)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog +
+                       scratch->vert[3]->fog) >> 2);
+            gte_ncds();
+            gte_strgb(&((POLY_FT4 *)scratch->poly)->r0);
+            setlen(scratch->poly, 9);
+            setcode(scratch->poly, 0x2e);
+            LINK_PART_PRIM(scratch,
+                (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z +
+                 scratch->vert[3]->z) >> 2,
+                depth, scratch->poly);
+            break;
+        case 0x34:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT3 *)scratch->poly)->clut =
+                ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT3 *)scratch->poly)->tpage = mode | (((u16 *)scratch->prim)[3] & 0xff9f);
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv3(((u16 *)scratch->prim)[6] + scratch->normals,
+                     ((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT3 *)scratch->poly)->r0, &((POLY_GT3 *)scratch->poly)->r1,
+                       &((POLY_GT3 *)scratch->poly)->r2);
+            setlen(scratch->poly, 9);
+            setcode(scratch->poly, 0x36);
+            LINK_PART_PRIM(scratch,
+                (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3,
+                depth, scratch->poly);
+            break;
+        case 0x3c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[13] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_GT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT4 *)scratch->poly)->clut =
+                ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT4 *)scratch->poly)->tpage = mode | (((u16 *)scratch->prim)[3] & 0xff9f);
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x3 = *(u32 *)&scratch->vert[3]->sxy;
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv3(((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals,
+                     ((u16 *)scratch->prim)[12] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT4 *)scratch->poly)->r0, &((POLY_GT4 *)scratch->poly)->r1,
+                       &((POLY_GT4 *)scratch->poly)->r2);
+            gte_ldv0(((u16 *)scratch->prim)[14] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&((POLY_GT4 *)scratch->poly)->r3);
+            setlen(scratch->poly, 12);
+            setcode(scratch->poly, 0x3e);
+            LINK_PART_PRIM(scratch,
+                (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z +
+                 scratch->vert[3]->z) >> 2,
+                depth, scratch->poly);
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the model in SCRATCH->model like render_enqueue_textured_tmd for the
+ * large models of render_distant_world_model: the depth-cue values are scaled down by
+ * 3 - shift, and with shift set the faces go into the eight SCRATCH->ot2
+ * entries by depth / 2048 instead of SCRATCH->ot. dist is unused.
+ */
+ADDRESS(0x80038844, 0xbe4)
+void render_enqueue_distant_tmd(u16 id, s32 depth, s32 shift, s32 dist)
+{
+    s32 n;
+    ScreenVertex *v0;
+    ScreenVertex *v1;
+    ScreenVertex *v2;
+    ScreenVertex *v3;
+    u8 *p;
+    ScratchPad *scratch;
+    s32 *opz;
+    CVECTOR *rgb;
+
+    scratch = SCRATCH;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
+    n = SCRATCH->part->prim_count;
+    SCRATCH->draw.count.tmd_prim_count += n;
+    while (n-- != 0) {
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_FT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT3 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT3 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_FT3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_FT3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_FT3 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u16 *)&((POLY_FT3 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT3 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT3 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp(((v0->fog + v1->fog + v2->fog) / 3) >> (3 - shift));
+            gte_ncds();
+            gte_strgb(&((POLY_FT3 *)p)->r0);
+            setlen(p, 7);
+            setcode(p, scratch->tag.code);
+            if (shift != 0) {
+                LINK_PART_BIN(scratch, ((v0->z + v1->z + v2->z) / 3) >> 11, depth, p);
+            } else {
+                LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
+            }
+            break;
+        case 0x2c:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_FT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_FT4 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_FT4 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_FT4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_FT4 *)p)->x3 = *(u32 *)&v3->sxy;
+            *(u16 *)&((POLY_FT4 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_FT4 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_FT4 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_FT4 *)p)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp(((v0->fog + v1->fog + v2->fog + v3->fog) >> 2) >> (3 - shift));
+            gte_ncds();
+            gte_strgb(&((POLY_FT4 *)p)->r0);
+            setlen(p, 9);
+            setcode(p, scratch->tag.code);
+            if (shift != 0) {
+                LINK_PART_BIN(scratch, ((v0->z + v1->z + v2->z + v3->z) >> 2) >> 11, depth, p);
+            } else {
+                LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
+            }
+            break;
+        case 0x34:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT3 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT3 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u16 *)&((POLY_GT3 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv3(((u16 *)scratch->prim)[6] + scratch->normals,
+                     ((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp(v0->fog >> (3 - shift));
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT3 *)p)->r0, &((POLY_GT3 *)p)->r1, &((POLY_GT3 *)p)->r2);
+            setlen(p, 9);
+            setcode(p, scratch->tag.code);
+            if (shift != 0) {
+                LINK_PART_BIN(scratch, ((v0->z + v1->z + v2->z) / 3) >> 11, depth, p);
+            } else {
+                LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z) / 3, depth, p);
+            }
+            break;
+        case 0x3c:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[13] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT4 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT4 *)p)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x3 = *(u32 *)&v3->sxy;
+            *(u16 *)&((POLY_GT4 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT4 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT4 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_GT4 *)p)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv3(((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals,
+                     ((u16 *)scratch->prim)[12] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp(v0->fog >> (3 - shift));
+            gte_ncdt();
+            gte_strgb3(&((POLY_GT4 *)p)->r0, &((POLY_GT4 *)p)->r1, &((POLY_GT4 *)p)->r2);
+            gte_ldv0(((u16 *)scratch->prim)[14] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp(v0->fog >> (3 - shift));
+            gte_ncds();
+            gte_strgb(&((POLY_GT4 *)p)->r3);
+            setlen(p, 12);
+            setcode(p, scratch->tag.code);
+            if (shift != 0) {
+                LINK_PART_BIN(scratch, ((v0->z + v1->z + v2->z + v3->z) >> 2) >> 11, depth, p);
+            } else {
+                LINK_PART_PRIM(scratch, (v0->z + v1->z + v2->z + v3->z) >> 2, depth, p);
+            }
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the model in SCRATCH->model as Gouraud-shaded faces lit
+ * with gte_ncct/gte_nccs: textured faces take their colour from SCRATCH->w.model.rgb
+ * and the blend rate shade in their tpage, plain ones the colour at the head of
+ * the record. Front faces only (gte_nclip); each face is linked into
+ * SCRATCH->ot2 at depth.
+ */
+ADDRESS(0x80039428, 0x928)
+void render_enqueue_tmd_fixed_depth(u16 id, s16 depth, s32 shade)
+{
+    s32 n;
+    ScreenVertex *v0;
+    ScreenVertex *v1;
+    ScreenVertex *v2;
+    ScreenVertex *v3;
+    u8 *p;
+    ScratchPad *scratch;
+    s32 *opz;
+    CVECTOR *rgb;
+
+    scratch = SCRATCH;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    SCRATCH->prim = (u32 *)(SCRATCH->part->prims + 12 + SCRATCH->model);
+    n = SCRATCH->part->prim_count;
+    SCRATCH->draw.count.tmd_prim_count += n;
+    shade <<= 5;
+    while (n-- != 0) {
+        opz = &SCRATCH->w.model.opz;
+        rgb = &SCRATCH->w.model.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x34:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT3 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT3 *)p)->tpage = (((u16 *)scratch->prim)[3] & 0xff9f) | shade;
+            *(u32 *)&((POLY_GT3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT3 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u16 *)&((POLY_GT3 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv3(((u16 *)scratch->prim)[6] + scratch->normals,
+                     ((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_ncct();
+            gte_strgb3(&((POLY_GT3 *)p)->r0, &((POLY_GT3 *)p)->r1, &((POLY_GT3 *)p)->r2);
+            setlen(p, 9);
+            setcode(p, (scratch->tag.code & 2) | 0x34);
+            LINK_PART_BIN(scratch, depth, 0, p);
+            break;
+        case 0x3c:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[13] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[15] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_GT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            ((POLY_GT4 *)p)->clut = ((u16 *)scratch->prim)[1] + scratch->draw.count.clut;
+            ((POLY_GT4 *)p)->tpage = (((u16 *)scratch->prim)[3] & 0xff9f) | shade;
+            *(u32 *)&((POLY_GT4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_GT4 *)p)->x3 = *(u32 *)&v3->sxy;
+            *(u16 *)&((POLY_GT4 *)p)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT4 *)p)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT4 *)p)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_GT4 *)p)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv3(((u16 *)scratch->prim)[8] + scratch->normals,
+                     ((u16 *)scratch->prim)[10] + scratch->normals,
+                     ((u16 *)scratch->prim)[12] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_ncct();
+            gte_strgb3(&((POLY_GT4 *)p)->r0, &((POLY_GT4 *)p)->r1, &((POLY_GT4 *)p)->r2);
+            gte_ldv0(((u16 *)scratch->prim)[14] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_nccs();
+            gte_strgb(&((POLY_GT4 *)p)->r3);
+            setlen(p, 12);
+            setcode(p, (scratch->tag.code & 2) | 0x3c);
+            LINK_PART_BIN(scratch, depth, 0, p);
+            break;
+        case 0x30:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[3] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[5] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            p = scratch->next;
+            scratch->next += sizeof(POLY_G3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            *(u32 *)&((POLY_G3 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_G3 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_G3 *)p)->x2 = *(u32 *)&v2->sxy;
+            gte_ldv3(((u16 *)scratch->prim)[2] + scratch->normals,
+                     ((u16 *)scratch->prim)[4] + scratch->normals,
+                     ((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(scratch->prim);
+            gte_ncct();
+            gte_strgb3(&((POLY_G3 *)p)->r0, &((POLY_G3 *)p)->r1, &((POLY_G3 *)p)->r2);
+            setlen(p, 6);
+            setcode(p, 0x30);
+            LINK_PART_BIN(scratch, depth, 0, p);
+            break;
+        case 0x38:
+            v0 = (ScreenVertex *)(((u16 *)scratch->prim)[3] + (u8 *)scratch->screen);
+            v1 = (ScreenVertex *)(((u16 *)scratch->prim)[5] + (u8 *)scratch->screen);
+            v2 = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&v0->sxy, *(u32 *)&v1->sxy, *(u32 *)&v2->sxy);
+            gte_nclip();
+            gte_stopz(opz);
+            if (scratch->w.model.opz <= 0) {
+                break;
+            }
+            v3 = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            p = scratch->next;
+            scratch->next += sizeof(POLY_G4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->draw.count.prim_count++;
+            *(u32 *)&((POLY_G4 *)p)->x0 = *(u32 *)&v0->sxy;
+            *(u32 *)&((POLY_G4 *)p)->x1 = *(u32 *)&v1->sxy;
+            *(u32 *)&((POLY_G4 *)p)->x2 = *(u32 *)&v2->sxy;
+            *(u32 *)&((POLY_G4 *)p)->x3 = *(u32 *)&v3->sxy;
+            gte_ldv3(((u16 *)scratch->prim)[2] + scratch->normals,
+                     ((u16 *)scratch->prim)[4] + scratch->normals,
+                     ((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(scratch->prim);
+            gte_ncct();
+            gte_strgb3(&((POLY_G4 *)p)->r0, &((POLY_G4 *)p)->r1, &((POLY_G4 *)p)->r2);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(scratch->prim);
+            gte_nccs();
+            gte_strgb(&((POLY_G4 *)p)->r3);
+            setlen(p, 8);
+            setcode(p, 0x38);
+            LINK_PART_BIN(scratch, depth, 0, p);
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the map layer model in SCRATCH->model (the far ground
+ * renderer of render_map_cell_object): projects its vertices with a fog value from
+ * GraphicsRuntime's fog range, then draws its faces as Gouraud-textured packets
+ * lit from one normal and depth-cued per vertex. Faces behind (gte_nclip) or
+ * with every vertex nearer than w.map.clip are dropped; flat-textured records
+ * become GT3/GT4 packets.
+ */
+ADDRESS(0x80039d50, 0xdb4)
+void render_enqueue_map(u16 id)
+{
+    s32 n;
+    ScratchPad *scratch;
+    CVECTOR *rgb;
+    CVECTOR *lit;
+
+    scratch = SCRATCH;
+    SCRATCH->screen_cursor = SCRATCH->screen;
+    SCRATCH->vertex = SCRATCH->vertices;
+    SCRATCH->w.map.near = scene_display_sys.fog_near;
+    SCRATCH->w.map.far = scene_display_sys.fog_far;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    n = SCRATCH->part->vertex_count;
+    while (n-- != 0) {
+        gte_ldv0(scratch->vertex);
+        gte_rtps();
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
+        if (scratch->w.map.near < 32000) {
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.map.near >> 2)) << 14) /
+                                  (scratch->w.map.far - scratch->w.map.near);
+        } else {
+            scratch->screen_cursor->fog = 0;
+        }
+        if (scratch->screen_cursor->fog >= 7952) {
+            scratch->screen_cursor->fog = 0x1f0f;
+        }
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
+        }
+        scratch->screen_cursor++;
+        scratch->vertex += 8;
+    }
+    scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
+    n = scratch->part->prim_count;
+    scratch->w.map.tmd_prim_count += n;
+    while (n-- != 0) {
+        rgb = &scratch->w.map.rgb;
+        lit = &scratch->lit;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->w.map.prim_count++;
+            ((POLY_GT3 *)scratch->poly)->clut = ((u16 *)scratch->prim)[1];
+            ((POLY_GT3 *)scratch->poly)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_nccs();
+            gte_strgb(lit);
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_nccs();
+            gte_strgb(lit);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r0);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r1);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r2);
+            setlen(scratch->poly, 9);
+            setcode(scratch->poly, scratch->tag.code | 0x34);
+            {
+                s32 z = scratch->w.map.z;
+
+                if (z >= 0 && z < 7952) {
+                    addPrim(scratch->ot + z, scratch->poly);
+                    scratch->w.map.ot_count++;
+                }
+            }
+            break;
+        case 0x2c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip &&
+                scratch->vert[3]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z +
+                                scratch->vert[3]->z) >> 2;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_GT4);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->w.map.prim_count++;
+            ((POLY_GT4 *)scratch->poly)->clut = ((u16 *)scratch->prim)[1];
+            ((POLY_GT4 *)scratch->poly)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u32 *)&((POLY_GT4 *)scratch->poly)->x3 = *(u32 *)&scratch->vert[3]->sxy;
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            *(u16 *)&((POLY_GT4 *)scratch->poly)->u3 = ((u16 *)scratch->prim)[6];
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_nccs();
+            gte_strgb(lit);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT4 *)scratch->poly)->r0);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT4 *)scratch->poly)->r1);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT4 *)scratch->poly)->r2);
+            gte_ldrgb(lit);
+            gte_lddp((u16)scratch->vert[3]->fog);
+            gte_dpcs();
+            gte_strgb(&((POLY_GT4 *)scratch->poly)->r3);
+            setlen(scratch->poly, 12);
+            setcode(scratch->poly, scratch->tag.code | 0x3c);
+            {
+                s32 z = scratch->w.map.z;
+
+                if (z >= 0 && z < 7952) {
+                    addPrim(scratch->ot + z, scratch->poly);
+                    scratch->w.map.ot_count++;
+                }
+            }
+            break;
+        case 0x34:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            scratch->poly = scratch->next;
+            scratch->next += sizeof(POLY_GT3);
+            if (scratch->end < scratch->next) {
+                return;
+            }
+            scratch->w.map.prim_count++;
+            ((POLY_GT3 *)scratch->poly)->clut = ((u16 *)scratch->prim)[1];
+            ((POLY_GT3 *)scratch->poly)->tpage = ((u16 *)scratch->prim)[3];
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x0 = *(u32 *)&scratch->vert[0]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x1 = *(u32 *)&scratch->vert[1]->sxy;
+            *(u32 *)&((POLY_GT3 *)scratch->poly)->x2 = *(u32 *)&scratch->vert[2]->sxy;
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u0 = ((u16 *)scratch->prim)[0];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u1 = ((u16 *)scratch->prim)[2];
+            *(u16 *)&((POLY_GT3 *)scratch->poly)->u2 = ((u16 *)scratch->prim)[4];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r0);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_ncds();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r1);
+            gte_ldv0(((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_ncds();
+            gte_strgb(&((POLY_GT3 *)scratch->poly)->r2);
+            setlen(scratch->poly, 9);
+            setcode(scratch->poly, scratch->tag.code);
+            {
+                s32 z = scratch->w.map.z;
+
+                if (z >= 0 && z < 7952) {
+                    addPrim(scratch->ot + z, scratch->poly);
+                    scratch->w.map.ot_count++;
+                }
+            }
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws part id of the map layer model in SCRATCH->model near the eye (the
+ * near ground renderer of render_map_cell_object): projects the vertices like
+ * render_enqueue_map, then hands each front face to the LIBGTE subdivision
+ * (RCpolyFT3/FT4/GT3), more finely the nearer it is.
+ */
+ADDRESS(0x8003ab04, 0x1000)
+void render_enqueue_map_subdivided(u16 id)
+{
+    s32 n;
+    ScratchPad *scratch;
+    CVECTOR *rgb;
+    union {
+        DIVPOLYGON3 d3;
+        DIVPOLYGON4 d4;
+    } div;
+
+    scratch = SCRATCH;
+    SCRATCH->screen_cursor = SCRATCH->screen;
+    SCRATCH->vertex = SCRATCH->vertices;
+    SCRATCH->w.map.near = scene_display_sys.fog_near;
+    SCRATCH->w.map.far = scene_display_sys.fog_far;
+    SCRATCH->part = &((ModelData *)SCRATCH->model)->parts[id];
+    SCRATCH->normals = SCRATCH->part->normals + 12 + SCRATCH->model;
+    n = SCRATCH->part->vertex_count;
+    while (n-- != 0) {
+        gte_ldv0(scratch->vertex);
+        gte_rtps();
+        gte_stsxy(&scratch->screen_cursor->sxy);
+        gte_stszotz(&scratch->screen_cursor->z);
+        if (scratch->w.map.near < 32000) {
+            scratch->screen_cursor->fog = ((scratch->screen_cursor->z - (scratch->w.map.near >> 2)) << 14) /
+                                  (scratch->w.map.far - scratch->w.map.near);
+        } else {
+            scratch->screen_cursor->fog = 0;
+        }
+        if (scratch->screen_cursor->fog >= 7952) {
+            scratch->screen_cursor->fog = 0x1f0f;
+        }
+        if (scratch->screen_cursor->fog < 0) {
+            scratch->screen_cursor->fog = 0;
+        }
+        scratch->screen_cursor++;
+        scratch->vertex += 8;
+    }
+    scratch->prim = (u32 *)(scratch->part->prims + 12 + scratch->model);
+    n = scratch->part->prim_count;
+    scratch->w.map.tmd_prim_count += n;
+    while (n-- != 0) {
+        rgb = &scratch->w.map.rgb;
+        *(u32 *)&scratch->tag = *scratch->prim;
+        scratch->prim++;
+        switch (scratch->tag.code & 0xfd) {
+        case 0x24:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[8] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d3.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1];
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog) / 3);
+            gte_ncds();
+            gte_strgb(&div.d3.rgbc);
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x24;
+            div.d3.ot = scratch->ot + scratch->w.map.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[8]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyFT3((POLY_FT3 *)scratch->next, &div.d3);
+            scratch->w.map.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x2c:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[0]);
+            gte_ldsxy3(*(u32 *)&scratch->vert[3]->sxy, *(u32 *)&scratch->vert[2]->sxy,
+                       *(u32 *)&scratch->vert[1]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->nclip[1]);
+            if (scratch->nclip[0] > 0 || scratch->nclip[1] > 0) {
+                scratch->w.map.opz = 1;
+            } else {
+                scratch->w.map.opz = -1;
+            }
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip &&
+                scratch->vert[3]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z +
+                                scratch->vert[3]->z) >> 2;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d4.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d4.pih = 320;
+            div.d4.piv = 240;
+            div.d4.clut = ((u16 *)scratch->prim)[1];
+            div.d4.tpage = ((u16 *)scratch->prim)[3];
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[10] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            scratch->vert[3] = (ScreenVertex *)(((u16 *)scratch->prim)[12] + (u8 *)scratch->screen);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((scratch->vert[0]->fog + scratch->vert[1]->fog + scratch->vert[2]->fog +
+                      scratch->vert[3]->fog) / 4);
+            gte_ncds();
+            gte_strgb(&div.d4.rgbc);
+            div.d4.cr[0].r0 = &div.d4.r0;
+            div.d4.cr[0].r1 = &div.d4.r1;
+            div.d4.cr[0].r2 = &div.d4.r2;
+            div.d4.cr[0].r3 = &div.d4.r3;
+            div.d4.rgbc.cd = scratch->tag.code | 0x2c;
+            div.d4.ot = scratch->ot + scratch->w.map.z;
+            div.d4.r0.sxy = scratch->vert[0]->sxy;
+            div.d4.r1.sxy = scratch->vert[1]->sxy;
+            div.d4.r2.sxy = scratch->vert[2]->sxy;
+            div.d4.r3.sxy = scratch->vert[3]->sxy;
+            div.d4.r0.sz = scratch->vert[0]->z;
+            div.d4.r1.sz = scratch->vert[1]->z;
+            div.d4.r2.sz = scratch->vert[2]->z;
+            div.d4.r3.sz = scratch->vert[3]->z;
+            div.d4.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            div.d4.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[10]);
+            div.d4.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[11]);
+            div.d4.r3.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[12]);
+            ((u32 *)&div.d4.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d4.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d4.r2)[2] = scratch->prim[2];
+            ((u32 *)&div.d4.r3)[2] = scratch->prim[3];
+            scratch->next = (u8 *)RCpolyFT4((POLY_FT4 *)scratch->next, &div.d4);
+            scratch->w.map.ot_count += div.d4.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        case 0x34:
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldsxy3(*(u32 *)&scratch->vert[0]->sxy, *(u32 *)&scratch->vert[1]->sxy,
+                       *(u32 *)&scratch->vert[2]->sxy);
+            gte_nclip();
+            gte_stopz(&scratch->w.map.opz);
+            if (scratch->w.map.opz <= 0) {
+                break;
+            }
+            if (scratch->vert[0]->z < scratch->w.map.clip &&
+                scratch->vert[1]->z < scratch->w.map.clip &&
+                scratch->vert[2]->z < scratch->w.map.clip) {
+                break;
+            }
+            scratch->w.map.z = (scratch->vert[0]->z + scratch->vert[1]->z + scratch->vert[2]->z) / 3;
+            if (scratch->w.map.z >= 7952) {
+                scratch->w.map.z = 0x1f0f;
+            }
+            div.d3.ndiv = scratch->w.map.z < 1024 ? ((1024 - scratch->w.map.z) >> 9) + 1 : 1;
+            div.d3.pih = 320;
+            div.d3.piv = 240;
+            div.d3.clut = ((u16 *)scratch->prim)[1];
+            div.d3.tpage = ((u16 *)scratch->prim)[3];
+            scratch->vert[0] = (ScreenVertex *)(((u16 *)scratch->prim)[7] + (u8 *)scratch->screen);
+            scratch->vert[1] = (ScreenVertex *)(((u16 *)scratch->prim)[9] + (u8 *)scratch->screen);
+            scratch->vert[2] = (ScreenVertex *)(((u16 *)scratch->prim)[11] + (u8 *)scratch->screen);
+            gte_ldv0(((u16 *)scratch->prim)[6] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[0]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r0.c);
+            gte_ldv0(((u16 *)scratch->prim)[8] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[1]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r1.c);
+            gte_ldv0(((u16 *)scratch->prim)[10] + scratch->normals);
+            gte_ldrgb(rgb);
+            gte_lddp((u16)scratch->vert[2]->fog);
+            gte_ncds();
+            gte_strgb(&div.d3.r2.c);
+            div.d3.cr[0].r0 = &div.d3.r0;
+            div.d3.cr[0].r1 = &div.d3.r1;
+            div.d3.cr[0].r2 = &div.d3.r2;
+            div.d3.rgbc.cd = scratch->tag.code | 0x34;
+            div.d3.ot = scratch->ot + scratch->w.map.z;
+            div.d3.r0.sxy = scratch->vert[0]->sxy;
+            div.d3.r1.sxy = scratch->vert[1]->sxy;
+            div.d3.r2.sxy = scratch->vert[2]->sxy;
+            div.d3.r0.sz = scratch->vert[0]->z;
+            div.d3.r1.sz = scratch->vert[1]->z;
+            div.d3.r2.sz = scratch->vert[2]->z;
+            div.d3.r0.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[7]);
+            div.d3.r1.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[8]);
+            div.d3.r2.v = *(SVECTOR *)(scratch->vertices + ((u16 *)scratch->prim)[9]);
+            ((u32 *)&div.d3.r0)[2] = scratch->prim[0];
+            ((u32 *)&div.d3.r1)[2] = scratch->prim[1];
+            ((u32 *)&div.d3.r2)[2] = scratch->prim[2];
+            scratch->next = (u8 *)RCpolyGT3((POLY_GT3 *)scratch->next, &div.d3);
+            scratch->w.map.ot_count += div.d3.ndiv ^ 2;
+            if (scratch->next > scratch->end) {
+                return;
+            }
+            break;
+        }
+        scratch->prim += scratch->tag.len;
+    }
+}
+
+/*
+ * Draws one map layer at pos (relative to SCRATCH->u.layer.unk108): loads its light
+ * record (layer->unk4) turned by layer->unk2, the fog and the view transform,
+ * then runs the near (flags bit 2) or far ground renderer on model part
+ * layer->unk0.
+ */
+ADDRESS(0x8003bb04, 0x330)
+void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
+{
+    LightRecord *light;
+    s32 turn;
+    long flag;
+    u16 part;
+    MATRIX *transform;
+    ScratchPad *scratch;
+
+    transform = &SCRATCH->draw.transform;
+    scratch = SCRATCH;
+    turn = layer->quarter_turns & 3;
+    light = &scene_display_sys.lights[layer->lighting_index & 0x3f];
+    gte_SetLightMatrix(&light->light_matrices[turn]);
+    gte_SetColorMatrix(&light->color_matrix);
+    fog_set_range(light->fog_near, light->fog_far);
+    gte_SetBackColor(light->back_color.r, light->back_color.g, light->back_color.b);
+    gte_SetRotMatrix(&scene_display_sys.view_matrix);
+    gte_SetTransMatrix(&scene_display_sys.view_matrix);
+    gte_ldv0(pos);
+    gte_rt();
+    gte_stlvnl(SCRATCH->draw.transform.t);
+    gte_stflg(&flag);
+    gte_SetRotMatrix(&scene_display_sys.view_matrix_turns[turn]);
+    gte_SetTransMatrix(transform);
+    part = layer->object_index;
+    if ((s16)asset_status.loading == 1 && asset_status.tmd_object_limit_active != 0 &&
+        part >= ((ModelData *)SCRATCH->model)->unk4 >> 1) {
+        return;
+    }
+    if (scratch->end - 10240 < scratch->next) {
+        flags &= ~4;
+    }
+    if (flags & 4) {
+        scratch->part = &((ModelData *)scratch->model)->parts[part];
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        render_enqueue_map_subdivided(part);
+    } else {
+        scratch->part = &((ModelData *)scratch->model)->parts[part];
+        scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        render_enqueue_map(part);
+    }
+}
+
+/*
+ * Draws the layers of map cell (x, z) that are visible, with flags bit 1 set.
+ * The position is built in the scratchpad in King's Field II's order (x, y, z).
+ * Nothing in the decompiled images calls it.
+ */
+ADDRESS(0x8003be34, 0x19c)
+void render_map_cell_layers(s32 x, s32 z, u8 flags)
+{
+    SVECTOR *pos;
+    VECTOR *origin;
+    MapCell *cell;
+    s32 kind;
+
+    pos = &SCRATCH->u.layer.pos;
+    origin = &SCRATCH->u.layer.origin;
+    cell = &map_world.cells[z][x];
+    kind = cell->layer[0].object_index;
+    if ((flags & 2) && kind < 240) {
+        pos->vx = (x << 11) - origin->vx + 1024;
+        pos->vy = (-cell->layer[0].elevation << 7) - origin->vy;
+        pos->vz = (z << 11) - origin->vz + 1024;
+        render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.pos, flags);
+        kind = cell->layer[1].object_index;
+        if (kind < 240) {
+            pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
+            render_map_cell_object(&cell->layer[1], &SCRATCH->u.layer.pos, flags);
+        }
+    } else {
+        kind = cell->layer[1].object_index;
+        if ((flags & 2) && kind < 240) {
+            pos->vx = (x << 11) - origin->vx + 1024;
+            pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
+            pos->vz = (z << 11) - origin->vz + 1024;
+            render_map_cell_object(&cell->layer[1], pos, flags);
+        }
+    }
+}
 
 DATA(0x8009c2d0, 0x8, ".sdata")
 RECT menu_transition_rect = { 320, 0, 320, 240 };
@@ -557,6 +2394,17 @@ void set_accumulated_color_overlay(s32 r, s32 g, s32 b, s32 scale, s32 which)
     }
 }
 
+/*
+ * Not exact (one instruction and one delay slot): retail reads the low half
+ * of the spilled x for the second quad straight from its stack slot (`sw
+ * a1,16(sp)` ... `lhu s1,16(sp)`) and fills the next branch's delay slot
+ * with `li a0,2`; this build reloads the whole word (`lw t0,16(sp)`) and puts
+ * `move s1,t0` in that slot. GNU C 2.6.0's reload cannot read part of a
+ * spilled word. FSF's reload change of 1994-08-07 (in 2.6.1 and later) does,
+ * and decompals' gcc 2.6.3-psx compiles this source to retail's code, but
+ * 2.6.3 breaks 0x80047010 and 0x800568bc (frame size), so GAME's compiler
+ * looks like a Sony 2.6.0 build with that reload fix (docs/toolchain.md).
+ */
 ADDRESS(0x8003daec, 0x464)
 void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
 {
@@ -564,10 +2412,6 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
     u8 r;
     u8 g;
     u8 b;
-    POLY_FT4 *p;
-    s16 top;
-    s16 bottom;
-    s16 right;
 
     count = 32;
     r = rgb[0];
@@ -584,7 +2428,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
     DrawSync(0);
     scene_display_sys.draw[0].isbg = 0;
     scene_display_sys.draw[1].isbg = 0;
-    while (count > 0) {
+    for (;;) {
+        POLY_FT4 *p;
+
+        if (count <= 0) {
+            break;
+        }
         if (step < 0) {
             r -= 4;
             g -= 4;
@@ -601,30 +2450,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
             return;
         }
         scene_display_sys.prim_count++;
-        top = y;
-        bottom = 240 - y;
         setPolyFT4(p);
-        p->y2 = top;
-        p->y3 = top;
-        p->u0 = 0;
-        p->v0 = 0;
-        p->v1 = 0;
-        p->u2 = 0;
+        setXYWH(p, 320 - x, 240 - y, x - 128, y * 2 - 240);
+        setUVWH(p, 0, 0, 192, 240);
         p->clut = 0;
-        p->x1 = 192;
-        p->x3 = 192;
-        p->u1 = 192;
-        p->v2 = 240;
-        p->u3 = 192;
-        p->x0 = 320 - x;
-        p->y0 = bottom;
-        p->y1 = bottom;
-        p->x2 = 320 - x;
-        p->v3 = 240;
         p->tpage = GetTPage(2, 0, 320, 0);
-        p->r0 = r;
-        p->g0 = g;
-        p->b0 = b;
+        setRGB0(p, r, g, b);
         addPrim(scene_display_sys.ot, p);
         p = (POLY_FT4 *)scene_display_sys.pool->next;
         scene_display_sys.pool->next += sizeof(POLY_FT4);
@@ -632,29 +2463,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
             return;
         }
         scene_display_sys.prim_count++;
-        right = x;
         setPolyFT4(p);
-        p->x0 = 192;
-        p->x2 = 192;
-        p->v2 = 240;
-        p->y0 = bottom;
-        p->x1 = right;
-        p->y1 = bottom;
-        p->y2 = top;
-        p->x3 = right;
-        p->y3 = top;
-        p->u0 = 0;
-        p->v0 = 0;
-        p->u1 = 128;
-        p->v1 = 0;
-        p->u2 = 0;
-        p->u3 = 128;
-        p->v3 = 240;
+        setXYWH(p, 192, 240 - y, x - 192, y * 2 - 240);
+        setUVWH(p, 0, 0, 128, 240);
         p->clut = 0;
         p->tpage = GetTPage(2, 0, 512, 0);
-        p->r0 = r;
-        p->g0 = g;
-        p->b0 = b;
+        setRGB0(p, r, g, b);
         addPrim(scene_display_sys.ot, p);
         count--;
         DrawSync(0);
@@ -710,7 +2524,7 @@ void render_player_weapon(void)
     file = scene_display_sys.models[32];
     model = file + ((ModelFile *)file)->tmd;
     SCRATCH->model = model;
-    if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.weapon_animation_cache, 32,
+    if (animation_prepare_asset_vertices(&cur_avatar_status.weapon_animation_cache, 32,
                                          cur_avatar_status.weapon_attack_mode,
                                          cur_avatar_status.weapon_attack_phase,
                                          ((ModelData *)model)->parts[0].vertex_count) == 0) {
@@ -903,9 +2717,9 @@ void render_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rotation, S
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
         n = animation_id & 0x7f;
-        part = &((ModelData *)scratch->model)->parts[n];
-        scratch->part = &((ModelData *)model)->parts[n];
+        scratch->part = &((ModelData *)scratch->model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        part = &((ModelData *)scratch->model)->parts[n];
     }
 draw:
     if (mode & 0x40) {
@@ -1184,9 +2998,9 @@ void render_distant_world_model(u8 layer_mask, u16 id, VECTOR *pos, SVECTOR *rot
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
     } else {
         n = animation_id & 0x7f;
-        part = &((ModelData *)scratch->model)->parts[n];
-        scratch->part = &((ModelData *)model)->parts[n];
+        scratch->part = &((ModelData *)scratch->model)->parts[n];
         scratch->vertices = scratch->part->vertices + 12 + scratch->model;
+        part = &((ModelData *)scratch->model)->parts[n];
     }
 draw:
     dist = SquareRoot0(mat->t[0] * mat->t[0] + mat->t[1] * mat->t[1] + mat->t[2] * mat->t[2]);
@@ -1357,7 +3171,7 @@ void resource_tmd_read_complete(u8 *file)
 }
 
 ADDRESS(0x80040694, 0x74)
-u8 map_cell_layer_mask(VECTOR *pos)
+u32 map_cell_layer_mask(VECTOR *pos)
 {
     s32 row;
     s32 col;
@@ -1374,7 +3188,7 @@ u8 map_cell_layer_mask(VECTOR *pos)
 }
 
 ADDRESS(0x80040708, 0xc4)
-u8 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
+u32 map_cell_layer_mask_radius(VECTOR *pos, s32 radius)
 {
     u8 cells = 0;
     s32 row = (pos->vz >> 11) + scene_display_sys.grid_z - radius;
@@ -1490,9 +3304,20 @@ void resource_tmd_update_range(s32 file, s32 entry, s32 id, s32 count)
  * records (models from 256 and the area bank, sound banks from 147; kind
  * 0x1f plays its sound by the player's distance), the Effect records and
  * the placed models. The passes flag the model ids and sound banks in use
- * and resource_tmd_update_range/resource_vab_update_range load the missing ones and release the rest.
+ * and resource_tmd_update_range/resource_vab_update_range load the missing
+ * ones and release the rest. The gotos and the scale variable follow King's
+ * Field II's function.
+ *
+ * Not exact, three differences. Retail tests case 0xe5 with a `beq` to the
+ * next object and a `j` to the default case; here reorg inverts that pair
+ * because the branch is predicted not taken (retail's was not, as if it
+ * left an inner loop). Retail loads the constant 1 of the mark stores in
+ * each case; here loop.c hoists it, since the object loop has 467 insns at
+ * loop time against a limit of 468, so retail's loop was larger at that
+ * point. Retail updates map_placed_frame_counter through an address
+ * register, the code of a struct member (King's Field II has
+ * scene_display_sys.map_placed_frame_counter++); here it is a plain s32.
  */
-
 ADDRESS(0x80040ae4, 0xff0)
 void render_scene_and_update_resources(void)
 {
@@ -1502,20 +3327,21 @@ void render_scene_and_update_resources(void)
     Actor *obj;
     ActorGroup *def;
     MapObject *rec;
+    MapObject *animated;
     MapObjectDef *rec_def;
     Effect *effect;
     MapPlacedEntry *placed;
     VECTOR *at;
+    SVECTOR *scale;
     s32 i;
     s32 now;
     s32 near;
     s32 dist;
-    s32 range;
     s32 volume;
     SoundEffect *sound;
     u16 id;
-    u8 mask;
-    u8 cells;
+    u32 mask;
+    u32 cells;
     u8 flags;
 
     scratch = SCRATCH;
@@ -1527,7 +3353,7 @@ void render_scene_and_update_resources(void)
     repeat_store_word((u32 *)SCRATCH->u.load.sounds, 0, 0x18);
     SCRATCH->draw.count.clut = 0;
     obj = actor_status.objects;
-    for (i = 199; i != -1; i--, obj++) {
+    for (i = 199; i != -1; obj++, i--) {
         if (obj->lifecycle != 1) {
             continue;
         }
@@ -1536,15 +3362,13 @@ void render_scene_and_update_resources(void)
         } else {
             mask = obj->layer_mask;
         }
-        if (!(obj->flags & 0x80000)) {
-            if (!(map_cell_layer_mask(&obj->pos) & mask)) {
-                continue;
-            }
-        } else {
-            if (!(map_cell_layer_mask_radius(&obj->pos, 3) & obj->layer_mask)) {
-                continue;
-            }
+        if (obj->flags & 0x80000) {
+            goto wide;
         }
+        if (!(map_cell_layer_mask(&obj->pos) & mask)) {
+            continue;
+        }
+    draw:
         resource_registry_get(obj->definition_id + 128, &model);
         if (model != NULL) {
             at = actor_resolve_group_position(obj, &pos);
@@ -1569,6 +3393,11 @@ void render_scene_and_update_resources(void)
         scratch->u.load.sounds[def->vab_resource_indices[0]] = 1;
         scratch->u.load.sounds[def->vab_resource_indices[1]] = 1;
         scratch->u.load.models[obj->definition_id] = 1;
+        continue;
+    wide:
+        if (map_cell_layer_mask_radius(&obj->pos, 3) & obj->layer_mask) {
+            goto draw;
+        }
     }
     resource_tmd_update_range(0, 0, 0x80, 0x80);
     resource_vab_update_range(2, 0x91, 0x33, 0x60);
@@ -1578,22 +3407,26 @@ void render_scene_and_update_resources(void)
     if (scene_display_sys.unk15996 == 0) {
         asset_status.animated_object = NULL;
     }
-    scratch->draw.count.clut = 0;
     rec = map_objects_slots.objects;
-    for (i = 395; i != -1; i--, rec++) {
+    scratch->draw.count.clut = 0;
+    for (i = 395; i != -1; rec++, i--) {
+        /* The frame keeps 16 unused bytes here, after model: King's Field II
+         * builds the rotation in an SVECTOR beside one unreferenced SVECTOR,
+         * and this version builds it in the scratchpad. */
+        SVECTOR rotation;
+        SVECTOR unused;
+
         if (rec->object_id == 0xff) {
             continue;
         }
         rec->flags &= 0x7f;
         switch (rec->action) {
-        case 0xe5:
-        case 0xe9:
-            break;
         case 0xf2:
             if (map_cell_visible(&rec->pos, rec->arg.m.radius_x, rec->arg.m.radius_z) == 0) {
                 break;
             }
             scratch->u.load.models[rec->object_id] = 1;
+            scale = &rec->scale;
             id = map_object_asset_index(rec->object_id);
             resource_registry_get(id, &model);
             if (model == NULL) {
@@ -1602,13 +3435,14 @@ void render_scene_and_update_resources(void)
             scratch->u.load.angle.vx = rec->angle.vx;
             scratch->u.load.angle.vy = rec->angle.vy + 2048;
             scratch->u.load.angle.vz = rec->angle.vz;
+            flags = rec->render_mode;
             pos.vx = ((rec->arg.m.cell_offset_x << 11) + rec->pos.vx) >> 1;
             pos.vz = ((rec->arg.m.cell_offset_z << 11) + rec->pos.vz) >> 1;
             pos.vy = (rec->pos.vy - (rec->arg.m.cell_height << 11)) >> 1;
-            render_distant_world_model(rec->layer_mask, id, &pos, &scratch->u.load.angle, &rec->scale,
+            render_distant_world_model(rec->layer_mask, id, &pos, &scratch->u.load.angle, scale,
                                        &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                        rec->animation_id, rec->animation_phase, rec->lighting_override_index,
-                                       rec->lighting_blend, rec->render_mode, rec->render_depth_offset);
+                                       rec->lighting_blend, flags, rec->render_depth_offset);
             rec->flags |= 0x80;
             break;
         case 0xf0:
@@ -1638,36 +3472,39 @@ void render_scene_and_update_resources(void)
                 }
                 if (rec->arg.s.next_sound_frame - now < 0) {
                     rec->arg.s.next_sound_frame = now + rec->arg.s.repeat_delay_units * 6;
-                    range = rec->arg.s.region_width << 10;
-                    dist = cur_avatar_status.pos.vx - (range + rec->pos.vx);
+                    /* One local carries each half extent, the fade distance
+                     * and finally the volume (King's Field II's shape). */
+                    volume = rec->arg.s.region_width << 10;
+                    near = cur_avatar_status.pos.vx - (volume + rec->pos.vx);
+                    if (near < 0) {
+                        near = -near;
+                    }
+                    near = volume - near;
+                    volume = rec->arg.s.region_depth << 10;
+                    dist = cur_avatar_status.pos.vz - (volume + rec->pos.vz);
                     if (dist < 0) {
                         dist = -dist;
                     }
-                    near = range - dist;
-                    range = rec->arg.s.region_depth << 10;
-                    dist = cur_avatar_status.pos.vz - (range + rec->pos.vz);
-                    if (dist < 0) {
-                        dist = -dist;
-                    }
-                    dist = range - dist;
+                    dist = volume - dist;
                     if (dist < near) {
                         near = dist;
                     }
-                    range = rec->arg.s.fade_distance << 11;
-                    if (near >= range) {
+                    volume = rec->arg.s.fade_distance << 11;
+                    if (near >= volume) {
                         volume = rec->arg.s.maximum_volume;
                     } else {
-                        if (range == 0) {
+                        if (volume == 0) {
                             break;
                         }
-                        volume = rec->arg.s.maximum_volume * near / range;
+                        volume = rec->arg.s.maximum_volume * near / volume;
                     }
                     if (rec->arg.s.vertical_attenuation_flags & 1) {
                         dist = cur_avatar_status.pos.vy - rec->pos.vy;
                         if (dist < 0) {
                             dist = -dist;
                         }
-                        volume -= (rec->arg.s.maximum_volume * dist) >> 13;
+                        dist = (rec->arg.s.maximum_volume * dist) >> 13;
+                        volume -= dist;
                     }
                     if (volume >= 20) {
                         audio_play_sound(rec->arg.s.sound_id + 496, volume);
@@ -1678,21 +3515,18 @@ void render_scene_and_update_resources(void)
             }
             break;
         default:
-            if (!(rec->flags & 2) || (rec->flags & 8)) {
-                cells = map_cell_layer_mask(&rec->pos);
-                if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
-                    break;
-                }
-                rec_def = &map_objects_slots.defs[rec->object_id];
-            } else {
-                rec_def = &map_objects_slots.defs[rec->object_id];
-                cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
-                if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
-                    break;
-                }
+            if ((rec->flags & 2) && !(rec->flags & 8)) {
+                goto reach;
             }
+            cells = map_cell_layer_mask(&rec->pos);
+            if (!(cells & rec->layer_mask) && !(rec->flags & 8)) {
+                break;
+            }
+            rec_def = &map_objects_slots.defs[rec->object_id];
+        shown:
             scratch->u.load.models[rec->object_id] = 1;
             scratch->u.load.sounds[rec_def->vab_resource_index] = 1;
+            scale = &rec->scale;
             id = map_object_asset_index(rec->object_id);
             resource_registry_get(id, &model);
             if (model == NULL) {
@@ -1711,23 +3545,33 @@ void render_scene_and_update_resources(void)
             }
             if (rec->flags & 0x40) {
                 scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
-                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, scale,
                                    &rec->arg.m.animation_cache, &scene_display_sys.pitch_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             } else if (rec->flags & 8) {
                 render_distant_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle,
-                                           &rec->scale, &rec->arg.m.animation_cache,
+                                           scale, &rec->arg.m.animation_cache,
                                            &scene_display_sys.view_matrix, rec->animation_id,
                                            rec->animation_phase, rec->lighting_override_index,
                                            rec->lighting_blend, flags, rec->render_depth_offset);
             } else {
-                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, &rec->scale,
+                render_world_model(rec->layer_mask, id, &rec->pos, &scratch->u.load.angle, scale,
                                    &rec->arg.m.animation_cache, &scene_display_sys.view_matrix,
                                    rec->animation_id, rec->animation_phase, rec->lighting_override_index,
                                    rec->lighting_blend, flags, rec->render_depth_offset);
             }
             rec->flags |= 0x80;
+            break;
+        reach:
+            rec_def = &map_objects_slots.defs[rec->object_id];
+            cells = map_cell_layer_mask_radius(&rec->pos, rec_def->arg.b.unkc);
+            if ((cells & rec->layer_mask) || (rec->flags & 8)) {
+                goto shown;
+            }
+            /* fall through */
+        case 0xe5:
+        case 0xe9:
             break;
         }
     }
@@ -1745,15 +3589,15 @@ void render_scene_and_update_resources(void)
     }
     resource_vab_update_range(2, 0xf1, 0x93, 0x20);
     if ((s16)asset_status.loading == 1 && asset_status.step > 0
-        && (rec = asset_status.animated_object) != NULL) {
-        id = rec->object_id - 221;
-        render_animated_object(id, &rec->angle, &rec->arg.v.animation_cache, rec->animation_id,
-                               rec->animation_phase, rec->arg.v.blend_mode, rec->arg.v.lighting_index,
-                               0x1fff - rec->arg.v.depth_code);
-        rec->flags |= 0x80;
+        && (animated = asset_status.animated_object) != NULL) {
+        id = animated->object_id - 221;
+        render_animated_object(id, &animated->angle, &animated->arg.v.animation_cache, animated->animation_id,
+                               animated->animation_phase, animated->arg.v.blend_mode, animated->arg.v.lighting_index,
+                               0x1fff - animated->arg.v.depth_code);
+        animated->flags |= 0x80;
     }
     effect = effect_status.objects;
-    for (i = 127; i != -1; i--, effect++) {
+    for (i = 127; i != -1; effect++, i--) {
         if (effect->type == 0xff) {
             continue;
         }
@@ -1798,7 +3642,7 @@ void render_scene_and_update_resources(void)
     placed = map_placed_entries;
     scratch->u.load.angle.vx = scratch->u.load.angle.vy = scratch->u.load.angle.vz = 0;
     scratch->draw.count.clut = 0;
-    for (i = 127; i != -1; i--, placed++) {
+    for (i = 127; i != -1; placed++, i--) {
         if (placed->model_index == 0xffff) {
             continue;
         }
@@ -2076,8 +3920,6 @@ void render_game_frame(VECTOR *pos, SVECTOR *angle)
  * Draws model 3 (the menu's item model) with the matrices the caller set:
  * projects its vertices into GraphicsRuntime.screen with a depth-cue value from
  * the fog range, then draws part 0 at depth offset 100.
- * Not exact: retail stores the CLUT offset between SCRATCH->screen and
- * SCRATCH->end; every statement order tried schedules it earlier.
  */
 
 ADDRESS(0x8004290c, 0x264)
@@ -2085,6 +3927,7 @@ void menu_render_item_model(void)
 {
     ScratchPad *scratch;
     u8 *model;
+    ModelPart *part;
     u8 *vertex;
     ScreenVertex *screen;
     s32 i;
@@ -2099,18 +3942,19 @@ void menu_render_item_model(void)
     offset = SCRATCH->part->vertices + 12;
     SCRATCH->vertices = (u8 *)(offset + (s32)model);
     fog_set_range(20000, 24000);
+    part = ((ModelData *)SCRATCH->model)->parts;
     SCRATCH->ot = scene_display_sys.ot;
     SCRATCH->draw.count.tmd_prim_count = scene_display_sys.tmd_prim_count;
     SCRATCH->draw.count.ot_count = scene_display_sys.ot_count;
     SCRATCH->draw.count.prim_count = scene_display_sys.prim_count;
     SCRATCH->next = scene_display_sys.pool->next;
-    SCRATCH->draw.count.clut = 0;
     SCRATCH->end = scene_display_sys.pool->end;
-    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     SCRATCH->screen = scene_display_sys.screen;
-    i = ((ModelData *)SCRATCH->model)->parts[0].vertex_count;
+    SCRATCH->draw.count.clut = 0;
+    *(u32 *)&SCRATCH->w.model.rgb = *(u32 *)&map_textured_primitive_color;
     vertex = SCRATCH->vertices;
     screen = scene_display_sys.screen;
+    i = part->vertex_count;
     while (--i != -1) {
         gte_ldv0(vertex);
         gte_rtps();

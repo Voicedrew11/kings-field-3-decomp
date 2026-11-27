@@ -2,10 +2,10 @@
 #define GAME_CARD_H
 
 /*
- * GAME.EXE memory card saves (src/game/card.c, WIP module). A save file is
- * BASLUS-00255 plus the save number (1 to 15) on slot 1 and holds 0x6000
- * bytes: the BIOS file header (SaveHeader), the checksum of the data at
- * +0x200, and 0x5c00 data bytes at CARD_DATA.
+ * GAME.EXE memory card saves (src/game/memory_card_events.c). A save file is
+ * BASLUS-00255 plus the save number (1 to 15) on slot 1 and holds 0x6000 bytes:
+ * the BIOS file header (SaveHeader), the checksum of the data at +0x200, and
+ * 0x5c00 data bytes at CARD_DATA.
  */
 #include <kf/lib/types.h>
 #include <sys/types.h>

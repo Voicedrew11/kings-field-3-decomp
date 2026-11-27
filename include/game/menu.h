@@ -2,7 +2,7 @@
 #define GAME_MENU_H
 
 /*
- * GAME.EXE in-game menus (src/game/menu.c, WIP names): the pause screen,
+ * GAME.EXE in-game menus (src/game/menu_root.c, WIP names): the pause screen,
  * the menu's button page and the pages it opens. The helpers the pages call
  * (frame begin/present, text, windows, list input) lie past band E and are
  * declared from their call sites only.
@@ -74,7 +74,7 @@ typedef struct MenuList {
     u8 unk34[4];
 } MenuList;
 
-/* menu.c */
+/* menu_root.c */
 void menu_run_pause_screen(void);
 s32 menu_run_root_controller(void);
 void menu_draw_location_number(void);
@@ -204,7 +204,7 @@ extern MenuSpriteDef menu_sprite_defs[];
  * yes/no positions [10] and [11], message titles from [28]. */
 extern MenuGlyphString menu_window_layouts[];
 extern MenuGlyphRow menu_item_names[];
-extern MenuGlyphRow menu_label_rows[10];
+extern MenuGlyphRow menu_label_rows[42];
 extern MenuGlyphRow menu_magic_names[];
 extern u8 item_guide_level[];
 /* Shop stock counts per shop and item id, buy prices and sell prices. */
@@ -244,6 +244,6 @@ extern s32 menu_item_model_read_sectors;
 extern s32 menu_item_model_read_id;
 extern s32 menu_option_pulse_frame;
 
-/* The menu .sbss words (0x8009c374..0x8009c3a7) are statics of menu.c. */
+/* The menu .sbss words (0x8009c374..0x8009c3a7) are statics of menu_root.c. */
 
 #endif

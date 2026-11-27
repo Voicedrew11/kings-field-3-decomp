@@ -19,17 +19,17 @@ RODATA(0x801e8308, 0xa0)
 
 void area_handler_noop(void);
 void area_update_light_flicker_and_actor_swap(void);
-void area_use_item_noop(void);
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item);
 void area_adjust_actor_magic_damage_lethal_only(Actor *obj, s32 *out, s32 arg2, s32 arg3, s32 arg4,
                                                 s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void area_on_actor_removed_unlock_door(Actor *obj);
 void area_region_trigger_set_doors_and_warp_cells(MapObject *obj);
-void area_init_map_object_noop(void);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_check_items_held(void);
-void area_on_movie_start_noop(void);
+void area_on_movie_start_noop(u8 movie_id);
 void area_on_movie_end_restore_hp_and_mp(u8 id);
 void area_talk_event_collect_items_and_wait(Actor *record, s32 event);
 void area_on_load_restore_actors_and_doors(void);
@@ -53,7 +53,7 @@ const FdatHeader fdat_header = {
         /* 13 */ area_handler_noop,
         /* 14 */ area_handler_noop,
         /* 15 */ area_handler_noop,
-        /* 16 */ area_actor_target_check_noop,
+        /* 16 */ (FdatActorTargetCheckHandler)area_actor_target_check_noop,
         /* 17 */ area_update_actor_target_noop,
         /* 18 */ area_adjust_actor_magic_damage_lethal_only,
         /* 19 */ area_on_actor_removed_unlock_door,
@@ -114,7 +114,7 @@ void area_update_light_flicker_and_actor_swap(void)
 }
 
 ADDRESS(0x801e8704, 0x8)
-void area_use_item_noop(void)
+void area_use_item_noop(VECTOR *pos, SVECTOR *angle, s32 item)
 {
 }
 
@@ -197,7 +197,7 @@ void area_region_trigger_set_doors_and_warp_cells(MapObject *obj)
 }
 
 ADDRESS(0x801e8960, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 
@@ -227,7 +227,7 @@ void area_on_item_added_check_items_held(void)
 }
 
 ADDRESS(0x801e89d0, 0x8)
-void area_on_movie_start_noop(void)
+void area_on_movie_start_noop(u8 movie_id)
 {
 }
 

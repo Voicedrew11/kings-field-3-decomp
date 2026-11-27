@@ -1,11 +1,12 @@
 /*
  * GAME.EXE: the in-game movie player's Sony movie-sample stream functions
- * (WIP module; src/open/movie.c and src/end/movie.c are the same sample): the
+ * (KF3-only; src/open/movie.c and src/end/movie.c are the same sample): the
  * decode environment lives in movie_state.dec, the ring buffer is
- * stream_work_buffer, and the display swaps through scene_display_sys. The decode
- * set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream precedes
- * it. movie_update_state steps the movie state; its jump table is this unit's .rdata
- * (after movie_play_stream's file names, so the TU starts at or before it).
+ * stream_work_buffer, and the display swaps through scene_display_sys. The
+ * decode set-up strSetDefDecEnv (not exact) leads; the player movie_play_stream
+ * precedes it. movie_update_state steps the movie state; its jump table is this
+ * unit's .rdata (after movie_play_stream's file names, so the TU starts at or
+ * before it).
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -364,7 +365,7 @@ void movie_update_state(void)
         movie_state.stream_status = 0;
         break;
     case 4:
-        ((void (*)(u8))asset_status.handlers[FDAT_SLOT_ON_MOVIE_START])(id);
+        asset_status.handlers->on_movie_start(id);
         movie_play_stream();
         if (cur_evt_state.unk61 == 1) {
             cur_evt_state.unk61 = 2;
@@ -384,7 +385,7 @@ void movie_update_state(void)
     case 8:
         if (movie_state.stream_status == 1) {
             movie_state.state = 0;
-            ((void (*)(u8))asset_status.handlers[FDAT_SLOT_ON_MOVIE_END])(id);
+            asset_status.handlers->on_movie_end(id);
         }
         movie_state.stream_status = 0;
         break;
