@@ -27,8 +27,8 @@ RODATA(0x80011be0, 0x74)
  * `& 0xfd` of the switch instead of folding one into the other, the second
  * store is the second use of the 0x00ffffff mask (register t2), and the
  * mask of the cleared byte, left without an instruction, is the 8 unused
- * bytes of frame. Any store to another byte of the copy does this; which
- * one the original had is not known.
+ * bytes of frame. Clearing either of the other two bytes instead gives the
+ * same object; which statement the original had is not known.
  */
 ADDRESS(0x8003591c, 0x328)
 void tmd_prepare_primitive_indices(u8 *data)
