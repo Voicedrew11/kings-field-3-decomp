@@ -81,7 +81,7 @@ void resource_initialize_game_assets(void)
     p = (u32 *)((u8 *)p + (*p + 4));
     resource_copy_words((u32 *)weapon_table, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
-    resource_copy_words(item_gear_recs, p + 1, *p >> 2);
+    resource_copy_words((u32 *)item_gear_recs, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
     resource_copy_words((u32 *)player_lv_grow_list, p + 1, *p >> 2);
     p = (u32 *)((u8 *)p + (*p + 4));
@@ -127,7 +127,7 @@ void resource_run_initial_transition(void)
     } while (asset_status.loading != 0);
     tmd_set_slot(0, resource_tmd_arc_work);
     movie_state_reset();
-    asset_status.handlers[FDAT_SLOT_ON_LOAD]();
+    asset_status.handlers->on_load();
 }
 
 ADDRESS(0x80017aa4, 0x1d4)
@@ -402,7 +402,7 @@ void resource_advance_transition(void)
         break;
     case 1:
         asset_status.step = STEP_WAIT;
-        asset_status.handlers = callback_default_table;
+        asset_status.handlers = &callback_default_table;
         cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3 + 2,
                               (u8 *)fdat_window_base[0], resource_transition_set_phase_2);
         resource_copy_words((u32 *)map_world.cells, data + 1, 0x3e80);
@@ -420,7 +420,7 @@ void resource_advance_transition(void)
         asset_status.step = STEP_WAIT;
         cd_archive_queue_read(FILE_FDAT, asset_status.requested_resource_ids[0] * 3 + 1, stream_work_buffer,
                               resource_transition_set_phase_3);
-        asset_status.handlers = (FdatHandler *)fdat_window_handlers;
+        asset_status.handlers = (FdatHandlers *)fdat_window_handlers;
         break;
     case 3:
     parts:
@@ -441,8 +441,8 @@ void resource_advance_transition(void)
             }
             obj44 = map_objects_slots.objects;
             for (i = 395; i != -1; i--) {
-                if (obj44->arg.w.animation_cache != 0) {
-                    pool_record_release((AnimSlot *)obj44->arg.w.animation_cache);
+                if (obj44->arg.m.animation_cache != NULL) {
+                    pool_record_release(obj44->arg.m.animation_cache);
                 }
                 switch (obj44->action) {
                 case 0x20:
@@ -492,7 +492,7 @@ void resource_advance_transition(void)
                 }
             }
             movie_state_reset();
-            asset_status.handlers[FDAT_SLOT_ON_LOAD]();
+            asset_status.handlers->on_load();
             cur_avatar_status.force_actor_lifecycle_refresh = 1;
             asset_status.area_records_loaded = 1;
         }

@@ -710,7 +710,7 @@ void render_player_weapon(void)
     file = scene_display_sys.models[32];
     model = file + ((ModelFile *)file)->tmd;
     SCRATCH->model = model;
-    if (animation_prepare_asset_vertices((AnimSlot **)&cur_avatar_status.weapon_animation_cache, 32,
+    if (animation_prepare_asset_vertices(&cur_avatar_status.weapon_animation_cache, 32,
                                          cur_avatar_status.weapon_attack_mode,
                                          cur_avatar_status.weapon_attack_phase,
                                          ((ModelData *)model)->parts[0].vertex_count) == 0) {

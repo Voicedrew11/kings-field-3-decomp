@@ -36,7 +36,7 @@
 /* The table at the module's first byte (WIP layout). */
 typedef struct FdatHeader {
     s32 id;                 /* +0x00: 5, 6, ... 0x20, one per module */
-    FdatHandler handlers[32]; /* +0x04: asset_status.handlers points here; slots FDAT_SLOT_* (game/data.h) */
+    FdatHandlers handlers;  /* +0x04: asset_status.handlers points here (game/data.h) */
     s32 unk84;              /* +0x84: id + 0x20 in every module */
 } FdatHeader;
 

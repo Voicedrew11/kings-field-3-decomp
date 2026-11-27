@@ -19,11 +19,13 @@ RODATA(0x801e8308, 0x140)
 void area_handler_noop(void);
 void area_update_respawn_actor_out_of_view(void);
 void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item);
-void area_adjust_actor_magic_damage_noop(void);
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7);
 void area_set_cell_toggle(s32 index, s32 state);
 void area_on_actor_removed_set_toggles(Actor *obj);
 void area_region_trigger_trade_item_and_damage(MapObject *obj);
-void area_init_map_object_noop(void);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
@@ -52,7 +54,7 @@ const FdatHeader fdat_header = {
         /* 13 */ area_handler_noop,
         /* 14 */ area_handler_noop,
         /* 15 */ area_handler_noop,
-        /* 16 */ area_actor_target_check_noop,
+        /* 16 */ (FdatActorTargetCheckHandler)area_actor_target_check_noop,
         /* 17 */ area_update_actor_target_noop,
         /* 18 */ area_adjust_actor_magic_damage_noop,
         /* 19 */ area_on_actor_removed_set_toggles,
@@ -153,7 +155,9 @@ void area_use_item_place_on_object(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e891c, 0x8)
-void area_adjust_actor_magic_damage_noop(void)
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7)
 {
 }
 
@@ -263,7 +267,7 @@ void area_region_trigger_trade_item_and_damage(MapObject *obj)
 }
 
 ADDRESS(0x801e8d24, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 

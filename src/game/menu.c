@@ -3778,7 +3778,7 @@ void menu_draw_combat_attributes(void)
     label.y += 16;
     menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &label);
     number.y = label.y;
-    menu_format_number(cur_avatar_status.attack_water, 6, 0, 0, number.text);
+    menu_format_number(cur_avatar_status.attack_components[7], 6, 0, 0, number.text);
     menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &number);
     label.x = 0xa4;
     label.y = 0x22;
