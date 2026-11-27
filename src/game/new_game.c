@@ -50,7 +50,7 @@ void game_update_ending(void)
     s32 n;
     s32 volume;
 
-    asset_status.handlers[FDAT_SLOT_UPDATE]();
+    asset_status.handlers->update();
     if (cur_evt_state.ending_state != 1) {
         return;
     }

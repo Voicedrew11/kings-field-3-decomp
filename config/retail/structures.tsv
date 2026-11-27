@@ -29,6 +29,7 @@ EffectTrailRow	0x18	supported	asm;effect_construct_record copies pos (16 bytes) 
 EffectWords	0x8	supported	asm;effect_construct_record sw trail pointer to Effect+0x44 (ids 5, 16) and pos.vy to +0x48 (id 95)	WIP (game-sw)
 EquipmentRecord	0x20	supported	asm;player_add_equipment_bonuses/player_set_equipment_slot 32-byte stride at map_world+0x11c14	WIP (game-d)
 EventState	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
+FdatHandlers	0x80	supported	asm;asset_status.handlers / FdatHeader +0x4: 32 handler words (callback_default_table, the FDAT module tables);GAME indirect_sites.tsv slot loads	types (ty1)
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 GraphicsRuntime	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)
@@ -59,7 +60,7 @@ MapObjectWords	0x10	supported	asm;map_object_pool_reset sw zero to +0x34/+0x38/+
 MapPlacedEntry	0x18	supported	asm;map_placed_expand_sources 24-byte stride, 128 entries ending at sound_weapon_vab_buffer;translate_active_world_positions 24-byte stride, 128 records	WIP field names; untouched ranges opaque
 MapPlacedSource	0x10	supported	asm;map_placed_expand_sources 16-byte stride	WIP field names; untouched ranges opaque
 MapRect	0x4	supported	asm;menu_draw_revealed_map_rects/map_reveal_visited_rects 4-byte stride from map_rects, u8 x/y/w/h loads	WIP (game-e)
-MapWorld	0x12054	supported	asm;game loop word-count clear;player_add_equipment_bonuses/player_set_equipment_slot 0x20-byte records at +0x11c14;player_update_collision_bounds heights +0x12018;band F collision results +0x12004..+0x1204c	WIP (game-d, game-f)
+MapWorld	0x12054	supported	asm;game loop word-count clear;resource_advance_transition copies 0x800 words to +0x10000;player_update_collision_bounds heights +0x12018;band F collision results +0x12004..+0x1204c	WIP (game-d, game-f)
 Matrix3x3	0x14	supported	asm;light_reset_records 20-byte lwl/lwr struct copies;light_refresh_record_rotations 20-byte stride passed to matrix_rotate_quarter_turns	WIP (game-h)
 MenuGlyphRow	0x18	supported	asm;menu_collect_masked_item_rows 24-byte unaligned (lwl/lwr) record copies from menu_label_rows	WIP (game-e)
 MenuGlyphString	0x1c	supported	asm;0x1c-byte locals (s16 x, s16 y, glyphs) and menu_window_layouts 0x1c stride	WIP (game-e)

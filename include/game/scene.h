@@ -15,7 +15,7 @@ extern u32 fdat_window_base[];
 
 /* Handler table installed while an FDAT module loads: 32 copies of the empty
  * resource_noop_callback (.data, owner unit unknown). */
-extern FdatHandler callback_default_table[32];
+extern FdatHandlers callback_default_table;
 
 void resource_initialize_game_assets(void);
 void resource_run_initial_transition(void);

@@ -382,8 +382,8 @@ void player_update_weapon_attack(void)
                                                        cur_avatar_status.attack_components[4],
                                                        cur_avatar_status.attack_components[5],
                                                        cur_avatar_status.attack_components[6],
-                                                       cur_avatar_status.attack_water, scale, 80, NULL,
-                                                       target);
+                                                       cur_avatar_status.attack_components[7], scale, 80,
+                                                       NULL, target);
                             break;
                         }
                     }

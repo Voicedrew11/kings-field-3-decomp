@@ -422,7 +422,7 @@ retry:
         if (cornered) {
             goto slide;
         }
-        slope = map_world.collision_layer[2] & 3;
+        slope = map_world.collision_layer->quarter_turns & 3;
         if (slope == 0 || slope == 2) {
             dz = (dx0 + dz0) >> 1;
             dx = dz;

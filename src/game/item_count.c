@@ -45,7 +45,7 @@ s32 game_counter_decrement(s32 id)
     } else {
         return 1;
     }
-    asset_status.handlers[FDAT_SLOT_ON_ITEM_REMOVED]();
+    asset_status.handlers->on_item_removed();
     return 0;
 }
 
@@ -61,7 +61,7 @@ s32 game_counter_increment(s32 id)
         notify_enqueue(11);
         return 1;
     }
-    asset_status.handlers[FDAT_SLOT_ON_ITEM_ADDED]();
+    asset_status.handlers->on_item_added();
     return 0;
 }
 
@@ -537,5 +537,5 @@ void event_world_dispatch_interaction(VECTOR *pos, SVECTOR *angle)
         }
     }
 done:
-    ((void (*)(VECTOR *, SVECTOR *))asset_status.handlers[FDAT_SLOT_INTERACT])(&p, angle);
+    asset_status.handlers->interact(&p, angle);
 }

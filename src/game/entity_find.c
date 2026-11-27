@@ -505,7 +505,7 @@ diagonal:
     if (cornered) {
         goto blocked;
     }
-    switch (map_world.collision_layer[2] & 3) {
+    switch (map_world.collision_layer->quarter_turns & 3) {
     case 0:
     case 2:
         dx = (dx0 + dz0) >> 1;

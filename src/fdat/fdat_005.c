@@ -18,18 +18,20 @@ void area_handler_noop(void);
 void area_interact_item_containers(VECTOR *pos, SVECTOR *angle);
 void area_update_actor_swap_when_far(void);
 void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item);
-void area_adjust_actor_magic_damage_noop(void);
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7);
 void area_on_actor_removed_set_flag(Actor *obj);
 void func_801e87c4(void);
 void func_801e87cc(void);
 void func_801e87d4(void);
 void area_region_trigger_update_warp_arrival_cells(MapObject *obj);
-void area_init_map_object_noop(void);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_actor_target_check_noop(void);
 void area_update_actor_target_noop(void);
 void area_on_item_added_noop(void);
-void area_on_movie_start_noop(void);
+void area_on_movie_start_noop(u8 movie_id);
 void area_on_movie_end_restore_hp(u8 id);
 void area_talk_event_give_items_and_copy_cells(Actor *record, s32 event);
 void area_on_load_restore_actors_and_cells(void);
@@ -53,7 +55,7 @@ const FdatHeader fdat_header = {
         /* 13 */ area_handler_noop,
         /* 14 */ area_handler_noop,
         /* 15 */ area_handler_noop,
-        /* 16 */ area_actor_target_check_noop,
+        /* 16 */ (FdatActorTargetCheckHandler)area_actor_target_check_noop,
         /* 17 */ area_update_actor_target_noop,
         /* 18 */ area_adjust_actor_magic_damage_noop,
         /* 19 */ area_on_actor_removed_set_flag,
@@ -179,7 +181,9 @@ void area_use_item_on_actor_unlock_door(VECTOR *pos, SVECTOR *angle, s32 item)
 }
 
 ADDRESS(0x801e8758, 0x8)
-void area_adjust_actor_magic_damage_noop(void)
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7)
 {
 }
 
@@ -233,7 +237,7 @@ void area_region_trigger_update_warp_arrival_cells(MapObject *obj)
 }
 
 ADDRESS(0x801e889c, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 
@@ -258,7 +262,7 @@ void area_on_item_added_noop(void)
 }
 
 ADDRESS(0x801e88c4, 0x8)
-void area_on_movie_start_noop(void)
+void area_on_movie_start_noop(u8 movie_id)
 {
 }
 
