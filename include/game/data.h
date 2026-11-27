@@ -882,8 +882,8 @@ typedef struct FdatHandlers {
     FdatActorTargetCheckHandler actor_target_check; /* slot 16: map-defined target types
                                                      * (actor_score_target_candidate) */
     FdatHandler update_actor_target; /* slot 17: actor_update_behavior */
-    FdatAdjustMagicDamageHandler adjust_actor_magic_damage; /* slot 18: the damage of a spell's
-                                                             * eight components (actor_apply_magic_to_actor) */
+    FdatAdjustMagicDamageHandler adjust_actor_magic_damage; /* slot 18: the damage of a spell's eight
+                                                             * components (actor_apply_magic_to_actor) */
     FdatActorHandler on_actor_removed; /* slot 19: actor_update_behavior,
                                         * actor_disable_type3_transition_actors */
     FdatHandler unused_20[12];    /* slots 20..31: never called */
