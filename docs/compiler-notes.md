@@ -161,6 +161,16 @@ What decides the numbers:
   parameter be read at its use (`0x80015410`). Such a parameter is read in
   place only with the equivalence and exactly two references.
 
+- **Two symmetric chains in one block.** With `gx = ex - cx; gz = ez - cz;
+  sx = -gx; sz = -gz; out.x = sx; out.z = sz;` sched1 keeps the x difference
+  first and schedules its negation and stores after the whole z chain, so
+  the x quantity has the long life: the z chain ranks first in local-alloc
+  and takes `v0`, x takes `v1`, and the read-back of `sz` reuses `v0`. With
+  the hard registers fixed like that, sched2 moves the x subtraction and its
+  store below the z chain and leaves the z store next to its read-back.
+  Writing the z pair first gives z the long life and `v1`, and sched2 then
+  sinks the z store and read-back below the x stores (`0x80034bf4`).
+
 ### Hard-register choice
 
 - MIPS has no `REG_ALLOC_ORDER`. `find_reg` pass 0 takes the call-used
@@ -430,6 +440,24 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   (`max_uid` guard). Retail's separate identical `li a0,N; j shared` blocks
   are cases that call the shared function themselves and `goto` past it
   (`case 6: player_probe_view_target_and_vectors(500, ...); goto spawn;`, `0x8002c30c`).
+- **Which copy of `x = 0; break;` survives decides whether its label is
+  new.** `if (c) { x = 0; break; }` has a branch before the store, so it
+  merges (jump-around rule) only into a copy that also has a jump insn
+  before it, never into a case that starts at a barrier. A copy reached
+  through a label (`case 2: x = 0; break;`, or the store after an `&&`
+  chain) merges into the first copy in the chain with one common insn.
+  So when a plain `case 2: case 3: x = 0; break;` comes *before* the case
+  that ends `if (c) goto use; x = 0; break;`, the plain block is merged into
+  that case's tail at a label made during jump2, and the jumps that later
+  reach it are never searched again: three identical
+  `jal f; bnez use; j zero` tails stay separate. With the plain block last
+  (KF2's fall-through order) the case's tail is merged into the old case
+  label instead and the tails are merged on the next pass (`0x8004b984`).
+- **A label before the store limits the merge to the store.** Written as one
+  condition (`if (a && b && f()) goto use; x = 0; break;`), the false exits
+  of `a` and `b` put a label before `x = 0`, the scan stops there, and only
+  the store is merged; with `if (!a) { x = 0; break; } ... if (f()) goto use;
+  x = 0; break;` the call and its test are merged too (`0x8004b984`).
 - **The later copy survives.** Where retail keeps the earlier one, the source
   has an explicit `goto` into it (`0x800500a8` case 30, `0x800324f0`,
   `0x8005c1e8`, `0x80055db0`, `0x80053c84`'s jumps into a later case just past
@@ -492,6 +520,13 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   retail's order (`left = ...; x = ...; f(left + x, ...)`) schedules as
   retail does where one expression does not (`0x8001b5c4`), and each local
   also keeps its own constant from fold's reassociation.
+- **An odd update among shifts.** In a run of `p[n] <<= 3` updates sched1
+  pipelines two loads ahead in `v0`/`v1`; four, six or eight updates keep
+  source order and five come out as 1, 3, 2, 5, 4. A different update in
+  the run (`p[3] &= 0xff9f`) joins that pipeline. Written last through a
+  block-scoped temporary (`{ u16 t; ...; t = p[3] & 0xff9f; p[3] = t; }`)
+  its load is scheduled first and held in a third register (`a0`) while the
+  shifts keep their own order (the case blocks of `0x8003591c`).
 - **Loop notes are barriers.** No insn is scheduled across a
   `NOTE_INSN_LOOP_BEG`/`END` inside a basic block (`sched_analyze_insn`;
   read in the source, no match rests on it yet).
@@ -502,6 +537,14 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   `v0` live at the return, so no `v0` write fills the last slot; declaring
   it `void` changes that slot (`0x800290d8`). The first-declared initialised
   scalar's `move sN,zero` fills the first slot (OPEN `main`).
+- **A redundant insn at the branch target.** When a branch goes to a shared
+  `x = 0; j end` block and an earlier slot on the same path already holds
+  `move x,zero`, reorg skips the redundant store, retargets the branch to
+  `end`, and then fills the slot from the fall-through (`bnez v0,end; li
+  v0,-257`). A branch that reaches `end` with `x` already zero but is not
+  written through the shared block takes `move v0,x` from `end` instead. In
+  `if (a) {...} else if (b && c) { flags &= ~F; } x = 0; break;` both tests
+  of the else arm go through the shared block (`0x8004b984`, type 25).
 
 ## Stack frames
 
@@ -661,7 +704,12 @@ Residues whose mechanism is known but whose source form is not:
   before the `scratch->part` store, as if cse had not followed the jump.
 - `0x800608ec`: retail stops hoisting after four invariants (the threshold),
   which needs a larger loop at loop time than any spelling found.
-- `0x8004b984`: three copies of one call-and-test tail survive in retail;
-  every spelling tried merges two of them.
 - `0x80044d9c`, `0x8005c308`: reorg fills, and sched2 moves, an instruction
   that retail leaves in place.
+- `0x8003591c`: retail keeps the byte insert of `tag.code &= ~2` in the
+  register copy of the head word *and* the `srl 24; andi 0xfd` of the
+  switch, with the `0x00ffffff` mask hoisted out of both loops and
+  allocated after the part counter and pointer. Combine keeps both only
+  when a later store of the byte dies after the switch value was combined;
+  the three-store form that does this references the mask three times and
+  the allocation order needs two.
