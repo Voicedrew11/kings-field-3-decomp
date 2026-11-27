@@ -26,7 +26,20 @@
 
 RODATA(0x800130f0, 0x1a4)
 
-/* Runs obj's talk script record (id 0x70) from its entry point up to the 0xff end, then its end action. */
+/*
+ * Runs obj's talk script record (id 0x70) from its entry point up to the
+ * 0xff end, then its end action.
+ *
+ * Not exact (one instruction out of place): in the first
+ * actor_animation_seek_phase(obj, script[1], ...) call retail sets `li
+ * a3,0xfff` before the argument loads and leaves the `lhu` next to the
+ * `jal`; here sched2 moves `li a3` into that load-use gap. Retail's sched2
+ * still had the copy of script[1] into a1 at that point, which needs the
+ * byte in a pseudo that combine could not merge into its extension. Only a
+ * volatile read of that one byte reproduces it, and the same byte is read
+ * non-volatile three lines earlier, so the plain read stays. gcc 2.6.3
+ * gives the same code as 2.6.0 here.
+ */
 ADDRESS(0x8005c308, 0x4e0)
 void event_target_stream_execute(Actor *obj)
 {
@@ -168,17 +181,17 @@ end:
     cur_evt_state.interaction_handled = 1;
 }
 
-/* Spawns MapObject 0x17c and links obj to it (its index - 124). */
+/* Spawns MapObject 0x17c, links obj to it (its index - 124) and returns it. */
 ADDRESS(0x8005c7e8, 0x7c)
-void event_spawn_effect_object(MapObject *obj, s32 id)
+MapObject *event_spawn_effect_object(MapObject *obj, s32 id)
 {
     MapObject *made;
-    s32 i;
 
     made = map_object_effect_pool_acquire(0x17c, 0x10, -1);
     obj->arg.b.unk39 = made - map_objects_slots.objects - 124;
     made->object_id = id;
     made->arg.b.unk38 = 0;
+    return made;
 }
 
 /* Loads start position n's areas and puts the player there (12: none). */

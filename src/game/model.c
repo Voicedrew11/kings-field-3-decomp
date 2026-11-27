@@ -1,7 +1,8 @@
 /*
- * GAME.EXE: model data registration, the model part renderers and the map
- * layer front ends with their ground renderers (WIP slice of the render
- * module; the primitive fix-up tmd_prepare_primitive_indices before it is not claimed yet).
+ * GAME.EXE: the model primitive fix-up, model data registration, the model
+ * part renderers and the map layer front ends with their ground renderers
+ * (WIP slice of the render module). The RODATA claim holds
+ * tmd_prepare_primitive_indices's jump table.
  */
 #include <kf/lib/address.h>
 #include <kf/lib/types.h>
@@ -10,6 +11,142 @@
 #include <game/data.h>
 #include <game/render.h>
 #include <INLINE.H>
+
+RODATA(0x80011be0, 0x74)
+
+/*
+ * Fixes up the primitive records of every part of a model data block: the
+ * vertex and normal numbers become byte offsets (8 per SVECTOR) and the
+ * textured kinds lose the blend bits (5-6) of their texture page word. The
+ * kind is the record's GPU code without the semi-transparency bit (2), which
+ * is cleared in the copy of the head word only.
+ * The copy is changed twice more before the switch reads it, and nothing
+ * reads those changes: the code is saved, another byte of the copy is
+ * cleared and the code is put back. Retail's instructions need them: they
+ * are why the compiler keeps the first store of the code byte and the
+ * `& 0xfd` of the switch instead of folding one into the other, the second
+ * store is the second use of the 0x00ffffff mask (register t2), and the
+ * mask of the cleared byte, left without an instruction, is the 8 unused
+ * bytes of frame. Clearing either of the other two bytes instead gives the
+ * same object; which statement the original had is not known.
+ */
+ADDRESS(0x8003591c, 0x328)
+void tmd_prepare_primitive_indices(u8 *data)
+{
+    ModelData *model;
+    ModelPart *part;
+    union {
+        u32 w;
+        PrimTag t;
+    } tag;
+    u8 *prim;
+    u16 *body;
+    s32 i;
+    s32 j;
+    s32 code;
+
+    model = (ModelData *)data;
+    part = model->parts;
+    i = model->count;
+    while (--i != -1) {
+        j = part->prim_count;
+        prim = data + (part->prims + 12);
+        while (--j != -1) {
+            body = (u16 *)(prim + 4);
+            tag.w = *(u32 *)prim;
+            prim = (u8 *)body + prim[1] * 4;
+            tag.t.code &= ~2;
+            code = tag.t.code;
+            tag.t.unk2 = 0;
+            tag.t.code = code;
+            switch (tag.t.code & 0xfd) {
+            case 0x20: /* flat triangle: three vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x24: { /* flat textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[8] <<= 3;
+                body[9] <<= 3;
+                body[6] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x28: /* flat quad: four vertices, one normal */
+                body[3] <<= 3;
+                body[4] <<= 3;
+                body[5] <<= 3;
+                body[6] <<= 3;
+                body[2] <<= 3;
+                break;
+            case 0x2c: { /* flat textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[10] <<= 3;
+                body[11] <<= 3;
+                body[12] <<= 3;
+                body[8] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x30: /* gouraud triangle: three vertices, three normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                break;
+            case 0x34: { /* gouraud textured triangle */
+                u16 tpage;
+
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            case 0x38: /* gouraud quad: four vertices, four normals */
+                body[3] <<= 3;
+                body[5] <<= 3;
+                body[7] <<= 3;
+                body[9] <<= 3;
+                body[2] <<= 3;
+                body[4] <<= 3;
+                body[6] <<= 3;
+                body[8] <<= 3;
+                break;
+            case 0x3c: { /* gouraud textured quad */
+                u16 tpage;
+
+                body[9] <<= 3;
+                body[11] <<= 3;
+                body[13] <<= 3;
+                body[15] <<= 3;
+                body[8] <<= 3;
+                body[10] <<= 3;
+                body[12] <<= 3;
+                body[14] <<= 3;
+                tpage = body[3] & 0xff9f;
+                body[3] = tpage;
+                break;
+            }
+            }
+        }
+        part++;
+    }
+}
 
 /* Registers model data id (0..3) and fixes up its primitives. */
 ADDRESS(0x80035c44, 0x40)
@@ -1673,11 +1810,11 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 
 /*
  * Draws the layers of map cell (x, z) that are visible, with flags bit 1 set.
- * Not exact: control flow, calls and constants agree; retail copies flags to
- * $a3 and x/z to $t0/$t1 at entry (unattributed allocation residue).
+ * The position is built in the scratchpad in King's Field II's order (x, y, z).
+ * Nothing in the decompiled images calls it.
  */
 ADDRESS(0x8003be34, 0x19c)
-void render_map_cell_layers(s32 x, s32 z, s32 flags)
+void render_map_cell_layers(s32 x, s32 z, u8 flags)
 {
     SVECTOR *pos;
     VECTOR *origin;
@@ -1690,8 +1827,8 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
     kind = cell->layer[0].object_index;
     if ((flags & 2) && kind < 240) {
         pos->vx = (x << 11) - origin->vx + 1024;
-        pos->vz = (z << 11) - origin->vz + 1024;
         pos->vy = (-cell->layer[0].elevation << 7) - origin->vy;
+        pos->vz = (z << 11) - origin->vz + 1024;
         render_map_cell_object(&cell->layer[0], &SCRATCH->u.layer.pos, flags);
         kind = cell->layer[1].object_index;
         if (kind < 240) {
@@ -1702,8 +1839,8 @@ void render_map_cell_layers(s32 x, s32 z, s32 flags)
         kind = cell->layer[1].object_index;
         if ((flags & 2) && kind < 240) {
             pos->vx = (x << 11) - origin->vx + 1024;
-            pos->vz = (z << 11) - origin->vz + 1024;
             pos->vy = (-cell->layer[1].elevation << 7) - origin->vy;
+            pos->vz = (z << 11) - origin->vz + 1024;
             render_map_cell_object(&cell->layer[1], pos, flags);
         }
     }

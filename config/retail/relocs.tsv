@@ -5653,6 +5653,7 @@ GAME.EXE	0x800358cc	0x250cc		mips26	reachable-code	0x80016290	load		jal		manual-
 GAME.EXE	0x800358dc	0x250dc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358ec	0x250ec		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x800358fc	0x250fc		mips26	reachable-code	0x80016290	load		jal		manual-decoded	reviewed	game-h asm review
+GAME.EXE	0x80035998	0x25198	0x8003599c	mips_hi16_lo16	reachable-code	0x80011be0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x800359e0	0x251e0		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a20	0x25220		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
 GAME.EXE	0x80035a60	0x25260		mips26	reachable-code	0x80035954	load		j		manual-decoded	reviewed	game-h asm review
@@ -7353,6 +7354,7 @@ GAME.EXE	0x8004b93c	0x3b13c	0x8004b940	mips_hi16_lo16	reachable-code	0x8018faa8	
 GAME.EXE	0x8004b964	0x3b164		mips26	reachable-code	0x8004b97c	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9a8	0x3b1a8	0x8004b9ac	mips_hi16_lo16	reachable-code	0x8018fab4	bss	actor_status	lui+lw		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004b9b8	0x3b1b8		mips26	reachable-code	0x8004befc	load		j		manual-decoded	reviewed	game-f asm review
+GAME.EXE	0x8004b9cc	0x3b1cc	0x8004b9d0	mips_hi16_lo16	reachable-code	0x800124d0	load		lui+addiu		manual-decoded	reviewed	finish asm review
 GAME.EXE	0x8004ba10	0x3b210		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba2c	0x3b22c		mips26	reachable-code	0x8004bef8	load		j		manual-decoded	reviewed	game-f asm review
 GAME.EXE	0x8004ba70	0x3b270		mips26	reachable-code	0x8004beec	load		j		manual-decoded	reviewed	game-f asm review

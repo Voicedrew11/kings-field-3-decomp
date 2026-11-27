@@ -331,8 +331,6 @@ void view_grid_occlude_walls_descending(void)
  * Builds the visibility grid: marks the cells inside the view cone (by the
  * yaw, the pitch-widened half angle and the view range) around the viewer,
  * hides those behind walls and copies the result to GraphicsRuntime.grid.
- * Not exact: control flow, calls and constants agree; register allocation
- * and the spilled point coordinates differ (first attempt only).
  */
 ADDRESS(0x80034bf4, 0x4cc)
 void view_build_visibility_grid(void)
@@ -356,6 +354,7 @@ void view_build_visibility_grid(void)
     s32 kl;
     s32 kr;
     u32 range;
+    ScratchPad *scratch = SCRATCH;
     u8 *p;
     s32 i;
     s32 row;
@@ -392,8 +391,8 @@ void view_build_visibility_grid(void)
     eye_x = (u32)(0xc7ff - c * 8) >> 12;
     eye_z = (u32)(0xc7ff - s * 8) >> 12;
     p = SCRATCH->u.view.grid[0];
-    kr = -drz * back_x + drx * back_z;
     kl = -dlz * back_x + dlx * back_z;
+    kr = -drz * back_x + drx * back_z;
     if (half < 600) {
         range = scene_display_sys.view_range * scene_display_sys.view_range;
     } else {
@@ -401,11 +400,7 @@ void view_build_visibility_grid(void)
     }
     row = 0;
     col = 0;
-    rx = 0;
-    lx = 0;
-    rz = 0;
-    lz = 0;
-    for (i = 624; i != -1; i--) {
+    for (i = 624, rx = 0, lx = 0, rz = 0, lz = 0; i != -1; i--) {
         if (col >= 25) {
             rz = 0;
             lz = 0;
@@ -414,9 +409,9 @@ void view_build_visibility_grid(void)
             lx += dlx;
             row++;
         }
-        d = (col - eye_x) * (col - eye_x) + (row - eye_z) * (row - eye_z);
         left = lz - lx + kl;
         right = rz - rx + kr;
+        d = (col - eye_x) * (col - eye_x) + (row - eye_z) * (row - eye_z);
         if (d < 5) {
             if (left <= 0 && right >= 0) {
                 *p = 30;
@@ -439,30 +434,30 @@ void view_build_visibility_grid(void)
         lz += dlz;
         col++;
     }
-    SCRATCH->u.view.grid[eye_z - 1][eye_x] = 30;
-    SCRATCH->u.view.grid[eye_z][eye_x - 1] = 30;
-    SCRATCH->u.view.grid[eye_z][eye_x] = 30;
-    SCRATCH->u.view.grid[eye_z][eye_x + 1] = 30;
-    SCRATCH->u.view.grid[eye_z + 1][eye_x] = 30;
+    scratch->u.view.grid[eye_z - 1][eye_x] = 30;
+    scratch->u.view.grid[eye_z][eye_x - 1] = 30;
+    scratch->u.view.grid[eye_z][eye_x] = 30;
+    scratch->u.view.grid[eye_z][eye_x + 1] = 30;
+    scratch->u.view.grid[eye_z + 1][eye_x] = 30;
     if (cur_avatar_status.reaction_mode != 0x11) {
-        SCRATCH->u.view.grid[back_z - 1][back_x] = 0;
-        SCRATCH->u.view.grid[back_z][back_x - 1] = 0;
-        SCRATCH->u.view.grid[back_z][back_x] = 0;
-        SCRATCH->u.view.grid[back_z][back_x + 1] = 0;
-        SCRATCH->u.view.grid[back_z + 1][back_x] = 0;
+        scratch->u.view.grid[back_z - 1][back_x] = 0;
+        scratch->u.view.grid[back_z][back_x - 1] = 0;
+        scratch->u.view.grid[back_z][back_x] = 0;
+        scratch->u.view.grid[back_z][back_x + 1] = 0;
+        scratch->u.view.grid[back_z + 1][back_x] = 0;
     }
-    scene_display_sys.grid_z = eye_z - scene_display_sys.view_cell_z;
-    scene_display_sys.map_scan_start_z = -scene_display_sys.grid_z;
     scene_display_sys.grid_x = eye_x - scene_display_sys.view_cell_x;
+    scene_display_sys.grid_z = eye_z - scene_display_sys.view_cell_z;
     scene_display_sys.map_scan_start_x = -scene_display_sys.grid_x;
-    SCRATCH->u.view.x = scene_display_sys.map_scan_start_x;
-    SCRATCH->u.view.z = scene_display_sys.map_scan_start_z;
+    scene_display_sys.map_scan_start_z = -scene_display_sys.grid_z;
+    scratch->u.view.x = scene_display_sys.map_scan_start_x;
+    scratch->u.view.z = scene_display_sys.map_scan_start_z;
     if ((yaw & 0xfff) < 2048) {
         view_grid_occlude_walls_ascending();
     } else {
         view_grid_occlude_walls_descending();
     }
-    resource_copy_words((u32 *)scene_display_sys.grid, (u32 *)SCRATCH->u.view.grid,
+    resource_copy_words((u32 *)scene_display_sys.grid, (u32 *)scratch->u.view.grid,
                         sizeof(scene_display_sys.grid) / 4);
 }
 

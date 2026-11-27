@@ -506,12 +506,6 @@ void player_cap_curse_strength(void)
     }
 }
 
-/*
- * Not exact: the map-marker argument loads (area, pos.vz) are scheduled and
- * allocated differently. The two-frame repeat is a goto loop: as a nested
- * loop its uses would be weighted by depth and the hoisted address would
- * outrank the 0x66666667 constant and the item copy ($s2/$s3/$s4).
- */
 ADDRESS(0x8001b5c4, 0x2c8)
 void menu_show_item_picture(u8 item)
 {
@@ -519,6 +513,9 @@ void menu_show_item_picture(u8 item)
     s32 i;
     s32 bytes;
     u8 area;
+    s32 left;
+    s32 x;
+    s32 y;
 
     if (item == 0x5f) {
         n = 0x2f1;
@@ -542,7 +539,6 @@ void menu_show_item_picture(u8 item)
     menu_cd_read_state = 0;
     input_wait_release();
     do {
-    again:
         menu_frame_begin();
         menu_draw_item_picture(item);
         if (asset_status.current_area < 12 && item == 0x5f) {
@@ -560,8 +556,10 @@ void menu_show_item_picture(u8 item)
                 n = 0;
             }
             area = asset_status.current_area;
-            primitive_set_poly_ft4_rect((area & 3) * 56 + cur_avatar_status.pos.vx / 2560 + 40,
-                                        0xbc - cur_avatar_status.pos.vz / 2560 - (area >> 2) * 56,
+            left = (area & 3) * 56;
+            x = cur_avatar_status.pos.vx / 2560 + 40;
+            y = 0xbc - cur_avatar_status.pos.vz / 2560;
+            primitive_set_poly_ft4_rect(left + x, y - (area >> 2) * 56,
                                         15, 15, n * 16 + 128, 0x90, 15, 15);
             primitive_buffer_commit_poly_ft4(0x1c);
         }
@@ -569,10 +567,7 @@ void menu_show_item_picture(u8 item)
         menu_draw_ascii_string(0x8a, 0xd6, "return", 0, 0);
         menu_present_frame();
         i++;
-        if (i < 2) {
-            goto again;
-        }
-    } while (!input_read_mark_active());
+    } while (i < 2 || !input_read_mark_active());
     input_wait_press();
     input_wait_release();
 }
@@ -1472,7 +1467,6 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
     u8 *buffer;
     s32 n;
     s32 i;
-    u16 page;
 
     buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
     cd_archive_read(8, entry, buffer);
@@ -1481,12 +1475,12 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
     memory_free((void *)buffer);
     n = 0;
     for (i = 0; i < 256; i++) {
-        page = conversation_record_page_entry(book, i);
-        if (page != 0xffff && page != 0xfffe && page != 0xfffd) {
+        entry = conversation_record_page_entry(book, i);
+        if (entry != 0xffff && entry != 0xfffe && entry != 0xfffd) {
             *out++ = i;
             n++;
         }
-        if (page == 0xffff) {
+        if (entry == 0xffff) {
             i = 256;
         }
     }
@@ -4463,11 +4457,12 @@ void menu_render_list(MenuList *list, s32 flags)
     u8 *second;
     u32 *values;
     u8 *counts;
+    u8 *out;
+    MenuSpriteDef *sprite;
+    s32 value;
     s32 hide;
-    s32 stock;
     s32 i;
-    s32 j;
-    s32 bright;
+    s32 n; /* glyph counter, then the cursor brightness */
     s32 blue;
 
     hide = flags & 0x8000;
@@ -4484,65 +4479,71 @@ void menu_render_list(MenuList *list, s32 flags)
     second += list->first * 24;
     values += list->first;
     counts += list->first;
-    stock = flags == 8 || flags == 9;
-    for (i = 0; i < list->rows; i++) {
-        if (i >= list->count) {
-            break;
-        }
+    for (i = 0; i < list->rows && i < list->count; i++) {
         text.x = list->x + 13;
         text.y = list->y + 8 + i * 16;
-        for (j = 0; j < list->glyphs_per_entry; j++) {
-            text.text[j] = *names++;
+        out = text.text;
+        for (n = 0; n < list->glyphs_per_entry; n++) {
+            *out++ = *names++;
         }
         menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         if (flags == 3) {
             text.x += 84;
-            for (j = 0; j < 24; j++) {
-                text.text[j] = *second++;
+            out = text.text;
+            for (n = 0; n < 24; n++) {
+                *out++ = *second++;
             }
-            text.text[j] = 0xff;
+            *out = 0xff;
             menu_draw_string(&menu_sprite_defs[MENU_FONT_TEXT], &text);
         }
         if (flags >= 10 && flags < 16 && flags != 12) {
+            value = *values;
             text.x += 161;
-            menu_format_number(*values++, 6, 0, 2, text.text);
+            menu_format_number(value, 6, 0, 2, text.text);
             menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
+            values++;
         }
         if (flags == 2 || flags == 4) {
-            if (*values++ != -1) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 206;
-                menu_format_number(values[-1], 3, 0, 3, text.text);
+                menu_format_number(value, 3, 0, 3, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
-        if (stock) {
-            if (*values++ != -1) {
+        if (flags == 8 || flags == 9) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 115;
-                menu_format_number(values[-1], 7, 0, 4, text.text);
+                menu_format_number(value, 7, 0, 4, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
-            if (*counts++ != 0xff) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x += 91;
-                menu_format_number(counts[-1], 3, 0, 5, text.text);
+                menu_format_number(value, 3, 0, 5, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
-        if (!(flags == 2 || flags == 3 || flags == 4 || stock || flags == 16)) {
-            if (*counts++ != 0xff) {
+        if (flags != 2 && flags != 3 && flags != 4 && flags != 8 && flags != 9 && flags != 16) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x = list->x + 233;
-                menu_format_number(counts[-1], 2, 0, 1, text.text);
+                menu_format_number(value, 2, 0, 1, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
         if (flags == 16) {
-            if (*counts++ != 0xff) {
+            value = *counts++;
+            if (value != 0xff) {
                 text.x += 220;
-                menu_format_number(counts[-1], 2, 0, 1, text.text);
+                menu_format_number(value, 2, 0, 1, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
-            if (*values++ != -1) {
+            value = *values++;
+            if (value != -1) {
                 text.x += 206;
-                menu_format_number(values[-1], 3, 0, 3, text.text);
+                menu_format_number(value, 3, 0, 3, text.text);
                 menu_draw_number(&menu_sprite_defs[MENU_FONT_NUMBER], &text);
             }
         }
@@ -4551,20 +4552,19 @@ void menu_render_list(MenuList *list, s32 flags)
     for (i = 0; i < list->rows; i++) {
         if (i == list->row) {
             if (menu_cursor_animation_frame < 48) {
-                bright = menu_cursor_animation_frame + menu_sprite_shade;
+                n = menu_cursor_animation_frame + menu_sprite_shade;
                 blue = menu_cursor_animation_frame / 2 + menu_sprite_shade;
             } else {
-                bright = menu_sprite_shade + 95 - menu_cursor_animation_frame;
-                blue = menu_sprite_shade + 47 - menu_cursor_animation_frame / 2;
+                n = menu_sprite_shade + (95 - menu_cursor_animation_frame);
+                blue = menu_sprite_shade + (47 - menu_cursor_animation_frame / 2);
             }
+            sprite = &menu_sprite_defs[11];
             primitive_buffer_begin_poly_ft4();
-            setRGB0(current_poly_ft4, bright, bright, blue);
-            current_poly_ft4->tpage = menu_sprite_defs[11].tpage;
-            current_poly_ft4->clut = menu_sprite_defs[11].clut;
-            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, menu_sprite_defs[11].width,
-                                        menu_sprite_defs[11].height, menu_sprite_defs[11].u,
-                                        menu_sprite_defs[11].v, menu_sprite_defs[11].width,
-                                        menu_sprite_defs[11].height);
+            setRGB0(current_poly_ft4, n, n, blue);
+            current_poly_ft4->tpage = sprite->tpage;
+            current_poly_ft4->clut = sprite->clut;
+            primitive_set_poly_ft4_rect(list->x + 6, list->y + i * 16 + 5, sprite->width, sprite->height,
+                                        sprite->u, sprite->v, sprite->width, sprite->height);
             SetSemiTrans((void *)current_poly_ft4, 1);
             primitive_buffer_commit_poly_ft4(0x31);
         }
@@ -5016,7 +5016,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     s32 k;
     s32 ww;
     s32 hh;
-    s32 v;
+    s16 v;
     s32 wrem;
     s32 hrem;
     s32 done;
@@ -5024,9 +5024,9 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
 
     x = x0;
     y = y0;
+    done = 0;
     wrem = w - 66;
     hrem = h - 66;
-    done = 0;
     for (i = 0, k = 9; i < 6; i++, k++) {
         if (i == 3) {
             k += 3;
@@ -5034,14 +5034,14 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             if (hrem < 0) {
                 y += 33;
             } else {
-                y = y + 33 + hrem;
+                y += hrem + 33;
             }
             wrem = w - 66;
         }
         f = &menu_sprite_defs[k + 3];
         if (i >= 3 && hrem < 0) {
             hh = h - 33;
-            v = f->v + 66 - h;
+            v = f->v + (66 - h);
         } else {
             hh = f->height;
             v = f->v;
@@ -5071,17 +5071,17 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
     }
     y = y0 + 33;
     x = x0;
-    i = 11;
+    k = 11;
     while (!done) {
-        i++;
-        f = &menu_sprite_defs[i + 3];
+        k++;
+        f = &menu_sprite_defs[k + 3];
         hh = f->height;
         ww = f->width;
-        end = 0;
         if (hrem < hh) {
             hh = hrem;
         }
         wrem = w - 66;
+        end = 0;
         do {
             primitive_buffer_begin_poly_ft4();
             setRGB0(current_poly_ft4, menu_sprite_shade, menu_sprite_shade, menu_sprite_shade);
@@ -5091,7 +5091,7 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
             primitive_set_poly_ft4_rect(x, y, ww, hh, f->u, f->v, ww, hh);
             x += ww;
             primitive_buffer_commit_poly_ft4(0x32);
-            if (i != 13) {
+            if (k != 13) {
                 break;
             }
             wrem -= ww;
@@ -5101,8 +5101,8 @@ void menu_draw_nine_slice_panel(s32 x0, s32 y0, s32 w, s32 h)
                 ww = wrem;
             }
         } while (!end);
-        if (i == 14) {
-            i = 11;
+        if (k == 14) {
+            k = 11;
             y += 28;
             x = x0;
             hrem -= hh;

@@ -27,7 +27,7 @@ extern MapCellPattern map_object_door5_object_pattern[3];
 
 void map_cell_apply_rotated_pattern(u8 area, s32 x, s32 z, s32 angle, MapCellPattern *rec, s32 index,
                                     s32 flags);
-void map_cell_copy_rotated_fields(s32 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
+void map_cell_copy_rotated_fields(u8 flags, s32 sx, s32 sz, s32 dx, s32 dz, s32 w, s32 h, s32 angle,
                                   s32 mask);
 
 #endif
