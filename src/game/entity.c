@@ -113,7 +113,7 @@ void actor_disable_type3_transition_actors(void)
         if (obj->slot_state == 1 && obj->lifecycle == 1 && obj->target_type == 3
             && obj->target_action_state == 0xf0) {
             if (obj->target_phase != 0 || obj->animation_phase > 0x800) {
-                ((void (*)(Actor *))asset_status.handlers[FDAT_SLOT_ON_ACTOR_REMOVED])(obj);
+                asset_status.handlers->on_actor_removed(obj);
                 actor_set_lifecycle_and_home_position(obj);
             }
         }

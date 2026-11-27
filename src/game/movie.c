@@ -364,7 +364,7 @@ void movie_update_state(void)
         movie_state.stream_status = 0;
         break;
     case 4:
-        ((void (*)(u8))asset_status.handlers[FDAT_SLOT_ON_MOVIE_START])(id);
+        asset_status.handlers->on_movie_start(id);
         movie_play_stream();
         if (cur_evt_state.unk61 == 1) {
             cur_evt_state.unk61 = 2;
@@ -384,7 +384,7 @@ void movie_update_state(void)
     case 8:
         if (movie_state.stream_status == 1) {
             movie_state.state = 0;
-            ((void (*)(u8))asset_status.handlers[FDAT_SLOT_ON_MOVIE_END])(id);
+            asset_status.handlers->on_movie_end(id);
         }
         movie_state.stream_status = 0;
         break;

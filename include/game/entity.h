@@ -83,11 +83,12 @@ void actor_bind_current(Actor *obj);
 void actor_advance_animation_wrapped(Actor *obj, s16 step);
 #ifdef FDAT_MODULE
 /*
- * The FDAT modules call it without this prototype: FDAT_077/083 pass a u16
- * script field zero-extended (lhu) where GAME.EXE's callers narrow to s16.
+ * FDAT_077/083 pass a u16 script field zero-extended (lhu) where GAME.EXE's
+ * callers narrow to s16: the FDAT view declares the step as the modules pass it.
  */
-void actor_advance_animation_clamped();
+void actor_advance_animation_clamped(Actor *obj, u16 step);
 #else
+
 void actor_advance_animation_clamped(Actor *obj, s16 step);
 #endif
 s32 actor_animation_crossed_phase(Actor *obj, u16 time);

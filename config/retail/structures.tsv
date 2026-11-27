@@ -29,6 +29,7 @@ EffectTrailRow	0x18	supported	asm;effect_construct_record copies pos (16 bytes) 
 EffectWords	0x8	supported	asm;effect_construct_record sw trail pointer to Effect+0x44 (ids 5, 16) and pos.vy to +0x48 (id 95)	WIP (game-sw)
 EquipmentRecord	0x20	supported	asm;player_add_equipment_bonuses/player_set_equipment_slot 32-byte stride at map_world+0x11c14	WIP (game-d)
 EventState	0x5144	supported	asm;game loop word-count clear;band D player_recalculate_combat_stats/player_learn_element_magic/player_equip_weapon byte accesses	WIP (game-d)
+FdatHandlers	0x80	supported	asm;asset_status.handlers / FdatHeader +0x4: 32 handler words (callback_default_table, the FDAT module tables);GAME indirect_sites.tsv slot loads	types (ty1)
 FdatHeader	0x88	supported	retail FDAT module bytes 0x0..0x88 (id, 32 handler words, id+0x20);15 modules relink byte-identically	WIP (fdat)
 GraphicsRuntime	0x178a8	supported	asm;game loop clears 0x5e2a words;game-b field accesses (one CSE base across members);resource_mark_area_models_reclaimable pointer table at +0x1015c	WIP: render work area; only the fields bands B and D touch are named
 HeapBlock	0xc	supported	asm;src/game/memory.c 12-byte block header (data - 12 accessors)	WIP (game-c)

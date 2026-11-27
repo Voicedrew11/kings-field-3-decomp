@@ -8,7 +8,9 @@
 #include <kf/lib/types.h>
 #include <sys/types.h>
 #include <psyq/sdk.h>
+#include <psyq/libc.h>
 #include <game/data.h>
+
 #include <game/render.h>
 #include <fdat/fdat.h>
 
@@ -16,15 +18,17 @@ RODATA(0x801e8308, 0x88)
 
 void area_handler_noop(void);
 void area_update_noop(void);
-void area_adjust_actor_magic_damage_noop(void);
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7);
 void area_on_actor_removed_trade_item(Actor *obj);
-void area_region_trigger_noop(void);
-void area_init_map_object_noop(void);
+void area_region_trigger_noop(MapObject *obj);
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def);
 void area_update_map_object_noop(void);
 void area_on_item_added_noop(void);
-void area_on_movie_start_noop(void);
-void area_on_movie_end_set_flag(void);
-void area_talk_event_noop(void);
+void area_on_movie_start_noop(u8 movie_id);
+void area_on_movie_end_set_flag(u8 movie_id);
+void area_talk_event_noop(Actor *obj, s32 event);
 void area_on_load_store_area_index(void);
 
 const FdatHeader fdat_header = {
@@ -81,7 +85,9 @@ void area_update_noop(void)
 #include "shared/area_use_item_notify_no_target.inc"
 
 ADDRESS(0x801e85dc, 0x8)
-void area_adjust_actor_magic_damage_noop(void)
+void area_adjust_actor_magic_damage_noop(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                         s32 component2, s32 component3, s32 component4, s32 component5,
+                                         s32 component6, s32 component7)
 {
 }
 
@@ -108,12 +114,12 @@ void area_on_actor_removed_trade_item(Actor *obj)
 }
 
 ADDRESS(0x801e8694, 0x8)
-void area_region_trigger_noop(void)
+void area_region_trigger_noop(MapObject *obj)
 {
 }
 
 ADDRESS(0x801e869c, 0x8)
-void area_init_map_object_noop(void)
+void area_init_map_object_noop(MapObject *obj, MapObjectDef *def)
 {
 }
 
@@ -132,19 +138,19 @@ void area_on_item_added_noop(void)
 }
 
 ADDRESS(0x801e8a48, 0x8)
-void area_on_movie_start_noop(void)
+void area_on_movie_start_noop(u8 movie_id)
 {
 }
 
 /* Sets flag 0x37. */
 ADDRESS(0x801e8a50, 0x14)
-void area_on_movie_end_set_flag(void)
+void area_on_movie_end_set_flag(u8 movie_id)
 {
     cur_evt_state.unk32[0x37] = 1;
 }
 
 ADDRESS(0x801e8a64, 0x8)
-void area_talk_event_noop(void)
+void area_talk_event_noop(Actor *obj, s32 event)
 {
 }
 

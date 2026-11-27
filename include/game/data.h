@@ -839,29 +839,59 @@ typedef struct WeaponRecord {
     s16 final_vertex_index;
 } WeaponRecord;
 
-/* One entry of a loaded FDAT module's handler table. */
-typedef s32 (*FdatHandler)();
+/* The handler shapes of a loaded FDAT module's table (FdatHandlers), one per kind of slot. */
+typedef void (*FdatHandler)(void);
+typedef void (*FdatInteractHandler)(VECTOR *pos, SVECTOR *angle);
+typedef void (*FdatUseItemHandler)(VECTOR *pos, SVECTOR *angle, s32 item);
+typedef void (*FdatMapObjectHandler)(MapObject *obj);
+typedef void (*FdatTalkEventHandler)(Actor *obj, s32 event);
+typedef void (*FdatMovieHandler)(u8 movie_id);
+typedef void (*FdatInitMapObjectHandler)(MapObject *obj, MapObjectDef *def);
+typedef s32 (*FdatActorTargetCheckHandler)(u8 *script, s32 dist);
+typedef void (*FdatAdjustMagicDamageHandler)(Actor *obj, s32 *damage, s32 component0, s32 component1,
+                                             s32 component2, s32 component3, s32 component4,
+                                             s32 component5, s32 component6, s32 component7);
+typedef void (*FdatActorHandler)(Actor *obj);
 
 /*
- * Slots of that table (FdatHeader.handlers, asset_status.handlers) GAME.EXE calls; the
- * slots not listed are empty in every module.
+ * The 32-slot handler table at +4 of a loaded FDAT module (FdatHeader.handlers), which
+ * asset_status.handlers points at; while a module loads it points at GAME's
+ * callback_default_table instead. GAME.EXE calls slots 0..11 and 16..19 (the indirect
+ * sites in config/retail/indirect_sites.tsv); the other slots hold the module's empty
+ * handler. A module fills a slot whose callers pass arguments with an empty handler
+ * that takes none (area_handler_noop in slots 7 and 10, the slot 16 noops) through an
+ * explicit cast.
  */
-#define FDAT_SLOT_INTERACT                  0
-#define FDAT_SLOT_UPDATE                    1
-#define FDAT_SLOT_USE_ITEM                  2
-#define FDAT_SLOT_REGION_TRIGGER            3
-#define FDAT_SLOT_TALK_EVENT                4
-#define FDAT_SLOT_ON_LOAD                   5
-#define FDAT_SLOT_ON_ITEM_ADDED             6
-#define FDAT_SLOT_ON_MOVIE_END              7
-#define FDAT_SLOT_INIT_MAP_OBJECT           8
-#define FDAT_SLOT_UPDATE_MAP_OBJECT         9
-#define FDAT_SLOT_ON_MOVIE_START            10
-#define FDAT_SLOT_ON_ITEM_REMOVED           11
-#define FDAT_SLOT_ACTOR_TARGET_CHECK        16
-#define FDAT_SLOT_UPDATE_ACTOR_TARGET       17
-#define FDAT_SLOT_ADJUST_ACTOR_MAGIC_DAMAGE 18
-#define FDAT_SLOT_ON_ACTOR_REMOVED          19
+typedef struct FdatHandlers {
+    FdatInteractHandler interact; /* slot 0: the player interacts at (pos, angle)
+                                   * (event_world_dispatch_interaction) */
+    FdatHandler update;           /* slot 1: every frame (game_update_ending) */
+
+    FdatUseItemHandler use_item;  /* slot 2: an item is used at (pos, angle)
+                                   * (event_scene_command_dispatch) */
+    FdatMapObjectHandler region_trigger; /* slot 3: map object region trigger
+                                          * (map_object_update_actions) */
+    FdatTalkEventHandler talk_event; /* slot 4: script record 0xf4 of an Actor
+                                      * (event_target_stream_execute) */
+    FdatHandler on_load;          /* slot 5: the area finished loading */
+    FdatHandler on_item_added;    /* slot 6: game_counter_increment */
+    FdatMovieHandler on_movie_end; /* slot 7: movie_update_state */
+    FdatInitMapObjectHandler init_map_object; /* slot 8: a module-defined map object kind is set up
+                                               * (map_object_initialize_from_placements) */
+    FdatHandler update_map_object; /* slot 9: a module-defined map object kind runs
+                                    * (map_object_update_actions, map_objects_slots.current) */
+    FdatMovieHandler on_movie_start; /* slot 10: movie_update_state */
+    FdatHandler on_item_removed;  /* slot 11: game_counter_decrement */
+    FdatHandler unused_12[4];     /* slots 12..15: never called */
+    FdatActorTargetCheckHandler actor_target_check; /* slot 16: map-defined target types
+                                                     * (actor_score_target_candidate) */
+    FdatHandler update_actor_target; /* slot 17: actor_update_behavior */
+    FdatAdjustMagicDamageHandler adjust_actor_magic_damage; /* slot 18: the damage of a spell's
+                                                             * eight components (actor_apply_magic_to_actor) */
+    FdatActorHandler on_actor_removed; /* slot 19: actor_update_behavior,
+                                        * actor_disable_type3_transition_actors */
+    FdatHandler unused_20[12];    /* slots 20..31: never called */
+} FdatHandlers;
 
 /*
  * Area state resource_initialize_game_assets and resource_run_initial_transition set up (WIP). Only the scene
@@ -886,7 +916,7 @@ typedef struct ResourceState {
                      * model id bank (map_object_asset_index) */
     u8 current_area;
     u8 unka[2];
-    FdatHandler *handlers; /* +0x0c: the loaded FDAT module's handler table */
+    FdatHandlers *handlers; /* +0x0c: the loaded FDAT module's handler table */
     u8 requested_resource_ids[5]; /* +0x10: the ids being loaded, 0xff for none */
     u8 world_shift_applied; /* +0x15: set once the loader shifted the origin (resource_advance_transition) */
     u8 tmd_object_limit_active; /* +0x16: render_map_cell_object limits the parts drawn while loading */
