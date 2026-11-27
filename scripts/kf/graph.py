@@ -124,6 +124,17 @@ def toolchain_identity() -> str:
     return "\n".join(rows) + "\n"
 
 
+def build_identity() -> str:
+    """The toolchain identity plus compilers that only some profiles use.
+
+    It decides when the build graph is stale. The ledger's input digest keeps
+    `toolchain_identity` (it already names the profile, and so the compiler),
+    so adding such a compiler does not re-hash every banked row.
+    """
+    resolved = shutil.which("cc1psx-260r")
+    return toolchain_identity() + f"cc1psx-260r={os.path.realpath(resolved) if resolved else '-'}\n"
+
+
 def _ninja_path(path: str | Path) -> str:
     return str(path).replace("$", "$$").replace(" ", "$ ").replace(":", "$:")
 
@@ -191,7 +202,7 @@ def emit(out: Path = NINJA, retail_dir: Path | None = None) -> tuple[int, int]:
     contributions = load_contributions(modules=manifest.modules())
     retail = configured_retail_dir(retail_dir)
     pruned = _prune_orphans(manifest)
-    _write_if_changed(TOOLCHAIN_ID, toolchain_identity())
+    _write_if_changed(TOOLCHAIN_ID, build_identity())
 
     scanner = IncludeScanner()
     headers = {unit.unit: scanner.headers(unit.source) for unit in manifest.units}
@@ -380,7 +391,7 @@ def _generator_input_missing() -> bool:
 
 def configure_if_needed(force: bool = False, retail_dir: Path | None = None) -> None:
     repinned = NINJA.is_file() and (
-        not TOOLCHAIN_ID.is_file() or TOOLCHAIN_ID.read_text() != toolchain_identity()
+        not TOOLCHAIN_ID.is_file() or TOOLCHAIN_ID.read_text() != build_identity()
     )
     if force or repinned or not NINJA.is_file() or _generator_input_missing():
         units, pruned = emit(NINJA, retail_dir)

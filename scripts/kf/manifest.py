@@ -46,7 +46,8 @@ class Profile:
 
 # Native probe compilers. Each is a Decompals old-gcc rebuild of a PSX GCC
 # target; neither is proven to be the historical King's Field III compiler.
-C_COMPILERS = ("gcc260-sony", "gcc260-native", "gcc257-native", "gcc241-kit")
+# gcc260r-native is 2.6.0 built from source with the 1994-08-07 reload change.
+C_COMPILERS = ("gcc260-sony", "gcc260r-native", "gcc260-native", "gcc257-native", "gcc241-kit")
 
 
 @dataclass(frozen=True)
