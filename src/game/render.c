@@ -564,10 +564,6 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
     u8 r;
     u8 g;
     u8 b;
-    POLY_FT4 *p;
-    s16 top;
-    s16 bottom;
-    s16 right;
 
     count = 32;
     r = rgb[0];
@@ -584,7 +580,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
     DrawSync(0);
     scene_display_sys.draw[0].isbg = 0;
     scene_display_sys.draw[1].isbg = 0;
-    while (count > 0) {
+    for (;;) {
+        POLY_FT4 *p;
+
+        if (count <= 0) {
+            break;
+        }
         if (step < 0) {
             r -= 4;
             g -= 4;
@@ -601,30 +602,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
             return;
         }
         scene_display_sys.prim_count++;
-        top = y;
-        bottom = 240 - y;
         setPolyFT4(p);
-        p->y2 = top;
-        p->y3 = top;
-        p->u0 = 0;
-        p->v0 = 0;
-        p->v1 = 0;
-        p->u2 = 0;
+        setXYWH(p, 320 - x, 240 - y, x - 128, y * 2 - 240);
+        setUVWH(p, 0, 0, 192, 240);
         p->clut = 0;
-        p->x1 = 192;
-        p->x3 = 192;
-        p->u1 = 192;
-        p->v2 = 240;
-        p->u3 = 192;
-        p->x0 = 320 - x;
-        p->y0 = bottom;
-        p->y1 = bottom;
-        p->x2 = 320 - x;
-        p->v3 = 240;
         p->tpage = GetTPage(2, 0, 320, 0);
-        p->r0 = r;
-        p->g0 = g;
-        p->b0 = b;
+        setRGB0(p, r, g, b);
         addPrim(scene_display_sys.ot, p);
         p = (POLY_FT4 *)scene_display_sys.pool->next;
         scene_display_sys.pool->next += sizeof(POLY_FT4);
@@ -632,29 +615,12 @@ void render_zoom_screen_transition(u8 *rgb, s32 x, s32 y, s32 step)
             return;
         }
         scene_display_sys.prim_count++;
-        right = x;
         setPolyFT4(p);
-        p->x0 = 192;
-        p->x2 = 192;
-        p->v2 = 240;
-        p->y0 = bottom;
-        p->x1 = right;
-        p->y1 = bottom;
-        p->y2 = top;
-        p->x3 = right;
-        p->y3 = top;
-        p->u0 = 0;
-        p->v0 = 0;
-        p->u1 = 128;
-        p->v1 = 0;
-        p->u2 = 0;
-        p->u3 = 128;
-        p->v3 = 240;
+        setXYWH(p, 192, 240 - y, x - 192, y * 2 - 240);
+        setUVWH(p, 0, 0, 128, 240);
         p->clut = 0;
         p->tpage = GetTPage(2, 0, 512, 0);
-        p->r0 = r;
-        p->g0 = g;
-        p->b0 = b;
+        setRGB0(p, r, g, b);
         addPrim(scene_display_sys.ot, p);
         count--;
         DrawSync(0);
@@ -1536,15 +1502,13 @@ void render_scene_and_update_resources(void)
         } else {
             mask = obj->layer_mask;
         }
-        if (!(obj->flags & 0x80000)) {
-            if (!(map_cell_layer_mask(&obj->pos) & mask)) {
-                continue;
-            }
-        } else {
-            if (!(map_cell_layer_mask_radius(&obj->pos, 3) & obj->layer_mask)) {
-                continue;
-            }
+        if (obj->flags & 0x80000) {
+            goto wide;
         }
+        if (!(map_cell_layer_mask(&obj->pos) & mask)) {
+            continue;
+        }
+    draw:
         resource_registry_get(obj->definition_id + 128, &model);
         if (model != NULL) {
             at = actor_resolve_group_position(obj, &pos);
@@ -1569,6 +1533,11 @@ void render_scene_and_update_resources(void)
         scratch->u.load.sounds[def->vab_resource_indices[0]] = 1;
         scratch->u.load.sounds[def->vab_resource_indices[1]] = 1;
         scratch->u.load.models[obj->definition_id] = 1;
+        continue;
+    wide:
+        if (map_cell_layer_mask_radius(&obj->pos, 3) & obj->layer_mask) {
+            goto draw;
+        }
     }
     resource_tmd_update_range(0, 0, 0x80, 0x80);
     resource_vab_update_range(2, 0x91, 0x33, 0x60);
