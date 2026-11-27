@@ -1472,7 +1472,6 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
     u8 *buffer;
     s32 n;
     s32 i;
-    u16 page;
 
     buffer = (u8 *)memory_allocate(cd_archive_entry_extent(8, entry, 0));
     cd_archive_read(8, entry, buffer);
@@ -1481,12 +1480,12 @@ s32 menu_conversation_load_character(s32 index, s32 book, u8 *out)
     memory_free((void *)buffer);
     n = 0;
     for (i = 0; i < 256; i++) {
-        page = conversation_record_page_entry(book, i);
-        if (page != 0xffff && page != 0xfffe && page != 0xfffd) {
+        entry = conversation_record_page_entry(book, i);
+        if (entry != 0xffff && entry != 0xfffe && entry != 0xfffd) {
             *out++ = i;
             n++;
         }
-        if (page == 0xffff) {
+        if (entry == 0xffff) {
             i = 256;
         }
     }
