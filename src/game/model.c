@@ -1674,6 +1674,7 @@ void render_map_cell_object(MapLayer *layer, SVECTOR *pos, u8 flags)
 /*
  * Draws the layers of map cell (x, z) that are visible, with flags bit 1 set.
  * The position is built in the scratchpad in King's Field II's order (x, y, z).
+ * Nothing in the decompiled images calls it.
  */
 ADDRESS(0x8003be34, 0x19c)
 void render_map_cell_layers(s32 x, s32 z, u8 flags)

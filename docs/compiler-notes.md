@@ -328,10 +328,29 @@ because the `SCRATCH->model` load for `part` is scheduled inside its life.
 ## loop.c
 
 - **Hoisting threshold.** `move_movables` starts at
-  `2 * (1 + n_non_fixed_regs)` and lowers the threshold by 3 for every insn it
-  moves; a candidate needs `threshold * savings * lifetime >= insn_count`. In
-  a big loop the late invariants stay in place (`0x8003260c`'s
-  `0x800 - q[k] + radius`).
+  `2 * (1 + n_non_fixed_regs)` (52 with this compiler, 26 when the loop has a
+  call) and lowers the threshold by 3 for every insn it moves; a candidate
+  needs `threshold * savings * lifetime >= insn_count`. In a big loop the late
+  invariants stay in place (`0x8003260c`'s `0x800 - q[k] + radius`). The
+  lifetime is counted in insn positions including line-number notes, so two
+  statements on separate lines are one further apart, and matching movables
+  (the same constant loaded at several places) add their savings and
+  lifetimes.
+- **Moved once, counted double.** A register that an inner loop has already
+  moved (`moved_once`) doubles `insn_count` for the rest of the outer loop's
+  list, cumulatively, moved or not ("halved since already moved" in the `-dL`
+  dump), and its lifetime is then the whole inner loop. A test of a `u8`
+  parameter (`if (flags & 2)`) is three insns at loop time (the `and`, the
+  truncation, the extension); written inside the inner loop of
+  `0x800445b8` they are moved out of both loops, and the third doubling is
+  what stops the outer loop from moving the second and third step of
+  `col * 10`, exactly as in retail. The same test kept in a variable set
+  before the loops gives another register allocation.
+- **A user variable's giv is not reduced.** `strength_reduce` lowers the
+  benefit of a giv whose register is a user variable, so
+  `scale = &rec->scale;` (King's Field II has the same statement) stays an
+  `addiu` in the loop while the argument expressions `&rec->pos` and
+  `&rec->arg.m.animation_cache` become incremented registers (`0x80040ae4`).
 - **Multi-set variables are not movable** (`scan_loop` wants one set): a
   variable assigned at several sites inside the loop is recomputed at each.
 - **Where hoisted code lands.** An invariant spelled inside the loop goes to
@@ -441,7 +460,10 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
 - **Three independent updates.** For three independent `+=`, stores or
   negations of `x`, `y`, `z`, the second and third source statements come out
   swapped: write `x, z, y` to get retail's `x, y, z` and the reverse
-  (`0x800568bc`, `0x80056268`, `0x800562f0`).
+  (`0x800568bc`, `0x80056268`, `0x800562f0`). King's Field II's `x, y, z`
+  order in `0x8003be34` also puts the cell's elevation read before the `z`
+  store, which lets sched1 schedule the flag's extension at the top of each
+  arm; the flag's life is then short enough to be allocated before `x` and `z`.
 - **Memory disambiguation.** A load of a struct or array member is not moved
   above a store through a struct pointer; a fixed-address scalar load is
   (`0x8001a34c`). Loads through a pointer local set once from a constant
@@ -541,7 +563,10 @@ jump2's `find_cross_jump` (`jump.c`) merges identical tails:
   arguments in one unit had no prototype (`0x80053c84`).
 - **Return types.** The callee's declared return type changes which register
   an `and` with its result lands in (`u16` against `s32`); an `s16` local for
-  an `s16` result keeps it apart from the next argument (`0x80030b24`).
+  an `s16` result keeps it apart from the next argument (`0x80030b24`). A
+  `u32` result tested against a `u32` mask is the first operand of the `and`
+  (`and v0,v0,s1`), a `u8` result the second (`map_cell_layer_mask`,
+  `0x80040ae4`).
 - **Extension patterns.** `lhu` then `sll/sra` = an `s16` local used raw and
   as an int (`s16 va = *a++`). `s16 d = (a - b) & 0xfff` masks before the
   extension. `s16` locals passed in a loop give a hoisted `sll` with the `sra`
@@ -625,15 +650,20 @@ raw words where GAME narrows. The link and the archive frame are in
 
 Residues whose mechanism is known but whose source form is not:
 
-- `0x8003be34`: retail keeps the flags parameter in two registers; a source
-  copy is CSE'd away or allocated elsewhere.
 - `0x800533e8`: retail spills a HImode parameter with `sw` and reloads it with
   `lhu`; no source form makes combine produce that pseudo. Both calls also
   schedule as if one more no-op copy were present than here.
 - `0x80028750`: the jump equivalence keeps the call result canonical where
   retail compares against a constant register.
-- `0x800608ec`: retail stops hoisting after four invariants (the threshold),
-  which needs a larger loop at loop time than any spelling found.
+- `0x800608ec`: retail stops hoisting after four invariants. With the
+  threshold at 52 the record loop needs 41 to 43 insns at loop time; the
+  plain source has 36 (each narrow temporary for a loaded byte adds one).
+- `0x80040ae4`: reorg (`relax_delay_slots`) swaps the `0xe5` test with the
+  jump to the default case unless `mostly_true_jump` is non-zero; retail does
+  not swap, as if that branch left an inner loop (a `do { } while (0)` around
+  the loop body gives retail's branch but moves two saved registers). The
+  constant 1 of the three mark stores is hoisted here because the object loop
+  has 467 insns at loop time and the limit is 468.
 - `0x8004b984`: three copies of one call-and-test tail survive in retail;
   every spelling tried merges two of them.
 - `0x8005c308`: sched2 moves `li a3,0xfff` into a load-use gap that retail
