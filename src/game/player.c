@@ -1332,19 +1332,22 @@ void player_set_equipment_slot(u8 id, u8 slot)
 ADDRESS(0x8002bdc0, 0x280)
 void player_equip_weapon(u8 id)
 {
+    u8 weapon = id;
     u8 effect[34] = {
         0xff, 0xff, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x04, 0xff, 0xff,
         0x07, 0x02, 0x05, 0x01, 0x06, 0x06, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
         0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff,
     };
+    u16 entry;
 
     cur_avatar_status.weapon_charge_delay = 10;
     cur_avatar_status.attack_charge_current = 0;
     cur_avatar_status.attack_charge_committed = 0;
     cur_avatar_status.equipped_weapon_id = id;
     if (id != 0xff) {
-        cur_avatar_status.equipped_weapon_record = &weapon_table[id];
-        cd_archive_read(4, id + 98, cur_avatar_status.weapon_asset_buffer);
+        cur_avatar_status.equipped_weapon_record = &weapon_table[weapon];
+        entry = weapon + 98;
+        cd_archive_read(4, entry, cur_avatar_status.weapon_asset_buffer);
         asset_registry_set(0x20, cur_avatar_status.weapon_asset_buffer);
         if (effect[cur_avatar_status.equipped_weapon_id] != 0xff) {
             audio_queue_vab_stream(2, sound_status.effects[effect[cur_avatar_status.equipped_weapon_id]
